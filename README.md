@@ -1,20 +1,9 @@
 # TIGERs Mannheim AutoReferee implementation
 
 ## Building the Project
-You can either build the application using the Maven buildtool or launch it through Eclipse. No matter which way you choose you will always need Java 8. Both the Oracle JDK and the OpenJDK will suffice.
+You can either build the application using the Maven buildtool or launch it through Eclipse. No matter which way you choose you will always need Java 8. Both the Oracle JDK and the OpenJDK will suffice. The software has been developed and tested under Linux, but should also run on Windows/Mac machines.
 
 The two procedures to launch the application are explained below.
-
-### Eclipse
-- Download Eclipse with EGit/Maven support (The Java EE edition already contains all necessary plugins)
-- Clone the repository into a directory of your choosing
-- Start Eclipse and add the Java 8 JRE to the list of known JREs. See this link for more details: [Adding a new JRE definition](http://help.eclipse.org/mars/topic/org.eclipse.jdt.doc.user/tasks/task-add_new_jre.htm)
-- Open the Import dialogue under `File->Import...`
-- Choose the entry `General->Existing Projects into Workspace`
-- Select the repository directory and make sure that `Search for nested projects` is ticked.
-- Select all listed projects and hit Finish
-- Eclipse will now import all projects and instruct Maven to download all necessary dependencies. This can take some time.
-- You can now launch the application by opening the drop down next to the green play button and selecting the `AutoReferee` entry
 
 ### Maven
 
@@ -27,6 +16,18 @@ Procedure:
 - Clone the repository
 - Change directory into the repository and issue the following command to build the project: `mvn install -DskipTests -Dmaven.javadoc.skip=true`
 - Run the `run.sh` script to start the application
+
+### Eclipse
+
+- Download Eclipse with EGit/Maven support (The Java EE edition already contains all necessary plugins)
+- Clone the repository into a directory of your choosing
+- Start Eclipse and add the Java 8 JRE to the list of known JREs. See this link for more details: [Adding a new JRE definition](http://help.eclipse.org/mars/topic/org.eclipse.jdt.doc.user/tasks/task-add_new_jre.htm)
+- Open the Import dialogue under `File->Import...`
+- Choose the entry `General->Existing Projects into Workspace`
+- Select the repository directory and make sure that `Search for nested projects` is ticked.
+- Select all listed projects and hit Finish
+- Eclipse will now import all projects and instruct Maven to download all necessary dependencies. This can take some time.
+- You can now launch the application by opening the drop down menu next to the green play button and selecting the `AutoReferee` entry. If Eclipse did not automatically pick up the launch configuration and the drop down menu is empty you can also launch the project by expanding the **autoreferee-main** project, right-clicking on the `AutoReferee.launch` file and selecting `Run as -> AutoReferee`
 
 ## Usage
 
