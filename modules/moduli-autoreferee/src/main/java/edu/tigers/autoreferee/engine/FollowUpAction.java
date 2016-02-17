@@ -1,0 +1,110 @@
+/*
+ * *********************************************************
+ * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
+ * Project: TIGERS - Sumatra
+ * Date: Nov 8, 2015
+ * Author(s): "Lukas Magel"
+ * *********************************************************
+ */
+package edu.tigers.autoreferee.engine;
+
+import java.util.Optional;
+
+import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
+import edu.tigers.autoreferee.engine.rules.impl.StopStateRule;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.IVector2;
+
+
+/**
+ * Encapsulates all information required by the autoref to initiate a new game situation after the game has been
+ * stopped. The {@link StopStateRule} acts upon the contents of this type.
+ * 
+ * @author "Lukas Magel"
+ */
+public class FollowUpAction
+{
+	
+	/**
+	 * @author "Lukas Magel"
+	 */
+	public enum EActionType
+	{
+		/**  */
+		INDIRECT_FREE,
+		/**  */
+		DIRECT_FREE,
+		/**  */
+		KICK_OFF,
+		/**  */
+		FORCE_START
+	}
+	
+	private final ETeamColor	teamInFavor;
+	private final EActionType	actionType;
+	private final IVector2		newBallPos;
+	
+	
+	/**
+	 * @param actionType
+	 * @param teamInFavor
+	 * @param newBallPos
+	 */
+	public FollowUpAction(final EActionType actionType, final ETeamColor teamInFavor,
+			final IVector2 newBallPos)
+	{
+		this.teamInFavor = teamInFavor;
+		this.actionType = actionType;
+		this.newBallPos = newBallPos;
+	}
+	
+	
+	/**
+	 * @return the teamInFavor
+	 */
+	public ETeamColor getTeamInFavor()
+	{
+		return teamInFavor;
+	}
+	
+	
+	/**
+	 * @return the action
+	 */
+	public EActionType getActionType()
+	{
+		return actionType;
+	}
+	
+	
+	/**
+	 * @return the newBallPosition
+	 */
+	public Optional<IVector2> getNewBallPosition()
+	{
+		return Optional.ofNullable(newBallPos);
+	}
+	
+	
+	/**
+	 * Returns the command to perform this action
+	 * 
+	 * @return
+	 */
+	public Command getCommand()
+	{
+		switch (actionType)
+		{
+			case DIRECT_FREE:
+				return teamInFavor == ETeamColor.BLUE ? Command.DIRECT_FREE_BLUE : Command.DIRECT_FREE_YELLOW;
+			case FORCE_START:
+				return Command.FORCE_START;
+			case INDIRECT_FREE:
+				return teamInFavor == ETeamColor.BLUE ? Command.INDIRECT_FREE_BLUE : Command.INDIRECT_FREE_YELLOW;
+			case KICK_OFF:
+				return teamInFavor == ETeamColor.BLUE ? Command.PREPARE_KICKOFF_BLUE : Command.PREPARE_KICKOFF_YELLOW;
+			default:
+				throw new IllegalArgumentException("Please add the following action type to the switch case: " + actionType);
+		}
+	}
+}
