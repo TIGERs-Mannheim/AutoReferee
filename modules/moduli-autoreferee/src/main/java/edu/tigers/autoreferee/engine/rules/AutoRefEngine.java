@@ -19,14 +19,20 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.RuleViolation;
+import edu.tigers.autoreferee.engine.rules.impl.FreekickRule;
 import edu.tigers.autoreferee.engine.rules.impl.GoalRule;
+import edu.tigers.autoreferee.engine.rules.impl.KickTimeoutRule;
 import edu.tigers.autoreferee.engine.rules.impl.PlaceBallStateRule;
 import edu.tigers.autoreferee.engine.rules.impl.PrepareKickoffStateRule;
 import edu.tigers.autoreferee.engine.rules.impl.StopStateRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.AttackerDefenseDistanceRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.AttackerInDefenseAreaRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BallLeftFieldRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BallSpeedingRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BotNumberRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BotStopSpeedRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.DoubleTouchRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.DribblingRule;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
@@ -68,6 +74,12 @@ public class AutoRefEngine
 		rules.add(new PlaceBallStateRule());
 		rules.add(new BotNumberRule());
 		rules.add(new BotStopSpeedRule());
+		rules.add(new FreekickRule());
+		rules.add(new KickTimeoutRule());
+		rules.add(new AttackerDefenseDistanceRule());
+		rules.add(new AttackerInDefenseAreaRule());
+		rules.add(new DoubleTouchRule());
+		rules.add(new DribblingRule());
 	}
 	
 	

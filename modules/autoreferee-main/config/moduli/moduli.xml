@@ -3,7 +3,7 @@
 	<moduliPath></moduliPath>
 
 	<globalConfiguration>
-		<environment>GRSIM</environment>
+		<environment>ROBOCUP</environment>
 	</globalConfiguration>
 
 
