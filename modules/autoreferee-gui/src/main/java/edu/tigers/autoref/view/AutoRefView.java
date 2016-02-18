@@ -6,7 +6,7 @@
  * Author(s): Lukas Magel
  * *********************************************************
  */
-package edu.tigers.autoref.view.startstop;
+package edu.tigers.autoref.view;
 
 import edu.tigers.autoref.AutoRefPresenter;
 import edu.tigers.sumatra.views.ASumatraView;

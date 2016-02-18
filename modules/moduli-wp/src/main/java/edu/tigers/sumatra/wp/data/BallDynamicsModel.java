@@ -41,16 +41,27 @@ public class BallDynamicsModel
 	private static final double	BALL_DAMP_KICKER_FACTOR	= 0.37;
 	private static final double	BALL_DAMP_GROUND_FACTOR	= 0.37;
 																			
-	private double						tLastCollision				= 0;
 	private boolean					modelStraightKick			= false;
-																			
-																			
+	private final boolean			handleCollision;
+											
+											
 	/**
 	 * @param acc
 	 */
 	public BallDynamicsModel(final double acc)
 	{
-		this.acc = acc;
+		this(acc, true);
+	}
+	
+	
+	/**
+	 * @param acc
+	 * @param handleCollision
+	 */
+	public BallDynamicsModel(final double acc, final boolean handleCollision)
+	{
+		this.acc = acc * 1000;
+		this.handleCollision = handleCollision;
 	}
 	
 	
@@ -73,7 +84,7 @@ public class BallDynamicsModel
 		final double ax; // = state.get(6, 0);
 		final double ay; // = state.get(7, 0);
 		double az; // = state.get(8, 0);
-		accSlide = 20 * acc;
+		accSlide = 10 * acc;
 		
 		// velocity
 		final double v = Math.sqrt((vx * vx) + (vy * vy));
@@ -130,7 +141,7 @@ public class BallDynamicsModel
 		vz = vz + (dt * az);
 		
 		
-		final Matrix newState = new Matrix(9, 1);
+		final Matrix newState = state.copy();
 		newState.set(0, 0, x);
 		newState.set(1, 0, y);
 		newState.set(2, 0, z);
@@ -141,8 +152,16 @@ public class BallDynamicsModel
 		newState.set(7, 0, ay);
 		newState.set(8, 0, az);
 		
-		tLastCollision += dt;
-		return handleCollision(state, newState, dt, context);
+		double confidence = state.get(9, 0);
+		confidence = Math.min(1, confidence + (dt / 0.1));
+		// double tLastCollision = state.get(9, 0) + dt;
+		newState.set(9, 0, confidence);
+		
+		if (handleCollision)
+		{
+			return handleCollision(state, newState, dt, context);
+		}
+		return newState;
 	}
 	
 	
@@ -223,7 +242,8 @@ public class BallDynamicsModel
 					if (botHull.isPointInShape(newBallPos))
 					{
 						// possible kick soon
-						tLastCollision = 0;
+						// tLastCollision = 0;
+						outState.set(9, 0, 0);
 					}
 					
 					Triangle tri = new Triangle(botHull.center(), leftBotEdge, rightBotEdge);
@@ -407,7 +427,8 @@ public class BallDynamicsModel
 		corState.set(3, 0, outVel.x());
 		corState.set(4, 0, outVel.y());
 		corState.set(5, 0, newState.get(5, 0) + shootVector.z());
-		tLastCollision = 0;
+		// tLastCollision = 0;
+		corState.set(9, 0, 0);
 		return corState;
 	}
 	
@@ -435,15 +456,6 @@ public class BallDynamicsModel
 		IVector2 outVel = new Vector2(collisionNormal).turn(velAngleDiff).scaleTo(
 				ballVel.getLength2() * (1 - BALL_DAMP_KICKER_FACTOR));
 		return outVel;
-	}
-	
-	
-	/**
-	 * @return the tLastCollision
-	 */
-	public final double gettLastCollision()
-	{
-		return tLastCollision;
 	}
 	
 	

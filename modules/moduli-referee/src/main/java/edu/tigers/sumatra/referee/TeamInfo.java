@@ -13,11 +13,11 @@ import java.util.List;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee;
 
 
 /**
- * Persistent wrapper for {@link edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.TeamInfo}
+ * Persistent wrapper for TeamInfo
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
@@ -37,8 +37,8 @@ public class TeamInfo
 	private final int					timeouts;
 	private final int					timeoutTime;
 	private final int					goalie;
-	
-	
+											
+											
 	@SuppressWarnings("unused")
 	TeamInfo()
 	{

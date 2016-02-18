@@ -76,6 +76,8 @@ public class BallMotionResult extends AMotionResult
 		IVector2 pos = new Vector2(xPos, yPos);
 		IVector2 vel = new Vector2(xVel, yVel);
 		IVector3 acc = new Vector3(xAcc, yAcc, zAcc);
-		return new TrackedBall(pos, height, vel, zVel, acc);
+		TrackedBall ball = new TrackedBall(pos, height, vel, zVel, acc);
+		ball.setConfidence(getConfidence());
+		return ball;
 	}
 }

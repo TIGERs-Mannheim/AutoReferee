@@ -243,6 +243,7 @@ public class ExportDataContainer
 		private IVector3	acc			= Vector3.ZERO_VECTOR;
 		private long		frameId		= -1;
 		private long		timestamp	= 0;
+		private double		confidence	= 0;
 												
 												
 		/**
@@ -259,9 +260,10 @@ public class ExportDataContainer
 		 * @param acc
 		 * @param frameId
 		 * @param timestamp
+		 * @param confidence
 		 */
 		public WpBall(final IVector3 pos, final IVector3 vel, final IVector3 acc, final long frameId,
-				final long timestamp)
+				final long timestamp, final double confidence)
 		{
 			super();
 			this.pos = pos;
@@ -269,6 +271,7 @@ public class ExportDataContainer
 			this.acc = acc;
 			this.frameId = frameId;
 			this.timestamp = timestamp;
+			this.confidence = confidence;
 		}
 		
 		
@@ -282,7 +285,8 @@ public class ExportDataContainer
 					AVector.fromNumberList(list.subList(3, 6)).getXYZVector(),
 					AVector.fromNumberList(list.subList(6, 9)).getXYZVector(),
 					list.size() > 10 ? list.get(10).longValue() : -1,
-					list.size() > 11 ? list.get(11).longValue() : -1);
+					list.size() > 11 ? list.get(11).longValue() : -1,
+					list.size() > 12 ? list.get(12).doubleValue() : 0);
 		}
 		
 		
@@ -316,6 +320,7 @@ public class ExportDataContainer
 			numbers.addAll(acc.getNumberList());
 			numbers.add(frameId);
 			numbers.add(timestamp);
+			numbers.add(confidence);
 			return numbers;
 		}
 		

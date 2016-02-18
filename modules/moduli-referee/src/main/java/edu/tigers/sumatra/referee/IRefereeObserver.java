@@ -8,7 +8,7 @@
  */
 package edu.tigers.sumatra.referee;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee;
 
 
 /**

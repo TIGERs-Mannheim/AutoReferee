@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
+import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;

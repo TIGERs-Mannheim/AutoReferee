@@ -23,7 +23,9 @@ public enum EShapeLayerSource
 	/**  */
 	AI_YELLOW,
 	/**  */
-	AI_BLUE, ;
+	AI_BLUE,
+	/**  */
+	AUTOREFEREE;
 	
 	
 	/**

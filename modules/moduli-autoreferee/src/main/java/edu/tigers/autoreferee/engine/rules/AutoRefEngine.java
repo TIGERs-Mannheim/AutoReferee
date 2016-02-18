@@ -44,6 +44,17 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class AutoRefEngine
 {
+	/**
+	 * @author Lukas Magel
+	 */
+	public enum AutoRefMode
+	{
+		/**  */
+		ACTIVE,
+		/**  */
+		PASSIVE
+	}
+	
 	private static final Logger	log								= Logger.getLogger(AutoRefEngine.class);
 	
 	/** in ms */
@@ -51,6 +62,7 @@ public class AutoRefEngine
 	
 	private List<IGameRule>			rules;
 	private IRefboxRemote			remote;
+	private AutoRefMode				mode;
 	
 	private FollowUpAction			lastFollowUp;
 	private FollowUpAction			followUp;
@@ -61,8 +73,9 @@ public class AutoRefEngine
 	
 	/**
 	 * @param remote
+	 * @param mode
 	 */
-	public AutoRefEngine(final IRefboxRemote remote)
+	public AutoRefEngine(final IRefboxRemote remote, final AutoRefMode mode)
 	{
 		this.remote = remote;
 		rules = new ArrayList<>();
@@ -78,8 +91,10 @@ public class AutoRefEngine
 		rules.add(new KickTimeoutRule());
 		rules.add(new AttackerDefenseDistanceRule());
 		rules.add(new AttackerInDefenseAreaRule());
-		rules.add(new DoubleTouchRule());
 		rules.add(new DribblingRule());
+		rules.add(new DoubleTouchRule());
+		
+		this.mode = mode;
 	}
 	
 	
@@ -117,26 +132,47 @@ public class AutoRefEngine
 				.map(optRslt -> optRslt.get()).collect(Collectors.toList());
 		Optional<RuleResult> optFirstResult = results.stream().findFirst();
 		
-		if (optFirstResult.isPresent())
-		{
-			RuleResult firstResult = optFirstResult.get();
-			firstResult.getFollowUp().ifPresent(followUp -> this.followUp = followUp);
-			firstResult.getCommands().forEach(cmd -> sendCommand(cmd, frame.getTimestamp()));
-		}
-		
 		/*
 		 * Log all rule violations
 		 */
 		results.stream().filter(result -> result.getViolation().isPresent()).map(result -> result.getViolation().get())
 				.forEach(violation -> logViolation(violation));
 		
+		if (optFirstResult.isPresent())
+		{
+			RuleResult firstResult = optFirstResult.get();
+			firstResult.getFollowUp().ifPresent(followUp -> {
+				this.followUp = followUp;
+				logFollowUp(followUp);
+			});
+			if (mode == AutoRefMode.ACTIVE)
+			{
+				firstResult.getCommands().forEach(cmd -> sendCommand(cmd, frame.getTimestamp()));
+			}
+		}
+		
+	}
+	
+	
+	private void logFollowUp(final FollowUpAction action)
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("New follow-up action: ");
+		builder.append(action.getActionType());
+		builder.append(" Team in favor: ");
+		builder.append(action.getTeamInFavor());
+		action.getNewBallPosition().ifPresent(ballPos -> {
+			builder.append(" At position: ");
+			builder.append(ballPos.x() + " | " + ballPos.y());
+		});
+		log.info(builder.toString());
 	}
 	
 	
 	private void sendCommand(final RefCommand cmd, final long ts)
 	{
 		if (cmd.equals(lastRefCommand)
-				&& (((ts - lastCommandTimestamp) * 1_000_000) < DUPLICATE_RESEND_WAIT_TIME))
+				&& ((ts - lastCommandTimestamp) < (DUPLICATE_RESEND_WAIT_TIME * 1_000_000)))
 		{
 			log.debug("Dropping duplicate ref message: " + cmd.getCommand());
 			return;

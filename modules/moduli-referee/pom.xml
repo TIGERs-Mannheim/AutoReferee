@@ -24,7 +24,8 @@
 		</repository>
 
 	</repositories>
-
+	
+	
 	<dependencies>
 
 		<dependency>
@@ -50,19 +51,39 @@
 			<artifactId>moduli-cam</artifactId>
 			<version>1.0</version>
 		</dependency>
-
+		
 		<dependency>
-			<groupId>edu.tigers.protobufMessages</groupId>
-			<artifactId>protobufMessages</artifactId>
-			<version>2.6.1-8</version>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>2.6.1</version>
 		</dependency>
 
 	</dependencies>
 
+
+	<pluginRepositories>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-sergei-ivanov-maven</id>
+			<name>bintray-plugins</name>
+			<url>http://dl.bintray.com/sergei-ivanov/maven</url>
+		</pluginRepository>
+	</pluginRepositories>
+	
+	
 	<build>
+<!-- 		<extensions> -->
+<!-- 			<extension> -->
+<!-- 				<groupId>kr.motd.maven</groupId> -->
+<!-- 				<artifactId>os-maven-plugin</artifactId> -->
+<!-- 				<version>1.4.0.Final</version> -->
+<!-- 			</extension> -->
+<!-- 		</extensions> -->
+
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
@@ -70,7 +91,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -84,7 +104,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -101,6 +120,52 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.google.protobuf.tools</groupId>
+				<artifactId>maven-protoc-plugin</artifactId>
+				<version>0.4.4</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+						<configuration>
+							<protocArtifact>com.google.protobuf:protoc:2.6.1:exe:${os.detected.classifier}</protocArtifact>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+
+
+	<profiles>
+		<profile>
+			<id>os-windows</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>windows-x86_64</os.detected.classifier>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>os-linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>linux-x86_64</os.detected.classifier>
+			</properties>
+		</profile>
+	</profiles>
 </project>

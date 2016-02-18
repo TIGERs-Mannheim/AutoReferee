@@ -20,7 +20,6 @@ import edu.tigers.sumatra.math.Vector3;
 
 /**
  * Simple data holder; internal data structure for the
- * {@link edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionBall} from
  * protobuf-protocol, coming from the
  * SSL-Vision.
  * <p>
@@ -33,11 +32,11 @@ import edu.tigers.sumatra.math.Vector3;
 public class CamBall extends ACamObject
 {
 	private final int			area;
-	
+									
 	/** mm, (NA in current SSLVision) */
 	private final IVector3	pos;
-	
-	
+									
+									
 	/**
 	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */

@@ -37,12 +37,15 @@ import edu.tigers.sumatra.wp.data.Geometry;
  */
 public class BallLeftFieldRule extends AGameRule
 {
-	private static final int	priority				= 1;
+	private static final int	priority							= 1;
 	
 	@Configurable(comment = "The goal line threshold in mm")
-	private static double		goalLineThreshold	= 1;
+	private static double		goalLineThreshold				= 10;
 	
-	private boolean				ballOutsideField	= false;
+	@Configurable(comment = "A goalline off is only considered icing if the bot was located more than this value (in mm) behind the kickoff line")
+	private static double		icingKickoffLineThreshold	= 100;
+	
+	private boolean				ballOutsideField				= false;
 	
 	static
 	{
@@ -81,10 +84,16 @@ public class BallLeftFieldRule extends AGameRule
 		{
 			ballOutsideField = true;
 			IVector2 intersection = frame.getBallLeftFieldPos();
+			if (intersection == null)
+			{
+				// Maybe the game was started while the ball was still outside the field
+				return Optional.empty();
+			}
 			BotPosition lastTouched = frame.getBotLastTouchedBall();
 			long ts = frame.getTimestamp();
-			if ((Math.abs((Geometry.getFieldLength() / 2) - intersection.x()) < goalLineThreshold)
-					&& (Math.abs((Geometry.getFieldWidth() / 2) - intersection.y()) > goalLineThreshold))
+			boolean exitGoallineInX = ((Geometry.getFieldLength() / 2) - Math.abs(intersection.x())) < goalLineThreshold;
+			boolean exitGoallineInY = ((Geometry.getFieldWidth() / 2) - Math.abs(intersection.y())) > goalLineThreshold;
+			if (exitGoallineInX && exitGoallineInY)
 			{
 				// The ball exited the field over the goal line
 				return handleGoalLineOff(intersection, lastTouched, ts);
@@ -135,7 +144,9 @@ public class BallLeftFieldRule extends AGameRule
 		ETeamColor colorOfGoalLine = NGeometry.getTeamOfClosestGoalLine(intersection);
 		ETeamColor kickerColor = lastTouched.getId().getTeamColor();
 		
-		boolean kickerWasInHisHalf = NGeometry.getFieldSide(kickerColor).isPointInShape(lastTouched.getPos());
+		IVector2 lastTouchedPos = lastTouched.getPos();
+		boolean kickerWasInHisHalf = NGeometry.getFieldSide(kickerColor).isPointInShape(lastTouchedPos)
+				&& (Math.abs(lastTouchedPos.x()) > icingKickoffLineThreshold);
 		boolean crossedOppositeGoalLine = kickerColor != colorOfGoalLine;
 		if (kickerWasInHisHalf && crossedOppositeGoalLine)
 		{

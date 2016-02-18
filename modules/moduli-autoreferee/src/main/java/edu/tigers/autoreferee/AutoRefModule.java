@@ -20,6 +20,7 @@ import edu.tigers.autoreferee.engine.calc.BotLastTouchedBallCalc;
 import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
 import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
 import edu.tigers.autoreferee.engine.rules.AutoRefEngine;
+import edu.tigers.autoreferee.engine.rules.AutoRefEngine.AutoRefMode;
 import edu.tigers.autoreferee.remote.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -57,7 +58,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	private List<IAutoRefStateObserver>	refObserver	= new ArrayList<>();
 	
 	private ThreadedTCPRefboxRemote		remote;
-	private AutoRefEngine						ruleEngine;
+	private AutoRefEngine					ruleEngine;
 	
 	private AutoRefState						state			= AutoRefState.STOPPED;
 	private IAutoRefFrame					lastFrame;
@@ -92,7 +93,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	public void startModule() throws StartModuleException
 	{
 		// Load all classes to execute the static blocks for config registration
-		new AutoRefEngine(null);
+		new AutoRefEngine(null, AutoRefMode.PASSIVE);
 		AutoRefConfig.getBallPlacementAccuracy();
 	}
 	
@@ -126,27 +127,35 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	
 	/**
+	 * @param mode
 	 * @throws StartModuleException
 	 */
-	public void start() throws StartModuleException
+	public void start(final AutoRefMode mode) throws StartModuleException
 	{
 		if (state == AutoRefState.STOPPED)
 		{
-			doStart();
+			doStart(mode);
 		}
 	}
 	
 	
-	private void doStart() throws StartModuleException
+	private void doStart(final AutoRefMode mode) throws StartModuleException
 	{
 		try
 		{
 			setState(AutoRefState.STARTING);
 			
-			remote = new ThreadedTCPRefboxRemote();
-			remote.start(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
+			if (mode == AutoRefMode.ACTIVE)
+			{
+				remote = new ThreadedTCPRefboxRemote();
+				remote.start(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
+				
+				ruleEngine = new AutoRefEngine(remote, mode);
+			} else
+			{
+				ruleEngine = new AutoRefEngine(null, mode);
+			}
 			
-			ruleEngine = new AutoRefEngine(remote);
 			
 			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
 					.getInstance().getModule(AWorldPredictor.MODULE_ID);
@@ -187,6 +196,11 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		{
 			log.warn("Could not find a module", err);
 		}
+		
+		if (remote != null)
+		{
+			remote.close();
+		}
 	}
 	
 	
@@ -212,6 +226,11 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		runCalculators(currentFrame);
 		
 		ruleEngine.update(currentFrame);
+		
+		for (IAutoRefStateObserver o : refObserver)
+		{
+			o.onNewAutoRefFrame(currentFrame);
+		}
 		
 		lastFrame = currentFrame;
 	}

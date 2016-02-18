@@ -11,10 +11,13 @@ package edu.tigers.autoreferee;
 import java.util.List;
 import java.util.Optional;
 
+import com.sleepycat.persist.model.Persistent;
+
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.ShapeMap;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
@@ -22,10 +25,12 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author "Lukas Magel"
  */
+@Persistent
 public class AutoRefFrame implements IAutoRefFrame
 {
 	
 	private WorldFrameWrapper			worldFrameWrapper;
+	private final ShapeMap				shapes;
 	
 	private IAutoRefFrame				previousFrame;
 	
@@ -35,6 +40,16 @@ public class AutoRefFrame implements IAutoRefFrame
 	private IVector2						ballLeftFieldPos;
 	
 	private List<EGameStateNeutral>	stateHistory;
+	
+	
+	/**
+	 * 
+	 */
+	@SuppressWarnings("unused")
+	private AutoRefFrame()
+	{
+		shapes = new ShapeMap();
+	}
 	
 	
 	/**
@@ -48,6 +63,7 @@ public class AutoRefFrame implements IAutoRefFrame
 		botTouchedBall = null;
 		previousFrame = previous;
 		this.worldFrameWrapper = worldFrameWrapper;
+		shapes = new ShapeMap();
 	}
 	
 	
@@ -157,5 +173,12 @@ public class AutoRefFrame implements IAutoRefFrame
 	public RefereeMsg getRefereeMsg()
 	{
 		return worldFrameWrapper.getRefereeMsg();
+	}
+	
+	
+	@Override
+	public ShapeMap getShapes()
+	{
+		return shapes;
 	}
 }

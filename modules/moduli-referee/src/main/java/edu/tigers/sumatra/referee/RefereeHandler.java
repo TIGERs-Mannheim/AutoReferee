@@ -11,16 +11,18 @@ package edu.tigers.sumatra.referee;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Stage;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.TeamInfo;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.Referee.SSL_Referee.Point;
+import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.IBallReplacer;
+import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
+import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
 
 
@@ -114,9 +116,10 @@ public class RefereeHandler extends AReferee
 	
 	@Override
 	public void sendOwnRefereeMsg(final Command cmd, final int goalsBlue, final int goalsYellow, final int timeLeft,
-			final long timestamp)
+			final long timestamp, final IVector2 placementPos)
 	{
-		SSL_Referee refMsg = createSSLRefereeMsg(cmd, goalsBlue, goalsYellow, timeLeft, refMsgId, timestamp);
+		SSL_Referee refMsg = createSSLRefereeMsg(cmd, goalsBlue, goalsYellow, timeLeft, refMsgId, timestamp,
+				placementPos);
 		refMsgId++;
 		onNewRefereeMsg(refMsg);
 	}
@@ -129,14 +132,15 @@ public class RefereeHandler extends AReferee
 	 * @param timeLeft
 	 * @param refId
 	 * @param timestamp
+	 * @param placementPos
 	 * @return
 	 */
 	public static SSL_Referee createSSLRefereeMsg(final Command cmd, final int goalsBlue, final int goalsYellow,
-			final int timeLeft, final int refId, final long timestamp)
+			final int timeLeft, final int refId, final long timestamp, final IVector2 placementPos)
 	{
 		
 		
-		TeamInfo.Builder teamBlueBuilder = TeamInfo.newBuilder();
+		SSL_Referee.TeamInfo.Builder teamBlueBuilder = SSL_Referee.TeamInfo.newBuilder();
 		teamBlueBuilder.setGoalie(TeamConfig.getKeeperIdBlue());
 		teamBlueBuilder.setName("Blue");
 		teamBlueBuilder.setRedCards(1);
@@ -145,7 +149,7 @@ public class RefereeHandler extends AReferee
 		teamBlueBuilder.setTimeoutTime(360);
 		teamBlueBuilder.setYellowCards(3);
 		
-		TeamInfo.Builder teamYellowBuilder = TeamInfo.newBuilder();
+		SSL_Referee.TeamInfo.Builder teamYellowBuilder = SSL_Referee.TeamInfo.newBuilder();
 		teamYellowBuilder.setGoalie(TeamConfig.getKeeperIdYellow());
 		teamYellowBuilder.setName("Yellow");
 		teamYellowBuilder.setRedCards(0);
@@ -164,6 +168,14 @@ public class RefereeHandler extends AReferee
 		builder.setStageTimeLeft(timeLeft);
 		builder.setStage(Stage.NORMAL_FIRST_HALF);
 		
+		if (placementPos != null)
+		{
+			Point.Builder point = Point.newBuilder();
+			point.setX((float) placementPos.x());
+			point.setY((float) placementPos.y());
+			builder.setDesignatedPosition(point);
+		}
+		
 		return builder.build();
 	}
 	
@@ -175,12 +187,14 @@ public class RefereeHandler extends AReferee
 	 * @param timeLeft
 	 * @param refId
 	 * @param timestamp
+	 * @param placementPos
 	 * @return
 	 */
 	public static RefereeMsg createRefereeMsg(final Command cmd, final int goalsBlue, final int goalsYellow,
-			final int timeLeft, final int refId, final long timestamp)
+			final int timeLeft, final int refId, final long timestamp, final Vector2 placementPos)
 	{
-		SSL_Referee sslReferee = createSSLRefereeMsg(cmd, goalsBlue, goalsYellow, timeLeft, refId, timestamp);
+		SSL_Referee sslReferee = createSSLRefereeMsg(cmd, goalsBlue, goalsYellow, timeLeft, refId, timestamp,
+				placementPos);
 		return new RefereeMsg(sslReferee);
 	}
 	

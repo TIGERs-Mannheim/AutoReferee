@@ -12,10 +12,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import edu.dhbw.mannheim.tigers.sumatra.presenter.log.LogView;
-import edu.tigers.autoref.view.startstop.AutoRefView;
+import edu.tigers.autoref.view.AutoRefView;
+import edu.tigers.autoref.view.visualizer.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
-import edu.tigers.sumatra.visualizer.VisualizerView;
 
 
 /**
@@ -35,7 +35,7 @@ public class AutoRefMainFrame extends AMainFrame
 		setTitle("Autoreferee");
 		
 		addView(new LogView(true));
-		addView(new VisualizerView());
+		addView(new VisualizerAutoRefView());
 		addView(new ConfigEditorView());
 		addView(new AutoRefView());
 		

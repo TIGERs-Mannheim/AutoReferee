@@ -32,9 +32,11 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 public class KickTimeoutRule extends APreparingGameRule
 {
 	private static final int	priority				= 1;
-	private static final int	FREEKICK_TIMEOUT	= 10_000;
+	/** in ms */
+	private static final long	FREEKICK_TIMEOUT	= 10_000;
 	
 	private long					entryTime;
+	private boolean				kickTimedOut;
 	
 	
 	/**
@@ -60,6 +62,7 @@ public class KickTimeoutRule extends APreparingGameRule
 	protected void prepare(final IRuleEngineFrame frame)
 	{
 		entryTime = frame.getTimestamp();
+		kickTimedOut = false;
 	}
 	
 	
@@ -70,13 +73,14 @@ public class KickTimeoutRule extends APreparingGameRule
 		ETeamColor attackingColor = frame.getGameState().getTeamColor();
 		
 		long curTime = frame.getTimestamp();
-		if ((curTime - entryTime) > (FREEKICK_TIMEOUT * 1_000_000))
+		if (((curTime - entryTime) > (FREEKICK_TIMEOUT * 1_000_000)) && (kickTimedOut == false))
 		{
+			kickTimedOut = true;
 			RuleViolation violation = new RuleViolation(ERuleViolation.KICK_TIMEOUT, frame.getTimestamp(), attackingColor);
 			FollowUpAction followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, ballPos);
 			return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 		}
-		return null;
+		return Optional.empty();
 	}
 	
 }

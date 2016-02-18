@@ -29,6 +29,22 @@ Procedure:
 - Eclipse will now import all projects and instruct Maven to download all necessary dependencies. This can take some time.
 - You can now launch the application by opening the drop down menu next to the green play button and selecting the `AutoReferee` entry. If Eclipse did not automatically pick up the launch configuration and the drop down menu is empty you can also launch the project by expanding the **autoreferee-main** project, right-clicking on the `AutoReferee.launch` file and selecting `Run as -> AutoReferee`
 
+## Mode of operation
+The autoref software has been designed to work as an extension of the refbox. It stores as few state about the game as possible. It employs a state machine that is driven by the received referee messages to determine the state of the current game. Depending on the state of the game different rules are evaluated with each vision frame. As a result of the evaluation each rule can specify a new command to be sent to the refbox or a rule violation that occurred on the field or set a new follow-up action. A follow-up action determines what action is to be taken after the game has returned to the Stopped state. Possible actions are: Kick-Off, Direct/Indirect Freekick. The follow-up action represents the only state information that is stored internally by the referee.
+All rules are stored in the **edu.tigers.autoreferee.engine.rules.impl** package and possible subpackages of the **moduli-autoreferee** project. The referee is currently capable of detecting the following rule infringements:
+
+- Defender to Ball distance during a freekick
+- Indirect Goals
+- 10s Timeout during a freekick/kick-off situation
+- Attacker to Defense Area distance during a freekick
+- Attacker touching the ball inside the defense area of the opponent
+- Throw-ins/Goalkicks/Corner
+- Ball velocity
+- Number of bots on the field
+- Bot speed during STOP
+- Double Touch
+- Dribbling
+
 ## Usage
 
 ### Configuration

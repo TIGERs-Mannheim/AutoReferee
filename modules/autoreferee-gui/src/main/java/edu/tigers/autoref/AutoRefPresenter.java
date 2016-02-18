@@ -17,7 +17,9 @@ import edu.tigers.autoref.view.startstop.StartStopPanel;
 import edu.tigers.autoref.view.startstop.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefModule;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
+import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.IAutoRefStateObserver;
+import edu.tigers.autoreferee.engine.rules.AutoRefEngine.AutoRefMode;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
@@ -35,10 +37,10 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 		IModuliStateObserver
 {
 	private static Logger	log				= Logger.getLogger(AutoRefPresenter.class);
-	
+														
 	private StartStopPanel	startStopPanel	= null;
-	
-	
+														
+														
 	/**
 	 * 
 	 */
@@ -112,7 +114,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 	@Override
 	public void onStartButtonPressed()
 	{
-		new Thread(new AutoRefStarter()).start();
+		new Thread(new AutoRefStarter(startStopPanel.getModeSetting())).start();
 	}
 	
 	
@@ -132,6 +134,17 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 	
 	private class AutoRefStarter implements Runnable
 	{
+		private final AutoRefMode	mode;
+		
+		
+		/**
+		 * @param mode
+		 */
+		public AutoRefStarter(final AutoRefMode mode)
+		{
+			this.mode = mode;
+		}
+		
 		
 		@Override
 		public void run()
@@ -140,13 +153,19 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 			{
 				AutoRefModule autoref = (AutoRefModule) SumatraModel
 						.getInstance().getModule(AutoRefModule.MODULE_ID);
-				autoref.start();
+				autoref.start(mode);
 			} catch (ModuleNotFoundException | StartModuleException e)
 			{
 				log.error("Error during Autoref startup: " + e.getMessage(), e);
 			}
 		}
 		
+	}
+	
+	
+	@Override
+	public void onNewAutoRefFrame(final IAutoRefFrame frame)
+	{
 	}
 	
 }

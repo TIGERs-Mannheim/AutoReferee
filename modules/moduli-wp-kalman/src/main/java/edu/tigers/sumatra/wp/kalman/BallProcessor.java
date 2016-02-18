@@ -144,7 +144,7 @@ public class BallProcessor
 			TrackedBall trackedBall = motion.toTrackedBall();
 			
 			wpBalls.add(new WpBall(trackedBall.getPos3(), trackedBall.getVel3(), trackedBall.getAcc3(), i, rawBall
-					.getTimestamp()));
+					.getTimestamp(), trackedBall.getConfidence()));
 		}
 		
 		CSVExporter.exportList(folder, "wpBallTest", wpBalls.stream().map(c -> c));

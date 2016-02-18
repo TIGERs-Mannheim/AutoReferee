@@ -10,6 +10,8 @@ package edu.tigers.autoreferee.engine.rules.impl.violations;
 
 import java.util.Optional;
 
+import org.apache.log4j.Logger;
+
 import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
@@ -18,11 +20,12 @@ import edu.tigers.autoreferee.engine.RuleViolation;
 import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
-import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -31,19 +34,22 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author Lukas Magel
  */
-public class DribblingRule extends AGameRule
+public class DribblingRule extends APreparingGameRule
 {
 	private static final int		priority								= 1;
+	private static final Logger	log									= Logger.getLogger(DribblingRule.class);
 	
 	/** mm */
 	private static final double	MAX_DRIBBLING_LENGTH				= 1000;
 	/** Any distance to the ball closer than this value is considered dribbling */
-	private static final double	DRIBBLING_BOT_BALL_DISTANCE	= 50;
+	private static final double	DRIBBLING_BOT_BALL_DISTANCE	= 100;
 	
 	/** The position where the currently dribbling bot first touched the ball */
 	private BotPosition				firstContact;
 	/** The position where the currently dribbling bot last touched the ball */
 	private BotPosition				lastContact;
+	
+	private long						entryTime;
 	
 	
 	/**
@@ -63,12 +69,19 @@ public class DribblingRule extends AGameRule
 	
 	
 	@Override
-	public Optional<RuleResult> update(final IRuleEngineFrame frame)
+	protected void prepare(final IRuleEngineFrame frame)
+	{
+		entryTime = frame.getTimestamp();
+	}
+	
+	
+	@Override
+	public Optional<RuleResult> doUpdate(final IRuleEngineFrame frame)
 	{
 		BotPosition curLastContact = frame.getBotLastTouchedBall();
-		if ((firstContact == null) || firstContact.getId().isUninitializedID())
+		if (!(isSane(firstContact) && isSane(lastContact)))
 		{
-			if ((curLastContact != null) && !curLastContact.getId().isUninitializedID())
+			if (isSane(curLastContact) && (curLastContact.getTs() > entryTime))
 			{
 				firstContact = curLastContact;
 				lastContact = curLastContact;
@@ -79,15 +92,20 @@ public class DribblingRule extends AGameRule
 		}
 		
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
+		ETeamColor dribblerColor = lastContact.getId().getTeamColor();
 		ITrackedBot bot = frame.getWorldFrame().getBot(lastContact.getId());
-		ETeamColor dribblerColor = bot.getBotId().getTeamColor();
+		if (bot == null)
+		{
+			log.warn("Bot that last touched the ball disappeard from the field: " + lastContact.getId());
+			return Optional.empty();
+		}
 		
 		if (lastContact.getTs() == curLastContact.getTs())
 		{
 			// The ball has not been touched since the last contact
-			if (GeoMath.distancePP(bot.getPos(), ballPos) > DRIBBLING_BOT_BALL_DISTANCE)
+			if (GeoMath.distancePP(bot.getPos(), ballPos) > (DRIBBLING_BOT_BALL_DISTANCE + Geometry.getBotRadius()))
 			{
-				reset();
+				doReset();
 				return Optional.empty();
 			}
 		} else
@@ -98,7 +116,7 @@ public class DribblingRule extends AGameRule
 				lastContact = curLastContact;
 			} else
 			{
-				reset();
+				doReset();
 				return Optional.empty();
 			}
 		}
@@ -108,7 +126,7 @@ public class DribblingRule extends AGameRule
 		{
 			RuleViolation violation = new RuleViolation(ERuleViolation.BALL_DRIBBLING, frame.getTimestamp(), dribblerColor);
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, dribblerColor.opposite(), ballPos);
-			reset();
+			doReset();
 			return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 		}
 		return Optional.empty();
@@ -116,10 +134,23 @@ public class DribblingRule extends AGameRule
 	
 	
 	@Override
-	public void reset()
+	public void doReset()
 	{
 		firstContact = null;
 		lastContact = null;
+	}
+	
+	
+	private boolean isSane(final BotPosition pos)
+	{
+		if (pos == null)
+		{
+			return false;
+		} else if (pos.getId().isUninitializedID())
+		{
+			return false;
+		}
+		return true;
 	}
 	
 }

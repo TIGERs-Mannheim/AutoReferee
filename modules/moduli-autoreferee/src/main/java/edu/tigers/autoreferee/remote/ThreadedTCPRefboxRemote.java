@@ -139,7 +139,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 			}
 		} catch (InterruptedException e)
 		{
-			log.warn("Interrupted", e);
+			log.debug("Interrupted", e);
 		} catch (IOException e)
 		{
 			log.error("", e);
@@ -151,14 +151,20 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	private SSL_RefereeRemoteControlReply readReply() throws IOException
 	{
 		prepareBuf(INT_FIELD_SIZE);
-		socket.read(intBuffer);
+		while (intBuffer.hasRemaining())
+		{
+			socket.read(intBuffer);
+		}
 		
 		intBuffer.flip();
 		int msgLength = intBuffer.getInt();
 		
 		
 		prepareBuf(msgLength);
-		socket.read(intBuffer);
+		while (intBuffer.hasRemaining())
+		{
+			socket.read(intBuffer);
+		}
 		intBuffer.flip();
 		
 		return SSL_RefereeRemoteControlReply.parseFrom(intBuffer.array());
@@ -174,7 +180,10 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		intBuffer.put(req.toByteArray());
 		intBuffer.flip();
 		
-		socket.write(intBuffer);
+		while (intBuffer.hasRemaining())
+		{
+			socket.write(intBuffer);
+		}
 	}
 	
 	

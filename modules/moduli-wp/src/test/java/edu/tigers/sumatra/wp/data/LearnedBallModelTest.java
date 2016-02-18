@@ -8,9 +8,7 @@
  */
 package edu.tigers.sumatra.wp.data;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import Jama.Matrix;
@@ -23,15 +21,25 @@ import edu.tigers.sumatra.math.Vector2;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Ignore
+// @Ignore
 public class LearnedBallModelTest
 {
-	@SuppressWarnings("unused")
-	private static final Logger	log	= Logger.getLogger(LearnedBallModelTest.class.getName());
-													
-	private static final double	acc	= 0.2;
-													
-													
+	private final double					acc;
+												
+	private static final double		DT	= 0.001;
+	private final BallDynamicsModel	model;
+												
+												
+	/**
+	 * 
+	 */
+	public LearnedBallModelTest()
+	{
+		acc = Geometry.getBallModel().getAcc();
+		model = new BallDynamicsModel(acc, false);
+	}
+	
+	
 	private IVector2 getPosFromMatrix(final Matrix state)
 	{
 		return new Vector2(state.get(0, 0), state.get(1, 0));
@@ -46,24 +54,23 @@ public class LearnedBallModelTest
 	
 	private Matrix getState(final IVector2 pos, final IVector2 vel)
 	{
-		return new Matrix(new double[] { pos.x(), pos.y(), 0, vel.x() * 1000, vel.y() * 1000, 0, 0, 0, 0 }, 9);
+		return new Matrix(new double[] { pos.x(), pos.y(), 0, vel.x() * 1000, vel.y() * 1000, 0, 0, 0, 0, 0 }, 10);
 	}
 	
 	
 	private double simulate(final Matrix initState, final Matrix finalState, final double maxt)
 	{
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
+		double DT = 0.001;
 		double refTime = 0;
 		Matrix state = initState;
 		while ((Math.sqrt((state.get(3, 0) * state.get(3, 0)) + (state.get(4, 0) * state.get(4, 0))) > 0)
 				&& (refTime <= maxt))
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
@@ -117,17 +124,15 @@ public class LearnedBallModelTest
 		IVector2 currentVel = new Vector2(0.5f, 1.1);
 		double velocity = currentVel.getLength2() - 0.5;
 		Matrix initState = getState(currentPos, currentVel);
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		Matrix state = initState;
 		double refTime = 0;
 		while ((Math.sqrt((state.get(3, 0) * state.get(3, 0)) + (state.get(4, 0) * state.get(4, 0))) > (velocity * 1000)))
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
@@ -146,17 +151,20 @@ public class LearnedBallModelTest
 		double currentVel = 1.5;
 		double velocity = 0.0;
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(currentVel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		Matrix state = initState;
 		double refTime = 0;
-		while ((Math.sqrt((state.get(3, 0) * state.get(3, 0)) + (state.get(4, 0) * state.get(4, 0))) > (velocity * 1000)))
+		while (true)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
+				break;
+			}
+			double simVel = Math.sqrt((state.get(3, 0) * state.get(3, 0)) + (state.get(4, 0) * state.get(4, 0)));
+			if (simVel <= (velocity * 1000))
+			{
 				break;
 			}
 		}
@@ -178,21 +186,19 @@ public class LearnedBallModelTest
 		double time = Geometry.getBallModel().getTimeByDist(currentVel, dist);
 		
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(currentVel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		Matrix state = initState;
 		double refTime = 0;
 		while (getPosFromMatrix(state).x() < dist)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
-		Assert.assertEquals(refTime, time, dt);
+		Assert.assertEquals(refTime, time, 0.05);
 	}
 	
 	
@@ -207,21 +213,19 @@ public class LearnedBallModelTest
 		double time = Geometry.getBallModel().getTimeByVel(currentVel, velocity);
 		
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(currentVel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		Matrix state = initState;
 		double refTime = 0;
 		while (getVelFromMatrix(state).getLength2() > velocity)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
-		Assert.assertEquals(refTime, time, dt);
+		Assert.assertEquals(refTime, time, 0.05);
 	}
 	
 	
@@ -235,18 +239,16 @@ public class LearnedBallModelTest
 		double dist = 1000;
 		double vel = Geometry.getBallModel().getVelByDist(currentVel, dist);
 		
-		Matrix initState = getState(new Vector2(0, 2000), new Vector2(currentVel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
+		Matrix initState = getState(new Vector2(0, 0), new Vector2(currentVel, 0));
 		Matrix state = initState;
 		double time = 0;
 		while (getPosFromMatrix(state).getLength2() < dist)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			time += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			time += DT;
 			if (time > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
@@ -265,17 +267,15 @@ public class LearnedBallModelTest
 		double vel = Geometry.getBallModel().getVelByTime(currentVel, time);
 		
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(currentVel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		double refTime = 0;
 		Matrix state = initState;
 		while (refTime < time)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
@@ -294,21 +294,19 @@ public class LearnedBallModelTest
 		double vel = Geometry.getBallModel().getVelForTime(endVel, time);
 		
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(vel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		double refTime = 0;
 		Matrix state = initState;
 		while (getVelFromMatrix(state).getLength2() > endVel)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}
-		Assert.assertEquals(time, refTime, dt);
+		Assert.assertEquals(time, refTime, 0.05);
 	}
 	
 	
@@ -323,17 +321,15 @@ public class LearnedBallModelTest
 		double vel = Geometry.getBallModel().getVelForDist(dist, endVel);
 		
 		Matrix initState = getState(new Vector2(0, 2000), new Vector2(vel, 0));
-		BallDynamicsModel model = new BallDynamicsModel(acc);
-		double dt = 0.016;
 		Matrix state = initState;
 		double refTime = 0;
 		while (getVelFromMatrix(state).x() > endVel)
 		{
-			state = model.dynamics(state, dt, new MotionContext());
-			refTime += dt;
+			state = model.dynamics(state, DT, new MotionContext());
+			refTime += DT;
 			if (refTime > 120)
 			{
-				log.error("Dynamics simulation run for more than 2min.");
+				System.err.println("Dynamics simulation run for more than 2min.");
 				break;
 			}
 		}

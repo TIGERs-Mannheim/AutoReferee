@@ -8,16 +8,18 @@
  */
 package edu.tigers.autoref.view.startstop;
 
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JMenu;
 
+import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.ObservablePanel;
 import edu.tigers.autoref.view.startstop.StartStopPanel.IStartStopPanelObserver;
+import edu.tigers.autoreferee.engine.rules.AutoRefEngine.AutoRefMode;
 import edu.tigers.sumatra.views.ISumatraView;
 
 
@@ -45,10 +47,11 @@ public class StartStopPanel extends ObservablePanel<IStartStopPanelObserver> imp
 	}
 	
 	/**  */
-	private static final long	serialVersionUID	= 1L;
+	private static final long			serialVersionUID	= 1L;
 	
-	private JButton				startButton			= null;
-	private JButton				stopButton			= null;
+	private JButton						startButton			= null;
+	private JButton						stopButton			= null;
+	private JComboBox<AutoRefMode>	refModeBox			= null;
 	
 	
 	/**
@@ -56,7 +59,7 @@ public class StartStopPanel extends ObservablePanel<IStartStopPanelObserver> imp
 	 */
 	public StartStopPanel()
 	{
-		setLayout(new FlowLayout());
+		setLayout(new MigLayout("center"));
 		
 		startButton = new JButton("Start");
 		startButton.setEnabled(true);
@@ -80,6 +83,9 @@ public class StartStopPanel extends ObservablePanel<IStartStopPanelObserver> imp
 			}
 		});
 		
+		refModeBox = new JComboBox<>(AutoRefMode.values());
+		
+		add(refModeBox, "align center, span, grow, wrap");
 		add(startButton);
 		add(stopButton);
 	}
@@ -100,6 +106,15 @@ public class StartStopPanel extends ObservablePanel<IStartStopPanelObserver> imp
 	public JButton getStopButton()
 	{
 		return stopButton;
+	}
+	
+	
+	/**
+	 * @return
+	 */
+	public AutoRefMode getModeSetting()
+	{
+		return (AutoRefMode) refModeBox.getSelectedItem();
 	}
 	
 	

@@ -20,4 +20,10 @@ public interface IAutoRefStateObserver
 	 * @param state
 	 */
 	void onAutoRefStateChanged(AutoRefState state);
+	
+	
+	/**
+	 * @param frame
+	 */
+	void onNewAutoRefFrame(IAutoRefFrame frame);
 }

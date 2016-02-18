@@ -38,6 +38,11 @@
 			<artifactId>moduli-autoreferee</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>edu.tigers.sumatra</groupId>
+			<artifactId>sumatra-gui-visualizer</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

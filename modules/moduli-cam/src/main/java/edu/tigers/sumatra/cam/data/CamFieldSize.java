@@ -11,9 +11,9 @@ package edu.tigers.sumatra.cam.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslGeometry.SSL_FieldCicularArc;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslGeometry.SSL_FieldLineSegment;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslGeometry.SSL_GeometryFieldSize;
+import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_FieldCicularArc;
+import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_FieldLineSegment;
+import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_GeometryFieldSize;
 import edu.tigers.sumatra.math.ILine;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Line;

@@ -14,10 +14,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.ids.ETeam;
+import edu.tigers.sumatra.math.AVector2;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.ILine;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Line;
 import edu.tigers.sumatra.math.Vector2f;
@@ -104,7 +104,7 @@ public class PenaltyArea implements I2DShape
 	}
 	
 	
-	private final IVector2 getPointOnCircle(final IVector origin, final double radius, final double angle)
+	private final IVector2 getPointOnCircle(final IVector2 origin, final double radius, final double angle)
 	{
 		return new Vector2f(origin.x() - (sign * radius * Math.cos(angle)),
 				origin.y() + (radius * Math.sin(angle)));
@@ -216,6 +216,46 @@ public class PenaltyArea implements I2DShape
 	}
 	
 	
+	private IVector2 nearestPointFallbackByBisection(final IVector2 point, final IVector2 pointToBuildLine,
+			final double correctedMargin)
+	{
+		
+		IVector2 start = new Vector2f(point);
+		IVector2 end = new Vector2f(pointToBuildLine);
+		double factor = 0.5;
+		boolean skip = false;
+		for (int i = 0; i < 1000; ++i)
+		{
+			IVector2 np = new Vector2f(start.x() + (factor * (end.x() - start.x())),
+					start.y() + (factor * (end.y() - start.y())));
+			if (!skip)
+			{
+				if (isPointInShape(end, correctedMargin))
+				{
+					factor = 2;
+					end = np;
+					continue;
+				}
+			}
+			factor = 0.5;
+			skip = true;
+			if (isPointInShape(np, correctedMargin))
+			{
+				start = np;
+			} else
+			{
+				end = np;
+			}
+			if (start.equals(end, 0.01))
+			{
+				break;
+			}
+		}
+		return start;
+		
+	}
+	
+	
 	/**
 	 * Creates nearest Point outside of shape that is the closest to the current point
 	 * Three possibilities:
@@ -260,11 +300,11 @@ public class PenaltyArea implements I2DShape
 		ILine p2pline = new Line(point, pointToBuildLine.subtractNew(point));
 		
 		List<IVector2> intersections = calcLineIntersections(p2pline, correctedMargin);
-		
 		if (intersections.isEmpty())
 		{
-			throw new RuntimeException(
-					"unexpected error with parameter: (" + point + ":" + pointToBuildLine + ":" + margin + ")");
+			log.warn("unexpected error with parameter: (" + point + ":" + pointToBuildLine + ":" + margin
+					+ ") -> using fallback");
+			return nearestPointFallbackByBisection(point, pointToBuildLine, correctedMargin);
 		}
 		double sqrLen = Double.MAX_VALUE;
 		IVector2 resPoint = null;
@@ -347,13 +387,14 @@ public class PenaltyArea implements I2DShape
 	{
 		final IVector2 lead = GeoMath.leadPointOnLine(circleCentre, line);
 		final double d = GeoMath.distancePPSqr(lead, circleCentre);
-		final double radius_with_margin = (radius * radius) + margin;
+		final double radius_with_margin = (radius + margin) * (radius + margin);
 		List<IVector2> result = new ArrayList<IVector2>(2);// a line can only intersect twice
 		
 		if ((d <= (radius_with_margin + DBL_EPSILON)))
 		{
-			double lambda = Math.sqrt((radius_with_margin) - (d));
-			final IVector2 direction = line.directionVector().normalizeNew().multiply(lambda);
+			final double lambda = (radius_with_margin) - (d);
+			final double length = GeoMath.distancePPSqr(AVector2.ZERO_VECTOR, line.directionVector());
+			final IVector2 direction = line.directionVector().multiplyNew(Math.sqrt(lambda / length));
 			final IVector2 c1 = lead.addNew(direction);
 			final IVector2 c2 = lead.subtractNew(direction);
 			result.add(c1);
@@ -382,7 +423,7 @@ public class PenaltyArea implements I2DShape
 				margin);
 		for (final IVector2 p : negIntersections)
 		{
-			if ((p.y() - DBL_EPSILON) < (circleCentreNeg.y() + DBL_EPSILON))
+			if ((p.y() + DBL_EPSILON) < (circleCentreNeg.y() - DBL_EPSILON))
 			{
 				if (outerRectangle.isPointInShape(p, margin))
 				{
@@ -392,10 +433,9 @@ public class PenaltyArea implements I2DShape
 		}
 		final List<IVector2> posIntersections = getLineCircleIntersection(circleCentrePos, line, getRadiusOfPenaltyArea(),
 				margin);
-				
 		for (final IVector2 p : posIntersections)
 		{
-			if ((p.y() + DBL_EPSILON) > (circleCentrePos.y() - DBL_EPSILON))
+			if ((p.y() - DBL_EPSILON) > (circleCentrePos.y() + DBL_EPSILON))
 			{
 				if (outerRectangle.isPointInShape(p, margin))
 				{
@@ -415,7 +455,7 @@ public class PenaltyArea implements I2DShape
 			 * Notice that the epsilon is for the edge-case between the circle and the line as the interval does not
 			 * contain 0 or 1
 			 **/
-			if ((DBL_EPSILON < lambda) && (lambda < (1 - DBL_EPSILON)))
+			if ((-DBL_EPSILON < lambda) && (lambda < (1 + DBL_EPSILON)))
 			{
 				result.add(marginLine.supportVector().addNew(marginLine.directionVector().multiplyNew(lambda)));
 			}

@@ -30,19 +30,21 @@ import edu.tigers.sumatra.math.Vector3;
 @Persistent
 public class TrackedBall extends ATrackedObject
 {
-	private final BallID		id	= new BallID();
-										
+	private final BallID			id				= new BallID();
+														
 	/** mm */
-	private final IVector2	pos;
+	private final IVector2		pos;
 	/** m/s */
-	private final IVector2	vel;
-									
-	private final IVector3	acc;
-									
-	private final double		height;
-	private final double		zVel;
-									
-									
+	private final IVector2		vel;
+										
+	private final IVector3		acc;
+										
+	private final double			height;
+	private final double			zVel;
+										
+	private transient double	confidence	= 0;
+														
+														
 	@SuppressWarnings("unused")
 	private TrackedBall()
 	{
@@ -244,5 +246,23 @@ public class TrackedBall extends ATrackedObject
 	public IVector3 getAcc3()
 	{
 		return acc;
+	}
+	
+	
+	/**
+	 * @return the confidence
+	 */
+	public double getConfidence()
+	{
+		return confidence;
+	}
+	
+	
+	/**
+	 * @param confidence the confidence to set
+	 */
+	public void setConfidence(final double confidence)
+	{
+		this.confidence = confidence;
 	}
 }

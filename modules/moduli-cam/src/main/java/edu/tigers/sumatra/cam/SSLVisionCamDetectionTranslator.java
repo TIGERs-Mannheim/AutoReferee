@@ -19,9 +19,9 @@ import java.util.Queue;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.log4j.Logger;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionBall;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionFrame;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionRobot;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionBall;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionFrame;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionRobot;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamRobot;

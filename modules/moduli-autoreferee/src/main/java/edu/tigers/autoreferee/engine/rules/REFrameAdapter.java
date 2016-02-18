@@ -18,6 +18,7 @@ import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.ShapeMap;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
@@ -29,8 +30,8 @@ public class REFrameAdapter implements IRuleEngineFrame
 	private final IAutoRefFrame	autorefFrame;
 	private final FollowUpAction	followUp;
 	private final FollowUpAction	lastFollowUp;
-	
-	
+											
+											
 	/**
 	 * @param autorefFrame
 	 * @param followUp
@@ -118,5 +119,12 @@ public class REFrameAdapter implements IRuleEngineFrame
 	public RefereeMsg getRefereeMsg()
 	{
 		return autorefFrame.getRefereeMsg();
+	}
+	
+	
+	@Override
+	public ShapeMap getShapes()
+	{
+		return autorefFrame.getShapes();
 	}
 }

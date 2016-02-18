@@ -236,7 +236,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		container.setTimestampRecorded(System.nanoTime());
 		container.setCurBall(curBall);
 		container.setWpBall(new WpBall(trackedBall.getPos3(), trackedBall.getVel3(), trackedBall.getAcc3(), frame
-				.getFrameNumber(), curBall.getTimestamp()));
+				.getFrameNumber(), curBall.getTimestamp(), trackedBall.getConfidence()));
 		for (CamBall camBall : frame.getBalls())
 		{
 			container.getBalls().add(camBall);

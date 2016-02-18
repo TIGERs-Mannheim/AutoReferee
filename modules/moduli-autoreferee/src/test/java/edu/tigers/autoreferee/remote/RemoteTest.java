@@ -34,8 +34,13 @@ public class RemoteTest
 	{
 		ThreadedTCPRefboxRemote remote = new ThreadedTCPRefboxRemote();
 		remote.start("localhost", 10007);
-		remote.sendCommand(new RefCommand(Command.DIRECT_FREE_BLUE));
-		Thread.sleep(10000);
+		for (int i = 0; i < 10; i++)
+		{
+			remote.sendCommand(new RefCommand(Command.DIRECT_FREE_BLUE));
+			Thread.sleep(1000);
+			remote.sendCommand(new RefCommand(Command.STOP));
+			Thread.sleep(1000);
+		}
 		remote.close();
 	}
 	

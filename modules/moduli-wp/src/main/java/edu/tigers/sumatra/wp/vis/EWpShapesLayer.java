@@ -36,14 +36,16 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	BALL("Ball", "VISION", true),
 	/**  */
-	VELOCITY("Velocity", "VISION"),;
+	VELOCITY("Velocity", "VISION"),
+	/**  */
+	AUTOREFEREE("AutoReferee", "VISION", true);
 	
 	
 	private final String		name;
 	private final String		category;
 	private final boolean	visible;
-									
-									
+	
+	
 	/**
 	 * 
 	 */

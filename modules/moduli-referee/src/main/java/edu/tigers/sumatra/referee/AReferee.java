@@ -11,10 +11,11 @@ package edu.tigers.sumatra.referee;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.moduli.AModule;
+import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.cam.IBallReplacer;
+import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
 
 
@@ -81,9 +82,10 @@ public abstract class AReferee extends AModule implements IBallReplacer
 	 * @param goalsYellow
 	 * @param timeLeft
 	 * @param timestamp
+	 * @param placementPos
 	 */
 	public abstract void sendOwnRefereeMsg(Command cmd, int goalsBlue, int goalsYellow, int timeLeft,
-			final long timestamp);
+			final long timestamp, IVector2 placementPos);
 			
 			
 	/**

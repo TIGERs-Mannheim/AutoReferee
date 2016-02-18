@@ -64,14 +64,14 @@ public class BangBangTrajectory2D implements ITrajectory<IVector2>
 			final double brk,
 			final double vmax)
 	{
-		double inc = SumatraMath.PI / 8.0;
-		double alpha = SumatraMath.PI / 4.0;
+		double inc = Math.PI / 8.0;
+		double alpha = Math.PI / 4.0;
 		
 		// binary search, some iterations (fixed)
-		while (inc > 0.001)
+		while (inc > 0.0001)
 		{
-			double cA = SumatraMath.cos(alpha);
-			double sA = SumatraMath.sin(alpha);
+			double cA = Math.cos(alpha);
+			double sA = Math.sin(alpha);
 			
 			x = new BangBangTrajectory1D(s0.x(), s1.x(), v0.x(), acc * cA, brk * cA, vmax * cA);
 			y = new BangBangTrajectory1D(s0.y(), s1.y(), v0.y(), acc * sA, brk * sA, vmax * sA);

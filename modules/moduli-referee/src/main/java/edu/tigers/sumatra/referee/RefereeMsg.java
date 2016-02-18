@@ -12,10 +12,9 @@ package edu.tigers.sumatra.referee;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Point;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
@@ -37,11 +36,11 @@ public class RefereeMsg
 	private final long			stageTimeLeft;
 	private final TeamInfo		teamInfoYellow;
 	private final TeamInfo		teamInfoBlue;
-	
+										
 	private final ETeamColor	leftTeam;
 	private final IVector2		ballPlacementPos;
-	
-	
+										
+										
 	/**
 	 * Create default referee msg
 	 */
@@ -77,7 +76,7 @@ public class RefereeMsg
 		
 		if (sslRefereeMsg.hasDesignatedPosition())
 		{
-			Point msgBallPos = sslRefereeMsg.getDesignatedPosition();
+			SSL_Referee.Point msgBallPos = sslRefereeMsg.getDesignatedPosition();
 			ballPlacementPos = new Vector2(msgBallPos.getX(), msgBallPos.getY());
 		} else
 		{

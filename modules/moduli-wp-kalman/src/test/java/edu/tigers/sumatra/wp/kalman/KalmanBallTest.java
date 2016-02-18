@@ -81,7 +81,7 @@ public class KalmanBallTest
 		exporterBot.close();
 		
 		
-		Matrix state = new Matrix(9, 1);
+		Matrix state = new Matrix(10, 1);
 		state.set(0, 0, -3000);
 		state.set(1, 0, -1000);
 		state.set(2, 0, 0);
@@ -100,7 +100,7 @@ public class KalmanBallTest
 			IVector3 pos = new Vector3(state.get(0, 0), state.get(1, 0), state.get(2, 0));
 			IVector3 vel = new Vector3(state.get(3, 0), state.get(4, 0), state.get(5, 0));
 			IVector3 acc = new Vector3(state.get(6, 0), state.get(7, 0), state.get(8, 0));
-			WpBall ball = new WpBall(pos, vel, acc, i, time);
+			WpBall ball = new WpBall(pos, vel, acc, i, time, state.get(9, 0));
 			exporter.addValues(ball.getNumberList());
 			
 			Matrix newState = model.dynamics(state, null, dt * 1e-9, new MotionContext());

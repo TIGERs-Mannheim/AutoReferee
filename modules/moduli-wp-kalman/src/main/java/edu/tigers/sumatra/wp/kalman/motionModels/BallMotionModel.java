@@ -25,6 +25,8 @@ import edu.tigers.sumatra.wp.kalman.data.WPCamBall;
  */
 public class BallMotionModel implements IMotionModel
 {
+	private static final int			STATE_SIZE					= 10;
+																				
 	/** m/s */
 	private static final double		baseMinVelocity			= 0.05;
 	/** m/s */
@@ -48,11 +50,10 @@ public class BallMotionModel implements IMotionModel
 	private final IFunction1D			relVelFunc;
 												
 	private final BallDynamicsModel	ballDynamicsModel			= new BallDynamicsModel(
-																						Geometry.getBallModel().getAcc() * 1000);
-	private Matrix							lastMeasurement			= null;
-	private static final int			VEL_BUFFER_SIZE			= 4;
-	private double[]						velErrorBuffer				= new double[VEL_BUFFER_SIZE];
-	private int								velErrorBufferIdx			= 0;
+																						Geometry.getBallModel().getAcc());
+	private static final int			VEL_BUFFER_SIZE			= 5;
+	private double[]						measuredVelBuffer			= new double[VEL_BUFFER_SIZE];
+	private int								measuredVelBufferIdx		= 0;
 																				
 																				
 	/**
@@ -145,7 +146,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getDynamicsJacobianWRTstate(final Matrix state, final double dt)
 	{
-		final Matrix a = Matrix.identity(9, 9);
+		final Matrix a = Matrix.identity(STATE_SIZE, STATE_SIZE);
 		a.set(0, 0, 1.0);
 		a.set(0, 3, dt);
 		a.set(0, 6, 0.5 * dt * dt);
@@ -168,7 +169,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getDynamicsJacobianWRTnoise(final Matrix state, final double dt)
 	{
-		final Matrix a = Matrix.identity(9, 9);
+		final Matrix a = Matrix.identity(STATE_SIZE, STATE_SIZE);
 		a.set(0, 0, 1.0);
 		a.set(0, 3, dt);
 		a.set(0, 6, 0.5 * dt * dt);
@@ -185,14 +186,13 @@ public class BallMotionModel implements IMotionModel
 		a.set(5, 5, 1.0);
 		a.set(5, 8, dt);
 		return a;
-		// return Matrix.identity(9, 9);
 	}
 	
 	
 	@Override
 	public Matrix getDynamicsCovariance(final Matrix state, final double dt)
 	{
-		final Matrix q = new Matrix(9, 9);
+		final Matrix q = new Matrix(STATE_SIZE, STATE_SIZE);
 		double vx = state.get(3, 0);
 		double vy = state.get(4, 0);
 		
@@ -202,16 +202,14 @@ public class BallMotionModel implements IMotionModel
 		
 		double vel = Math.sqrt((vx * vx) + (vy * vy));
 		double relVel = relVelFunc.eval(vel);
-		double collisionInfluence = 0;
-		if (ballDynamicsModel.gettLastCollision() >= 0)
-		{
-			collisionInfluence += 1 - Math.min(1, ballDynamicsModel.gettLastCollision() / 0.1);
-		}
-		double velError = Arrays.stream(velErrorBuffer).sum() / VEL_BUFFER_SIZE;
+		double confidence = state.get(9, 0);
+		double collisionInfluence = 1 - confidence;
+		double velError = Math.abs(vel - (Arrays.stream(measuredVelBuffer).sum() / VEL_BUFFER_SIZE));
 		
-		if (velError > 2000)
+		double velTol = 100;
+		if (velError > velTol)
 		{
-			collisionInfluence += (velError - 2000) / 3000;
+			collisionInfluence += (velError - velTol) / 3000;
 		}
 		collisionInfluence = Math.min(1, collisionInfluence);
 		
@@ -274,18 +272,10 @@ public class BallMotionModel implements IMotionModel
 	public void newMeasurement(final Matrix measurement, final Matrix state, final double dt)
 	{
 		Matrix mp = measurement.getMatrix(0, 1, 0, 0);
-		if (lastMeasurement == null)
-		{
-			lastMeasurement = mp;
-			return;
-		}
-		
-		Matrix mv = mp.minus(lastMeasurement).times(dt);
-		Matrix v = mv.minus(state.getMatrix(3, 4, 0, 0));
+		Matrix v = mp.minus(state.getMatrix(0, 1, 0, 0)).times(1 / dt);
 		double vel = Math.sqrt((v.get(0, 0) * v.get(0, 0)) + (v.get(1, 0) * v.get(1, 0)));
-		velErrorBuffer[velErrorBufferIdx] = vel;
-		velErrorBufferIdx = (velErrorBufferIdx + 1) % VEL_BUFFER_SIZE;
-		lastMeasurement = mp;
+		measuredVelBuffer[measuredVelBufferIdx] = vel;
+		measuredVelBufferIdx = (measuredVelBufferIdx + 1) % VEL_BUFFER_SIZE;
 	}
 	
 	
@@ -340,7 +330,7 @@ public class BallMotionModel implements IMotionModel
 		final double ax = state.get(6, 0);
 		final double ay = state.get(7, 0);
 		final double az = state.get(8, 0);
-		final double confidence = 1.0;
+		final double confidence = state.get(9, 0);
 		return new BallMotionResult(x, y, z, vx, vy, vz, ax, ay, az, confidence, onCam);
 	}
 	
@@ -361,10 +351,11 @@ public class BallMotionModel implements IMotionModel
 	public Matrix generateStateMatrix(final Matrix measurement, final Matrix control)
 	{
 		// no control for ball
-		final Matrix s = new Matrix(9, 1);
+		final Matrix s = new Matrix(STATE_SIZE, 1);
 		s.set(0, 0, measurement.get(0, 0));
 		s.set(1, 0, measurement.get(1, 0));
 		s.set(2, 0, measurement.get(2, 0));
+		s.set(9, 0, 1);
 		return s;
 	}
 	
@@ -380,7 +371,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix generateCovarianceMatrix(final Matrix state)
 	{
-		final Matrix p = new Matrix(9, 9);
+		final Matrix p = new Matrix(STATE_SIZE, STATE_SIZE);
 		p.set(0, 0, varPosition);
 		p.set(1, 1, varPosition);
 		p.set(2, 2, varPosition);
@@ -390,6 +381,7 @@ public class BallMotionModel implements IMotionModel
 		p.set(6, 6, varAcceleration);
 		p.set(7, 7, varAcceleration);
 		p.set(8, 8, varAcceleration);
+		p.set(9, 9, 0);
 		return p;
 	}
 	
@@ -416,7 +408,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getMeasurementJacobianWRTstate(final Matrix state)
 	{
-		return Matrix.identity(3, 9);
+		return Matrix.identity(3, STATE_SIZE);
 	}
 	
 	
@@ -468,7 +460,7 @@ public class BallMotionModel implements IMotionModel
 	public Matrix getCovarianceOnNoObservation(final Matrix covariance)
 	{
 		final double improbable = 1e10;
-		final Matrix covar = new Matrix(9, 9);
+		final Matrix covar = new Matrix(STATE_SIZE, STATE_SIZE);
 		for (int i = 0; i < covar.getRowDimension(); i++)
 		{
 			for (int j = 0; j < covar.getColumnDimension(); j++)

@@ -11,7 +11,7 @@ package edu.tigers.sumatra.cam;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslGeometry.SSL_GeometryData;
+import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_GeometryData;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamFieldSize;
 import edu.tigers.sumatra.cam.data.CamGeometry;

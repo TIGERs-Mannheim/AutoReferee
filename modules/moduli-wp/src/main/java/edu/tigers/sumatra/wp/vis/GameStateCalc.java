@@ -8,7 +8,7 @@
  */
 package edu.tigers.sumatra.wp.vis;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;

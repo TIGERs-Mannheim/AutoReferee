@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee;
+import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.network.IReceiver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;

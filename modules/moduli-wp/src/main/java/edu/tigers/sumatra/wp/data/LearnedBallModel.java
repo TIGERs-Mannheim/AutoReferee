@@ -52,15 +52,7 @@ public class LearnedBallModel extends ALearnedModel
 	 */
 	public IVector2 getPosByTime(final IVector2 currentPos, final IVector2 currentVel, final double time)
 	{
-		double x = currentVel.getLength2() * 1000;
-		double y = time * 1e3f;
-		
-		double result = p[0] + (p[1] * x) + (p[2] * y) + (p[3] * x * x) + (p[4] * x * y) + (p[5] * y * y);
-		if (result < 0)
-		{
-			return currentPos;
-		}
-		return currentPos.addNew(currentVel.scaleToNew(result));
+		return currentPos.addNew(currentVel.scaleToNew(getDistByTime(currentVel.getLength2(), time)));
 	}
 	
 	
@@ -71,8 +63,9 @@ public class LearnedBallModel extends ALearnedModel
 	 */
 	public double getDistByTime(final double currentVel, final double time)
 	{
+		double tMax = getTimeByVel(currentVel, 0);
 		double x = currentVel * 1000;
-		double y = time * 1e3f;
+		double y = Math.min(time, tMax) * 1e3f;
 		
 		double result = p[0] + (p[1] * x) + (p[2] * y) + (p[3] * x * x) + (p[4] * x * y) + (p[5] * y * y);
 		if (result < 0)

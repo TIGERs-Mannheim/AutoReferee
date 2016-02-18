@@ -23,7 +23,7 @@ import edu.tigers.sumatra.math.Vector2f;
 
 /**
  * Simple data holder; internal data structure for the
- * {@link edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionRobot} from
+ * SSL_DetectionRobot from
  * protobuf-protocol, coming from
  * the SSL-Vision.
  * <p>
@@ -39,8 +39,8 @@ public class CamRobot extends ACamObject
 	private final IVector2	pos;
 	private final double		orientation;
 	private final double		height;
-	
-	
+									
+									
 	/**
 	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
@@ -118,7 +118,8 @@ public class CamRobot extends ACamObject
 		
 		final long tSent = list.size() <= 12 ? 0 : list.get(12).longValue();
 		
-		return new CamRobot(confidence, pixelX, pixelY, tCapture, tSent, camId, frameId, x, y, orientation, height, botId);
+		return new CamRobot(confidence, pixelX, pixelY, tCapture, tSent, camId, frameId, x, y, orientation, height,
+				botId);
 	}
 	
 	

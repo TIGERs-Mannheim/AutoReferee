@@ -8,6 +8,7 @@
  */
 package edu.tigers.autoreferee.engine.rules.impl;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,11 +23,18 @@ import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BallLeftFieldRule;
+import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.DrawablePoint;
+import edu.tigers.sumatra.drawable.DrawableText;
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
+import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.ShapeMap;
 import edu.tigers.sumatra.wp.data.TrackedBall;
+import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 
 
 /**
@@ -39,13 +47,16 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
  */
 public class StopStateRule extends APreparingGameRule
 {
-	private static int	priority					= 1;
+	private static int	priority						= 1;
 	
 	@Configurable(comment = "Time to wait before performing an action after reaching the stop state in [ms]")
-	private static long	stopWaitTime			= 2_000;	// ms
-																			
+	private static long	stopWaitTime				= 2_000;	// ms
+																				
 	@Configurable(comment = "The time to wait before performing an action although the ball is not placed correctly")
-	private static long	maxUnplacedWaitTime	= 20_000;
+	private static long	maxUnplacedWaitTime		= 20_000;
+	
+	@Configurable(comment = "Start the next action although the ball has not been placed")
+	private boolean		continueAfterMaxTimeout	= false;
 	
 	private Long			entryTime;
 	
@@ -101,6 +112,8 @@ public class StopStateRule extends APreparingGameRule
 		TrackedBall ball = frame.getWorldFrame().getBall();
 		IVector2 kickPos = determineKickPos(action);
 		
+		visualizeKickPos(frame.getShapes(), kickPos);
+		
 		boolean ballPlaced = ballIsPlaced(frame.getWorldFrame().getBall(), kickPos);
 		boolean ballInsideField = field.isPointInShape(ball.getPos());
 		boolean botsStationary = botsAreStationary(frame.getWorldFrame().getBots().values());
@@ -108,7 +121,8 @@ public class StopStateRule extends APreparingGameRule
 		
 		boolean maxWaitTimeOver = (frame.getTimestamp() - entryTime) > (maxUnplacedWaitTime * 1_000_000);
 		
-		if ((ballPlaced && botsStationary && botsCorrectDistance) || (maxWaitTimeOver && ballInsideField))
+		if ((ballPlaced && botsStationary && botsCorrectDistance)
+				|| (maxWaitTimeOver && ballInsideField && continueAfterMaxTimeout))
 		{
 			return Optional.of(new RuleResult(action.getCommand(), null, null));
 		}
@@ -120,6 +134,19 @@ public class StopStateRule extends APreparingGameRule
 		}
 		
 		return Optional.empty();
+	}
+	
+	
+	private void visualizeKickPos(final ShapeMap map, final IVector2 kickPos)
+	{
+		List<IDrawableShape> shapes = map.get(EWpShapesLayer.AUTOREFEREE);
+		
+		double radius = AutoRefConfig.getBallPlacementAccuracy();
+		
+		shapes.add(new DrawableCircle(kickPos, radius, Color.BLUE));
+		shapes.add(new DrawablePoint(kickPos, Color.BLACK));
+		IVector2 textPos = kickPos.addNew(new Vector2(radius, radius));
+		shapes.add(new DrawableText(textPos, "New Ball Pos", Color.BLACK));
 	}
 	
 	

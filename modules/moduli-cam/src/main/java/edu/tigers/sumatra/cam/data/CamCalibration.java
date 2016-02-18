@@ -8,7 +8,7 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslGeometry.SSL_GeometryCameraCalibration;
+import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_GeometryCameraCalibration;
 
 
 /**

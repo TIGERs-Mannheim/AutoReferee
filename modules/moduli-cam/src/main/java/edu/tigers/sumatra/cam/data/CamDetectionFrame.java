@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * This class contains every information a
- * {@link edu.dhbw.mannheim.tigers.sumatra.model.data.MessagesRobocupSslDetection.SSL_DetectionFrame} has to offer about
+ * SSL_DetectionFrame has to offer about
  * the current situation on the field
  * 
  * @author Gero
@@ -23,20 +23,20 @@ public class CamDetectionFrame
 {
 	/** time-stamp in System.nanotime() */
 	private final long				tCapture;
-	
+											
 	/** time-stamp in System.nanotime() */
 	private final long				tSent;
-	
+											
 	/** ID 0 or 1 */
 	private final int					cameraId;
-	
+											
 	/** independent frame number, continuous */
 	private final long				frameNumber;
 	private final List<CamBall>	balls;
 	private final List<CamRobot>	robotsYellow;
 	private final List<CamRobot>	robotsBlue;
-	
-	
+											
+											
 	/**
 	 * @param tCapture
 	 * @param tSent
