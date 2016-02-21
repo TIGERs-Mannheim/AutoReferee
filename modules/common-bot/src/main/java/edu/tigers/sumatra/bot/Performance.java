@@ -37,7 +37,8 @@ public class Performance
 	@Configurable(spezis = { "GRSIM" }, defValue = "10")
 	private double	velMaxW			= 10;
 											
-	private double	velMaxOverride	= -1;
+	private double	velMaxOverride	= 0;
+	private double	accMaxOverride	= 0;
 											
 											
 	static
@@ -59,6 +60,10 @@ public class Performance
 	 */
 	public final double getAccMax()
 	{
+		if (accMaxOverride > 0)
+		{
+			return accMaxOverride;
+		}
 		return accMax;
 	}
 	
@@ -77,6 +82,10 @@ public class Performance
 	 */
 	public final double getBrkMax()
 	{
+		if (accMaxOverride > 0)
+		{
+			return accMaxOverride;
+		}
 		return brkMax;
 	}
 	
@@ -185,10 +194,19 @@ public class Performance
 	
 	
 	/**
-	 * @param enable
+	 * @return the accMaxOverride
 	 */
-	public final void setVelMaxOverride(final boolean enable)
+	public double getAccMaxOverride()
 	{
-		velMaxOverride = enable ? 1.2 : -1;
+		return accMaxOverride;
+	}
+	
+	
+	/**
+	 * @param accMaxOverride the accMaxOverride to set
+	 */
+	public void setAccMaxOverride(final double accMaxOverride)
+	{
+		this.accMaxOverride = accMaxOverride;
 	}
 }

@@ -11,6 +11,7 @@ package edu.tigers.sumatra.referee;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 
 
@@ -27,8 +28,8 @@ public final class TeamConfig
 	private static int			keeperIdYellow	= 0;
 	@Configurable
 	private static ETeamColor	leftTeam			= ETeamColor.BLUE;
-															
-															
+	
+	
 	static
 	{
 		ConfigRegistration.registerClass("team", TeamConfig.class);
@@ -72,6 +73,42 @@ public final class TeamConfig
 			return keeperIdYellow;
 		}
 		throw new IllegalArgumentException();
+	}
+	
+	
+	/**
+	 * @return
+	 */
+	public static final BotID getKeeperBotIDBlue()
+	{
+		return BotID.createBotId(keeperIdBlue, ETeamColor.BLUE);
+	}
+	
+	
+	/**
+	 * @return
+	 */
+	public static final BotID getKeeperBotIDYellow()
+	{
+		return BotID.createBotId(keeperIdYellow, ETeamColor.YELLOW);
+	}
+	
+	
+	/**
+	 * @param color
+	 * @return
+	 */
+	public static final BotID getKeeperBotID(final ETeamColor color)
+	{
+		switch (color)
+		{
+			case BLUE:
+				return getKeeperBotIDBlue();
+			case YELLOW:
+				return getKeeperBotIDYellow();
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 	
 	

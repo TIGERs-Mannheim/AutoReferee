@@ -40,16 +40,16 @@ public class Ellipse implements IEllipse
 	private double						radiusX;
 	private double						radiusY;
 	private double						turnAngle;
-	
-	
+											
+											
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
 	
 	@SuppressWarnings("unused")
-	private Ellipse()
+	protected Ellipse()
 	{
-		
+	
 	}
 	
 	

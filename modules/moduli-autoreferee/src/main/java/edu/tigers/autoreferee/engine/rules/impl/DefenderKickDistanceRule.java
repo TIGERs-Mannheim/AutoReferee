@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.RuleViolation;
 import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
@@ -33,7 +33,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author Lukas Magel
  */
-public class FreekickRule extends APreparingGameRule
+public class DefenderKickDistanceRule extends APreparingGameRule
 {
 	private static final int	priority	= 1;
 	private IVector2				ballPos;
@@ -42,11 +42,12 @@ public class FreekickRule extends APreparingGameRule
 	/**
 	 * 
 	 */
-	public FreekickRule()
+	public DefenderKickDistanceRule()
 	{
 		super(Arrays.asList(
 				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
-				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW));
+				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
+				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW));
 	}
 	
 	

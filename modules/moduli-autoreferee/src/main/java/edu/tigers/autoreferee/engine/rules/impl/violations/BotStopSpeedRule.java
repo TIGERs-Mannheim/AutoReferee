@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
+
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.RuleViolation;
@@ -66,8 +68,7 @@ public class BotStopSpeedRule extends AGameRule
 		Set<BotID> violators = bots.stream().filter(bot -> bot.getVel().getLength() > AutoRefConfig.getMaxBotStopSpeed())
 				.map(bot -> bot.getBotId()).collect(Collectors.toSet());
 		
-		Set<BotID> newViolators = new HashSet<BotID>(violators);
-		newViolators.removeAll(lastViolators);
+		Set<BotID> newViolators = Sets.difference(violators, lastViolators);
 		lastViolators = violators;
 		
 		Optional<BotID> violator = newViolators.stream().findFirst();

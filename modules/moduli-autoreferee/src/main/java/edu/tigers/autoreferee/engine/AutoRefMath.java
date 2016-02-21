@@ -8,9 +8,15 @@
  */
 package edu.tigers.autoreferee.engine;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
+import edu.tigers.sumatra.shapes.rectangle.Rectangle;
+import edu.tigers.sumatra.wp.data.Geometry;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.PenaltyArea;
 
 
@@ -107,5 +113,26 @@ public class AutoRefMath
 					.addNew(new Vector2((DEFENSE_AREA_GOALLINE_DISTANCE - GOAL_KICK_DISTANCE) * xSide, 0));
 		}
 		return pos;
+	}
+	
+	
+	/**
+	 * Checks if all bots that are located entirely inside the field area are on their own side of the field
+	 * 
+	 * @param bots
+	 * @return true if all bots are in their half of the field
+	 */
+	public static boolean botsAreOnCorrectSide(final Collection<ITrackedBot> bots)
+	{
+		Rectangle field = Geometry.getField();
+		Stream<ITrackedBot> onFieldBots = bots.stream().filter(
+				bot -> {
+					return field.isPointInShape(bot.getPos(), Geometry.getBotRadius());
+				});
+		
+		return onFieldBots.allMatch(bot -> {
+			Rectangle side = NGeometry.getFieldSide(bot.getTeamColor());
+			return side.isPointInShape(bot.getPos());
+		});
 	}
 }

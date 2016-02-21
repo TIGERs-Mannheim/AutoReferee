@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 
 
 /*

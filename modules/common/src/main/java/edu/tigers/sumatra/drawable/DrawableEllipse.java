@@ -31,8 +31,9 @@ public class DrawableEllipse extends Ellipse implements IDrawableShape
 {
 	private Color		color	= Color.red;
 	private boolean	fill	= false;
-	
-	
+									
+									
+	@SuppressWarnings("unused")
 	private DrawableEllipse()
 	{
 		super(AVector2.ZERO_VECTOR, 1, 1);
@@ -102,5 +103,12 @@ public class DrawableEllipse extends Ellipse implements IDrawableShape
 	public void setFill(final boolean fill)
 	{
 		this.fill = fill;
+	}
+	
+	
+	@Override
+	public void setColor(final Color color)
+	{
+		this.color = color;
 	}
 }

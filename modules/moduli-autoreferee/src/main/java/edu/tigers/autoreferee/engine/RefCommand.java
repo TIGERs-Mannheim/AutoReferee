@@ -10,7 +10,7 @@ package edu.tigers.autoreferee.engine;
 
 import java.util.Optional;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.math.IVector2;
 
 

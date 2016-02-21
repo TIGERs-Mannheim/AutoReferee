@@ -154,6 +154,18 @@
 				<os.detected.classifier>windows-x86_64</os.detected.classifier>
 			</properties>
 		</profile>
+		<profile>
+			<id>os-windows-32</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+					<arch>i386</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>windows-x86_32</os.detected.classifier>
+			</properties>
+		</profile>
 
 		<profile>
 			<id>os-linux</id>
@@ -165,6 +177,43 @@
 			</activation>
 			<properties>
 				<os.detected.classifier>linux-x86_64</os.detected.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>os-linux-32</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<arch>i386</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>linux-x86_32</os.detected.classifier>
+			</properties>
+		</profile>
+
+		<profile>
+			<id>os-mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>amd64</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>osx-x86_64</os.detected.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>os-mac-32</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>i386</arch>
+				</os>
+			</activation>
+			<properties>
+				<os.detected.classifier>osx-x86_32</os.detected.classifier>
 			</properties>
 		</profile>
 	</profiles>

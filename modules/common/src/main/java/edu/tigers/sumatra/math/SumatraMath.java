@@ -11,8 +11,6 @@ package edu.tigers.sumatra.math;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 
 /**
  * This class holds math-functions often used in the AI Module.<br>
@@ -24,8 +22,6 @@ import org.apache.log4j.Logger;
  */
 public final class SumatraMath
 {
-	private static final Logger	log				= Logger.getLogger(SumatraMath.class.getName());
-																
 	/**  */
 	public static final double		EQUAL_TOL		= 0.000001;
 																
@@ -168,17 +164,16 @@ public final class SumatraMath
 	 * @param n
 	 * @author Malte, Gero
 	 * @return
+	 * @throws MathException
 	 */
-	public static long faculty(final int n)
+	public static long faculty(final int n) throws MathException
 	{
 		if (n > FACTORIAL_MAX)
 		{
-			log.error("AIMath.faculty is limited to FACTORIAL_MAX; if you need more, change it! ;-)");
-			return -1;
+			throw new MathException("AIMath.faculty is limited to FACTORIAL_MAX; if you need more, change it! ;-)");
 		} else if (n < 0)
 		{
-			log.error("AIMath.faculty: Can't calculate faculty of a negative number!");
-			return -1;
+			throw new MathException("AIMath.faculty: Can't calculate faculty of a negative number!");
 		} else
 		{
 			return FACTORIALS[n];

@@ -12,12 +12,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -74,7 +75,7 @@ public class PlaceBallStateRule extends AGameRule
 		}
 		
 		// Wait until the team has had enough time to place the ball
-		if ((frame.getTimestamp() - entryTime) < (AutoRefConfig.getBallPlacementWindow() * 1_000_000))
+		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(AutoRefConfig.getBallPlacementWindow()))
 		{
 			return Optional.empty();
 		}

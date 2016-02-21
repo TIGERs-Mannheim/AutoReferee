@@ -37,10 +37,10 @@ public class AutoRefConfig
 	private static double		ballPlacementAccuracy		= 100;
 	
 	@Configurable(comment = "The maximum allowed ball velocity ingame in m/s")
-	private static double		maxBallVelocity				= 8;
+	private static double		maxBallVelocity				= 8.5d;
 	
 	@Configurable(comment = "The maximum bot velocity during game stoppage in m/s")
-	private static double		maxBotStopSpeed				= 1.5d;						// in m/s
+	private static double		maxBotStopSpeed				= 1.7d;						// in m/s
 																											
 	@Configurable(comment = "The velocity below which an entity is considered to be stationary in m/s")
 	private static double		stationarySpeedThreshold	= 0.01;

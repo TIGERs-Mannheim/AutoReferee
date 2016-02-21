@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.remote;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SocketChannel;
@@ -18,12 +19,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.RefboxRemoteControl.SSL_RefereeRemoteControlReply;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.RefboxRemoteControl.SSL_RefereeRemoteControlReply.Outcome;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.RefboxRemoteControl.SSL_RefereeRemoteControlRequest.Builder;
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Point;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply;
+import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply.Outcome;
+import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
+import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest.Builder;
+import edu.tigers.sumatra.Referee.SSL_Referee.Point;
 import edu.tigers.sumatra.math.IVector2;
 
 
@@ -71,6 +72,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		try
 		{
 			socket.connect(addr);
+			socket.setOption(StandardSocketOptions.TCP_NODELAY, true);
 		} catch (IOException e)
 		{
 			throw new IOException("Unable to connect to the Refbox: " + e.getMessage(), e);

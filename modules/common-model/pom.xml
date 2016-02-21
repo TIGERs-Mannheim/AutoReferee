@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.github.g3force</groupId>
       <artifactId>configurable</artifactId>
-      <version>v1.9</version>
+      <version>v1.9-1</version>
     </dependency>
 
   </dependencies>

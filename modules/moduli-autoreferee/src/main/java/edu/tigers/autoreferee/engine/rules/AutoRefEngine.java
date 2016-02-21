@@ -11,6 +11,7 @@ package edu.tigers.autoreferee.engine.rules;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -19,16 +20,18 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.rules.impl.FreekickRule;
+import edu.tigers.autoreferee.engine.rules.impl.DefenderKickDistanceRule;
 import edu.tigers.autoreferee.engine.rules.impl.GoalRule;
 import edu.tigers.autoreferee.engine.rules.impl.KickTimeoutRule;
 import edu.tigers.autoreferee.engine.rules.impl.PlaceBallStateRule;
 import edu.tigers.autoreferee.engine.rules.impl.PrepareKickoffStateRule;
 import edu.tigers.autoreferee.engine.rules.impl.StopStateRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.AttackerDefenseDistanceRule;
-import edu.tigers.autoreferee.engine.rules.impl.violations.AttackerInDefenseAreaRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.AttackerTouchKeeperRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BallLeftFieldRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BallSpeedingRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.BotCollisionRule;
+import edu.tigers.autoreferee.engine.rules.impl.violations.BotInDefenseAreaRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BotNumberRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BotStopSpeedRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.DoubleTouchRule;
@@ -58,7 +61,7 @@ public class AutoRefEngine
 	private static final Logger	log								= Logger.getLogger(AutoRefEngine.class);
 	
 	/** in ms */
-	private static long				DUPLICATE_RESEND_WAIT_TIME	= 500;
+	private static long				DUPLICATE_RESEND_WAIT_TIME_MS	= 500;
 	
 	private List<IGameRule>			rules;
 	private IRefboxRemote			remote;
@@ -87,12 +90,14 @@ public class AutoRefEngine
 		rules.add(new PlaceBallStateRule());
 		rules.add(new BotNumberRule());
 		rules.add(new BotStopSpeedRule());
-		rules.add(new FreekickRule());
+		rules.add(new DefenderKickDistanceRule());
 		rules.add(new KickTimeoutRule());
 		rules.add(new AttackerDefenseDistanceRule());
-		rules.add(new AttackerInDefenseAreaRule());
+		rules.add(new BotInDefenseAreaRule());
 		rules.add(new DribblingRule());
 		rules.add(new DoubleTouchRule());
+		rules.add(new BotCollisionRule());
+		rules.add(new AttackerTouchKeeperRule());
 		
 		this.mode = mode;
 	}
@@ -172,7 +177,7 @@ public class AutoRefEngine
 	private void sendCommand(final RefCommand cmd, final long ts)
 	{
 		if (cmd.equals(lastRefCommand)
-				&& ((ts - lastCommandTimestamp) < (DUPLICATE_RESEND_WAIT_TIME * 1_000_000)))
+				&& ((ts - lastCommandTimestamp) < TimeUnit.MILLISECONDS.toNanos(DUPLICATE_RESEND_WAIT_TIME_MS)))
 		{
 			log.debug("Dropping duplicate ref message: " + cmd.getCommand());
 			return;

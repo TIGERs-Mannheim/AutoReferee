@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
+import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
@@ -26,7 +26,9 @@ import edu.tigers.autoreferee.engine.RuleViolation;
 import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
 import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
@@ -48,7 +50,7 @@ public class DoubleTouchRule extends APreparingGameRule
 	private static final Logger				log							= Logger.getLogger(DoubleTouchRule.class);
 	
 	@Configurable(comment = "The bot may not approach the ball by less than this value only once")
-	private static final double				MIN_BOT_BALL_DISTANCE	= 50;
+	private static double						MIN_BOT_BALL_DISTANCE	= 50;
 	
 	private BotPosition							firstTouchedPos;
 	private boolean								hasMovedAwayFromBall		= false;
@@ -58,6 +60,8 @@ public class DoubleTouchRule extends APreparingGameRule
 	
 	static
 	{
+		AGameRule.registerClass(DoubleTouchRule.class);
+		
 		List<EGameStateNeutral> states = new ArrayList<>();
 		states.addAll(Arrays.asList(
 				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW,
@@ -142,8 +146,10 @@ public class DoubleTouchRule extends APreparingGameRule
 				ETeamColor firstTouchedColor = firstTouchedId.getTeamColor();
 				RuleViolation violation = new RuleViolation(ERuleViolation.DOUBLE_TOUCH, frame.getTimestamp(),
 						firstTouchedColor);
+				
+				IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, firstTouchedColor.opposite());
 				FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, firstTouchedColor.opposite(),
-						ballPos);
+						kickPos);
 				doReset();
 				return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 			}

@@ -51,15 +51,19 @@ public class RuleViolation
 		/** The defending team comes too close to the ball during a freekick */
 		DEFENDER_KICK_DISTANCE,
 		/** If the kick was not taken after a certain amount of time */
-		KICK_TIMEOUT
+		KICK_TIMEOUT,
+		/**  */
+		MULTIPLE_DEFENDER,
+		/**  */
+		ATTACKER_TOUCH_KEEPER
 		
 	}
 	
 	private final ERuleViolation	violationType;
 	private final long				timestamp;		// ns
 	private final ETeamColor		teamAtFault;
-	
-	
+											
+											
 	/**
 	 * @param violationType
 	 * @param timestamp in ns

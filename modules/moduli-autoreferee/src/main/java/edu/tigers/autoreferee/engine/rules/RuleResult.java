@@ -13,10 +13,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.RuleViolation;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 
 
 /**

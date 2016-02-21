@@ -10,14 +10,15 @@ package edu.tigers.autoreferee.engine.rules.impl;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.RuleViolation;
 import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -25,7 +26,7 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
 /**
  * The kick timeout will stop the game and initiate a {@link Command#FORCE_START} command if the ball is not kicked
- * after {@link KickTimeoutRule#FREEKICK_TIMEOUT} seconds.
+ * after {@link KickTimeoutRule#FREEKICK_TIMEOUT_MS} seconds.
  * 
  * @author Lukas Magel
  */
@@ -33,7 +34,7 @@ public class KickTimeoutRule extends APreparingGameRule
 {
 	private static final int	priority				= 1;
 	/** in ms */
-	private static final long	FREEKICK_TIMEOUT	= 10_000;
+	private static final long	FREEKICK_TIMEOUT_MS	= 10_000;
 	
 	private long					entryTime;
 	private boolean				kickTimedOut;
@@ -73,7 +74,7 @@ public class KickTimeoutRule extends APreparingGameRule
 		ETeamColor attackingColor = frame.getGameState().getTeamColor();
 		
 		long curTime = frame.getTimestamp();
-		if (((curTime - entryTime) > (FREEKICK_TIMEOUT * 1_000_000)) && (kickTimedOut == false))
+		if (((curTime - entryTime) > TimeUnit.MILLISECONDS.toNanos(FREEKICK_TIMEOUT_MS)) && (kickTimedOut == false))
 		{
 			kickTimedOut = true;
 			RuleViolation violation = new RuleViolation(ERuleViolation.KICK_TIMEOUT, frame.getTimestamp(), attackingColor);

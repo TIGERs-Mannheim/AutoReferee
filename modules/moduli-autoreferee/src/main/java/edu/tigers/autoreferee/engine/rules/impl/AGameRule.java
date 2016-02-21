@@ -15,7 +15,6 @@ import java.util.List;
 import com.github.g3force.configurable.ConfigRegistration;
 
 import edu.tigers.autoreferee.AutoRefConfig;
-import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.rules.IGameRule;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
@@ -100,12 +99,4 @@ public abstract class AGameRule implements IGameRule
 		return bots.stream().allMatch(
 				bot -> GeoMath.distancePP(bot.getPosByTime(0), ballPos) > Geometry.getBotToBallDistanceStop());
 	}
-	
-	
-	protected static boolean botsAreOnCorrectSide(final Collection<ITrackedBot> bots)
-	{
-		return bots.stream().allMatch(bot -> NGeometry.getFieldSide(bot.getTeamColor()).isPointInShape(bot.getPos()));
-	}
-	
-	
 }

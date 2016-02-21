@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -24,7 +25,7 @@ import org.junit.Test;
  */
 public class SumatraMathTest
 {
-	private static final double	ACCURACY	= 0.001;
+	private static final double ACCURACY = 0.001;
 	
 	
 	/**
@@ -35,10 +36,29 @@ public class SumatraMathTest
 	@Test
 	public void testFaculty()
 	{
-		assertEquals((120), SumatraMath.faculty(5));
-		assertEquals((-1), SumatraMath.faculty(-5));
-		// This may change if you raise max_faculty
-		assertEquals((-1), SumatraMath.faculty(50));
+		try
+		{
+			assertEquals((120), SumatraMath.faculty(5));
+			
+		} catch (MathException e)
+		{
+			Assert.fail();
+		}
+		try
+		{
+			assertEquals((-1), SumatraMath.faculty(-5));
+			Assert.fail();
+		} catch (MathException e)
+		{
+		}
+		try
+		{
+			// This may change if you raise max_faculty
+			assertEquals((-1), SumatraMath.faculty(50));
+			Assert.fail();
+		} catch (MathException e)
+		{
+		}
 	}
 	
 	

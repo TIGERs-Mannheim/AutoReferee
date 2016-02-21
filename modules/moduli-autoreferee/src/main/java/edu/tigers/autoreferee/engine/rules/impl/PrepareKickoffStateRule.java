@@ -10,12 +10,14 @@ package edu.tigers.autoreferee.engine.rules.impl;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.dhbw.mannheim.tigers.sumatra.model.data.Referee.SSL_Referee.Command;
+import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
@@ -28,13 +30,13 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
  */
 public class PrepareKickoffStateRule extends APreparingGameRule
 {
-	private static int	priority		= 1;
+	private static int	priority				= 1;
 	
 	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
-	private int				minWaitTime	= 5_000;
+	private static long	MIN_WAIT_TIME_MS	= 5_000;
 	
 	@Configurable(comment = "The maximum time to wait before sending the kickoff signal in ms")
-	private int				maxWaitTime	= 20_000;
+	private static long	MAX_WAIT_TIME_MS	= 20_000;
 	
 	private long			entryTime;
 	
@@ -70,7 +72,7 @@ public class PrepareKickoffStateRule extends APreparingGameRule
 	@Override
 	public Optional<RuleResult> doUpdate(final IRuleEngineFrame frame)
 	{
-		if ((frame.getTimestamp() - entryTime) < (minWaitTime * 1_000_000))
+		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(MIN_WAIT_TIME_MS))
 		{
 			return Optional.empty();
 		}
@@ -78,8 +80,8 @@ public class PrepareKickoffStateRule extends APreparingGameRule
 		SimpleWorldFrame wFrame = frame.getWorldFrame();
 		boolean ballStationary = ballIsStationary(wFrame.getBall());
 		boolean botsStationary = botsAreStationary(wFrame.getBots().values());
-		boolean botPosCorrect = botsAreOnCorrectSide(wFrame.getBots().values());
-		boolean maxWaitTimeElapsed = (frame.getTimestamp() - entryTime) > (maxWaitTime * 1_000_000);
+		boolean botPosCorrect = AutoRefMath.botsAreOnCorrectSide(wFrame.getBots().values());
+		boolean maxWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS.toNanos(MAX_WAIT_TIME_MS);
 		
 		if ((ballStationary && botsStationary && botPosCorrect) || maxWaitTimeElapsed)
 		{

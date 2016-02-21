@@ -39,12 +39,6 @@
     </dependency>
 
     <dependency>
-      <groupId>com.github.g3force</groupId>
-      <artifactId>configurable</artifactId>
-      <version>v1.9</version>
-    </dependency>
-
-    <dependency>
       <groupId>edu.tigers.sumatra</groupId>
       <artifactId>common-model</artifactId>
       <version>1.0</version>

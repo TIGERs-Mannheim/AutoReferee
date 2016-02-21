@@ -40,9 +40,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>edu.tigers.protobufMessages</groupId>
-			<artifactId>protobufMessages</artifactId>
-			<version>2.6.1-8</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
 		</dependency>
 	</dependencies>
 

@@ -23,6 +23,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.tigers.sumatra.math.IVector3;
@@ -32,12 +33,14 @@ import edu.tigers.sumatra.math.Vector3;
 /**
  * @author AndreR
  */
+@Ignore
 public class MotorLearnerTest
 {
 	private static final double		BOT_RADIUS	= 0.076;
-	
+																
 	private static final RealMatrix	Dinv;
-	
+												
+												
 	static
 	{
 		// specify "real" front and back motor angles in degree
@@ -50,8 +53,8 @@ public class MotorLearnerTest
 		
 		// construct angle vector
 		RealVector theta = new ArrayRealVector(new double[] { frontAngle, Math.PI - frontAngle, Math.PI + backAngle,
-			(2 * Math.PI) - backAngle });
-		
+				(2 * Math.PI) - backAngle });
+				
 		// construct matrix for conversion from XYW to M1..M4
 		RealMatrix D = new Array2DRowRealMatrix(4, 3);
 		D.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
@@ -83,7 +86,7 @@ public class MotorLearnerTest
 	
 	private class MotorFunc implements MultivariateFunction
 	{
-		private final double[]	target;
+		private final double[] target;
 		
 		
 		public MotorFunc(final double[] target)
@@ -124,8 +127,8 @@ public class MotorLearnerTest
 				new ObjectiveFunction(new MotorFunc(new double[] { 1, 0, 0 })),
 				new InitialGuess(new double[] { -0.5, -0.5, 0.8, 1.6 }),
 				new NelderMeadSimplex(4, 1.0, 1.0, 2.0, 0.5, 0.5)
-				// new MultiDirectionalSimplex(4)
-				);
+		// new MultiDirectionalSimplex(4)
+		);
 		
 		
 		RealVector p = new ArrayRealVector(result.getPoint());
