@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableBorderText;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
@@ -34,8 +35,8 @@ public class RefereeVisCalc implements IVisCalc
 {
 	private final DecimalFormat	df2			= new DecimalFormat("00");
 	private final DecimalFormat	dfBallVel	= new DecimalFormat("0.00");
-															
-															
+	
+	
 	@Override
 	public void process(final WorldFrameWrapper wfw)
 	{
@@ -61,7 +62,7 @@ public class RefereeVisCalc implements IVisCalc
 				.getTeamInfoYellow().getYellowCardsTimes());
 		String yellowCardBlueStr = getYellowCardString(msg.getTeamInfoBlue().getYellowCards(), msg.getTeamInfoBlue()
 				.getYellowCardsTimes());
-				
+		
 		int[] off = getOffsets(msg);
 		
 		double ballSpeed = wfw.getSimpleWorldFrame().getBall().getVel().getLength2();
@@ -70,7 +71,7 @@ public class RefereeVisCalc implements IVisCalc
 		
 		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 35), ballVelStr, ballSpeed <= 8 ? Color.white
 				: Color.red));
-				
+		
 		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 11), msg.getStage().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 23), msg.getCommand().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[1], 11), timeStr, Color.white));
@@ -116,12 +117,30 @@ public class RefereeVisCalc implements IVisCalc
 	
 	private void paintShapes(final List<IDrawableShape> shapes, final WorldFrameWrapper wfw)
 	{
-		IVector2 marker = null;
-		double radius = 100;
-		
-		marker = getRequiredBallPos(wfw);
-		
 		switch (wfw.getRefereeMsg().getCommand())
+		{
+			case BALL_PLACEMENT_BLUE:
+			case BALL_PLACEMENT_YELLOW:
+				paintAutomatedPlacementShapes(shapes, wfw);
+			case PREPARE_KICKOFF_BLUE:
+			case PREPARE_KICKOFF_YELLOW:
+			case STOP:
+				paintBallDistanceCircle(shapes, wfw);
+				break;
+			default:
+				break;
+		}
+	}
+	
+	
+	private void paintBallDistanceCircle(final List<IDrawableShape> shapes, final WorldFrameWrapper wfw)
+	{
+		double radius = 100;
+		Color circleColor = Color.red;
+		IVector2 ballPos = wfw.getSimpleWorldFrame().getBall().getPos();
+		
+		Command refCmd = wfw.getRefereeMsg().getCommand();
+		switch (refCmd)
 		{
 			case PREPARE_KICKOFF_BLUE:
 			case PREPARE_KICKOFF_YELLOW:
@@ -130,18 +149,57 @@ public class RefereeVisCalc implements IVisCalc
 			case STOP:
 				radius = Geometry.getBotToBallDistanceStop();
 				break;
+			case BALL_PLACEMENT_BLUE:
+			case BALL_PLACEMENT_YELLOW:
+				radius = Geometry.getBotToBallDistanceStop();
+				circleColor = refCmd == Command.BALL_PLACEMENT_BLUE ? Color.YELLOW : Color.BLUE;
+				break;
 			default:
 				break;
 		}
 		
-		if (marker != null)
+		DrawableCircle circle = new DrawableCircle(new Circle(ballPos, radius), circleColor);
+		shapes.add(circle);
+		DrawablePoint point = new DrawablePoint(ballPos, Color.red);
+		point.setSize(2);
+		shapes.add(point);
+	}
+	
+	
+	/**
+	 * @param shapes
+	 * @param wfw
+	 */
+	private void paintAutomatedPlacementShapes(final List<IDrawableShape> shapes, final WorldFrameWrapper wfw)
+	{
+		RefereeMsg refMsg = wfw.getRefereeMsg();
+		IVector2 ballTargetPos = refMsg.getBallPlacementPos();
+		
+		Color distToBallColor = new Color(255, 0, 0, 100);
+		Color targetCircleColor = new Color(20, 255, 255, 210);
+		switch (refMsg.getCommand())
 		{
-			DrawableCircle circle = new DrawableCircle(new Circle(marker, radius), Color.red);
-			shapes.add(circle);
-			DrawablePoint point = new DrawablePoint(marker, Color.red);
-			point.setSize(2);
-			shapes.add(point);
+			case BALL_PLACEMENT_BLUE:
+				distToBallColor = Color.YELLOW;
+				targetCircleColor = Color.BLUE;
+				break;
+			case BALL_PLACEMENT_YELLOW:
+				distToBallColor = Color.BLUE;
+				targetCircleColor = Color.YELLOW;
+				break;
+			default:
+				break;
 		}
+		
+		DrawableCircle distToBallCircle = new DrawableCircle(
+				new Circle(wfw.getSimpleWorldFrame().getBall().getPos(), 500), distToBallColor);
+		shapes.add(distToBallCircle);
+		
+		DrawableCircle dtargetCircle = new DrawableCircle(
+				new Circle(ballTargetPos, 100), targetCircleColor);
+		DrawablePoint dtargetPoint = new DrawablePoint(ballTargetPos, Color.RED);
+		shapes.add(dtargetCircle);
+		shapes.add(dtargetPoint);
 	}
 	
 	
@@ -183,16 +241,17 @@ public class RefereeVisCalc implements IVisCalc
 	}
 	
 	
+	@SuppressWarnings("unused")
 	private IVector2 getRequiredBallPos(final WorldFrameWrapper wfw)
 	{
 		IVector2 marker = null;
-		switch (wfw.getGameState())
+		switch (wfw.getRefereeMsg().getCommand())
 		{
-			case DIRECT_KICK_BLUE:
-			case DIRECT_KICK_YELLOW:
-			case INDIRECT_KICK_BLUE:
-			case INDIRECT_KICK_YELLOW:
-			case STOPPED:
+			case DIRECT_FREE_BLUE:
+			case DIRECT_FREE_YELLOW:
+			case INDIRECT_FREE_BLUE:
+			case INDIRECT_FREE_YELLOW:
+			case STOP:
 				marker = wfw.getSimpleWorldFrame().getBall().getPos();
 				break;
 			case PREPARE_KICKOFF_BLUE:
