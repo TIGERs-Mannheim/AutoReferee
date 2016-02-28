@@ -44,10 +44,10 @@ public class DribblingRule extends APreparingGameRule
 	private static final Logger	log									= Logger.getLogger(DribblingRule.class);
 	
 	@Configurable(comment = "Any dribbling distance above this value in mm is considered a violation")
-	private static final double	MAX_DRIBBLING_LENGTH				= 1000;
+	private static double			MAX_DRIBBLING_LENGTH				= 1000;
 	
 	@Configurable(comment = "Any distance to the ball closer than this value is considered dribbling")
-	private static final double	DRIBBLING_BOT_BALL_DISTANCE	= 100;
+	private static double			DRIBBLING_BOT_BALL_DISTANCE	= 100;
 	
 	/** The position where the currently dribbling bot first touched the ball */
 	private BotPosition				firstContact;

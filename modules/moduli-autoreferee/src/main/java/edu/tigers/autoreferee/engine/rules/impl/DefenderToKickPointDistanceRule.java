@@ -53,7 +53,7 @@ public class DefenderToKickPointDistanceRule extends APreparingGameRule
 	private static boolean		STRICT_MODE							= true;
 	
 	@Configurable(comment = "The amount of time in ms a bot can be located inside the outer circle (500mm>x>250mm from the kick pos) without logging a violation")
-	private long					MAX_OUTER_CIRCLE_LINGER_TIME	= 3_000;
+	private static long			MAX_OUTER_CIRCLE_LINGER_TIME	= 3_000;
 	
 	private IVector2				ballPos								= null;
 	private Set<BotID>			lastViolators						= new HashSet<>();
