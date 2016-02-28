@@ -8,22 +8,23 @@
  */
 package edu.tigers.sumatra.wp.kalman.data;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector3;
 import edu.tigers.sumatra.math.Vector3;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.data.MotionContext.BotInfo;
+import edu.tigers.sumatra.wp.kalman.filter.ExtKalmanFilter;
 import edu.tigers.sumatra.wp.kalman.filter.IFilter;
+import edu.tigers.sumatra.wp.kalman.motionModels.BallMotionModel;
 
 
 /**
@@ -51,19 +52,14 @@ public class PredictionContext
 	private final Map<Integer, UnregisteredBot>	newBlueBots;
 																
 	@Configurable(comment = "time which one lookahead prediction step should look ahead (in internalTime)")
-	private static double								stepSize				= 10e-3;
+	private static double								stepSize					= 0.05;
 	@Configurable(comment = "number of lookahead steps which should be performed")
-	private static int									stepCount			= 5;
-	@Configurable(comment = "number of particles used in particle filter")
-	private static int									numberParticle		= 500;
-	@Configurable(comment = "threshold for particle filter when to resample")
-	private static double								pfESS					= 0.2;
+	private static int									maxStepCount			= 10;
+																							
 	@Configurable
-	private static String								resampler			= "stratified";
-	@Configurable(comment = "constant offset between capture time and now")
-	private static double								filterTimeOffset	= 0.001;
-																						
-																						
+	private static double								predictionLookahead	= 0.08;
+																							
+																							
 	private MotionContext								motionContext;
 																
 																
@@ -89,24 +85,23 @@ public class PredictionContext
 		
 		getNewYellowBots().clear();
 		getNewBlueBots().clear();
-		updateMotionContext();
+		
+		ball = new ExtKalmanFilter();
+		ball.init(new BallMotionModel(), this, 0, new WPCamBall(new CamBall()));
+		updateMotionContext(0);
 	}
 	
 	
 	/**
-	 * 
+	 * @param timestamp
 	 */
-	public void updateMotionContext()
+	public void updateMotionContext(final long timestamp)
 	{
 		motionContext = new MotionContext();
 		
-		List<IFilter> bots = new ArrayList<IFilter>(getBlueBots().size() + getYellowBots().size());
-		bots.addAll(getBlueBots().values());
-		bots.addAll(getYellowBots().values());
-		
 		for (IFilter f : getBlueBots().values())
 		{
-			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getLookahead(0);
+			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getPrediction(timestamp);
 			IVector3 pos = new Vector3(mr.x, mr.y, mr.orientation);
 			BotID botId = BotID.createBotId(f.getId(), ETeamColor.BLUE);
 			motionContext.getBots().put(botId, new BotInfo(botId, pos));
@@ -114,7 +109,7 @@ public class PredictionContext
 		
 		for (IFilter f : getYellowBots().values())
 		{
-			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getLookahead(0);
+			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getPrediction(timestamp);
 			IVector3 pos = new Vector3(mr.x, mr.y, mr.orientation);
 			BotID botId = BotID.createBotId(f.getId(), ETeamColor.YELLOW);
 			motionContext.getBots().put(botId, new BotInfo(botId, pos));
@@ -127,7 +122,7 @@ public class PredictionContext
 	 */
 	public int getStepCount()
 	{
-		return stepCount;
+		return maxStepCount;
 	}
 	
 	
@@ -137,33 +132,6 @@ public class PredictionContext
 	public double getStepSize()
 	{
 		return stepSize;
-	}
-	
-	
-	/**
-	 * @return the numberParticle
-	 */
-	public final int getNumberParticle()
-	{
-		return numberParticle;
-	}
-	
-	
-	/**
-	 * @return the resampler
-	 */
-	public final String getResampler()
-	{
-		return resampler;
-	}
-	
-	
-	/**
-	 * @return the pfESS
-	 */
-	public final double getPfESS()
-	{
-		return pfESS;
 	}
 	
 	
@@ -226,7 +194,7 @@ public class PredictionContext
 	 */
 	public double getFilterTimeOffset()
 	{
-		return filterTimeOffset;
+		return 0;
 	}
 	
 	
@@ -240,10 +208,10 @@ public class PredictionContext
 	
 	
 	/**
-	 * @return
+	 * @return the predictionLookahead
 	 */
-	public double getFullLookahead()
+	public double getPredictionLookahead()
 	{
-		return filterTimeOffset + (stepCount * stepSize);
+		return predictionLookahead;
 	}
 }

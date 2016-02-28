@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
@@ -32,7 +32,7 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class KickTimeoutRule extends APreparingGameRule
 {
-	private static final int	priority				= 1;
+	private static final int	priority					= 1;
 	/** in ms */
 	private static final long	FREEKICK_TIMEOUT_MS	= 10_000;
 	

@@ -27,7 +27,7 @@ The following guides provide detailed instructions on how to install and run the
 	sudo apt-get install maven
 	```
 
-3. You can the proceed to cloning the repository:
+3. You can then proceed to cloning the repository:
 
 	```
 	git clone http://gitlab.tigers-mannheim.de/open-source/AutoReferee.git
@@ -76,22 +76,6 @@ The following guides provide detailed instructions on how to install and run the
 	The Java files which the protobuf compiler generates do not comply with the strict compiler settings for the projects. This is why the classpath folders that contain the generated protobuf files are marked to ignore optional compiler errors. These settings are overriden by Eclipse when updating the projects from the Maven configuration. If Eclipse complains about compile errors in these classpath folders check if the **.classpath** file has been modified and **checkout** possible changes. Refresh the projects afterwards.
 
 
-# Mode of operation
-The autoref software has been designed to work as an extension of the refbox. It stores as few state about the game as possible. It employs a state machine that is driven by the received referee messages to determine the state of the current game. Depending on the state of the game different rules are evaluated with each vision frame. As a result of the evaluation each rule can specify a new command to be sent to the refbox or a rule violation that occurred on the field or set a new follow-up action. A follow-up action determines what action is to be taken after the game has returned to the Stopped state. Possible actions are: Kick-Off, Direct/Indirect Freekick. The follow-up action represents the only state information that is stored internally by the referee.
-All rules are stored in the **edu.tigers.autoreferee.engine.rules.impl** package and possible subpackages of the **moduli-autoreferee** project. The referee is currently capable of detecting the following rule infringements:
-
-- Defender to Ball distance during a freekick
-- Indirect Goals
-- 10s Timeout during a freekick/kick-off situation
-- Attacker to Defense Area distance during a freekick
-- Attacker touching the ball inside the defense area of the opponent
-- Throw-ins/Goalkicks/Corner
-- Ball velocity
-- Number of bots on the field
-- Bot speed during STOP
-- Double Touch
-- Dribbling
-
 # Usage
 
 ## Configuration
@@ -105,3 +89,45 @@ The behavior of the AutoReferee can be altered through the **autoreferee** confi
 
 ## AutoReferee
 The autoref software has been designed to work as an extension of the refbox. It will automatically try to keep the game alive once you initiate an action(kickoff/direct/indirect). Rule infringements are currently logged directly to the LogView in the bottom right corner of the main window.
+
+
+# Mode of operation
+The autoref software has been designed to work as an extension of the refbox. It stores as few state about the game as possible. It employs a state machine that is driven by the received referee messages to determine the state of the current game. Depending on the state of the game different rules are evaluated with each vision frame. As a result of the evaluation each rule can specify a new command to be sent to the refbox or a rule violation that occurred on the field or set a new follow-up action. A follow-up action determines what action is to be taken after the game has returned to the Stopped state. Possible actions are: Kick-Off, Direct/Indirect Freekick. The follow-up action represents the only state information that is stored internally by the referee.
+All rules are stored in the **edu.tigers.autoreferee.engine.rules.impl** package and possible subpackages of the **moduli-autoreferee** project.
+
+The autoref can be used in two modes:
+- **Active**: A connection to the refbox is required. The autoref will actively send commands and run the game
+- **Passive**: No connection to the refbox is required. The autoref will not send any commands and log all its decisions to the main window
+
+## Initiating Plays
+Whenever the game is stopped after a rule violation or a goal the autoref will send a ball placement command (see the Ball Placement section for more details) to have the ball placed at the desired position. If the placement fails or no teams are capable of placing the ball it will visualize the desired position on the field visualizer and wait for the ball to be placed. After the ball has been placed the autoref will wait until all robots have come to a stop and then send the next command. It is possible to have the autoref initiate the next action although the ball is not placed at the correct location by enabling the max wait timeout. This can be done in the **AutoReferee** section of the **Cfg** tab under  **edu.tigers.autoreferee.engine.rules.impl.StopStateRule**. Another alternative is to simply issue the command manually using the refbox.
+
+## Detecting Goals
+At the moment it is not possible to deduct the vertical position of the ball from the vision data. This can produce false positives if the ball is chip kicked over the goal. To avoid these situations the autoref tries to detect goals by monitoring the direction in which the ball is headed while being located inside the goal perimeter. It checks the following sufficient conditions for a goal:
+- The ball comes to a stop while being inside the goal
+- The heading of the ball changes by more than 45 degrees while the ball is inside the goal
+
+## Ball Placement
+The autoref will signal ball placements after it has stopped the game to place the ball at the desired position. It is possible to specify which team is capable of performing a ball placement in the **Cfg** tab. Please note that at the moment the ball placement is deactivated by default so you will need to activate it before or during the game. The autoref will give each team 15s time to place the ball at the desired position. After the ball has been placed or all teams that are capable of placing the ball have failed it will return to the stopped state and wait for the ball to be placed manually or initiate the next action. This will give the teams more time to reposition themselves after the placement states.
+
+## Rule infringements
+The referee is currently capable of detecting the following rule infringements:
+
+- **Defender to Ball distance during a freekick**: The autoref will interrupt the freekick and return to the stopped state to reschedule.
+- **Indirect Goals**: If the ball is kicked directly into the goal after an indirect freekick the autoref will schedule a throw-in or goal kick. 
+- **10s Timeout during a freekick/kick-off situation**: If the team performing the kick takes longer than 10 seconds to move the ball at least 50mm from the kick position the autoref will stop the game and schedule a Force Start.
+- **Attacker to Defense Area distance during a freekick**
+- **Attacker touching the Keeper**
+- **Attacker/Defender touching the ball inside the defense area of the opponent**
+- **Throw-ins/Goal kicks/Corner kicks/ Icing**
+- **Ball velocity**: Monitors the ball velocity and schedules a freekick for the opposing team if the ball was kicked too fast. Please note that you can set the maximum allowed ball velocity in the **AutoReferee** section of the **Cfg** tab.
+- **Number of bots on the field**: The autoref consults referee messages and vision data to determine the currently allowed number of bots on the field for each team. It monitors the number of bots whenever the ball is in play. At the moment the autoref will only log violations of this rule but not take any further actions. 
+- **Bot speed during STOP**: The rule monitors the maximum allowed speed for bots during the stopped state. At the moment it does not book any yellow cards but logs the violation. It is possible to change the velocity threshold in the **AutoReferee** section of the **Cfg** tab.
+- **Double Touch**: If the bot performing a freekick/kick-off touches the ball a second time after he has performed the kick the autoref will stop the game and schedule a freekick for the opponents.
+- **Dribbling**: The autoref will schedule a freekick for the opposing team if a robot stays closer than 50mm to the ball for a total distance of 1m from where it first touched the ball
+- **Bot collisions**
+
+If the freekick is not to be taken from a well defined position (like a Thrown-in/Goal kick/Corner kick) the autoref will try to place the ball at the position that is the most suited. It will perform the following checks:
+- If the ball is located closer than 700m from the defense area of the attacking team -> Place it 600mm from the goal line and 100mm from the touch line
+- If the ball is located closer than 700m from the defense area of the defending team -> Place it at a point that is closest to the original position and located 700mm away from the defense area
+- Move the ball away from the goal line/ touch line if the kick position is located closer than 100m to these lines

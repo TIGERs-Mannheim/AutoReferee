@@ -47,8 +47,6 @@ public class ExtKalmanFilter implements IFilter
 	// control vector
 	private Matrix						contr;
 											
-	private boolean					keptAlive;
-											
 											
 	/**
 	 * Creates a new KalmanFilter.
@@ -57,7 +55,7 @@ public class ExtKalmanFilter implements IFilter
 	 */
 	public ExtKalmanFilter()
 	{
-		setId(0);
+		id = 0;
 		currentTimestamp = 0;
 		context = null;
 		motion = null;
@@ -66,7 +64,6 @@ public class ExtKalmanFilter implements IFilter
 		contr = null;
 		state = null;
 		covar = null;
-		keptAlive = true;
 	}
 	
 	
@@ -77,21 +74,25 @@ public class ExtKalmanFilter implements IFilter
 		motion = motionModel;
 		this.context = context;
 		
-		setId(motion.extraxtObjectID(firstObservation));
+		id = (motion.extraxtObjectID(firstObservation));
 		
-		currentTimestamp = firstTimestamp;
 		offset = context.getFilterTimeOffset();
 		
 		stepsize = this.context.getStepSize();
 		stepcount = this.context.getStepCount();
-		
-		keptAlive = false;
 		
 		// initialize data arrays for 1 current state and 'stepcount' lookahead predictions
 		state = new Matrix[stepcount + 1];
 		covar = new Matrix[stepcount + 1];
 		
 		final Matrix measurement = motion.generateMeasurementMatrix(firstObservation, null);
+		reset(firstTimestamp, measurement);
+	}
+	
+	
+	private void reset(final long firstTimestamp, final Matrix measurement)
+	{
+		currentTimestamp = firstTimestamp;
 		contr = motion.generateControlMatrix(null, null);
 		state[0] = motion.generateStateMatrix(measurement, contr);
 		covar[0] = motion.generateCovarianceMatrix(state[0]);
@@ -118,37 +119,31 @@ public class ExtKalmanFilter implements IFilter
 	
 	
 	@Override
-	public AMotionResult getLookahead(final int index)
+	public AMotionResult getPrediction(final long timestamp)
 	{
-		if ((index < 0) || (index > stepcount))
-		{
-			log.debug("Lookahead prediction with index " + index + " is out of " + "lookahead bounds" + " (min: 0; max: "
-					+ stepcount + ")");
-			throw new InvalidParameterException("Passed index (" + index + ") " + "is out of valid scope (0-" + stepcount
-					+ ").");
-		}
+		Matrix st = predictStateAtTime(timestamp);
 		
-		performAutoLookahead(index);
+		double age = (timestamp - currentTimestamp) / 1e9;
 		
-		return motion.generateMotionResult(getId(), state[index], !keptAlive);
+		return motion.generateMotionResult(getId(), st, age < 0.5);
 	}
 	
 	
 	@Override
 	public void observation(final long timestamp, final AWPCamObject observation)
 	{
-		// observation vector
-		final Matrix o = motion.generateMeasurementMatrix(observation, state[0]);
-		
-		keptAlive = false;
-		
-		// do Update
-		update(timestamp, o);
+		if (timestamp > currentTimestamp)
+		{
+			// observation vector
+			final Matrix o = motion.generateMeasurementMatrix(observation, state[0]);
+			
+			// do Update
+			update(timestamp, o);
+		}
 	}
 	
 	
-	@Override
-	public void performLookahead(final int index)
+	private void performLookahead(final int index)
 	{
 		if ((index < 1) || (index > stepcount))
 		{
@@ -256,6 +251,11 @@ public class ExtKalmanFilter implements IFilter
 			dt = dt - ((stepsize * basisState) + offset);
 		}
 		
+		if (dt <= 0)
+		{
+			return state[basisState];
+		}
+		
 		// use determined state to predict state at targetTime
 		return predictState(state[basisState], contr, dt);
 	}
@@ -299,51 +299,46 @@ public class ExtKalmanFilter implements IFilter
 	protected void update(final long timestamp, final Matrix measurement)
 	{
 		assert currentTimestamp >= 0;
-		Matrix s2m = state[0].getMatrix(0, 1, 0, 0).minus(measurement.getMatrix(0, 1, 0, 0));
-		double dist = Math.sqrt((s2m.get(0, 0) * s2m.get(0, 0)) + (s2m.get(1, 0) * s2m.get(1, 0)));
+		
 		double dt = (timestamp - currentTimestamp) * 1e-9;
-		if (dt == 0)
+		assert dt > 0;
+		
+		// Matrix s2m = state[0].getMatrix(0, 1, 0, 0).minus(measurement.getMatrix(0, 1, 0, 0));
+		// double dist = Math.sqrt((s2m.get(0, 0) * s2m.get(0, 0)) + (s2m.get(1, 0) * s2m.get(1, 0)));
+		// double vel = dist / dt;
+		// if((vel > 150000))
+		// {
+		//
+		// }
+		
+		if ((dt > 0.5))
 		{
-			return;
+			reset(timestamp, measurement);
 		}
-		double vel = dist / dt;
-		if ((vel > 20000)
-				// || !Geometry.getFieldWBorders()
-				// .isPointInShape(new Vector2((double) state[0].get(0, 0), (double) state[0].get(1, 0)))
-				|| (dt > 0.15))
-		{
-			state[0].setMatrix(0, 2, 0, 0, measurement);
-			for (int i = 3; i < state[0].getRowDimension(); i++)
-			{
-				state[0].set(i, 0, 0);
-			}
-			covar[0] = motion.generateCovarianceMatrix(state[0]);
-		} else
-		{
-			motion.newMeasurement(measurement, state[0], dt);
-			
-			// do prediction for the time of the measurement
-			final Matrix predState = predictStateAtTime(timestamp);
-			final Matrix predCov = predictCovarianceAtTime(timestamp);
-			
-			// just call abstract methods because the specification of these matrices depends on the motion model
-			final Matrix h = motion.getMeasurementJacobianWRTstate(measurement);
-			final Matrix v = motion.getMeasurementJacobianWRTnoise(measurement);
-			final Matrix r = motion.getMeasurementCovariance(measurement);
-			
-			// calculate kalman gain
-			final Matrix a = predCov.times(h.transpose());
-			final Matrix b = h.times(predCov).times(h.transpose());
-			final Matrix c = v.times(r).times(v.transpose());
-			final Matrix k = a.times((b.plus(c)).inverse());
-			
-			// correct state
-			state[0] = motion.statePostProcessing(predState.plus(k.times(measurement.minus(motion
-					.measurementDynamics(predState)))), state[0]);
-			// correct covariance
-			final int dim = predCov.getRowDimension();
-			covar[0] = (Matrix.identity(dim, dim).minus(k.times(h))).times(predCov);
-		}
+		
+		// do prediction for the time of the measurement
+		final Matrix predState = predictStateAtTime(timestamp);
+		final Matrix predCov = predictCovarianceAtTime(timestamp);
+		
+		motion.newMeasurement(measurement, state[0], dt);
+		
+		// just call abstract methods because the specification of these matrices depends on the motion model
+		final Matrix h = motion.getMeasurementJacobianWRTstate(measurement);
+		final Matrix v = motion.getMeasurementJacobianWRTnoise(measurement);
+		final Matrix r = motion.getMeasurementCovariance(measurement);
+		
+		// calculate kalman gain
+		final Matrix a = predCov.times(h.transpose());
+		final Matrix b = h.times(predCov).times(h.transpose());
+		final Matrix c = v.times(r).times(v.transpose());
+		final Matrix k = a.times((b.plus(c)).inverse());
+		
+		// correct state
+		state[0] = motion.statePostProcessing(predState.plus(k.times(measurement.minus(motion
+				.measurementDynamics(predState)))), state[0]);
+		// correct covariance
+		final int dim = predCov.getRowDimension();
+		covar[0] = (Matrix.identity(dim, dim).minus(k.times(h))).times(predCov);
 		
 		currentTimestamp = timestamp;
 		
@@ -374,37 +369,5 @@ public class ExtKalmanFilter implements IFilter
 			state[i] = null;
 			covar[i] = null;
 		}
-	}
-	
-	
-	@Override
-	public void keepPositionAliveOnNoObservation()
-	{
-		keptAlive = true;
-		state[0] = motion.getStateOnNoObservation(state[stepcount]);
-		covar[0] = motion.getCovarianceOnNoObservation(covar[stepcount]);
-		contr = motion.getControlOnNoObservation(contr);
-	}
-	
-	
-	@Override
-	public boolean positionKeptAlive()
-	{
-		return keptAlive;
-	}
-	
-	
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(final int id)
-	{
-		this.id = id;
-	}
-	
-	
-	protected void setCurrentState(final Matrix state)
-	{
-		this.state[0] = state;
 	}
 }

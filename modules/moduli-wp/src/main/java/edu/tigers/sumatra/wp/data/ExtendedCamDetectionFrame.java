@@ -22,7 +22,7 @@ import edu.tigers.sumatra.cam.data.CamRobot;
  */
 public class ExtendedCamDetectionFrame extends CamDetectionFrame
 {
-	private final CamBall	ball;
+	private final CamBall ball;
 	
 	
 	/**
@@ -37,17 +37,18 @@ public class ExtendedCamDetectionFrame extends CamDetectionFrame
 	
 	
 	/**
+	 * @param frameId
 	 * @param frame
 	 * @param balls
 	 * @param yellowBots
 	 * @param blueBots
 	 * @param ball
 	 */
-	public ExtendedCamDetectionFrame(final CamDetectionFrame frame,
+	public ExtendedCamDetectionFrame(final long frameId, final CamDetectionFrame frame,
 			final List<CamBall> balls, final List<CamRobot> yellowBots, final List<CamRobot> blueBots,
 			final CamBall ball)
 	{
-		super(frame.gettCapture(), frame.gettSent(), frame.getCameraId(), frame.getFrameNumber(), balls, yellowBots,
+		super(frame.gettCapture(), frame.gettSent(), frame.getCameraId(), frameId, balls, yellowBots,
 				blueBots);
 		this.ball = ball;
 	}

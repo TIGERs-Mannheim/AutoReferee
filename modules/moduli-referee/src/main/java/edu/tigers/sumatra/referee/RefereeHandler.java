@@ -181,6 +181,7 @@ public class RefereeHandler extends AReferee
 	
 	
 	/**
+	 * @param frameTimestamp
 	 * @param cmd
 	 * @param goalsBlue
 	 * @param goalsYellow
@@ -190,12 +191,13 @@ public class RefereeHandler extends AReferee
 	 * @param placementPos
 	 * @return
 	 */
-	public static RefereeMsg createRefereeMsg(final Command cmd, final int goalsBlue, final int goalsYellow,
+	public static RefereeMsg createRefereeMsg(final long frameTimestamp, final Command cmd, final int goalsBlue,
+			final int goalsYellow,
 			final int timeLeft, final int refId, final long timestamp, final Vector2 placementPos)
 	{
 		SSL_Referee sslReferee = createSSLRefereeMsg(cmd, goalsBlue, goalsYellow, timeLeft, refId, timestamp,
 				placementPos);
-		return new RefereeMsg(sslReferee);
+		return new RefereeMsg(frameTimestamp, sslReferee);
 	}
 	
 	

@@ -42,6 +42,8 @@ public class WorldInfoProcessor implements IRefereeObserver
 	
 	private final List<IVisCalc>	calculators			= new ArrayList<>();
 	
+	
+	private long						lastWFTimestamp	= 0;
 	private RefereeMsg				latestRefereeMsg	= new RefereeMsg();
 	
 	
@@ -96,7 +98,12 @@ public class WorldInfoProcessor implements IRefereeObserver
 	@Override
 	public void onNewRefereeMsg(final SSL_Referee refMsg)
 	{
-		latestRefereeMsg = new RefereeMsg(refMsg);
+		long ts = lastWFTimestamp;
+		if (refMsg.getCommandCounter() == latestRefereeMsg.getCommandCounter())
+		{
+			ts = latestRefereeMsg.getFrameTimestamp();
+		}
+		latestRefereeMsg = new RefereeMsg(ts, refMsg);
 	}
 	
 	
@@ -107,6 +114,7 @@ public class WorldInfoProcessor implements IRefereeObserver
 	public WorldFrameWrapper processSimpleWorldFrame(final SimpleWorldFrame swf)
 	{
 		WorldFrameWrapper wrapper = new WorldFrameWrapper(swf, latestRefereeMsg, new ShapeMap());
+		lastWFTimestamp = swf.getTimestamp();
 		for (IVisCalc calc : calculators)
 		{
 			calc.process(wrapper);

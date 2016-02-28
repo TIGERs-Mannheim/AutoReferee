@@ -26,6 +26,7 @@ import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Line;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.math.Vector2f;
+import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 
 
 /**
@@ -162,6 +163,30 @@ public class PenaltyAreaTest
 		assertTrue(opponents.nearestPointOutside(testPoint8).equals(testPoint8, EPSILON));
 		
 		
+	}
+	
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void testNearestPointOutsideWithMargin()
+	{
+		Rectangle field = Geometry.getField();
+		double margin = 500.0d;
+		double penCircleRadius = opponents.getRadiusOfPenaltyArea();
+		
+		double posX = ((field.getxExtend() / 2) - penCircleRadius);
+		double posY = (opponents.getLengthOfPenaltyAreaFrontLineHalf()) + 250;
+		IVector2 point = new Vector2(posX, posY);
+		
+		IVector2 circleCenter = opponents.getPenaltyCirclePosCentre();
+		IVector2 expected = circleCenter.addNew(
+				point.subtractNew(circleCenter).multiply(
+						(penCircleRadius + margin) / GeoMath.distancePP(point, circleCenter)));
+		IVector2 actual = opponents.nearestPointOutside(point, margin);
+		
+		assertTrue(expected.equals(actual, EPSILON));
 	}
 	
 	

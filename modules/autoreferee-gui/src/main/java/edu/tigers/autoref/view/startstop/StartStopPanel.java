@@ -92,6 +92,15 @@ public class StartStopPanel extends ObservablePanel<IStartStopPanelObserver> imp
 	
 	
 	/**
+	 * @param enabled
+	 */
+	public void setModeBoxEnabled(final boolean enabled)
+	{
+		refModeBox.setEnabled(enabled);
+	}
+	
+	
+	/**
 	 * @return
 	 */
 	public JButton getStartButton()

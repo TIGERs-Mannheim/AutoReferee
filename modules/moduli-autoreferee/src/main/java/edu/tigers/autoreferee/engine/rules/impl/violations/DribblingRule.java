@@ -16,11 +16,11 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
@@ -50,7 +50,7 @@ public class DribblingRule extends APreparingGameRule
 	/** The position where the currently dribbling bot last touched the ball */
 	private BotPosition				lastContact;
 	
-	private long						entryTime;
+	private long						resetTime;
 	
 	
 	/**
@@ -72,7 +72,7 @@ public class DribblingRule extends APreparingGameRule
 	@Override
 	protected void prepare(final IRuleEngineFrame frame)
 	{
-		entryTime = frame.getTimestamp();
+		resetTime = frame.getTimestamp();
 	}
 	
 	
@@ -82,7 +82,7 @@ public class DribblingRule extends APreparingGameRule
 		BotPosition curLastContact = frame.getBotLastTouchedBall();
 		if (!(isSane(firstContact) && isSane(lastContact)))
 		{
-			if (isSane(curLastContact) && (curLastContact.getTs() > entryTime))
+			if (isSane(curLastContact) && (curLastContact.getTs() >= resetTime))
 			{
 				firstContact = curLastContact;
 				lastContact = curLastContact;
@@ -106,7 +106,7 @@ public class DribblingRule extends APreparingGameRule
 			// The ball has not been touched since the last contact
 			if (GeoMath.distancePP(bot.getPos(), ballPos) > (DRIBBLING_BOT_BALL_DISTANCE + Geometry.getBotRadius()))
 			{
-				doReset();
+				resetRule(frame.getTimestamp());
 				return Optional.empty();
 			}
 		} else
@@ -117,7 +117,7 @@ public class DribblingRule extends APreparingGameRule
 				lastContact = curLastContact;
 			} else
 			{
-				doReset();
+				resetRule(curLastContact.getTs());
 				return Optional.empty();
 			}
 		}
@@ -126,9 +126,10 @@ public class DribblingRule extends APreparingGameRule
 		if (totalDistance > MAX_DRIBBLING_LENGTH)
 		{
 			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, dribblerColor.opposite());
-			RuleViolation violation = new RuleViolation(ERuleViolation.BALL_DRIBBLING, frame.getTimestamp(), dribblerColor);
+			RuleViolation violation = new RuleViolation(ERuleViolation.BALL_DRIBBLING, frame.getTimestamp(),
+					lastContact.getId());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, dribblerColor.opposite(), kickPos);
-			doReset();
+			resetRule(frame.getTimestamp());
 			return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 		}
 		return Optional.empty();
@@ -140,6 +141,13 @@ public class DribblingRule extends APreparingGameRule
 	{
 		firstContact = null;
 		lastContact = null;
+	}
+	
+	
+	private void resetRule(final long ts)
+	{
+		resetTime = ts;
+		doReset();
 	}
 	
 	

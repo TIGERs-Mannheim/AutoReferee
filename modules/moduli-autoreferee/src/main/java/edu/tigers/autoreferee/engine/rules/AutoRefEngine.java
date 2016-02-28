@@ -19,8 +19,7 @@ import org.apache.log4j.Logger;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.rules.impl.DefenderKickDistanceRule;
+import edu.tigers.autoreferee.engine.rules.impl.DefenderToKickPointDistanceRule;
 import edu.tigers.autoreferee.engine.rules.impl.GoalRule;
 import edu.tigers.autoreferee.engine.rules.impl.KickTimeoutRule;
 import edu.tigers.autoreferee.engine.rules.impl.PlaceBallStateRule;
@@ -36,6 +35,7 @@ import edu.tigers.autoreferee.engine.rules.impl.violations.BotNumberRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.BotStopSpeedRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.DoubleTouchRule;
 import edu.tigers.autoreferee.engine.rules.impl.violations.DribblingRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
@@ -58,7 +58,7 @@ public class AutoRefEngine
 		PASSIVE
 	}
 	
-	private static final Logger	log								= Logger.getLogger(AutoRefEngine.class);
+	private static final Logger	log									= Logger.getLogger(AutoRefEngine.class);
 	
 	/** in ms */
 	private static long				DUPLICATE_RESEND_WAIT_TIME_MS	= 500;
@@ -90,7 +90,7 @@ public class AutoRefEngine
 		rules.add(new PlaceBallStateRule());
 		rules.add(new BotNumberRule());
 		rules.add(new BotStopSpeedRule());
-		rules.add(new DefenderKickDistanceRule());
+		rules.add(new DefenderToKickPointDistanceRule());
 		rules.add(new KickTimeoutRule());
 		rules.add(new AttackerDefenseDistanceRule());
 		rules.add(new BotInDefenseAreaRule());
@@ -204,9 +204,9 @@ public class AutoRefEngine
 	}
 	
 	
-	private void logViolation(final RuleViolation violation)
+	private void logViolation(final IRuleViolation violation)
 	{
-		log.warn("Rule violation: " + violation.getViolationType() + " Committed by team: " + violation.getTeamAtFault());
+		log.warn(violation.buildLogString());
 	}
 	
 	

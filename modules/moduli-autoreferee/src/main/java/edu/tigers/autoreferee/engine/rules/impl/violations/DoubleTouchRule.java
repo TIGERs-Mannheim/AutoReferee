@@ -22,12 +22,12 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
 import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -50,7 +50,7 @@ public class DoubleTouchRule extends APreparingGameRule
 	private static final Logger				log							= Logger.getLogger(DoubleTouchRule.class);
 	
 	@Configurable(comment = "The bot may not approach the ball by less than this value only once")
-	private static double						MIN_BOT_BALL_DISTANCE	= 50;
+	private static double						MIN_BOT_BALL_DISTANCE	= 100;
 	
 	private BotPosition							firstTouchedPos;
 	private boolean								hasMovedAwayFromBall		= false;
@@ -145,7 +145,7 @@ public class DoubleTouchRule extends APreparingGameRule
 			{
 				ETeamColor firstTouchedColor = firstTouchedId.getTeamColor();
 				RuleViolation violation = new RuleViolation(ERuleViolation.DOUBLE_TOUCH, frame.getTimestamp(),
-						firstTouchedColor);
+						firstTouchedId);
 				
 				IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, firstTouchedColor.opposite());
 				FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, firstTouchedColor.opposite(),

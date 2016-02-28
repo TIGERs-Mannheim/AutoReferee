@@ -19,7 +19,7 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private static final double	BASE_NO_RPTATION_BORDER			= 0.1;
 	/** m/s */
 	private static final double	BASE_NO_MOVEMENT_BORDER			= 0.0001;
-	
+																					
 	/** m */
 	private static final double	BASE_STDEV_POSITION				= 0.02;
 	/** m/s */
@@ -28,42 +28,42 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private static final double	BASE_STDEV_ORIENTATION			= 0.08;
 	/** rad/s */
 	private static final double	BASE_STDEV_ANG_VELOCITY			= 1.0;
-	
+																					
 	/** m/s^2 */
-	private static final double	BASE_CRTL_MAX_ACCEL				= 1.0;
+	private static final double	BASE_CRTL_MAX_ACCEL				= 10.0;
 	/** m/s^2 */
-	private static final double	BASE_CRTL_MAX_BRAKE_ACCEL		= 3.0;
+	private static final double	BASE_CRTL_MAX_BRAKE_ACCEL		= 10.0;
 	/** rad/s^2 */
-	private static final double	BASE_CRTL_MAX_ANG_ACCEL			= 10.0;
+	private static final double	BASE_CRTL_MAX_ANG_ACCEL			= 50.0;
 	/** rad/s^2 */
-	private static final double	BASE_CRTL_MAX_ANG_BRAKE_ACCEL	= 15.0;
+	private static final double	BASE_CRTL_MAX_ANG_BRAKE_ACCEL	= 50.0;
 	private static final double	ACCEL_RAMP_PERCENT_SEC1			= 0.1;
 	private static final double	ACCEL_RAMP_PERCENT_SEC2			= 0.7;
 	private static final double	ACCEL_RAMP_PERCENT_SEC3			= 0.2;
-	
+																					
 	/** m/s */
 	private static final double	BASE_ANGLE_TAKE_VEL				= 0.5;
 	private static final double	ANGLE_TAKE_FACTOR					= 0.05;
-	
+																					
 	// private static final double BASE_MIN_VELOCITY = 0.01;
 	// :::<<<
 	
 	private final double				noRotationBorder;
 	private final double				noMovementBorder;
-	
+											
 	private final double				varPosition;
 	private final double				varVelocity;
 	private final double				varOrientation;
 	private final double				varAngVelocity;
-	
+											
 	private final double				botCtrlMaxAccel;
 	private final double				botCtrlMaxBrakeAccel;
 	private final double				botCtrlMaxAngAccel;
 	private final double				botCtrlMaxAngBrakeAccel;
-	
+											
 	private final double				angleTakeVel;
-	
-	
+											
+											
 	// private final double minVelocity;
 	
 	
@@ -426,11 +426,13 @@ public abstract class AOmniBot_V2 implements IMotionModel
 					tCurrent = current * (((1.0 / 3.0) * accEndT) / (ACCEL_RAMP_PERCENT_SEC1 * target));
 				} else if (currentFactor < (ACCEL_RAMP_PERCENT_SEC1 + ACCEL_RAMP_PERCENT_SEC2))
 				{
-					tCurrent = ((current - (ACCEL_RAMP_PERCENT_SEC1 * target)) * (((1.0 / 3.0) * accEndT) / ((ACCEL_RAMP_PERCENT_SEC2) * target)))
+					tCurrent = ((current - (ACCEL_RAMP_PERCENT_SEC1 * target))
+							* (((1.0 / 3.0) * accEndT) / ((ACCEL_RAMP_PERCENT_SEC2) * target)))
 							+ (accEndT / 3.0);
 				} else
 				{
-					tCurrent = ((current - (ACCEL_RAMP_PERCENT_SEC1 * target) - (ACCEL_RAMP_PERCENT_SEC2 * target)) * (((1.0 / 3.0) * accEndT) / (ACCEL_RAMP_PERCENT_SEC3 * target)))
+					tCurrent = ((current - (ACCEL_RAMP_PERCENT_SEC1 * target) - (ACCEL_RAMP_PERCENT_SEC2 * target))
+							* (((1.0 / 3.0) * accEndT) / (ACCEL_RAMP_PERCENT_SEC3 * target)))
 							+ ((2 * accEndT) / 3.0);
 				}
 				
@@ -440,11 +442,13 @@ public abstract class AOmniBot_V2 implements IMotionModel
 					vel = ((ACCEL_RAMP_PERCENT_SEC1 * target) / ((1.0 / 3.0) * accEndT)) * tFinal;
 				} else if (tFinal < ((2.0 / 3.0) * accEndT))
 				{
-					vel = ((((ACCEL_RAMP_PERCENT_SEC2 * target) / ((1.0 / 3.0) * accEndT)) * tFinal) - (ACCEL_RAMP_PERCENT_SEC2 * target))
+					vel = ((((ACCEL_RAMP_PERCENT_SEC2 * target) / ((1.0 / 3.0) * accEndT)) * tFinal)
+							- (ACCEL_RAMP_PERCENT_SEC2 * target))
 							+ (ACCEL_RAMP_PERCENT_SEC1 * target);
 				} else if (tFinal < accEndT)
 				{
-					vel = (((ACCEL_RAMP_PERCENT_SEC3 * target) / ((1.0 / 3.0) * accEndT)) * (tFinal - ((2.0 / 3.0) * accEndT)))
+					vel = (((ACCEL_RAMP_PERCENT_SEC3 * target) / ((1.0 / 3.0) * accEndT))
+							* (tFinal - ((2.0 / 3.0) * accEndT)))
 							+ ((1 - ACCEL_RAMP_PERCENT_SEC3) * target);
 				} else
 				{

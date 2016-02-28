@@ -202,7 +202,7 @@
 			<activation>
 				<os>
 					<family>mac</family>
-					<arch>amd64</arch>
+					<arch>x86_64</arch>
 				</os>
 			</activation>
 			<properties>

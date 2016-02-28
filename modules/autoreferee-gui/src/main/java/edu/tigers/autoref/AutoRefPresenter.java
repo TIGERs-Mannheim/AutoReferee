@@ -107,6 +107,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 		EventQueue.invokeLater(() -> {
 			startStopPanel.getStartButton().setEnabled(startVal);
 			startStopPanel.getStopButton().setEnabled(stopVal);
+			startStopPanel.setModeBoxEnabled(startVal);
 		});
 	}
 	

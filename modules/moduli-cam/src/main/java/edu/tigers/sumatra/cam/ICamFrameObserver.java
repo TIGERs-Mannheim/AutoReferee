@@ -8,7 +8,7 @@
  */
 package edu.tigers.sumatra.cam;
 
-import edu.tigers.sumatra.cam.data.CamDetectionFrame;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 
 
@@ -19,8 +19,9 @@ public interface ICamFrameObserver
 {
 	/**
 	 * @param frame
+	 * @param timeSync
 	 */
-	default void onNewCameraFrame(final CamDetectionFrame frame)
+	default void onNewCameraFrame(final SSL_DetectionFrame frame, final TimeSync timeSync)
 	{
 	}
 	

@@ -26,13 +26,19 @@ import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionBall;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionFrame;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionRobot;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
+import edu.tigers.sumatra.cam.TimeSync;
 import edu.tigers.sumatra.cam.data.ACamObject;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.cam.data.CamRobot;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -84,6 +90,8 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	private ExecutorService						execService;
 	private final Object							execServiceSync	= new Object();
 	private final Object							lastSeenBallSync	= new Object();
+																				
+	private long									frameId				= 0;
 																				
 																				
 	static
@@ -142,24 +150,107 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	}
 	
 	
-	private void processCameraDetectionFrameInternal(final CamDetectionFrame frame)
+	private void processCameraDetectionFrameInternal(final SSL_DetectionFrame detectionFrame, final TimeSync timeSync)
 	{
-		startTime(frame.getFrameNumber());
+		startTime(frameId);
 		
-		List<CamRobot> newBotY = filterCamObjects(frame.getRobotsYellow());
-		List<CamRobot> newBotB = filterCamObjects(frame.getRobotsBlue());
-		List<CamBall> newBalls = filterCamObjects(frame.getBalls());
+		long localCaptureNs = timeSync.sync(detectionFrame.getTCapture());
+		long localSentNs = timeSync.sync(detectionFrame.getTSent());
 		
-		CamBall ball = findCurrentBall(newBalls);
+		final List<CamBall> balls = new ArrayList<CamBall>();
+		final List<CamRobot> blues = new ArrayList<CamRobot>();
+		final List<CamRobot> yellows = new ArrayList<CamRobot>();
 		
-		ExtendedCamDetectionFrame eFrame = new ExtendedCamDetectionFrame(frame, newBalls, newBotY, newBotB, ball);
+		// --- if we play from left to right, turn ball and robots, so that we're always playing from right to left ---
+		// --- process team Blue ---
+		for (final SSL_DetectionRobot bot : detectionFrame.getRobotsBlueList())
+		{
+			blues.add(convertRobot(bot, ETeamColor.BLUE, frameId, detectionFrame.getCameraId(),
+					localCaptureNs, localSentNs));
+		}
+		
+		// --- process team Yellow ---
+		for (final SSL_DetectionRobot bot : detectionFrame.getRobotsYellowList())
+		{
+			yellows.add(convertRobot(bot, ETeamColor.YELLOW, frameId,
+					detectionFrame.getCameraId(),
+					localCaptureNs, localSentNs));
+		}
+		
+		// --- process ball ---
+		for (final SSL_DetectionBall ball : detectionFrame.getBallsList())
+		{
+			balls.add(convertBall(ball, localCaptureNs, localSentNs, detectionFrame.getCameraId(),
+					frameId));
+		}
+		
+		List<CamRobot> newBotY = filterCamObjects(yellows);
+		List<CamRobot> newBotB = filterCamObjects(blues);
+		List<CamBall> newBalls = filterCamObjects(balls);
+		
+		
+		CamDetectionFrame cFrame = new CamDetectionFrame(localCaptureNs, localSentNs, detectionFrame.getCameraId(),
+				frameId, newBalls, newBotY, newBotB);
+		processCamDetectionFrame(cFrame);
+		
+		ExtendedCamDetectionFrame eFrame = processCamDetectionFrame(cFrame);
 		
 		for (IWorldFrameObserver obs : observers)
 		{
 			obs.onNewCamDetectionFrame(eFrame);
 		}
 		processCameraDetectionFrame(eFrame);
-		stopTime(frame.getFrameNumber());
+		stopTime(frameId);
+		frameId++;
+	}
+	
+	
+	/**
+	 * @param cFrame
+	 * @return
+	 */
+	public ExtendedCamDetectionFrame processCamDetectionFrame(final CamDetectionFrame cFrame)
+	{
+		CamBall ball = findCurrentBall(cFrame.getBalls());
+		return new ExtendedCamDetectionFrame(cFrame, ball);
+	}
+	
+	
+	private static CamRobot convertRobot(
+			final SSL_DetectionRobot bot,
+			final ETeamColor color,
+			final long frameId,
+			final int camId,
+			final long tCapture,
+			final long tSent)
+	{
+		double orientation = bot.getOrientation();
+		double x = bot.getX();
+		double y = bot.getY();
+		BotID botId = BotID.createBotId(bot.getRobotId(), color);
+		return new CamRobot(bot.getConfidence(), bot.getPixelX(), bot.getPixelY(), tCapture, tSent, camId, frameId, x, y,
+				orientation, bot.getHeight(), botId);
+	}
+	
+	
+	private static CamBall convertBall(final SSL_DetectionBall ball, final long tCapture, final long tSent,
+			final int camId,
+			final long frameId)
+	{
+		double x;
+		double y;
+		x = ball.getX();
+		y = ball.getY();
+		
+		return new CamBall(ball.getConfidence(),
+				ball.getArea(),
+				x, y,
+				ball.getZ(),
+				ball.getPixelX(), ball.getPixelY(),
+				tCapture,
+				tSent,
+				camId,
+				frameId);
 	}
 	
 	
@@ -335,16 +426,16 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	
 	@Override
-	public final void onNewCameraFrame(final CamDetectionFrame frame)
+	public final void onNewCameraFrame(final SSL_DetectionFrame frame, final TimeSync timeSync)
 	{
 		synchronized (execServiceSync)
 		{
 			if (ownThread && (execService != null))
 			{
-				execService.execute(() -> processCameraDetectionFrameInternal(frame));
+				execService.execute(() -> processCameraDetectionFrameInternal(frame, timeSync));
 			} else
 			{
-				processCameraDetectionFrameInternal(frame);
+				processCameraDetectionFrameInternal(frame, timeSync);
 			}
 		}
 	}
@@ -466,5 +557,14 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 				execService = Executors.newSingleThreadExecutor(new NamedThreadFactory("WP_worker"));
 			}
 		}
+	}
+	
+	
+	/**
+	 * @return the postProcessors
+	 */
+	public List<IWfPostProcessor> getPostProcessors()
+	{
+		return postProcessors;
 	}
 }

@@ -21,21 +21,21 @@ public class Performance
 {
 	
 	
-	@Configurable(spezis = { "GRSIM" }, defValue = "2")
-	private double	accMax			= 2;
-	@Configurable(spezis = { "GRSIM" }, defValue = "2")
-	private double	brkMax			= 2;
+	@Configurable(spezis = { "" }, defValue = "3")
+	private double	accMax			= 0;
+	@Configurable(spezis = { "" }, defValue = "4")
+	private double	brkMax			= 0;
 											
-	@Configurable(spezis = { "GRSIM" }, defValue = "2")
-	private double	velMax			= 2.0;
+	@Configurable(spezis = { "" }, defValue = "3")
+	private double	velMax			= 0;
 											
-	@Configurable(spezis = { "GRSIM" }, defValue = "30")
-	private double	accMaxW			= 30;
-	@Configurable(spezis = { "GRSIM" }, defValue = "30")
-	private double	brkMaxW			= 30;
+	@Configurable(spezis = { "" }, defValue = "30")
+	private double	accMaxW			= 0;
+	@Configurable(spezis = { "" }, defValue = "30")
+	private double	brkMaxW			= 0;
 											
-	@Configurable(spezis = { "GRSIM" }, defValue = "10")
-	private double	velMaxW			= 10;
+	@Configurable(spezis = { "" }, defValue = "10")
+	private double	velMaxW			= 0;
 											
 	private double	velMaxOverride	= 0;
 	private double	accMaxOverride	= 0;
@@ -52,6 +52,7 @@ public class Performance
 	 */
 	public Performance()
 	{
+		ConfigRegistration.applySpezis(this, "botmgr", "");
 	}
 	
 	

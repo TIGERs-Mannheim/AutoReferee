@@ -28,7 +28,6 @@ import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.MessagesRobocupSslWrapper.SSL_WrapperPacket;
-import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.network.IReceiver;
@@ -46,43 +45,43 @@ import edu.tigers.sumatra.network.NetworkUtility;
 public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, IConfigObserver
 {
 	
-	private static final Logger							log						= Logger
-																										.getLogger(SSLVisionCam.class.getName());
-																										
+	private static final Logger						log						= Logger
+																									.getLogger(SSLVisionCam.class.getName());
+																									
 	// Constants
-	private static final int								BUFFER_SIZE				= 10000;
-	private final byte[]										bufferArr				= new byte[BUFFER_SIZE];
-																								
+	private static final int							BUFFER_SIZE				= 10000;
+	private final byte[]									bufferArr				= new byte[BUFFER_SIZE];
+																							
 	// Connection
-	private Thread												cam;
-	private IReceiver											receiver;
-																	
-																	
-	private boolean											expectIOE				= false;
-																								
+	private Thread											cam;
+	private IReceiver										receiver;
+																
+																
+	private boolean										expectIOE				= false;
+																							
 	// Translation
-	private final SSLVisionCamDetectionTranslator	detectionTranslator	= new SSLVisionCamDetectionTranslator();
-	private final SSLVisionCamGeometryTranslator		geometryTranslator	= new SSLVisionCamGeometryTranslator();
-																								
+	private final SSLVisionCamGeometryTranslator	geometryTranslator	= new SSLVisionCamGeometryTranslator();
+																							
 	// DEBUG, write sslvision data
-	private long												normTime;
-	private FileOutputStream								fos;
-	private ObjectOutputStream								out;
-	private final String										filename					= "data/sslvision.log";
-	private boolean											write						= false;
-	private final boolean									read						= false;
-																								
+	private long											normTime;
+	private FileOutputStream							fos;
+	private ObjectOutputStream							out;
+	private final String									filename					= "data/sslvision.log";
+	private boolean										write						= false;
+	private final boolean								read						= false;
+																							
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH" }, defValueSpezis = { "10006", "40102", "10006",
 			"10006" })
-	private int													port						= 10006;
+	private int												port						= 10006;
 	@Configurable(defValue = "224.5.23.2")
-	private String												address					= "224.5.23.2";
+	private String											address					= "224.5.23.2";
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP" }, defValue = "")
-	private String												network					= "";
-																								
-	private NetworkInterface								nif;
-																	
-																	
+	private String											network					= "";
+																							
+	private NetworkInterface							nif;
+	private final TimeSync								timeSync					= new TimeSync();
+																							
+																							
 	static
 	{
 		ConfigRegistration.registerClass("user", SSLVisionCam.class);
@@ -236,11 +235,12 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					notifyNewCameraCalibration(geometry);
 				}
 				
+				
+				timeSync.update(sslPacket.getDetection().getTSent());
+				
 				if (sslPacket.hasDetection())
 				{
-					final CamDetectionFrame frame = detectionTranslator.translate(sslPacket.getDetection());
-					
-					notifyNewCameraFrame(frame);
+					notifyNewCameraFrame(sslPacket.getDetection(), timeSync);
 				}
 			} catch (final IOException err)
 			{

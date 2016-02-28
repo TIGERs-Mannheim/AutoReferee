@@ -196,8 +196,9 @@ public class PenaltyArea implements I2DShape
 			return point;
 		}
 		final double correctedMargin = margin + DBL_EPSILON;
-		
-		if (centreRect.isPointInShape(point, correctedMargin))
+		Rectangle marginRect = new Rectangle(
+				new Vector2f(circlePointUpperNeg.x() + (sign * correctedMargin), circlePointUpperNeg.y()), circleCentrePos);
+		if (marginRect.isPointInShape(point))
 		{
 			return new Vector2f(penaltyMark.x() + (sign * margin), point.y());
 		}

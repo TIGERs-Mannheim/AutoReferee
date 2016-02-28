@@ -67,12 +67,12 @@ public class ExtKalman extends AWorldPredictor
 	
 	
 	private void processBot(final IFilter filterBot, final IBotIDMap<ITrackedBot> bots, final ETeamColor color,
-			final TrackedBall trackedBall)
+			final long timestamp)
 	{
 		final BotID botID = BotID.createBotId(filterBot.getId(), color);
 		
 		ITrackedBot trackedTigerBot;
-		final RobotMotionResult_V2 motion = (RobotMotionResult_V2) filterBot.getLookahead(context.getStepCount());
+		final RobotMotionResult_V2 motion = (RobotMotionResult_V2) filterBot.getPrediction(timestamp);
 		
 		trackedTigerBot = motion.motionToTrackedBot(botID);
 		bots.put(botID, trackedTigerBot);
@@ -87,15 +87,14 @@ public class ExtKalman extends AWorldPredictor
 	 */
 	public SimpleWorldFrame predictSimpleWorldFrame(final ExtendedCamDetectionFrame frame)
 	{
-		context.updateMotionContext();
+		long timestamp = frame.gettCapture() + (long) (context.getPredictionLookahead() * 1e9);
+		
+		context.updateMotionContext(timestamp);
 		processMotionContext(context.getMotionContext());
 		
-		trackingManager.checkItems(frame.gettCapture());
-		
 		ballProcessor.process(frame);
-		ballProcessor.performCollisionAwareLookahead();
 		final IFilter ball = context.getBall();
-		final BallMotionResult motion = (BallMotionResult) ball.getLookahead(context.getStepCount());
+		final BallMotionResult motion = (BallMotionResult) ball.getPrediction(timestamp);
 		TrackedBall trackedBall = motion.toTrackedBall();
 		
 		
@@ -103,19 +102,20 @@ public class ExtKalman extends AWorldPredictor
 		if (processBots)
 		{
 			botProcessor.process(frame.getRobotsYellow(), frame.getRobotsBlue());
-			botProcessor.performCollisionAwareLookahead();
 			for (final IFilter filterBot : context.getYellowBots().values())
 			{
-				processBot(filterBot, bots, ETeamColor.YELLOW, trackedBall);
+				processBot(filterBot, bots, ETeamColor.YELLOW, timestamp);
 			}
 			for (final IFilter filterBot : context.getBlueBots().values())
 			{
-				processBot(filterBot, bots, ETeamColor.BLUE, trackedBall);
+				processBot(filterBot, bots, ETeamColor.BLUE, timestamp);
 			}
+			
+			trackingManager.checkItems(frame.gettCapture());
 		}
 		
 		return new SimpleWorldFrame(bots, trackedBall, frame.getFrameNumber(),
-				frame.gettCapture() + (long) (context.getFullLookahead() * 1e9));
+				frame.gettCapture());
 	}
 	
 	
@@ -143,5 +143,14 @@ public class ExtKalman extends AWorldPredictor
 	{
 		super.onClearCamFrame();
 		start();
+	}
+	
+	
+	/**
+	 * @return the context
+	 */
+	public PredictionContext getContext()
+	{
+		return context;
 	}
 }

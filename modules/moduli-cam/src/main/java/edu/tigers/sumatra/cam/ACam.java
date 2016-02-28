@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.configuration.SubnodeConfiguration;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.sumatra.cam.data.CamDetectionFrame;
+import edu.tigers.sumatra.MessagesRobocupSslDetection.SSL_DetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.math.IVector3;
 
@@ -66,11 +66,11 @@ public abstract class ACam extends AModule implements IBallReplacer
 	}
 	
 	
-	protected void notifyNewCameraFrame(final CamDetectionFrame frame)
+	protected void notifyNewCameraFrame(final SSL_DetectionFrame frame, final TimeSync timeSync)
 	{
 		for (ICamFrameObserver observer : observers)
 		{
-			observer.onNewCameraFrame(frame);
+			observer.onNewCameraFrame(frame, timeSync);
 		}
 	}
 	

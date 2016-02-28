@@ -1,20 +1,23 @@
 /*
  * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
  * Project: TIGERS - Sumatra
- * Date: Nov 8, 2015
+ * Date: Feb 26, 2016
  * Author(s): "Lukas Magel"
  * *********************************************************
  */
-package edu.tigers.autoreferee.engine;
+package edu.tigers.autoreferee.engine.violations;
 
+import java.util.Optional;
+
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 
 
 /**
  * @author "Lukas Magel"
  */
-public class RuleViolation
+public interface IRuleViolation
 {
 	/**
 	 * @author "Lukas Magel"
@@ -39,7 +42,7 @@ public class RuleViolation
 		/**  */
 		INDIRECT_GOAL,
 		/**  */
-		NO_TOUCH_GOAL_LINE,
+		ICING,
 		/**  */
 		BALL_DRIBBLING,
 		/**  */
@@ -49,58 +52,42 @@ public class RuleViolation
 		/**  */
 		ATTACKER_IN_DEFENSE_AREA,
 		/** The defending team comes too close to the ball during a freekick */
-		DEFENDER_KICK_DISTANCE,
+		DEFENDER_TO_KICK_POINT_DISTANCE,
 		/** If the kick was not taken after a certain amount of time */
 		KICK_TIMEOUT,
 		/**  */
 		MULTIPLE_DEFENDER,
 		/**  */
 		ATTACKER_TOUCH_KEEPER
-		
-	}
-	
-	private final ERuleViolation	violationType;
-	private final long				timestamp;		// ns
-	private final ETeamColor		teamAtFault;
-											
-											
-	/**
-	 * @param violationType
-	 * @param timestamp in ns
-	 * @param teamAtFault
-	 */
-	public RuleViolation(final ERuleViolation violationType, final long timestamp,
-			final ETeamColor teamAtFault)
-	{
-		this.violationType = violationType;
-		this.timestamp = timestamp;
-		this.teamAtFault = teamAtFault;
 	}
 	
 	
 	/**
 	 * @return
 	 */
-	public ERuleViolation getViolationType()
-	{
-		return violationType;
-	}
-	
-	
-	/**
-	 * @return timestamp in ns
-	 */
-	public long getTimestamp()
-	{
-		return timestamp;
-	}
+	public ERuleViolation getType();
 	
 	
 	/**
 	 * @return
 	 */
-	public ETeamColor getTeamAtFault()
-	{
-		return teamAtFault;
-	}
+	public long getTimestamp();
+	
+	
+	/**
+	 * @return
+	 */
+	public ETeamColor getTeamAtFault();
+	
+	
+	/**
+	 * @return
+	 */
+	public Optional<BotID> getBotAtFault();
+	
+	
+	/**
+	 * @return
+	 */
+	public String buildLogString();
 }

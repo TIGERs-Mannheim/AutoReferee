@@ -22,7 +22,6 @@ import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
-import edu.tigers.autoreferee.engine.rules.impl.violations.BallLeftFieldRule;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
@@ -42,7 +41,8 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
  * The stop state rule initiates new actions depending on the queue follow up action. If the ball is not in the correct
  * position for the action a ball placement command is issued. If a ball placement has been attempted but the ball is
  * still not in the correct position the game will restart anyway after a maximum wait time
- * {@value StopStateRule#MAX_UNPLACED_WAIT_TIME_MS}.
+ * {@literal AutoRefConfig#getMaxUnplacedWaitTime()} or the ball is closely placed and the closely placed wait time has
+ * elapsed.
  * 
  * <pre>
  *                                         v
@@ -74,23 +74,21 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
  */
 public class StopStateRule extends APreparingGameRule
 {
-	private static int		priority							= 1;
+	private static int	priority					= 1;
 	
 	@Configurable(comment = "Time to wait before performing an action after reaching the stop state in [ms]")
-	private static long		STOP_WAIT_TIME_MS				= 2_000;	// ms
-																						
-	@Configurable(comment = "The time to wait before performing an action although the ball is not placed correctly")
-	private static long		MAX_UNPLACED_WAIT_TIME_MS	= 20_000;
+	private static long	STOP_WAIT_TIME_MS		= 2_000; // ms
+																		
+	@Configurable(comment = "The time to wait after all bots have come to a stop and the ball has been placed correctly")
+	private static long	READY_WAIT_TIME_MS	= 3_000;
 	
-	@Configurable(comment = "Start the next action although the ball has not been placed")
-	private static boolean	CONTINUE_AFTER_MAX_TIMEOUT		= false;
-	
-	private Long				entryTime;
+	private long			entryTime;
+	private Long			readyTime;
 	
 	
 	static
 	{
-		AGameRule.registerClass(BallLeftFieldRule.class);
+		AGameRule.registerClass(StopStateRule.class);
 	}
 	
 	
@@ -114,6 +112,7 @@ public class StopStateRule extends APreparingGameRule
 	protected void prepare(final IRuleEngineFrame frame)
 	{
 		entryTime = frame.getTimestamp();
+		readyTime = null;
 	}
 	
 	
@@ -142,28 +141,55 @@ public class StopStateRule extends APreparingGameRule
 		}
 		
 		boolean ballPlaced = ballIsPlaced(frame.getWorldFrame().getBall(), kickPos);
+		
 		boolean ballInsideField = field.isPointInShape(ball.getPos());
+		boolean maxUnplacedWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS
+				.toNanos(AutoRefConfig.getMaxUnplacedWaitTime());
+		
+		boolean ballIsCloselyPlaced = ballIsCloselyPlaced(frame.getWorldFrame().getBall(), kickPos);
+		boolean closelyPlacedWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS
+				.toNanos(AutoRefConfig.getMaxCloselyPlacedWaitTime());
+		
 		boolean botsStationary = botsAreStationary(frame.getWorldFrame().getBots().values());
 		boolean botsCorrectDistance = botStopDistanceIsCorrect(frame.getWorldFrame());
+		boolean readyWaitTimeOver = false;
 		
-		boolean maxWaitTimeOver = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS
-				.toNanos(MAX_UNPLACED_WAIT_TIME_MS);
+		if (ballPlaced && botsStationary && botsCorrectDistance)
+		{
+			if (readyTime == null)
+			{
+				readyTime = frame.getTimestamp();
+			} else
+			{
+				long waitTimeNS = frame.getTimestamp() - readyTime;
+				readyWaitTimeOver = waitTimeNS > TimeUnit.MILLISECONDS.toNanos(READY_WAIT_TIME_MS);
+			}
+		} else
+		{
+			readyTime = null;
+		}
+		
 		
 		if (ballPlaced)
 		{
-			if (botsStationary && botsCorrectDistance)
+			if (readyWaitTimeOver)
 			{
 				return Optional.of(new RuleResult(action.getCommand(), null, null));
 			}
 		} else
 		{
-			if (!placementWasAttempted(frame) && (AutoRefConfig.getBallPlacementTeams().size() > 0))
+			if (!placementWasAttempted(frame) && (AutoRefConfig.getBallPlacementTeams().size() > 0) && ball.isOnCam())
 			{
 				// Try to place the ball
 				return Optional.ofNullable(handlePlacement(kickPos));
 			}
 			
-			if (maxWaitTimeOver && ballInsideField && CONTINUE_AFTER_MAX_TIMEOUT)
+			/*
+			 * Only start the next action if the MAX_UNPLACED_WAIT_TIME_MS is set to a value > 0. A value <= 0 will
+			 * deactivate this override.
+			 */
+			if ((maxUnplacedWaitTimeElapsed && ballInsideField && (AutoRefConfig.getMaxUnplacedWaitTime() > 0))
+					|| (closelyPlacedWaitTimeElapsed && ballIsCloselyPlaced && (AutoRefConfig.getMaxCloselyPlacedWaitTime() > 0)))
 			{
 				return Optional.of(new RuleResult(action.getCommand(), null, null));
 			}
@@ -250,7 +276,7 @@ public class StopStateRule extends APreparingGameRule
 	
 	private boolean placementWasAttempted(final IRuleEngineFrame frame)
 	{
-		return determineAttemptedPlacements(frame).size() > 1;
+		return determineAttemptedPlacements(frame).size() >= 1;
 	}
 	
 }

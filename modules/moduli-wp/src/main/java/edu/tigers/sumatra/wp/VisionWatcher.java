@@ -29,6 +29,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.wp.ExportDataContainer.FrameInfo;
 import edu.tigers.sumatra.wp.ExportDataContainer.WpBall;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -233,7 +234,8 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		TrackedBall trackedBall = currentFrame.getBall();
 		
 		ExportDataContainer container = new ExportDataContainer();
-		container.setTimestampRecorded(System.nanoTime());
+		container.setFrameInfo(new FrameInfo(frame.getFrameNumber(), frame.getCameraId(),
+				frame.gettCapture(), frame.gettSent(), System.nanoTime()));
 		container.setCurBall(curBall);
 		container.setWpBall(new WpBall(trackedBall.getPos3(), trackedBall.getVel3(), trackedBall.getAcc3(), frame
 				.getFrameNumber(), curBall.getTimestamp(), trackedBall.getConfidence()));
@@ -362,6 +364,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 			log.error("Can not create target folder: " + folder);
 			return;
 		}
+		CSVExporter.exportList(folder, "frameInfo", data.stream().map(c -> c.getFrameInfo()));
 		CSVExporter.exportList(folder, "rawBall", data.stream().map(c -> c.getCurBall()));
 		CSVExporter.exportList(folder, "wpBall", data.stream().map(c -> c.getWpBall()));
 		CSVExporter.exportList(folder, "rawBalls", data.stream().flatMap(c -> c.getBalls().stream()));

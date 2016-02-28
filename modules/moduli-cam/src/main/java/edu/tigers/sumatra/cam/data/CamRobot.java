@@ -210,4 +210,13 @@ public class CamRobot extends ACamObject
 		numbers.add(gettSent());
 		return numbers;
 	}
+	
+	
+	/**
+	 * @return the botId
+	 */
+	public BotID getBotId()
+	{
+		return botId;
+	}
 }

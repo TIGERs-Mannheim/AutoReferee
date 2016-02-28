@@ -69,15 +69,28 @@ public abstract class AGameRule implements IGameRule
 	protected static boolean botsAreStationary(final Collection<ITrackedBot> bots)
 	{
 		return bots.stream().allMatch(
-				bot -> bot.getVelByTime(0).getLength() < AutoRefConfig.getStationarySpeedThreshold());
+				bot -> bot.getVelByTime(0).getLength() < AutoRefConfig.getBotStationarySpeedThreshold());
 	}
 	
 	
 	protected static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos)
 	{
+		return ballIsPlaced(ball, destPos, AutoRefConfig.getBallPlacementAccuracy());
+	}
+	
+	
+	protected static boolean ballIsCloselyPlaced(final TrackedBall ball, final IVector2 destPos)
+	{
+		return ballIsPlaced(ball, destPos, AutoRefConfig.getBallCloselyPlacedAccuracy());
+	}
+	
+	
+	private static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos, final double accuracy)
+	{
 		double dist = GeoMath.distancePP(ball.getPos(), destPos);
 		double velocity = ball.getVel().getLength();
-		if ((dist < AutoRefConfig.getBallPlacementAccuracy()) && (velocity < AutoRefConfig.getStationarySpeedThreshold()))
+		if ((dist < accuracy)
+				&& (velocity < AutoRefConfig.getBallStationarySpeedThreshold()))
 		{
 			return true;
 		}
@@ -87,7 +100,7 @@ public abstract class AGameRule implements IGameRule
 	
 	protected static boolean ballIsStationary(final TrackedBall ball)
 	{
-		return ball.getVel().getLength() < AutoRefConfig.getStationarySpeedThreshold();
+		return ball.getVel().getLength() < AutoRefConfig.getBallStationarySpeedThreshold();
 	}
 	
 	

@@ -26,6 +26,8 @@ import edu.tigers.sumatra.math.Vector2;
 @Persistent
 public class RefereeMsg
 {
+	/** in nanoseconds */
+	private final long			frameTimestamp;
 	private final Command		command;
 	/** in microseconds */
 	private final long			cmdTimestamp;
@@ -46,6 +48,7 @@ public class RefereeMsg
 	 */
 	public RefereeMsg()
 	{
+		frameTimestamp = 0;
 		command = Command.HALT;
 		cmdTimestamp = 0;
 		cmdCounter = -1;
@@ -60,10 +63,12 @@ public class RefereeMsg
 	
 	
 	/**
+	 * @param frameTimestamp
 	 * @param sslRefereeMsg
 	 */
-	public RefereeMsg(final SSL_Referee sslRefereeMsg)
+	public RefereeMsg(final long frameTimestamp, final SSL_Referee sslRefereeMsg)
 	{
+		this.frameTimestamp = frameTimestamp;
 		command = sslRefereeMsg.getCommand();
 		cmdTimestamp = sslRefereeMsg.getCommandTimestamp();
 		cmdCounter = sslRefereeMsg.getCommandCounter();
@@ -92,6 +97,7 @@ public class RefereeMsg
 	 */
 	public RefereeMsg(final RefereeMsg refereeMsg)
 	{
+		frameTimestamp = refereeMsg.getFrameTimestamp();
 		command = refereeMsg.command;
 		cmdTimestamp = refereeMsg.cmdTimestamp;
 		cmdCounter = refereeMsg.cmdCounter;
@@ -198,5 +204,16 @@ public class RefereeMsg
 	public IVector2 getBallPlacementPos()
 	{
 		return ballPlacementPos;
+	}
+	
+	
+	/**
+	 * The timestamp of the last world frame when this message was received
+	 * 
+	 * @return the frameTimestamp in nanoseconds
+	 */
+	public final long getFrameTimestamp()
+	{
+		return frameTimestamp;
 	}
 }

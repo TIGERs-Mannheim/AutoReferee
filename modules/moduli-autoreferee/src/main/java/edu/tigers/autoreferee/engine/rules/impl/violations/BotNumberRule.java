@@ -15,10 +15,10 @@ import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.referee.TeamInfo;
@@ -91,7 +91,8 @@ public class BotNumberRule extends AGameRule
 		long msgTime = msg.getPacketTimestamp();
 		TeamInfo teamInfo = color == ETeamColor.BLUE ? msg.getTeamInfoBlue() : msg.getTeamInfoYellow();
 		
-		int yellowCards = (int) teamInfo.getYellowCardsTimes().stream().map(cardTime -> cardTime - (curTime - msgTime))
+		int yellowCards = (int) teamInfo.getYellowCardsTimes().stream()
+				.map(cardTime -> cardTime - (curTime - msgTime))
 				.filter(cardTime -> cardTime > 0).count();
 		
 		return maxTeamBotCount - yellowCards;
@@ -100,8 +101,10 @@ public class BotNumberRule extends AGameRule
 	
 	private int getTeamOnFieldBotCount(final Collection<ITrackedBot> bots, final ETeamColor color)
 	{
-		return (int) bots.stream().filter(bot -> bot.getBotId().getTeamColor() == color)
-				.filter(bot -> NGeometry.getField().isPointInShape(bot.getPos())).count();
+		return (int) bots.stream()
+				.filter(bot -> bot.getBotId().getTeamColor() == color)
+				.filter(bot -> NGeometry.getField().isPointInShape(bot.getPos()))
+				.count();
 	}
 	
 	

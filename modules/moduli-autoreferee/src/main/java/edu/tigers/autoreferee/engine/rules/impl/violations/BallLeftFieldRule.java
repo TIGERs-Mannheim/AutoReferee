@@ -17,12 +17,13 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
@@ -107,35 +108,34 @@ public class BallLeftFieldRule extends AGameRule
 	private Optional<RuleResult> handleSideLineOff(final IVector2 ballPos,
 			final BotPosition lastTouched, final long ts)
 	{
-		ETeamColor lastTouchedColor = lastTouched.getId().getTeamColor();
 		int ySide = ballPos.y() > 0 ? 1 : -1;
 		IVector2 kickPos = ballPos.addNew(new Vector2(0, -100 * ySide));
-		return Optional.of(buildThrowInResult(lastTouchedColor, kickPos, ts));
+		return Optional.of(buildThrowInResult(lastTouched.getId(), kickPos, ts));
 	}
 	
 	
 	protected Optional<RuleResult> handleGoalLineOff(final IVector2 intersection,
 			final BotPosition lastTouched, final long ts)
 	{
-		ETeamColor lastTouchedColor = lastTouched.getId().getTeamColor();
+		BotID lastTouchedID = lastTouched.getId();
 		
 		if (isIcing(lastTouched, intersection))
 		{
-			return Optional.of(buildIcingResult(lastTouchedColor, lastTouched.getPos(), ts));
+			return Optional.of(buildIcingResult(lastTouchedID, lastTouched.getPos(), ts));
 		}
 		
 		ETeamColor goalLineColor = NGeometry.getTeamOfClosestGoalLine(intersection);
 		
-		if (lastTouchedColor == goalLineColor)
+		if (lastTouchedID.getTeamColor() == goalLineColor)
 		{
 			// This is a corner kick
 			IVector2 kickPos = AutoRefMath.getClosestCornerKickPos(intersection);
-			return Optional.of(buildCornerKickResult(lastTouchedColor, kickPos, ts));
+			return Optional.of(buildCornerKickResult(lastTouchedID, kickPos, ts));
 		}
 		// This is a goal kick
 		IVector2 kickPos = AutoRefMath.getClosestGoalKickPos(intersection);
 		
-		return Optional.of(buildGoalKickResult(lastTouchedColor, kickPos, ts));
+		return Optional.of(buildGoalKickResult(lastTouchedID, kickPos, ts));
 	}
 	
 	
@@ -156,38 +156,43 @@ public class BallLeftFieldRule extends AGameRule
 	}
 	
 	
-	private RuleResult buildCornerKickResult(final ETeamColor lastTouched, final IVector2 kickPos, final long ts)
+	private RuleResult buildCornerKickResult(final BotID lastTouched, final IVector2 kickPos, final long ts)
 	{
 		Command cmd = Command.STOP;
-		FollowUpAction action = new FollowUpAction(EActionType.DIRECT_FREE, lastTouched.opposite(), kickPos);
+		FollowUpAction action = new FollowUpAction(EActionType.DIRECT_FREE, lastTouched.getTeamColor().opposite(),
+				kickPos);
 		RuleViolation violation = new RuleViolation(ERuleViolation.BALL_LEFT_FIELD, ts, lastTouched);
 		return new RuleResult(cmd, action, violation);
 	}
 	
 	
-	private RuleResult buildGoalKickResult(final ETeamColor lastTouched, final IVector2 kickPos, final long ts)
+	private RuleResult buildGoalKickResult(final BotID lastTouched, final IVector2 kickPos, final long ts)
 	{
 		Command cmd = Command.STOP;
-		FollowUpAction action = new FollowUpAction(EActionType.DIRECT_FREE, lastTouched.opposite(), kickPos);
+		FollowUpAction action = new FollowUpAction(EActionType.DIRECT_FREE, lastTouched.getTeamColor().opposite(),
+				kickPos);
 		RuleViolation violation = new RuleViolation(ERuleViolation.BALL_LEFT_FIELD, ts, lastTouched);
 		return new RuleResult(cmd, action, violation);
 	}
 	
 	
-	private RuleResult buildIcingResult(final ETeamColor lastTouched, final IVector2 kickPos, final long ts)
+	private RuleResult buildIcingResult(final BotID lastTouched, final IVector2 lastTouchedPos, final long ts)
 	{
 		Command cmd = Command.STOP;
-		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, lastTouched.opposite(), kickPos);
-		RuleViolation violation = new RuleViolation(ERuleViolation.NO_TOUCH_GOAL_LINE, ts, lastTouched);
+		
+		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastTouchedPos, lastTouched.getTeamColor().opposite());
+		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, lastTouched.getTeamColor().opposite(),
+				kickPos);
+		RuleViolation violation = new RuleViolation(ERuleViolation.ICING, ts, lastTouched);
 		return new RuleResult(cmd, action, violation);
 	}
 	
 	
-	private RuleResult buildThrowInResult(final ETeamColor lastTouched, final IVector2 kickPos, final long ts)
+	private RuleResult buildThrowInResult(final BotID lastTouched, final IVector2 kickPos, final long ts)
 	{
 		Command cmd = Command.STOP;
 		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, lastTouched
-				.opposite(), kickPos);
+				.getTeamColor().opposite(), kickPos);
 		RuleViolation violation = new RuleViolation(ERuleViolation.BALL_LEFT_FIELD, ts, lastTouched);
 		return new RuleResult(cmd, action, violation);
 	}

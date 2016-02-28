@@ -51,13 +51,13 @@ public class ExportDataContainer
 	private static final Logger						log						= Logger.getLogger(ExportDataContainer.class
 																									.getName());
 																									
-	private long											timestampRecorded		= 0;
 	private final List<CamBall>						balls						= new ArrayList<>();
 	private final List<CamRobot>						rawBots					= new ArrayList<>();
 	private final List<WpBot>							wpBots					= new ArrayList<>();
 	private final List<SkillBot>						skillBots				= new ArrayList<>();
 	private CamBall										curBall					= new CamBall();
 	private WpBall											wpBall					= new WpBall();
+	private FrameInfo										frameInfo				= new FrameInfo();
 	private final Map<String, INumberListable>	customNumberListable	= new HashMap<>();
 																							
 																							
@@ -119,6 +119,31 @@ public class ExportDataContainer
 	/**
 	 * @param folder
 	 * @param filename
+	 * @return
+	 */
+	public static List<FrameInfo> readFrameInfo(final String folder, final String filename)
+	{
+		try
+		{
+			return Files
+					.lines(Paths.get(folder + "/" + filename + ".csv"))
+					.filter(line -> !line.startsWith("#"))
+					.map(line -> line.split(","))
+					.map(arr -> Arrays.asList(arr).stream()
+							.map(s -> Double.valueOf(s))
+							.collect(Collectors.toList()))
+					.map(l -> FrameInfo.fromNumberList(l))
+					.collect(Collectors.toList());
+		} catch (IOException err)
+		{
+			return new ArrayList<>();
+		}
+	}
+	
+	
+	/**
+	 * @param folder
+	 * @param filename
 	 * @param color
 	 * @return
 	 */
@@ -141,24 +166,6 @@ public class ExportDataContainer
 		{
 			throw new IllegalStateException();
 		}
-	}
-	
-	
-	/**
-	 * @return the timestampRecorded
-	 */
-	public final long getTimestampRecorded()
-	{
-		return timestampRecorded;
-	}
-	
-	
-	/**
-	 * @param timestampRecorded the timestampRecorded to set
-	 */
-	public final void setTimestampRecorded(final long timestampRecorded)
-	{
-		this.timestampRecorded = timestampRecorded;
 	}
 	
 	
@@ -231,6 +238,33 @@ public class ExportDataContainer
 	public final List<SkillBot> getSkillBots()
 	{
 		return skillBots;
+	}
+	
+	
+	/**
+	 * @return the customNumberListable
+	 */
+	public final Map<String, INumberListable> getCustomNumberListable()
+	{
+		return customNumberListable;
+	}
+	
+	
+	/**
+	 * @return the frameInfo
+	 */
+	public FrameInfo getFrameInfo()
+	{
+		return frameInfo;
+	}
+	
+	
+	/**
+	 * @param frameInfo the frameInfo to set
+	 */
+	public void setFrameInfo(final FrameInfo frameInfo)
+	{
+		this.frameInfo = frameInfo;
 	}
 	
 	
@@ -891,12 +925,171 @@ public class ExportDataContainer
 		}
 	}
 	
-	
 	/**
-	 * @return the customNumberListable
+	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
-	public final Map<String, INumberListable> getCustomNumberListable()
+	public static class FrameInfo implements IJsonString, INumberListable
 	{
-		return customNumberListable;
+		private long	frameId;
+		private int		camId;
+		private long	tCapture;
+		private long	tSent;
+		private long	tRecorded;
+							
+							
+		/**
+		 * 
+		 */
+		public FrameInfo()
+		{
+		}
+		
+		
+		/**
+		 * @param frameId
+		 * @param camId
+		 * @param tCapture
+		 * @param tSent
+		 * @param tRecorded
+		 */
+		public FrameInfo(final long frameId, final int camId, final long tCapture, final long tSent, final long tRecorded)
+		{
+			super();
+			this.frameId = frameId;
+			this.camId = camId;
+			this.tCapture = tCapture;
+			this.tSent = tSent;
+			this.tRecorded = tRecorded;
+		}
+		
+		
+		/**
+		 * @param list
+		 * @return
+		 */
+		public static FrameInfo fromNumberList(final List<? extends Number> list)
+		{
+			return new FrameInfo(list.get(0).longValue(),
+					list.get(1).intValue(),
+					list.get(2).longValue(),
+					list.get(3).longValue(),
+					list.get(4).longValue());
+		}
+		
+		
+		@Override
+		public JSONObject toJSON()
+		{
+			Map<String, Object> jsonMapping = new LinkedHashMap<String, Object>();
+			jsonMapping.put("frameId", frameId);
+			jsonMapping.put("camId", camId);
+			jsonMapping.put("tCapture", tCapture);
+			jsonMapping.put("tSent", tSent);
+			jsonMapping.put("tRecorded", tRecorded);
+			return new JSONObject(jsonMapping);
+		}
+		
+		
+		@Override
+		public List<Number> getNumberList()
+		{
+			List<Number> numbers = new ArrayList<>();
+			numbers.add(frameId);
+			numbers.add(camId);
+			numbers.add(tCapture);
+			numbers.add(tSent);
+			numbers.add(tRecorded);
+			return numbers;
+		}
+		
+		
+		/**
+		 * @return the frameId
+		 */
+		public long getFrameId()
+		{
+			return frameId;
+		}
+		
+		
+		/**
+		 * @param frameId the frameId to set
+		 */
+		public void setFrameId(final long frameId)
+		{
+			this.frameId = frameId;
+		}
+		
+		
+		/**
+		 * @return the camId
+		 */
+		public int getCamId()
+		{
+			return camId;
+		}
+		
+		
+		/**
+		 * @param camId the camId to set
+		 */
+		public void setCamId(final int camId)
+		{
+			this.camId = camId;
+		}
+		
+		
+		/**
+		 * @return the tCapture
+		 */
+		public long gettCapture()
+		{
+			return tCapture;
+		}
+		
+		
+		/**
+		 * @param tCapture the tCapture to set
+		 */
+		public void settCapture(final long tCapture)
+		{
+			this.tCapture = tCapture;
+		}
+		
+		
+		/**
+		 * @return the tSent
+		 */
+		public long gettSent()
+		{
+			return tSent;
+		}
+		
+		
+		/**
+		 * @param tSent the tSent to set
+		 */
+		public void settSent(final long tSent)
+		{
+			this.tSent = tSent;
+		}
+		
+		
+		/**
+		 * @return the tRecorded
+		 */
+		public long gettRecorded()
+		{
+			return tRecorded;
+		}
+		
+		
+		/**
+		 * @param tRecorded the tRecorded to set
+		 */
+		public void settRecorded(final long tRecorded)
+		{
+			this.tRecorded = tRecorded;
+		}
 	}
 }

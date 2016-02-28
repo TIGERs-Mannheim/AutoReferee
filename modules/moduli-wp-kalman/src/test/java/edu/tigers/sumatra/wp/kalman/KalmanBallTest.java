@@ -41,16 +41,6 @@ public class KalmanBallTest
 	 */
 	@Test
 	@Ignore
-	public void testProcessBall()
-	{
-		BallProcessor.runOnData(FOLDER);
-	}
-	
-	
-	/**
-	 */
-	@Test
-	@Ignore
 	public void testCorrectBall()
 	{
 		BallCorrector.runOnData(FOLDER);

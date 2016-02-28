@@ -82,12 +82,34 @@ public class AutoRefMath
 	 */
 	public static IVector2 getClosestFreekickPos(final IVector2 pos, final ETeamColor kickerColor)
 	{
+		Rectangle field = NGeometry.getField();
 		ETeamColor goalColor = NGeometry.getTeamOfClosestGoalLine(pos);
+		IVector2 newKickPos;
 		if (goalColor == kickerColor)
 		{
-			return getDefenseKickPos(pos);
+			newKickPos = getDefenseKickPos(pos);
 		}
-		return getOffenseKickPos(pos);
+		newKickPos = getOffenseKickPos(pos);
+		
+		/*
+		 * Check if the ball is located too close to the touch lines or goal lines
+		 */
+		int xSide = newKickPos.x() > 0 ? 1 : -1;
+		int ySide = newKickPos.y() > 0 ? 1 : -1;
+		
+		if (Math.abs(newKickPos.x()) > ((field.getxExtend() / 2) - THROW_IN_DISTANCE))
+		{
+			double newXPos = ((field.getxExtend() / 2) - THROW_IN_DISTANCE) * xSide;
+			newKickPos = new Vector2(newXPos, newKickPos.y());
+		}
+		
+		if (Math.abs(newKickPos.y()) > ((field.getyExtend() / 2) - THROW_IN_DISTANCE))
+		{
+			double newYPos = ((field.getyExtend() / 2) - THROW_IN_DISTANCE) * ySide;
+			newKickPos = new Vector2(newKickPos.x(), newYPos);
+		}
+		
+		return newKickPos;
 	}
 	
 	

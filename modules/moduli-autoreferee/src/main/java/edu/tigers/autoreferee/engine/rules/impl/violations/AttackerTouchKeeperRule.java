@@ -8,11 +8,14 @@
  */
 package edu.tigers.autoreferee.engine.rules.impl.violations;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.Sets;
 
@@ -20,10 +23,11 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -33,6 +37,7 @@ import edu.tigers.sumatra.referee.TeamConfig;
 import edu.tigers.sumatra.shapes.circle.Circle;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.PenaltyArea;
 
 
 /**
@@ -42,12 +47,13 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class AttackerTouchKeeperRule extends AGameRule
 {
-	
 	private static final int		priority					= 1;
+	private static final Logger	log						= Logger.getLogger(AttackerTouchKeeperRule.class);
+	
 	private static final double	MIN_KEEPER_DEFENSE	= 200;
 	private Set<BotID>				oldViolators			= new HashSet<>();
-																		
-																		
+	
+	
 	/**
 	 * 
 	 */
@@ -68,32 +74,26 @@ public class AttackerTouchKeeperRule extends AGameRule
 	public Optional<RuleResult> update(final IRuleEngineFrame frame)
 	{
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
+		Set<BotID> keepers = getKeepers();
 		
-		BotID keeperIDBlue = BotID.createBotId(TeamConfig.getKeeperIdBlue(), ETeamColor.BLUE);
-		BotID keeperIDYellow = BotID.createBotId(TeamConfig.getKeeperIdYellow(), ETeamColor.YELLOW);
-		ITrackedBot keeperBlue = bots.get(keeperIDBlue);
-		ITrackedBot keeperYellow = bots.get(keeperIDYellow);
+		Set<BotID> violators = new HashSet<>();
 		
-		Circle keeperBlueCircle = new Circle(keeperBlue.getPos(), MIN_KEEPER_DEFENSE);
-		Circle keeperYellowCircle = new Circle(keeperYellow.getPos(), MIN_KEEPER_DEFENSE);
-		
-		
-		List<ITrackedBot> attackingBlueBots = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == ETeamColor.BLUE)
-				.collect(Collectors.toList());
-		List<ITrackedBot> attackingYellowBots = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == ETeamColor.YELLOW)
-				.collect(Collectors.toList());
-				
-		Set<BotID> yellowViolators = attackingYellowBots.stream()
-				.filter(bot -> keeperBlueCircle.isPointInShape(bot.getPos(), 0)).map(bot -> bot.getBotId())
-				.collect(Collectors.toSet());
-				
-		Set<BotID> blueViolators = attackingBlueBots.stream()
-				.filter(bot -> keeperYellowCircle.isPointInShape(bot.getPos(), 0)).map(bot -> bot.getBotId())
-				.collect(Collectors.toSet());
-				
-		Set<BotID> violators = Sets.union(yellowViolators, blueViolators);
+		for (BotID keeperID : keepers)
+		{
+			ITrackedBot keeper = bots.getWithNull(keeperID);
+			if (keeper == null)
+			{
+				log.debug("A Keeper disappeard from the field: " + keeperID);
+				continue;
+			}
+			
+			// Only check for violators if the keeper is positioned inside his own penalty area
+			PenaltyArea penArea = NGeometry.getPenaltyArea(keeperID.getTeamColor());
+			if (penArea.isPointInShape(keeper.getPos()))
+			{
+				violators.addAll(getViolators(bots, keeper));
+			}
+		}
 		
 		// remove the old Violators from the current Violators
 		Set<BotID> newViolators = Sets.difference(violators, oldViolators);
@@ -102,26 +102,48 @@ public class AttackerTouchKeeperRule extends AGameRule
 		oldViolators.removeAll(Sets.difference(oldViolators, violators));
 		
 		// get the first validator
-		Optional<BotID> validatorID = newViolators.stream().findFirst();
+		Optional<BotID> violatorID = newViolators.stream().findFirst();
 		
-		if (validatorID.isPresent() && bots.containsKey(validatorID.get()))
+		if (violatorID.isPresent() && bots.containsKey(violatorID.get()))
 		{
-			
-			IVector2 ValidationPos = bots.get(validatorID.get()).getPos();
-			ETeamColor validatorTeamColor = validatorID.get().getTeamColor();
+			ITrackedBot violator = bots.get(violatorID.get());
+			IVector2 violatorPos = violator.getPos();
+			ETeamColor violatorTeamColor = violatorID.get().getTeamColor();
 			
 			RuleViolation violation = new RuleViolation(ERuleViolation.ATTACKER_TOUCH_KEEPER, frame.getTimestamp(),
-					validatorTeamColor);
-			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, validatorTeamColor.opposite(),
-					AutoRefMath.getClosestFreekickPos(ValidationPos, validatorTeamColor.opposite()));
-					
+					violatorID.get());
+			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, violatorTeamColor.opposite(),
+					AutoRefMath.getClosestFreekickPos(violatorPos, violatorTeamColor.opposite()));
+			
 			// add current validator to old validator
-			oldViolators.add(validatorID.get());
+			oldViolators.add(violatorID.get());
 			
 			return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 			
 		}
 		return Optional.empty();
+	}
+	
+	
+	private Set<BotID> getViolators(final IBotIDMap<ITrackedBot> bots, final ITrackedBot target)
+	{
+		ETeamColor targetColor = target.getBotId().getTeamColor();
+		Circle circle = new Circle(target.getPos(), MIN_KEEPER_DEFENSE);
+		
+		List<ITrackedBot> attackingBots = bots.values().stream()
+				.filter(bot -> bot.getBotId().getTeamColor() == targetColor.opposite())
+				.collect(Collectors.toList());
+		
+		return attackingBots.stream()
+				.filter(bot -> circle.isPointInShape(bot.getPos(), 0))
+				.map(bot -> bot.getBotId())
+				.collect(Collectors.toSet());
+	}
+	
+	
+	private Set<BotID> getKeepers()
+	{
+		return new HashSet<>(Arrays.asList(TeamConfig.getKeeperBotIDBlue(), TeamConfig.getKeeperBotIDYellow()));
 	}
 	
 	

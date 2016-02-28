@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
-import edu.tigers.autoreferee.engine.RuleViolation;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 
 
@@ -28,7 +28,7 @@ public class RuleResult
 {
 	private final List<RefCommand>	commands;
 	private final FollowUpAction		followUp;
-	private final RuleViolation		violation;
+	private final IRuleViolation		violation;
 	
 	
 	/**
@@ -36,7 +36,7 @@ public class RuleResult
 	 * @param followUp
 	 * @param violation
 	 */
-	public RuleResult(final Command refCommand, final FollowUpAction followUp, final RuleViolation violation)
+	public RuleResult(final Command refCommand, final FollowUpAction followUp, final IRuleViolation violation)
 	{
 		this(new RefCommand(refCommand), followUp, violation);
 	}
@@ -47,7 +47,7 @@ public class RuleResult
 	 * @param followUp
 	 * @param violation
 	 */
-	public RuleResult(final RefCommand command, final FollowUpAction followUp, final RuleViolation violation)
+	public RuleResult(final RefCommand command, final FollowUpAction followUp, final IRuleViolation violation)
 	{
 		this(Arrays.asList(command), followUp, violation);
 	}
@@ -58,7 +58,7 @@ public class RuleResult
 	 * @param followUp
 	 * @param violation
 	 */
-	public RuleResult(final List<RefCommand> commands, final FollowUpAction followUp, final RuleViolation violation)
+	public RuleResult(final List<RefCommand> commands, final FollowUpAction followUp, final IRuleViolation violation)
 	{
 		if (commands == null)
 		{
@@ -93,7 +93,7 @@ public class RuleResult
 	/**
 	 * @return the violation
 	 */
-	public Optional<RuleViolation> getViolation()
+	public Optional<IRuleViolation> getViolation()
 	{
 		return Optional.ofNullable(violation);
 	}

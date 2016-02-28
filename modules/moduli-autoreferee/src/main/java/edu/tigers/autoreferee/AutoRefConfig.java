@@ -25,34 +25,46 @@ import edu.tigers.sumatra.ids.ETeamColor;
 public class AutoRefConfig
 {
 	@Configurable(comment = "Enable ball placement calls for the blue teams")
-	private static boolean		ballPlacementBlueEnabled	= false;
+	private static boolean		ballPlacementBlueEnabled		= false;
 	
 	@Configurable(comment = "Enable ball placement calls for the blue teams")
-	private static boolean		ballPlacementYellowEnabled	= false;
+	private static boolean		ballPlacementYellowEnabled		= false;
 	
 	@Configurable(comment = "Enable ball placement calls for the blue teams")
-	private static ETeamColor	ballPlacementPreference		= ETeamColor.NEUTRAL;
+	private static ETeamColor	ballPlacementPreference			= ETeamColor.NEUTRAL;
 	
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed")
-	private static double		ballPlacementAccuracy		= 100;
+	private static double		ballPlacementAccuracy			= 100;
 	
 	@Configurable(comment = "The maximum allowed ball velocity ingame in m/s")
-	private static double		maxBallVelocity				= 8.5d;
+	private static double		maxBallVelocity					= 8.5d;
 	
 	@Configurable(comment = "The maximum bot velocity during game stoppage in m/s")
-	private static double		maxBotStopSpeed				= 1.7d;						// in m/s
-																											
-	@Configurable(comment = "The velocity below which an entity is considered to be stationary in m/s")
-	private static double		stationarySpeedThreshold	= 0.01;
+	private static double		maxBotStopSpeed					= 1.7d;						// in m/s
+																												
+	@Configurable(comment = "The velocity below which a bot is considered to be stationary in m/s")
+	private static double		botStationarySpeedThreshold	= 0.3;
+	
+	@Configurable(comment = "The velocity below which the ball is considered to be stationary in m/s")
+	private static double		ballStationarySpeedThreshold	= 0.08;
 	
 	@Configurable(comment = "The time each team has to place the ball in ms")
-	private static int			ballPlacementWindow			= 15_000;
+	private static int			ballPlacementWindow				= 15_000;
 	
 	@Configurable(comment = "The hostname/ip address of the refbox")
-	private static String		refboxHostname					= "localhost";
+	private static String		refboxHostname						= "localhost";
 	
 	@Configurable(comment = "The port which will be used to connect to the refbox")
-	private static int			refboxPort						= 10007;
+	private static int			refboxPort							= 10007;
+	
+	@Configurable(comment = "Maximum time before sending the next signal although the ball is not placed - A value of 0 means to wait forever in ms")
+	private static long			maxUnplacedWaitTime				= 0;
+	
+	@Configurable(comment = "Maximum time before sending the next signal although the ball is not entirely correctly placed ins ms - A value of 0 means to wait forever")
+	private static long			maxCloselyPlacedWaitTime		= 10_000;
+	
+	@Configurable(comment = "The ball is considered to be closely placed if the distance to the target position is below this threshold in mm")
+	private static double		ballCloselyPlacedAccuracy		= 500;
 	
 	static
 	{
@@ -116,11 +128,20 @@ public class AutoRefConfig
 	
 	
 	/**
-	 * @return The velocity below which an entity is considered to be stationary in m/s
+	 * @return The velocity below which a bot is considered to be stationary in m/s
 	 */
-	public static double getStationarySpeedThreshold()
+	public static double getBotStationarySpeedThreshold()
 	{
-		return stationarySpeedThreshold;
+		return botStationarySpeedThreshold;
+	}
+	
+	
+	/**
+	 * @return The velocity below which the ball is considered to be stationary in m/s
+	 */
+	public static double getBallStationarySpeedThreshold()
+	{
+		return ballStationarySpeedThreshold;
 	}
 	
 	
@@ -152,6 +173,33 @@ public class AutoRefConfig
 	public static int getRefboxPort()
 	{
 		return refboxPort;
+	}
+	
+	
+	/**
+	 * @return value in ms
+	 */
+	public static long getMaxCloselyPlacedWaitTime()
+	{
+		return maxCloselyPlacedWaitTime;
+	}
+	
+	
+	/**
+	 * @return in ms
+	 */
+	public static long getMaxUnplacedWaitTime()
+	{
+		return maxUnplacedWaitTime;
+	}
+	
+	
+	/**
+	 * @return in mm
+	 */
+	public static double getBallCloselyPlacedAccuracy()
+	{
+		return ballCloselyPlacedAccuracy;
 	}
 	
 }

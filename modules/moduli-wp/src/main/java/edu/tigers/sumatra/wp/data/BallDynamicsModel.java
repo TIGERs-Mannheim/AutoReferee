@@ -153,7 +153,7 @@ public class BallDynamicsModel
 		newState.set(8, 0, az);
 		
 		double confidence = state.get(9, 0);
-		confidence = Math.min(1, confidence + (dt / 0.1));
+		confidence = Math.max(0, Math.min(1, confidence + (dt / 0.1)));
 		// double tLastCollision = state.get(9, 0) + dt;
 		newState.set(9, 0, confidence);
 		

@@ -24,11 +24,12 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -40,17 +41,19 @@ import edu.tigers.sumatra.wp.data.PenaltyArea;
 
 
 /**
- * This rule detects attackers that touch the ball while inside the defense area of the defending team.
+ * This rule detects attackers/defenders that touch the ball while inside the defense area of the defending/their own
+ * team.
  * 
  * @author Lukas Magel
  */
-public class BotInDefenseAreaRule extends AGameRule
+public class BotInDefenseAreaRule extends APreparingGameRule
 {
 	private static final int			priority				= 1;
 	
 	@Configurable(comment = "The cooldown time before registering a ball touch with the same bot again in ms")
-	private static int					COOLDOWN_TIME_MS	= 1_000;
+	private static int					COOLDOWN_TIME_MS	= 3_000;
 	
+	private long							entryTime			= 0;
 	private Map<BotID, BotPosition>	lastViolators		= new HashMap<>();
 	
 	static
@@ -76,9 +79,24 @@ public class BotInDefenseAreaRule extends AGameRule
 	
 	
 	@Override
-	public Optional<RuleResult> update(final IRuleEngineFrame frame)
+	protected void prepare(final IRuleEngineFrame frame)
+	{
+		entryTime = frame.getTimestamp();
+	}
+	
+	
+	@Override
+	public Optional<RuleResult> doUpdate(final IRuleEngineFrame frame)
 	{
 		BotPosition curKicker = frame.getBotLastTouchedBall();
+		
+		if (curKicker.getTs() < entryTime)
+		{
+			/*
+			 * The ball was last touched before the game state changed to RUNNING
+			 */
+			return Optional.empty();
+		}
 		if ((curKicker == null) || curKicker.getId().isUninitializedID())
 		{
 			return Optional.empty();
@@ -129,7 +147,7 @@ public class BotInDefenseAreaRule extends AGameRule
 					AutoRefMath.getClosestFreekickPos(curKickerPos, curKickerColor.opposite()));
 			
 			RuleViolation violation = new RuleViolation(ERuleViolation.ATTACKER_IN_DEFENSE_AREA, frame.getTimestamp(),
-					curKickerColor);
+					curKickerId);
 			
 			return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 		} else if (ownPenArea.isPointInShape(curKickerPos, -Geometry.getBotRadius()))
@@ -141,7 +159,7 @@ public class BotInDefenseAreaRule extends AGameRule
 			lastViolators.put(curKickerId, curKicker);
 			
 			RuleViolation violation = new RuleViolation(ERuleViolation.MULTIPLE_DEFENDER, frame.getTimestamp(),
-					curKickerColor);
+					curKickerId);
 			return Optional.of(new RuleResult(Collections.emptyList(), null, violation));
 		}
 		
@@ -156,7 +174,7 @@ public class BotInDefenseAreaRule extends AGameRule
 	
 	
 	@Override
-	public void reset()
+	public void doReset()
 	{
 		lastViolators.clear();
 	}

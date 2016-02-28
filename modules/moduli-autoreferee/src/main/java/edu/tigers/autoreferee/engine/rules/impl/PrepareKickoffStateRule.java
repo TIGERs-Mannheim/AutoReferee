@@ -14,11 +14,13 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
@@ -34,9 +36,6 @@ public class PrepareKickoffStateRule extends APreparingGameRule
 	
 	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
 	private static long	MIN_WAIT_TIME_MS	= 5_000;
-	
-	@Configurable(comment = "The maximum time to wait before sending the kickoff signal in ms")
-	private static long	MAX_WAIT_TIME_MS	= 20_000;
 	
 	private long			entryTime;
 	
@@ -78,12 +77,21 @@ public class PrepareKickoffStateRule extends APreparingGameRule
 		}
 		
 		SimpleWorldFrame wFrame = frame.getWorldFrame();
-		boolean ballStationary = ballIsStationary(wFrame.getBall());
+		boolean ballIsPlaced = ballIsPlaced(wFrame.getBall(), Geometry.getCenter());
+		boolean ballInsideField = Geometry.getField().isPointInShape(wFrame.getBall().getPos());
+		boolean maxUnplacedWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS
+				.toNanos(AutoRefConfig.getMaxUnplacedWaitTime());
+		
+		boolean ballIsCloselyPlaced = ballIsCloselyPlaced(wFrame.getBall(), Geometry.getCenter());
+		boolean closelyPlacedWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS
+				.toNanos(AutoRefConfig.getMaxCloselyPlacedWaitTime());
+		
 		boolean botsStationary = botsAreStationary(wFrame.getBots().values());
 		boolean botPosCorrect = AutoRefMath.botsAreOnCorrectSide(wFrame.getBots().values());
-		boolean maxWaitTimeElapsed = (frame.getTimestamp() - entryTime) > TimeUnit.MILLISECONDS.toNanos(MAX_WAIT_TIME_MS);
 		
-		if ((ballStationary && botsStationary && botPosCorrect) || maxWaitTimeElapsed)
+		if ((ballIsPlaced && botsStationary && botPosCorrect)
+				|| ((ballInsideField && maxUnplacedWaitTimeElapsed && (AutoRefConfig.getMaxUnplacedWaitTime() > 0))
+				|| (ballIsCloselyPlaced && closelyPlacedWaitTimeElapsed && (AutoRefConfig.getMaxCloselyPlacedWaitTime() > 0))))
 		{
 			return Optional.of(new RuleResult(Command.NORMAL_START, null, null));
 		}

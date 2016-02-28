@@ -29,10 +29,10 @@ public interface IFilter
 	
 	
 	/**
-	 * @param index
+	 * @param timestamp
 	 * @return
 	 */
-	AMotionResult getLookahead(int index);
+	AMotionResult getPrediction(final long timestamp);
 	
 	
 	/**
@@ -40,12 +40,6 @@ public interface IFilter
 	 * @param observation
 	 */
 	void observation(long timestamp, AWPCamObject observation);
-	
-	
-	/**
-	 * @param index
-	 */
-	void performLookahead(int index);
 	
 	
 	/**
@@ -58,16 +52,4 @@ public interface IFilter
 	 * @return
 	 */
 	int getId();
-	
-	
-	/**
-	 *
-	 */
-	void keepPositionAliveOnNoObservation();
-	
-	
-	/**
-	 * @return
-	 */
-	boolean positionKeptAlive();
 }

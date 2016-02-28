@@ -132,6 +132,15 @@ public class TrajWTimeImpl<RETURN_TYPE, TRAJ extends ITrajectory<RETURN_TYPE>>
 	}
 	
 	
+	/**
+	 * @return
+	 */
+	public RETURN_TYPE getFinalDestination()
+	{
+		return trajectory.getPositionMM(trajectory.getTotalTime());
+	}
+	
+	
 	@Override
 	public String toString()
 	{

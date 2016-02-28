@@ -27,7 +27,9 @@ public enum EBotType
 	/**  */
 	TIGER_2016(6, "TigerBot2016", "Tiger Bot v2016"),
 	/**  */
-	SUMATRA(5, "sumatra", "SumatraBot");
+	SUMATRA(5, "sumatra", "SumatraBot"),
+	/**  */
+	SHARED_RADIO(7, "sharedRadio", "SharedRadio Bot");
 	
 	private final String	cfgName;
 	private final String	displayName;

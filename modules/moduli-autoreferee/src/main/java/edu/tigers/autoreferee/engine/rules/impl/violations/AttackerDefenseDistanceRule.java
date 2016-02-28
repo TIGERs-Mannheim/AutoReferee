@@ -19,11 +19,12 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.RuleViolation;
-import edu.tigers.autoreferee.engine.RuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
 import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
+import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
+import edu.tigers.autoreferee.engine.violations.RuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -77,18 +78,22 @@ public class AttackerDefenseDistanceRule extends AGameRule
 			PenaltyArea penArea = NGeometry.getPenaltyArea(attackerColor.opposite());
 			
 			Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
-			List<ITrackedBot> attackingBots = bots.stream().filter(bot -> bot.getBotId().getTeamColor() == attackerColor)
+			List<ITrackedBot> attackingBots = bots.stream()
+					.filter(bot -> bot.getBotId().getTeamColor() == attackerColor)
 					.collect(Collectors.toList());
 			
-			Optional<ITrackedBot> optOffender = attackingBots.stream()
-					.filter(bot -> penArea.isPointInShape(bot.getPos(), MIN_ATTACKER_DEFENSE_DISTANCE)).findFirst();
+			Optional<BotID> optOffender = attackingBots.stream()
+					.filter(bot -> penArea.isPointInShape(bot.getPos(), MIN_ATTACKER_DEFENSE_DISTANCE))
+					.map(bot -> bot.getBotId())
+					.findFirst();
 			
 			if (optOffender.isPresent())
 			{
+				BotID offender = optOffender.get();
 				RuleViolation violation = new RuleViolation(ERuleViolation.ATTACKER_TO_DEFENCE_AREA, frame.getTimestamp(),
-						attackerColor);
+						offender);
 				IVector2 kickPos = AutoRefMath.getClosestFreekickPos(frame.getWorldFrame().getBall().getPos(),
-						attackerColor.opposite());
+						offender.getTeamColor().opposite());
 				FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, attackerColor.opposite(), kickPos);
 				return Optional.of(new RuleResult(Command.STOP, followUp, violation));
 			}
