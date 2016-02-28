@@ -12,12 +12,15 @@ import java.util.Optional;
 
 import org.apache.log4j.Logger;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.IRuleEngineFrame;
 import edu.tigers.autoreferee.engine.calc.BotPosition;
 import edu.tigers.autoreferee.engine.rules.RuleResult;
+import edu.tigers.autoreferee.engine.rules.impl.AGameRule;
 import edu.tigers.autoreferee.engine.rules.impl.APreparingGameRule;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
 import edu.tigers.autoreferee.engine.violations.RuleViolation;
@@ -40,9 +43,10 @@ public class DribblingRule extends APreparingGameRule
 	private static final int		priority								= 1;
 	private static final Logger	log									= Logger.getLogger(DribblingRule.class);
 	
-	/** mm */
+	@Configurable(comment = "Any dribbling distance above this value in mm is considered a violation")
 	private static final double	MAX_DRIBBLING_LENGTH				= 1000;
-	/** Any distance to the ball closer than this value is considered dribbling */
+	
+	@Configurable(comment = "Any distance to the ball closer than this value is considered dribbling")
 	private static final double	DRIBBLING_BOT_BALL_DISTANCE	= 100;
 	
 	/** The position where the currently dribbling bot first touched the ball */
@@ -51,6 +55,11 @@ public class DribblingRule extends APreparingGameRule
 	private BotPosition				lastContact;
 	
 	private long						resetTime;
+	
+	static
+	{
+		AGameRule.registerClass(DribblingRule.class);
+	}
 	
 	
 	/**
