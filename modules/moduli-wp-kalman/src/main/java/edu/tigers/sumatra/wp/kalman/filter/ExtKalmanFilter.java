@@ -74,7 +74,7 @@ public class ExtKalmanFilter implements IFilter
 		motion = motionModel;
 		this.context = context;
 		
-		id = (motion.extraxtObjectID(firstObservation));
+		id = (motion.extractObjectID(firstObservation));
 		
 		offset = context.getFilterTimeOffset();
 		
@@ -85,7 +85,7 @@ public class ExtKalmanFilter implements IFilter
 		state = new Matrix[stepcount + 1];
 		covar = new Matrix[stepcount + 1];
 		
-		final Matrix measurement = motion.generateMeasurementMatrix(firstObservation, null);
+		final Matrix measurement = motion.generateMeasurementMatrix(firstObservation, state[0]);
 		reset(firstTimestamp, measurement);
 	}
 	
@@ -96,6 +96,7 @@ public class ExtKalmanFilter implements IFilter
 		contr = motion.generateControlMatrix(null, null);
 		state[0] = motion.generateStateMatrix(measurement, contr);
 		covar[0] = motion.generateCovarianceMatrix(state[0]);
+		motion.newMeasurement(measurement, state[0], 0.001);
 		
 		// no lookahead prediction necessary due to no movement after first observation
 		for (int i = 1; i <= stepcount; i++)
@@ -316,11 +317,11 @@ public class ExtKalmanFilter implements IFilter
 			reset(timestamp, measurement);
 		}
 		
+		motion.newMeasurement(measurement, state[0], dt);
+		
 		// do prediction for the time of the measurement
 		final Matrix predState = predictStateAtTime(timestamp);
 		final Matrix predCov = predictCovarianceAtTime(timestamp);
-		
-		motion.newMeasurement(measurement, state[0], dt);
 		
 		// just call abstract methods because the specification of these matrices depends on the motion model
 		final Matrix h = motion.getMeasurementJacobianWRTstate(measurement);
@@ -369,5 +370,33 @@ public class ExtKalmanFilter implements IFilter
 			state[i] = null;
 			covar[i] = null;
 		}
+	}
+	
+	
+	/**
+	 * @return the motion
+	 */
+	@Override
+	public IMotionModel getMotion()
+	{
+		return motion;
+	}
+	
+	
+	/**
+	 * @return the contr
+	 */
+	public Matrix getContr()
+	{
+		return contr;
+	}
+	
+	
+	/**
+	 * @return the state
+	 */
+	public Matrix[] getState()
+	{
+		return state;
 	}
 }

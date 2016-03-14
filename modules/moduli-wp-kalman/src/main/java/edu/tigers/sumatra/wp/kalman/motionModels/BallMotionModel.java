@@ -3,13 +3,14 @@ package edu.tigers.sumatra.wp.kalman.motionModels;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
 
 import Jama.Matrix;
+import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.functions.EFunction;
 import edu.tigers.sumatra.functions.IFunction1D;
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.wp.data.BallDynamicsModel;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.MotionContext;
@@ -19,6 +20,7 @@ import edu.tigers.sumatra.wp.kalman.data.AWPCamObject;
 import edu.tigers.sumatra.wp.kalman.data.BallMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.IControl;
 import edu.tigers.sumatra.wp.kalman.data.WPCamBall;
+import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 
 
 /**
@@ -83,63 +85,6 @@ public class BallMotionModel implements IMotionModel
 	public Matrix dynamics(final Matrix state, final Matrix control, final double dt, final MotionContext context)
 	{
 		return ballDynamicsModel.dynamics(state, dt, context);
-	}
-	
-	
-	@Override
-	public Matrix sample(final Matrix state, final Matrix control)
-	{
-		throw new IllegalStateException();
-		// final double x = state.get(0, 0);
-		// final double y = state.get(1, 0);
-		// final double z = state.get(2, 0);
-		// final double vx = state.get(3, 0);
-		// final double vy = state.get(4, 0);
-		// final double vz = state.get(5, 0);
-		// final double ax = state.get(6, 0);
-		// final double ay = state.get(7, 0);
-		// final double az = state.get(8, 0);
-		//
-		// final Matrix newState = new Matrix(9, 1);
-		// newState.set(0, 0, (x + genPos.nextValue()));
-		// newState.set(1, 0, (y + genPos.nextValue()));
-		// newState.set(2, 0, z);
-		// newState.set(3, 0, (vx + genVel.nextValue()));
-		// newState.set(4, 0, (vy + genVel.nextValue()));
-		// newState.set(5, 0, vz);
-		// newState.set(6, 0, ax);
-		// newState.set(7, 0, ay);
-		// newState.set(8, 0, az);
-		// return newState;
-	}
-	
-	
-	@Override
-	public double transitionProbability(final Matrix stateNew, final Matrix stateOld, final Matrix control)
-	{
-		throw new NotImplementedException();
-	}
-	
-	
-	@Override
-	public double measurementProbability(final Matrix state, final Matrix measurement, final double dt)
-	{
-		final Matrix p = getDynamicsCovariance(state, 1.0);
-		
-		// calculate matrices for comparing of possible measurement with predicted state
-		final Matrix hState = measurementDynamics(state);
-		final Matrix h = getMeasurementJacobianWRTstate(state);
-		final Matrix c = h.times(p).times(h.transpose());
-		final Matrix d = measurement.minus(hState);
-		
-		// determine likelihood of measurement
-		double likelihood = 1.0;
-		for (int i = 0; i < d.getRowDimension(); i++)
-		{
-			final double factor = Math.exp(-(d.get(i, 0) * d.get(i, 0)) / (2.0 * c.get(i, i)));
-			likelihood *= factor;
-		}
-		return likelihood;
 	}
 	
 	
@@ -387,7 +332,7 @@ public class BallMotionModel implements IMotionModel
 	
 	
 	@Override
-	public int extraxtObjectID(final AWPCamObject observation)
+	public int extractObjectID(final AWPCamObject observation)
 	{
 		// a ball has no id, so we set it to 0
 		return 0;
@@ -556,5 +501,12 @@ public class BallMotionModel implements IMotionModel
 		{
 			return null;
 		}
+	}
+	
+	
+	@Override
+	public void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot, final double dt,
+			final IVector targetVel)
+	{
 	}
 }

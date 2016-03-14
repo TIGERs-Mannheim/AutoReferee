@@ -10,10 +10,8 @@ import edu.tigers.sumatra.wp.kalman.WPConfig;
 
 /**
  */
-public class RobotMotionResult_V2 extends AMotionResult
+public class RobotMotionResult_V2 extends ABotMotionResult
 {
-	/** */
-	public final double	orientation;
 	/** */
 	public final double	movementAngle;
 	/** */
@@ -39,8 +37,7 @@ public class RobotMotionResult_V2 extends AMotionResult
 			final double v,
 			final double trackSpeed, final double angularVelocity, final double confidence, final boolean onCam)
 	{
-		super(x, y, confidence, onCam);
-		this.orientation = orientation;
+		super(x, y, orientation, confidence, onCam);
 		this.movementAngle = movementAngle;
 		this.v = v;
 		this.trackSpeed = trackSpeed;
@@ -52,6 +49,7 @@ public class RobotMotionResult_V2 extends AMotionResult
 	 * @param botId
 	 * @return
 	 */
+	@Override
 	public ITrackedBot motionToTrackedBot(final BotID botId)
 	{
 		IVector2 pos = new Vector2f(x / WPConfig.FILTER_CONVERT_MM_TO_INTERNAL_UNIT,

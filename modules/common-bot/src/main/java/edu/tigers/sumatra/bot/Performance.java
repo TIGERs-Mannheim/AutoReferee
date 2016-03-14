@@ -210,4 +210,23 @@ public class Performance
 	{
 		this.accMaxOverride = accMaxOverride;
 	}
+	
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(getAccMax());
+		builder.append(",");
+		builder.append(getBrkMax());
+		builder.append(",");
+		builder.append(getVelMax());
+		builder.append(",");
+		builder.append(getAccMaxW());
+		builder.append(",");
+		builder.append(getBrkMaxW());
+		builder.append(",");
+		builder.append(getVelMaxW());
+		return builder.toString();
+	}
 }

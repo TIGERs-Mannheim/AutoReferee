@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.wp.vis;
 
-import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;
@@ -106,6 +105,12 @@ public class GameStateCalc implements IVisCalc
 					} else if (lastGameState == EGameStateNeutral.PREPARE_KICKOFF_YELLOW)
 					{
 						newGameState = EGameStateNeutral.KICKOFF_YELLOW;
+					} else if (lastGameState == EGameStateNeutral.PREPARE_PENALTY_BLUE)
+					{
+						newGameState = EGameStateNeutral.PENALTY_BLUE;
+					} else if (lastGameState == EGameStateNeutral.PREPARE_PENALTY_YELLOW)
+					{
+						newGameState = EGameStateNeutral.PENALTY_YELLOW;
 					}
 					break;
 				case PREPARE_PENALTY_BLUE:
@@ -150,12 +155,8 @@ public class GameStateCalc implements IVisCalc
 		{
 			switch (lastGameState)
 			{
-				case PREPARE_PENALTY_BLUE:
-				case PREPARE_PENALTY_YELLOW:
-					if (refereeMsg.getCommand() != Command.NORMAL_START)
-					{
-						break;
-					}
+				case PENALTY_BLUE:
+				case PENALTY_YELLOW:
 				case KICKOFF_BLUE:
 				case KICKOFF_YELLOW:
 				case INDIRECT_KICK_BLUE:
@@ -192,6 +193,10 @@ public class GameStateCalc implements IVisCalc
 				case PREPARE_KICKOFF_BLUE:
 					break;
 				case PREPARE_KICKOFF_YELLOW:
+					break;
+				case PREPARE_PENALTY_BLUE:
+					break;
+				case PREPARE_PENALTY_YELLOW:
 					break;
 				default:
 					throw new IllegalStateException();

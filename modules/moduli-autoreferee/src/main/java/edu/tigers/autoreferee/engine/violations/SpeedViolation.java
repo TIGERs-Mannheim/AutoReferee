@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.violations;
 
 import java.text.DecimalFormat;
 
+import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.ids.BotID;
 
 
@@ -26,12 +27,13 @@ public class SpeedViolation extends RuleViolation
 	 * @param violationType
 	 * @param timestamp
 	 * @param botAtFault
+	 * @param followUp
 	 * @param speed in m/s
 	 */
 	public SpeedViolation(final ERuleViolation violationType, final long timestamp, final BotID botAtFault,
-			final double speed)
+			final FollowUpAction followUp, final double speed)
 	{
-		super(violationType, timestamp, botAtFault);
+		super(violationType, timestamp, botAtFault, followUp);
 		this.speed = speed;
 	}
 	

@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.util.List;
 
 import edu.tigers.sumatra.drawable.DrawableBotShape;
-import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.wp.data.Geometry;
@@ -45,12 +44,6 @@ public class BotVisCalc implements IVisCalc
 			shape.setFontColor(bot.getTeamColor() == ETeamColor.YELLOW ? Color.black : Color.white);
 			shape.setId(String.valueOf(bot.getBotId().getNumber()));
 			shapes.add(shape);
-			
-			if (!bot.isAvailableToAi())
-			{
-				DrawableCircle arc = new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.red);
-				shapes.add(arc);
-			}
 		}
 	}
 	

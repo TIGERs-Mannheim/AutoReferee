@@ -112,6 +112,10 @@ public class Geometry
 	private final PenaltyArea			penaltyAreaOur;
 	/** Their Penalty Area ("Strafraum") */
 	private final PenaltyArea			penaltyAreaTheir;
+	/** The no-go area for all bots during a penalty kick */
+	private final Rectangle				penaltyKickAreaOur;
+	/** The no-go area for all bots during a penalty kick */
+	private final Rectangle				penaltyKickAreaTheir;
 	/** Our penalty mark */
 	private final Vector2f				penaltyMarkOur;
 	/** Their penalty mark */
@@ -171,6 +175,10 @@ public class Geometry
 		centerCircle = calcCenterCircle(center, centerCircleRadius);
 		penaltyLineOur = calcOurPenalityLine(fieldLength, distanceToPenaltyMark, distancePenaltyMarkToPenaltyLine);
 		penaltyLineTheir = calcTheirPenalityLine(fieldLength, distanceToPenaltyMark, distancePenaltyMarkToPenaltyLine);
+		penaltyKickAreaOur = calcOurPenaltyKickArea(center, fieldLength, fieldWidth, distanceToPenaltyMark,
+				distancePenaltyMarkToPenaltyLine);
+		penaltyKickAreaTheir = calcTheirPenaltyKickArea(center, fieldLength, fieldWidth, distanceToPenaltyMark,
+				distancePenaltyMarkToPenaltyLine);
 		
 		ourHalf = new Rectangle(field.topLeft(), field.xExtend() / 2, field.yExtend());
 		theirHalf = new Rectangle(field.topLeft().addNew(new Vector2(field.xExtend() / 2, 0)), field.xExtend() / 2,
@@ -270,6 +278,23 @@ public class Geometry
 			final double distanceTopenaltyLine)
 	{
 		return new Vector2f((-fieldLength / 2.0) + distanceToPenaltyMark + distanceTopenaltyLine, 0);
+	}
+	
+	
+	private Rectangle calcOurPenaltyKickArea(final IVector2 center, final double fieldLength, final double fieldWidth,
+			final double distanceToPenaltyMark, final double distancePenaltyMarkToPenaltyLine)
+	{
+		return new Rectangle(center.addNew(new Vector2f(-fieldLength / 2, fieldWidth / 2)), distanceToPenaltyMark
+				+ distancePenaltyMarkToPenaltyLine, fieldWidth);
+	}
+	
+	
+	private Rectangle calcTheirPenaltyKickArea(final IVector2 center, final double fieldLength, final double fieldWidth,
+			final double distanceToPenaltyMark, final double distancePenaltyMarkToPenaltyLine)
+	{
+		return new Rectangle(center.addNew(new Vector2f(
+				(fieldLength / 2) - (distanceToPenaltyMark + distancePenaltyMarkToPenaltyLine), fieldWidth / 2)),
+				distanceToPenaltyMark + distancePenaltyMarkToPenaltyLine, fieldWidth);
 	}
 	
 	
@@ -681,5 +706,23 @@ public class Geometry
 	public static LearnedBallModel getBallModel()
 	{
 		return instance.ballModel;
+	}
+	
+	
+	/**
+	 * @return the penaltyKickAreaOur
+	 */
+	public static Rectangle getPenaltyKickAreaOur()
+	{
+		return instance.penaltyKickAreaOur;
+	}
+	
+	
+	/**
+	 * @return the penaltyKickAreaTheir
+	 */
+	public static Rectangle getPenaltyKickAreaTheir()
+	{
+		return instance.penaltyKickAreaTheir;
 	}
 }

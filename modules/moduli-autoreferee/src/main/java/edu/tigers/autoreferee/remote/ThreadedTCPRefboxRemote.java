@@ -84,6 +84,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	/**
 	 * 
 	 */
+	@Override
 	public void close()
 	{
 		stop = true;

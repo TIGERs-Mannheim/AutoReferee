@@ -41,7 +41,6 @@ public class TimeSync
 		
 		diffBuffer.add(diff);
 		
-		
 		double avgDiff = Math.abs(average(diffBuffer));
 		
 		if ((avgDiff > 3e8) || !offsetBuffer.isEmpty())
@@ -50,7 +49,7 @@ public class TimeSync
 			offset = (long) average(offsetBuffer);
 			if (avgDiff < 100_000)
 			{
-				log.debug("Synced with Vision clock. offset=" + offset + " diff=" + avgDiff);
+				log.info("Synced with Vision clock. offset=" + offset + " diff=" + avgDiff);
 				offsetBuffer.clear();
 			}
 		}

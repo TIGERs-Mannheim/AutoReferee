@@ -52,4 +52,10 @@ public interface IFilter
 	 * @return
 	 */
 	int getId();
+	
+	
+	/**
+	 * @return
+	 */
+	IMotionModel getMotion();
 }

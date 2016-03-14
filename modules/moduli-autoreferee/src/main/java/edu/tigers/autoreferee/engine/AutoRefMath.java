@@ -11,13 +11,17 @@ package edu.tigers.autoreferee.engine;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.PenaltyArea;
+import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
+import edu.tigers.sumatra.wp.data.TrackedBall;
 
 
 /**
@@ -156,5 +160,86 @@ public class AutoRefMath
 			Rectangle side = NGeometry.getFieldSide(bot.getTeamColor());
 			return side.isPointInShape(bot.getPos());
 		});
+	}
+	
+	
+	/**
+	 * Returns true if all bots have stopped moving
+	 * 
+	 * @param bots
+	 * @return
+	 */
+	public static boolean botsAreStationary(final Collection<ITrackedBot> bots)
+	{
+		return bots.stream().allMatch(
+				bot -> bot.getVelByTime(0).getLength() < AutoRefConfig.getBotStationarySpeedThreshold());
+	}
+	
+	
+	/**
+	 * Returns true if the ball has been placed at {@code destPos} with a precision of
+	 * {@link AutoRefConfig#getBallPlacementAccuracy()} and is stationary.
+	 * 
+	 * @param ball
+	 * @param destPos
+	 * @return
+	 */
+	public static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos)
+	{
+		return ballIsPlaced(ball, destPos, AutoRefConfig.getBallPlacementAccuracy());
+	}
+	
+	
+	/**
+	 * Returns true if the ball has been placed at {@code destPos} with a precision of
+	 * {@link AutoRefConfig#getBallCloselyPlacedAccuracy()} and is stationary.
+	 * 
+	 * @param ball
+	 * @param destPos
+	 * @return
+	 */
+	public static boolean ballIsCloselyPlaced(final TrackedBall ball, final IVector2 destPos)
+	{
+		return ballIsPlaced(ball, destPos, AutoRefConfig.getBallCloselyPlacedAccuracy());
+	}
+	
+	
+	private static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos, final double accuracy)
+	{
+		double dist = GeoMath.distancePP(ball.getPos(), destPos);
+		if ((dist < accuracy) && ballIsStationary(ball))
+		{
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * Returns {@code true} if the velocity is below the {@link AutoRefConfig#getBallStationarySpeedThreshold()}
+	 * threshold.
+	 * 
+	 * @param ball
+	 * @return
+	 */
+	public static boolean ballIsStationary(final TrackedBall ball)
+	{
+		return ball.getVel().getLength() < AutoRefConfig.getBallStationarySpeedThreshold();
+	}
+	
+	
+	/**
+	 * Returns true if all bots are located further than {@link Geometry#getBotToBallDistanceStop()} from the ball
+	 * 
+	 * @param frame
+	 * @return
+	 */
+	public static boolean botStopDistanceIsCorrect(final SimpleWorldFrame frame)
+	{
+		Collection<ITrackedBot> bots = frame.getBots().values();
+		IVector2 ballPos = frame.getBall().getPos();
+		
+		return bots.stream().allMatch(
+				bot -> GeoMath.distancePP(bot.getPosByTime(0), ballPos) > Geometry.getBotToBallDistanceStop());
 	}
 }

@@ -20,6 +20,7 @@ import edu.tigers.sumatra.referee.TeamConfig;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.Goal;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.PenaltyArea;
 
 
@@ -64,6 +65,32 @@ public class NGeometry
 				return 1;
 			}
 			return 0;
+		}
+		
+	}
+	
+	/**
+	 * @author "Lukas Magel"
+	 */
+	public static class BotDistanceComparator implements Comparator<ITrackedBot>
+	{
+		
+		private PointDistanceComparator	comparator;
+		
+		
+		/**
+		 * @param pos
+		 */
+		public BotDistanceComparator(final IVector2 pos)
+		{
+			comparator = new PointDistanceComparator(pos);
+		}
+		
+		
+		@Override
+		public int compare(final ITrackedBot o1, final ITrackedBot o2)
+		{
+			return comparator.compare(o1.getPos(), o2.getPos());
 		}
 		
 	}
@@ -153,6 +180,36 @@ public class NGeometry
 	
 	
 	/**
+	 * @param color
+	 * @return
+	 */
+	public static IVector2 getPenaltyMark(final ETeamColor color)
+	{
+		if (color == TeamConfig.getLeftTeam())
+		{
+			return Geometry.getPenaltyMarkOur();
+		}
+		return Geometry.getPenaltyMarkTheir();
+	}
+	
+	
+	/**
+	 * The no-go area for bots other than the kicker during a penalty kick
+	 * 
+	 * @param color
+	 * @return
+	 */
+	public static Rectangle getPenaltyKickArea(final ETeamColor color)
+	{
+		if (color == TeamConfig.getLeftTeam())
+		{
+			return Geometry.getPenaltyKickAreaOur();
+		}
+		return Geometry.getPenaltyKickAreaTheir();
+	}
+	
+	
+	/**
 	 * @return
 	 */
 	public static List<PenaltyArea> getPenaltyAreas()
@@ -202,12 +259,27 @@ public class NGeometry
 	 */
 	public static boolean ballInsideGoal(final IVector2 pos)
 	{
+		return ballInsideGoal(pos, 0);
+	}
+	
+	
+	/**
+	 * Returns true if the specified position is located inside one of the two goals
+	 * The area behind the goal (abs(x) <= GoalDepth + goalDepthMargin) up to the margin is considered to be part of the
+	 * goal
+	 * 
+	 * @param pos
+	 * @param goalDepthMargin
+	 * @return
+	 */
+	public static boolean ballInsideGoal(final IVector2 pos, final double goalDepthMargin)
+	{
 		Rectangle field = getField();
 		double absXPos = Math.abs(pos.x());
 		double absYPos = Math.abs(pos.y());
 		
 		boolean xPosCorrect = (absXPos > (field.getxExtend() / 2))
-				&& (absXPos < ((field.getxExtend() / 2) + Geometry.getGoalDepth()));
+				&& (absXPos < ((field.getxExtend() / 2) + Geometry.getGoalDepth() + goalDepthMargin));
 		boolean yPosCorrect = absYPos < (Geometry.getGoalSize() / 2);
 		return xPosCorrect && yPosCorrect;
 	}

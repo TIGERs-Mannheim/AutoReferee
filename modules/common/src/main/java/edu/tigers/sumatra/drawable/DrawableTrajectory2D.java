@@ -13,6 +13,7 @@ import java.awt.Graphics2D;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.trajectory.ITrajectory;
@@ -26,8 +27,8 @@ public class DrawableTrajectory2D implements IDrawableShape
 {
 	private final ITrajectory<? extends IVector>	trajXY;
 	private final double									colorBlue;
-																
-																
+	
+	
 	@SuppressWarnings("unused")
 	private DrawableTrajectory2D()
 	{
@@ -60,8 +61,10 @@ public class DrawableTrajectory2D implements IDrawableShape
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
 		double t = 0;
+		IVector2 pLast = trajXY.getPosition(t).getXYVector();
 		while (t < trajXY.getTotalTime())
 		{
+			t = Math.min(t, trajXY.getTotalTime());
 			IVector2 pos = trajXY.getPositionMM(t).getXYVector();
 			IVector2 posTrans = tool.transformToGuiCoordinates(pos, invert);
 			IVector2 vel = trajXY.getVelocity(t).getXYVector();
@@ -82,15 +85,13 @@ public class DrawableTrajectory2D implements IDrawableShape
 			
 			g.fillOval((int) posTrans.x() - 1, (int) posTrans.y() - 1, 2, 2);
 			
-			// g.drawString(String.format("%.1f", t), (float) posTrans.x() + 2, (float) posTrans.y() + 0.8f);
-			
-			if (colorBlue > 0)
+			if (GeoMath.distancePP(pLast, trajXY.getPosition(t).getXYVector()) > 0.2)
 			{
-				t += 0.02;
-			} else
-			{
-				t += 0.1;
+				// g.drawString(String.format("%.1f", t), (float) posTrans.x() + 2, (float) posTrans.y() + 0.8f);
+				pLast = trajXY.getPosition(t).getXYVector();
 			}
+			
+			t += 0.1;
 		}
 	}
 	

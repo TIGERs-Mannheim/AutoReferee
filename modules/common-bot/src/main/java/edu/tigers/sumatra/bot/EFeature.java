@@ -29,7 +29,11 @@ public enum EFeature
 	/**  */
 	CHIP_KICKER("Chip Kicker", 0x0008),
 	/**  */
-	BARRIER("Barrier", 0x0010);
+	BARRIER("Barrier", 0x0010),
+	/** */
+	V2016("v2016", 0x0020),
+	/** */
+	EXT_BOARD("Ext. Board", 0x0040);
 	
 	private final String	name;
 	private final int		id;

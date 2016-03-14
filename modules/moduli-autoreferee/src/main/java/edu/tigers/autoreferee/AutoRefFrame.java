@@ -14,6 +14,7 @@ import java.util.Optional;
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.autoreferee.engine.calc.BotPosition;
+import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -40,6 +41,8 @@ public class AutoRefFrame implements IAutoRefFrame
 	private IVector2						ballLeftFieldPos;
 	
 	private List<EGameStateNeutral>	stateHistory;
+	
+	private PossibleGoal					possibleGoal;
 	
 	
 	/**
@@ -180,5 +183,24 @@ public class AutoRefFrame implements IAutoRefFrame
 	public ShapeMap getShapes()
 	{
 		return shapes;
+	}
+	
+	
+	/**
+	 * @return the possibleGoal
+	 */
+	@Override
+	public Optional<PossibleGoal> getPossibleGoal()
+	{
+		return Optional.ofNullable(possibleGoal);
+	}
+	
+	
+	/**
+	 * @param possibleGoal the possibleGoal to set
+	 */
+	public void setPossibleGoal(final PossibleGoal possibleGoal)
+	{
+		this.possibleGoal = possibleGoal;
 	}
 }

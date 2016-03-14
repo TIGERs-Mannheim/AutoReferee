@@ -57,7 +57,7 @@ public class PredictionContext
 	private static int									maxStepCount			= 10;
 																							
 	@Configurable
-	private static double								predictionLookahead	= 0.08;
+	private static double								predictionLookahead	= 0.0;
 																							
 																							
 	private MotionContext								motionContext;
@@ -101,7 +101,7 @@ public class PredictionContext
 		
 		for (IFilter f : getBlueBots().values())
 		{
-			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getPrediction(timestamp);
+			ABotMotionResult mr = (ABotMotionResult) f.getPrediction(timestamp);
 			IVector3 pos = new Vector3(mr.x, mr.y, mr.orientation);
 			BotID botId = BotID.createBotId(f.getId(), ETeamColor.BLUE);
 			motionContext.getBots().put(botId, new BotInfo(botId, pos));
@@ -109,7 +109,7 @@ public class PredictionContext
 		
 		for (IFilter f : getYellowBots().values())
 		{
-			RobotMotionResult_V2 mr = (RobotMotionResult_V2) f.getPrediction(timestamp);
+			ABotMotionResult mr = (ABotMotionResult) f.getPrediction(timestamp);
 			IVector3 pos = new Vector3(mr.x, mr.y, mr.orientation);
 			BotID botId = BotID.createBotId(f.getId(), ETeamColor.YELLOW);
 			motionContext.getBots().put(botId, new BotInfo(botId, pos));

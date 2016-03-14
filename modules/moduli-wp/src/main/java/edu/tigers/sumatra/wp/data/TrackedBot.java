@@ -122,7 +122,7 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public IVector2 getPosByTime(final double t)
 	{
-		return getPos().addNew(getVel().multiplyNew(t));
+		return getPos().addNew(getVel().multiplyNew(1000 * t));
 	}
 	
 	

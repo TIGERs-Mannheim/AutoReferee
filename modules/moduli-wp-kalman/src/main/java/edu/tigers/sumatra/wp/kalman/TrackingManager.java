@@ -22,7 +22,7 @@ import edu.tigers.sumatra.wp.kalman.data.UnregisteredBot;
 import edu.tigers.sumatra.wp.kalman.filter.ExtKalmanFilter;
 import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 import edu.tigers.sumatra.wp.kalman.motionModels.IMotionModel;
-import edu.tigers.sumatra.wp.kalman.motionModels.TigersMotionModel;
+import edu.tigers.sumatra.wp.kalman.motionModels.OmniBot_V3;
 
 
 /**
@@ -103,7 +103,8 @@ public class TrackingManager
 				// --- after that, continue with next new bots ---
 				
 				final IFilter bot = new ExtKalmanFilter();
-				final IMotionModel motionModel = new TigersMotionModel();
+				// final IMotionModel motionModel = new TigersMotionModel();
+				final IMotionModel motionModel = new OmniBot_V3();
 				bot.init(motionModel, context, newBot.getNewTimestamp(), newBot.getVisionBot());
 				contextRobots.put(newBot.getVisionBot().id + offsetId, bot);
 				log.debug("New Bot detected: " + newBot.getVisionBot().id);

@@ -10,6 +10,7 @@ package edu.tigers.sumatra.wp;
 
 import java.util.Random;
 
+import edu.tigers.sumatra.bot.DummyBot;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -123,6 +124,9 @@ public class WorldFrameFactory
 		
 		TrackedBot tBot = new TrackedBot(id);
 		tBot.setPos(pos);
+		DummyBot bot = new DummyBot(id);
+		bot.setAvail2Ai(true);
+		tBot.setBot(bot);
 		return tBot;
 	}
 }

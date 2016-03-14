@@ -13,7 +13,7 @@ import javax.swing.JMenuItem;
 
 import edu.dhbw.mannheim.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.autoref.view.AutoRefView;
-import edu.tigers.autoref.view.visualizer.VisualizerAutoRefView;
+import edu.tigers.autoref.view.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
 

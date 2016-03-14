@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.violations;
 
 import java.util.Optional;
 
+import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 
@@ -90,4 +91,10 @@ public interface IRuleViolation
 	 * @return
 	 */
 	public String buildLogString();
+	
+	
+	/**
+	 * @return
+	 */
+	public FollowUpAction getFollowUpAction();
 }

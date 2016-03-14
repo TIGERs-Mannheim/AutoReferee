@@ -15,12 +15,15 @@ import java.util.List;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
+import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
+import edu.tigers.autoreferee.engine.IAutoRefEngine;
+import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
+import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.calc.BallLeftFieldCalc;
 import edu.tigers.autoreferee.engine.calc.BotLastTouchedBallCalc;
 import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
 import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
-import edu.tigers.autoreferee.engine.rules.AutoRefEngine;
-import edu.tigers.autoreferee.engine.rules.AutoRefEngine.AutoRefMode;
+import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc;
 import edu.tigers.autoreferee.remote.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -44,6 +47,10 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	{
 		/**  */
 		RUNNING,
+		/** Right before running, but only when the engine is first started */
+		STARTED,
+		/**  */
+		PAUSED,
 		/**  */
 		STARTING,
 		/**  */
@@ -57,8 +64,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	private List<IRefereeCalc>				calculators	= new ArrayList<>();
 	private List<IAutoRefStateObserver>	refObserver	= new ArrayList<>();
 	
-	private ThreadedTCPRefboxRemote		remote;
-	private AutoRefEngine					ruleEngine;
+	private IAutoRefEngine					autoRefEngine;
 	
 	private AutoRefState						state			= AutoRefState.STOPPED;
 	private IAutoRefFrame					lastFrame;
@@ -72,6 +78,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		calculators.add(new BallLeftFieldCalc());
 		calculators.add(new BotLastTouchedBallCalc());
 		calculators.add(new GameStateHistoryCalc());
+		calculators.add(new PossibleGoalCalc());
 	}
 	
 	
@@ -93,18 +100,20 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	public void startModule() throws StartModuleException
 	{
 		// Load all classes to execute the static blocks for config registration
-		new AutoRefEngine(null, AutoRefMode.PASSIVE);
+		new ActiveAutoRefEngine(null);
 		AutoRefConfig.getBallPlacementAccuracy();
+		refObserver.clear();
 	}
 	
 	
 	@Override
 	public void stopModule()
 	{
-		if (remote != null)
+		if (autoRefEngine != null)
 		{
-			remote.close();
+			autoRefEngine.stop();
 		}
+		setState(AutoRefState.STOPPED);
 	}
 	
 	
@@ -127,6 +136,24 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	
 	/**
+	 * @return
+	 */
+	public IAutoRefEngine getEngine()
+	{
+		return autoRefEngine;
+	}
+	
+	
+	/**
+	 * @return
+	 */
+	public AutoRefState getState()
+	{
+		return state;
+	}
+	
+	
+	/**
 	 * @param mode
 	 * @throws StartModuleException
 	 */
@@ -141,6 +168,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	private void doStart(final AutoRefMode mode) throws StartModuleException
 	{
+		ThreadedTCPRefboxRemote remote = null;
 		try
 		{
 			setState(AutoRefState.STARTING);
@@ -150,21 +178,29 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 				remote = new ThreadedTCPRefboxRemote();
 				remote.start(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
 				
-				ruleEngine = new AutoRefEngine(remote, mode);
+				autoRefEngine = new ActiveAutoRefEngine(remote);
 			} else
 			{
-				ruleEngine = new AutoRefEngine(null, mode);
+				autoRefEngine = new PassiveAutoRefEngine();
 			}
-			
+			lastFrame = null;
 			
 			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
 					.getInstance().getModule(AWorldPredictor.MODULE_ID);
 			predictor.addWorldFrameConsumer(AutoRefModule.this);
 			
-			lastFrame = null;
+			setState(AutoRefState.STARTED);
 			setState(AutoRefState.RUNNING);
 		} catch (ModuleNotFoundException | IOException e)
 		{
+			if (remote != null)
+			{
+				remote.close();
+			}
+			if (autoRefEngine != null)
+			{
+				autoRefEngine.stop();
+			}
 			setState(AutoRefState.STOPPED);
 			throw new StartModuleException(e.getMessage(), e);
 		}
@@ -176,7 +212,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	 */
 	public void stop()
 	{
-		if (state == AutoRefState.RUNNING)
+		if ((state == AutoRefState.RUNNING) || (state == AutoRefState.PAUSED))
 		{
 			doStop();
 		}
@@ -197,10 +233,62 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 			log.warn("Could not find a module", err);
 		}
 		
-		if (remote != null)
+		if (autoRefEngine != null)
 		{
-			remote.close();
+			autoRefEngine.stop();
 		}
+	}
+	
+	
+	/**
+	 * 
+	 */
+	public void pause()
+	{
+		if (state != AutoRefState.RUNNING)
+		{
+			return;
+		}
+		
+		try
+		{
+			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
+					.getInstance().getModule(AWorldPredictor.MODULE_ID);
+			predictor.removeWorldFrameConsumer(this);
+		} catch (ModuleNotFoundException err)
+		{
+			log.warn("Could not find a module", err);
+		}
+		autoRefEngine.pause();
+		
+		setState(AutoRefState.PAUSED);
+	}
+	
+	
+	/**
+	 * 
+	 */
+	public void resume()
+	{
+		if (state != AutoRefState.PAUSED)
+		{
+			return;
+		}
+		
+		autoRefEngine.resume();
+		try
+		{
+			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
+					.getInstance().getModule(AWorldPredictor.MODULE_ID);
+			predictor.addWorldFrameConsumer(this);
+		} catch (ModuleNotFoundException err)
+		{
+			log.error("Could not find the predictor module -> Stopping the referee", err);
+			doStop();
+			return;
+		}
+		
+		setState(AutoRefState.RUNNING);
 	}
 	
 	
@@ -225,7 +313,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		AutoRefFrame currentFrame = createNewRefFrame(wFrameWrapper);
 		runCalculators(currentFrame);
 		
-		ruleEngine.update(currentFrame);
+		autoRefEngine.process(currentFrame);
 		
 		for (IAutoRefStateObserver o : refObserver)
 		{

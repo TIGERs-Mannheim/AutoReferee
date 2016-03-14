@@ -12,13 +12,16 @@
  */
 package edu.tigers.sumatra.wp.kalman;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import edu.tigers.sumatra.cam.data.CamRobot;
-import edu.tigers.sumatra.wp.kalman.data.OmnibotControl_V2;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.IVector;
+import edu.tigers.sumatra.wp.kalman.data.ABotMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.PredictionContext;
-import edu.tigers.sumatra.wp.kalman.data.RobotMotionResult_V2;
 import edu.tigers.sumatra.wp.kalman.data.UnregisteredBot;
 import edu.tigers.sumatra.wp.kalman.data.WPCamBot;
 import edu.tigers.sumatra.wp.kalman.filter.IFilter;
@@ -33,9 +36,11 @@ import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 public class BotProcessor
 {
 	
-	private final PredictionContext context;
-	
-	
+	private final PredictionContext		context;
+													
+	private final Map<BotID, CamRobot>	lastDetections	= new HashMap<>();
+																		
+																		
 	/**
 	 * @param context
 	 */
@@ -58,93 +63,73 @@ public class BotProcessor
 		
 		for (final CamRobot visionBotCam : camYellowBots)
 		{
-			final WPCamBot visionBot = new WPCamBot(visionBotCam);
-			final int botID = visionBot.id + WPConfig.YELLOW_ID_OFFSET;
+			final int botID = visionBotCam.getRobotID() + WPConfig.YELLOW_ID_OFFSET;
 			
+			CamRobot last = lastDetections.get(visionBotCam.getBotId());
+			if ((last != null) && (last.getCameraId() != visionBotCam.getCameraId()))
+			{
+				if ((visionBotCam.getTimestamp()) < (last.getTimestamp() + 1e8))
+				{
+					continue;
+				}
+			}
 			final IFilter existingBot = context.getYellowBots().get(botID);
-			processBot(visionBotCam, botID, existingBot, visionBotCam.getTimestamp(), context.getNewYellowBots());
+			processBot(botID, existingBot, visionBotCam, context.getNewYellowBots(), ETeamColor.YELLOW);
+			lastDetections.put(visionBotCam.getBotId(), visionBotCam);
 		}
 		
 		// --- same for blue ~~~~
 		for (final CamRobot visionBotCam : camBlueBots)
 		{
-			final WPCamBot visionBot = new WPCamBot(visionBotCam);
-			final int botID = visionBot.id + WPConfig.BLUE_ID_OFFSET;
+			final int botID = visionBotCam.getRobotID() + WPConfig.BLUE_ID_OFFSET;
 			
+			CamRobot last = lastDetections.get(visionBotCam.getBotId());
+			if ((last != null) && (last.getCameraId() != visionBotCam.getCameraId()))
+			{
+				if ((visionBotCam.getTimestamp()) < (last.getTimestamp() + 1e8))
+				{
+					continue;
+				}
+			}
 			final IFilter existingBot = context.getBlueBots().get(botID);
-			processBot(visionBotCam, botID, existingBot, visionBotCam.getTimestamp(), context.getNewBlueBots());
+			processBot(botID, existingBot, visionBotCam, context.getNewBlueBots(), ETeamColor.BLUE);
+			lastDetections.put(visionBotCam.getBotId(), visionBotCam);
 		}
 	}
 	
 	
-	private void processBot(final CamRobot visionBotCam, final int botID, final IFilter existingBot,
-			final long timestamp,
-			final Map<Integer, UnregisteredBot> contextNewBots)
+	private void processBot(final int botID, final IFilter existingBot, final CamRobot visionBotCam,
+			final Map<Integer, UnregisteredBot> contextNewBots, final ETeamColor color)
 	{
 		final WPCamBot visionBot = new WPCamBot(visionBotCam);
 		if (existingBot != null)
 		{
 			// drop doubled observation if bot is in overlap area of cameras
-			final double dt = (timestamp - existingBot.getTimestamp()) * WPConfig.FILTER_CONVERT_NS_TO_INTERNAL_TIME;
+			final double dt = (visionBotCam.getTimestamp() - existingBot.getTimestamp())
+					* WPConfig.FILTER_CONVERT_NS_TO_INTERNAL_TIME;
 			if (dt <= WPConfig.MIN_CAMFRAME_DELAY_TIME)
 			{
 				return;
 			}
 			
-			final RobotMotionResult_V2 oldState = (RobotMotionResult_V2) existingBot
+			final ABotMotionResult oldState = (ABotMotionResult) existingBot
 					.getPrediction(existingBot.getTimestamp());
-					
-			existingBot.observation(timestamp, visionBot);
-			estimateControl(oldState, existingBot, dt, timestamp);
+			BotID botId = BotID.createBotId(visionBotCam.getRobotID(), color);
+			IVector targetVel = context.getMotionContext().getBots().get(botId).getTargetVelocity();
+			
+			existingBot.observation(visionBotCam.getTimestamp(), visionBot);
+			existingBot.getMotion().estimateControl(existingBot, oldState, visionBotCam, dt, targetVel);
 			return;
 		}
 		
 		UnregisteredBot newBot = contextNewBots.get(botID);
 		if (newBot != null)
 		{
-			newBot.addBot(timestamp, visionBot);
+			newBot.addBot(visionBotCam.getTimestamp(), visionBot);
 		} else
 		{
-			newBot = new UnregisteredBot(timestamp, visionBot);
+			newBot = new UnregisteredBot(visionBotCam.getTimestamp(), visionBot);
 			contextNewBots.put(botID, newBot);
 		}
-	}
-	
-	
-	private void estimateControl(final RobotMotionResult_V2 oldState, final IFilter bot, final double dt,
-			final long timestamp)
-	{
-		final double oldX = oldState.x;
-		final double oldY = oldState.y;
-		final double oldTheta = oldState.orientation;
-		
-		final RobotMotionResult_V2 newState = (RobotMotionResult_V2) bot.getPrediction(timestamp);
-		final double newX = newState.x;
-		final double newY = newState.y;
-		final double newTheta = newState.orientation;
-		
-		final double sinOri = Math.sin(oldTheta);
-		final double cosOri = Math.cos(oldTheta);
-		
-		// Determine new v_x and v_y
-		final double dX = (newX - oldX);
-		final double dY = (newY - oldY);
-		
-		final double vT = ((cosOri * dX) + (sinOri * dY)) / dt;
-		final double vO = ((-sinOri * dX) + (cosOri * dY)) / dt;
-		
-		// Determine new omega
-		double dOmega = newTheta - oldTheta;
-		if (Math.abs(dOmega) > Math.PI)
-		{
-			dOmega = ((2 * Math.PI) - Math.abs(dOmega)) * (-1 * Math.signum(dOmega));
-		}
-		final double omega = dOmega / dt;
-		
-		// Determine new eta
-		final double eta = 0.0 / dt;
-		
-		// Set determined values (control)
-		bot.setControl(new OmnibotControl_V2(vT, vO, omega, eta));
 	}
 }

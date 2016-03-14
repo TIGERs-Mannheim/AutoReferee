@@ -1,10 +1,13 @@
 package edu.tigers.sumatra.wp.kalman.motionModels;
 
 import Jama.Matrix;
+import edu.tigers.sumatra.cam.data.CamRobot;
+import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.kalman.data.AMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.AWPCamObject;
 import edu.tigers.sumatra.wp.kalman.data.IControl;
+import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 
 
 /**
@@ -20,32 +23,6 @@ public interface IMotionModel
 	 * @return
 	 */
 	Matrix dynamics(Matrix state, Matrix control, double dt, MotionContext context);
-	
-	
-	/**
-	 * @param state
-	 * @param control
-	 * @return
-	 */
-	Matrix sample(Matrix state, Matrix control);
-	
-	
-	/**
-	 * @param stateNew
-	 * @param stateOld
-	 * @param control
-	 * @return
-	 */
-	double transitionProbability(Matrix stateNew, Matrix stateOld, Matrix control);
-	
-	
-	/**
-	 * @param state
-	 * @param measurement
-	 * @param dt
-	 * @return
-	 */
-	double measurementProbability(Matrix state, Matrix measurement, double dt);
 	
 	
 	/**
@@ -83,7 +60,7 @@ public interface IMotionModel
 	
 	/**
 	 * @param observation
-	 * @param state
+	 * @param state TODO
 	 * @return
 	 */
 	Matrix generateMeasurementMatrix(AWPCamObject observation, Matrix state);
@@ -132,7 +109,7 @@ public interface IMotionModel
 	 * @param observation
 	 * @return
 	 */
-	int extraxtObjectID(AWPCamObject observation);
+	int extractObjectID(AWPCamObject observation);
 	
 	
 	/**
@@ -200,4 +177,15 @@ public interface IMotionModel
 	default void newMeasurement(final Matrix measurement, final Matrix matrix, final double dt)
 	{
 	}
+	
+	
+	/**
+	 * @param bot
+	 * @param oldState
+	 * @param newBot
+	 * @param dt
+	 * @param targetVel
+	 */
+	void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot,
+			final double dt, final IVector targetVel);
 }

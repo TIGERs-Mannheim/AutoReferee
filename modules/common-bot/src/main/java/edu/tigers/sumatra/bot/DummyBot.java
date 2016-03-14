@@ -27,7 +27,7 @@ import edu.tigers.sumatra.math.IVector3;
 @Persistent
 public class DummyBot implements IBot
 {
-	private boolean		avail2Ai	= true;
+	private boolean		avail2Ai	= false;
 	private final BotID	botId;
 								
 								

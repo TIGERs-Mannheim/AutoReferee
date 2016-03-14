@@ -13,11 +13,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.export.CSVExporter;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.wp.ExportDataContainer;
 import edu.tigers.sumatra.wp.ExportDataContainer.FrameInfo;
 import edu.tigers.sumatra.wp.ExportDataContainer.WpBall;
@@ -25,6 +28,8 @@ import edu.tigers.sumatra.wp.ExportDataContainer.WpBot;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
+import edu.tigers.sumatra.wp.kalman.data.ABotMotionResult;
+import edu.tigers.sumatra.wp.kalman.filter.ExtKalmanFilter;
 
 
 /**
@@ -45,19 +50,6 @@ public class RunExtKalmanOnData
 	{
 		kalman = new ExtKalman(null);
 		kalman.start();
-		
-		// AWorldPredictor wp;
-		// try
-		// {
-		// wp = (AWorldPredictor) SumatraModel.getInstance().getModule(AWorldPredictor.MODULE_ID);
-		// for (IWfPostProcessor pp : wp.getPostProcessors())
-		// {
-		// kalman.addPostProcessor(pp);
-		// }
-		// } catch (ModuleNotFoundException e)
-		// {
-		// log.error("Could not find wp module", e);
-		// }
 	}
 	
 	
@@ -100,6 +92,9 @@ public class RunExtKalmanOnData
 				return;
 			}
 		}
+		
+		CSVExporter exp = new CSVExporter("/tmp/testControl", false);
+		CSVExporter exp2 = new CSVExporter("/tmp/state", false);
 		
 		List<WpBot> outBots = new ArrayList<>();
 		List<WpBall> wpBalls = new ArrayList<>();
@@ -164,9 +159,41 @@ public class RunExtKalmanOnData
 				ExtendedCamDetectionFrame eFrame = kalman.processCamDetectionFrame(cFrame);
 				SimpleWorldFrame swf = kalman.predictSimpleWorldFrame(eFrame);
 				
-				for (ITrackedBot tBot : swf.getBots().values())
+				BotID botID = BotID.createBotId(1, ETeamColor.BLUE);
+				final ExtKalmanFilter existingBot = (ExtKalmanFilter) kalman.getContext().getBlueBots()
+						.get(botID.getNumber() + WPConfig.BLUE_ID_OFFSET);
+				if ((existingBot != null) && !cFrame.getRobotsBlue().isEmpty())
 				{
-					outBots.add(ExportDataContainer.trackedBot2WpBot(tBot, frameId, swf.getTimestamp()));
+					CamRobot bot = cFrame.getRobotsBlue().get(0);
+					final ABotMotionResult s = (ABotMotionResult) existingBot
+							.getPrediction(swf.getTimestamp());
+					Matrix contr = existingBot.getContr();
+					if (contr == null)
+					{
+						contr = new Matrix(6, 1);
+					}
+					Matrix state = existingBot.getState()[0];
+					
+					exp2.addValues(
+							state.get(0, 0), state.get(1, 0), // x,y
+							AngleMath.normalizeAngle(state.get(2, 0)), // orientation,
+							AngleMath.normalizeAngle(state.get(3, 0)), // dir
+							state.get(4, 0) / 1000, // v
+							state.get(5, 0), state.get(6, 0), // omega, eta
+							contr.get(0, 0), contr.get(0, 0), contr.get(1, 0));
+							
+					ITrackedBot tBot = s.motionToTrackedBot(botID);
+					exp.addValues(cFrame.gettCapture(),
+							tBot.getPos().x(), tBot.getPos().y(), tBot.getAngle(),
+							tBot.getVel().x(), tBot.getVel().y(), tBot.getaVel(),
+							bot.getPos().x(), bot.getPos().y(), bot.getOrientation(),
+							0, 0, 0,
+							contr.get(0, 0), contr.get(0, 0), contr.get(1, 0));
+				}
+				
+				for (ITrackedBot bot : swf.getBots().values())
+				{
+					outBots.add(ExportDataContainer.trackedBot2WpBot(bot, frameId, swf.getTimestamp()));
 				}
 				wpBalls
 						.add(new WpBall(swf.getBall().getPos3(), swf.getBall().getVel3(), swf.getBall().getAcc3(), frameId,
@@ -177,7 +204,24 @@ public class RunExtKalmanOnData
 			frameId++;
 		}
 		
+		exp.close();
+		exp2.close();
+		
 		CSVExporter.exportList(folder, "wpBotsTest", outBots.stream().map(c -> c));
 		CSVExporter.exportList(folder, "wpBallTest", wpBalls.stream().map(c -> c));
+	}
+	
+	
+	/**
+	 * @param args
+	 */
+	public static void main(final String[] args)
+	{
+		RunExtKalmanOnData run = new RunExtKalmanOnData();
+		// run.runOnData("/home/geforce/git/Sumatra/modules/sumatra-main/data/vision/moduli_lab/manual/2016-03-04_19-52-29");
+		run.runOnData(
+				"/home/geforce/git/Sumatra/modules/sumatra-main/data/vision/moduli_sumatra/manual/2016-03-04_22-23-49");
+		run.runOnData(
+				"/home/geforce/git/Sumatra/modules/sumatra-main/data/vision/moduli_lab/manual/2016-03-02_19-17-46");
 	}
 }

@@ -31,9 +31,7 @@ import edu.tigers.sumatra.export.INumberListable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AVector;
-import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
-import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.math.Vector3;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.TrackedBall;
@@ -54,6 +52,7 @@ public class ExportDataContainer
 	private final List<CamBall>						balls						= new ArrayList<>();
 	private final List<CamRobot>						rawBots					= new ArrayList<>();
 	private final List<WpBot>							wpBots					= new ArrayList<>();
+	private final List<WpBot>							isBots					= new ArrayList<>();
 	private final List<SkillBot>						skillBots				= new ArrayList<>();
 	private CamBall										curBall					= new CamBall();
 	private WpBall											wpBall					= new WpBall();
@@ -111,7 +110,8 @@ public class ExportDataContainer
 					.collect(Collectors.toList());
 		} catch (IOException err)
 		{
-			throw new IllegalStateException();
+			log.error("Could not read raw balls.", err);
+			return new ArrayList<>();
 		}
 	}
 	
@@ -238,6 +238,15 @@ public class ExportDataContainer
 	public final List<SkillBot> getSkillBots()
 	{
 		return skillBots;
+	}
+	
+	
+	/**
+	 * @return the isBots
+	 */
+	public List<WpBot> getIsBots()
+	{
+		return isBots;
 	}
 	
 	
@@ -707,8 +716,8 @@ public class ExportDataContainer
 		private int				id				= -1;
 		private ETeamColor	color			= ETeamColor.UNINITIALIZED;
 		private long			timestamp	= 0;
-		private IVector2		trajVel		= Vector2.ZERO_VECTOR;
-		private IVector2		trajPos		= Vector2.ZERO_VECTOR;
+		private IVector3		trajVel		= Vector3.ZERO_VECTOR;
+		private IVector3		trajPos		= Vector3.ZERO_VECTOR;
 		private IVector3		setVel		= Vector3.ZERO_VECTOR;
 		private IVector3		setPos		= Vector3.ZERO_VECTOR;
 		private IVector3		localVel		= Vector3.ZERO_VECTOR;
@@ -772,11 +781,15 @@ public class ExportDataContainer
 			numbers.add(id);
 			numbers.addAll(color.getNumberList());
 			numbers.add(timestamp);
-			numbers.addAll(trajVel.getNumberList());
-			numbers.addAll(trajPos.getNumberList());
+			numbers.add(trajVel.x());
+			numbers.add(trajVel.y());
+			numbers.add(trajPos.x());
+			numbers.add(trajPos.y());
 			numbers.addAll(setVel.getNumberList());
 			numbers.addAll(setPos.getNumberList());
 			numbers.addAll(localVel.getNumberList());
+			numbers.add(trajVel.z());
+			numbers.add(trajPos.z());
 			return numbers;
 		}
 		
@@ -838,7 +851,7 @@ public class ExportDataContainer
 		/**
 		 * @return the trajVel
 		 */
-		public IVector2 getTrajVel()
+		public IVector3 getTrajVel()
 		{
 			return trajVel;
 		}
@@ -847,7 +860,7 @@ public class ExportDataContainer
 		/**
 		 * @param trajVel the trajVel to set
 		 */
-		public void setTrajVel(final IVector2 trajVel)
+		public void setTrajVel(final IVector3 trajVel)
 		{
 			this.trajVel = trajVel;
 		}
@@ -856,7 +869,7 @@ public class ExportDataContainer
 		/**
 		 * @return the trajPos
 		 */
-		public IVector2 getTrajPos()
+		public IVector3 getTrajPos()
 		{
 			return trajPos;
 		}
@@ -865,7 +878,7 @@ public class ExportDataContainer
 		/**
 		 * @param trajPos the trajPos to set
 		 */
-		public void setTrajPos(final IVector2 trajPos)
+		public void setTrajPos(final IVector3 trajPos)
 		{
 			this.trajPos = trajPos;
 		}

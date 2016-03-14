@@ -61,7 +61,7 @@ public class AutoRefConfig
 	private static long			maxUnplacedWaitTime				= 0;
 	
 	@Configurable(comment = "Maximum time before sending the next signal although the ball is not entirely correctly placed ins ms - A value of 0 means to wait forever")
-	private static long			maxCloselyPlacedWaitTime		= 10_000;
+	private static long			maxCloselyPlacedWaitTime		= 0;
 	
 	@Configurable(comment = "The ball is considered to be closely placed if the distance to the target position is below this threshold in mm")
 	private static double		ballCloselyPlacedAccuracy		= 500;

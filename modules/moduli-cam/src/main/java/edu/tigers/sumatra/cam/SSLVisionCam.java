@@ -9,13 +9,10 @@
 package edu.tigers.sumatra.cam;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
@@ -62,13 +59,6 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	// Translation
 	private final SSLVisionCamGeometryTranslator	geometryTranslator	= new SSLVisionCamGeometryTranslator();
 																							
-	// DEBUG, write sslvision data
-	private long											normTime;
-	private FileOutputStream							fos;
-	private ObjectOutputStream							out;
-	private final String									filename					= "data/sslvision.log";
-	private boolean										write						= false;
-	private final boolean								read						= false;
 																							
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH" }, defValueSpezis = { "10006", "40102", "10006",
 			"10006" })
@@ -124,17 +114,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			log.debug("Chose nif for vision-cam: " + nif.getDisplayName() + ".");
 		}
 		
-		if (read)
-		{
-			try
-			{
-				receiver = new FileReceiver(filename);
-			} catch (final IOException err)
-			{
-				log.error("Error opening file to playback");
-			}
-			write = false;
-		} else if (getNif() == null)
+		if (getNif() == null)
 		{
 			MulticastUDPReceiver recv = new MulticastUDPReceiver(getPort(), getAddress());
 			recv.addObserver(this);
@@ -144,19 +124,6 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			MulticastUDPReceiver recv = new MulticastUDPReceiver(getPort(), getAddress(), getNif());
 			recv.addObserver(this);
 			receiver = recv;
-		}
-		
-		normTime = System.nanoTime();
-		if (write)
-		{
-			try
-			{
-				fos = new FileOutputStream(filename);
-				out = new ObjectOutputStream(fos);
-			} catch (final IOException err)
-			{
-				log.error("Error opening streams for playback");
-			}
 		}
 		
 		cam = new Thread(this, "SSLVisionCam");
@@ -189,13 +156,6 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					break;
 				}
 				receiver.receive(packet);
-				if (write)
-				{
-					final byte[] copy = Arrays.copyOfRange(packet.getData(), packet.getOffset(), packet.getLength());
-					final SSLVisionData object = new SSLVisionData((System.nanoTime() - normTime), copy);
-					out.writeObject(object);
-					out.flush();
-				}
 				
 				// At this point we got a problem: The DatagramPacket has a total length of BUFFER_SIZE (= 10000), but the
 				// actual data is smaller.
@@ -228,6 +188,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					continue;
 				}
 				
+				
 				if (sslPacket.hasGeometry())
 				{
 					final CamGeometry geometry = geometryTranslator.translate(sslPacket.getGeometry());
@@ -236,10 +197,9 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 				}
 				
 				
-				timeSync.update(sslPacket.getDetection().getTSent());
-				
 				if (sslPacket.hasDetection())
 				{
+					timeSync.update(sslPacket.getDetection().getTSent());
 					notifyNewCameraFrame(sslPacket.getDetection(), timeSync);
 				}
 			} catch (final IOException err)
@@ -271,17 +231,6 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	public void stopModule()
 	{
 		cleanup();
-		if (write)
-		{
-			try
-			{
-				fos.close();
-				out.close();
-			} catch (final IOException err)
-			{
-				log.fatal("IOException", err);
-			}
-		}
 		ConfigRegistration.unregisterConfigurableCallback("user", this);
 	}
 	

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.calc.BotPosition;
+import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -91,5 +92,11 @@ public interface IAutoRefFrame
 	 * @return
 	 */
 	public ShapeMap getShapes();
+	
+	
+	/**
+	 * @return
+	 */
+	public Optional<PossibleGoal> getPossibleGoal();
 	
 }

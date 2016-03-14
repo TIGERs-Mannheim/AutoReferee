@@ -21,4 +21,10 @@ public interface IRefboxRemote
 	 * @param command
 	 */
 	public void sendCommand(RefCommand command);
+	
+	
+	/**
+	 * 
+	 */
+	public void close();
 }

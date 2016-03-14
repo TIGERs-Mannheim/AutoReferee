@@ -36,15 +36,15 @@ public class BallDynamicsModel
 	/** [mm/s²] */
 	private final double				acc;
 	private double						accSlide;
-											
+	
 	private static final double	A_FALL						= -9810;
 	private static final double	BALL_DAMP_KICKER_FACTOR	= 0.37;
 	private static final double	BALL_DAMP_GROUND_FACTOR	= 0.37;
-																			
+	
 	private boolean					modelStraightKick			= false;
 	private final boolean			handleCollision;
-											
-											
+	
+	
 	/**
 	 * @param acc
 	 */
@@ -98,14 +98,13 @@ public class BallDynamicsModel
 			az = A_FALL;
 		} else
 		{
-			// not flying
+			// not flying or z < 0
 			if ((Math.abs(vz) + (A_FALL * dt)) >= 0)
 			{
 				// damp on ground
 				z = 0;
 				vz = -BALL_DAMP_GROUND_FACTOR * vz;
 				az = A_FALL;
-				// TODO also damp xy vel?
 			} else
 			{
 				z = 0;
@@ -139,6 +138,11 @@ public class BallDynamicsModel
 		vx = vx + (dt * ax);
 		vy = vy + (dt * ay);
 		vz = vz + (dt * az);
+		
+		if (z < 0)
+		{
+			z = 0;
+		}
 		
 		
 		final Matrix newState = state.copy();
@@ -194,14 +198,14 @@ public class BallDynamicsModel
 			IVector3 pos = info.getPos();
 			Circle botHull = new Circle(pos.getXYVector(), Geometry.getBotRadius()
 					+ Geometry.getBallRadius());
-					
+			
 			double theta = Math.acos((info.getCenter2DribblerDist() + Geometry.getBallRadius())
 					/ (Geometry.getBotRadius() + Geometry.getBallRadius()));
 			IVector2 leftBotEdge = pos.getXYVector()
 					.addNew(new Vector2(pos.z() - theta).scaleTo(Geometry.getBotRadius() + Geometry.getBallRadius()));
 			IVector2 rightBotEdge = pos.getXYVector()
 					.addNew(new Vector2(pos.z() + theta).scaleTo(Geometry.getBotRadius() + Geometry.getBallRadius()));
-					
+			
 			IVector2 newBallPos = new Vector2(outState.get(0, 0), outState.get(1, 0));
 			IVector2 oldBallPos = new Vector2(state.get(0, 0), state.get(1, 0));
 			
@@ -210,87 +214,110 @@ public class BallDynamicsModel
 			{
 				// ball is within bot, but allow it to be in front of kicker
 				IVector2 center2Ball = collision.get().subtractNew(botHull.center());
-				double angleDiff = Math.abs(AngleMath.getShortestRotation(center2Ball.getAngle(), pos.z()));
-				
-				if (angleDiff >= theta)
+				if (!center2Ball.isZeroVector())
 				{
-					// ball is NOT in front of kicker
 					
-					boolean isCollision = false;
-					if (botHull.isPointInShape(newBallPos) || botHull.isPointInShape(oldBallPos))
+					double angleDiff = Math.abs(AngleMath.getShortestRotation(center2Ball.getAngle(), pos.z()));
+					
+					if (angleDiff >= theta)
 					{
-						isCollision = true;
-					} else
-					{
-						Rectangle rectState = new Rectangle(oldBallPos, newBallPos);
-						if (rectState.isPointInShape(collision.get()))
+						// ball is NOT in front of kicker
+						
+						boolean isCollision = false;
+						if (botHull.isPointInShape(newBallPos) || botHull.isPointInShape(oldBallPos))
 						{
 							isCollision = true;
-						}
-					}
-					
-					if (isCollision)
-					{
-						outState = handleCollisionPoint(state, newState, dt, context, collision.get(), center2Ball,
-								AVector3.ZERO_VECTOR);
-						return outState;
-					}
-				} else
-				{
-					// ball is in front of kicker
-					
-					if (botHull.isPointInShape(newBallPos))
-					{
-						// possible kick soon
-						// tLastCollision = 0;
-						outState.set(9, 0, 0);
-					}
-					
-					Triangle tri = new Triangle(botHull.center(), leftBotEdge, rightBotEdge);
-					boolean forceCollision = false;
-					if (tri.isPointInShape(newBallPos) || tri.isPointInShape(oldBallPos))
-					{
-						forceCollision = true;
-					}
-					
-					ILine frontLine = Line.newLine(leftBotEdge, rightBotEdge);
-					
-					Optional<IVector2> frontCollision = Optional.empty();
-					if (newBallPos.equals(oldBallPos) && forceCollision)
-					{
-						frontCollision = Optional.of(GeoMath.leadPointOnLine(newBallPos, frontLine));
-					} else
-					{
-						frontCollision = getLineCollision(state, outState, frontLine);
-						Rectangle rectState = new Rectangle(oldBallPos, newBallPos);
-						if (frontCollision.isPresent() &&
-								!forceCollision &&
-								!rectState.isPointInShape(frontCollision.get()))
-						{
-							frontCollision = Optional.empty();
-						}
-					}
-					
-					if (frontCollision.isPresent())
-					{
-						IVector2 normal = new Vector2(pos.z());
-						IVector3 shootVector;
-						if (modelStraightKick)
-						{
-							IVector2 shootVector2 = new Vector2(pos.z()).scaleTo(info.getKickSpeed() * 1000);
-							double shootZ = 0;
-							if (info.isChip())
-							{
-								shootZ = info.getKickSpeed() * 1000;
-							}
-							shootVector = new Vector3(shootVector2, shootZ);
 						} else
 						{
-							shootVector = AVector3.ZERO_VECTOR;
+							Rectangle rectState = new Rectangle(oldBallPos, newBallPos);
+							if (rectState.isPointInShape(collision.get()))
+							{
+								isCollision = true;
+							}
 						}
-						outState = handleCollisionPoint(state, newState, dt, context, frontCollision.get(), normal,
-								shootVector);
-						return outState;
+						
+						if (isCollision)
+						{
+							outState = handleCollisionPoint(state, newState, dt, context, collision.get(), center2Ball,
+									AVector3.ZERO_VECTOR);
+							return outState;
+						}
+					} else
+					{
+						// ball is in front of kicker
+						
+						Triangle tri = new Triangle(botHull.center(), leftBotEdge, rightBotEdge);
+						boolean forceCollision = false;
+						if (tri.isPointInShape(newBallPos) || tri.isPointInShape(oldBallPos))
+						{
+							forceCollision = true;
+						}
+						
+						ILine frontLine = Line.newLine(leftBotEdge, rightBotEdge);
+						
+						Optional<IVector2> frontCollision = Optional.empty();
+						if (newBallPos.equals(oldBallPos) && forceCollision)
+						{
+							frontCollision = Optional.of(GeoMath.leadPointOnLine(newBallPos, frontLine));
+						} else
+						{
+							frontCollision = getLineCollision(state, outState, frontLine);
+							Rectangle rectState = new Rectangle(oldBallPos, newBallPos);
+							if (frontCollision.isPresent() &&
+									!forceCollision &&
+									!rectState.isPointInShape(frontCollision.get()))
+							{
+								frontCollision = Optional.empty();
+							}
+						}
+						
+						if (botHull.isPointInShape(newBallPos))
+						{
+							// possible kick soon
+							outState.set(9, 0, 0);
+							
+							if (modelStraightKick && (info.getDribbleRpm() > 0))
+							{
+								IVector2 kickerPos = info.getPos().getXYVector()
+										.addNew(new Vector2(info.getPos().z())
+												.scaleTo(info.getCenter2DribblerDist() + Geometry.getBallRadius()));
+								outState.set(0, 0, kickerPos.x());
+								outState.set(1, 0, kickerPos.y());
+							}
+						}
+						
+						if (frontCollision.isPresent())
+						{
+							
+							IVector2 normal = new Vector2(pos.z());
+							IVector3 shootVector;
+							if (modelStraightKick)
+							{
+								IVector2 shootVector2 = new Vector2(pos.z()).scaleTo(info.getKickSpeed() * 1000);
+								double shootZ = 0;
+								if (info.isChip())
+								{
+									shootZ = info.getKickSpeed() * 1000;
+								}
+								shootVector = new Vector3(shootVector2, shootZ);
+							} else
+							{
+								shootVector = AVector3.ZERO_VECTOR;
+							}
+							
+							if (modelStraightKick && (info.getDribbleRpm() > 0))
+							{
+								outState.set(3, 0, shootVector.x());
+								outState.set(4, 0, shootVector.y());
+								outState.set(5, 0, shootVector.z());
+								outState.set(9, 0, 0);
+							} else
+							{
+								outState = handleCollisionPoint(state, newState, dt, context, frontCollision.get(), normal,
+										shootVector);
+							}
+							return outState;
+						}
 					}
 				}
 			}
@@ -427,7 +454,6 @@ public class BallDynamicsModel
 		corState.set(3, 0, outVel.x());
 		corState.set(4, 0, outVel.y());
 		corState.set(5, 0, newState.get(5, 0) + shootVector.z());
-		// tLastCollision = 0;
 		corState.set(9, 0, 0);
 		return corState;
 	}

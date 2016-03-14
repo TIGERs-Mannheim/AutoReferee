@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.violations;
 
 import java.util.Optional;
 
+import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 
@@ -23,6 +24,7 @@ public class RuleViolation implements IRuleViolation
 	private final long				timestamp;						// ns
 	private final ETeamColor		teamAtFault;
 	private final BotID				botAtFault;
+	private final FollowUpAction	followUpAction;
 	
 	private String						cachedLogString	= null;
 	
@@ -31,13 +33,16 @@ public class RuleViolation implements IRuleViolation
 	 * @param violationType
 	 * @param timestamp in ns
 	 * @param botAtFault
+	 * @param followUp
 	 */
 	public RuleViolation(final ERuleViolation violationType, final long timestamp,
-			final BotID botAtFault)
+			final BotID botAtFault, final FollowUpAction followUp)
 	{
 		this.violationType = violationType;
 		this.timestamp = timestamp;
 		this.botAtFault = botAtFault;
+		followUpAction = followUp;
+		
 		teamAtFault = botAtFault.getTeamColor();
 	}
 	
@@ -46,13 +51,16 @@ public class RuleViolation implements IRuleViolation
 	 * @param violationType
 	 * @param timestamp
 	 * @param teamAtFault
+	 * @param followUp
 	 */
-	public RuleViolation(final ERuleViolation violationType, final long timestamp, final ETeamColor teamAtFault)
+	public RuleViolation(final ERuleViolation violationType, final long timestamp, final ETeamColor teamAtFault,
+			final FollowUpAction followUp)
 	{
 		this.violationType = violationType;
 		this.timestamp = timestamp;
 		this.teamAtFault = teamAtFault;
 		botAtFault = null;
+		followUpAction = followUp;
 	}
 	
 	
@@ -132,5 +140,15 @@ public class RuleViolation implements IRuleViolation
 	public String toString()
 	{
 		return buildLogString();
+	}
+	
+	
+	/**
+	 * @return the followUpAction
+	 */
+	@Override
+	public FollowUpAction getFollowUpAction()
+	{
+		return followUpAction;
 	}
 }

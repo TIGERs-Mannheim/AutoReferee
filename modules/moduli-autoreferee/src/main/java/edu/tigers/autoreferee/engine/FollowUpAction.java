@@ -10,7 +10,7 @@ package edu.tigers.autoreferee.engine;
 
 import java.util.Optional;
 
-import edu.tigers.autoreferee.engine.rules.impl.StopStateRule;
+import edu.tigers.autoreferee.engine.states.impl.StopState;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
@@ -18,7 +18,7 @@ import edu.tigers.sumatra.math.IVector2;
 
 /**
  * Encapsulates all information required by the autoref to initiate a new game situation after the game has been
- * stopped. The {@link StopStateRule} acts upon the contents of this type.
+ * stopped. The {@link StopState} acts upon the contents of this type.
  * 
  * @author "Lukas Magel"
  */
@@ -37,7 +37,9 @@ public class FollowUpAction
 		/**  */
 		KICK_OFF,
 		/**  */
-		FORCE_START
+		FORCE_START,
+		/**  */
+		PENALTY
 	}
 	
 	private final ETeamColor	teamInFavor;

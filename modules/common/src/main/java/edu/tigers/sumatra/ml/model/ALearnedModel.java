@@ -43,19 +43,17 @@ public abstract class ALearnedModel
 		try
 		{
 			Path path = getConfigPath(identifier);
-			if (!path.toFile().exists())
+			if (path.toFile().exists())
 			{
-				log.warn("Loading default " + base + " model config, because config file does not exist: " + path);
-				path = getConfigPath("default");
-			}
-			List<String> lines = Files.readAllLines(path);
-			
-			if (lines.isEmpty())
-			{
-				log.error("Invalid config file. Expected one line, but is: " + lines.size());
-			} else
-			{
-				parameters = lines.get(0);
+				List<String> lines = Files.readAllLines(path);
+				
+				if (lines.isEmpty())
+				{
+					log.error("Invalid config file. Expected one line, but is: " + lines.size());
+				} else
+				{
+					parameters = lines.get(0);
+				}
 			}
 		} catch (IOException err)
 		{

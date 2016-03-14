@@ -48,6 +48,11 @@ public enum EGameStateNeutral
 	/**  */
 	PREPARE_PENALTY_BLUE,
 	
+	/**  */
+	PENALTY_YELLOW,
+	/**  */
+	PENALTY_BLUE,
+	
 	// /** */
 	// THROW_IN_YELLOW,
 	// /** */
@@ -106,7 +111,7 @@ public enum EGameStateNeutral
 	 * @param color
 	 * @return
 	 */
-	public static EGameStateNeutral getPenalty(final ETeamColor color)
+	public static EGameStateNeutral getPreparePenalty(final ETeamColor color)
 	{
 		switch (color)
 		{
@@ -114,6 +119,24 @@ public enum EGameStateNeutral
 				return PREPARE_PENALTY_BLUE;
 			case YELLOW:
 				return PREPARE_PENALTY_YELLOW;
+			default:
+				throw new IllegalArgumentException("Invalid color: " + color);
+		}
+	}
+	
+	
+	/**
+	 * @param color
+	 * @return
+	 */
+	public static EGameStateNeutral getPenalty(final ETeamColor color)
+	{
+		switch (color)
+		{
+			case BLUE:
+				return PENALTY_BLUE;
+			case YELLOW:
+				return PENALTY_YELLOW;
 			default:
 				throw new IllegalArgumentException("Invalid color: " + color);
 		}
@@ -222,6 +245,7 @@ public enum EGameStateNeutral
 			case DIRECT_KICK_BLUE:
 			case INDIRECT_KICK_BLUE:
 			case KICKOFF_BLUE:
+			case PENALTY_BLUE:
 			case PREPARE_KICKOFF_BLUE:
 			case PREPARE_PENALTY_BLUE:
 			case TIMEOUT_BLUE:
@@ -230,6 +254,7 @@ public enum EGameStateNeutral
 			case DIRECT_KICK_YELLOW:
 			case INDIRECT_KICK_YELLOW:
 			case KICKOFF_YELLOW:
+			case PENALTY_YELLOW:
 			case PREPARE_KICKOFF_YELLOW:
 			case PREPARE_PENALTY_YELLOW:
 			case TIMEOUT_YELLOW:

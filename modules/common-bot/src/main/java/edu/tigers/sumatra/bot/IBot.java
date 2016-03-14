@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
 import edu.tigers.sumatra.trajectory.TrajectoryWithTime;
 
@@ -177,7 +176,7 @@ public interface IBot
 	/**
 	 * @return
 	 */
-	default Optional<TrajectoryWithTime<IVector2>> getCurrentTrajectory()
+	default Optional<TrajectoryWithTime<IVector3>> getCurrentTrajectory()
 	{
 		return Optional.empty();
 	}

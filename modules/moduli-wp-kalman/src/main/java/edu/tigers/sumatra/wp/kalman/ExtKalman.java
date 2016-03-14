@@ -27,9 +27,9 @@ import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
+import edu.tigers.sumatra.wp.kalman.data.ABotMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.BallMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.PredictionContext;
-import edu.tigers.sumatra.wp.kalman.data.RobotMotionResult_V2;
 import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 
 
@@ -39,18 +39,18 @@ import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 public class ExtKalman extends AWorldPredictor
 {
 	@SuppressWarnings("unused")
-	private static final Logger	log			= Logger.getLogger(ExtKalman.class.getName());
-															
+	private static final Logger	log	= Logger.getLogger(ExtKalman.class.getName());
+													
 	private TrackingManager			trackingManager;
 	private BallProcessor			ballProcessor;
 	private BotProcessor				botProcessor;
 											
 	private PredictionContext		context;
 											
-	@Configurable
-	private static boolean			processBots	= true;
-															
-															
+	@Configurable(defValue = "true")
+	private static boolean			processBots;
+											
+											
 	static
 	{
 		ConfigRegistration.registerClass("wp", ExtKalman.class);
@@ -72,7 +72,7 @@ public class ExtKalman extends AWorldPredictor
 		final BotID botID = BotID.createBotId(filterBot.getId(), color);
 		
 		ITrackedBot trackedTigerBot;
-		final RobotMotionResult_V2 motion = (RobotMotionResult_V2) filterBot.getPrediction(timestamp);
+		final ABotMotionResult motion = (ABotMotionResult) filterBot.getPrediction(timestamp);
 		
 		trackedTigerBot = motion.motionToTrackedBot(botID);
 		bots.put(botID, trackedTigerBot);

@@ -125,7 +125,7 @@ The referee is currently capable of detecting the following rule infringements:
 - **Bot speed during STOP**: The rule monitors the maximum allowed speed for bots during the stopped state. At the moment it does not book any yellow cards but logs the violation. It is possible to change the velocity threshold in the **AutoReferee** section of the **Cfg** tab.
 - **Double Touch**: If the bot performing a freekick/kick-off touches the ball a second time after he has performed the kick the autoref will stop the game and schedule a freekick for the opponents.
 - **Dribbling**: The autoref will schedule a freekick for the opposing team if a robot stays closer than 50mm to the ball for a total distance of 1m from where it first touched the ball
-- **Bot collisions**
+- **Bot collisions**: The autoref tries to detect bots which make close contact and evaluates the velocity with which they make contact. If the velocity exceeds a certain threshold a violation is reported and a freekick awarded to the team of the bot with the lower absolute velocity.
 
 If the freekick is not to be taken from a well defined position (like a Thrown-in/Goal kick/Corner kick) the autoref will try to place the ball at the position that is the most suited. It will perform the following checks:
 - If the ball is located closer than 700m from the defense area of the attacking team -> Place it 600mm from the goal line and 100mm from the touch line

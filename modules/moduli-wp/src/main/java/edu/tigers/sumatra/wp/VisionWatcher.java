@@ -26,11 +26,13 @@ import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.export.CSVExporter;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.AVector3;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.wp.ExportDataContainer.FrameInfo;
 import edu.tigers.sumatra.wp.ExportDataContainer.WpBall;
+import edu.tigers.sumatra.wp.ExportDataContainer.WpBot;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
@@ -49,7 +51,6 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 {
 	private static final Logger					log						= Logger
 																								.getLogger(VisionWatcher.class.getName());
-	private static final long						TIMEOUT_NS				= (long) 30e9;
 	private static final String					DATA_DIR					= "data/vision/";
 	private final long								startTime				= System.nanoTime();
 	private SimpleWorldFrame						currentFrame			= null;
@@ -62,6 +63,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	private final List<IBallWatcherObserver>	observers				= new CopyOnWriteArrayList<IBallWatcherObserver>();
 	private int											numFramesBallStopped	= 0;
 	private boolean									stopAutomatically		= true;
+	private double										timeout					= 30;
 																						
 																						
 	/**
@@ -133,7 +135,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	/**
 	 * 
 	 */
-	public void stop()
+	protected void stop()
 	{
 		try
 		{
@@ -179,7 +181,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 			log.debug("requested timeout reached. Done.");
 			return true;
 		}
-		if ((System.nanoTime() - startTime) > TIMEOUT_NS)
+		if (((System.nanoTime() - startTime) / 1e9) > timeout)
 		{
 			log.debug("Ball watcher timed out");
 			return true;
@@ -255,6 +257,20 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		{
 			container.getWpBots().add(
 					ExportDataContainer.trackedBot2WpBot(tBot, currentFrame.getId(), currentFrame.getTimestamp()));
+					
+			if (tBot.getBot().getSensoryPos().isPresent())
+			{
+				WpBot isBot = ExportDataContainer.trackedBot2WpBot(tBot, currentFrame.getId(), currentFrame.getTimestamp());
+				isBot.setPos(tBot.getBot().getSensoryPos().get());
+				if (tBot.getBot().getSensoryVel().isPresent())
+				{
+					isBot.setVel(tBot.getBot().getSensoryVel().get());
+				} else
+				{
+					isBot.setVel(AVector3.ZERO_VECTOR);
+				}
+				container.getIsBots().add(isBot);
+			}
 		}
 		
 		container.getCustomNumberListable().put("nearestBot",
@@ -370,6 +386,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		CSVExporter.exportList(folder, "rawBalls", data.stream().flatMap(c -> c.getBalls().stream()));
 		CSVExporter.exportList(folder, "rawBots", data.stream().flatMap(c -> c.getRawBots().stream()));
 		CSVExporter.exportList(folder, "wpBots", data.stream().flatMap(c -> c.getWpBots().stream()));
+		CSVExporter.exportList(folder, "isBots", data.stream().flatMap(c -> c.getIsBots().stream()));
 		CSVExporter.exportList(folder, "skillBots", data.stream().flatMap(c -> c.getSkillBots().stream()));
 		for (String key : data.get(0).getCustomNumberListable().keySet())
 		{
@@ -429,5 +446,14 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	public final void setStopAutomatically(final boolean stopAutomatically)
 	{
 		this.stopAutomatically = stopAutomatically;
+	}
+	
+	
+	/**
+	 * @param timeout the timeout to set
+	 */
+	public void setTimeout(final double timeout)
+	{
+		this.timeout = timeout;
 	}
 }
