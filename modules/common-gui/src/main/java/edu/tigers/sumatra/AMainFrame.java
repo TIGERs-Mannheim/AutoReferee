@@ -83,10 +83,10 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		setSize(new Dimension(800, 600));
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		
-		URL kralleUrl = ClassLoader.getSystemResource("kralle-icon.png");
-		if (kralleUrl != null)
+		
+		ImageIcon icon = getFrameIcon();
+		if (icon != null)
 		{
-			ImageIcon icon = new ImageIcon(kralleUrl);
 			setIconImage(icon.getImage());
 		}
 		
@@ -106,6 +106,23 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	{
 		getJMenuBar().add(layoutMenu);
 		getJMenuBar().add(viewsMenu);
+	}
+	
+	
+	protected ImageIcon getFrameIcon()
+	{
+		return loadIconImage("kralle-icon.png");
+	}
+	
+	
+	protected ImageIcon loadIconImage(final String url)
+	{
+		URL iconUrl = ClassLoader.getSystemResource(url);
+		if (iconUrl != null)
+		{
+			return new ImageIcon(iconUrl);
+		}
+		return null;
 	}
 	
 	

@@ -8,6 +8,7 @@
  */
 package edu.tigers.autoref.gui.view;
 
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
@@ -61,5 +62,12 @@ public class AutoRefMainFrame extends AMainFrame
 		 */
 		super.addMenuItems();
 		
+	}
+	
+	
+	@Override
+	protected ImageIcon getFrameIcon()
+	{
+		return loadIconImage("whistle.png");
 	}
 }
