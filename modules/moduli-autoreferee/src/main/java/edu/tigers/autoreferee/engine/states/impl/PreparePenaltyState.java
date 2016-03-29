@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
@@ -148,7 +149,7 @@ public class PreparePenaltyState extends AbstractAutoRefState
 			final List<IDrawableShape> shapes)
 	{
 		List<ITrackedBot> possibleKicker = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == shooterTeam)
+				.filter(ColorFilter.get(shooterTeam))
 				.filter(bot -> penaltyKickArea.isPointInShape(bot.getPos(), -Geometry.getBotRadius()))
 				.collect(Collectors.toList());
 		
@@ -167,7 +168,7 @@ public class PreparePenaltyState extends AbstractAutoRefState
 	{
 		BotID keeperID = TeamConfig.getKeeperBotID(shooterTeam.opposite());
 		List<ITrackedBot> defender = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == shooterTeam.opposite())
+				.filter(ColorFilter.get(shooterTeam.opposite()))
 				.filter(bot -> penaltyKickArea.isPointInShape(bot.getPos(), -Geometry.getBotRadius()))
 				.filter(bot -> !bot.getBotId().equals(keeperID))
 				.collect(Collectors.toList());

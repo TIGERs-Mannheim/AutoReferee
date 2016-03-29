@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 
 import com.google.common.collect.Sets;
 
+import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -128,13 +130,11 @@ public class AttackerTouchKeeperDetector extends AViolationDetector
 		ETeamColor targetColor = target.getBotId().getTeamColor();
 		Circle circle = new Circle(target.getPos(), MIN_KEEPER_DEFENSE);
 		
-		List<ITrackedBot> attackingBots = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == targetColor.opposite())
-				.collect(Collectors.toList());
+		List<ITrackedBot> attackingBots = AutoRefUtil.filterByColor(bots, targetColor.opposite());
 		
 		return attackingBots.stream()
 				.filter(bot -> circle.isPointInShape(bot.getPos(), 0))
-				.map(bot -> bot.getBotId())
+				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());
 	}
 	

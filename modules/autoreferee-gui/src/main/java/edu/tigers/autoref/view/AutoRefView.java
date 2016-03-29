@@ -8,7 +8,7 @@
  */
 package edu.tigers.autoref.view;
 
-import edu.tigers.autoref.AutoRefPresenter;
+import edu.tigers.autoref.presenter.AutoRefPresenter;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;

@@ -58,7 +58,11 @@ public enum ESumatraViewType
 	/**  */
 	VISION_ANALYSER(39, "Vision"),
 	/**  */
-	AUTOREFEREE(40, "AutoReferee");
+	AUTOREFEREE(40, "AutoReferee"),
+	/**  */
+	AUTOREFEREE_GAME_LOG(41, "Game Log"),
+	/**  */
+	BALL_SPEED(42, "Ball Speed");
 	
 	private final int			id;
 	private final String		title;

@@ -2,37 +2,36 @@
  * *********************************************************
  * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
  * Project: TIGERS - Sumatra
- * Date: Feb 18, 2016
- * Author(s): Lukas Magel
+ * Date: Mar 26, 2016
+ * Author(s): "Lukas Magel"
  * *********************************************************
  */
 package edu.tigers.autoref.view;
 
-import edu.tigers.autoref.presenter.VisualizerRefPresenter;
+import edu.tigers.autoref.presenter.BallSpeedPresenter;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 
 
 /**
- * @author Lukas Magel
+ * @author "Lukas Magel"
  */
-public class VisualizerAutoRefView extends ASumatraView
+public class BallSpeedView extends ASumatraView
 {
-	
 	/**
+	 * 
 	 */
-	public VisualizerAutoRefView()
+	public BallSpeedView()
 	{
-		super(ESumatraViewType.VISUALIZER);
+		super(ESumatraViewType.BALL_SPEED);
 	}
 	
 	
 	@Override
 	protected ISumatraViewPresenter createPresenter()
 	{
-		return new VisualizerRefPresenter();
+		return new BallSpeedPresenter();
 	}
-	
 	
 }

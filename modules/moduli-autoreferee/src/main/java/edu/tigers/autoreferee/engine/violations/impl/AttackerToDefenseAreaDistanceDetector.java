@@ -10,10 +10,12 @@ package edu.tigers.autoreferee.engine.violations.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -35,12 +37,24 @@ import edu.tigers.sumatra.wp.data.PenaltyArea;
  * 
  * @author Lukas Magel
  */
-public class AttackerToDefenseAreaDistanceDetector extends AViolationDetector
+public class AttackerToDefenseAreaDistanceDetector extends APreparingViolationDetector
 {
-	private static final int		priority								= 1;
+	private static final int							priority								= 1;
 	
 	/** The minimum allowed distance between the bots of the attacking team and the defense area */
-	private static final double	MIN_ATTACKER_DEFENSE_DISTANCE	= 200;
+	private static final double						MIN_ATTACKER_DEFENSE_DISTANCE	= 200;
+	private static final List<EGameStateNeutral>	ALLOWED_PREVIOUS_STATES;
+	
+	private boolean										active								= false;
+	
+	static
+	{
+		List<EGameStateNeutral> states = Arrays.asList(
+				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
+				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
+				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW);
+		ALLOWED_PREVIOUS_STATES = Collections.unmodifiableList(states);
+	}
 	
 	
 	/**
@@ -48,11 +62,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AViolationDetector
 	 */
 	public AttackerToDefenseAreaDistanceDetector()
 	{
-		super(Arrays.asList(
-				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
-				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
-				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW,
-				EGameStateNeutral.RUNNING));
+		super(EGameStateNeutral.RUNNING);
 	}
 	
 	
@@ -64,25 +74,37 @@ public class AttackerToDefenseAreaDistanceDetector extends AViolationDetector
 	
 	
 	@Override
-	public Optional<IRuleViolation> update(final IAutoRefFrame frame, final List<IRuleViolation> violations)
+	protected void prepare(final IAutoRefFrame frame)
 	{
-		EGameStateNeutral lastFrameState = frame.getPreviousFrame().getGameState();
-		boolean isRunning = frame.getGameState() == EGameStateNeutral.RUNNING;
-		boolean lastFrameNotRunning = lastFrameState != EGameStateNeutral.RUNNING;
+		List<EGameStateNeutral> stateHistory = frame.getStateHistory();
 		
-		if (isRunning && lastFrameNotRunning)
+		if ((stateHistory.size() > 1) && ALLOWED_PREVIOUS_STATES.contains(stateHistory.get(1)))
 		{
-			ETeamColor attackerColor = lastFrameState.getTeamColor();
+			active = true;
+		} else
+		{
+			active = false;
+		}
+	}
+	
+	
+	@Override
+	public Optional<IRuleViolation> doUpdate(final IAutoRefFrame frame, final List<IRuleViolation> violations)
+	{
+		if (active)
+		{
+			active = false;
+			
+			EGameStateNeutral lastGameState = frame.getStateHistory().get(1);
+			ETeamColor attackerColor = lastGameState.getTeamColor();
 			PenaltyArea penArea = NGeometry.getPenaltyArea(attackerColor.opposite());
 			
 			Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
-			List<ITrackedBot> attackingBots = bots.stream()
-					.filter(bot -> bot.getBotId().getTeamColor() == attackerColor)
-					.collect(Collectors.toList());
+			List<ITrackedBot> attackingBots = AutoRefUtil.filterByColor(bots, attackerColor);
 			
 			Optional<BotID> optOffender = attackingBots.stream()
 					.filter(bot -> penArea.isPointInShape(bot.getPos(), MIN_ATTACKER_DEFENSE_DISTANCE))
-					.map(bot -> bot.getBotId())
+					.map(ToBotIDMapper.get())
 					.findFirst();
 			
 			if (optOffender.isPresent())
@@ -101,7 +123,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AViolationDetector
 	
 	
 	@Override
-	public void reset()
+	public void doReset()
 	{
 	}
 	

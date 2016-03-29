@@ -11,6 +11,7 @@ package edu.tigers.sumatra.referee;
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.IVector2;
 
 
 /**
@@ -136,5 +137,17 @@ public class RefereeMsgTeamSpec extends RefereeMsg
 	public final ETeamColor getColor()
 	{
 		return color;
+	}
+	
+	
+	@Override
+	public IVector2 getBallPlacementPos()
+	{
+		IVector2 camFramePos = super.getBallPlacementPos();
+		if (color != getLeftTeam())
+		{
+			return camFramePos.multiplyNew(-1.0d);
+		}
+		return camFramePos;
 	}
 }

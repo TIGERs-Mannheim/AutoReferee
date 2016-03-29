@@ -27,6 +27,7 @@ import edu.tigers.autoreferee.engine.states.impl.RunningState;
 import edu.tigers.autoreferee.engine.states.impl.StopState;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
+import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
 
@@ -51,6 +52,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	
 	private RefCommand										lastRefCommand						= null;
 	private long												lastCommandTimestamp				= 0;
+	
 	
 	private class RefStateContext implements IAutoRefStateContext
 	{
@@ -213,18 +215,13 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 			return;
 		}
 		
-		EGameStateNeutral curGameState = frame.getGameState();
-		EGameStateNeutral lastGameState = frame.getPreviousFrame().getGameState();
-		if (curGameState != lastGameState)
-		{
-			onGameStateChange(lastGameState, curGameState);
-		}
+		super.process(frame);
 		
 		IAutoRefState state = getActiveState(frame.getGameState());
 		RefStateContext ctx = new RefStateContext(frame.getTimestamp());
 		
 		List<IRuleViolation> violations = getViolations(frame);
-		violations.forEach(violation -> logViolation(violation));
+		logViolations(violations);
 		
 		boolean canProceed = state.canProceed();
 		if (violations.size() > 0)
@@ -244,9 +241,10 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	}
 	
 	
-	private void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
+	@Override
+	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
 	{
-		log.info("GameState changed to: " + newGameState);
+		super.onGameStateChange(oldGameState, newGameState);
 		
 		IAutoRefState oldRefState = getActiveState(oldGameState);
 		IAutoRefState newRefState = getActiveState(newGameState);
@@ -258,6 +256,19 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		notifyStateChange(false);
 		
 		if (newGameState == EGameStateNeutral.RUNNING)
+		{
+			setFollowUp(null);
+		}
+	}
+	
+	
+	@Override
+	protected void onStageChange(final Stage oldStage, final Stage newStage)
+	{
+		super.onStageChange(oldStage, newStage);
+		
+		if ((oldStage == Stage.NORMAL_FIRST_HALF) || (oldStage == Stage.NORMAL_SECOND_HALF)
+				|| (oldStage == Stage.EXTRA_FIRST_HALF) || (oldStage == Stage.EXTRA_SECOND_HALF))
 		{
 			setFollowUp(null);
 		}
@@ -280,16 +291,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	
 	private void doSendCommand(final RefCommand cmd)
 	{
-		StringBuilder builder = new StringBuilder();
-		builder.append("Sending new command: ");
-		builder.append(cmd.getCommand());
-		cmd.getKickPos().ifPresent(pos -> {
-			builder.append(" @Position: ");
-			builder.append(pos.x());
-			builder.append(" | ");
-			builder.append(pos.y());
-		});
-		log.info(builder.toString());
+		gameLog.addEntry(cmd);
 		remote.sendCommand(cmd);
 	}
 	
@@ -316,6 +318,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	{
 		followUp = action;
 		engineObserver.forEach(observer -> observer.onFollowUpChanged(followUp));
+		gameLog.addEntry(followUp);
 	}
 	
 	

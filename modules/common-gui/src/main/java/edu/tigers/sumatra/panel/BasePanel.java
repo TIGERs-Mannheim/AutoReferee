@@ -6,7 +6,7 @@
  * Author(s): Lukas Magel
  * *********************************************************
  */
-package edu.tigers.autoref.view.panel;
+package edu.tigers.sumatra.panel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,9 @@ import javax.swing.JPanel;
 
 
 /**
+ * Generic panel base class which groups commonly needed functionality like an observer mechanism as well as a method to
+ * enabled/disable the panel and all of its components
+ * 
  * @author Lukas Magel
  * @param <T>
  */
@@ -24,7 +27,7 @@ public abstract class BasePanel<T> extends JPanel
 	/**  */
 	private static final long	serialVersionUID	= 1L;
 	
-	protected List<T>				observer				= new ArrayList<>();
+	private List<T>				observer				= new ArrayList<>();
 	
 	
 	/**
@@ -45,7 +48,15 @@ public abstract class BasePanel<T> extends JPanel
 	}
 	
 	
+	protected List<T> getObserver()
+	{
+		return observer;
+	}
+	
+	
 	/**
+	 * Enable/disable the panel and all of its components
+	 * 
 	 * @param enabled
 	 */
 	public abstract void setPanelEnabled(boolean enabled);

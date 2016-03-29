@@ -6,7 +6,7 @@
  * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
  * *********************************************************
  */
-package edu.tigers.autoref;
+package edu.tigers.autoref.presenter;
 
 import org.apache.log4j.Logger;
 

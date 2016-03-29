@@ -25,6 +25,8 @@ import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
 
 import edu.tigers.autoreferee.AutoRefConfig;
+import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
@@ -94,9 +96,7 @@ public class BotStopSpeedDetector extends APreparingViolationDetector
 	{
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
 		
-		Set<BotID> botIDs = bots.values().stream()
-				.map(bot -> bot.getBotId())
-				.collect(Collectors.toSet());
+		Set<BotID> botIDs = AutoRefUtil.mapToID(bots);
 		
 		long delta = frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
 		Set<BotID> frameViolators = getViolators(bots.values());
@@ -148,7 +148,7 @@ public class BotStopSpeedDetector extends APreparingViolationDetector
 	{
 		return bots.stream()
 				.filter(bot -> bot.getVel().getLength() > AutoRefConfig.getMaxBotStopSpeed())
-				.map(bot -> bot.getBotId())
+				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());
 	}
 	

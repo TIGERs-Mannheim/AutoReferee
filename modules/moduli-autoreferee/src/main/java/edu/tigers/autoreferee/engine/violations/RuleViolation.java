@@ -121,12 +121,13 @@ public class RuleViolation implements IRuleViolation
 	protected String generateLogString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("Violation: ");
 		builder.append(getType());
 		if (botAtFault != null)
 		{
 			builder.append(" | Bot: ");
-			builder.append(botAtFault);
+			builder.append(botAtFault.getNumber());
+			builder.append(" ");
+			builder.append(botAtFault.getTeamColor());
 		} else
 		{
 			builder.append(" | Team: ");

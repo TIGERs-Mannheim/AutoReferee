@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
 
+import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
@@ -119,9 +121,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingViolationDete
 		ETeamColor attackingColor = state.getTeamColor();
 		
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
-		List<ITrackedBot> defendingBots = bots.values().stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == attackingColor.opposite())
-				.collect(Collectors.toList());
+		List<ITrackedBot> defendingBots = AutoRefUtil.filterByColor(bots, attackingColor.opposite());
 		
 		
 		Set<BotID> violators = new HashSet<>();
@@ -164,7 +164,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingViolationDete
 	{
 		return bots.stream()
 				.filter(bot -> circle.isPointInShape(bot.getPos()))
-				.map(bot -> bot.getBotId())
+				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());
 	}
 	

@@ -34,14 +34,6 @@ public interface ICircle extends I2DShape
 	
 	
 	/**
-	 * @param point
-	 * @param margin like the margin in css, the area around the shape with the thickness of this value
-	 * @return
-	 */
-	boolean isPointInShape(IVector2 point, double margin);
-	
-	
-	/**
 	 * @param externalPoint
 	 * @return
 	 */

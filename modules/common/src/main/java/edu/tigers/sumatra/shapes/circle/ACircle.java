@@ -62,13 +62,6 @@ public abstract class ACircle implements ICircle
 	 * @author Dion
 	 */
 	@Override
-	public boolean isPointInShape(final IVector2 point)
-	{
-		return isPointInShape(point, 0);
-	}
-	
-	
-	@Override
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		final Vector2 tmp = point.subtractNew(center());

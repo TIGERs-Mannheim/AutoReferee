@@ -20,6 +20,7 @@ import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.panel.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
+import edu.tigers.sumatra.panel.BasePanel;
 
 
 /**
@@ -81,7 +82,7 @@ public class StartStopPanel extends BasePanel<IStartStopPanelObserver>
 			@Override
 			public void actionPerformed(final ActionEvent e)
 			{
-				observer.forEach(obs -> obs.onStartButtonPressed());
+				getObserver().forEach(obs -> obs.onStartButtonPressed());
 			}
 		});
 		
@@ -92,17 +93,17 @@ public class StartStopPanel extends BasePanel<IStartStopPanelObserver>
 			@Override
 			public void actionPerformed(final ActionEvent e)
 			{
-				observer.forEach(obs -> obs.onStopButtonPressed());
+				getObserver().forEach(obs -> obs.onStopButtonPressed());
 			}
 		});
 		
 		pauseButton = new JButton("Pause");
 		pauseButton.setEnabled(false);
-		pauseButton.addActionListener(e -> observer.forEach(obs -> obs.onPauseButtonPressed()));
+		pauseButton.addActionListener(e -> getObserver().forEach(obs -> obs.onPauseButtonPressed()));
 		
 		resumeButton = new JButton("Resume");
 		resumeButton.setEnabled(false);
-		resumeButton.addActionListener(e -> observer.forEach(obs -> obs.onResumeButtonPressed()));
+		resumeButton.addActionListener(e -> getObserver().forEach(obs -> obs.onResumeButtonPressed()));
 		
 		
 		refModeBox = new JComboBox<>(AutoRefMode.values());

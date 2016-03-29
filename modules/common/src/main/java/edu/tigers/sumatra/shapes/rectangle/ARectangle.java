@@ -113,24 +113,11 @@ public abstract class ARectangle implements IRectangle
 	 * checks if the point is inside the rectangle
 	 * 
 	 * @param point
-	 * @return true if inside (corners included!!)
-	 * @author DanielW
-	 */
-	@Override
-	public boolean isPointInShape(final IVector2 point)
-	{
-		return isPointInShape(point, 0);
-	}
-	
-	
-	/**
-	 * checks if the point is inside the rectangle
-	 * 
-	 * @param point
 	 * @param margin
 	 * @return true if inside (corners included!!)
 	 * @author DanielW
 	 */
+	@Override
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		return (((point.x() + margin) >= topLeft().x()) && ((point.x() - margin) <= (topLeft().x() + xExtend()))

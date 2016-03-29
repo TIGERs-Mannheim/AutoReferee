@@ -22,14 +22,19 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
+import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.DrawableText;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.AVector3;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
+import edu.tigers.sumatra.math.Vector3f;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.TrackedBall;
@@ -74,12 +79,13 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 public class StopState extends AbstractAutoRefState
 {
 	@Configurable(comment = "Time to wait before performing an action after reaching the stop state in [ms]")
-	private static long	STOP_WAIT_TIME_MS		= 2_000; // ms
-																		
+	private static long	STOP_WAIT_TIME_MS					= 2_000; // ms
+																					
 	@Configurable(comment = "The time to wait after all bots have come to a stop and the ball has been placed correctly")
-	private static long	READY_WAIT_TIME_MS	= 3_000;
+	private static long	READY_WAIT_TIME_MS				= 3_000;
 	
 	private Long			readyTime;
+	private boolean		simulationPlacementAttempted	= false;
 	
 	
 	static
@@ -100,6 +106,7 @@ public class StopState extends AbstractAutoRefState
 	protected void prepare(final IAutoRefFrame frame)
 	{
 		readyTime = null;
+		simulationPlacementAttempted = false;
 	}
 	
 	
@@ -163,13 +170,18 @@ public class StopState extends AbstractAutoRefState
 			readyTime = null;
 		}
 		
-		if (ballStationary && !ballPlaced && !placementWasAttempted(frame)
-				&& (AutoRefConfig.getBallPlacementTeams().size() > 0)
-				&& ball.isOnCam())
+		if (ballStationary && !ballPlaced)
 		{
-			// Try to place the ball
-			ctx.sendCommand(getPlacementCommand(kickPos));
-			return;
+			if (!placementWasAttempted(frame) && (AutoRefConfig.getBallPlacementTeams().size() > 0) && ball.isOnCam())
+			{
+				// Try to place the ball
+				ctx.sendCommand(getPlacementCommand(kickPos));
+				return;
+			} else if (!simulationPlacementAttempted)
+			{
+				tryPlaceBallInSimulation(kickPos);
+				simulationPlacementAttempted = true;
+			}
 		}
 		
 		if (readyWaitTimeOver || ctx.doProceed())
@@ -257,5 +269,17 @@ public class StopState extends AbstractAutoRefState
 	private boolean placementWasAttempted(final IAutoRefFrame frame)
 	{
 		return determineAttemptedPlacements(frame).size() >= 1;
+	}
+	
+	
+	private void tryPlaceBallInSimulation(final IVector2 pos)
+	{
+		try
+		{
+			ACam cam = (ACam) SumatraModel.getInstance().getModule(ACam.MODULE_ID);
+			cam.replaceBall(new Vector3f(pos, 0), AVector3.ZERO_VECTOR);
+		} catch (ModuleNotFoundException e)
+		{
+		}
 	}
 }

@@ -139,13 +139,6 @@ public class PenaltyArea implements I2DShape
 	}
 	
 	
-	@Override
-	public boolean isPointInShape(final IVector2 point)
-	{
-		return isPointInShape(point, 0);
-	}
-	
-	
 	/**
 	 * Checks if point in penalty with margin
 	 * 
@@ -153,6 +146,7 @@ public class PenaltyArea implements I2DShape
 	 * @param margin
 	 * @return
 	 */
+	@Override
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		final double correctedMargin = margin + DBL_EPSILON;

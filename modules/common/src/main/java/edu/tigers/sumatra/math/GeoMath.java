@@ -682,7 +682,7 @@ public final class GeoMath
 	 * 
 	 * @param current point on circle
 	 * @param center of circle
-	 * @param angle of rotation
+	 * @param angle of rotation in radians
 	 * @return projected point
 	 * @author DanielW
 	 */

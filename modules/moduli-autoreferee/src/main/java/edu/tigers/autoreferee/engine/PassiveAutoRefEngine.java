@@ -8,10 +8,7 @@
  */
 package edu.tigers.autoreferee.engine;
 
-import java.util.List;
-
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 
 
 /**
@@ -40,7 +37,6 @@ public class PassiveAutoRefEngine extends AbstractAutoRefEngine
 		{
 			return;
 		}
-		List<IRuleViolation> violations = getViolations(frame);
-		violations.forEach(violation -> logViolation(violation));
+		logViolations(getViolations(frame));
 	}
 }

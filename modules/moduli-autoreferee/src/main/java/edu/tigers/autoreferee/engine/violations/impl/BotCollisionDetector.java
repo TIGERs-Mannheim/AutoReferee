@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -80,8 +80,8 @@ public class BotCollisionDetector extends AViolationDetector
 	public Optional<IRuleViolation> update(final IAutoRefFrame frame, final List<IRuleViolation> violations)
 	{
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
-		List<ITrackedBot> yellowBots = filterByColor(bots, ETeamColor.YELLOW);
-		List<ITrackedBot> blueBots = filterByColor(bots, ETeamColor.BLUE);
+		List<ITrackedBot> yellowBots = AutoRefUtil.filterByColor(bots, ETeamColor.YELLOW);
+		List<ITrackedBot> blueBots = AutoRefUtil.filterByColor(bots, ETeamColor.BLUE);
 		
 		long curTS = frame.getTimestamp();
 		for (ITrackedBot blueBot : blueBots)
@@ -184,12 +184,6 @@ public class BotCollisionDetector extends AViolationDetector
 		double a = va.getLength();
 		double b = vb.getLength();
 		return (Math.sin(angle / 2) * (a + b)) + (Math.cos(angle / 2) * Math.abs(a - b));
-	}
-	
-	
-	private List<ITrackedBot> filterByColor(final Collection<ITrackedBot> bots, final ETeamColor color)
-	{
-		return bots.stream().filter(bot -> bot.getBotId().getTeamColor() == color).collect(Collectors.toList());
 	}
 	
 	

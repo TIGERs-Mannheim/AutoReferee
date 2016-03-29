@@ -195,6 +195,14 @@ public class Ellipse implements IEllipse
 	
 	
 	@Override
+	public boolean isPointInShape(final IVector2 point, final double margin)
+	{
+		Ellipse marginEllipse = new Ellipse(getCenter(), getRadiusX() + margin, getRadiusY() + margin, getTurnAngle());
+		return marginEllipse.isPointInShape(point);
+	}
+	
+	
+	@Override
 	public boolean isLineIntersectingShape(final ILine line)
 	{
 		return !lineIntersections(line).isEmpty();

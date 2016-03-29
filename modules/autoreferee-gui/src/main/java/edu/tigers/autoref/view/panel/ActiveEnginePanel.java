@@ -16,6 +16,7 @@ import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.panel.ActiveEnginePanel.IActiveEnginePanelObserver;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.math.IVector2;
+import edu.tigers.sumatra.panel.BasePanel;
 
 
 /**
@@ -63,10 +64,10 @@ public class ActiveEnginePanel extends BasePanel<IActiveEnginePanelObserver>
 		positionLabel = new JLabel("");
 		
 		proceedButton = new JButton("Proceed");
-		proceedButton.addActionListener(e -> observer.forEach(obs -> obs.onProceedButtonPressed()));
+		proceedButton.addActionListener(e -> getObserver().forEach(obs -> obs.onProceedButtonPressed()));
 		
 		resetButton = new JButton("Reset");
-		resetButton.addActionListener(e -> observer.forEach(obs -> obs.onResetButtonPressed()));
+		resetButton.addActionListener(e -> getObserver().forEach(obs -> obs.onResetButtonPressed()));
 		
 		add(followUpLabel, "span, wrap");
 		add(teamInFavorLabel, "span, wrap");

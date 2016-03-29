@@ -11,12 +11,14 @@ package edu.tigers.autoreferee.engine;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
 import edu.tigers.autoreferee.engine.violations.RuleViolationEngine;
+import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.referee.RefereeMsg;
+import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
 
 /**
@@ -24,10 +26,11 @@ import edu.tigers.autoreferee.engine.violations.RuleViolationEngine;
  */
 public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
-	private static final Logger	log					= Logger.getLogger(AbstractAutoRefEngine.class);
-	
 	private RuleViolationEngine	violationEngine	= null;
 	protected EEngineState			engineState			= null;
+	protected GameLog					gameLog				= new GameLog();
+	
+	private boolean					firstFrame			= true;
 	
 	protected enum EEngineState
 	{
@@ -68,28 +71,67 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	}
 	
 	
-	protected void logViolation(final IRuleViolation violation)
+	@Override
+	public synchronized void process(final IAutoRefFrame frame)
 	{
-		log.warn(violation.buildLogString());
-		if (violation.getFollowUpAction() != null)
+		if (firstFrame == true)
 		{
-			logFollowUp(violation.getFollowUpAction());
+			firstFrame = false;
+			onFirstFrame(frame);
+		}
+		gameLog.setCurrentTimestamp(frame.getTimestamp());
+		
+		EGameStateNeutral curGameState = frame.getGameState();
+		EGameStateNeutral lastGameState = frame.getPreviousFrame().getGameState();
+		if (curGameState != lastGameState)
+		{
+			onGameStateChange(lastGameState, curGameState);
+		}
+		
+		Stage curStage = frame.getRefereeMsg().getStage();
+		Stage previousStage = frame.getPreviousFrame().getRefereeMsg().getStage();
+		if (curStage != previousStage)
+		{
+			onStageChange(previousStage, curStage);
+		}
+		
+		RefereeMsg curRefMsg = frame.getRefereeMsg();
+		RefereeMsg lastRefMsg = frame.getPreviousFrame().getRefereeMsg();
+		if (curRefMsg.getCommandCounter() != lastRefMsg.getCommandCounter())
+		{
+			gameLog.addEntry(curRefMsg);
 		}
 	}
 	
 	
-	protected void logFollowUp(final FollowUpAction action)
+	protected void onFirstFrame(final IAutoRefFrame frame)
 	{
-		StringBuilder builder = new StringBuilder();
-		builder.append("Follow-up action: ");
-		builder.append(action.getActionType());
-		builder.append(" | Team in favor: ");
-		builder.append(action.getTeamInFavor());
-		action.getNewBallPosition().ifPresent(ballPos -> {
-			builder.append(" At position: ");
-			builder.append(ballPos.x() + " | " + ballPos.y());
-		});
-		log.info(builder.toString());
+		gameLog.initialize(frame.getTimestamp());
+	}
+	
+	
+	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
+	{
+		gameLog.addEntry(newGameState);
+	}
+	
+	
+	protected void onStageChange(final Stage oldStage, final Stage newStage)
+	{
+		
+	}
+	
+	
+	protected void logViolations(final List<IRuleViolation> violations)
+	{
+		violations.forEach(violation -> gameLog.addEntry(violation));
+	}
+	
+	
+	@Override
+	public GameLog getGameLog()
+	{
+		return gameLog;
 	}
 	
 	

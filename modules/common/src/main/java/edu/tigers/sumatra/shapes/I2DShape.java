@@ -37,7 +37,18 @@ public interface I2DShape
 	 * @param point
 	 * @return
 	 */
-	boolean isPointInShape(IVector2 point);
+	default boolean isPointInShape(final IVector2 point)
+	{
+		return isPointInShape(point, 0.0d);
+	}
+	
+	
+	/**
+	 * @param point
+	 * @param margin like the margin in css, the area around the shape with the thickness of this value
+	 * @return
+	 */
+	boolean isPointInShape(IVector2 point, double margin);
 	
 	
 	/**

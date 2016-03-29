@@ -14,6 +14,8 @@ import javax.swing.JMenuItem;
 
 import edu.dhbw.mannheim.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.autoref.view.AutoRefView;
+import edu.tigers.autoref.view.BallSpeedView;
+import edu.tigers.autoref.view.GameLogView;
 import edu.tigers.autoref.view.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
@@ -39,6 +41,8 @@ public class AutoRefMainFrame extends AMainFrame
 		addView(new VisualizerAutoRefView());
 		addView(new ConfigEditorView());
 		addView(new AutoRefView());
+		addView(new GameLogView());
+		addView(new BallSpeedView());
 		
 		updateViewMenu();
 		fillMenuBar();

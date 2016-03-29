@@ -11,6 +11,7 @@ package edu.tigers.autoreferee.engine;
 import java.util.Set;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
 
 
@@ -59,6 +60,12 @@ public interface IAutoRefEngine
 	 * @return
 	 */
 	public AutoRefMode getMode();
+	
+	
+	/**
+	 * @return
+	 */
+	public GameLog getGameLog();
 	
 	
 	/**

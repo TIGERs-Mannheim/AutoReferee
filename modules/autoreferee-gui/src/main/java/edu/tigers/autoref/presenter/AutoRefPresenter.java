@@ -6,7 +6,7 @@
  * Author(s): Lukas Magel
  * *********************************************************
  */
-package edu.tigers.autoref;
+package edu.tigers.autoref.presenter;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -14,19 +14,20 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.swing.BoxLayout;
+
 import net.miginfocom.swing.MigLayout;
 
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoref.view.panel.ActiveEnginePanel;
 import edu.tigers.autoref.view.panel.ActiveEnginePanel.IActiveEnginePanelObserver;
-import edu.tigers.autoref.view.panel.AutoRefPanel;
 import edu.tigers.autoref.view.panel.StartStopPanel;
 import edu.tigers.autoref.view.panel.StartStopPanel.IStartStopPanelObserver;
-import edu.tigers.autoref.view.panel.ViolationsPanel;
-import edu.tigers.autoref.view.panel.ViolationsPanel.IViolationsPanelObserver;
+import edu.tigers.autoref.view.panel.SumatraViewPanel;
 import edu.tigers.autoreferee.AutoRefModule;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
+import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.IAutoRefStateObserver;
 import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
@@ -36,11 +37,11 @@ import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
 import edu.tigers.moduli.IModuliStateObserver;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
-import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.panel.EnumCheckBoxPanel;
+import edu.tigers.sumatra.panel.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 
@@ -50,12 +51,12 @@ import edu.tigers.sumatra.views.ISumatraViewPresenter;
  */
 public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObserver
 {
-	private static Logger		log					= Logger.getLogger(AutoRefPresenter.class);
+	private static Logger										log					= Logger.getLogger(AutoRefPresenter.class);
 	
-	private AutoRefPanel			mainPanel			= new AutoRefPanel();
-	private StartStopPanel		startStopPanel		= new StartStopPanel();
-	private ViolationsPanel		violationsPanel	= new ViolationsPanel();
-	private ActiveEnginePanel	activeEnginePanel	= new ActiveEnginePanel();
+	private SumatraViewPanel									mainPanel			= new SumatraViewPanel();
+	private StartStopPanel										startStopPanel		= new StartStopPanel();
+	private EnumCheckBoxPanel<EViolationDetectorType>	violationsPanel;
+	private ActiveEnginePanel									activeEnginePanel	= new ActiveEnginePanel();
 	
 	private class AutoRefStateObserver implements IAutoRefStateObserver
 	{
@@ -71,7 +72,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 					EventQueue.invokeLater(() -> activeEnginePanel.setPanelEnabled(false));
 					break;
 				case STARTED:
-					Optional<AutoRefModule> optModule = getAutoRefModule();
+					Optional<AutoRefModule> optModule = AutoRefUtil.getAutoRefModule();
 					if (optModule.isPresent())
 					{
 						AutoRefModule module = optModule.get();
@@ -96,13 +97,13 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		}
 	}
 	
-	private class ViolationsPanelObserver implements IViolationsPanelObserver
+	private class ViolationsPanelObserver implements IEnumPanelObserver<EViolationDetectorType>
 	{
 		@Override
-		public void onButtonTicked(final EViolationDetectorType type, final boolean value)
+		public void onValueTicked(final EViolationDetectorType type, final boolean value)
 		{
 			Set<EViolationDetectorType> types = violationsPanel.getValues();
-			Optional<AutoRefModule> autoref = getAutoRefModule();
+			Optional<AutoRefModule> autoref = AutoRefUtil.getAutoRefModule();
 			if (autoref.isPresent() && (autoref.get().getState() == AutoRefState.RUNNING))
 			{
 				autoref.get().getEngine().setActiveViolations(types);
@@ -129,7 +130,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		{
 			try
 			{
-				Optional<AutoRefModule> optAutoref = getAutoRefModule();
+				Optional<AutoRefModule> optAutoref = AutoRefUtil.getAutoRefModule();
 				if (optAutoref.isPresent())
 				{
 					optAutoref.get().start(mode);
@@ -154,25 +155,21 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		@Override
 		public void onStopButtonPressed()
 		{
-			Optional<AutoRefModule> optRef = getAutoRefModule();
-			optRef.ifPresent(autoref -> autoref.stop());
+			AutoRefUtil.ifAutoRefModulePresent(autoref -> autoref.stop());
 		}
 		
 		
 		@Override
 		public void onPauseButtonPressed()
 		{
-			Optional<AutoRefModule> optModule = getAutoRefModule();
-			optModule.ifPresent(module -> module.pause());
-			
+			AutoRefUtil.ifAutoRefModulePresent(module -> module.pause());
 		}
 		
 		
 		@Override
 		public void onResumeButtonPressed()
 		{
-			Optional<AutoRefModule> optModule = getAutoRefModule();
-			optModule.ifPresent(module -> module.resume());
+			AutoRefUtil.ifAutoRefModulePresent(module -> module.resume());
 		}
 	}
 	
@@ -203,15 +200,14 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		@Override
 		public void onResetButtonPressed()
 		{
-			Optional<AutoRefModule> optModule = getAutoRefModule();
-			optModule.ifPresent(module -> module.getEngine().reset());
+			AutoRefUtil.ifAutoRefModulePresent(module -> module.getEngine().reset());
 		}
 		
 		
 		@Override
 		public void onProceedButtonPressed()
 		{
-			Optional<AutoRefModule> optModule = getAutoRefModule();
+			Optional<AutoRefModule> optModule = AutoRefUtil.getAutoRefModule();
 			if (optModule.isPresent())
 			{
 				AutoRefModule module = optModule.get();
@@ -233,6 +229,8 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 	 */
 	public AutoRefPresenter()
 	{
+		violationsPanel = new EnumCheckBoxPanel<>(EViolationDetectorType.class, "Violations", BoxLayout.PAGE_AXIS);
+		
 		startStopPanel.addObserver(new StartStopPanelObserver());
 		violationsPanel.addObserver(new ViolationsPanelObserver());
 		
@@ -268,7 +266,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		switch (state)
 		{
 			case ACTIVE:
-				Optional<AutoRefModule> optModule = getAutoRefModule();
+				Optional<AutoRefModule> optModule = AutoRefUtil.getAutoRefModule();
 				optModule.ifPresent(autoref -> autoref.addObserver(new AutoRefStateObserver()));
 				setPanelsEnabledLater(true);
 				break;
@@ -296,17 +294,4 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		}
 	}
 	
-	
-	private Optional<AutoRefModule> getAutoRefModule()
-	{
-		try
-		{
-			AutoRefModule autoref = (AutoRefModule) SumatraModel.getInstance().getModule(AutoRefModule.MODULE_ID);
-			return Optional.of(autoref);
-		} catch (ModuleNotFoundException e)
-		{
-			log.error(e);
-		}
-		return Optional.empty();
-	}
 }

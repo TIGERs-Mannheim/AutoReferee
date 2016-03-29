@@ -8,6 +8,7 @@
  */
 package edu.tigers.sumatra.views;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JMenu;
@@ -27,7 +28,10 @@ public interface ISumatraView
 	 * 
 	 * @return Optional JMenus or null if not used.
 	 */
-	List<JMenu> getCustomMenus();
+	default List<JMenu> getCustomMenus()
+	{
+		return Collections.emptyList();
+	}
 	
 	
 	/**
@@ -35,23 +39,35 @@ public interface ISumatraView
 	 * You may use this function together with onHidden for
 	 * e.g. controlling a rendering loop.
 	 */
-	void onShown();
+	default void onShown()
+	{
+		
+	}
 	
 	
 	/**
 	 * Called if the view is hidden.
 	 */
-	void onHidden();
+	default void onHidden()
+	{
+		
+	}
 	
 	
 	/**
 	 * Called if the view got focused.
 	 */
-	void onFocused();
+	default void onFocused()
+	{
+		
+	}
 	
 	
 	/**
 	 * Called if the view lost the focus.
 	 */
-	void onFocusLost();
+	default void onFocusLost()
+	{
+		
+	}
 }

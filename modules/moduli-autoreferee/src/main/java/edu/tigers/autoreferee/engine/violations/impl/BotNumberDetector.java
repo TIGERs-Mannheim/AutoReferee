@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
+import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
@@ -64,10 +66,12 @@ public class BotNumberDetector extends AViolationDetector
 	{
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		RefereeMsg refMsg = frame.getRefereeMsg();
+		long ts = frame.getTimestamp();
 		
-		int blueDiff = getTeamOnFieldBotCount(bots, ETeamColor.BLUE) - getAllowedTeamBotCount(refMsg, ETeamColor.BLUE);
+		int blueDiff = getTeamOnFieldBotCount(bots, ETeamColor.BLUE)
+				- getAllowedTeamBotCount(refMsg, ETeamColor.BLUE, ts);
 		int yellowDiff = getTeamOnFieldBotCount(bots, ETeamColor.YELLOW)
-				- getAllowedTeamBotCount(refMsg, ETeamColor.YELLOW);
+				- getAllowedTeamBotCount(refMsg, ETeamColor.YELLOW, ts);
 		
 		RuleViolation violation = null;
 		if ((blueDiff > blueLastDiff) && (blueDiff > 0))
@@ -83,15 +87,16 @@ public class BotNumberDetector extends AViolationDetector
 	}
 	
 	
-	private int getAllowedTeamBotCount(final RefereeMsg msg, final ETeamColor color)
+	private int getAllowedTeamBotCount(final RefereeMsg msg, final ETeamColor color, final long curTime_ns)
 	{
-		long curTime = System.currentTimeMillis() * 1_000; // us
-		long msgTime = msg.getPacketTimestamp();
 		TeamInfo teamInfo = color == ETeamColor.BLUE ? msg.getTeamInfoBlue() : msg.getTeamInfoYellow();
+		long msgTime_ns = msg.getFrameTimestamp();
+		long passedTime_us = TimeUnit.NANOSECONDS.toMicros(curTime_ns - msgTime_ns);
 		
 		int yellowCards = (int) teamInfo.getYellowCardsTimes().stream()
-				.map(cardTime -> cardTime - (curTime - msgTime))
-				.filter(cardTime -> cardTime > 0).count();
+				.map(cardTime_us -> cardTime_us - passedTime_us)
+				.filter(cardTime_us -> cardTime_us > 0)
+				.count();
 		
 		return maxTeamBotCount - yellowCards;
 	}
@@ -100,7 +105,7 @@ public class BotNumberDetector extends AViolationDetector
 	private int getTeamOnFieldBotCount(final Collection<ITrackedBot> bots, final ETeamColor color)
 	{
 		return (int) bots.stream()
-				.filter(bot -> bot.getBotId().getTeamColor() == color)
+				.filter(ColorFilter.get(color))
 				.filter(bot -> NGeometry.getField().isPointInShape(bot.getPos()))
 				.count();
 	}
