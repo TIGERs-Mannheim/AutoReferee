@@ -175,7 +175,7 @@ public class StopState extends AbstractAutoRefState
 			if (!placementWasAttempted(frame) && (AutoRefConfig.getBallPlacementTeams().size() > 0) && ball.isOnCam())
 			{
 				// Try to place the ball
-				ctx.sendCommand(getPlacementCommand(kickPos));
+				ctx.sendCommand(getPlacementCommand(kickPos, action.getTeamInFavor()));
 				return;
 			} else if (!simulationPlacementAttempted)
 			{
@@ -205,19 +205,40 @@ public class StopState extends AbstractAutoRefState
 	/**
 	 * @return
 	 */
-	private RefCommand getPlacementCommand(final IVector2 kickPos)
+	private RefCommand getPlacementCommand(final IVector2 kickPos, final ETeamColor kickExecutingTeam)
 	{
-		List<ETeamColor> teams = AutoRefConfig.getBallPlacementTeams();
-		if (teams.size() == 0)
+		List<ETeamColor> capableTeams = AutoRefConfig.getBallPlacementTeams();
+		if (capableTeams.size() == 0)
 		{
 			return null;
 		}
 		
-		ETeamColor placingTeam = teams.get(0);
+		/*
+		 * At this point we know that the size of the list of capable teams is greater than zero. We pick the first entry
+		 * in the list by default and perform further checks if the size is greater than 1 which means both teams are
+		 * capable of placing the ball.
+		 */
+		ETeamColor placingTeam = capableTeams.get(0);
+		
 		ETeamColor preference = AutoRefConfig.getBallPlacementPreference();
-		if ((teams.size() > 1) && (preference != ETeamColor.NEUTRAL) && (preference != ETeamColor.UNINITIALIZED))
+		if ((capableTeams.size() > 1))
 		{
-			placingTeam = preference;
+			/*
+			 * At this point both teams are capable of placing the ball which means that we need to pick one of them. The
+			 * preference setting takes precedence but is only considered if it is initialized. If it is not initialized we
+			 * try to let the team which will later on execute the kick place the ball. If this fails too, we simply fall
+			 * back to the first team in the list which has already been set before.
+			 */
+			if (preference.isNonNeutral())
+			{
+				placingTeam = preference;
+			} else
+			{
+				if (kickExecutingTeam.isNonNeutral())
+				{
+					placingTeam = kickExecutingTeam;
+				}
+			}
 		}
 		
 		Command cmd = placingTeam == ETeamColor.BLUE ? Command.BALL_PLACEMENT_BLUE : Command.BALL_PLACEMENT_YELLOW;

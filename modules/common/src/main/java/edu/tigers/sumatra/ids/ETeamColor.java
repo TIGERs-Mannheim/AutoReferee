@@ -110,6 +110,29 @@ public enum ETeamColor implements INumberListable
 	}
 	
 	
+	/**
+	 * Returns true if {@code color} is set to either {@code BLUE} or {@code YELLOW}
+	 * 
+	 * @param color
+	 * @return true if the parameter is set to a color
+	 */
+	public static boolean isNonNeutral(final ETeamColor color)
+	{
+		return (color != NEUTRAL) && (color != UNINITIALIZED);
+	}
+	
+	
+	/**
+	 * Returns true if {@code color} is set to either {@code BLUE} or {@code YELLOW}
+	 * 
+	 * @return true if the parameter is set to a color
+	 */
+	public boolean isNonNeutral()
+	{
+		return isNonNeutral(this);
+	}
+	
+	
 	@Override
 	public List<Number> getNumberList()
 	{

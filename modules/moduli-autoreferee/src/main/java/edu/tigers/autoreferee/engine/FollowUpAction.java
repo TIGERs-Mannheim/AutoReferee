@@ -55,7 +55,13 @@ public class FollowUpAction
 	public FollowUpAction(final EActionType actionType, final ETeamColor teamInFavor,
 			final IVector2 newBallPos)
 	{
-		this.teamInFavor = teamInFavor;
+		if (teamInFavor != null)
+		{
+			this.teamInFavor = teamInFavor;
+		} else
+		{
+			this.teamInFavor = ETeamColor.NEUTRAL;
+		}
 		this.actionType = actionType;
 		this.newBallPos = newBallPos;
 	}

@@ -167,6 +167,24 @@ public class FixedTimeRangeChartPanel extends JPanel
 	
 	
 	/**
+	 * Calculates the data point buffer size of the chart to accomodate enough points to fill 90 percent of its width if
+	 * new data points arrive with a time delta (T) of {@code updatePeriod} nanoseconds.
+	 * 
+	 * @param updatePeriod in nanoseconds
+	 */
+	public void setPointBufferSizeWithPeriod(final long updatePeriod)
+	{
+		if (updatePeriod <= 0)
+		{
+			return;
+		}
+		
+		int requiredSize = (int) (((timeRange * 90) / 100) / updatePeriod);
+		setPointBufferSize(requiredSize);
+	}
+	
+	
+	/**
 	 * Remove all currently displayed data points
 	 */
 	public void clear()

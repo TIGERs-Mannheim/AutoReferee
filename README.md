@@ -78,6 +78,17 @@ The following guides provide detailed instructions on how to install and run the
 
 # Usage
 
+## GUI
+
+### AutoReferee view
+The **Violations** group can be used to activate/deactivate individual rule violations even after the autoreferee has been started. The **Engine** group provides multiple controls to alter the behavior of the active autoreferee. The labels in the top part of the group display the next action that the autoref will execute after the game has come to a stop. The **Reset** button can be used to reset the internal state and delete the stored action. The **Proceed** button will instruct the autoref to initiate the next action even if it is still waiting for a condition to become true like a ball to be placed or a bot to come to a stop. 
+
+### Game Log View
+The **Game Log** view displays all events that occurred and have an impact on the behavior of the autoreferee. The checkboxes below the table can be used to toggle different event types on or off.
+
+### Ball Speed View
+The ball speed view displays the velocity of the ball on the field. The slider component on the right can be used to alter the time window of the chart. If the **Pause when not RUNNING** checkbox is ticked the chart will automatically pause if the game is not in the RUNNING gamestate. This pause can be overridden by using the Pause/Resume buttons. Please note that the chart will not automatically resume after it has been manually paused by the user if the gamestate transitions back to RUNNING.
+
 ## Configuration
 All configuration options are available via the **Cfg** tab. The **Cfg** tab itself contains multiple tabs to modify parameters of different parts of the application. Before you can modify any parameter you need to hit the **Load** button. You can then make the necessary modifications and **Apply** them and/or **Save** them to disk.
 
@@ -88,19 +99,18 @@ The application will try to receive vision frames from **224.5.23.2:10006** by d
 The behavior of the AutoReferee can be altered through the **autoreferee** config section. All import configuration parameters are grouped under the `edu.tigers.autoreferee->AutoRefConfig` section. Before you hit the **Start** button make sure that the refbox hostname and port are configured correctly. They point to **localhost:10007** by default.
 
 ## AutoReferee
-The autoref software has been designed to work as an extension of the refbox. It will automatically try to keep the game alive once you initiate an action(kickoff/direct/indirect). Rule infringements are currently logged directly to the LogView in the bottom right corner of the main window.
+The autoref software has been designed to work as an extension of the refbox. It will automatically try to keep the game alive once you initiate an action(kickoff/direct/indirect). Rule infringements are currently logged directly to the game log in the bottom right corner of the main window.
 
 
 # Mode of operation
-The autoref software has been designed to work as an extension of the refbox. It stores as few state about the game as possible. It employs a state machine that is driven by the received referee messages to determine the state of the current game. Depending on the state of the game different rules are evaluated with each vision frame. As a result of the evaluation each rule can specify a new command to be sent to the refbox or a rule violation that occurred on the field or set a new follow-up action. A follow-up action determines what action is to be taken after the game has returned to the Stopped state. Possible actions are: Kick-Off, Direct/Indirect Freekick. The follow-up action represents the only state information that is stored internally by the referee.
-All rules are stored in the **edu.tigers.autoreferee.engine.rules.impl** package and possible subpackages of the **moduli-autoreferee** project.
+The autoref software has been designed to work as an extension of the refbox. It can be used in two modes:
+- **Active**: A connection to the refbox is required. The autoref will actively send commands and run the game.
+- **Passive**: No connection to the refbox is required. The autoref will not send any commands and log all its decisions to the main window.
 
-The autoref can be used in two modes:
-- **Active**: A connection to the refbox is required. The autoref will actively send commands and run the game
-- **Passive**: No connection to the refbox is required. The autoref will not send any commands and log all its decisions to the main window
+No matter which mode is chosen the AutoReferee always employs multiple detector classes which are responsible for detecting rule violations that occur on the field. These classes do not actively manipulate the state of the game and are meant to be passive. They can be found in the [edu.tigers.autoreferee.engine.violations.impl](modules/moduli-autoreferee/src/main/java/edu/tigers/autoreferee/engine/violations/impl/) package of the [moduli-autoreferee](modules/moduli-autoreferee/) project. The passive autoref merely displays the detected violations in the game log whereas the active autoref will act upon the violations and alter the gamestate accordingly. This behavior of the active autoref is implemented through multiple state classes which are responsible for driving gamestate transitions as well as handling rule violations by sending commands to the refbox. In every gamestate there can be only one active autoref state.
 
 ## Initiating Plays
-Whenever the game is stopped after a rule violation or a goal the autoref will send a ball placement command (see the Ball Placement section for more details) to have the ball placed at the desired position. If the placement fails or no teams are capable of placing the ball it will visualize the desired position on the field visualizer and wait for the ball to be placed. After the ball has been placed the autoref will wait until all robots have come to a stop and then send the next command. It is possible to have the autoref initiate the next action although the ball is not placed at the correct location by enabling the max wait timeout. This can be done in the **AutoReferee** section of the **Cfg** tab under  **edu.tigers.autoreferee.engine.rules.impl.StopStateRule**. Another alternative is to simply issue the command manually using the refbox.
+Whenever the game is stopped after a rule violation or a goal the autoref will send a ball placement command (see the Ball Placement section for more details) to have the ball placed at the desired position. If the placement fails or no teams are capable of placing the ball it will visualize the desired position on the field visualizer and wait for the ball to be placed. After the ball has been placed the autoref will wait until all robots have come to a stop and then send the next command. If for some reason the bots do not come to a stop it is possible to manually start the transition by clicking the **Proceed** button in the **AutoReferee** view. Another alternative is to simply issue the command manually using the refbox.
 
 ## Detecting Goals
 At the moment it is not possible to deduct the vertical position of the ball from the vision data. This can produce false positives if the ball is chip kicked over the goal. To avoid these situations the autoref tries to detect goals by monitoring the direction in which the ball is headed while being located inside the goal perimeter. It checks the following sufficient conditions for a goal:
@@ -108,7 +118,9 @@ At the moment it is not possible to deduct the vertical position of the ball fro
 - The heading of the ball changes by more than 45 degrees while the ball is inside the goal
 
 ## Ball Placement
-The autoref will signal ball placements after it has stopped the game to place the ball at the desired position. It is possible to specify which team is capable of performing a ball placement in the **Cfg** tab. Please note that at the moment the ball placement is deactivated by default so you will need to activate it before or during the game. The autoref will give each team 15s time to place the ball at the desired position. After the ball has been placed or all teams that are capable of placing the ball have failed it will return to the stopped state and wait for the ball to be placed manually or initiate the next action. This will give the teams more time to reposition themselves after the placement states.
+The autoref will signal ball placements after it has stopped the game to place the ball at the desired position. It is possible to specify which team is capable of performing a ball placement in the **Cfg** tab. Please note that at the moment the ball placement is deactivated by default so you will need to activate it before or during the game. If both teams are capable of placing the ball you can manually set a preference for which team will be given the chance to place the ball first. If you do not set a preference the autoreferee will first send the placement command to the team which will afterwards perform the actual kick.
+
+The autoref will give each team 15s time to place the ball at the desired position. After the ball has been placed or all teams that are capable of placing the ball have failed it will return to the stopped state and wait for the ball to be placed manually or initiate the next action. This will give the teams more time to reposition themselves after the placement states.
 
 ## Rule infringements
 The referee is currently capable of detecting the following rule infringements:
