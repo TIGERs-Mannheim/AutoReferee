@@ -8,6 +8,7 @@
  */
 package edu.tigers.sumatra.trajectory;
 
+import edu.tigers.sumatra.math.AVector2;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.Vector2;
@@ -20,9 +21,12 @@ import edu.tigers.sumatra.math.Vector2;
  */
 public final class BangBangTrajectoryMath
 {
-	private static final double DT_PRECISE = 0.01;
-	
-	
+	private static final double	DT_PRECISE					= 0.01;
+																			
+																			
+	private static final double	BINARY_SEARCH_EPSILON	= 0.01;
+																			
+																			
 	private BangBangTrajectoryMath()
 	{
 	}
@@ -142,6 +146,69 @@ public final class BangBangTrajectoryMath
 	public static double maxVelocityOfTrajectory(final ITrajectory<IVector2> traj)
 	{
 		return maxVelocityOfTrajectory(traj, DT_PRECISE);
+	}
+	
+	
+	/**
+	 * Get virtual (not necessarily reachable) destination to generate trajectory in order to reach given point at given
+	 * time. Target velocity does not have to be zero
+	 * 
+	 * @param curPos
+	 * @param initialVel
+	 * @param desiredPos
+	 * @param maxAcc
+	 * @param maxBrk
+	 * @param maxVel
+	 * @param time
+	 * @return
+	 */
+	public static IVector2 getVirtualDestinationToReachPositionInTime(final IVector2 curPos, final IVector2 initialVel,
+			final IVector2 desiredPos, final double maxAcc, final double maxBrk, final double maxVel, final double time)
+	{
+		ITrajectory<IVector2> direct = new BangBangTrajectory2D(curPos.multiplyNew(1e-3), desiredPos.multiplyNew(1e-3),
+				initialVel.multiplyNew(1e-3), maxAcc, maxAcc, maxVel);
+				
+		if (direct.getPositionMM(time).equals(desiredPos, 1.0))
+		{
+			return desiredPos; // passt schon so
+		}
+		
+		IVector2 delta = desiredPos.subtractNew(curPos);
+		
+		double t_tovmax = maxVel / maxAcc; // time to accelerate to maximum speed
+		double t_uniform = time - t_tovmax;
+		
+		double s_maxdistance = (1000 * ((0.5 * maxAcc * t_tovmax * t_tovmax))) + (maxVel * t_uniform); // longest possible
+																																		// distance
+		// to given time
+		if (s_maxdistance < delta.getLength())
+		{
+			// it won't be possible to reach target in given time slot. Desperate maxvel destination will be given.
+			return curPos.addNew(delta.normalizeNew().multiplyNew(s_maxdistance));
+		}
+		
+		double left = 0.0;
+		double right = s_maxdistance;
+		double probe = s_maxdistance / 2.0;
+		
+		do
+		{
+			IVector2 probeVec = delta.scaleToNew(probe);
+			ITrajectory<IVector2> probeTraj = new BangBangTrajectory2D(AVector2.ZERO_VECTOR, probeVec.multiplyNew(1e-3),
+					AVector2.ZERO_VECTOR, maxAcc, maxBrk, maxVel);
+			if (probeTraj.getPositionMM(time).getLength() > delta.getLength())
+			{
+				right = probe;
+			} else
+			{
+				left = probe;
+			}
+			probe = ((right - left) / 2) + left;
+		} while ((right - left) > BINARY_SEARCH_EPSILON);
+		
+		IVector2 resultVector = delta.scaleToNew(probe);
+		return resultVector.addNew(curPos);
+		
 	}
 	
 	

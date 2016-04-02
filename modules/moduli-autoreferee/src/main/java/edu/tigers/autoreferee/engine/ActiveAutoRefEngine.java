@@ -319,6 +319,9 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		followUp = action;
 		engineObserver.forEach(observer -> observer.onFollowUpChanged(followUp));
 		gameLog.addEntry(followUp);
+		
+		Exception ex = new Exception("FollowUpReset");
+		ex.printStackTrace();
 	}
 	
 	

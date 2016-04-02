@@ -180,4 +180,16 @@ public interface IBot
 	{
 		return Optional.empty();
 	}
+	
+	
+	/**
+	 * @return
+	 */
+	double getKickSpeed();
+	
+	
+	/**
+	 * @return
+	 */
+	String getDevice();
 }

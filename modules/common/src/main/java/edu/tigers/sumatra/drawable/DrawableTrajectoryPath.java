@@ -29,8 +29,9 @@ import edu.tigers.sumatra.trajectory.ITrajectory;
 @Persistent
 public class DrawableTrajectoryPath implements IDrawableShape
 {
-	private Color						color		= Color.black;
-	private final List<IVector2>	points	= new ArrayList<>();
+	private Color						color			= Color.black;
+	private final List<IVector2>	points		= new ArrayList<>();
+	private double						precision	= 0.01;
 	
 	
 	@SuppressWarnings("unused")
@@ -64,7 +65,7 @@ public class DrawableTrajectoryPath implements IDrawableShape
 			IVector2 pos = trajXY.getPositionMM(t).getXYVector();
 			IVector2 vel = trajXY.getVelocity(t).getXYVector();
 			if ((vLast == null) || (!vLast.isZeroVector() && !vel.isZeroVector()
-					&& (Math.abs(AngleMath.getShortestRotation(vLast.getAngle(), vel.getAngle())) > 0.3)))
+					&& (Math.abs(AngleMath.getShortestRotation(vLast.getAngle(), vel.getAngle())) > precision)))
 			{
 				points.add(pos);
 				vLast = vel;

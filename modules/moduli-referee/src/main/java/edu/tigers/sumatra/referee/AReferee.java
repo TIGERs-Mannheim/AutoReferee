@@ -8,8 +8,8 @@
  */
 package edu.tigers.sumatra.referee;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.moduli.AModule;
 import edu.tigers.sumatra.Referee.SSL_Referee;
@@ -28,13 +28,13 @@ public abstract class AReferee extends AModule implements IBallReplacer
 	public static final String					MODULE_TYPE				= "AReferee";
 	/** */
 	public static final String					MODULE_ID				= "referee";
-																					
-	private final List<IRefereeObserver>	observers				= new ArrayList<>();
-																					
+	
+	private final List<IRefereeObserver>	observers				= new CopyOnWriteArrayList<>();
+	
 	private boolean								receiveExternalMsg	= true;
 	private long									lastRefMsgCounter		= 0;
-																					
-																					
+	
+	
 	/**
 	  * 
 	  */
@@ -86,8 +86,8 @@ public abstract class AReferee extends AModule implements IBallReplacer
 	 */
 	public abstract void sendOwnRefereeMsg(Command cmd, int goalsBlue, int goalsYellow, int timeLeft,
 			final long timestamp, IVector2 placementPos);
-			
-			
+	
+	
 	/**
 	 * Replace the ball in the simulator
 	 * 

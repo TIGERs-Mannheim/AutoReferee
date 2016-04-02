@@ -42,7 +42,6 @@ public class WorldInfoProcessor implements IRefereeObserver
 	
 	private final List<IVisCalc>	calculators			= new ArrayList<>();
 	
-	
 	private long						lastWFTimestamp	= 0;
 	private RefereeMsg				latestRefereeMsg	= new RefereeMsg();
 	
@@ -54,9 +53,9 @@ public class WorldInfoProcessor implements IRefereeObserver
 	{
 		calculators.add(new BallVisCalc());
 		calculators.add(new BorderVisCalc());
-		calculators.add(new GameStateCalc());
 		calculators.add(new BotVisCalc());
 		calculators.add(new BufferCalc());
+		calculators.add(new GameStateCalc());
 		calculators.add(new RefereeVisCalc());
 		calculators.add(new VelocityVisCalc());
 	}

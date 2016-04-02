@@ -304,6 +304,26 @@ public class GeoMathTestV2
 			
 			
 		}
-		
 	}
+	
+	
+	/**
+	 * {@link GeoMath#calculateBisector(IVector2, IVector2, IVector2)}
+	 * points on a spiral from very small to very big vector lengths to test numeric stability
+	 */
+	@Test
+	public void testBisector()
+	{
+		for (double i = 0; i < (2 * Math.PI); i += 0.01)
+		{
+			final double spiralCoeff = Math.pow(10, i - (0.5 * Math.PI));
+			IVector2 p1 = new Vector2(spiralCoeff * Math.cos(i), spiralCoeff * Math.sin(i));
+			IVector2 p2 = new Vector2(spiralCoeff * Math.cos(i + 0.5), spiralCoeff * Math.sin(i + 0.5));
+			IVector2 e = new Vector2(p1.x() + (0.5 * (p2.x() - p1.x())), p1.y() + (0.5 * (p2.y() - p1.y())));
+			final IVector calculated = GeoMath.calculateBisector(ZERO_VECTOR, p1, p2);
+			assertTrue(calculated.equals(e, TEST_ACCURANCY));
+		}
+	}
+	
+	
 }

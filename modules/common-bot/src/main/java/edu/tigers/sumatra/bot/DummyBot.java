@@ -29,8 +29,8 @@ public class DummyBot implements IBot
 {
 	private boolean		avail2Ai	= false;
 	private final BotID	botId;
-								
-								
+	
+	
 	/**
 	 */
 	public DummyBot()
@@ -225,5 +225,19 @@ public class DummyBot implements IBot
 	public Performance getPerformance()
 	{
 		return new Performance();
+	}
+	
+	
+	@Override
+	public double getKickSpeed()
+	{
+		return 0;
+	}
+	
+	
+	@Override
+	public String getDevice()
+	{
+		return "";
 	}
 }

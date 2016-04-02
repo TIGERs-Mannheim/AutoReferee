@@ -10,13 +10,11 @@ package edu.tigers.autoref.presenter;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.autoreferee.AutoRefModule;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
+import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.IAutoRefStateObserver;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.visualizer.VisualizerPresenter;
 import edu.tigers.sumatra.visualizer.view.field.EShapeLayerSource;
 import edu.tigers.sumatra.wp.data.ShapeMap.IShapeLayer;
@@ -40,26 +38,12 @@ public class VisualizerRefPresenter extends VisualizerPresenter implements IAuto
 		switch (state)
 		{
 			case ACTIVE:
-				try
-				{
-					AutoRefModule ref = (AutoRefModule) SumatraModel.getInstance().getModule(AutoRefModule.MODULE_ID);
-					ref.addObserver(this);
-				} catch (ModuleNotFoundException e)
-				{
-					log.error("Could not find auto referee module", e);
-				}
+				AutoRefUtil.ifAutoRefModulePresent(ref -> ref.addObserver(this));
 				break;
 			case NOT_LOADED:
 				break;
 			case RESOLVED:
-				try
-				{
-					AutoRefModule ref = (AutoRefModule) SumatraModel.getInstance().getModule(AutoRefModule.MODULE_ID);
-					ref.removeObserver(this);
-				} catch (ModuleNotFoundException e)
-				{
-					log.error("Could not find auto referee module", e);
-				}
+				AutoRefUtil.ifAutoRefModulePresent(ref -> ref.removeObserver(this));
 				break;
 			default:
 				break;

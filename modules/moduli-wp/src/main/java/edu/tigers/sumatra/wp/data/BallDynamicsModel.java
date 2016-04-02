@@ -44,6 +44,8 @@ public class BallDynamicsModel
 	private boolean					modelStraightKick			= false;
 	private final boolean			handleCollision;
 	
+	private double						confOnCollision			= 0.0;
+	
 	
 	/**
 	 * @param acc
@@ -157,6 +159,7 @@ public class BallDynamicsModel
 		newState.set(8, 0, az);
 		
 		double confidence = state.get(9, 0);
+		// cooldown of confidence
 		confidence = Math.max(0, Math.min(1, confidence + (dt / 0.1)));
 		// double tLastCollision = state.get(9, 0) + dt;
 		newState.set(9, 0, confidence);
@@ -274,7 +277,7 @@ public class BallDynamicsModel
 						if (botHull.isPointInShape(newBallPos))
 						{
 							// possible kick soon
-							outState.set(9, 0, 0);
+							outState.set(9, 0, confOnCollision);
 							
 							if (modelStraightKick && (info.getDribbleRpm() > 0))
 							{
@@ -310,7 +313,7 @@ public class BallDynamicsModel
 								outState.set(3, 0, shootVector.x());
 								outState.set(4, 0, shootVector.y());
 								outState.set(5, 0, shootVector.z());
-								outState.set(9, 0, 0);
+								outState.set(9, 0, confOnCollision);
 							} else
 							{
 								outState = handleCollisionPoint(state, newState, dt, context, frontCollision.get(), normal,
@@ -454,7 +457,7 @@ public class BallDynamicsModel
 		corState.set(3, 0, outVel.x());
 		corState.set(4, 0, outVel.y());
 		corState.set(5, 0, newState.get(5, 0) + shootVector.z());
-		corState.set(9, 0, 0);
+		corState.set(9, 0, confOnCollision);
 		return corState;
 	}
 	

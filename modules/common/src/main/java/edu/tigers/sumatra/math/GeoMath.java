@@ -12,8 +12,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import Jama.Matrix;
-
 
 /**
  * Helper class for Geometry math problems.
@@ -24,14 +22,180 @@ public final class GeoMath
 {
 	private static final Logger	log		= Logger.getLogger(GeoMath.class.getName());
 														
-	/** Matrix X index */
-	private static final int		X			= 0;
-	/** Matrix X index */
-	private static final int		Y			= 1;
-														
 	private static final double	ACCURACY	= 0.001;
 														
 														
+	/**
+	 * Some Low-Level methods
+	 * 
+	 * @author KaiE
+	 */
+	private static class LowLevel
+	{
+		
+		private LowLevel()
+		{
+			throw new RuntimeException("instance is forbidden");
+		}
+		
+		
+		/**
+		 * calculates the intersection-coefficient of the first line given as supp1 and dir1 and the second line
+		 * build from supp2 and dir2.
+		 * 
+		 * <pre>
+		 * :: Let the following variables be defined as:
+		 * s1 = supp1.x
+		 * s2 = supp1.y
+		 * d1 = dir1.x
+		 * d2 = dir1.y
+		 * x1 = supp2.x
+		 * x2 = supp2.y
+		 * r1 = dir2.x
+		 * r2 = dir2.y
+		 * ::
+		 * Basic equations: s1 + lambda*d1 = x1 + gamma*r1
+		 *                  s2 + lambda*d2 = x2 + gamma*r2
+		 * ==============================================
+		 * s1 + lambda*d1 = x1 + gamma*r1
+		 * 
+		 * s1 - x1 + lambda*d1 = gamma*r1
+		 * 
+		 * s1 - x1 + lambda*d1
+		 * ------------------- = gamma
+		 *          r1
+		 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Insert into 2nd dim:
+		 * 
+		 *                            s1 - x1 + lambda*d1
+		 * s2 + lambda * d2 = x2 + (----------------------)*r2
+		 *                                     r1
+		 * 
+		 * 
+		 * (s2*r1) + (lambda*d2*r1) = (x2*r1) + (s1*r2) - (x1*r2) + (lambda*d1*r2)
+		 * 
+		 * with a sharp eye one can notice some determinants of 2d-matrices...
+		 * 
+		 *  ((r1*s2)-(r2*s1)) - ((r1*x2)-(r2*x1)) = lambda *((d1*r2)-(d2*r1))
+		 * 
+		 *  ^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^           ^^^^^^^^^^^^^^^^^
+		 *       detRS               detRX                        detDR
+		 * 
+		 *  ==> if detDR==0 -> parallel
+		 * 
+		 *                detRS - detRX
+		 *  ==> lambda = ---------------
+		 *                    detDR
+		 * </pre>
+		 * 
+		 * @param supp1
+		 * @param dir1
+		 * @param supp2
+		 * @param dir2
+		 * @throws MathException if the Lines are parallel or no true lines...
+		 * @return the lambda for the first line
+		 */
+		public static double getLineIntersectionLambda(final IVector2 supp1, final IVector2 dir1, final IVector2 supp2,
+				final IVector2 dir2) throws MathException
+		{
+			final double s1 = supp1.x();
+			final double s2 = supp1.y();
+			final double d1 = dir1.x();
+			final double d2 = dir1.y();
+			
+			final double x1 = supp2.x();
+			final double x2 = supp2.y();
+			final double r1 = dir2.x();
+			final double r2 = dir2.y();
+			
+			
+			final double detRS = (r1 * s2) - (r2 * s1);
+			final double detRX = (r1 * x2) - (r2 * x1);
+			final double detDR = (d1 * r2) - (d2 * r1);
+			
+			if (Math.abs(detDR) < (ACCURACY * ACCURACY))
+			{
+				throw new MathException(
+						"the two lines are parallel! Should not happen when there is a check if the lines are parallel");
+			}
+			return (detRS - detRX) / detDR;
+		}
+		
+		
+		/**
+		 * returns point on line with support-vector s and direction vector d with the given lambda.
+		 * solves axpy of vector line function
+		 * 
+		 * @param s
+		 * @param d
+		 * @param lambda
+		 * @return
+		 */
+		public static Vector2 getPointOnLineForLambda(final IVector2 s, final IVector2 d, final double lambda)
+		{
+			
+			final double xcut = s.x() + (d.x() * lambda);
+			final double ycut = s.y() + (d.y() * lambda);
+			return new Vector2(xcut, ycut);
+		}
+		
+		
+		/**
+		 * checks if the lines are parallel
+		 * 
+		 * @param s1 support-vector 1
+		 * @param d1 direction-vector 1
+		 * @param s2 support-vector 2
+		 * @param d2 direction-vector 2
+		 * @return
+		 */
+		public static boolean isLineParallel(final IVector2 s1, final IVector2 d1, final IVector2 s2, final IVector2 d2)
+		{
+			return (Math.abs((d1.x() * d2.y()) - (d2.x() * d1.y())) < (ACCURACY * ACCURACY));
+		}
+		
+		
+		/**
+		 * checks if the given lambda is within the interval [min,max] with the predefined epsilon.
+		 * 
+		 * @param lambda
+		 * @param min
+		 * @param max
+		 * @return
+		 */
+		public static boolean isLambdaInRange(final double lambda, final double min, final double max)
+		{
+			return (((min - ACCURACY) < lambda) && (lambda < (max + ACCURACY)));
+		}
+		
+		
+		/**
+		 * calculates the lambda for a point if on the line. Returns NaN when the point was not
+		 * part of the line
+		 * 
+		 * @param point
+		 * @param supp
+		 * @param dir
+		 * @return
+		 */
+		public static double getLeadPointLambda(final IVector2 point, final IVector2 supp, final IVector2 dir)
+		{
+			if ((Math.abs(dir.x()) + Math.abs(dir.y())) < (2 * ACCURACY * ACCURACY))
+			{
+				return 0;
+			}
+			final IVector2 ortho = new Vector2(dir.y(), -dir.x());
+			try
+			{
+				return getLineIntersectionLambda(supp, dir, point, ortho);
+			} catch (MathException e)
+			{
+				throw new RuntimeException("Error calculating a intersection!");
+			}
+		}
+		
+	}
+	
+	
 	/**
 	 * not instantiable
 	 */
@@ -50,7 +214,7 @@ public final class GeoMath
 	 */
 	public static double distancePP(final IVector2 a, final IVector2 b)
 	{
-		return a.subtractNew(b).getLength2();
+		return Math.sqrt(distancePPSqr(a, b));
 	}
 	
 	
@@ -85,46 +249,6 @@ public final class GeoMath
 	
 	
 	/**
-	 * Create the lead point on a straight line (Lot f�llen).
-	 * 
-	 * @param point which should be used to create lead
-	 * @param line1 , first point on the line
-	 * @param line2 , second point on the line
-	 * @return the lead point on the line
-	 * @author Oliver Steinbrecher <OST1988@aol.com>
-	 */
-	public static Vector2 leadPointOnLine(final IVector2 point, final IVector2 line1, final IVector2 line2)
-	{
-		if (SumatraMath.isEqual(line1.x(), line2.x()))
-		{
-			// special case 1. line is orthogonal to x-axis
-			return new Vector2(line1.x(), point.y());
-			
-		} else if (SumatraMath.isEqual(line1.y(), line2.y()))
-		{
-			// special case 2. line is orthogonal to y-axis
-			return new Vector2(point.x(), line1.y());
-			
-		} else
-		{
-			// create straight line A from line1 to line2
-			final double mA = (line2.y() - line1.y()) / (line2.x() - line1.x());
-			final double nA = line2.y() - (mA * line2.x());
-			
-			// calculate straight line B
-			final double mB = -1.0 / mA;
-			final double nB = point.y() - (mB * point.x());
-			
-			// cut straight lines A and B
-			final double xCut = (nB - nA) / (mA - mB);
-			final double yCut = (mA * xCut) + nA;
-			
-			return new Vector2(xCut, yCut);
-		}
-	}
-	
-	
-	/**
 	 * Calculates the distance between a point and a line.
 	 * 
 	 * @param point
@@ -138,7 +262,22 @@ public final class GeoMath
 	
 	
 	/**
-	 * Create the lead point on a straight line (Lot f�llen).
+	 * Create the lead point on a straight line (Lot faellen).
+	 * 
+	 * @param point which should be used to create lead
+	 * @param line1 , first point on the line
+	 * @param line2 , second point on the line
+	 * @return the lead point on the line
+	 * @author Oliver Steinbrecher <OST1988@aol.com>
+	 */
+	public static Vector2 leadPointOnLine(final IVector2 point, final IVector2 line1, final IVector2 line2)
+	{
+		return leadPointOnLine(point, Line.newLine(line1, line2));
+	}
+	
+	
+	/**
+	 * Create the lead point on a straight line (Lot faellen).
 	 * 
 	 * @param point
 	 * @param line
@@ -146,7 +285,12 @@ public final class GeoMath
 	 */
 	public static Vector2 leadPointOnLine(final IVector2 point, final ILine line)
 	{
-		return leadPointOnLine(point, line.supportVector(), line.supportVector().addNew(line.directionVector()));
+		final IVector2 sline = line.supportVector();
+		final IVector2 dline = line.directionVector();
+		
+		
+		return LowLevel.getPointOnLineForLambda(sline, dline, LowLevel.getLeadPointLambda(point, sline, dline));
+		
 	}
 	
 	
@@ -272,7 +416,7 @@ public final class GeoMath
 	 * returns the dotted line (see image)
 	 * 
 	 * <pre>
-	 * p2				  p3
+	 * p2            p3
 	 *  \      p4   /
 	 *   \----x----/
 	 *    \   |   /
@@ -308,6 +452,81 @@ public final class GeoMath
 		}
 		
 		return GeoMath.distancePP(defenseLineLeft, defenseLineRight);
+	}
+	
+	
+	/**
+	 * Two line segments (Strecke) are given by two vectors each.
+	 * This method calculates the distance between the line segments.
+	 * If one or both of the lines are points (both vectors are the same) the distance from the line segment to the point
+	 * is calculated
+	 * 
+	 * @param l1p1
+	 * @param l1p2
+	 * @param l2p1
+	 * @param l2p2
+	 * @author Dirk,KaiE
+	 * @return
+	 * @throws MathException if lines are parallel or equal or one of the vectors is zero
+	 */
+	public static double incompleteDistanceBetweenLineSegments(final IVector2 l1p1, final IVector2 l1p2,
+			final IVector2 l2p1,
+			final IVector2 l2p2)
+					throws MathException
+	{
+		
+		
+		final IVector2 dir1 = l1p2.subtractNew(l1p1);
+		final IVector2 dir2 = l2p2.subtractNew(l2p1);
+		
+		if ((dir1.getLength2() + dir2.getLength2()) < (ACCURACY))
+		{
+			return distancePP(l1p1, l2p1);
+		}
+		try
+		{
+			final double lambda = LowLevel.getLineIntersectionLambda(l1p1, dir1, l2p1, dir2);
+			final double delta = LowLevel.getLineIntersectionLambda(l2p1, dir2, l1p1, dir1);
+			/**
+			 * Segments are intersecting - so the distance is 0
+			 */
+			if (LowLevel.isLambdaInRange(lambda, 0, 1) && LowLevel.isLambdaInRange(delta, 0, 1))
+			{
+				return 0;
+			}
+			final IVector2 closestEndPointToIntersectionA = lambda < (0.5 + ACCURACY) ? l1p1 : l1p2;
+			final IVector2 closestEndPointToIntersectionB = delta < (0.5 + ACCURACY) ? l2p1 : l2p2;
+			final double lambdaLead = LowLevel.getLeadPointLambda(closestEndPointToIntersectionB, l1p1, dir1);
+			final double deltaLead = LowLevel.getLeadPointLambda(closestEndPointToIntersectionA, l2p1, dir2);
+			double distanceLineAFromB = 0;
+			if (LowLevel.isLambdaInRange(deltaLead, 0, 1))
+			{
+				distanceLineAFromB = distancePP(closestEndPointToIntersectionA,
+						LowLevel.getPointOnLineForLambda(l2p1, dir2, deltaLead));
+			} else
+			{
+				final IVector2 closestEndPointToLead = deltaLead <= (0.5 + ACCURACY) ? l2p1 : l2p2;
+				distanceLineAFromB = distancePP(closestEndPointToIntersectionA, closestEndPointToLead);
+			}
+			double distanceLineBFromA = 0;
+			
+			if (LowLevel.isLambdaInRange(lambdaLead, 0, 1))
+			{
+				distanceLineBFromA = distancePP(closestEndPointToIntersectionB,
+						LowLevel.getPointOnLineForLambda(l1p1, dir1, lambdaLead));
+			} else
+			{
+				final IVector2 closestEndPointToLead = lambdaLead <= (0.5 + ACCURACY) ? l1p1 : l1p2;
+				distanceLineBFromA = distancePP(closestEndPointToIntersectionB, closestEndPointToLead);
+			}
+			return Math.min(distanceLineAFromB, distanceLineBFromA);
+			
+		} catch (RuntimeException ex)
+		{
+			throw new MathException("lines were parallel with direction " + dir1 + " and " + dir2);
+		}
+		
+		
 	}
 	
 	
@@ -439,112 +658,27 @@ public final class GeoMath
 	 * Two lines are given by a support vector <b>p</b> ("Stuetzvektor") and a direction vector <b>v</b>
 	 * ("Richtungsvektor").
 	 * This methods calculate the point where these lines intersect.
-	 * If lines are parallel or equal or one of the vectors is zero Exeption is thrown!!
+	 * If lines are parallel or equal or one of the vectors is zero MathException is thrown!!
 	 * 
 	 * @param p1
 	 * @param v1
 	 * @param p2
 	 * @param v2
-	 * @author Malte
+	 * @author KaiE
 	 * @return
-	 * @throws MathException if lines are parallel or equal or one of the vectors is zero
+	 * @throws MathException
 	 */
 	public static Vector2 intersectionPoint(final IVector2 p1, final IVector2 v1, final IVector2 p2, final IVector2 v2)
 			throws MathException
 	{
-		if (v1.equals(AVector2.ZERO_VECTOR))
-		{
-			throw new MathException("v1 is the zero vector!");
-		}
-		if (v2.equals(AVector2.ZERO_VECTOR))
-		{
-			throw new MathException("v2 is the zero vector!");
-		}
-		assert !Double.isNaN(v1.x());
-		assert !Double.isNaN(v1.x());
-		assert !Double.isNaN(v2.y());
-		assert !Double.isNaN(v2.y());
-		// Create a matrix
-		final Matrix m = new Matrix(2, 2);
-		m.set(0, 0, v1.x());
-		m.set(0, 1, -v2.x());
-		m.set(1, 0, v1.y());
-		m.set(1, 1, -v2.y());
-		
-		final double[] b = { p2.x() - p1.x(), p2.y() - p1.y() };
-		if (m.rank() == 1)
-		{
-			throw new MathException("Given lines are parallel or equal!");
-		}
-		
-		final Matrix bM = new Matrix(2, 1);
-		bM.set(0, 0, b[X]);
-		bM.set(1, 0, b[Y]);
-		final Matrix solved = m.solve(bM);
-		
-		final double x = (solved.get(0, 0) * v1.x()) + p1.x();
-		final double y = (solved.get(0, 0) * v1.y()) + p1.y();
-		
-		return new Vector2(x, y);
-		
-	}
-	
-	
-	/**
-	 * TODO FelixB <bayer.fel@gmail.com>, add comment!
-	 * 
-	 * @param p1p1 first point of the first line
-	 * @param p1p2 second point of the first line
-	 * @param p2p1 first point of the second line
-	 * @param p2p2 second point of the second line
-	 * @return intersection of the two paths if exists, null else
-	 */
-	public static IVector2 intersectionBetweenPaths(final IVector2 p1p1, final IVector2 p1p2, final IVector2 p2p1,
-			final IVector2 p2p2)
-	{
-		IVector2 intersectionPoint = intersectionPointPath(p1p1, p1p2.subtractNew(p1p1), p2p1, p2p2.subtractNew(p2p1));
-		return intersectionPoint;
-	}
-	
-	
-	/**
-	 * Calculates the intersection point of two paths. Returns null if there is no intersection point.
-	 * 
-	 * @param p1 vector to the first point of the first path
-	 * @param v1 vector from the first point of the first path to the second point of the first path
-	 * @param p2 vector to the first point of the second path
-	 * @param v2 vector from the first point of the second path to the second point of the second path
-	 * @return the intersection point of the two paths if possible, else null
-	 */
-	public static Vector2 intersectionPointPath(final IVector2 p1, final IVector2 v1, final IVector2 p2,
-			final IVector2 v2)
-	{
-		IVector2 intersectionPoint = null;
 		try
 		{
-			intersectionPoint = intersectionPoint(p1, v1, p2, v2);
-		} catch (MathException err)
+			final double lambda = LowLevel.getLineIntersectionLambda(p1, v1, p2, v2);
+			return LowLevel.getPointOnLineForLambda(p1, v1, lambda);
+		} catch (RuntimeException ex)
 		{
-			// There is no intersection point at all
-			return null;
+			throw new MathException("lines were parallel!");
 		}
-		
-		if (betweenValues(p1, p1.addNew(v1), intersectionPoint) &&
-				betweenValues(p2, p2.addNew(v2), intersectionPoint))
-		{
-			return (Vector2) intersectionPoint;
-		}
-		return null;
-	}
-	
-	
-	/*
-	 * Tests if the vector pm lies in the rectangle spanned by p1 and p2.
-	 */
-	private static boolean betweenValues(final IVector2 p1, final IVector2 p2, final IVector2 pm)
-	{
-		return (((p1.x() <= pm.x()) && (pm.x() <= p2.x())) || ((p2.x() <= pm.x()) && (pm.x() <= p1.x())))
-				&& (((p1.y() <= pm.y()) && (pm.y() <= p2.y())) || ((p2.y() <= pm.y()) && (pm.y() <= p1.y())));
 	}
 	
 	
@@ -561,6 +695,67 @@ public final class GeoMath
 	public static Vector2 intersectionPoint(final ILine l1, final ILine l2) throws MathException
 	{
 		return intersectionPoint(l1.supportVector(), l1.directionVector(), l2.supportVector(), l2.directionVector());
+	}
+	
+	
+	/**
+	 * Calculates the intersection point of two paths. Returns null if there is no intersection point.
+	 * 
+	 * @param p1 vector to the first point of the first path
+	 * @param v1 vector from the first point of the first path to the second point of the first path
+	 * @param p2 vector to the first point of the second path
+	 * @param v2 vector from the first point of the second path to the second point of the second path
+	 * @return the intersection point of the two paths if possible, else null
+	 */
+	public static Vector2 intersectionPointPath(final IVector2 p1, final IVector2 v1, final IVector2 p2,
+			final IVector2 v2)
+	{
+		if (LowLevel.isLineParallel(v1, p1, p2, v2))
+		{
+			return null;
+		}
+		double lambda;
+		
+		try
+		{
+			lambda = LowLevel.getLineIntersectionLambda(p1, v1, p2, v2);
+		} catch (MathException e)
+		{
+			return null;
+		}
+		
+		double delta;
+		
+		try
+		{
+			delta = LowLevel.getLineIntersectionLambda(p2, v2, p1, v1);
+		} catch (MathException e)
+		{
+			return null;
+		}
+		
+		if (LowLevel.isLambdaInRange(lambda, 0, 1) && LowLevel.isLambdaInRange(delta, 0, 1))
+		{
+			return LowLevel.getPointOnLineForLambda(p1, v1, lambda);
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Proxy to {@link GeoMath#intersectionPointPath}
+	 * 
+	 * @param p1p1 first point of the first line
+	 * @param p1p2 second point of the first line
+	 * @param p2p1 first point of the second line
+	 * @param p2p2 second point of the second line
+	 * @return intersection of the two paths if exists, null else
+	 */
+	public static IVector2 intersectionBetweenPaths(final IVector2 p1p1, final IVector2 p1p2, final IVector2 p2p1,
+			final IVector2 p2p2)
+	{
+		IVector2 intersectionPoint = intersectionPointPath(p1p1, p1p2.subtractNew(p1p1), p2p1, p2p2.subtractNew(p2p1));
+		return intersectionPoint;
 	}
 	
 	
@@ -734,14 +929,15 @@ public final class GeoMath
 	{
 		final Vector2 result = new Vector2();
 		
-		final double distance = distancePP(start, end);
-		if (distance == 0)
+		final double distanceSqr = distancePPSqr(start, end);
+		if (distanceSqr == 0)
 		{
 			result.setX(end.x());
 			result.setY(end.y());
 			return result;
 		}
 		
+		final double distance = Math.sqrt(distanceSqr);
 		final double coefficient = stepSize / distance;
 		
 		final double xDistance = end.x() - start.x();

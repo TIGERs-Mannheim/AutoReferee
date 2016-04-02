@@ -69,21 +69,22 @@ public class RefereeVisCalc implements IVisCalc
 		double ballHeight = wfw.getSimpleWorldFrame().getBall().getPos3().z();
 		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "; height: " + dfBallVel.format(ballHeight);
 		
-		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 35), ballVelStr, ballSpeed <= 8 ? Color.white
+		txtShapes.add(new DrawableBorderText(new Vector2(off[1], 35), ballVelStr, ballSpeed <= 8 ? Color.white
 				: Color.red));
 		
 		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 11), msg.getStage().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 23), msg.getCommand().toString(), Color.white));
+		txtShapes.add(new DrawableBorderText(new Vector2(off[0], 35), wfw.getGameState().name(), Color.white));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[1], 11), timeStr, Color.white));
 		
-		txtShapes.add(new DrawableBorderText(new Vector2(off[2], 11), msg.getTeamInfoYellow().getName(), Color.yellow));
-		txtShapes.add(new DrawableBorderText(new Vector2(off[4], 11), String.valueOf(msg.getTeamInfoYellow().getScore()),
+		txtShapes.add(new DrawableBorderText(new Vector2(off[4], 11), msg.getTeamInfoYellow().getName(), Color.yellow));
+		txtShapes.add(new DrawableBorderText(new Vector2(off[2], 11), String.valueOf(msg.getTeamInfoYellow().getScore()),
 				Color.yellow));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[5], 11), timeoutYellowStr, Color.yellow));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[6], 11), yellowCardYellowStr, Color.yellow));
 		
-		txtShapes.add(new DrawableBorderText(new Vector2(off[2], 23), msg.getTeamInfoBlue().getName(), Color.blue));
-		txtShapes.add(new DrawableBorderText(new Vector2(off[4], 23), String.valueOf(msg.getTeamInfoBlue().getScore()),
+		txtShapes.add(new DrawableBorderText(new Vector2(off[4], 23), msg.getTeamInfoBlue().getName(), Color.blue));
+		txtShapes.add(new DrawableBorderText(new Vector2(off[2], 23), String.valueOf(msg.getTeamInfoBlue().getScore()),
 				Color.blue));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[5], 23), timeoutBlueStr, Color.blue));
 		txtShapes.add(new DrawableBorderText(new Vector2(off[6], 23), yellowCardBlueStr, Color.blue));
