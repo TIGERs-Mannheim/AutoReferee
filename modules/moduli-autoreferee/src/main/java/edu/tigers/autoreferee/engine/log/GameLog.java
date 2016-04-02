@@ -39,7 +39,7 @@ public class GameLog
 	}
 	
 	private long							startRefTimestamp	= 0;
-	private Instant						startTime;
+	private Instant						startTime			= Instant.now();
 	private long							currentTimestamp	= 0;
 	private List<GameLogEntry>			entries				= new ArrayList<>();
 	private List<IGameLogObserver>	observer				= new ArrayList<>();
