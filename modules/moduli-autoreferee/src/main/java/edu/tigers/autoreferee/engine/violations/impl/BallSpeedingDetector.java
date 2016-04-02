@@ -13,6 +13,8 @@ import java.util.Optional;
 
 import org.apache.log4j.Logger;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
@@ -37,7 +39,9 @@ public class BallSpeedingDetector extends AViolationDetector
 	private static int				priority					= 1;
 	private static final Logger	log						= Logger.getLogger(BallSpeedingDetector.class);
 	
-	private static final int		REQUIRED_FRAME_COUNT	= 3;
+	private static final int		REQUIRED_FRAME_COUNT	= 10;
+	@Configurable(comment = "The ball is not considered to be too fast if above this threshold to prevent false positives")
+	private static double			topSpeedThreshold		= 20.0d;
 	
 	private boolean					speedingDetected		= true;
 	private int							speedingFrameCount	= 0;
@@ -63,7 +67,7 @@ public class BallSpeedingDetector extends AViolationDetector
 	public Optional<IRuleViolation> update(final IAutoRefFrame frame, final List<IRuleViolation> violations)
 	{
 		double ballVelocity = frame.getWorldFrame().getBall().getVel().getLength2();
-		if (ballVelocity > AutoRefConfig.getMaxBallVelocity())
+		if ((ballVelocity > AutoRefConfig.getMaxBallVelocity()) && (ballVelocity < topSpeedThreshold))
 		{
 			speedingFrameCount++;
 			if ((speedingFrameCount >= REQUIRED_FRAME_COUNT) && (speedingDetected == false))
