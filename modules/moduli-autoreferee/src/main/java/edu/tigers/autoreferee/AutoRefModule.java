@@ -311,13 +311,32 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 			return;
 		}
 		AutoRefFrame currentFrame = createNewRefFrame(wFrameWrapper);
-		runCalculators(currentFrame);
+		try
+		{
+			runCalculators(currentFrame);
+		} catch (Exception t)
+		{
+			log.error("Error while running autoref calculators", t);
+			return;
+		}
 		
-		autoRefEngine.process(currentFrame);
+		try
+		{
+			autoRefEngine.process(currentFrame);
+		} catch (Exception t)
+		{
+			log.error("Error while running autoref engine", t);
+		}
 		
 		for (IAutoRefStateObserver o : refObserver)
 		{
-			o.onNewAutoRefFrame(currentFrame);
+			try
+			{
+				o.onNewAutoRefFrame(currentFrame);
+			} catch (Exception t)
+			{
+				log.error("Error in autoref state observer (" + (o != null ? o.toString() : "null") + ")", t);
+			}
 		}
 		
 		lastFrame = currentFrame;
