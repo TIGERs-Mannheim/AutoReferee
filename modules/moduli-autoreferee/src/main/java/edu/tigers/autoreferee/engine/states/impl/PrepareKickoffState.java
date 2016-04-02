@@ -35,12 +35,17 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 public class PrepareKickoffState extends AbstractAutoRefState
 {
 	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
-	private static long	MIN_WAIT_TIME_MS		= 3_500;
+	private static long		MIN_WAIT_TIME_MS			= 3_500;
 	
 	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
-	private static long	READY_WAIT_TIME_MS	= 1_500;
+	private static long		READY_WAIT_TIME_MS		= 1_500;
 	
-	private Long			readyWaitTime			= null;
+	@Configurable(comment = "If in fast mode the ref will not wait for the bots to settle")
+	private static boolean	FAST_MODE					= true;
+	@Configurable(comment = "The additional wait time in fast mode in ms")
+	private static long		FAST_MODE_WAIT_TIME_MS	= 1_000;
+	
+	private Long				readyWaitTime				= null;
 	static
 	{
 		AbstractAutoRefState.registerClass(PrepareKickoffState.class);
@@ -71,6 +76,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		boolean ballIsStationary = AutoRefMath.ballIsStationary(ball);
 		boolean ballIsPlaced = checkBallPlaced(ball, Geometry.getCenter(), shapes);
 		boolean ballInsideField = Geometry.getField().isPointInShape(ball.getPos());
+		boolean fastModeWaitTimeElapsed = timeElapsedSinceEntry(MIN_WAIT_TIME_MS + FAST_MODE_WAIT_TIME_MS);
 		boolean maxUnplacedWaitTimeElapsed = timeElapsedSinceEntry(AutoRefConfig.getMaxUnplacedWaitTime());
 		
 		boolean ballIsCloselyPlaced = AutoRefMath.ballIsCloselyPlaced(ball, Geometry.getCenter());
@@ -81,7 +87,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		
 		boolean readyWaitTimeOver = false;
 		
-		if ((ballIsPlaced && botsStationary && botPosCorrect)
+		if ((ballIsPlaced && botPosCorrect && ((FAST_MODE && fastModeWaitTimeElapsed) || botsStationary))
 				|| (ballInsideField && ballIsStationary && maxUnplacedWaitTimeElapsed && (AutoRefConfig
 						.getMaxUnplacedWaitTime() > 0))
 				|| (ballIsCloselyPlaced && ballIsStationary && closelyPlacedWaitTimeElapsed && (AutoRefConfig
