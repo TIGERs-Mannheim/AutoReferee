@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.apache.log4j.Logger;
+
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
@@ -26,17 +28,7 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class GameLog
 {
-	/**
-	 * @author "Lukas Magel"
-	 */
-	public interface IGameLogObserver
-	{
-		/**
-		 * @param id
-		 * @param entry
-		 */
-		public void onNewEntry(int id, GameLogEntry entry);
-	}
+	private static final Logger		log					= Logger.getLogger(GameLog.class);
 	
 	private long							startRefTimestamp	= 0;
 	private Instant						startTime			= Instant.now();
@@ -50,6 +42,7 @@ public class GameLog
 	 */
 	public void initialize(final long timestamp)
 	{
+		log.debug("Initialized game log with timestamp: " + timestamp);
 		startTime = Instant.now();
 		startRefTimestamp = timestamp;
 		currentTimestamp = timestamp;
@@ -97,7 +90,7 @@ public class GameLog
 			entries.add(entry);
 			id = entries.size() - 1;
 		}
-		
+		log.debug("Added new entry with id " + id + "and type " + entry.getType());
 		observer.forEach(obs -> obs.onNewEntry(id, entry));
 	}
 	
@@ -187,5 +180,17 @@ public class GameLog
 	public void removeObserver(final IGameLogObserver observer)
 	{
 		this.observer.remove(observer);
+	}
+	
+	/**
+	 * @author "Lukas Magel"
+	 */
+	public interface IGameLogObserver
+	{
+		/**
+		 * @param id
+		 * @param entry
+		 */
+		public void onNewEntry(int id, GameLogEntry entry);
 	}
 }

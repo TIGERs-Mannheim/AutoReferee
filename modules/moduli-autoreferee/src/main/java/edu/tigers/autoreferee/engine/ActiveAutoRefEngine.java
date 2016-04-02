@@ -320,8 +320,8 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		engineObserver.forEach(observer -> observer.onFollowUpChanged(followUp));
 		gameLog.addEntry(followUp);
 		
-		Exception ex = new Exception("FollowUpReset");
-		ex.printStackTrace();
+		log.info("Follow up set to: " + (action != null ? action.getActionType() : "null"),
+				new Exception("FollowUpReset"));
 	}
 	
 	

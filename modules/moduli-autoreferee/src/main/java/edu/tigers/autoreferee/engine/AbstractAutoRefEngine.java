@@ -11,6 +11,8 @@ package edu.tigers.autoreferee.engine;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.violations.IRuleViolation;
@@ -26,6 +28,8 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
+	private static final Logger	log					= Logger.getLogger(AbstractAutoRefEngine.class);
+	
 	private RuleViolationEngine	violationEngine	= null;
 	protected EEngineState			engineState			= null;
 	protected GameLog					gameLog				= new GameLog();
@@ -106,19 +110,21 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	
 	protected void onFirstFrame(final IAutoRefFrame frame)
 	{
+		log.debug("On First Frame");
 		gameLog.initialize(frame.getTimestamp());
 	}
 	
 	
 	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
 	{
+		log.debug("On Gamestate Change to: " + newGameState);
 		gameLog.addEntry(newGameState);
 	}
 	
 	
 	protected void onStageChange(final Stage oldStage, final Stage newStage)
 	{
-		
+		log.debug("On Stage Change to: " + newStage);
 	}
 	
 	
@@ -138,6 +144,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	@Override
 	public synchronized void reset()
 	{
+		log.debug("Autoref Engine reset");
 		violationEngine.reset();
 	}
 	
@@ -145,6 +152,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	@Override
 	public synchronized void resume()
 	{
+		log.debug("Autoref Engine resumed");
 		violationEngine.reset();
 		engineState = EEngineState.RUNNING;
 	}
@@ -153,6 +161,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	@Override
 	public synchronized void pause()
 	{
+		log.debug("Autoref Engine paused");
 		engineState = EEngineState.PAUSED;
 	}
 }

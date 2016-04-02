@@ -109,11 +109,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	@Override
 	public void stopModule()
 	{
-		if (autoRefEngine != null)
-		{
-			autoRefEngine.stop();
-		}
-		setState(AutoRefState.STOPPED);
+		doStop();
 	}
 	
 	
@@ -168,6 +164,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	private void doStart(final AutoRefMode mode) throws StartModuleException
 	{
+		log.debug("Starting autoref engine with mode: " + mode);
 		ThreadedTCPRefboxRemote remote = null;
 		try
 		{
@@ -202,6 +199,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 				autoRefEngine.stop();
 			}
 			setState(AutoRefState.STOPPED);
+			log.error("Error while starting up the autoref engine (" + mode + ")", e);
 			throw new StartModuleException(e.getMessage(), e);
 		}
 	}
@@ -221,6 +219,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	private void doStop()
 	{
+		log.debug("Stopping the autoref engine");
 		setState(AutoRefState.STOPPED);
 		
 		try
@@ -295,6 +294,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	private void setState(final AutoRefState state)
 	{
 		this.state = state;
+		log.debug("AutoRef State changed to: " + state);
 		refObserver.forEach(obs -> obs.onAutoRefStateChanged(state));
 	}
 	
