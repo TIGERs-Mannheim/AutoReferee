@@ -50,6 +50,9 @@ public class BotInDefenseAreaDetector extends APreparingViolationDetector
 	@Configurable(comment = "The cooldown time before registering a ball touch with the same bot again in ms")
 	private static int					COOLDOWN_TIME_MS	= 3_000;
 	
+	@Configurable(comment = "If true: Attacker is considered to be violating if it touches the penalty area")
+	private static boolean				attackerStrictMode			= false;
+	
 	private long							entryTime			= 0;
 	private Map<BotID, BotPosition>	lastViolators		= new HashMap<>();
 	
@@ -133,7 +136,7 @@ public class BotInDefenseAreaDetector extends APreparingViolationDetector
 		PenaltyArea opponentPenArea = NGeometry.getPenaltyArea(curKickerColor.opposite());
 		PenaltyArea ownPenArea = NGeometry.getPenaltyArea(curKickerColor);
 		
-		if (opponentPenArea.isPointInShape(curKickerPos))
+		if (opponentPenArea.isPointInShape(curKickerPos, getAttackerPenaltyAreaMargin()))
 		{
 			/*
 			 * Attacker touched the ball while being located partially/fully inside the opponent's penalty area
@@ -163,6 +166,16 @@ public class BotInDefenseAreaDetector extends APreparingViolationDetector
 		}
 		
 		return Optional.empty();
+	}
+	
+	
+	private double getAttackerPenaltyAreaMargin()
+	{
+		if (attackerStrictMode)
+		{
+			return Geometry.getBotRadius() - Geometry.getBallRadius();
+		}
+		return 0;
 	}
 	
 	
