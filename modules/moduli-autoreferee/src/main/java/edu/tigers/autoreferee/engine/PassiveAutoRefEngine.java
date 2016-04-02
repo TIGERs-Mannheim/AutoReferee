@@ -37,6 +37,7 @@ public class PassiveAutoRefEngine extends AbstractAutoRefEngine
 		{
 			return;
 		}
+		super.process(frame);
 		logViolations(getViolations(frame));
 	}
 }
