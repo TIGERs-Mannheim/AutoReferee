@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
@@ -58,9 +60,11 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		BALL_HEADING
 	}
 	
+	private static final Logger	log		= Logger.getLogger(BotLastTouchedBallCalc.class);
+	
 	@Configurable(comment = "The algorithm to use for ball touch detection")
-	private static CalcMode	mode		= CalcMode.BALL_HEADING;
-	private BotPosition		lastBot	= new BotPosition();
+	private static CalcMode			mode		= CalcMode.BALL_HEADING;
+	private BotPosition				lastBot	= new BotPosition();
 	
 	static
 	{
@@ -177,46 +181,40 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		return null;
 	}
 	
-	@Configurable
+	@Configurable(comment = "[degree]")
 	private static double	ANGLE_THRESHOLD_DEGREE	= 10;
 	
 	/** in mm */
-	@Configurable
+	@Configurable(comment = "[mm]")
 	private static double	MIN_SEARCH_RADIUS			= 300;
 	
-	@Configurable
+	@Configurable(comment = "[mm]")
 	private static double	BOT_RADIUS_MARGIN			= 30;
 	
 	
 	private BotPosition processHeading(final IAutoRefFrame frame)
 	{
-		
 		TrackedBall curBall = frame.getWorldFrame().getBall();
 		TrackedBall prevBall = frame.getPreviousFrame().getWorldFrame().getBall();
 		
-		
 		IVector2 prevHeading = prevBall.getVel();
 		IVector2 curHeading = curBall.getVel();
+		
+		if (prevHeading.isZeroVector() || curHeading.isZeroVector())
+		{
+			return null;
+		}
 		
 		double radAngle = GeoMath.angleBetweenVectorAndVector(prevHeading, curHeading);
 		if (radAngle > Math.toRadians(ANGLE_THRESHOLD_DEGREE))
 		{
 			IVector2 ballPos = curBall.getPos();
-			ILine ballHeadingLine = new Line(ballPos, curBall.getVel().multiplyNew(-1.0d));
-			List<ITrackedBot> closeBots = getCloseBots(frame, ballPos);
+			ILine reversedBallHeading = new Line(ballPos, curBall.getVel().multiplyNew(-1.0d));
+			List<ITrackedBot> closeBots = getBotsCloseToBall(frame);
 			
 			
 			Optional<ITrackedBot> optTouchedBot = closeBots.stream()
-					.filter(bot -> {
-						IVector2 leadPoint = GeoMath.leadPointOnLine(bot.getPos(), ballHeadingLine);
-						double lineToBotDist = GeoMath.distancePP(bot.getPos(), leadPoint);
-						if ((lineToBotDist < (Geometry.getBotRadius() + BOT_RADIUS_MARGIN)) &&
-								ballHeadingLine.isPointInFront(bot.getPos()))
-						{
-							return true;
-						}
-						return false;
-					})
+					.filter(bot -> isBotInFrontOfLine(bot, reversedBallHeading))
 					.sorted(new BotDistanceComparator(ballPos))
 					.findFirst();
 			
@@ -230,7 +228,33 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	}
 	
 	
-	private List<ITrackedBot> getCloseBots(final IAutoRefFrame frame, final IVector2 pos)
+	/**
+	 * This function tries to determine if the ball heading which is described by {@code line} intersects with the bot
+	 * and the intersection is located in the direction of the line.
+	 * 
+	 * @param bot
+	 * @param line
+	 * @return
+	 */
+	private boolean isBotInFrontOfLine(final ITrackedBot bot, final ILine line)
+	{
+		try
+		{
+			double lineToBotDist = GeoMath.distancePL(bot.getPos(), line);
+			
+			boolean ballOriginatedFromBot = lineToBotDist < (Geometry.getBotRadius() + BOT_RADIUS_MARGIN);
+			boolean botInFront = line.isPointInFront(bot.getPos());
+			return ballOriginatedFromBot && botInFront;
+		} catch (RuntimeException e)
+		{
+			log.debug("Error while calculating the lead point", e);
+			return false;
+		}
+		
+	}
+	
+	
+	private List<ITrackedBot> getBotsCloseToBall(final IAutoRefFrame frame)
 	{
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
 		TrackedBall ball = frame.getWorldFrame().getBall();
@@ -244,7 +268,7 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		double radius = Math.max(ballTravelDist, MIN_SEARCH_RADIUS);
 		
 		return bots.values().stream()
-				.filter(bot -> GeoMath.distancePP(bot.getPos(), pos) < radius)
+				.filter(bot -> GeoMath.distancePP(bot.getPos(), ball.getPos()) < radius)
 				.collect(Collectors.toList());
 	}
 }

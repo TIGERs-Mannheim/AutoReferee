@@ -72,6 +72,6 @@ public class AutoRefMainFrame extends AMainFrame
 	@Override
 	protected ImageIcon getFrameIcon()
 	{
-		return loadIconImage("whistle.png");
+		return loadIconImage("/whistle.png");
 	}
 }

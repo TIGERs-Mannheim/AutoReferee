@@ -77,28 +77,7 @@ public class DummyBot implements IBot
 	@Override
 	public double getBatteryRelative()
 	{
-		return 0;
-	}
-	
-	
-	@Override
-	public double getBatteryLevel()
-	{
-		return 0;
-	}
-	
-	
-	@Override
-	public double getBatteryLevelMax()
-	{
-		return 0;
-	}
-	
-	
-	@Override
-	public double getBatteryLevelMin()
-	{
-		return 0;
+		return 1;
 	}
 	
 	
@@ -239,5 +218,19 @@ public class DummyBot implements IBot
 	public String getDevice()
 	{
 		return "";
+	}
+	
+	
+	@Override
+	public double getDefaultVelocity()
+	{
+		return 3;
+	}
+	
+	
+	@Override
+	public double getDefaultAcceleration()
+	{
+		return 3;
 	}
 }

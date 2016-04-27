@@ -8,6 +8,9 @@
  */
 package edu.tigers.sumatra.referee;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
@@ -109,6 +112,20 @@ public final class TeamConfig
 			default:
 				throw new IllegalArgumentException();
 		}
+	}
+	
+	
+	/**
+	 * Returns the keeper IDs as set
+	 * 
+	 * @return modifiable set of the keeper ids
+	 */
+	public static Set<BotID> getKeeperIDs()
+	{
+		Set<BotID> keeperSet = new HashSet<>();
+		keeperSet.add(getKeeperBotIDBlue());
+		keeperSet.add(getKeeperBotIDYellow());
+		return keeperSet;
 	}
 	
 	

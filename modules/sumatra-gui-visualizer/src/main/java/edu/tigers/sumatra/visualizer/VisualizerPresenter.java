@@ -13,6 +13,8 @@ import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -69,31 +71,28 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class VisualizerPresenter extends ASumatraViewPresenter implements IRobotsPanelObserver, IFieldPanelObserver,
 		IWorldFrameObserver
 {
-	private static final Logger							log							= Logger
-																											.getLogger(
-																													VisualizerPresenter.class
-																															.getName());
-	private static final int								CAM_FRAME_BUFFER_SIZE	= 10;
-																									
-	private static final int								VISUALIZATION_FPS			= 30;
-	private ScheduledExecutorService						execService;
-	private final VisualizerPanel							panel							= new VisualizerPanel();
-	private final OptionsPanelPresenter					optionsPanelPresenter;
-																	
-																	
-	private WorldFrameWrapper								lastWorldFrameWrapper	= null;
-	private final List<ExtendedCamDetectionFrame>	camFrameBuffer				= new ArrayList<>(
-																											CAM_FRAME_BUFFER_SIZE);
-	private final Object										camFrameBufferSync		= new Object();
-																									
-																									
-	private BotID												selectedRobotId			= BotID.get();
-																									
-																									
+	private static final Logger									log							= Logger
+			.getLogger(
+					VisualizerPresenter.class
+							.getName());
+	
+	private static final int										VISUALIZATION_FPS			= 30;
+	private ScheduledExecutorService								execService;
+	private final VisualizerPanel									panel							= new VisualizerPanel();
+	private final OptionsPanelPresenter							optionsPanelPresenter;
+	
+	
+	private WorldFrameWrapper										lastWorldFrameWrapper	= null;
+	private final Map<Integer, ExtendedCamDetectionFrame>	camFrames					= new ConcurrentHashMap<>();
+	
+	
+	private BotID														selectedRobotId			= BotID.get();
+	
+	
 	/**  */
-	public static final String								BLOCKED_BY_SUMATRA		= "Blocked by Sumatra";
-																									
-																									
+	public static final String										BLOCKED_BY_SUMATRA		= "Blocked by Sumatra";
+	
+	
 	/**
 	 */
 	public VisualizerPresenter()
@@ -280,7 +279,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 				
 				GlobalShortcuts.register(EShortcut.RESET_FIELD,
 						(() -> panel.getFieldPanel().onOptionChanged(EVisualizerOptions.RESET_FIELD, true)));
-						
+				
 				start();
 				break;
 			case NOT_LOADED:
@@ -302,7 +301,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 				break;
 			default:
 				break;
-				
+			
 		}
 	}
 	
@@ -377,11 +376,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	private void updateCamFrameShapes()
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
-		List<ExtendedCamDetectionFrame> mergedFrames;
-		synchronized (camFrameBufferSync)
-		{
-			mergedFrames = new ArrayList<>(camFrameBuffer);
-		}
+		List<ExtendedCamDetectionFrame> mergedFrames = new ArrayList<>(camFrames.values());
 		for (ExtendedCamDetectionFrame mergedCamFrame : mergedFrames)
 		{
 			assert mergedCamFrame != null;
@@ -414,9 +409,9 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 				shapes.add(ballCircle);
 			}
 			
-			Color ballColor = new Color(50, 100, 20);
+			Color ballColor = new Color(50, 100, 200);
 			DrawableCircle ballCircle = new DrawableCircle(mergedCamFrame.getBall().getPos().getXYVector(),
-					Geometry.getBallRadius(), ballColor);
+					Geometry.getBallRadius() - 5, ballColor);
 			ballCircle.setFill(true);
 			shapes.add(ballCircle);
 		}
@@ -452,15 +447,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	@Override
 	public void onNewCamDetectionFrame(final ExtendedCamDetectionFrame frame)
 	{
-		synchronized (camFrameBufferSync)
-		{
-			if (camFrameBuffer.size() >= CAM_FRAME_BUFFER_SIZE)
-			{
-				camFrameBuffer.remove(0);
-			}
-			assert frame != null;
-			camFrameBuffer.add(frame);
-		}
+		camFrames.put(frame.getCameraId(), frame);
 	}
 	
 	
@@ -475,10 +462,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	@Override
 	public void onClearCamDetectionFrame()
 	{
-		synchronized (camFrameBufferSync)
-		{
-			camFrameBuffer.clear();
-		}
+		camFrames.clear();
 	}
 	
 	

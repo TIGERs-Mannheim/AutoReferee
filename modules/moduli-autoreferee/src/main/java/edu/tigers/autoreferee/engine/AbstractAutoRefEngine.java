@@ -14,10 +14,10 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.GameEventEngine;
+import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.log.GameLog;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
-import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
-import edu.tigers.autoreferee.engine.violations.RuleViolationEngine;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -30,7 +30,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
 	private static final Logger	log					= Logger.getLogger(AbstractAutoRefEngine.class);
 	
-	private RuleViolationEngine	violationEngine	= null;
+	private GameEventEngine	gameEventEngine	= null;
 	protected EEngineState			engineState			= null;
 	protected GameLog					gameLog				= new GameLog();
 	
@@ -48,7 +48,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	 */
 	public AbstractAutoRefEngine()
 	{
-		violationEngine = new RuleViolationEngine();
+		gameEventEngine = new GameEventEngine();
 		engineState = EEngineState.RUNNING;
 	}
 	
@@ -56,22 +56,22 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	/**
 	 * @param detectors
 	 */
-	public AbstractAutoRefEngine(final Set<EViolationDetectorType> detectors)
+	public AbstractAutoRefEngine(final Set<EGameEventDetectorType> detectors)
 	{
-		violationEngine = new RuleViolationEngine(detectors);
+		gameEventEngine = new GameEventEngine(detectors);
 	}
 	
 	
 	@Override
-	public synchronized void setActiveViolations(final Set<EViolationDetectorType> types)
+	public synchronized void setActiveGameEvents(final Set<EGameEventDetectorType> types)
 	{
-		violationEngine.setActiveDetectors(types);
+		gameEventEngine.setActiveDetectors(types);
 	}
 	
 	
-	protected List<IRuleViolation> getViolations(final IAutoRefFrame frame)
+	protected List<IGameEvent> getGameEvents(final IAutoRefFrame frame)
 	{
-		return violationEngine.update(frame);
+		return gameEventEngine.update(frame);
 	}
 	
 	
@@ -85,6 +85,13 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 		}
 		gameLog.setCurrentTimestamp(frame.getTimestamp());
 		
+		RefereeMsg curRefMsg = frame.getRefereeMsg();
+		RefereeMsg lastRefMsg = frame.getPreviousFrame().getRefereeMsg();
+		if (curRefMsg.getCommandCounter() != lastRefMsg.getCommandCounter())
+		{
+			gameLog.addEntry(curRefMsg);
+		}
+		
 		EGameStateNeutral curGameState = frame.getGameState();
 		EGameStateNeutral lastGameState = frame.getPreviousFrame().getGameState();
 		if (curGameState != lastGameState)
@@ -97,13 +104,6 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 		if (curStage != previousStage)
 		{
 			onStageChange(previousStage, curStage);
-		}
-		
-		RefereeMsg curRefMsg = frame.getRefereeMsg();
-		RefereeMsg lastRefMsg = frame.getPreviousFrame().getRefereeMsg();
-		if (curRefMsg.getCommandCounter() != lastRefMsg.getCommandCounter())
-		{
-			gameLog.addEntry(curRefMsg);
 		}
 	}
 	
@@ -128,9 +128,9 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	}
 	
 	
-	protected void logViolations(final List<IRuleViolation> violations)
+	protected void logGameEvents(final List<IGameEvent> gameEvents)
 	{
-		violations.forEach(violation -> gameLog.addEntry(violation));
+		gameEvents.forEach(event -> gameLog.addEntry(event));
 	}
 	
 	
@@ -145,7 +145,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	public synchronized void reset()
 	{
 		log.debug("Autoref Engine reset");
-		violationEngine.reset();
+		gameEventEngine.reset();
 	}
 	
 	
@@ -153,7 +153,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	public synchronized void resume()
 	{
 		log.debug("Autoref Engine resumed");
-		violationEngine.reset();
+		gameEventEngine.reset();
 		engineState = EEngineState.RUNNING;
 	}
 	

@@ -18,24 +18,24 @@ import edu.tigers.sumatra.wp.kalman.motionModels.IMotionModel;
 public class ExtKalmanFilter implements IFilter
 {
 	private static final Logger	log					= Logger.getLogger(ExtKalmanFilter.class.getName());
-																	
+	
 	private int							id;
-											
+	
 	// time of current state
 	private long						currentTimestamp	= -1;
-																	
+	
 	// predictor context providing access to global variables
 	private PredictionContext		context;
 	// motion model handling the processed object
 	private IMotionModel				motion;
-											
+	
 	// number of lookahead predictions
 	private int							stepcount;
 	// period of time to next lookahead prediction
 	private double						stepsize;
 	// increment of first lookahead prediction time
 	private double						offset;
-											
+	
 	// arrays for holding filter data
 	// index 0 provides data for the current state
 	// other indices provide data for predicted states at 'stepsize*index+predictionGap'
@@ -43,11 +43,11 @@ public class ExtKalmanFilter implements IFilter
 	private Matrix[]					state;
 	// covariance matrix
 	private Matrix[]					covar;
-											
+	
 	// control vector
 	private Matrix						contr;
-											
-											
+	
+	
 	/**
 	 * Creates a new KalmanFilter.
 	 * state_n number of different states in the state vector
@@ -90,7 +90,8 @@ public class ExtKalmanFilter implements IFilter
 	}
 	
 	
-	private void reset(final long firstTimestamp, final Matrix measurement)
+	@Override
+	public void reset(final long firstTimestamp, final Matrix measurement)
 	{
 		currentTimestamp = firstTimestamp;
 		contr = motion.generateControlMatrix(null, null);

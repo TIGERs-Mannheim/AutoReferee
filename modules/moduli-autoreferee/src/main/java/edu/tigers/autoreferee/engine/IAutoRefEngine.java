@@ -11,8 +11,8 @@ package edu.tigers.autoreferee.engine;
 import java.util.Set;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.log.GameLog;
-import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
 
 
 /**
@@ -71,7 +71,7 @@ public interface IAutoRefEngine
 	/**
 	 * @param types
 	 */
-	public void setActiveViolations(Set<EViolationDetectorType> types);
+	public void setActiveGameEvents(Set<EGameEventDetectorType> types);
 	
 	
 	/**

@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
@@ -31,7 +31,6 @@ public class GameLog
 	private static final Logger		log					= Logger.getLogger(GameLog.class);
 	
 	private long							startRefTimestamp	= 0;
-	private Instant						startTime			= Instant.now();
 	private long							currentTimestamp	= 0;
 	private List<GameLogEntry>			entries				= new ArrayList<>();
 	private List<IGameLogObserver>	observer				= new ArrayList<>();
@@ -43,7 +42,6 @@ public class GameLog
 	public void initialize(final long timestamp)
 	{
 		log.debug("Initialized game log with timestamp: " + timestamp);
-		startTime = Instant.now();
 		startRefTimestamp = timestamp;
 		currentTimestamp = timestamp;
 	}
@@ -57,7 +55,7 @@ public class GameLog
 	
 	private Instant getCurrentInstant()
 	{
-		return startTime.plusNanos(getTimeSinceStart());
+		return Instant.now();
 	}
 	
 	
@@ -121,17 +119,19 @@ public class GameLog
 	 */
 	public GameLogEntry addEntry(final EGameStateNeutral gamestate)
 	{
+		log.info("Gamestate changed: " + gamestate);
 		return buildAndAddEntry(builder -> builder.setGamestate(gamestate));
 	}
 	
 	
 	/**
-	 * @param violation
+	 * @param event
 	 * @return
 	 */
-	public GameLogEntry addEntry(final IRuleViolation violation)
+	public GameLogEntry addEntry(final IGameEvent event)
 	{
-		return buildAndAddEntry(builder -> builder.setViolation(violation));
+		log.info("Game event: " + event.toString());
+		return buildAndAddEntry(builder -> builder.setGameEvent(event));
 	}
 	
 	
@@ -141,6 +141,7 @@ public class GameLog
 	 */
 	public GameLogEntry addEntry(final RefereeMsg refereeMsg)
 	{
+		log.info("Ref msg: " + GameLogFormatter.formatRefMsg(refereeMsg));
 		return buildAndAddEntry(builder -> builder.setRefereeMsg(refereeMsg));
 	}
 	
@@ -151,6 +152,13 @@ public class GameLog
 	 */
 	public GameLogEntry addEntry(final FollowUpAction action)
 	{
+		if (action != null)
+		{
+			log.info("Follow up set: " + GameLogFormatter.formatFollowUp(action));
+		} else
+		{
+			log.info("Follow up reset");
+		}
 		return buildAndAddEntry(builder -> builder.setFollowUpAction(action));
 	}
 	
@@ -161,6 +169,7 @@ public class GameLog
 	 */
 	public GameLogEntry addEntry(final RefCommand command)
 	{
+		log.info("Command sent: " + GameLogFormatter.formatCommand(command));
 		return buildAndAddEntry(builder -> builder.setCommand(command));
 	}
 	

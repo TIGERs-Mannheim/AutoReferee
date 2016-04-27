@@ -11,6 +11,8 @@ package edu.tigers.sumatra.cam.data;
 import java.util.Collections;
 import java.util.List;
 
+import com.sleepycat.persist.model.Persistent;
+
 
 /**
  * This class contains every information a
@@ -19,24 +21,40 @@ import java.util.List;
  * 
  * @author Gero
  */
+@Persistent
 public class CamDetectionFrame
 {
 	/** time-stamp in System.nanotime() */
 	private final long				tCapture;
-											
+	
 	/** time-stamp in System.nanotime() */
 	private final long				tSent;
-											
+	
 	/** ID 0 or 1 */
 	private final int					cameraId;
-											
+	
 	/** independent frame number, continuous */
 	private final long				frameNumber;
 	private final List<CamBall>	balls;
 	private final List<CamRobot>	robotsYellow;
 	private final List<CamRobot>	robotsBlue;
-											
-											
+	
+	
+	/**
+	 * 
+	 */
+	protected CamDetectionFrame()
+	{
+		tCapture = 0;
+		tSent = 0;
+		cameraId = 0;
+		frameNumber = 0;
+		balls = null;
+		robotsYellow = null;
+		robotsBlue = null;
+	}
+	
+	
 	/**
 	 * @param tCapture
 	 * @param tSent
@@ -57,9 +75,9 @@ public class CamDetectionFrame
 		this.frameNumber = frameNumber;
 		
 		// Collections
-		this.balls = Collections.unmodifiableList(balls);
-		robotsYellow = Collections.unmodifiableList(yellowBots);
-		robotsBlue = Collections.unmodifiableList(blueBots);
+		this.balls = balls;
+		robotsYellow = yellowBots;
+		robotsBlue = blueBots;
 	}
 	
 	
@@ -131,7 +149,7 @@ public class CamDetectionFrame
 	 */
 	public List<CamBall> getBalls()
 	{
-		return balls;
+		return Collections.unmodifiableList(balls);
 	}
 	
 	
@@ -140,7 +158,7 @@ public class CamDetectionFrame
 	 */
 	public List<CamRobot> getRobotsYellow()
 	{
-		return robotsYellow;
+		return Collections.unmodifiableList(robotsYellow);
 	}
 	
 	
@@ -149,6 +167,6 @@ public class CamDetectionFrame
 	 */
 	public List<CamRobot> getRobotsBlue()
 	{
-		return robotsBlue;
+		return Collections.unmodifiableList(robotsBlue);
 	}
 }

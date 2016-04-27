@@ -21,15 +21,16 @@ import edu.tigers.sumatra.ids.IBotIDMap;
  * 
  * @author Gero
  */
-@Persistent(version = 1)
+@Persistent(version = 3)
 public class SimpleWorldFrame
 {
-	private final long							frameNumber;
-	private final IBotIDMap<ITrackedBot>	bots;
-	private final TrackedBall					ball;
-	private final long							timestamp;
-														
-														
+	private final long									frameNumber;
+	private final IBotIDMap<ITrackedBot>			bots;
+	private final TrackedBall							ball;
+	private final long									timestamp;
+	private transient ExtendedCamDetectionFrame	frame	= null;
+	
+	
 	@SuppressWarnings("unused")
 	private SimpleWorldFrame()
 	{
@@ -67,6 +68,7 @@ public class SimpleWorldFrame
 		timestamp = swf.timestamp;
 		frameNumber = swf.frameNumber;
 		bots = swf.bots;
+		frame = swf.frame;
 	}
 	
 	
@@ -85,6 +87,7 @@ public class SimpleWorldFrame
 		}
 		TrackedBall mBall = new TrackedBall(getBall()).mirrorNew();
 		SimpleWorldFrame frame = new SimpleWorldFrame(bots, mBall, frameNumber, timestamp);
+		frame.setCamFrame(getCamFrame());
 		return frame;
 	}
 	
@@ -149,5 +152,23 @@ public class SimpleWorldFrame
 	public final long getTimestamp()
 	{
 		return timestamp;
+	}
+	
+	
+	/**
+	 * @param frame
+	 */
+	public void setCamFrame(final ExtendedCamDetectionFrame frame)
+	{
+		this.frame = frame;
+	}
+	
+	
+	/**
+	 * @return the frame
+	 */
+	public ExtendedCamDetectionFrame getCamFrame()
+	{
+		return frame;
 	}
 }

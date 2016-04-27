@@ -9,7 +9,7 @@
 package edu.tigers.autoreferee.engine.states;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 
 
 /**
@@ -32,10 +32,10 @@ public interface IAutoRefState
 	
 	
 	/**
-	 * @param violation
+	 * @param gameEvent
 	 * @param ctx
 	 */
-	public void handleViolation(IRuleViolation violation, IAutoRefStateContext ctx);
+	public void handleGameEvent(IGameEvent gameEvent, IAutoRefStateContext ctx);
 	
 	
 	/**

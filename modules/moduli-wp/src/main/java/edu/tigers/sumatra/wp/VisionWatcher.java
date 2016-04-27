@@ -12,8 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,13 +50,13 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class VisionWatcher implements IWorldFrameObserver, Runnable
 {
 	private static final Logger					log						= Logger
-																								.getLogger(VisionWatcher.class.getName());
+			.getLogger(VisionWatcher.class.getName());
 	private static final String					DATA_DIR					= "data/vision/";
 	private final long								startTime				= System.nanoTime();
 	private SimpleWorldFrame						currentFrame			= null;
-	private CamBall									lastBall					= null;
+	private TrackedBall								lastBall					= null;
 	private IVector2									initBallPos				= null;
-	private final List<ExportDataContainer>	data						= new LinkedList<>();
+	private final List<ExportDataContainer>	data						= new ArrayList<>();
 	private final String								fileName;
 	private long										time2Stop				= 0;
 	private boolean									processing				= false;
@@ -64,8 +64,8 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	private int											numFramesBallStopped	= 0;
 	private boolean									stopAutomatically		= true;
 	private double										timeout					= 30;
-																						
-																						
+	
+	
 	/**
 	 * @param fileName
 	 */
@@ -174,8 +174,21 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	}
 	
 	
-	protected boolean checkIsDone(final CamBall ball)
+	protected boolean checkIsDone(final TrackedBall ball)
 	{
+		TrackedBall lastBall = this.lastBall;
+		if (lastBall == null)
+		{
+			lastBall = ball;
+		}
+		
+		this.lastBall = ball;
+		
+		if (initBallPos == null)
+		{
+			initBallPos = ball.getPos().getXYVector();
+		}
+		
 		if ((time2Stop != 0) && ((System.nanoTime() - time2Stop) > 0))
 		{
 			log.debug("requested timeout reached. Done.");
@@ -217,30 +230,19 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		{
 			return;
 		}
+		
 		if (currentFrame == null)
 		{
 			return;
 		}
 		
 		CamBall curBall = frame.getBall();
-		if (lastBall == null)
-		{
-			lastBall = curBall;
-		}
-		
-		if (initBallPos == null)
-		{
-			initBallPos = curBall.getPos().getXYVector();
-		}
-		ITrackedBot nearestBot = getBotNearestToBall(currentFrame, curBall);
-		TrackedBall trackedBall = currentFrame.getBall();
 		
 		ExportDataContainer container = new ExportDataContainer();
 		container.setFrameInfo(new FrameInfo(frame.getFrameNumber(), frame.getCameraId(),
 				frame.gettCapture(), frame.gettSent(), System.nanoTime()));
 		container.setCurBall(curBall);
-		container.setWpBall(new WpBall(trackedBall.getPos3(), trackedBall.getVel3(), trackedBall.getAcc3(), frame
-				.getFrameNumber(), curBall.getTimestamp(), trackedBall.getConfidence()));
+		
 		for (CamBall camBall : frame.getBalls())
 		{
 			container.getBalls().add(camBall);
@@ -253,11 +255,17 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 		{
 			container.getRawBots().add(camRobot);
 		}
+		
+		// ### WP
+		
+		TrackedBall trackedBall = currentFrame.getBall();
+		container.setWpBall(new WpBall(trackedBall.getPos3(), trackedBall.getVel3(), trackedBall.getAcc3(), currentFrame
+				.getId(), currentFrame.getTimestamp(), trackedBall.getConfidence()));
 		for (ITrackedBot tBot : currentFrame.getBots().values())
 		{
 			container.getWpBots().add(
 					ExportDataContainer.trackedBot2WpBot(tBot, currentFrame.getId(), currentFrame.getTimestamp()));
-					
+			
 			if (tBot.getBot().getSensoryPos().isPresent())
 			{
 				WpBot isBot = ExportDataContainer.trackedBot2WpBot(tBot, currentFrame.getId(), currentFrame.getTimestamp());
@@ -273,12 +281,13 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 			}
 		}
 		
+		ITrackedBot nearestBot = getBotNearestToBall(currentFrame, trackedBall);
 		container.getCustomNumberListable().put("nearestBot",
 				ExportDataContainer.trackedBot2WpBot(nearestBot, currentFrame.getId(), currentFrame.getTimestamp()));
+		
+		
 		notifyCustomData(container, frame);
 		data.add(container);
-		
-		lastBall = curBall;
 		
 		if (checkIsFailed(curBall))
 		{
@@ -287,14 +296,21 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 			return;
 		}
 		
-		if (checkIsDone(curBall))
+		if (checkIsDone(trackedBall))
 		{
 			exportData();
 		}
 	}
 	
 	
-	private ITrackedBot getBotNearestToBall(final SimpleWorldFrame frame, final CamBall curBall)
+	@Override
+	public void onNewWorldFrame(final WorldFrameWrapper wfWrapper)
+	{
+		currentFrame = wfWrapper.getSimpleWorldFrame();
+	}
+	
+	
+	private ITrackedBot getBotNearestToBall(final SimpleWorldFrame frame, final TrackedBall curBall)
 	{
 		IVector2 ballPos = curBall.getPos().getXYVector();
 		double minDist = Double.MAX_VALUE;
@@ -329,13 +345,6 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	public final void stopExport()
 	{
 		stopDelayed(0);
-	}
-	
-	
-	@Override
-	public void onNewWorldFrame(final WorldFrameWrapper wfWrapper)
-	{
-		currentFrame = wfWrapper.getSimpleWorldFrame();
 	}
 	
 	
@@ -401,15 +410,6 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	public final IVector2 getInitBallPos()
 	{
 		return initBallPos;
-	}
-	
-	
-	/**
-	 * @return the lastBall
-	 */
-	public final CamBall getLastBall()
-	{
-		return lastBall;
 	}
 	
 	

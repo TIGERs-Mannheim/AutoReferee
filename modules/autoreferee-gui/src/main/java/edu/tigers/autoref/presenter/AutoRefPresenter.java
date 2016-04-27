@@ -35,7 +35,7 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine.IAutoRefEngineObserver;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
-import edu.tigers.autoreferee.engine.violations.IViolationDetector.EViolationDetectorType;
+import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
@@ -55,7 +55,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 	
 	private SumatraViewPanel									mainPanel			= new SumatraViewPanel();
 	private StartStopPanel										startStopPanel		= new StartStopPanel();
-	private EnumCheckBoxPanel<EViolationDetectorType>	violationsPanel;
+	private EnumCheckBoxPanel<EGameEventDetectorType>	gameEventPanel;
 	private ActiveEnginePanel									activeEnginePanel	= new ActiveEnginePanel();
 	
 	private class AutoRefStateObserver implements IAutoRefStateObserver
@@ -97,16 +97,16 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 		}
 	}
 	
-	private class ViolationsPanelObserver implements IEnumPanelObserver<EViolationDetectorType>
+	private class GameEventsPanelObserver implements IEnumPanelObserver<EGameEventDetectorType>
 	{
 		@Override
-		public void onValueTicked(final EViolationDetectorType type, final boolean value)
+		public void onValueTicked(final EGameEventDetectorType type, final boolean value)
 		{
-			Set<EViolationDetectorType> types = violationsPanel.getValues();
+			Set<EGameEventDetectorType> types = gameEventPanel.getValues();
 			Optional<AutoRefModule> autoref = AutoRefUtil.getAutoRefModule();
 			if (autoref.isPresent() && (autoref.get().getState() == AutoRefState.RUNNING))
 			{
-				autoref.get().getEngine().setActiveViolations(types);
+				autoref.get().getEngine().setActiveGameEvents(types);
 			}
 		}
 	}
@@ -229,17 +229,17 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 	 */
 	public AutoRefPresenter()
 	{
-		violationsPanel = new EnumCheckBoxPanel<>(EViolationDetectorType.class, "Violations", BoxLayout.PAGE_AXIS);
+		gameEventPanel = new EnumCheckBoxPanel<>(EGameEventDetectorType.class, "Game Events", BoxLayout.PAGE_AXIS);
 		
 		startStopPanel.addObserver(new StartStopPanelObserver());
-		violationsPanel.addObserver(new ViolationsPanelObserver());
+		gameEventPanel.addObserver(new GameEventsPanelObserver());
 		
 		activeEnginePanel.setPanelEnabled(false);
 		activeEnginePanel.addObserver(new ActiveEnginePanelObserver());
 		
 		mainPanel.setLayout(new MigLayout("center", "[320][]", "[][]"));
 		mainPanel.add(startStopPanel, "grow x, top");
-		mainPanel.add(violationsPanel, "span 1 2, wrap");
+		mainPanel.add(gameEventPanel, "span 1 2, wrap");
 		mainPanel.add(activeEnginePanel, "grow x, top");
 		
 		ModuliStateAdapter.getInstance().addObserver(this);
@@ -286,7 +286,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 	
 	private void setPanelsEnabled(final boolean enabled)
 	{
-		Arrays.asList(startStopPanel, activeEnginePanel, violationsPanel).forEach(
+		Arrays.asList(startStopPanel, activeEnginePanel, gameEventPanel).forEach(
 				panel -> panel.setPanelEnabled(enabled));
 		if (enabled == true)
 		{

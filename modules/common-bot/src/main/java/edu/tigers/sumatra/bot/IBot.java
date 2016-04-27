@@ -32,24 +32,6 @@ public interface IBot
 	/**
 	 * @return
 	 */
-	double getBatteryLevel();
-	
-	
-	/**
-	 * @return
-	 */
-	double getBatteryLevelMax();
-	
-	
-	/**
-	 * @return
-	 */
-	double getBatteryLevelMin();
-	
-	
-	/**
-	 * @return
-	 */
 	double getKickerLevel();
 	
 	
@@ -192,4 +174,16 @@ public interface IBot
 	 * @return
 	 */
 	String getDevice();
+	
+	
+	/**
+	 * @return
+	 */
+	double getDefaultVelocity();
+	
+	
+	/**
+	 * @return
+	 */
+	double getDefaultAcceleration();
 }

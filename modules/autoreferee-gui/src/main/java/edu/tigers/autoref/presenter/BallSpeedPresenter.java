@@ -24,8 +24,13 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.IConfigClient;
+import com.github.g3force.configurable.IConfigObserver;
+
 import edu.tigers.autoref.view.panel.FixedTimeRangeChartPanel;
 import edu.tigers.autoref.view.panel.SumatraViewPanel;
+import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
@@ -150,12 +155,13 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 				}
 			});
 		
-		chartPanel = new FixedTimeRangeChartPanel(getTimeRange());
-		chartPanel.setColor(Color.RED);
+		chartPanel = new FixedTimeRangeChartPanel(getTimeRange(), true);
+		chartPanel.setColor(Color.BLUE);
 		chartPanel.clipY(0, 15);
 		chartPanel.setXTitle("Time [s]");
 		chartPanel.setYTitle("Ball Speed [m/s]");
 		chartPanel.setPointBufferSizeWithPeriod(TimeUnit.MILLISECONDS.toNanos(chartUpdatePeriod));
+		setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
 		
 		pauseButton.addActionListener(e -> pauseRequested = true);
 		resumeButton.addActionListener(e -> resumeRequested = true);
@@ -170,6 +176,15 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 		mainPanel.add(chartPanel, BorderLayout.CENTER);
 		mainPanel.add(southPanel, BorderLayout.SOUTH);
 		mainPanel.add(timeRangeSlider, BorderLayout.EAST);
+		
+		ConfigRegistration.registerConfigurableCallback("autoreferee", new IConfigObserver()
+		{
+			@Override
+			public void afterApply(final IConfigClient configClient)
+			{
+				setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
+			}
+		});
 	}
 	
 	
@@ -193,6 +208,12 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	private long getTimeRange()
 	{
 		return TimeUnit.SECONDS.toNanos(timeRange);
+	}
+	
+	
+	private void setMaxBallVelocityLine(final double value)
+	{
+		chartPanel.setHorizontalLine("Max", Color.RED, value);
 	}
 	
 	

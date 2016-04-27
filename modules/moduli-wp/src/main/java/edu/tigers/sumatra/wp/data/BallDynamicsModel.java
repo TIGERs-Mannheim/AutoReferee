@@ -164,10 +164,12 @@ public class BallDynamicsModel
 		// double tLastCollision = state.get(9, 0) + dt;
 		newState.set(9, 0, confidence);
 		
+		Matrix outState = handleCollision(state, newState, dt, context);
 		if (handleCollision)
 		{
-			return handleCollision(state, newState, dt, context);
+			return outState;
 		}
+		newState.set(9, 0, outState.get(9, 0));
 		return newState;
 	}
 	
@@ -279,7 +281,7 @@ public class BallDynamicsModel
 							// possible kick soon
 							outState.set(9, 0, confOnCollision);
 							
-							if (modelStraightKick && (info.getDribbleRpm() > 0))
+							if (modelStraightKick && ((info.getDribbleRpm() > 0) && (info.getKickSpeed() == 0)))
 							{
 								IVector2 kickerPos = info.getPos().getXYVector()
 										.addNew(new Vector2(info.getPos().z())

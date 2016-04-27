@@ -43,23 +43,23 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 {
 	
 	private static final Logger						log						= Logger
-																									.getLogger(SSLVisionCam.class.getName());
-																									
+			.getLogger(SSLVisionCam.class.getName());
+	
 	// Constants
 	private static final int							BUFFER_SIZE				= 10000;
 	private final byte[]									bufferArr				= new byte[BUFFER_SIZE];
-																							
+	
 	// Connection
 	private Thread											cam;
 	private IReceiver										receiver;
-																
-																
+	
+	
 	private boolean										expectIOE				= false;
-																							
+	
 	// Translation
 	private final SSLVisionCamGeometryTranslator	geometryTranslator	= new SSLVisionCamGeometryTranslator();
-																							
-																							
+	
+	
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH" }, defValueSpezis = { "10006", "40102", "10006",
 			"10006" })
 	private int												port						= 10006;
@@ -67,11 +67,11 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	private String											address					= "224.5.23.2";
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP" }, defValue = "")
 	private String											network					= "";
-																							
+	
 	private NetworkInterface							nif;
 	private final TimeSync								timeSync					= new TimeSync();
-																							
-																							
+	
+	
 	static
 	{
 		ConfigRegistration.registerClass("user", SSLVisionCam.class);

@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.states;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.autoreferee.remote.ICommandResult;
 
 
 /**
@@ -19,8 +20,9 @@ public interface IAutoRefStateContext
 {
 	/**
 	 * @param cmd
+	 * @return
 	 */
-	public void sendCommand(RefCommand cmd);
+	public ICommandResult sendCommand(RefCommand cmd);
 	
 	
 	/**

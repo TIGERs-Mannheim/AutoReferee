@@ -23,13 +23,14 @@ import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
+import net.miginfocom.swing.MigLayout;
+
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.GlobalShortcuts.EShortcut;
 import edu.tigers.sumatra.util.ImageScaler;
 import edu.tigers.sumatra.view.FpsPanel;
-import net.miginfocom.swing.MigLayout;
 
 
 /**
@@ -76,7 +77,7 @@ public class ToolBar
 		btnEmergency = new JButton();
 		btnEmergency.setForeground(Color.red);
 		btnEmergency.addActionListener(new EmergencyStopListener());
-		btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("stop-emergency.png"));
+		btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/stop-emergency.png"));
 		btnEmergency.setToolTipText("Emergency stop [Esc]");
 		btnEmergency.setEnabled(false);
 		btnEmergency.setBorder(BorderFactory.createEmptyBorder());
@@ -84,7 +85,7 @@ public class ToolBar
 		
 		btnRecSave = new JButton();
 		btnRecSave.addActionListener(new RecordSaveButtonListener());
-		btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("record.png"));
+		btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/record.png"));
 		btnRecSave.setToolTipText("Start/Stop recording");
 		btnRecSave.setEnabled(false);
 		btnRecSave.setBorder(BorderFactory.createEmptyBorder());
@@ -259,10 +260,10 @@ public class ToolBar
 	{
 		if (recording)
 		{
-			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("recordActive.gif"));
+			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/recordActive.gif"));
 		} else
 		{
-			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("record.png"));
+			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/record.png"));
 		}
 		
 		toolBar.repaint();

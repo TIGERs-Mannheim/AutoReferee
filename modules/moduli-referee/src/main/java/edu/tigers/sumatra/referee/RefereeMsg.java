@@ -15,6 +15,7 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
@@ -38,11 +39,11 @@ public class RefereeMsg
 	private final long			stageTimeLeft;
 	private final TeamInfo		teamInfoYellow;
 	private final TeamInfo		teamInfoBlue;
-										
+	
 	private final ETeamColor	leftTeam;
 	private final IVector2		ballPlacementPos;
-										
-										
+	
+	
 	/**
 	 * Create default referee msg
 	 */
@@ -108,6 +109,24 @@ public class RefereeMsg
 		teamInfoBlue = refereeMsg.teamInfoBlue;
 		leftTeam = refereeMsg.leftTeam;
 		ballPlacementPos = refereeMsg.getBallPlacementPos();
+	}
+	
+	
+	/**
+	 * @param color
+	 * @return
+	 */
+	public final BotID getKeeperBotID(final ETeamColor color)
+	{
+		switch (color)
+		{
+			case BLUE:
+				return BotID.createBotId(teamInfoBlue.getGoalie(), color);
+			case YELLOW:
+				return BotID.createBotId(teamInfoYellow.getGoalie(), color);
+			default:
+				throw new IllegalArgumentException();
+		}
 	}
 	
 	

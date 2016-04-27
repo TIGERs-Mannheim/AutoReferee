@@ -25,11 +25,11 @@ import edu.tigers.sumatra.math.Vector2;
 public class LearnedBallModelTest
 {
 	private final double					acc;
-												
+	
 	private static final double		DT	= 0.001;
 	private final BallDynamicsModel	model;
-												
-												
+	
+	
 	/**
 	 * 
 	 */
@@ -334,6 +334,23 @@ public class LearnedBallModelTest
 			}
 		}
 		Assert.assertEquals(dist, getPosFromMatrix(state).x(), 50);
+	}
+	
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void testGetTimeByInitialVelAndDist()
+	{
+		// [11.275050215242668, -0.10653789862767693, 0.09292537825985826, 7.926686685405853E-5, 9.145954347108197E-4,
+		// -1.386489713332727E-4]
+		
+		// [-3.7968075, 0.011605997, 1.04270024E-4, -7.2500393E-6, 9.995082E-4, -9.8052085E-5]
+		// 0.29795053681064926
+		// System.out.println(Arrays.toString(Geometry.getBallModel().getP()));
+		// double time = Geometry.getBallModel().getTimeByDist(6.318920504534976, 1653.1818843925253);
+		// System.out.println(time);
 	}
 	
 	

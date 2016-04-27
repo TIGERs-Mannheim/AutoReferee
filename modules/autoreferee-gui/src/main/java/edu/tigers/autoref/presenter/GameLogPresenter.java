@@ -52,7 +52,7 @@ public class GameLogPresenter implements ISumatraViewPresenter, IModuliStateObse
 	{
 		Set<ELogEntryType> types = new HashSet<>();
 		types.add(ELogEntryType.COMMAND);
-		types.add(ELogEntryType.VIOLATION);
+		types.add(ELogEntryType.GAME_EVENT);
 		types.add(ELogEntryType.FOLLOW_UP);
 		DEFAULT_ENABLED_BOXES = Collections.unmodifiableSet(types);
 	}

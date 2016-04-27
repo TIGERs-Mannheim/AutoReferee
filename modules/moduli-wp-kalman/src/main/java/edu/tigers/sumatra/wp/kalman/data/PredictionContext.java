@@ -20,6 +20,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.IVector3;
 import edu.tigers.sumatra.math.Vector3;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.data.MotionContext.BotInfo;
 import edu.tigers.sumatra.wp.kalman.filter.ExtKalmanFilter;
@@ -45,24 +46,25 @@ public class PredictionContext
 	private final Map<Integer, IFilter>				blueBots;
 	/** The currently detected balls */
 	private IFilter										ball;
-																
+	
 	/** The new detected TIGER-bots */
 	private final Map<Integer, UnregisteredBot>	newYellowBots;
 	/** The new detected foe-bots */
 	private final Map<Integer, UnregisteredBot>	newBlueBots;
-																
+	
 	@Configurable(comment = "time which one lookahead prediction step should look ahead (in internalTime)")
-	private static double								stepSize					= 0.05;
+	private static double								stepSize					= 0.01;
 	@Configurable(comment = "number of lookahead steps which should be performed")
-	private static int									maxStepCount			= 10;
-																							
-	@Configurable
+	private static int									maxStepCount			= 20;
+	
+	@Configurable(comment = "lookahead to add to current timestamp (prediction part)", spezis = { "",
+			"SUMATRA" }, defValueSpezis = { "0.06", "0.016" })
 	private static double								predictionLookahead	= 0.0;
-																							
-																							
+	
+	
 	private MotionContext								motionContext;
-																
-																
+	
+	
 	static
 	{
 		ConfigRegistration.registerClass("wp", PredictionContext.class);
@@ -73,6 +75,8 @@ public class PredictionContext
 	 */
 	public PredictionContext()
 	{
+		ConfigRegistration.applySpezi("wp", SumatraModel.getInstance().getGlobalConfiguration().getString("environment"));
+		
 		// maps an id (integer) to a ObjectData, maximum 10 elements, 100% load
 		yellowBots = new ConcurrentHashMap<Integer, IFilter>(10, 1);
 		blueBots = new ConcurrentHashMap<Integer, IFilter>(10, 1);

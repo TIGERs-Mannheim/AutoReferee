@@ -17,17 +17,21 @@ import edu.tigers.sumatra.math.IVector2;
 public interface ILearnedBallModel
 {
 	/**
+	 * Get predicted position after given time
+	 * 
 	 * @param currentPos
 	 * @param currentVel
-	 * @param initialVel
+	 * @param initialVel (used to determine t_switch)
 	 * @param time
 	 * @return
 	 */
 	public IVector2 getPosByTime(final IVector2 currentPos, final IVector2 currentVel, final IVector2 initialVel,
 			double time);
-	
-	
+			
+			
 	/**
+	 * Get predicted position after given time
+	 * 
 	 * @param currentVel
 	 * @param initialVel
 	 * @param time
@@ -37,6 +41,8 @@ public interface ILearnedBallModel
 	
 	
 	/**
+	 * Gets theoretical position at given velocity
+	 * 
 	 * @param currentPos
 	 * @param currentVel
 	 * @param initialVel
@@ -45,9 +51,11 @@ public interface ILearnedBallModel
 	 */
 	public IVector2 getPosByVel(final IVector2 currentPos, final IVector2 currentVel, final IVector2 initialVel,
 			final double velocity);
-	
-	
+			
+			
 	/**
+	 * Get theoretical distance at given velocity
+	 * 
 	 * @param currentPos
 	 * @param currentVel
 	 * @param initialVel
@@ -56,9 +64,11 @@ public interface ILearnedBallModel
 	 */
 	public double getDistByVel(final IVector2 currentPos, final IVector2 currentVel, final IVector2 initialVel,
 			double velocity);
-	
-	
+			
+			
 	/**
+	 * Get theoretical spent time to reach distance
+	 * 
 	 * @param currentVel
 	 * @param initialVel
 	 * @param dist
@@ -68,6 +78,8 @@ public interface ILearnedBallModel
 	
 	
 	/**
+	 * Get theoretical time to reach given velocity
+	 * 
 	 * @param currentVel
 	 * @param initialVel
 	 * @param velocity
@@ -77,6 +89,7 @@ public interface ILearnedBallModel
 	
 	
 	/**
+	 * Get velocity at given distance
 	 * @param currentVel
 	 * @param initialVel
 	 * @param dist

@@ -22,9 +22,10 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
+import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -41,13 +42,15 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
  */
 public abstract class AbstractAutoRefState implements IAutoRefState
 {
-	private boolean	firstRun		= true;
+	private boolean			firstRun		= true;
 	/** in ns */
-	private long		entryTime	= 0;
+	private long				entryTime	= 0;
 	/** in ns */
-	private long		currentTime	= 0;
+	private long				currentTime	= 0;
 	
-	private boolean	canProceed;
+	private ICommandResult	lastCommand	= null;
+	
+	private boolean			canProceed;
 	
 	
 	protected static void registerClass(final Class<?> clazz)
@@ -78,10 +81,11 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	
 	
 	@Override
-	public void reset()
+	public final void reset()
 	{
 		firstRun = true;
 		canProceed = false;
+		lastCommand = null;
 		doReset();
 	}
 	
@@ -116,6 +120,34 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	}
 	
 	
+	protected void sendCommand(final IAutoRefStateContext ctx, final RefCommand cmd)
+	{
+		lastCommand = ctx.sendCommand(cmd);
+	}
+	
+	
+	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefCommand cmd)
+	{
+		if ((lastCommand == null) || lastCommand.hasFailed())
+		{
+			lastCommand = ctx.sendCommand(cmd);
+			return true;
+		}
+		return false;
+	}
+	
+	
+	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefCommand cmd, final boolean doProceed)
+	{
+		if (doProceed)
+		{
+			sendCommand(ctx, cmd);
+			return true;
+		}
+		return sendCommandIfReady(ctx, cmd);
+	}
+	
+	
 	protected boolean timeElapsedSinceEntry(final long time_ms)
 	{
 		return (currentTime - entryTime) >= TimeUnit.MILLISECONDS.toNanos(time_ms);
@@ -126,9 +158,9 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	
 	
 	@Override
-	public void handleViolation(final IRuleViolation violation, final IAutoRefStateContext ctx)
+	public void handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
 	{
-		switch (violation.getType())
+		switch (gameEvent.getType())
 		{
 			case BOT_STOP_SPEED:
 			case BOT_COUNT:
@@ -136,8 +168,11 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 			default:
 				break;
 		}
+		
 		ctx.sendCommand(new RefCommand(Command.STOP));
-		FollowUpAction followUp = violation.getFollowUpAction();
+		gameEvent.getCardPenalty().ifPresent(cardPenalty -> ctx.sendCommand(cardPenalty.toRefCommand()));
+		
+		FollowUpAction followUp = gameEvent.getFollowUpAction();
 		if (followUp != null)
 		{
 			ctx.setFollowUpAction(followUp);

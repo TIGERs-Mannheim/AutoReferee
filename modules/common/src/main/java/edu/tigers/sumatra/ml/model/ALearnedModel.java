@@ -27,10 +27,10 @@ public abstract class ALearnedModel
 	private static final Logger	log	= Logger.getLogger(ALearnedModel.class.getName());
 	private final String				configPath;
 	private final String				identifier;
-											
+	
 	protected double[]				p;
-											
-											
+	
+	
 	/**
 	 * 
 	 */
@@ -115,5 +115,14 @@ public abstract class ALearnedModel
 	
 	protected void onNewParameters()
 	{
+	}
+	
+	
+	/**
+	 * @return the p
+	 */
+	public double[] getP()
+	{
+		return p;
 	}
 }

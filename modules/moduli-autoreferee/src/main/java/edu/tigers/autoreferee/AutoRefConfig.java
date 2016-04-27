@@ -36,19 +36,19 @@ public class AutoRefConfig
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed")
 	private static double		ballPlacementAccuracy			= 100;
 	
-	@Configurable(comment = "The maximum allowed ball velocity ingame in m/s")
+	@Configurable(comment = "[m/s] The maximum allowed ball velocity ingame")
 	private static double		maxBallVelocity					= 8.5d;
 	
-	@Configurable(comment = "The maximum bot velocity during game stoppage in m/s")
+	@Configurable(comment = "[m/s] The maximum bot velocity during game stoppage")
 	private static double		maxBotStopSpeed					= 1.7d;						// in m/s
 																												
-	@Configurable(comment = "The velocity below which a bot is considered to be stationary in m/s")
+	@Configurable(comment = "[m/s] The velocity below which a bot is considered to be stationary")
 	private static double		botStationarySpeedThreshold	= 0.3;
 	
-	@Configurable(comment = "The velocity below which the ball is considered to be stationary in m/s")
+	@Configurable(comment = "[m/s] The velocity below which the ball is considered to be stationary")
 	private static double		ballStationarySpeedThreshold	= 0.08;
 	
-	@Configurable(comment = "The time each team has to place the ball in ms")
+	@Configurable(comment = "[ms] The time each team has to place the ball")
 	private static int			ballPlacementWindow				= 15_000;
 	
 	@Configurable(comment = "The hostname/ip address of the refbox")
@@ -57,13 +57,13 @@ public class AutoRefConfig
 	@Configurable(comment = "The port which will be used to connect to the refbox")
 	private static int			refboxPort							= 10007;
 	
-	@Configurable(comment = "Maximum time before sending the next signal although the ball is not placed - A value of 0 means to wait forever in ms")
+	@Configurable(comment = "[ms] Maximum time before sending the next signal although the ball is not placed - A value of 0 means to wait forever")
 	private static long			maxUnplacedWaitTime				= 0;
 	
-	@Configurable(comment = "Maximum time before sending the next signal although the ball is not entirely correctly placed ins ms - A value of 0 means to wait forever")
+	@Configurable(comment = "[ms] Maximum time before sending the next signal although the ball is not entirely correctly placed - A value of 0 means to wait forever")
 	private static long			maxCloselyPlacedWaitTime		= 0;
 	
-	@Configurable(comment = "The ball is considered to be closely placed if the distance to the target position is below this threshold in mm")
+	@Configurable(comment = "[mm] The ball is considered to be closely placed if the distance to the target position is below this threshold")
 	private static double		ballCloselyPlacedAccuracy		= 500;
 	
 	static

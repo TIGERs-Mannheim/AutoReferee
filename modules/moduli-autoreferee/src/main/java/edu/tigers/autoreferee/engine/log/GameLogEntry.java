@@ -14,7 +14,7 @@ import org.apache.commons.lang.NotImplementedException;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
@@ -32,7 +32,7 @@ public class GameLogEntry
 		/**  */
 		GAME_STATE,
 		/**  */
-		VIOLATION,
+		GAME_EVENT,
 		/**  */
 		REFEREE_MSG,
 		/**  */
@@ -50,7 +50,7 @@ public class GameLogEntry
 	private final long					timeSinceStart;
 	
 	private final EGameStateNeutral	gamestate;
-	private final IRuleViolation		violation;
+	private final IGameEvent			gameEvent;
 	private final RefereeMsg			refereeMsg;
 	private final FollowUpAction		followUpAction;
 	private final RefCommand			command;
@@ -62,13 +62,13 @@ public class GameLogEntry
 	 * @param instant
 	 * @param type
 	 * @param gamestate
-	 * @param violation
+	 * @param gameEvent
 	 * @param refereeMsg
 	 * @param followUpAction
 	 * @param command
 	 */
 	protected GameLogEntry(final long timestamp, final long timeSinceStart, final Instant instant,
-			final ELogEntryType type, final EGameStateNeutral gamestate, final IRuleViolation violation,
+			final ELogEntryType type, final EGameStateNeutral gamestate, final IGameEvent gameEvent,
 			final RefereeMsg refereeMsg, final FollowUpAction followUpAction, final RefCommand command)
 	{
 		this.type = type;
@@ -77,86 +77,10 @@ public class GameLogEntry
 		this.instant = instant;
 		
 		this.gamestate = gamestate;
-		this.violation = violation;
+		this.gameEvent = gameEvent;
 		this.refereeMsg = refereeMsg;
 		this.followUpAction = followUpAction;
 		this.command = command;
-	}
-	
-	
-	/**
-	 * @param timestamp
-	 * @param timeSinceStart
-	 * @param instant
-	 * @param gamestate
-	 * @return
-	 */
-	public static GameLogEntry create(final long timestamp, final long timeSinceStart, final Instant instant,
-			final EGameStateNeutral gamestate)
-	{
-		return new GameLogEntry(timestamp, timeSinceStart, instant, ELogEntryType.GAME_STATE, gamestate, null, null,
-				null, null);
-	}
-	
-	
-	/**
-	 * @param timestamp
-	 * @param timeSinceStart
-	 * @param instant
-	 * @param violation
-	 * @return
-	 */
-	public static GameLogEntry create(final long timestamp, final long timeSinceStart, final Instant instant,
-			final IRuleViolation violation)
-	{
-		return new GameLogEntry(timestamp, timeSinceStart, instant, ELogEntryType.VIOLATION, null, violation, null, null,
-				null);
-	}
-	
-	
-	/**
-	 * @param timestamp
-	 * @param timeSinceStart
-	 * @param instant
-	 * @param refereeMsg
-	 * @return
-	 */
-	public static GameLogEntry create(final long timestamp, final long timeSinceStart, final Instant instant,
-			final RefereeMsg refereeMsg)
-	{
-		return new GameLogEntry(timestamp, timeSinceStart, instant, ELogEntryType.REFEREE_MSG, null, null, refereeMsg,
-				null, null);
-	}
-	
-	
-	/**
-	 * @param timestamp
-	 * @param timeSinceStart
-	 * @param instant
-	 * @param followUpAction
-	 * @return
-	 */
-	public static GameLogEntry create(final long timestamp, final long timeSinceStart, final Instant instant,
-			final FollowUpAction followUpAction)
-	{
-		return new GameLogEntry(timestamp, timeSinceStart, instant, ELogEntryType.FOLLOW_UP, null, null, null,
-				followUpAction,
-				null);
-	}
-	
-	
-	/**
-	 * @param timestamp
-	 * @param timeSinceStart
-	 * @param instant
-	 * @param command
-	 * @return
-	 */
-	public static GameLogEntry create(final long timestamp, final long timeSinceStart, final Instant instant,
-			final RefCommand command)
-	{
-		return new GameLogEntry(timestamp, timeSinceStart, instant, ELogEntryType.COMMAND, null, null, null, null,
-				command);
 	}
 	
 	
@@ -203,9 +127,9 @@ public class GameLogEntry
 	/**
 	 * @return
 	 */
-	public IRuleViolation getViolation()
+	public IGameEvent getGameEvent()
 	{
-		return violation;
+		return gameEvent;
 	}
 	
 	
@@ -262,8 +186,8 @@ public class GameLogEntry
 				return gamestate;
 			case REFEREE_MSG:
 				return refereeMsg;
-			case VIOLATION:
-				return violation;
+			case GAME_EVENT:
+				return gameEvent;
 			default:
 				throw new NotImplementedException("Please add the following enum value to this switch case: " + type);
 		}

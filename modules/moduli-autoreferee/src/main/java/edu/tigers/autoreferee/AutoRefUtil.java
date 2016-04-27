@@ -183,4 +183,36 @@ public final class AutoRefUtil
 		Optional<AutoRefModule> module = getAutoRefModule();
 		module.ifPresent(consumer);
 	}
+	
+	
+	/**
+	 * Executes the supplied function and returns the caught exception if any occurred
+	 * 
+	 * @param f The function that is executed synchronously
+	 * @return an Optional containg the caught exception or an empty optional if none occurred
+	 */
+	public static Optional<Exception> execAndCatchAll(final CheckedRunnable f)
+	{
+		try
+		{
+			f.run();
+		} catch (Exception e)
+		{
+			return Optional.of(e);
+		}
+		return Optional.empty();
+	}
+	
+	/**
+	 * @author "Lukas Magel"
+	 */
+	@FunctionalInterface
+	public interface CheckedRunnable
+	{
+		
+		/**
+		 * @throws Exception
+		 */
+		public void run() throws Exception;
+	}
 }

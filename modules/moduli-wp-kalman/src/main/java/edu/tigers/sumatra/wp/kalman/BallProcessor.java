@@ -12,7 +12,9 @@
  */
 package edu.tigers.sumatra.wp.kalman;
 
+import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamBall;
+import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.kalman.data.PredictionContext;
 import edu.tigers.sumatra.wp.kalman.data.WPCamBall;
@@ -45,5 +47,18 @@ public class BallProcessor
 		CamBall ball = frame.getBall();
 		final WPCamBall visionBall = new WPCamBall(ball);
 		context.getBall().observation(ball.getTimestamp(), visionBall);
+	}
+	
+	
+	/**
+	 * @param timestamp
+	 * @param pos
+	 */
+	public void reset(final long timestamp, final IVector2 pos)
+	{
+		Matrix m = new Matrix(3, 1);
+		m.set(0, 0, pos.x());
+		m.set(1, 0, pos.y());
+		context.getBall().reset(timestamp, m);
 	}
 }

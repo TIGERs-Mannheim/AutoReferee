@@ -195,7 +195,7 @@ public final class BangBangTrajectoryMath
 		{
 			IVector2 probeVec = delta.scaleToNew(probe);
 			ITrajectory<IVector2> probeTraj = new BangBangTrajectory2D(AVector2.ZERO_VECTOR, probeVec.multiplyNew(1e-3),
-					AVector2.ZERO_VECTOR, maxAcc, maxBrk, maxVel);
+					initialVel, maxAcc, maxBrk, maxVel);
 			if (probeTraj.getPositionMM(time).getLength() > delta.getLength())
 			{
 				right = probe;

@@ -201,29 +201,113 @@ public enum EGameStateNeutral
 	
 	
 	/**
-	 * Returns true if the supplied state is either BALL_PLACEMENT_BLUE or BALL_PLACEMENT_YELLOW
+	 * Returns true if the supplied {@code state} is either {@link #BALL_PLACEMENT_BLUE} or
+	 * {@link #BALL_PLACEMENT_YELLOW}
 	 * 
 	 * @param state
 	 * @return
 	 */
 	public static boolean isBallPlacement(final EGameStateNeutral state)
 	{
-		if ((state == BALL_PLACEMENT_BLUE) || (state == BALL_PLACEMENT_YELLOW))
-		{
-			return true;
-		}
-		return false;
+		return (state == BALL_PLACEMENT_BLUE) || (state == BALL_PLACEMENT_YELLOW);
 	}
 	
 	
 	/**
-	 * Seee {@link #isBallPlacement(EGameStateNeutral)}
-	 * 
+	 * @See #isBallPlacement(EGameStateNeutral)
 	 * @return
 	 */
 	public boolean isBallPlacement()
 	{
 		return isBallPlacement(this);
+	}
+	
+	
+	/**
+	 * Returns true if the specified {@code state} is a {@link #DIRECT_KICK_BLUE} or {@link #DIRECT_KICK_YELLOW}
+	 * 
+	 * @param state
+	 * @return
+	 */
+	public static boolean isDirectKick(final EGameStateNeutral state)
+	{
+		return (state == DIRECT_KICK_BLUE) || (state == DIRECT_KICK_YELLOW);
+	}
+	
+	
+	/**
+	 * @see #isDirectKick(EGameStateNeutral)
+	 * @return
+	 */
+	public boolean isDirectKick()
+	{
+		return isDirectKick(this);
+	}
+	
+	
+	/**
+	 * Returns true if the specified {@code state} is an {@link #INDIRECT_KICK_BLUE} or {@link #INDIRECT_KICK_YELLOW}
+	 * 
+	 * @param state
+	 * @return
+	 */
+	public static boolean isIndirectKick(final EGameStateNeutral state)
+	{
+		return (state == INDIRECT_KICK_BLUE) || (state == INDIRECT_KICK_YELLOW);
+	}
+	
+	
+	/**
+	 * @see #isIndirectKick(EGameStateNeutral)
+	 * @return
+	 */
+	public boolean isIndirectKick()
+	{
+		return isIndirectKick(this);
+	}
+	
+	
+	/**
+	 * Returns true if the specified {@code state} is a {@link #KICKOFF_BLUE} or {@link #KICKOFF_YELLOW}
+	 * 
+	 * @param state
+	 * @return
+	 */
+	public static boolean isKickOff(final EGameStateNeutral state)
+	{
+		return (state == KICKOFF_BLUE) || (state == KICKOFF_YELLOW);
+	}
+	
+	
+	/**
+	 * @see #isKickOff(EGameStateNeutral)
+	 * @return
+	 */
+	public boolean isKickOff()
+	{
+		return isKickOff(this);
+	}
+	
+	
+	/**
+	 * Returns true if the specified {@code state} is either {@link #PENALTY_BLUE} or {@link #PENALTY_YELLOW}
+	 * 
+	 * @param state
+	 * @return
+	 */
+	public static boolean isPenalty(final EGameStateNeutral state)
+	{
+		return (state == PENALTY_BLUE) || (state == PENALTY_YELLOW);
+	}
+	
+	
+	/**
+	 * @see #isPenalty(EGameStateNeutral)
+	 * @return
+	 */
+	public boolean isPenalty()
+	{
+		return isPenalty(this);
 	}
 	
 	

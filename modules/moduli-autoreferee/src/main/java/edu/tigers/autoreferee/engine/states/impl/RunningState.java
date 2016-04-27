@@ -13,16 +13,13 @@ import java.util.Optional;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.IGameEvent.EGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation.ERuleViolation;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.wp.data.Geometry;
 
 
 /**
@@ -48,25 +45,35 @@ public class RunningState extends AbstractAutoRefState
 	
 	
 	@Override
-	public void handleViolation(final IRuleViolation violation, final IAutoRefStateContext ctx)
+	public void handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
 	{
-		switch (violation.getType())
+		switch (gameEvent.getType())
 		{
-			case BALL_LEFT_FIELD:
-				if (goalDetected
-						|| ((ctx.getFollowUpAction() != null) && (ctx.getFollowUpAction().getActionType() == EActionType.KICK_OFF)))
-				{
-					log.debug("Dropping " + ERuleViolation.BALL_LEFT_FIELD + " violation since a goal has been detected");
-					return;
-				}
-				break;
+			case GOAL:
+				goalDetected = true;
+				
+				ETeamColor teamInFavor = gameEvent.getResponsibleTeam();
+				Command goalCmd = teamInFavor == ETeamColor.BLUE ? Command.GOAL_BLUE : Command.GOAL_YELLOW;
+				
+				ctx.sendCommand(new RefCommand(Command.STOP));
+				ctx.sendCommand(new RefCommand(goalCmd));
+				ctx.setFollowUpAction(gameEvent.getFollowUpAction());
+				return;
 			case INDIRECT_GOAL:
 				indirectDetected = true;
+				break;
+			case BALL_LEFT_FIELD:
+				boolean followUpSet = ctx.getFollowUpAction() != null;
+				if (goalDetected || indirectDetected || followUpSet)
+				{
+					log.debug("Dropping " + EGameEvent.BALL_LEFT_FIELD + " violation since a goal has been detected");
+					return;
+				}
 				break;
 			default:
 				break;
 		}
-		super.handleViolation(violation, ctx);
+		super.handleGameEvent(gameEvent, ctx);
 	}
 	
 	
@@ -74,24 +81,7 @@ public class RunningState extends AbstractAutoRefState
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 		Optional<PossibleGoal> optDetectedGoal = frame.getPossibleGoal();
-		
-		if (optDetectedGoal.isPresent())
-		{
-			PossibleGoal detectedGoal = optDetectedGoal.get();
-			
-			if ((goalDetected == false) && (indirectDetected == false))
-			{
-				goalDetected = true;
-				ETeamColor goalColor = detectedGoal.getGoalColor();
-				Command goalCmd = goalColor == ETeamColor.BLUE ? Command.GOAL_YELLOW : Command.GOAL_BLUE;
-				
-				ctx.sendCommand(new RefCommand(Command.STOP));
-				ctx.sendCommand(new RefCommand(goalCmd));
-				
-				FollowUpAction followUp = new FollowUpAction(EActionType.KICK_OFF, goalColor, Geometry.getCenter());
-				ctx.setFollowUpAction(followUp);
-			}
-		} else
+		if (!optDetectedGoal.isPresent())
 		{
 			doReset();
 		}

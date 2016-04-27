@@ -22,6 +22,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
+import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -40,17 +41,17 @@ public class ExtKalman extends AWorldPredictor
 {
 	@SuppressWarnings("unused")
 	private static final Logger	log	= Logger.getLogger(ExtKalman.class.getName());
-													
+	
 	private TrackingManager			trackingManager;
 	private BallProcessor			ballProcessor;
 	private BotProcessor				botProcessor;
-											
+	
 	private PredictionContext		context;
-											
+	
 	@Configurable(defValue = "true")
 	private static boolean			processBots;
-											
-											
+	
+	
 	static
 	{
 		ConfigRegistration.registerClass("wp", ExtKalman.class);
@@ -114,8 +115,10 @@ public class ExtKalman extends AWorldPredictor
 			trackingManager.checkItems(frame.gettCapture());
 		}
 		
-		return new SimpleWorldFrame(bots, trackedBall, frame.getFrameNumber(),
+		SimpleWorldFrame swf = new SimpleWorldFrame(bots, trackedBall, frame.getFrameNumber(),
 				frame.gettCapture());
+		swf.setCamFrame(frame);
+		return swf;
 	}
 	
 	
@@ -143,6 +146,13 @@ public class ExtKalman extends AWorldPredictor
 	{
 		super.onClearCamFrame();
 		start();
+	}
+	
+	
+	@Override
+	public void resetBall(final long timestamp, final IVector2 pos)
+	{
+		ballProcessor.reset(timestamp, pos);
 	}
 	
 	

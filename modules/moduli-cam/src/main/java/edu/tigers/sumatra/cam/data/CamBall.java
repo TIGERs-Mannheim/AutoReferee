@@ -14,6 +14,7 @@ import java.util.List;
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.math.AVector3;
+import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
 import edu.tigers.sumatra.math.Vector3;
 
@@ -32,11 +33,11 @@ import edu.tigers.sumatra.math.Vector3;
 public class CamBall extends ACamObject
 {
 	private final int			area;
-									
+	
 	/** mm, (NA in current SSLVision) */
 	private final IVector3	pos;
-									
-									
+	
+	
 	/**
 	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
@@ -74,6 +75,17 @@ public class CamBall extends ACamObject
 		super(confidence, pixelX, pixelY, tCapture, tSent, camId, frameId);
 		this.area = area;
 		pos = new Vector3(x, y, z);
+	}
+	
+	
+	/**
+	 * @param base
+	 * @param pos
+	 */
+	public CamBall(final CamBall base, final IVector2 pos)
+	{
+		this(base.getConfidence(), base.getArea(), pos.x(), pos.y(), base.getPos().z(), base.getPixelX(),
+				base.getPixelY(), base.gettCapture(), base.gettSent(), base.getCameraId(), base.getFrameId());
 	}
 	
 	

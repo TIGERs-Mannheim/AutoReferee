@@ -34,15 +34,15 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
  */
 public class PrepareKickoffState extends AbstractAutoRefState
 {
-	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
+	@Configurable(comment = "[ms] The minimum time to wait before sending the kickoff signal")
 	private static long		MIN_WAIT_TIME_MS			= 3_500;
 	
-	@Configurable(comment = "The minimum time to wait before sending the kickoff signal in ms")
+	@Configurable(comment = "[ms] The minimum time to wait before sending the kickoff signal")
 	private static long		READY_WAIT_TIME_MS		= 1_500;
 	
 	@Configurable(comment = "If in fast mode the ref will not wait for the bots to settle")
 	private static boolean	FAST_MODE					= true;
-	@Configurable(comment = "The additional wait time in fast mode in ms")
+	@Configurable(comment = "[ms] The additional wait time in fast mode")
 	private static long		FAST_MODE_WAIT_TIME_MS	= 1_000;
 	
 	private Long				readyWaitTime				= null;
@@ -107,7 +107,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		
 		if (readyWaitTimeOver || ctx.doProceed())
 		{
-			ctx.sendCommand(new RefCommand(Command.NORMAL_START));
+			sendCommandIfReady(ctx, new RefCommand(Command.NORMAL_START), ctx.doProceed());
 		}
 	}
 	

@@ -24,7 +24,7 @@ import edu.tigers.autoreferee.engine.calc.BotLastTouchedBallCalc;
 import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
 import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc;
-import edu.tigers.autoreferee.remote.ThreadedTCPRefboxRemote;
+import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -172,8 +172,8 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 			
 			if (mode == AutoRefMode.ACTIVE)
 			{
-				remote = new ThreadedTCPRefboxRemote();
-				remote.start(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
+				remote = new ThreadedTCPRefboxRemote(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
+				remote.start();
 				
 				autoRefEngine = new ActiveAutoRefEngine(remote);
 			} else
@@ -192,7 +192,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		{
 			if (remote != null)
 			{
-				remote.close();
+				remote.stop();
 			}
 			if (autoRefEngine != null)
 			{

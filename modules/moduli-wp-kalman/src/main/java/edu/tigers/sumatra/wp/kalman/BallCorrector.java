@@ -26,7 +26,7 @@ import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.ExportDataContainer;
 import edu.tigers.sumatra.wp.data.Geometry;
-import edu.tigers.sumatra.wp.kalman.flyingBalls.Altigraph;
+import edu.tigers.sumatra.wp.flyingBalls.Altigraph;
 
 
 /**

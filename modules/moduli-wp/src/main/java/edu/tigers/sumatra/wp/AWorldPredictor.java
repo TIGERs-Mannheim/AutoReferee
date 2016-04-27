@@ -39,6 +39,8 @@ import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -52,6 +54,7 @@ import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import edu.tigers.sumatra.wp.flyingBalls.Altigraph;
 
 
 /**
@@ -63,37 +66,45 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public abstract class AWorldPredictor extends AModule implements ICamFrameObserver, IConfigObserver
 {
 	@SuppressWarnings("unused")
-	private static final Logger				log					= Logger.getLogger(AWorldPredictor.class.getName());
-																				
+	private static final Logger				log						= Logger.getLogger(AWorldPredictor.class.getName());
+	
 	/** */
-	public static final String					MODULE_TYPE			= "AWorldPredictor";
+	public static final String					MODULE_TYPE				= "AWorldPredictor";
 	/** */
-	public static final String					MODULE_ID			= "worldpredictor";
-																				
-	private SumatraTimer							timer					= null;
-	private List<IWorldFrameObserver>		observers			= new CopyOnWriteArrayList<>();
-	private boolean								geometryReceived	= false;
-																				
-	private WorldInfoProcessor					infoProcessor		= new WorldInfoProcessor();
-	private final List<IWfPostProcessor>	postProcessors		= new ArrayList<>();
-																				
-	private CamBall								lastSeenBall		= new CamBall();
-																				
+	public static final String					MODULE_ID				= "worldpredictor";
+	
+	private SumatraTimer							timer						= null;
+	private List<IWorldFrameObserver>		observers				= new CopyOnWriteArrayList<>();
+	private boolean								geometryReceived		= false;
+	
+	private WorldInfoProcessor					infoProcessor			= new WorldInfoProcessor();
+	private final List<IWfPostProcessor>	postProcessors			= new ArrayList<>();
+	
+	private CamBall								lastSeenBall			= new CamBall();
+	private CamBall								nextBallCandidate		= null;
+	
 	@Configurable(comment = "P1 of rectangle defining a range where objects are ignored")
-	private static IVector2						exclusionRectP1	= Vector2.ZERO_VECTOR;
+	private static IVector2						exclusionRectP1		= Vector2.ZERO_VECTOR;
 	@Configurable(comment = "P2 of rectangle defining a range where objects are ignored")
-	private static IVector2						exclusionRectP2	= Vector2.ZERO_VECTOR;
+	private static IVector2						exclusionRectP2		= Vector2.ZERO_VECTOR;
 	@Configurable
-	private static boolean						ownThread			= false;
-																				
-																				
+	private static boolean						ownThread				= false;
+	
+	
 	private ExecutorService						execService;
-	private final Object							execServiceSync	= new Object();
-	private final Object							lastSeenBallSync	= new Object();
-																				
-	private long									frameId				= 0;
-																				
-																				
+	private final Object							execServiceSync		= new Object();
+	private final Object							lastSeenBallSync		= new Object();
+	
+	private long									frameId					= 0;
+	
+	
+	@Configurable(comment = "correct flying balls")
+	private static boolean						correctFlyingBalls	= true;
+	private static final double				MAX_DIST_BALL			= 50;
+	private static final double				MAX_ORIENTATION_DIFF	= 0.1;
+	
+	private final Altigraph						altigraph				= new Altigraph();
+	
 	static
 	{
 		ConfigRegistration.registerClass("wp", AWorldPredictor.class);
@@ -212,6 +223,7 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	public ExtendedCamDetectionFrame processCamDetectionFrame(final CamDetectionFrame cFrame)
 	{
 		CamBall ball = findCurrentBall(cFrame.getBalls());
+		ball = correctBall(ball, cFrame.getRobotsYellow(), cFrame.getRobotsBlue());
 		return new ExtendedCamDetectionFrame(cFrame, ball);
 	}
 	
@@ -256,17 +268,21 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	private CamBall findCurrentBall(final List<CamBall> balls)
 	{
-		if (balls.isEmpty())
-		{
-			return lastSeenBall;
-		}
-		
 		synchronized (lastSeenBallSync)
 		{
-			CamBall ballToUse = balls.get(0);
-			double shortestDifference = difference(ballToUse, lastSeenBall);
+			if (balls.isEmpty())
+			{
+				return lastSeenBall;
+			}
+			
+			CamBall ballToUse = nextBallCandidate;
+			double shortestDifference = Double.MAX_VALUE;
 			for (CamBall ball : balls)
 			{
+				if (isWithinExclusionRectangle(ball.getPos().getXYVector()))
+				{
+					continue;
+				}
 				double diff = difference(ball, lastSeenBall);
 				if (diff < shortestDifference)
 				{
@@ -274,10 +290,16 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 					shortestDifference = diff;
 				}
 			}
+			if (ballToUse == null)
+			{
+				return lastSeenBall;
+			}
+			nextBallCandidate = ballToUse;
 			
 			boolean containsBallFromCurrentCam = balls.stream()
 					.anyMatch(b -> b.getCameraId() == lastSeenBall.getCameraId());
 			double dt = Math.abs(lastSeenBall.getTimestamp() - ballToUse.getTimestamp()) / 1e9;
+			
 			if (!containsBallFromCurrentCam && (dt < 0.05))
 			{
 				// wait some time before switching cameras
@@ -286,23 +308,18 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 				// so we accept this to get more stable ball positions.
 				return lastSeenBall;
 			}
+			
 			double dist = difference(ballToUse, lastSeenBall) / 1000.0;
 			double vel = dist * dt;
-			if (vel > 15)
+			if (vel > 20)
 			{
 				// high velocity, probably noise
+				log.debug("high vel: " + vel);
 				return lastSeenBall;
 			}
 			
-			// 1mm -> 0.1ms
-			// 10mm -> 1ms -> 10m/s
-			// if the ball is moving with less than 10m/s, the new ball will always be used. (following if will be false)
-			// if (difference(lastSeenBall, ballToUse) > (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()
-			// - lastSeenBall.getTimestamp()) * 10))
-			// {
-			// return lastSeenBall;
-			// }
 			lastSeenBall = new CamBall(ballToUse);
+			nextBallCandidate = null;
 			return ballToUse;
 		}
 	}
@@ -310,13 +327,13 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	private double difference(final CamBall ball1, final CamBall ball2)
 	{
-		if (ball1.getTimestamp() > (ball2.getTimestamp() + 1e8))
+		if (ball1.getTimestamp() > (ball2.getTimestamp() + 5e7))
 		{
 			return 0;
 		}
 		return ball1.getPos().subtractNew(ball2.getPos()).getLength2()
 				// add a penalty to balls that are not on same camera
-				+ (ball1.getCameraId() == ball2.getCameraId() ? 0 : 200);
+				+ (ball1.getCameraId() == ball2.getCameraId() ? 0 : 10);
 	}
 	
 	
@@ -381,10 +398,92 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	{
 		synchronized (lastSeenBallSync)
 		{
-			long timestamp = lastSeenBall.getTimestamp() + (long) (5e8);
+			long timestamp = lastSeenBall.getTimestamp() + (long) (1e8);
 			lastSeenBall = new CamBall(1, 0, pos.x(), pos.y(), 0, 0, 0, timestamp, timestamp, lastSeenBall.getCameraId(),
 					lastSeenBall.getFrameId());
+			resetBall(timestamp, pos);
 		}
+	}
+	
+	
+	/**
+	 * correct the ball frame, if ball is flying
+	 * 
+	 * @param ballToUse
+	 * @param yellowBots
+	 * @param blueBots
+	 * @return
+	 */
+	public CamBall correctBall(final CamBall ballToUse, final List<CamRobot> yellowBots, final List<CamRobot> blueBots)
+	{
+		if (correctFlyingBalls)
+		{
+			// get Data of Ball and Bots
+			final List<CamRobot> bots = new ArrayList<>(blueBots.size() + yellowBots.size());
+			bots.addAll(blueBots);
+			bots.addAll(yellowBots);
+			
+			// if kick possible, add new fly
+			CamRobot possShooter = findPossibleShooter(ballToUse, bots);
+			if (possShooter != null)
+			{
+				// append new fly
+				// log.trace("kicker zone identified: " + possShooter.getPos() + " " + possShooter.getOrientation());
+				altigraph.addKickerZoneIdentified(possShooter.getPos(), possShooter.getOrientation());
+			}
+			
+			// append the ball to old and new flys
+			altigraph.addCamFrame(ballToUse.getPos().getXYVector(), ballToUse.getCameraId());
+			
+			// if ball is flying
+			if (altigraph.isBallFlying())
+			{
+				// log.trace("Ball is flying: " + altigraph.getCorrectedFrame().z());
+				CamBall newBall = new CamBall(ballToUse.getConfidence(), ballToUse.getArea(), altigraph
+						.getCorrectedFrame().x(),
+						altigraph.getCorrectedFrame().y(), altigraph.getCorrectedFrame().z(),
+						ballToUse.getPixelX(),
+						ballToUse.getPixelY(), ballToUse.gettCapture(), ballToUse.gettSent(), ballToUse.getCameraId(),
+						ballToUse.getFrameId());
+				return newBall;
+			}
+		}
+		return ballToUse;
+	}
+	
+	
+	/*
+	 * find out the potential kicker-bot
+	 */
+	private CamRobot findPossibleShooter(final CamBall ball, final List<CamRobot> bots)
+	{
+		for (final CamRobot bot : bots)
+		{
+			IVector2 kickerPos = GeoMath
+					.getBotKickerPos(bot.getPos(), bot.getOrientation(), Geometry.getCenter2DribblerDistDefault());
+			if (GeoMath.distancePP(kickerPos, ball.getPos().getXYVector()) > (MAX_DIST_BALL + Geometry
+					.getBotRadius()))
+			{
+				continue;
+			}
+			IVector2 bot2Ball = ball.getPos().getXYVector().subtractNew(bot.getPos());
+			if (Math.abs(AngleMath.difference(bot2Ball.getAngle(), bot.getOrientation())) > MAX_ORIENTATION_DIFF)
+			{
+				continue;
+			}
+			
+			return bot;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * @param timestamp
+	 * @param pos
+	 */
+	public void resetBall(final long timestamp, final IVector2 pos)
+	{
 	}
 	
 	

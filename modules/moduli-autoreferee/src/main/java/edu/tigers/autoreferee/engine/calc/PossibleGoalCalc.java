@@ -64,7 +64,7 @@ public class PossibleGoalCalc implements IRefereeCalc
 		}
 	}
 	
-	@Configurable(comment = "The angle by which the ball heading needs to change while inside the goal to count as goal")
+	@Configurable(comment = "[degree] The angle by which the ball heading needs to change while inside the goal to count as goal")
 	private static double	GOAL_BALL_CHANGE_ANGLE_DEGREE	= 45;
 	
 	private PossibleGoal		detectedGoal						= null;

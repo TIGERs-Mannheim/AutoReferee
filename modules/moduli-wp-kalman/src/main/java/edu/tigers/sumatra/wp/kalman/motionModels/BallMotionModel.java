@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialFunction;
+import org.apache.log4j.Logger;
 
 import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamRobot;
@@ -27,37 +28,40 @@ import edu.tigers.sumatra.wp.kalman.filter.IFilter;
  */
 public class BallMotionModel implements IMotionModel
 {
+	@SuppressWarnings("unused")
+	private static final Logger		log							= Logger.getLogger(BallMotionModel.class.getName());
+	
 	private static final int			STATE_SIZE					= 10;
-																				
+	
 	/** m/s */
 	private static final double		baseMinVelocity			= 0.05;
 	/** m/s */
 	private static final double		baseMaxRollingVelocity	= 2.0;
-																				
+	
 	/** m */
 	private static final double		baseStDevPosition			= 0.01;
 	/** m/s */
 	private static final double		baseStDevVelocity			= 0.001;
 	/** m/s^2 */
 	private static final double		baseStDevAcceleration	= 0.001;
-																				
+	
 	private final double					minVelocity;
 	private final double					maxRollingVelocity;
-												
+	
 	private final double					varPosition;
 	private final double					varVelocity;
 	private final double					varAcceleration;
-												
-												
+	
+	
 	private final IFunction1D			relVelFunc;
-												
+	
 	private final BallDynamicsModel	ballDynamicsModel			= new BallDynamicsModel(
-																						Geometry.getBallModel().getAcc());
+			Geometry.getBallModel().getAcc(), true);
 	private static final int			VEL_BUFFER_SIZE			= 5;
 	private double[]						measuredVelBuffer			= new double[VEL_BUFFER_SIZE];
 	private int								measuredVelBufferIdx		= 0;
-																				
-																				
+	
+	
 	/**
 	 */
 	public BallMotionModel()
@@ -446,6 +450,12 @@ public class BallMotionModel implements IMotionModel
 			return newState;
 		}
 		
+		// if (v > 12000)
+		// {
+		// log.debug("Filtered high vel: " + v);
+		// return preState;
+		// }
+		
 		return state;
 	}
 	
@@ -453,8 +463,8 @@ public class BallMotionModel implements IMotionModel
 	{
 		private final double					vmax;
 		private final PolynomialFunction	relVelFunc;
-													
-													
+		
+		
 		/**
 		 * @param vmax
 		 */

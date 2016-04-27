@@ -61,7 +61,7 @@ public class PlaceBallState extends AbstractAutoRefState
 		if (criteriaAreMet(frame.getWorldFrame(), targetPos))
 		{
 			// The ball has been placed at the kick position. Return to the stopped state to perform the action
-			ctx.sendCommand(new RefCommand(Command.STOP));
+			sendCommandIfReady(ctx, new RefCommand(Command.STOP));
 			return;
 		}
 		
@@ -72,7 +72,7 @@ public class PlaceBallState extends AbstractAutoRefState
 		}
 		
 		RefCommand cmd = determineNextAction(frame, targetPos);
-		ctx.sendCommand(cmd);
+		sendCommandIfReady(ctx, cmd);
 	}
 	
 	

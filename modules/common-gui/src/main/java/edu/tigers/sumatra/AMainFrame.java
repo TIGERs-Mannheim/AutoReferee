@@ -111,13 +111,13 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	
 	protected ImageIcon getFrameIcon()
 	{
-		return loadIconImage("kralle-icon.png");
+		return loadIconImage("/kralle-icon.png");
 	}
 	
 	
 	protected ImageIcon loadIconImage(final String url)
 	{
-		URL iconUrl = ClassLoader.getSystemResource(url);
+		URL iconUrl = AMainFrame.class.getResource(url);
 		if (iconUrl != null)
 		{
 			return new ImageIcon(iconUrl);

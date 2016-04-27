@@ -64,7 +64,7 @@ public final class ImageScaler
 	 */
 	public static ImageIcon scaleDefaultButtonImageIcon(final String path)
 	{
-		ImageIcon imageIcon = new ImageIcon(ClassLoader.getSystemResource(path));
+		ImageIcon imageIcon = new ImageIcon(ImageScaler.class.getResource(path));
 		return scaleImageIcon(imageIcon, BUTTON_DEFAULT_SIZE, BUTTON_DEFAULT_SIZE);
 	}
 	// --------------------------------------------------------------------------

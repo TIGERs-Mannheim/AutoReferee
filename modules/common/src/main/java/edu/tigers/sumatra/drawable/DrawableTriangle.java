@@ -84,6 +84,17 @@ public class DrawableTriangle extends Triangle implements IDrawableShape
 	}
 	
 	
+	/**
+	 * @param triangle
+	 * @param color
+	 */
+	public DrawableTriangle(final Triangle triangle, final Color color)
+	{
+		super(triangle);
+		setColor(color);
+	}
+	
+	
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{

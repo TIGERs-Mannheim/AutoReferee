@@ -78,10 +78,10 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
  */
 public class StopState extends AbstractAutoRefState
 {
-	@Configurable(comment = "Time to wait before performing an action after reaching the stop state in [ms]")
+	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state")
 	private static long	STOP_WAIT_TIME_MS					= 2_000; // ms
 																					
-	@Configurable(comment = "The time to wait after all bots have come to a stop and the ball has been placed correctly")
+	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly")
 	private static long	READY_WAIT_TIME_MS				= 3_000;
 	
 	private Long			readyTime;
@@ -175,7 +175,7 @@ public class StopState extends AbstractAutoRefState
 			if (!placementWasAttempted(frame) && (AutoRefConfig.getBallPlacementTeams().size() > 0) && ball.isOnCam())
 			{
 				// Try to place the ball
-				ctx.sendCommand(getPlacementCommand(kickPos, action.getTeamInFavor()));
+				sendCommandIfReady(ctx, getPlacementCommand(kickPos, action.getTeamInFavor()));
 				return;
 			} else if (!simulationPlacementAttempted)
 			{
@@ -186,7 +186,15 @@ public class StopState extends AbstractAutoRefState
 		
 		if (readyWaitTimeOver || ctx.doProceed())
 		{
-			ctx.sendCommand(new RefCommand(action.getCommand()));
+			RefCommand cmd = new RefCommand(action.getCommand());
+			if (ctx.doProceed())
+			{
+				sendCommand(ctx, cmd);
+			} else
+			{
+				sendCommandIfReady(ctx, cmd);
+			}
+			
 		}
 	}
 	

@@ -31,7 +31,7 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2f;
-import edu.tigers.sumatra.referee.TeamConfig;
+import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.Geometry;
@@ -50,10 +50,10 @@ public class PreparePenaltyState extends AbstractAutoRefState
 	private static final Logger	log						= Logger.getLogger(PreparePenaltyState.class);
 	private static final Color		AREA_COLOR				= new Color(0, 0, 255, 150);
 	
-	@Configurable(comment = "The minimum time to wait before sending the start signal in ms")
+	@Configurable(comment = "[ms] The minimum time to wait before sending the start signal")
 	private static long				MIN_WAIT_TIME_MS		= 5_000;
 	
-	@Configurable(comment = "The time to wait after all bots have come to a stop and the ball has been placed correctly")
+	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly")
 	private static long				READY_WAIT_TIME_MS	= 1_500;
 	
 	private IVector2					penaltyMark;
@@ -92,9 +92,9 @@ public class PreparePenaltyState extends AbstractAutoRefState
 		setCanProceed(true);
 		
 		boolean ballPlaced = checkBallPlaced(wFrame.getBall(), penaltyMark, shapes);
-		boolean keeperPosCorrect = checkKeeper(wFrame.getBots(), shapes);
+		boolean keeperPosCorrect = checkKeeper(frame.getRefereeMsg(), wFrame.getBots(), shapes);
 		boolean kickingTeamCorrect = checkKickingTeam(wFrame.getBots(), wFrame.getBall(), shapes);
-		boolean defendingTeamCorrect = checkDefendingTeam(wFrame.getBots(), shapes);
+		boolean defendingTeamCorrect = checkDefendingTeam(frame.getRefereeMsg(), wFrame.getBots(), shapes);
 		boolean ready = false;
 		
 		if (ballPlaced && keeperPosCorrect && kickingTeamCorrect && defendingTeamCorrect)
@@ -114,7 +114,7 @@ public class PreparePenaltyState extends AbstractAutoRefState
 		if ((ready == true) || ctx.doProceed())
 		{
 			RefCommand cmd = new RefCommand(Command.NORMAL_START);
-			ctx.sendCommand(cmd);
+			sendCommandIfReady(ctx, cmd, ctx.doProceed());
 		}
 	}
 	
@@ -126,9 +126,10 @@ public class PreparePenaltyState extends AbstractAutoRefState
 	}
 	
 	
-	private boolean checkKeeper(final IBotIDMap<ITrackedBot> bots, final List<IDrawableShape> shapes)
+	private boolean checkKeeper(final RefereeMsg refMsg, final IBotIDMap<ITrackedBot> bots,
+			final List<IDrawableShape> shapes)
 	{
-		BotID keeperID = TeamConfig.getKeeperBotID(shooterTeam.opposite());
+		BotID keeperID = refMsg.getKeeperBotID(shooterTeam.opposite());
 		ITrackedBot keeper = bots.getWithNull(keeperID);
 		if (keeper == null)
 		{
@@ -164,9 +165,10 @@ public class PreparePenaltyState extends AbstractAutoRefState
 	}
 	
 	
-	private boolean checkDefendingTeam(final IBotIDMap<ITrackedBot> bots, final List<IDrawableShape> shapes)
+	private boolean checkDefendingTeam(final RefereeMsg refMsg, final IBotIDMap<ITrackedBot> bots,
+			final List<IDrawableShape> shapes)
 	{
-		BotID keeperID = TeamConfig.getKeeperBotID(shooterTeam.opposite());
+		BotID keeperID = refMsg.getKeeperBotID(shooterTeam.opposite());
 		List<ITrackedBot> defender = bots.values().stream()
 				.filter(ColorFilter.get(shooterTeam.opposite()))
 				.filter(bot -> penaltyKickArea.isPointInShape(bot.getPos(), -Geometry.getBotRadius()))

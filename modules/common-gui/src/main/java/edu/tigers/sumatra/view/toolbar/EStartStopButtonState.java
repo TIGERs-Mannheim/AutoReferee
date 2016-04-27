@@ -21,11 +21,11 @@ import edu.tigers.sumatra.util.ImageScaler;
 public enum EStartStopButtonState
 {
 	/**  */
-	START("start.png"),
+	START("/start.png"),
 	/**  */
-	STOP("stop.png"),
+	STOP("/stop.png"),
 	/**  */
-	LOADING("LoadingTrans.gif");
+	LOADING("/LoadingTrans.gif");
 	
 	private final ImageIcon	icon;
 	

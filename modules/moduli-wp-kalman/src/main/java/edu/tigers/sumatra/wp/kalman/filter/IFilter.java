@@ -1,5 +1,6 @@
 package edu.tigers.sumatra.wp.kalman.filter;
 
+import Jama.Matrix;
 import edu.tigers.sumatra.wp.kalman.data.AMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.AWPCamObject;
 import edu.tigers.sumatra.wp.kalman.data.IControl;
@@ -20,8 +21,17 @@ public interface IFilter
 	 */
 	void init(IMotionModel motionModel, PredictionContext context, final long firstTimestamp,
 			AWPCamObject firstObservation);
-			
-			
+	
+	
+	/**
+	 * @param firstTimestamp
+	 * @param measurement
+	 */
+	default void reset(final long firstTimestamp, final Matrix measurement)
+	{
+	}
+	
+	
 	/**
 	 * @return
 	 */

@@ -27,7 +27,7 @@ public class VelocityXywContinousSampler implements IVelocityXywSampler
 	
 	private final double				angleMin		= 0;
 	private final double				angleMax		= AngleMath.PI_TWO;
-	private final double				angleStep	= AngleMath.PI_QUART / 4;
+	private final double				angleStep	= AngleMath.PI_TWO / 72;
 	
 	private final List<IVector3>	velocities	= new ArrayList<>();
 	
@@ -40,18 +40,18 @@ public class VelocityXywContinousSampler implements IVelocityXywSampler
 	public VelocityXywContinousSampler()
 	{
 		// double[] speeds = new double[] { 0.1, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4 };
-		double[] aVels = new double[] { -20, -10, -5, -1, 1, 5, 10, 20 };
+		// double[] aVels = new double[] { -20, -10, -5, -1, 1, 5, 10, 20 };
 		
-		// double[] speeds = new double[] { 0.1, 1.0, 2.0, 2.5, 3.0 };
+		double[] speeds = new double[] { 0.5, 1.0, 1.5, 1.75 };
 		// double[] speeds = new double[] {};
 		// double[] speeds = new double[] { 0.1, 0.5, 1.0, 1.5 };
-		// double[] aVels = new double[] {};
+		double[] aVels = new double[] {};
 		
-		List<Double> speeds = new ArrayList<>();
-		for (double s = 0.1; s < 2.5; s += 0.1)
-		{
-			speeds.add(s);
-		}
+		// List<Double> speeds = new ArrayList<>();
+		// for (double s = 0.1; s < 2.5; s += 0.1)
+		// {
+		// speeds.add(s);
+		// }
 		
 		for (double angle = angleMin; angle < (angleMax - EPS); angle += angleStep)
 		{

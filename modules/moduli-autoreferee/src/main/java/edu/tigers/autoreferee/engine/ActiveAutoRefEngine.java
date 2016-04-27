@@ -9,23 +9,25 @@
 package edu.tigers.autoreferee.engine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
 import edu.tigers.autoreferee.engine.states.impl.DummyAutoRefState;
+import edu.tigers.autoreferee.engine.states.impl.KickState;
 import edu.tigers.autoreferee.engine.states.impl.PlaceBallState;
 import edu.tigers.autoreferee.engine.states.impl.PrepareKickoffState;
 import edu.tigers.autoreferee.engine.states.impl.PreparePenaltyState;
 import edu.tigers.autoreferee.engine.states.impl.RunningState;
 import edu.tigers.autoreferee.engine.states.impl.StopState;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
+import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -36,39 +38,31 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 {
-	private static final Logger							log									= Logger
-																													.getLogger(ActiveAutoRefEngine.class);
+	private static final Logger							log				= Logger
+																								.getLogger(ActiveAutoRefEngine.class);
 	
-	/** in ms */
-	private static long										DUPLICATE_RESEND_WAIT_TIME_MS	= 500;
-	
-	private List<IAutoRefEngineObserver>				engineObserver						= new ArrayList<>();
-	private IAutoRefState									dummyState							= null;
-	private Map<EGameStateNeutral, IAutoRefState>	refStates							= new HashMap<>();
+	private List<IAutoRefEngineObserver>				engineObserver	= new ArrayList<>();
+	private IAutoRefState									dummyState		= null;
+	private Map<EGameStateNeutral, IAutoRefState>	refStates		= new HashMap<>();
 	
 	private final IRefboxRemote							remote;
-	private FollowUpAction									followUp								= null;
-	private boolean											doProceed							= false;
-	
-	private RefCommand										lastRefCommand						= null;
-	private long												lastCommandTimestamp				= 0;
+	private FollowUpAction									followUp			= null;
+	private boolean											doProceed		= false;
 	
 	
 	private class RefStateContext implements IAutoRefStateContext
 	{
-		private long	ts;
 		
-		
-		private RefStateContext(final long ts)
+		private RefStateContext()
 		{
-			this.ts = ts;
+			
 		}
 		
 		
 		@Override
-		public void sendCommand(final RefCommand cmd)
+		public ICommandResult sendCommand(final RefCommand cmd)
 		{
-			ActiveAutoRefEngine.this.sendCommand(cmd, ts);
+			return ActiveAutoRefEngine.this.sendCommand(cmd);
 		}
 		
 		
@@ -130,16 +124,23 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		refStates.put(EGameStateNeutral.RUNNING, runningState);
 		
 		PrepareKickoffState prepKickOffState = new PrepareKickoffState();
-		refStates.put(EGameStateNeutral.PREPARE_KICKOFF_BLUE, prepKickOffState);
-		refStates.put(EGameStateNeutral.PREPARE_KICKOFF_YELLOW, prepKickOffState);
+		putForAll(prepKickOffState, Arrays.asList(EGameStateNeutral.PREPARE_KICKOFF_BLUE,
+				EGameStateNeutral.PREPARE_KICKOFF_YELLOW));
 		
 		PreparePenaltyState prepPenaltyState = new PreparePenaltyState();
-		refStates.put(EGameStateNeutral.PREPARE_PENALTY_BLUE, prepPenaltyState);
-		refStates.put(EGameStateNeutral.PREPARE_PENALTY_YELLOW, prepPenaltyState);
+		putForAll(prepPenaltyState, Arrays.asList(EGameStateNeutral.PREPARE_PENALTY_BLUE,
+				EGameStateNeutral.PREPARE_PENALTY_YELLOW));
 		
 		PlaceBallState placeBallState = new PlaceBallState();
-		refStates.put(EGameStateNeutral.BALL_PLACEMENT_BLUE, placeBallState);
-		refStates.put(EGameStateNeutral.BALL_PLACEMENT_YELLOW, placeBallState);
+		putForAll(placeBallState, Arrays.asList(EGameStateNeutral.BALL_PLACEMENT_BLUE,
+				EGameStateNeutral.BALL_PLACEMENT_YELLOW));
+		
+		KickState kickState = new KickState();
+		putForAll(kickState, Arrays.asList(
+				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
+				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
+				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW,
+				EGameStateNeutral.PENALTY_BLUE, EGameStateNeutral.PENALTY_YELLOW));
 		
 		StopState stopState = new StopState();
 		refStates.put(EGameStateNeutral.STOPPED, stopState);
@@ -148,10 +149,16 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	}
 	
 	
+	private void putForAll(final IAutoRefState refState, final List<EGameStateNeutral> states)
+	{
+		states.forEach(state -> refStates.put(state, refState));
+	}
+	
+	
 	@Override
 	public synchronized void stop()
 	{
-		remote.close();
+		remote.stop();
 	}
 	
 	
@@ -207,6 +214,13 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	}
 	
 	
+	private ICommandResult sendCommand(final RefCommand cmd)
+	{
+		gameLog.addEntry(cmd);
+		return remote.sendCommand(cmd);
+	}
+	
+	
 	@Override
 	public synchronized void process(final IAutoRefFrame frame)
 	{
@@ -218,16 +232,16 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		super.process(frame);
 		
 		IAutoRefState state = getActiveState(frame.getGameState());
-		RefStateContext ctx = new RefStateContext(frame.getTimestamp());
+		RefStateContext ctx = new RefStateContext();
 		
-		List<IRuleViolation> violations = getViolations(frame);
-		logViolations(violations);
+		List<IGameEvent> gameEvents = getGameEvents(frame);
+		logGameEvents(gameEvents);
 		
 		boolean canProceed = state.canProceed();
-		if (violations.size() > 0)
+		if (gameEvents.size() > 0)
 		{
-			IRuleViolation violation = violations.get(0);
-			state.handleViolation(violation, ctx);
+			IGameEvent gameEvent = gameEvents.get(0);
+			state.handleGameEvent(gameEvent, ctx);
 		}
 		
 		state.update(frame, ctx);
@@ -272,27 +286,6 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		{
 			setFollowUp(null);
 		}
-	}
-	
-	
-	private void sendCommand(final RefCommand cmd, final long ts)
-	{
-		if (cmd.equals(lastRefCommand)
-				&& ((ts - lastCommandTimestamp) < TimeUnit.MILLISECONDS.toNanos(DUPLICATE_RESEND_WAIT_TIME_MS)))
-		{
-			log.debug("Dropping duplicate ref message: " + cmd.getCommand());
-			return;
-		}
-		lastRefCommand = cmd;
-		lastCommandTimestamp = ts;
-		doSendCommand(cmd);
-	}
-	
-	
-	private void doSendCommand(final RefCommand cmd)
-	{
-		gameLog.addEntry(cmd);
-		remote.sendCommand(cmd);
 	}
 	
 	

@@ -22,9 +22,8 @@ import javax.swing.table.TableColumn;
 
 import edu.tigers.autoref.presenter.gamelog.GameLogTableModel;
 import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
-import edu.tigers.sumatra.referee.RefereeMsg;
+import edu.tigers.autoreferee.engine.log.GameLogFormatter;
 
 
 /**
@@ -41,7 +40,6 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 	private static final DecimalFormat	msFormat				= new DecimalFormat("000");
 	private static final DecimalFormat	sFormat				= new DecimalFormat("00");
 	private static final DecimalFormat	minFormat			= new DecimalFormat("00");
-	private static final DecimalFormat	posFormat			= new DecimalFormat("###0.00");
 	
 	
 	/**
@@ -103,20 +101,20 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				switch (entry.getType())
 				{
 					case COMMAND:
-						return formatCommand(entry.getCommand());
+						return GameLogFormatter.formatCommand(entry.getCommand());
 					case FOLLOW_UP:
 						FollowUpAction action = entry.getFollowUpAction();
 						if (action == null)
 						{
 							return "Follow Up reset";
 						}
-						return formatFollowUp(action);
+						return GameLogFormatter.formatFollowUp(action);
 					case GAME_STATE:
 						return entry.getGamestate().toString();
 					case REFEREE_MSG:
-						return formatRefMsg(entry.getRefereeMsg());
-					case VIOLATION:
-						return entry.getViolation().toString();
+						return GameLogFormatter.formatRefMsg(entry.getRefereeMsg());
+					case GAME_EVENT:
+						return entry.getGameEvent().toString();
 				}
 			default:
 				throw new IllegalArgumentException("Column index out of range: " + colIndex);
@@ -131,14 +129,15 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		switch (entry.getType())
 		{
 			case COMMAND:
-				builder.append("Sent the command \"" + formatCommand(entry.getCommand()) + "\" to the refbox");
+				builder.append("Sent the command \"" + GameLogFormatter.formatCommand(entry.getCommand())
+						+ "\" to the refbox");
 				break;
 			case FOLLOW_UP:
 				FollowUpAction action = entry.getFollowUpAction();
 				if (action != null)
 				{
 					builder.append("Set the next action which is executed when the game reaches the Stopped state to: "
-							+ formatFollowUp(action));
+							+ GameLogFormatter.formatFollowUp(action));
 					
 				} else
 				{
@@ -153,10 +152,10 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				builder.append("Received a new referee msg from the refbox with command "
 						+ entry.getRefereeMsg().getCommand());
 				break;
-			case VIOLATION:
-				builder.append("The AutoReferee has registered the following violation");
+			case GAME_EVENT:
+				builder.append("The AutoReferee has registered the following game event");
 				builder.append(System.lineSeparator());
-				builder.append(entry.getViolation());
+				builder.append(entry.getGameEvent());
 				break;
 		}
 		return builder.toString();
@@ -175,7 +174,7 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				return new Color(0, 180, 0);
 			case REFEREE_MSG:
 				return new Color(50, 50, 50);
-			case VIOLATION:
+			case GAME_EVENT:
 				return new Color(230, 0, 0);
 		}
 		return Color.BLACK;
@@ -195,47 +194,6 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		builder.append(":");
 		builder.append(msFormat.format(date.getNano() / 1_000_000));
 		
-		return builder.toString();
-	}
-	
-	
-	private String formatFollowUp(final FollowUpAction action)
-	{
-		StringBuilder builder = new StringBuilder();
-		builder.append(action.getActionType());
-		builder.append(" | ");
-		builder.append(action.getTeamInFavor());
-		action.getNewBallPosition().ifPresent(ballPos -> {
-			builder.append(" | (");
-			builder.append(posFormat.format(ballPos.x()));
-			builder.append(" ");
-			builder.append(posFormat.format(ballPos.y()));
-			builder.append(")");
-		});
-		return builder.toString();
-	}
-	
-	
-	private String formatCommand(final RefCommand cmd)
-	{
-		StringBuilder builder = new StringBuilder();
-		builder.append(cmd.getCommand());
-		cmd.getKickPos().ifPresent(pos -> {
-			builder.append(" @Pos: ");
-			builder.append(posFormat.format(pos.x()));
-			builder.append(" | ");
-			builder.append(posFormat.format(pos.y()));
-		});
-		return builder.toString();
-	}
-	
-	
-	private String formatRefMsg(final RefereeMsg msg)
-	{
-		StringBuilder builder = new StringBuilder();
-		builder.append(msg.getCommandCounter());
-		builder.append(" ");
-		builder.append(msg.getCommand());
 		return builder.toString();
 	}
 }

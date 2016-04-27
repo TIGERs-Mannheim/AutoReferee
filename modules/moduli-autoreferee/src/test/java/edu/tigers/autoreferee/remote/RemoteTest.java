@@ -6,6 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 
 
@@ -32,8 +33,8 @@ public class RemoteTest
 	@Ignore
 	public void test() throws IOException, InterruptedException
 	{
-		ThreadedTCPRefboxRemote remote = new ThreadedTCPRefboxRemote();
-		remote.start("localhost", 10007);
+		ThreadedTCPRefboxRemote remote = new ThreadedTCPRefboxRemote("localhost", 10007);
+		remote.start();
 		for (int i = 0; i < 10; i++)
 		{
 			remote.sendCommand(new RefCommand(Command.DIRECT_FREE_BLUE));
@@ -41,7 +42,7 @@ public class RemoteTest
 			remote.sendCommand(new RefCommand(Command.STOP));
 			Thread.sleep(1000);
 		}
-		remote.close();
+		remote.stop();
 	}
 	
 }

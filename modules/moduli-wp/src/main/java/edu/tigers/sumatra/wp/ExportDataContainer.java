@@ -47,8 +47,8 @@ public class ExportDataContainer
 {
 	@SuppressWarnings("unused")
 	private static final Logger						log						= Logger.getLogger(ExportDataContainer.class
-																									.getName());
-																									
+			.getName());
+	
 	private final List<CamBall>						balls						= new ArrayList<>();
 	private final List<CamRobot>						rawBots					= new ArrayList<>();
 	private final List<WpBot>							wpBots					= new ArrayList<>();
@@ -58,8 +58,8 @@ public class ExportDataContainer
 	private WpBall											wpBall					= new WpBall();
 	private FrameInfo										frameInfo				= new FrameInfo();
 	private final Map<String, INumberListable>	customNumberListable	= new HashMap<>();
-																							
-																							
+	
+	
 	/**
 	 * @param tBot
 	 * @param frameId
@@ -287,8 +287,8 @@ public class ExportDataContainer
 		private long		frameId		= -1;
 		private long		timestamp	= 0;
 		private double		confidence	= 0;
-												
-												
+		
+		
 		/**
 		 * 
 		 */
@@ -489,8 +489,8 @@ public class ExportDataContainer
 		private final IVector3	acc			= Vector3.ZERO_VECTOR;
 		private long				frameId		= -1;
 		private long				timestamp	= 0;
-														
-														
+		
+		
 		/**
 		 * 
 		 */
@@ -721,8 +721,8 @@ public class ExportDataContainer
 		private IVector3		setVel		= Vector3.ZERO_VECTOR;
 		private IVector3		setPos		= Vector3.ZERO_VECTOR;
 		private IVector3		localVel		= Vector3.ZERO_VECTOR;
-													
-													
+		
+		
 		/**
 		 * 
 		 */
@@ -948,8 +948,8 @@ public class ExportDataContainer
 		private long	tCapture;
 		private long	tSent;
 		private long	tRecorded;
-							
-							
+		
+		
 		/**
 		 * 
 		 */

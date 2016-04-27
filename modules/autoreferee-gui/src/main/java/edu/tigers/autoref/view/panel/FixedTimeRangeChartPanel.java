@@ -13,12 +13,16 @@ import info.monitorenter.gui.chart.IAxis;
 import info.monitorenter.gui.chart.ITracePoint2D;
 import info.monitorenter.gui.chart.rangepolicies.RangePolicyFixedViewport;
 import info.monitorenter.gui.chart.traces.Trace2DLtd;
+import info.monitorenter.gui.chart.traces.Trace2DSimple;
+import info.monitorenter.gui.chart.traces.painters.TracePainterDisc;
 import info.monitorenter.gui.chart.traces.painters.TracePainterLine;
 import info.monitorenter.util.Range;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
@@ -33,19 +37,26 @@ import javax.swing.JPanel;
 public class FixedTimeRangeChartPanel extends JPanel
 {
 	/**  */
-	private static final long	serialVersionUID	= -5176647826548801416L;
+	private static final long				serialVersionUID	= -5176647826548801416L;
 	
-	private long					timeRange;
+	private long								timeRange;
 	
-	private Chart2D				mainChart			= new Chart2D();
-	private Trace2DLtd			mainTrace			= new Trace2DLtd();
+	private Chart2D							mainChart			= new Chart2D();
+	private Trace2DLtd						mainTrace			= new Trace2DLtd();
+	private Map<String, Trace2DSimple>	horizontalLines	= new HashMap<>();
+	
+	private boolean							highlightHead		= true;
+	private Trace2DLtd						headTrace			= new Trace2DLtd(1);
 	
 	
 	/**
 	 * @param timeRange The time range that will be displayed in nanoseconds
+	 * @param highlightHead If true the point which was inserted last will be highlighted
 	 */
-	public FixedTimeRangeChartPanel(final long timeRange)
+	public FixedTimeRangeChartPanel(final long timeRange, final boolean highlightHead)
 	{
+		this.highlightHead = highlightHead;
+		
 		setLayout(new BorderLayout());
 		add(mainChart, BorderLayout.CENTER);
 		
@@ -72,6 +83,10 @@ public class FixedTimeRangeChartPanel extends JPanel
 		mainTrace.setName(null);
 		mainChart.addTrace(mainTrace);
 		
+		headTrace.setName(null);
+		headTrace.setTracePainter(new TracePainterDisc(12));
+		mainChart.addTrace(headTrace);
+		
 		mainChart.setGridColor(Color.LIGHT_GRAY);
 	}
 	
@@ -86,6 +101,11 @@ public class FixedTimeRangeChartPanel extends JPanel
 	{
 		double x = (timestamp % timeRange) / 1e9;
 		mainTrace.addPoint(x, y);
+		
+		if (highlightHead)
+		{
+			headTrace.addPoint(x, y);
+		}
 	}
 	
 	
@@ -109,6 +129,7 @@ public class FixedTimeRangeChartPanel extends JPanel
 	public void setColor(final Color color)
 	{
 		mainTrace.setColor(color);
+		headTrace.setColor(color);
 	}
 	
 	
@@ -163,6 +184,45 @@ public class FixedTimeRangeChartPanel extends JPanel
 	public void setPointBufferSize(final int bufSize)
 	{
 		mainTrace.setMaxSize(bufSize);
+	}
+	
+	
+	/**
+	 * Whether or not the current head of the graph should be highlighted
+	 * 
+	 * @param val
+	 */
+	public void setHighlightHead(final boolean val)
+	{
+		highlightHead = val;
+		if (!highlightHead)
+		{
+			headTrace.removeAllPoints();
+		}
+	}
+	
+	
+	/**
+	 * @param name
+	 * @param color
+	 * @param yValue
+	 */
+	public void setHorizontalLine(final String name, final Color color, final double yValue)
+	{
+		if (!horizontalLines.containsKey(name))
+		{
+			Trace2DSimple trace = new Trace2DSimple(null);
+			mainChart.addTrace(trace);
+			
+			trace.setZIndex(mainTrace.getZIndex() - 1);
+			horizontalLines.put(name, trace);
+		}
+		Trace2DSimple trace = horizontalLines.get(name);
+		
+		trace.setColor(color);
+		trace.removeAllPoints();
+		trace.addPoint(Double.MIN_VALUE, yValue);
+		trace.addPoint(Double.MAX_VALUE, yValue);
 	}
 	
 	

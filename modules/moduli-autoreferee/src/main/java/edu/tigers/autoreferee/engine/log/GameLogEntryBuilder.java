@@ -12,8 +12,8 @@ import java.time.Instant;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
-import edu.tigers.autoreferee.engine.violations.IRuleViolation;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 
@@ -32,7 +32,7 @@ public class GameLogEntryBuilder
 	private Long					timeSinceStart;
 	
 	private EGameStateNeutral	gamestate;
-	private IRuleViolation		violation;
+	private IGameEvent		gameEvent;
 	private RefereeMsg			refereeMsg;
 	private FollowUpAction		followUpAction;
 	private RefCommand			command;
@@ -82,12 +82,12 @@ public class GameLogEntryBuilder
 	
 	
 	/**
-	 * @param violation
+	 * @param gameEvent
 	 */
-	public void setViolation(final IRuleViolation violation)
+	public void setGameEvent(final IGameEvent gameEvent)
 	{
-		this.violation = violation;
-		setType(ELogEntryType.VIOLATION);
+		this.gameEvent = gameEvent;
+		setType(ELogEntryType.GAME_EVENT);
 	}
 	
 	
@@ -131,7 +131,7 @@ public class GameLogEntryBuilder
 			throw new NullPointerException("Not all required fields have been set");
 		}
 		
-		return new GameLogEntry(timestamp, timeSinceStart, instant, type, gamestate, violation, refereeMsg,
+		return new GameLogEntry(timestamp, timeSinceStart, instant, type, gamestate, gameEvent, refereeMsg,
 				followUpAction, command);
 	}
 }
