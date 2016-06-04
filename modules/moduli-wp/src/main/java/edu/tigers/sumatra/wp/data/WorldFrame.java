@@ -10,6 +10,7 @@ package edu.tigers.sumatra.wp.data;
 
 import java.util.Map;
 
+import edu.tigers.sumatra.bot.DummyBot;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.BotIDMapConst;
@@ -29,18 +30,18 @@ public class WorldFrame extends SimpleWorldFrame
 {
 	/** our enemies visible */
 	public final BotIDMapConst<ITrackedBot>	foeBots;
-															
+	
 	/** tiger bots that were detected by the WorldPredictor */
 	public final BotIDMapConst<ITrackedBot>	tigerBotsVisible;
 	/** tiger bots that were detected by the WorldPredictor AND are connected */
 	public final IBotIDMap<ITrackedBot>			tigerBotsAvailable;
-															
-															
+	
+	
 	private final ETeamColor						teamColor;
-															
+	
 	private final boolean							inverted;
-															
-															
+	
+	
 	/**
 	 * @param simpleWorldFrame
 	 * @param teamColor
@@ -71,7 +72,9 @@ public class WorldFrame extends SimpleWorldFrame
 				}
 			} else
 			{
-				foes.put(botID, bot);
+				TrackedBot nBot = new TrackedBot(bot);
+				nBot.setBot(new DummyBot(botID));
+				foes.put(botID, nBot);
 			}
 		}
 		foeBots = BotIDMapConst.unmodifiableBotIDMap(foes);

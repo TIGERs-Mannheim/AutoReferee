@@ -8,7 +8,7 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +46,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author Lukas Magel
  */
-public class DefenderToKickPointDistanceDetector extends APreparingViolationDetector
+public class DefenderToKickPointDistanceDetector extends APreparingGameEventDetector
 {
 	private static final int	priority								= 1;
 	
@@ -65,7 +65,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingViolationDete
 	
 	static
 	{
-		AViolationDetector.registerClass(DefenderToKickPointDistanceDetector.class);
+		AGameEventDetector.registerClass(DefenderToKickPointDistanceDetector.class);
 	}
 	
 	
@@ -74,7 +74,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingViolationDete
 	 */
 	public DefenderToKickPointDistanceDetector()
 	{
-		super(Arrays.asList(
+		super(EnumSet.of(
 				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
 				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
 				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW));

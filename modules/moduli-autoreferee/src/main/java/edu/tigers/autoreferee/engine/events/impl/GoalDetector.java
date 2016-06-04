@@ -32,7 +32,7 @@ import edu.tigers.sumatra.wp.data.Geometry;
 /**
  * @author "Lukas Magel"
  */
-public class GoalDetector extends APreparingViolationDetector
+public class GoalDetector extends APreparingGameEventDetector
 {
 	private static final int	priority				= 1;
 	

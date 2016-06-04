@@ -124,6 +124,16 @@ public interface IVector2 extends IVector
 	
 	
 	/**
+	 * Same as {@link IVector2#getAngle()}, but if vector has zero length, return
+	 * the given default value.
+	 * 
+	 * @param defAngle
+	 * @return
+	 */
+	double getAngle(double defAngle);
+	
+	
+	/**
 	 * Returns the scalar product of 'this' and the given vector. (this * v)
 	 * 
 	 * @param v

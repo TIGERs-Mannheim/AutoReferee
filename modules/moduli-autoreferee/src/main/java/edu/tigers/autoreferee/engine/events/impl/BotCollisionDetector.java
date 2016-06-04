@@ -37,7 +37,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 /**
  * @author Lukas Magel
  */
-public class BotCollisionDetector extends AViolationDetector
+public class BotCollisionDetector extends AGameEventDetector
 {
 	private static final int	priority						= 1;
 	
@@ -57,7 +57,7 @@ public class BotCollisionDetector extends AViolationDetector
 	
 	static
 	{
-		AViolationDetector.registerClass(BotCollisionDetector.class);
+		AGameEventDetector.registerClass(BotCollisionDetector.class);
 	}
 	
 	

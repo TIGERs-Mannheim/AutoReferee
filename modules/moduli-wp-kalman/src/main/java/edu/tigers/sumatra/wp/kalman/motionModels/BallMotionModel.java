@@ -10,9 +10,23 @@ import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.functions.EFunction;
 import edu.tigers.sumatra.functions.IFunction1D;
+import edu.tigers.sumatra.math.AVector2;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IVector;
-import edu.tigers.sumatra.wp.data.BallDynamicsModel;
+import edu.tigers.sumatra.math.IVector2;
+import edu.tigers.sumatra.math.IVector3;
+import edu.tigers.sumatra.math.Vector2;
+import edu.tigers.sumatra.math.Vector3;
+import edu.tigers.sumatra.statistics.CollectorVectorAvg;
+import edu.tigers.sumatra.wp.ball.BallAction;
+import edu.tigers.sumatra.wp.ball.BallCollisionModel;
+import edu.tigers.sumatra.wp.ball.BallDynamicsModelSimple;
+import edu.tigers.sumatra.wp.ball.BallState;
+import edu.tigers.sumatra.wp.ball.IAction;
+import edu.tigers.sumatra.wp.ball.IBallCollisionModel;
+import edu.tigers.sumatra.wp.ball.IBallDynamicsModel;
+import edu.tigers.sumatra.wp.ball.IState;
+import edu.tigers.sumatra.wp.ball.collision.ICollisionState;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.kalman.WPConfig;
@@ -29,37 +43,42 @@ import edu.tigers.sumatra.wp.kalman.filter.IFilter;
 public class BallMotionModel implements IMotionModel
 {
 	@SuppressWarnings("unused")
-	private static final Logger		log							= Logger.getLogger(BallMotionModel.class.getName());
+	private static final Logger			log							= Logger.getLogger(BallMotionModel.class.getName());
 	
-	private static final int			STATE_SIZE					= 10;
+	private static final int				STATE_SIZE					= 16;
+	private static final int				STATE_DYNAMICS_SIZE		= 9;
 	
 	/** m/s */
-	private static final double		baseMinVelocity			= 0.05;
+	private static final double			baseMinVelocity			= 0.05;
 	/** m/s */
-	private static final double		baseMaxRollingVelocity	= 2.0;
+	private static final double			baseMaxRollingVelocity	= 2.0;
 	
 	/** m */
-	private static final double		baseStDevPosition			= 0.01;
+	private static final double			baseStDevPosition			= 0.01;
 	/** m/s */
-	private static final double		baseStDevVelocity			= 0.001;
+	private static final double			baseStDevVelocity			= 0.001;
 	/** m/s^2 */
-	private static final double		baseStDevAcceleration	= 0.001;
+	private static final double			baseStDevAcceleration	= 0.001;
 	
-	private final double					minVelocity;
-	private final double					maxRollingVelocity;
+	private final double						minVelocity;
+	private final double						maxRollingVelocity;
 	
-	private final double					varPosition;
-	private final double					varVelocity;
-	private final double					varAcceleration;
+	private final double						varPosition;
+	private final double						varVelocity;
+	private final double						varAcceleration;
 	
 	
-	private final IFunction1D			relVelFunc;
+	private final IFunction1D				relVelFunc;
 	
-	private final BallDynamicsModel	ballDynamicsModel			= new BallDynamicsModel(
-			Geometry.getBallModel().getAcc(), true);
-	private static final int			VEL_BUFFER_SIZE			= 5;
-	private double[]						measuredVelBuffer			= new double[VEL_BUFFER_SIZE];
-	private int								measuredVelBufferIdx		= 0;
+	private final IBallDynamicsModel		ballDynamicsModel			= new BallDynamicsModelSimple(
+			Geometry.getBallModel().getAcc());
+	private final IBallCollisionModel	ballCollisionModel		= new BallCollisionModel();
+	
+	// TODO this should be moved to state somehow. atm, this model is called mulitple times for the time steps into
+	// future
+	private static final int				VEL_BUFFER_SIZE			= 5;
+	private IVector2[]						measuredVelBuffer			= new IVector2[VEL_BUFFER_SIZE];
+	private int									measuredVelBufferIdx		= 0;
 	
 	
 	/**
@@ -80,6 +99,11 @@ public class BallMotionModel implements IMotionModel
 		// genPos = new GaussianGenerator(0, stDevSamplePosition, rng);
 		// genVel = new GaussianGenerator(0, stDevSampleVel, rng);
 		
+		for (int i = 0; i < VEL_BUFFER_SIZE; i++)
+		{
+			measuredVelBuffer[i] = AVector2.ZERO_VECTOR;
+		}
+		
 		double vMaxRel = 500;
 		relVelFunc = new RelVelFunction(vMaxRel);
 	}
@@ -88,14 +112,67 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix dynamics(final Matrix state, final Matrix control, final double dt, final MotionContext context)
 	{
-		return ballDynamicsModel.dynamics(state, dt, context);
+		IState preState = getStateFromMatrix(state);
+		IVector3 acc = ballCollisionModel.getTorqueAcc(preState, context);
+		IAction action = new BallAction(acc);
+		IState postState = ballDynamicsModel.dynamics(preState, action, dt, context);
+		
+		ICollisionState colState = ballCollisionModel.processCollision(preState, postState, dt, context);
+		IVector3 impulse = colState.getVel().addNew(ballCollisionModel.getImpulse(colState, context));
+		
+		Matrix m = getMatrixFromState(state, colState, impulse);
+		
+		if (colState.getCollision().isPresent())
+		{
+			m.set(9, 0, 0);
+		} else
+		{
+			// cooldown of confidence
+			double confidence = m.get(9, 0);
+			confidence = Math.max(0, Math.min(1, confidence + (dt / 0.1)));
+			m.set(9, 0, confidence);
+		}
+		
+		return m;
+	}
+	
+	
+	private IState getStateFromMatrix(final Matrix state)
+	{
+		IVector3 pos = new Vector3(state.get(0, 0), state.get(1, 0), state.get(2, 0));
+		IVector3 vel = new Vector3(state.get(3, 0), state.get(4, 0), state.get(5, 0)).multiply(1e-3);
+		IVector3 acc = new Vector3(state.get(6, 0), state.get(7, 0), state.get(8, 0)).multiply(1e-3);
+		IVector3 accTorque = new Vector3(state.get(10, 0), state.get(11, 0), state.get(12, 0)).multiply(1e-3);
+		return new BallState(pos, vel, acc, accTorque);
+	}
+	
+	
+	private Matrix getMatrixFromState(final Matrix base, final IState state, final IVector3 impulse)
+	{
+		Matrix m = base.copy();
+		m.set(0, 0, state.getPos().x());
+		m.set(1, 0, state.getPos().y());
+		m.set(2, 0, state.getPos().z());
+		m.set(3, 0, state.getVel().x() * 1000);
+		m.set(4, 0, state.getVel().y() * 1000);
+		m.set(5, 0, state.getVel().z() * 1000);
+		m.set(6, 0, state.getAcc().x() * 1000);
+		m.set(7, 0, state.getAcc().y() * 1000);
+		m.set(8, 0, state.getAcc().z() * 1000);
+		m.set(10, 0, state.getAccFromTorque().x() * 1000);
+		m.set(11, 0, state.getAccFromTorque().y() * 1000);
+		m.set(12, 0, state.getAccFromTorque().z() * 1000);
+		m.set(13, 0, impulse.x() * 1000);
+		m.set(14, 0, impulse.y() * 1000);
+		m.set(15, 0, impulse.z() * 1000);
+		return m;
 	}
 	
 	
 	@Override
 	public Matrix getDynamicsJacobianWRTstate(final Matrix state, final double dt)
 	{
-		final Matrix a = Matrix.identity(STATE_SIZE, STATE_SIZE);
+		final Matrix a = Matrix.identity(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
 		a.set(0, 0, 1.0);
 		a.set(0, 3, dt);
 		a.set(0, 6, 0.5 * dt * dt);
@@ -118,7 +195,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getDynamicsJacobianWRTnoise(final Matrix state, final double dt)
 	{
-		final Matrix a = Matrix.identity(STATE_SIZE, STATE_SIZE);
+		final Matrix a = Matrix.identity(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
 		a.set(0, 0, 1.0);
 		a.set(0, 3, dt);
 		a.set(0, 6, 0.5 * dt * dt);
@@ -141,9 +218,9 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getDynamicsCovariance(final Matrix state, final double dt)
 	{
-		final Matrix q = new Matrix(STATE_SIZE, STATE_SIZE);
-		double vx = state.get(3, 0);
-		double vy = state.get(4, 0);
+		final Matrix q = new Matrix(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
+		double vx = state.get(13, 0);
+		double vy = state.get(14, 0);
 		
 		// sigma: max change within one dt,
 		// 2*sigma=95% range in data, so divide by 2 below
@@ -153,9 +230,11 @@ public class BallMotionModel implements IMotionModel
 		double relVel = relVelFunc.eval(vel);
 		double confidence = state.get(9, 0);
 		double collisionInfluence = 1 - confidence;
-		double velError = Math.abs(vel - (Arrays.stream(measuredVelBuffer).sum() / VEL_BUFFER_SIZE));
 		
-		double velTol = 100;
+		double velError = Math
+				.abs(vel - (Arrays.stream(measuredVelBuffer).collect(new CollectorVectorAvg(2)).getLength()));
+		
+		double velTol = 800;
 		if (velError > velTol)
 		{
 			collisionInfluence += (velError - velTol) / 3000;
@@ -199,20 +278,6 @@ public class BallMotionModel implements IMotionModel
 		q.set(5, 5, 0);
 		q.set(8, 8, 0);
 		
-		
-		// CSVExporter pexporter = new CSVExporter("data/ball/model/pcov", false, true);
-		// pexporter.addValues(ExportDataContainer.toNumberList(pCov));
-		// pexporter.close();
-		// CSVExporter vexporter = new CSVExporter("data/ball/model/vcov", false, true);
-		// vexporter.addValues(ExportDataContainer.toNumberList(vCov));
-		// vexporter.close();
-		// CSVExporter aexporter = new CSVExporter("data/ball/model/acov", false, true);
-		// aexporter.addValues(ExportDataContainer.toNumberList(aCov));
-		// aexporter.close();
-		// CSVExporter sexporter = new CSVExporter("data/ball/model/state", false, true);
-		// sexporter.addValues(ExportDataContainer.toNumberList(state));
-		// sexporter.close();
-		
 		return q;
 	}
 	
@@ -222,8 +287,7 @@ public class BallMotionModel implements IMotionModel
 	{
 		Matrix mp = measurement.getMatrix(0, 1, 0, 0);
 		Matrix v = mp.minus(state.getMatrix(0, 1, 0, 0)).times(1 / dt);
-		double vel = Math.sqrt((v.get(0, 0) * v.get(0, 0)) + (v.get(1, 0) * v.get(1, 0)));
-		measuredVelBuffer[measuredVelBufferIdx] = vel;
+		measuredVelBuffer[measuredVelBufferIdx] = new Vector2(v.get(0, 0), v.get(1, 0));
 		measuredVelBufferIdx = (measuredVelBufferIdx + 1) % VEL_BUFFER_SIZE;
 	}
 	
@@ -320,7 +384,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix generateCovarianceMatrix(final Matrix state)
 	{
-		final Matrix p = new Matrix(STATE_SIZE, STATE_SIZE);
+		final Matrix p = new Matrix(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
 		p.set(0, 0, varPosition);
 		p.set(1, 1, varPosition);
 		p.set(2, 2, varPosition);
@@ -330,7 +394,6 @@ public class BallMotionModel implements IMotionModel
 		p.set(6, 6, varAcceleration);
 		p.set(7, 7, varAcceleration);
 		p.set(8, 8, varAcceleration);
-		p.set(9, 9, 0);
 		return p;
 	}
 	
@@ -357,7 +420,7 @@ public class BallMotionModel implements IMotionModel
 	@Override
 	public Matrix getMeasurementJacobianWRTstate(final Matrix state)
 	{
-		return Matrix.identity(3, STATE_SIZE);
+		return Matrix.identity(3, STATE_DYNAMICS_SIZE);
 	}
 	
 	
@@ -409,7 +472,7 @@ public class BallMotionModel implements IMotionModel
 	public Matrix getCovarianceOnNoObservation(final Matrix covariance)
 	{
 		final double improbable = 1e10;
-		final Matrix covar = new Matrix(STATE_SIZE, STATE_SIZE);
+		final Matrix covar = new Matrix(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
 		for (int i = 0; i < covar.getRowDimension(); i++)
 		{
 			for (int j = 0; j < covar.getColumnDimension(); j++)
@@ -429,10 +492,12 @@ public class BallMotionModel implements IMotionModel
 	
 	
 	@Override
-	public Matrix statePostProcessing(final Matrix state, final Matrix preState)
+	public Matrix statePostProcessing(final Matrix dynState, final Matrix preState)
 	{
-		double vx = state.get(3, 0);
-		double vy = state.get(4, 0);
+		Matrix newState = preState.copy();
+		newState.setMatrix(0, STATE_DYNAMICS_SIZE - 1, 0, 0, dynState);
+		double vx = dynState.get(3, 0);
+		double vy = dynState.get(4, 0);
 		final double v = Math.sqrt((vx * vx) + (vy * vy));
 		double vxpre = preState.get(3, 0);
 		double vypre = preState.get(4, 0);
@@ -440,14 +505,12 @@ public class BallMotionModel implements IMotionModel
 		// if ball is getting faster in new state, filter for minVelocity
 		if ((vpre < v) && (v < minVelocity))
 		{
-			Matrix newState = state.copy();
 			newState.set(3, 0, 0);
 			newState.set(4, 0, 0);
 			newState.set(5, 0, 0);
 			newState.set(6, 0, 0);
 			newState.set(7, 0, 0);
 			newState.set(8, 0, 0);
-			return newState;
 		}
 		
 		// if (v > 12000)
@@ -456,7 +519,14 @@ public class BallMotionModel implements IMotionModel
 		// return preState;
 		// }
 		
-		return state;
+		return newState;
+	}
+	
+	
+	@Override
+	public Matrix getDynamicsState(final Matrix fullState)
+	{
+		return fullState.getMatrix(0, STATE_DYNAMICS_SIZE - 1, 0, 0);
 	}
 	
 	private static class RelVelFunction implements IFunction1D

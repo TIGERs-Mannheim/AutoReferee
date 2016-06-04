@@ -434,7 +434,7 @@ public class GeoMathTest
 	/**
 	 */
 	@Test
-	public void testisPointOnLine()
+	public void testisPointOnPath()
 	{
 		IVector2 A = new Vector2(2f, 5);
 		IVector2 B = new Vector2(2f, 10);
@@ -445,56 +445,13 @@ public class GeoMathTest
 		
 		Line Line1 = Line.newLine(A, B);
 		
-		boolean uIs1 = GeoMath.isPointOnLine(Line1, C);
-		boolean uIs2 = GeoMath.isPointOnLine(Line1, D);
+		boolean uIs1 = GeoMath.isPointOnPath(Line1, C);
+		boolean uIs2 = GeoMath.isPointOnPath(Line1, D);
 		
 		assertEquals(true, uIs1);
 		assertEquals(false, uIs2);
 		
 		
-	}
-	
-	
-	/**
-	 */
-	@Test
-	public void testintersectionPointOnLine()
-	{
-		IVector2 A = new Vector2(13.04f, -10.34f);
-		IVector2 B = new Vector2(-2.88f, 3.18);
-		
-		IVector2 C = new Vector2(5.47f, 3.56);
-		IVector2 D = new Vector2(3.36f, -9.13f);
-		
-		IVector2 E = new Vector2(4.14f, 8.12);
-		IVector2 F = new Vector2(23.22f, -24.7f);
-		
-		
-		Line LineAB = Line.newLine(A, B);
-		Line LineCD = Line.newLine(C, D);
-		Line LineEF = Line.newLine(E, F);
-		
-		IVector2 uIs1;
-		IVector2 uDesired1 = new Vector2(1000, -1000);
-		
-		try
-		{
-			GeoMath.intersectionPointOnLine(LineAB, LineEF);
-			fail();
-		} catch (MathException err)
-		{
-		}
-		
-		try
-		{
-			uIs1 = GeoMath.intersectionPointOnLine(LineAB, LineCD);
-			uDesired1 = new Vector2(4.38f, -2.99);
-			assertEquals(uDesired1.x(), uIs1.x(), 0.01);
-			assertEquals(uDesired1.y(), uIs1.y(), 0.01);
-		} catch (MathException err)
-		{
-			err.printStackTrace();
-		}
 	}
 	
 	
@@ -511,9 +468,9 @@ public class GeoMathTest
 		IVector2 to = new Vector2(-4100, 0);
 		assertEquals(0.0f, GeoMath.distanceBetweenLineSegments(goalPostRight, goalPostLeft, from, to), 0.01);
 		
-		from = new Vector2(-4000, 100);
-		to = new Vector2(-4100, 1100);
-		assertEquals(100.0f, GeoMath.distanceBetweenLineSegments(goalPostRight, goalPostLeft, from, to), 0.01);
+		from = new Vector2(-3050, 100);
+		to = new Vector2(-4030, 100);
+		assertEquals(20.0f, GeoMath.distanceBetweenLineSegments(goalPostRight, goalPostLeft, from, to), 0.01);
 	}
 	
 	

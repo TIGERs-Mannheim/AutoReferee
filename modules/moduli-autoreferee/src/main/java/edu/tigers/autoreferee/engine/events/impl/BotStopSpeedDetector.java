@@ -8,8 +8,8 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +42,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author "Lukas Magel"
  */
-public class BotStopSpeedDetector extends APreparingViolationDetector
+public class BotStopSpeedDetector extends APreparingGameEventDetector
 {
 	private static final int		priority						= 1;
 	private static final Logger	log							= Logger.getLogger(BotStopSpeedDetector.class);
@@ -55,7 +55,7 @@ public class BotStopSpeedDetector extends APreparingViolationDetector
 	
 	static
 	{
-		AViolationDetector.registerClass(BotStopSpeedDetector.class);
+		AGameEventDetector.registerClass(BotStopSpeedDetector.class);
 	}
 	
 	
@@ -64,7 +64,7 @@ public class BotStopSpeedDetector extends APreparingViolationDetector
 	 */
 	public BotStopSpeedDetector()
 	{
-		super(Arrays.asList(EGameStateNeutral.STOPPED,
+		super(EnumSet.of(EGameStateNeutral.STOPPED,
 				EGameStateNeutral.PREPARE_KICKOFF_BLUE, EGameStateNeutral.PREPARE_KICKOFF_YELLOW));
 	}
 	

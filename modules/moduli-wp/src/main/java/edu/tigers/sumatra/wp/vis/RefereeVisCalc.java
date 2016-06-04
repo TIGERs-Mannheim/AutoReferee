@@ -31,7 +31,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class RefereeVisCalc implements IVisCalc
+public class RefereeVisCalc implements IWpCalc
 {
 	private final DecimalFormat	df2			= new DecimalFormat("00");
 	private final DecimalFormat	dfBallVel	= new DecimalFormat("0.00");

@@ -22,14 +22,26 @@ import edu.tigers.sumatra.math.IVector2;
  * 
  * @author Gero
  */
-@Persistent(version = 1)
+@Persistent(version = 2)
 public abstract class ATrackedObject implements ITrackedObject
 {
+	private final long	timestamp;
+	
 	
 	/**
 	 */
-	public ATrackedObject()
+	protected ATrackedObject()
 	{
+		timestamp = 0;
+	}
+	
+	
+	/**
+	 * @param timestamp
+	 */
+	public ATrackedObject(final long timestamp)
+	{
+		this.timestamp = timestamp;
 	}
 	
 	
@@ -40,7 +52,7 @@ public abstract class ATrackedObject implements ITrackedObject
 	 */
 	public ATrackedObject(final ITrackedObject o)
 	{
-		this();
+		this(o.getTimestamp());
 	}
 	
 	
@@ -80,7 +92,7 @@ public abstract class ATrackedObject implements ITrackedObject
 	public static class TrackedObjectComparator implements Comparator<ITrackedObject>, Serializable
 	{
 		/**  */
-		private static final long serialVersionUID = -5304247749124149706L;
+		private static final long	serialVersionUID	= -5304247749124149706L;
 		
 		
 		@Override
@@ -88,5 +100,15 @@ public abstract class ATrackedObject implements ITrackedObject
 		{
 			return o1.getBotId().compareTo(o2.getBotId());
 		}
+	}
+	
+	
+	/**
+	 * @return the timestamp
+	 */
+	@Override
+	public long getTimestamp()
+	{
+		return timestamp;
 	}
 }

@@ -242,4 +242,34 @@ public class AutoRefMath
 		return bots.stream().allMatch(
 				bot -> GeoMath.distancePP(bot.getPosByTime(0), ballPos) > Geometry.getBotToBallDistanceStop());
 	}
+	
+	
+	/**
+	 * Calculates the distance between the supplied {@code pos} and the edge of the penalty area.
+	 * If the point does not lie inside the penalty area a distance of 0 is returned.
+	 * 
+	 * @param penArea
+	 * @param pos
+	 * @return
+	 */
+	public static double distanceToNearestPointOutside(final PenaltyArea penArea, final IVector2 pos)
+	{
+		return distanceToNearestPointOutside(penArea, 0, pos);
+	}
+	
+	
+	/**
+	 * Calculates the distance between the supplied {@code pos} and the edge of the penalty area plus the specified
+	 * {@code margin}. If the point does not lie inside the penalty area plus margin a distance of 0 is returned.
+	 * 
+	 * @param penArea
+	 * @param margin
+	 * @param pos
+	 * @return
+	 */
+	public static double distanceToNearestPointOutside(final PenaltyArea penArea, final double margin, final IVector2 pos)
+	{
+		IVector2 nearestPointOutsideMargin = penArea.nearestPointOutside(pos, margin);
+		return GeoMath.distancePP(pos, nearestPointOutsideMargin);
+	}
 }

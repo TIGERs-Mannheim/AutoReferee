@@ -27,8 +27,9 @@ import edu.tigers.sumatra.math.IVector3;
 @Persistent
 public class DummyBot implements IBot
 {
-	private boolean		avail2Ai	= false;
-	private final BotID	botId;
+	private boolean					avail2Ai				= false;
+	private final BotID				botId;
+	private final MoveConstraints	moveConstraints	= new MoveConstraints();
 	
 	
 	/**
@@ -201,13 +202,6 @@ public class DummyBot implements IBot
 	
 	
 	@Override
-	public Performance getPerformance()
-	{
-		return new Performance();
-	}
-	
-	
-	@Override
 	public double getKickSpeed()
 	{
 		return 0;
@@ -224,13 +218,20 @@ public class DummyBot implements IBot
 	@Override
 	public double getDefaultVelocity()
 	{
-		return 3;
+		return 0;
 	}
 	
 	
 	@Override
 	public double getDefaultAcceleration()
 	{
-		return 3;
+		return 0;
+	}
+	
+	
+	@Override
+	public MoveConstraints getMoveConstraints()
+	{
+		return moveConstraints;
 	}
 }

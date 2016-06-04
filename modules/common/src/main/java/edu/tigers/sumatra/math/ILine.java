@@ -108,4 +108,15 @@ public interface ILine
 	 * @author AndreR
 	 */
 	boolean isPointInFront(IVector2 point);
+	
+	
+	/**
+	 * Check if the given point is on this line <b>segment</b>.
+	 * The direction vector is considered as the segment.
+	 * 
+	 * @param point
+	 * @param margin
+	 * @return
+	 */
+	boolean isPointOnLine(final IVector2 point, final double margin);
 }

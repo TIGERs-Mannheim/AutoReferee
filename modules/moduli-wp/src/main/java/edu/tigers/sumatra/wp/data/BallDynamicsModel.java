@@ -43,8 +43,10 @@ public class BallDynamicsModel
 	
 	private boolean					modelStraightKick			= false;
 	private final boolean			handleCollision;
+	private double						minVelForCollision		= 0;
 	
-	private double						confOnCollision			= 0.0;
+	private double						confOnCollision			= 1;
+	private IVector2					ballDir						= Vector2.X_AXIS;
 	
 	
 	/**
@@ -165,7 +167,8 @@ public class BallDynamicsModel
 		newState.set(9, 0, confidence);
 		
 		Matrix outState = handleCollision(state, newState, dt, context);
-		if (handleCollision)
+		if ((v >= minVelForCollision) &&
+				handleCollision)
 		{
 			return outState;
 		}
@@ -182,6 +185,8 @@ public class BallDynamicsModel
 			// ball is flying
 			return newState;
 		}
+		
+		ballDir = new Vector2(state.get(3, 0), state.get(4, 0));
 		
 		Matrix outState = newState;
 		
@@ -281,13 +286,23 @@ public class BallDynamicsModel
 							// possible kick soon
 							outState.set(9, 0, confOnCollision);
 							
-							if (modelStraightKick && ((info.getDribbleRpm() > 0) && (info.getKickSpeed() == 0)))
+							ballDir = new Vector2(pos.z()).scaleTo(info.getKickSpeed() * 1000);
+							
+							if (((info.getDribbleRpm() > 0) && (info.getKickSpeed() == 0)))
 							{
 								IVector2 kickerPos = info.getPos().getXYVector()
 										.addNew(new Vector2(info.getPos().z())
 												.scaleTo(info.getCenter2DribblerDist() + Geometry.getBallRadius()));
+								// if (modelStraightKick)
+								// {
 								outState.set(0, 0, kickerPos.x());
 								outState.set(1, 0, kickerPos.y());
+								// } else
+								// {
+								// IVector2 pullVel = info.getVel().getXYVector().multiplyNew(1.05);
+								// outState.set(3, 0, pullVel.x());
+								// outState.set(3, 0, pullVel.y());
+								// }
 							}
 						}
 						
@@ -496,5 +511,23 @@ public class BallDynamicsModel
 	public void setModelStraightKick(final boolean modelStraightKick)
 	{
 		this.modelStraightKick = modelStraightKick;
+	}
+	
+	
+	/**
+	 * @param minVelForCollision the minVelForCollision to set
+	 */
+	public void setMinVelForCollision(final double minVelForCollision)
+	{
+		this.minVelForCollision = minVelForCollision;
+	}
+	
+	
+	/**
+	 * @return the ballDir
+	 */
+	public IVector2 getPropBallVelDir()
+	{
+		return ballDir;
 	}
 }

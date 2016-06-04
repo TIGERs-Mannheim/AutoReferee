@@ -8,11 +8,11 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -41,7 +41,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author "Simon Sander"
  */
-public class DoubleTouchDetector extends APreparingViolationDetector
+public class DoubleTouchDetector extends APreparingGameEventDetector
 {
 	private static final int					priority						= 1;
 	private static final Logger				log							= Logger.getLogger(DoubleTouchDetector.class);
@@ -53,18 +53,17 @@ public class DoubleTouchDetector extends APreparingViolationDetector
 	private boolean								hasMovedAwayFromBall		= false;
 	private long									hasMovedAwayFromBallTs;
 	
-	private static List<EGameStateNeutral>	VALID_PREVIOUS_STATES;
+	private static Set<EGameStateNeutral>	VALID_PREVIOUS_STATES;
 	
 	static
 	{
-		AViolationDetector.registerClass(DoubleTouchDetector.class);
+		AGameEventDetector.registerClass(DoubleTouchDetector.class);
 		
-		List<EGameStateNeutral> states = new ArrayList<>();
-		states.addAll(Arrays.asList(
+		Set<EGameStateNeutral> states = EnumSet.of(
 				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW,
 				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
-				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW));
-		VALID_PREVIOUS_STATES = Collections.unmodifiableList(states);
+				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW);
+		VALID_PREVIOUS_STATES = Collections.unmodifiableSet(states);
 	}
 	
 	

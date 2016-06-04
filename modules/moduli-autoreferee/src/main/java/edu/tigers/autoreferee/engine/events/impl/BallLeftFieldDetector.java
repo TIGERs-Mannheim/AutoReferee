@@ -35,7 +35,7 @@ import edu.tigers.sumatra.wp.data.Geometry;
  * 
  * @author "Lukas Magel"
  */
-public class BallLeftFieldDetector extends AViolationDetector
+public class BallLeftFieldDetector extends AGameEventDetector
 {
 	private static final int	priority							= 1;
 	
@@ -52,7 +52,7 @@ public class BallLeftFieldDetector extends AViolationDetector
 	
 	static
 	{
-		AViolationDetector.registerClass(BallLeftFieldDetector.class);
+		AGameEventDetector.registerClass(BallLeftFieldDetector.class);
 	}
 	
 	

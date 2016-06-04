@@ -46,7 +46,14 @@ public class BallProcessor
 	{
 		CamBall ball = frame.getBall();
 		final WPCamBall visionBall = new WPCamBall(ball);
-		context.getBall().observation(ball.getTimestamp(), visionBall);
+		double age = (frame.gettCapture() - ball.getTimestamp()) / 1e9;
+		if (age > 0.1)
+		{
+			context.getBall().observation(frame.gettCapture(), null);
+		} else
+		{
+			context.getBall().observation(ball.getTimestamp(), visionBall);
+		}
 	}
 	
 	

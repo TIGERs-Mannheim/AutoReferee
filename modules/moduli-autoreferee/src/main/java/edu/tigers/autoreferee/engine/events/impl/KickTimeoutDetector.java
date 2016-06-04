@@ -8,7 +8,7 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -16,8 +16,8 @@ import java.util.concurrent.TimeUnit;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.GameEvent;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent.EGameEvent;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -31,7 +31,7 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  * 
  * @author Lukas Magel
  */
-public class KickTimeoutDetector extends APreparingViolationDetector
+public class KickTimeoutDetector extends APreparingGameEventDetector
 {
 	private static final int	priority					= 1;
 	/** in ms */
@@ -46,7 +46,7 @@ public class KickTimeoutDetector extends APreparingViolationDetector
 	 */
 	public KickTimeoutDetector()
 	{
-		super(Arrays.asList(
+		super(EnumSet.of(
 				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
 				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
 				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW));

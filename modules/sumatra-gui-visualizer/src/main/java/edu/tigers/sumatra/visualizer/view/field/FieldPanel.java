@@ -55,57 +55,57 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	/** color of field background */
 	public static final Color								FIELD_COLOR				= new Color(0,
-																										180,
-																										30);
+			180,
+			30);
 	/** color of field background */
 	public static final Color								FIELD_COLOR_REFEREE	= new Color(0,
-																										150,
-																										30);
-																										
+			150,
+			30);
+	
 	// --- repaint ---
 	private Image												offImage					= null;
 	private final Object										offImageSync			= new Object();
-																								
+	
 	/**  */
 	private static final long								serialVersionUID		= 4330620225157027091L;
-																								
+	
 	// --- observer ---
 	private final List<IFieldPanelObserver>			observers				= new CopyOnWriteArrayList<IFieldPanelObserver>();
-																								
+	
 	// --- field constants / size of the loaded image in pixel ---
 	/** */
 	public static final int									FIELD_MARGIN			= 35;
 	private static final int								SCROLL_SPEED			= 20;
-	private static final int								DEF_FIELD_WIDTH		= 600;
-																								
-																								
+	private static final int								DEF_FIELD_WIDTH		= 1000;
+	
+	
 	private final int											fieldWidth				= DEF_FIELD_WIDTH;
-																								
+	
 	private final MouseEvents								mouseEventsListener	= new MouseEvents();
-																								
+	
 	// --- field scrolling ---
 	private double												scaleFactor				= 1;
 	private double												fieldOriginY			= 0;
 	private double												fieldOriginX			= 0;
-																								
-																								
+	
+	
 	private boolean											fancyPainting			= false;
-																								
+	
 	private final Set<EShapeLayerSource>				showSources				= EnumSet
-																										.allOf(
-																												EShapeLayerSource.class);
+			.allOf(
+					EShapeLayerSource.class);
 	private final Map<EShapeLayerSource, Boolean>	teamInverted			= new EnumMap<>(
-																										EShapeLayerSource.class);
+			EShapeLayerSource.class);
 	private final Map<EShapeLayerSource, ShapeMap>	shapeMap					= new EnumMap<>(
-																										EShapeLayerSource.class);
+			EShapeLayerSource.class);
 	private final Map<String, Boolean>					shapeVisibilityMap	= new HashMap<>();
-																								
+	
 	private EFieldTurn										fieldTurn				= EFieldTurn.NORMAL;
-																								
+	
 	private IVector2											lastMousePoint			= new Vector2();
 	private final FpsCounter								fpsCounter				= new FpsCounter();
-																								
-																								
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -420,12 +420,12 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		
 		final IVector2 transPosition = globalPosition.addNew(new Vector2(Geometry.getFieldLength() / 2,
 				Geometry.getFieldWidth() / 2.0));
-				
+		
 		double x = (transPosition.x() * xScaleFactor);
 		double y = (transPosition.y() * yScaleFactor);
 		
-		x += FIELD_MARGIN;
-		y += FIELD_MARGIN;
+		x += Geometry.getBoundaryLength() * xScaleFactor;
+		y += Geometry.getBoundaryWidth() * yScaleFactor;
 		
 		return turnGuiPoint(fieldTurn, new Vector2(y, x));
 	}
@@ -451,7 +451,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		final double xScaleFactor = (Geometry.getFieldWidth() / fieldWidth);
 		final double yScaleFactor = (Geometry.getFieldLength() / getFieldHeight());
 		
-		final IVector2 transPosition = guiPosTurned.subtractNew(new Vector2(FIELD_MARGIN, FIELD_MARGIN));
+		final IVector2 transPosition = guiPosTurned.subtractNew(
+				new Vector2(Geometry.getBoundaryLength() / xScaleFactor, Geometry.getBoundaryWidth() / yScaleFactor));
 		
 		int x = (int) (transPosition.x() * xScaleFactor);
 		int y = (int) (transPosition.y() * yScaleFactor);
@@ -517,8 +518,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		private static final double	SCROLL_FACTOR	= 250.0;
 		private int							mousePressedY	= 0;
 		private int							mousePressedX	= 0;
-																	
-																	
+		
+		
 		@Override
 		public void mouseClicked(final MouseEvent e)
 		{
@@ -610,7 +611,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public int getFieldTotalWidth()
 	{
-		return fieldWidth + (2 * FIELD_MARGIN);
+		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
+		return fieldWidth + (int) ((2 * Geometry.getBoundaryWidth()) * yScaleFactor);
 	}
 	
 	
@@ -622,7 +624,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public int getFieldTotalHeight()
 	{
-		return getFieldHeight() + (2 * FIELD_MARGIN);
+		final double xScaleFactor = getFieldHeight() / Geometry.getFieldLength();
+		return getFieldHeight() + (int) ((2 * Geometry.getBoundaryLength()) * xScaleFactor);
 	}
 	
 	
@@ -831,6 +834,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public int getFieldMargin()
 	{
-		return FIELD_MARGIN;
+		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
+		return (int) ((Geometry.getBoundaryWidth()) * yScaleFactor);
 	}
 }

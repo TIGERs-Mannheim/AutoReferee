@@ -75,7 +75,7 @@ public class ExtKalman extends AWorldPredictor
 		ITrackedBot trackedTigerBot;
 		final ABotMotionResult motion = (ABotMotionResult) filterBot.getPrediction(timestamp);
 		
-		trackedTigerBot = motion.motionToTrackedBot(botID);
+		trackedTigerBot = motion.motionToTrackedBot(timestamp, botID);
 		bots.put(botID, trackedTigerBot);
 	}
 	

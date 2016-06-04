@@ -136,11 +136,17 @@ public class ExtKalmanFilter implements IFilter
 	{
 		if (timestamp > currentTimestamp)
 		{
-			// observation vector
-			final Matrix o = motion.generateMeasurementMatrix(observation, state[0]);
-			
-			// do Update
-			update(timestamp, o);
+			if (observation != null)
+			{
+				// observation vector
+				final Matrix o = motion.generateMeasurementMatrix(observation, state[0]);
+				
+				// do Update
+				update(timestamp, o);
+			} else
+			{
+				update(timestamp, null);
+			}
 		}
 	}
 	
@@ -313,34 +319,41 @@ public class ExtKalmanFilter implements IFilter
 		//
 		// }
 		
-		if ((dt > 0.5))
-		{
-			reset(timestamp, measurement);
-		}
-		
-		motion.newMeasurement(measurement, state[0], dt);
+		// if ((dt > 0.5))
+		// {
+		// reset(timestamp, measurement);
+		// }
 		
 		// do prediction for the time of the measurement
 		final Matrix predState = predictStateAtTime(timestamp);
 		final Matrix predCov = predictCovarianceAtTime(timestamp);
 		
-		// just call abstract methods because the specification of these matrices depends on the motion model
-		final Matrix h = motion.getMeasurementJacobianWRTstate(measurement);
-		final Matrix v = motion.getMeasurementJacobianWRTnoise(measurement);
-		final Matrix r = motion.getMeasurementCovariance(measurement);
-		
-		// calculate kalman gain
-		final Matrix a = predCov.times(h.transpose());
-		final Matrix b = h.times(predCov).times(h.transpose());
-		final Matrix c = v.times(r).times(v.transpose());
-		final Matrix k = a.times((b.plus(c)).inverse());
-		
-		// correct state
-		state[0] = motion.statePostProcessing(predState.plus(k.times(measurement.minus(motion
-				.measurementDynamics(predState)))), state[0]);
-		// correct covariance
-		final int dim = predCov.getRowDimension();
-		covar[0] = (Matrix.identity(dim, dim).minus(k.times(h))).times(predCov);
+		if (measurement != null)
+		{
+			motion.newMeasurement(measurement, state[0], dt);
+			
+			// just call abstract methods because the specification of these matrices depends on the motion model
+			final Matrix h = motion.getMeasurementJacobianWRTstate(measurement);
+			final Matrix v = motion.getMeasurementJacobianWRTnoise(measurement);
+			final Matrix r = motion.getMeasurementCovariance(measurement);
+			
+			// calculate kalman gain
+			final Matrix a = predCov.times(h.transpose());
+			final Matrix b = h.times(predCov).times(h.transpose());
+			final Matrix c = v.times(r).times(v.transpose());
+			final Matrix k = a.times((b.plus(c)).inverse());
+			
+			// correct state
+			Matrix z = k.times(measurement.minus(motion.measurementDynamics(predState)));
+			state[0] = motion.statePostProcessing(motion.getDynamicsState(predState).plus(z), state[0]);
+			// correct covariance
+			final int dim = predCov.getRowDimension();
+			covar[0] = (Matrix.identity(dim, dim).minus(k.times(h))).times(predCov);
+		} else
+		{
+			state[0] = motion.statePostProcessing(motion.getDynamicsState(predState), state[0]);
+			covar[0] = predCov;
+		}
 		
 		currentTimestamp = timestamp;
 		

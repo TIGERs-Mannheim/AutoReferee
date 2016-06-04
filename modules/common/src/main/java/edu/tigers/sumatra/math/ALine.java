@@ -31,7 +31,7 @@ public abstract class ALine implements ILine
 	 */
 	ALine()
 	{
-	
+		
 	}
 	
 	
@@ -143,6 +143,28 @@ public abstract class ALine implements ILine
 			return false;
 		}
 		
+		return true;
+	}
+	
+	
+	@Override
+	public boolean isPointOnLine(final IVector2 point, final double margin)
+	{
+		IVector2 lp = GeoMath.leadPointOnLine(point, this);
+		double dist = GeoMath.distancePP(point, lp);
+		if (dist > margin)
+		{
+			return false;
+		}
+		double lineLength = directionVector().getLength();
+		if (GeoMath.distancePP(lp, supportVector()) > lineLength)
+		{
+			return false;
+		}
+		if (GeoMath.distancePP(lp, supportVector().addNew(directionVector())) > lineLength)
+		{
+			return false;
+		}
 		return true;
 	}
 }

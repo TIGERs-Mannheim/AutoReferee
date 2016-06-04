@@ -27,7 +27,7 @@ import edu.tigers.sumatra.wp.vis.BorderVisCalc;
 import edu.tigers.sumatra.wp.vis.BotVisCalc;
 import edu.tigers.sumatra.wp.vis.BufferCalc;
 import edu.tigers.sumatra.wp.vis.GameStateCalc;
-import edu.tigers.sumatra.wp.vis.IVisCalc;
+import edu.tigers.sumatra.wp.vis.IWpCalc;
 import edu.tigers.sumatra.wp.vis.RefereeVisCalc;
 import edu.tigers.sumatra.wp.vis.VelocityVisCalc;
 
@@ -40,7 +40,8 @@ public class WorldInfoProcessor implements IRefereeObserver
 	@SuppressWarnings("unused")
 	private static final Logger	log					= Logger.getLogger(WorldInfoProcessor.class.getName());
 	
-	private final List<IVisCalc>	calculators			= new ArrayList<>();
+	private final List<IWpCalc>	calculators			= new ArrayList<>();
+	private final List<IWpCalc>	calculatorsVis		= new ArrayList<>();
 	
 	private long						lastWFTimestamp	= 0;
 	private RefereeMsg				latestRefereeMsg	= new RefereeMsg();
@@ -51,13 +52,13 @@ public class WorldInfoProcessor implements IRefereeObserver
 	 */
 	public WorldInfoProcessor()
 	{
-		calculators.add(new BallVisCalc());
-		calculators.add(new BorderVisCalc());
-		calculators.add(new BotVisCalc());
-		calculators.add(new BufferCalc());
+		calculatorsVis.add(new BallVisCalc());
+		calculatorsVis.add(new BorderVisCalc());
+		calculatorsVis.add(new BotVisCalc());
+		calculatorsVis.add(new BufferCalc());
 		calculators.add(new GameStateCalc());
-		calculators.add(new RefereeVisCalc());
-		calculators.add(new VelocityVisCalc());
+		calculatorsVis.add(new RefereeVisCalc());
+		calculatorsVis.add(new VelocityVisCalc());
 	}
 	
 	
@@ -107,14 +108,26 @@ public class WorldInfoProcessor implements IRefereeObserver
 	
 	
 	/**
+	 * @param wrapper
+	 */
+	public void processSimpleWorldFrame(final WorldFrameWrapper wrapper)
+	{
+		for (IWpCalc calc : calculatorsVis)
+		{
+			calc.process(wrapper);
+		}
+	}
+	
+	
+	/**
 	 * @param swf
 	 * @return
 	 */
-	public WorldFrameWrapper processSimpleWorldFrame(final SimpleWorldFrame swf)
+	public WorldFrameWrapper createWorldFrameWrapper(final SimpleWorldFrame swf)
 	{
 		WorldFrameWrapper wrapper = new WorldFrameWrapper(swf, latestRefereeMsg, new ShapeMap());
 		lastWFTimestamp = swf.getTimestamp();
-		for (IVisCalc calc : calculators)
+		for (IWpCalc calc : calculators)
 		{
 			calc.process(wrapper);
 		}

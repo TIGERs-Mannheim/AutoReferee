@@ -36,10 +36,10 @@ public class FieldPredictorTest
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
 	private WorldFramePrediction			wfp;
-													
+	
 	private FieldPredictionInformation	fpi;
-													
-													
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -69,13 +69,13 @@ public class FieldPredictorTest
 		
 		IBotIDMap<ITrackedBot> bots = new BotIDMap<>();
 		BotID tiger1BotID = BotID.createBotId(0, ETeamColor.YELLOW);
-		TrackedBot tiger1 = new TrackedBot(tiger1BotID);
+		TrackedBot tiger1 = new TrackedBot(0, tiger1BotID);
 		tiger1.setPos(new Vector2(200, 200));
 		tiger1.setVel(new Vector2(0, 0.01));
 		bots.put(tiger1BotID, tiger1);
 		
 		BotID tiger2BotID = BotID.createBotId(1, ETeamColor.YELLOW);
-		TrackedBot tiger2 = new TrackedBot(tiger2BotID);
+		TrackedBot tiger2 = new TrackedBot(0, tiger2BotID);
 		tiger2.setPos(new Vector2(0, 400));
 		tiger2.setVel(new Vector2(0.01, 0));
 		bots.put(tiger2BotID, tiger2);

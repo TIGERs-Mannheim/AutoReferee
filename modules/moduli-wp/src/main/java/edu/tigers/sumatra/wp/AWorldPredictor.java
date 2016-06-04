@@ -9,7 +9,9 @@
 package edu.tigers.sumatra.wp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,13 +77,15 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	private SumatraTimer							timer						= null;
 	private List<IWorldFrameObserver>		observers				= new CopyOnWriteArrayList<>();
+	private List<IWorldFrameObserver>		prioObservers			= new CopyOnWriteArrayList<>();
 	private boolean								geometryReceived		= false;
+	private Map<Integer, Double>				lastTCaptures			= new HashMap<>();
 	
 	private WorldInfoProcessor					infoProcessor			= new WorldInfoProcessor();
 	private final List<IWfPostProcessor>	postProcessors			= new ArrayList<>();
 	
 	private CamBall								lastSeenBall			= new CamBall();
-	private CamBall								nextBallCandidate		= null;
+	private long									latestTimestamp		= 0;
 	
 	@Configurable(comment = "P1 of rectangle defining a range where objects are ignored")
 	private static IVector2						exclusionRectP1		= Vector2.ZERO_VECTOR;
@@ -163,6 +167,13 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	private void processCameraDetectionFrameInternal(final SSL_DetectionFrame detectionFrame, final TimeSync timeSync)
 	{
+		Double tLast = lastTCaptures.get(detectionFrame.getCameraId());
+		if ((tLast != null) && (tLast > detectionFrame.getTCapture()))
+		{
+			return;
+		}
+		lastTCaptures.put(detectionFrame.getCameraId(), detectionFrame.getTCapture());
+		
 		startTime(frameId);
 		
 		long localCaptureNs = timeSync.sync(detectionFrame.getTCapture());
@@ -207,6 +218,10 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 		ExtendedCamDetectionFrame eFrame = processCamDetectionFrame(cFrame);
 		
 		for (IWorldFrameObserver obs : observers)
+		{
+			obs.onNewCamDetectionFrame(eFrame);
+		}
+		for (IWorldFrameObserver obs : prioObservers)
 		{
 			obs.onNewCamDetectionFrame(eFrame);
 		}
@@ -270,70 +285,58 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	{
 		synchronized (lastSeenBallSync)
 		{
-			if (balls.isEmpty())
-			{
-				return lastSeenBall;
-			}
-			
-			CamBall ballToUse = nextBallCandidate;
 			double shortestDifference = Double.MAX_VALUE;
+			CamBall selectedBall = null;
 			for (CamBall ball : balls)
 			{
 				if (isWithinExclusionRectangle(ball.getPos().getXYVector()))
 				{
 					continue;
 				}
-				double diff = difference(ball, lastSeenBall);
+				
+				double diff = ball.getPos().subtractNew(lastSeenBall.getPos()).getLength2();
 				if (diff < shortestDifference)
 				{
-					ballToUse = ball;
+					selectedBall = ball;
 					shortestDifference = diff;
 				}
 			}
-			if (ballToUse == null)
+			if (selectedBall == null)
 			{
 				return lastSeenBall;
 			}
-			nextBallCandidate = ballToUse;
 			
-			boolean containsBallFromCurrentCam = balls.stream()
-					.anyMatch(b -> b.getCameraId() == lastSeenBall.getCameraId());
-			double dt = Math.abs(lastSeenBall.getTimestamp() - ballToUse.getTimestamp()) / 1e9;
-			
-			if (!containsBallFromCurrentCam && (dt < 0.05))
-			{
-				// wait some time before switching cameras
-				// note: with a delay of 50ms, the ball can travel up to 40cm with 8m/s
-				// but: if the ball is fast, it will slow down quickly and it will not do unexpected direction changes,
-				// so we accept this to get more stable ball positions.
-				return lastSeenBall;
-			}
-			
-			double dist = difference(ballToUse, lastSeenBall) / 1000.0;
-			double vel = dist * dt;
-			if (vel > 20)
+			double dt = (selectedBall.getTimestamp() - lastSeenBall.getTimestamp()) / 1e9;
+			double dist = selectedBall.getPos().subtractNew(lastSeenBall.getPos()).getLength2() / 1000.0;
+			double vel = dist / dt;
+			if (vel > 15)
 			{
 				// high velocity, probably noise
 				log.debug("high vel: " + vel);
 				return lastSeenBall;
 			}
 			
-			lastSeenBall = new CamBall(ballToUse);
-			nextBallCandidate = null;
-			return ballToUse;
+			double waitForNextBallTime = 0;
+			if (!Geometry.getField().isPointInShape(selectedBall.getPos().getXYVector()) &&
+					Geometry.getField().isPointInShape(lastSeenBall.getPos().getXYVector()))
+			{
+				waitForNextBallTime += 1;
+			}
+			
+			if (selectedBall.getCameraId() != lastSeenBall.getCameraId())
+			{
+				waitForNextBallTime += 0.05;
+			}
+			
+			if (dt < waitForNextBallTime)
+			{
+				return lastSeenBall;
+			}
+			
+			lastSeenBall = selectedBall;
+			shortestDifference = Double.MAX_VALUE;
+			return new CamBall(lastSeenBall);
 		}
-	}
-	
-	
-	private double difference(final CamBall ball1, final CamBall ball2)
-	{
-		if (ball1.getTimestamp() > (ball2.getTimestamp() + 5e7))
-		{
-			return 0;
-		}
-		return ball1.getPos().subtractNew(ball2.getPos()).getLength2()
-				// add a penalty to balls that are not on same camera
-				+ (ball1.getCameraId() == ball2.getCameraId() ? 0 : 10);
 	}
 	
 	
@@ -363,12 +366,23 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	{
 		try
 		{
+			if (swf.getTimestamp() < latestTimestamp)
+			{
+				return;
+			}
+			latestTimestamp = swf.getTimestamp();
+			
 			SimpleWorldFrame ppSwf = swf;
 			for (IWfPostProcessor pp : postProcessors)
 			{
 				ppSwf = pp.process(ppSwf);
 			}
-			WorldFrameWrapper wrapped = infoProcessor.processSimpleWorldFrame(ppSwf);
+			WorldFrameWrapper wrapped = infoProcessor.createWorldFrameWrapper(ppSwf);
+			for (IWorldFrameObserver c : prioObservers)
+			{
+				c.onNewWorldFrame(wrapped);
+			}
+			infoProcessor.processSimpleWorldFrame(wrapped);
 			for (IWorldFrameObserver c : observers)
 			{
 				c.onNewWorldFrame(wrapped);
@@ -506,6 +520,24 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	
 	
 	/**
+	 * @param consumer
+	 */
+	public final void addWorldFramePrioConsumer(final IWorldFrameObserver consumer)
+	{
+		prioObservers.add(consumer);
+	}
+	
+	
+	/**
+	 * @param consumer
+	 */
+	public final void removeWorldFramePrioConsumer(final IWorldFrameObserver consumer)
+	{
+		prioObservers.remove(consumer);
+	}
+	
+	
+	/**
 	 * @param pp
 	 */
 	public final void addPostProcessor(final IWfPostProcessor pp)
@@ -565,6 +597,11 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 			obs.onClearWorldFrame();
 			obs.onClearCamDetectionFrame();
 		}
+		for (IWorldFrameObserver obs : prioObservers)
+		{
+			obs.onClearWorldFrame();
+			obs.onClearCamDetectionFrame();
+		}
 		synchronized (lastSeenBallSync)
 		{
 			lastSeenBall = new CamBall();
@@ -598,6 +635,11 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 		{
 			log.warn("There were observers left: " + observers);
 			observers.clear();
+		}
+		if (!prioObservers.isEmpty())
+		{
+			log.warn("There were prioObservers left: " + prioObservers);
+			prioObservers.clear();
 		}
 		infoProcessor.start();
 		try

@@ -31,7 +31,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class BufferCalc implements IVisCalc
+public class BufferCalc implements IWpCalc
 {
 	private static final double									MIN_ANGLE_DIFF	= 0.05;
 																								

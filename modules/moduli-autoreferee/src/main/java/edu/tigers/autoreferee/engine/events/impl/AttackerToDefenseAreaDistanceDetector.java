@@ -8,11 +8,12 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
@@ -24,7 +25,6 @@ import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent.EGameEvent;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.Geometry;
@@ -38,23 +38,23 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
  * 
  * @author Lukas Magel
  */
-public class AttackerToDefenseAreaDistanceDetector extends APreparingViolationDetector
+public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDetector
 {
 	private static final int							priority								= 1;
 	
 	/** The minimum allowed distance between the bots of the attacking team and the defense area */
 	private static final double						MIN_ATTACKER_DEFENSE_DISTANCE	= 200;
-	private static final List<EGameStateNeutral>	ALLOWED_PREVIOUS_STATES;
+	private static final Set<EGameStateNeutral>	ALLOWED_PREVIOUS_STATES;
 	
 	private boolean										active								= false;
 	
 	static
 	{
-		List<EGameStateNeutral> states = Arrays.asList(
+		Set<EGameStateNeutral> states = EnumSet.of(
 				EGameStateNeutral.INDIRECT_KICK_BLUE, EGameStateNeutral.INDIRECT_KICK_YELLOW,
 				EGameStateNeutral.DIRECT_KICK_BLUE, EGameStateNeutral.DIRECT_KICK_YELLOW,
 				EGameStateNeutral.KICKOFF_BLUE, EGameStateNeutral.KICKOFF_YELLOW);
-		ALLOWED_PREVIOUS_STATES = Collections.unmodifiableList(states);
+		ALLOWED_PREVIOUS_STATES = Collections.unmodifiableSet(states);
 	}
 	
 	
@@ -154,8 +154,8 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingViolationDe
 		
 		private DistanceViolation buildViolation(final ITrackedBot offender)
 		{
-			IVector2 nearestPointOutsideMargin = defenderPenArea.nearestPointOutside(offender.getPos(), requiredMargin);
-			double distance = GeoMath.distancePP(offender.getPos(), nearestPointOutsideMargin);
+			double distance = AutoRefMath
+					.distanceToNearestPointOutside(defenderPenArea, requiredMargin, offender.getPos());
 			
 			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ball.getPos(), offender.getTeamColor().opposite());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, attackerColor.opposite(), kickPos);

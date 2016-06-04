@@ -11,6 +11,7 @@ package edu.tigers.autoreferee;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
@@ -62,7 +63,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	public static String						MODULE_ID	= "autoreferee";
 	
 	private List<IRefereeCalc>				calculators	= new ArrayList<>();
-	private List<IAutoRefStateObserver>	refObserver	= new ArrayList<>();
+	private List<IAutoRefStateObserver>	refObserver	= new CopyOnWriteArrayList<>();
 	
 	private IAutoRefEngine					autoRefEngine;
 	

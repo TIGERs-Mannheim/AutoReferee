@@ -8,8 +8,8 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
 
 import com.github.g3force.configurable.ConfigRegistration;
 
@@ -22,24 +22,24 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  * 
  * @author "Lukas Magel"
  */
-public abstract class AViolationDetector implements IGameEventDetector
+public abstract class AGameEventDetector implements IGameEventDetector
 {
-	private final List<EGameStateNeutral>	activeStates;
+	private final Set<EGameStateNeutral>	activeStates;
 	
 	
 	/**
 	 * @param gamestate The gamestate this rule will be active in
 	 */
-	public AViolationDetector(final EGameStateNeutral gamestate)
+	public AGameEventDetector(final EGameStateNeutral gamestate)
 	{
-		this(Arrays.asList(gamestate));
+		this(EnumSet.of(gamestate));
 	}
 	
 	
 	/**
 	 * @param activeStates the list of game states that the rule will be active in
 	 */
-	public AViolationDetector(final List<EGameStateNeutral> activeStates)
+	public AGameEventDetector(final Set<EGameStateNeutral> activeStates)
 	{
 		this.activeStates = activeStates;
 	}

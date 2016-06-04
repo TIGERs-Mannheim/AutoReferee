@@ -20,7 +20,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class GameStateCalc implements IVisCalc
+public class GameStateCalc implements IWpCalc
 {
 	private static final double	BALL_MOVED_DISTANCE_TOL	= 50;
 	private IVector2					ballPosOnPrepare			= null;

@@ -51,6 +51,18 @@ public class WorldFrameFactory
 	}
 	
 	
+	/**
+	 * This method sets the Seed for the randomgenerator used to place the bots.
+	 * If this method is called the randomgenerator is resetted.
+	 * 
+	 * @param seed
+	 */
+	public static void setRandomSeed(final long seed)
+	{
+		RND.setSeed(seed);
+	}
+	
+	
 	// --------------------------------------------------------------------------
 	// --- methods --------------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -61,7 +73,7 @@ public class WorldFrameFactory
 	 * @param timestamp
 	 * @return
 	 */
-	public WorldFrame createWorldFrame(final long frameNumber, final long timestamp)
+	public static WorldFrame createWorldFrame(final long frameNumber, final long timestamp)
 	{
 		return new WorldFrame(createSimpleWorldFrame(frameNumber, timestamp), ETeamColor.YELLOW, false);
 	}
@@ -74,17 +86,17 @@ public class WorldFrameFactory
 	 * @param timestamp
 	 * @return
 	 */
-	public SimpleWorldFrame createSimpleWorldFrame(final long frameNumber, final long timestamp)
+	public static SimpleWorldFrame createSimpleWorldFrame(final long frameNumber, final long timestamp)
 	{
 		final IBotIDMap<ITrackedBot> bots = new BotIDMap<>();
 		
 		for (int i = 0; i < 6; i++)
 		{
 			BotID idF = BotID.createBotId(i, ETeamColor.BLUE);
-			bots.put(idF, createBot(idF, ETeamColor.BLUE));
+			bots.put(idF, createBot(timestamp, idF, ETeamColor.BLUE));
 			
 			BotID idT = BotID.createBotId(i, ETeamColor.YELLOW);
-			bots.put(idT, createBot(idT, ETeamColor.YELLOW));
+			bots.put(idT, createBot(timestamp, idT, ETeamColor.YELLOW));
 		}
 		
 		final TrackedBall ball = TrackedBall.defaultInstance();
@@ -110,11 +122,12 @@ public class WorldFrameFactory
 	/**
 	 * Create bot with random positions
 	 * 
+	 * @param timestamp
 	 * @param id
 	 * @param color
 	 * @return bot
 	 */
-	public ITrackedBot createBot(final BotID id, final ETeamColor color)
+	public static ITrackedBot createBot(final long timestamp, final BotID id, final ETeamColor color)
 	{
 		double x = (RND.nextDouble() * Geometry.getFieldLength())
 				- (Geometry.getFieldLength() / 2.0);
@@ -122,7 +135,7 @@ public class WorldFrameFactory
 				- (Geometry.getFieldWidth() / 2.0);
 		final IVector2 pos = new Vector2(x, y);
 		
-		TrackedBot tBot = new TrackedBot(id);
+		TrackedBot tBot = new TrackedBot(timestamp, id);
 		tBot.setPos(pos);
 		DummyBot bot = new DummyBot(id);
 		bot.setAvail2Ai(true);

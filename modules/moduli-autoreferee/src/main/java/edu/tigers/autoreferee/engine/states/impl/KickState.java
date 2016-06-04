@@ -33,9 +33,9 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 public class KickState extends AbstractAutoRefState
 {
 	@Configurable(comment = "If active, the autoref will automatically set the follow up action according to the decisions of the refbox")
-	private static final boolean	followUpOverride	= true;
+	private static boolean	followUpOverride	= true;
 	
-	private boolean					firstUpdate			= true;
+	private boolean			firstUpdate			= true;
 	
 	static
 	{

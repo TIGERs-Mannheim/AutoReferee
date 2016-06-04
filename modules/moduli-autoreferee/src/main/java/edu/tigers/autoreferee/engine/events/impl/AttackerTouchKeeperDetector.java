@@ -48,7 +48,7 @@ import edu.tigers.sumatra.wp.data.PenaltyArea;
  * 
  * @author Simon Sander
  */
-public class AttackerTouchKeeperDetector extends AViolationDetector
+public class AttackerTouchKeeperDetector extends AGameEventDetector
 {
 	private static final int		priority						= 1;
 	

@@ -40,11 +40,11 @@ public class RobotMotionResult_V3 extends ABotMotionResult
 	 * @return
 	 */
 	@Override
-	public ITrackedBot motionToTrackedBot(final BotID botId)
+	public ITrackedBot motionToTrackedBot(final long timestamp, final BotID botId)
 	{
 		IVector2 pos = new Vector2f(x / WPConfig.FILTER_CONVERT_MM_TO_INTERNAL_UNIT,
 				y / WPConfig.FILTER_CONVERT_MM_TO_INTERNAL_UNIT);
-				
+		
 		final double xVel = vx / WPConfig.FILTER_CONVERT_MperS_TO_INTERNAL_V;
 		final double yVel = vy / WPConfig.FILTER_CONVERT_MperS_TO_INTERNAL_V;
 		final IVector2 vel = new Vector2f(xVel, yVel);
@@ -52,7 +52,7 @@ public class RobotMotionResult_V3 extends ABotMotionResult
 		final double angle = orientation;
 		final double aVel = vw / WPConfig.FILTER_CONVERT_RadPerS_TO_RadPerInternal;
 		
-		TrackedBot bot = new TrackedBot(botId);
+		TrackedBot bot = new TrackedBot(timestamp, botId);
 		bot.setPos(pos);
 		bot.setVel(vel);
 		bot.setAngle(angle);

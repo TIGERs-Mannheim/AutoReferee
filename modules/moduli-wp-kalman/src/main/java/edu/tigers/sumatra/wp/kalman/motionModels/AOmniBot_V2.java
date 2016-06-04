@@ -19,7 +19,7 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private static final double	BASE_NO_RPTATION_BORDER			= 0.1;
 	/** m/s */
 	private static final double	BASE_NO_MOVEMENT_BORDER			= 0.0001;
-																					
+	
 	/** m */
 	private static final double	BASE_STDEV_POSITION				= 0.001;
 	/** m/s */
@@ -32,12 +32,12 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private static final double	BASE_STDEV_OMEGA					= 0.1;
 	/** rad/s rotation w/o lin movement */
 	private static final double	BASE_STDEV_ETA						= 0.1;
-																					
+	
 	/** m */
 	private static final double	BASE_STDEV_POSITION_MEAS		= 0.001;
 	/** rad */
 	private static final double	BASE_STDEV_ORIENTATION_MEAS	= 0.01;
-																					
+	
 	/** m/s^2 */
 	private static final double	BASE_CRTL_MAX_ACCEL				= 5.0;
 	/** m/s^2 */
@@ -49,15 +49,15 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private static final double	ACCEL_RAMP_PERCENT_SEC1			= 0.1;
 	private static final double	ACCEL_RAMP_PERCENT_SEC2			= 0.7;
 	private static final double	ACCEL_RAMP_PERCENT_SEC3			= 0.2;
-																					
+	
 	/** m/s */
 	private static final double	BASE_ANGLE_TAKE_VEL				= 0.5;
 	private static final double	ANGLE_TAKE_FACTOR					= 0.05;
-																					
-																					
+	
+	
 	private final double				noRotationBorder;
 	private final double				noMovementBorder;
-											
+	
 	private final double				varPosition;
 	private final double				varPositionMeasurement;
 	private final double				varVelocity;
@@ -66,15 +66,15 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	private final double				varOrientationMeasurement;
 	private final double				varOmega;
 	private final double				varEta;
-											
+	
 	private final double				botCtrlMaxAccel;
 	private final double				botCtrlMaxBrakeAccel;
 	private final double				botCtrlMaxAngAccel;
 	private final double				botCtrlMaxAngBrakeAccel;
-											
+	
 	private final double				angleTakeVel;
-											
-											
+	
+	
 	AOmniBot_V2()
 	{
 		noRotationBorder = BASE_NO_RPTATION_BORDER * WPConfig.FILTER_CONVERT_RadPerS_TO_RadPerInternal;
@@ -551,6 +551,13 @@ public abstract class AOmniBot_V2 implements IMotionModel
 	public Matrix statePostProcessing(final Matrix state, final Matrix preState)
 	{
 		return state;
+	}
+	
+	
+	@Override
+	public Matrix getDynamicsState(final Matrix fullState)
+	{
+		return fullState;
 	}
 	
 	

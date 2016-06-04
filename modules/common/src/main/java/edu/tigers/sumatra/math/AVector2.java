@@ -36,8 +36,8 @@ public abstract class AVector2 extends AVector implements IVector2
 	public static final IVector2								ZERO_VECTOR		= new Vector2f(0, 0);
 	/**  */
 	public static final Comparator<? super IVector2>	Y_COMPARATOR	= new YComparator();
-																							
-																							
+	
+	
 	/**
 	 * The String must be a pair of comma or space separated double values.
 	 * Additional spaces are considered
@@ -105,6 +105,17 @@ public abstract class AVector2 extends AVector implements IVector2
 	
 	
 	@Override
+	public synchronized double getAngle(final double defAngle)
+	{
+		if (isZeroVector())
+		{
+			return defAngle;
+		}
+		return getAngle();
+	}
+	
+	
+	@Override
 	public synchronized Vector2 addNew(final IVector vector)
 	{
 		final Vector2 result = new Vector2();
@@ -155,7 +166,7 @@ public abstract class AVector2 extends AVector implements IVector2
 		final Vector2 result = new Vector2(
 				x() * vector.x(),
 				y() * vector.y());
-				
+		
 		return result;
 	}
 	

@@ -13,8 +13,7 @@ import edu.tigers.sumatra.math.IVector2;
 
 
 /**
- * 
- * @author geforce 
+ * @author geforce
  */
 public interface ITrackedObject
 {
@@ -35,5 +34,11 @@ public interface ITrackedObject
 	 * @return id
 	 */
 	AObjectID getBotId();
+	
+	
+	/**
+	 * @return
+	 */
+	long getTimestamp();
 	
 }

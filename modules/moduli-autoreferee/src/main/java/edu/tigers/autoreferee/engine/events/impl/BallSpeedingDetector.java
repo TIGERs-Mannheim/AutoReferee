@@ -34,7 +34,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author "Lukas Magel"
  */
-public class BallSpeedingDetector extends AViolationDetector
+public class BallSpeedingDetector extends AGameEventDetector
 {
 	private static int				priority					= 1;
 	private static final Logger	log						= Logger.getLogger(BallSpeedingDetector.class);

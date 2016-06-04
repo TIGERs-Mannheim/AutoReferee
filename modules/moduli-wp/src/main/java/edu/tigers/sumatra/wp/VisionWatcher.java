@@ -314,7 +314,7 @@ public class VisionWatcher implements IWorldFrameObserver, Runnable
 	{
 		IVector2 ballPos = curBall.getPos().getXYVector();
 		double minDist = Double.MAX_VALUE;
-		ITrackedBot nearest = new TrackedBot(BotID.get());
+		ITrackedBot nearest = new TrackedBot(frame.getTimestamp(), BotID.get());
 		for (ITrackedBot bot : frame.getBots().values())
 		{
 			double dist = GeoMath.distancePP(ballPos, bot.getPos());

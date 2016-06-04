@@ -8,6 +8,7 @@
  */
 package edu.tigers.sumatra.drawable;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
@@ -79,6 +80,7 @@ public class DrawableTrajectoryPath implements IDrawableShape
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
 		g.setColor(color);
+		g.setStroke(new BasicStroke(1));
 		
 		final GeneralPath drawPath = new GeneralPath();
 		IVector2 pLast = points.get(0);

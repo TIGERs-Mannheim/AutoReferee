@@ -33,12 +33,12 @@ public class OmniBot_V3 implements IMotionModel
 	private static final double	BASE_STDEV_ORI_VEL				= 0.1;
 	/** rad/s^2 */
 	private static final double	BASE_STDEV_ORI_ACC				= 1;
-																					
+	
 	/** m */
 	private static final double	BASE_STDEV_POSITION_MEAS		= 0.01;
 	/** rad */
 	private static final double	BASE_STDEV_ORIENTATION_MEAS	= 0.1;
-																					
+	
 	/** m/s^2 */
 	private static final double	BASE_CRTL_MAX_ACCEL				= 5.0;
 	/** m/s^2 */
@@ -50,12 +50,12 @@ public class OmniBot_V3 implements IMotionModel
 	private static final double	ACCEL_RAMP_PERCENT_SEC1			= 0.1;
 	private static final double	ACCEL_RAMP_PERCENT_SEC2			= 0.7;
 	private static final double	ACCEL_RAMP_PERCENT_SEC3			= 0.2;
-																					
+	
 	/** m/s */
 	private static final double	BASE_ANGLE_TAKE_VEL				= 0.5;
 	private static final double	ANGLE_TAKE_FACTOR					= 0.05;
-																					
-																					
+	
+	
 	private final double				varPosition;
 	private final double				varPositionMeasurement;
 	private final double				varVelocity;
@@ -64,15 +64,15 @@ public class OmniBot_V3 implements IMotionModel
 	private final double				varOriVel;
 	private final double				varOriAcc;
 	private final double				varOrientationMeasurement;
-											
+	
 	private final double				botCtrlMaxAccel;
 	private final double				botCtrlMaxBrakeAccel;
 	private final double				botCtrlMaxAngAccel;
 	private final double				botCtrlMaxAngBrakeAccel;
-											
+	
 	private final double				angleTakeVel;
-											
-											
+	
+	
 	/**
 	 * 
 	 */
@@ -645,5 +645,12 @@ public class OmniBot_V3 implements IMotionModel
 	public double getBotCtrlMaxAngAccel()
 	{
 		return botCtrlMaxAngAccel;
+	}
+	
+	
+	@Override
+	public Matrix getDynamicsState(final Matrix fullState)
+	{
+		return fullState;
 	}
 }

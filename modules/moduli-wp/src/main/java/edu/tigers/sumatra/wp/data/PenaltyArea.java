@@ -30,18 +30,42 @@ import edu.tigers.sumatra.shapes.rectangle.Rectangle;
  * Class representing a penalty area
  * The PenaltyArea is built out of one rectangle in the middle, with two quarter circles on the top and the
  * bottom half
+ * A little sketch with the given points
  * 
+ * <pre>
+ *         circlePointUpperNeg   penalty mark   circlePointUpperPos
+ *                    v             v             v
+ * |------------------+-------------+-------------+------------------|
+ * |outer Rectangle ..|[-------front Line--------]|..                |
+ * |           ....:  |                           |  :....           |
+ * |         .:       |                           |       :.         |
+ * |       .:         |                           |         :.       |
+ * |      :           |                           |           :      |
+ * |     :            |   centre Rectangle        |            :     |
+ * |    :             |                           |             :    |
+ * |   :              |                           |              :   |
+ * |  :   neg-circle  |                           | pos-circle    :  |
+ * | :                |                           |                : |
+ * |:                 |                           |                 :|
+ * +------------------+-------------+-------------+------------------+
+ * ^                  ^             ^             ^                  ^
+ * |           circleCentreNeg  goal centre  circleCentrePos    circlePointLowerPos
+ * circlePointLowerNeg
+ * </pre>
+ *
  * @author Malte, Frieder, KaiE
  */
 public class PenaltyArea implements I2DShape
 {
 	private static final Logger	log			= Logger.getLogger(PenaltyArea.class.getName());
-															
+	
 	/** as check when using the margin this value is always added to make the border a part of the area */
 	private static final double	DBL_EPSILON	= 1e-7;
-															
-															
+	
+	
 	private final ETeam				owner;
+	
+	
 	private final IVector2			goalCentre;
 	private final IVector2			penaltyMark;
 	private final IVector2			circleCentreNeg;
@@ -52,11 +76,11 @@ public class PenaltyArea implements I2DShape
 	private final IVector2			circlePointUpperPos;
 	private final Rectangle			outerRectangle;
 	private final float				sign;
-											
+	
 	private final Rectangle			centreRect;
 	private final Line				frontLine;
-											
-											
+	
+	
 	/**
 	 * @param owner
 	 */
@@ -79,7 +103,7 @@ public class PenaltyArea implements I2DShape
 		
 		outerRectangle = new Rectangle(circlePointLowerNeg,
 				new Vector2f(circlePointUpperPos.x(), circlePointLowerPos.y()));
-				
+		
 		centreRect = new Rectangle(circlePointUpperNeg, circleCentrePos);
 		frontLine = new Line(circlePointUpperPos, circlePointUpperNeg.subtractNew(circlePointUpperPos));
 	}
@@ -150,17 +174,21 @@ public class PenaltyArea implements I2DShape
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		final double correctedMargin = margin + DBL_EPSILON;
-		if (outerRectangle.isPointInShape(point, correctedMargin))
+		if (outerRectangle.isPointInShape(point, Math.max(0, correctedMargin)))
 		{
-			if (centreRect.isPointInShape(point, correctedMargin))
+			final Rectangle marginCentreRect = new Rectangle(
+					new Vector2f(circlePointUpperNeg.x() + (sign * correctedMargin), circlePointUpperNeg.y()),
+					circleCentrePos);
+			
+			if (marginCentreRect.isPointInShape(point))
 			{
 				return true;
 			}
-			if (GeoMath.distancePP(point, circleCentreNeg) <= (getRadiusOfPenaltyArea() + correctedMargin))
+			if (GeoMath.distancePPSqr(point, circleCentreNeg) <= Math.pow((getRadiusOfPenaltyArea() + correctedMargin), 2))
 			{
 				return true;
 			}
-			if (GeoMath.distancePP(point, circleCentrePos) <= (getRadiusOfPenaltyArea() + correctedMargin))
+			if (GeoMath.distancePPSqr(point, circleCentrePos) <= Math.pow((getRadiusOfPenaltyArea() + correctedMargin), 2))
 			{
 				return true;
 			}
@@ -194,7 +222,7 @@ public class PenaltyArea implements I2DShape
 				new Vector2f(circlePointUpperNeg.x() + (sign * correctedMargin), circlePointUpperNeg.y()), circleCentrePos);
 		if (marginRect.isPointInShape(point))
 		{
-			return new Vector2f(penaltyMark.x() + (sign * margin), point.y());
+			return new Vector2f(frontLine.supportVector().x() + (sign * margin), point.y());
 		}
 		final double plen = GeoMath.distancePPSqr(point, circleCentrePos);
 		final double nlen = GeoMath.distancePPSqr(point, circleCentreNeg);
@@ -301,56 +329,7 @@ public class PenaltyArea implements I2DShape
 					+ ") -> using fallback");
 			return nearestPointFallbackByBisection(point, pointToBuildLine, correctedMargin);
 		}
-		double sqrLen = Double.MAX_VALUE;
-		IVector2 resPoint = null;
-		for (IVector2 i : intersections)
-		{
-			final double tlen = GeoMath.distancePPSqr(i, point);
-			if (tlen <= sqrLen)
-			{
-				sqrLen = tlen;
-				resPoint = i;
-			}
-		}
-		
-		return resPoint;
-	}
-	
-	
-	// will be removed later when math is updated
-	private double getIntersectionLambda(final ILine lineOfLambda, final ILine otherLine)
-	{
-		// disassemble the lines to components for readability
-		final double s1 = lineOfLambda.supportVector().x();
-		final double s2 = lineOfLambda.supportVector().y();
-		final double d1 = lineOfLambda.directionVector().x();
-		final double d2 = lineOfLambda.directionVector().y();
-		
-		final double x1 = otherLine.supportVector().x();
-		final double x2 = otherLine.supportVector().y();
-		final double r1 = otherLine.directionVector().x();
-		final double r2 = otherLine.directionVector().y();
-		
-		final double detRS = (r1 * s2) - (s1 * r2);
-		final double detRX = (r1 * x2) - (x1 * r2);
-		final double detDR = (d1 * r2) - (r1 * d2);
-		if (Math.abs(detDR) < DBL_EPSILON)
-		{
-			throw new RuntimeException(
-					"the two lines are parallel! Should not happen when there is a check if the lines are parallel");
-		}
-		return (detRS - detRX) / detDR;
-		
-	}
-	
-	
-	// will be removed later when math is updated
-	private boolean isLineParallelToOther(final ILine a, final ILine b)
-	{
-		final double r[] = { a.directionVector().x(), a.directionVector().y() };
-		final double d[] = { b.directionVector().x(), b.directionVector().y() };
-		
-		return Math.abs((r[0] * d[1]) - (d[0] * r[1])) < DBL_EPSILON;
+		return GeoMath.nearestPointInList(intersections, point);
 	}
 	
 	
@@ -380,6 +359,7 @@ public class PenaltyArea implements I2DShape
 	private List<IVector2> getLineCircleIntersection(final IVector2 circleCentre, final ILine line, final double radius,
 			final double margin)
 	{
+		/** TODO: can be placed as alternative in {@link ACircle#lineIntersections(ILine)} */
 		final IVector2 lead = GeoMath.leadPointOnLine(circleCentre, line);
 		final double d = GeoMath.distancePPSqr(lead, circleCentre);
 		final double radius_with_margin = (radius + margin) * (radius + margin);
@@ -439,21 +419,24 @@ public class PenaltyArea implements I2DShape
 			}
 		}
 		
-		if (!isLineParallelToOther(frontLine, line))
+		if (!GeoMath.isLineParallel(frontLine, line))
 		{
 			ILine marginLine = new Line(frontLine.supportVector().addNew(new Vector2f(sign * margin, 0)),
 					frontLine.directionVector());
-					
-			double lambda = getIntersectionLambda(marginLine, line);
+			
 			/**
 			 * 2) the line segment is intersected when the coefficient of the front line is within the interval (0,1)
 			 * Notice that the epsilon is for the edge-case between the circle and the line as the interval does not
 			 * contain 0 or 1
 			 **/
-			if ((-DBL_EPSILON < lambda) && (lambda < (1 + DBL_EPSILON)))
+			
+			final IVector2 pnt = GeoMath.intersectionPointLinePath(line, marginLine.supportVector(),
+					marginLine.directionVector());
+			if (pnt != null)
 			{
-				result.add(marginLine.supportVector().addNew(marginLine.directionVector().multiplyNew(lambda)));
+				result.add(pnt);
 			}
+			
 		}
 		
 		// 3)

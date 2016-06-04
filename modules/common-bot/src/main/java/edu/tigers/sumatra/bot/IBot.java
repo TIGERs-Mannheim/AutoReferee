@@ -152,12 +152,6 @@ public interface IBot
 	/**
 	 * @return
 	 */
-	Performance getPerformance();
-	
-	
-	/**
-	 * @return
-	 */
 	default Optional<TrajectoryWithTime<IVector3>> getCurrentTrajectory()
 	{
 		return Optional.empty();
@@ -186,4 +180,10 @@ public interface IBot
 	 * @return
 	 */
 	double getDefaultAcceleration();
+	
+	
+	/**
+	 * @return
+	 */
+	MoveConstraints getMoveConstraints();
 }

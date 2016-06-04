@@ -8,7 +8,6 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +35,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author "Lukas Magel"
  */
-public class BotNumberDetector extends AViolationDetector
+public class BotNumberDetector extends AGameEventDetector
 {
 	private static final int	priority				= 1;
 	private static int			maxTeamBotCount	= 6;
@@ -50,7 +49,7 @@ public class BotNumberDetector extends AViolationDetector
 	 */
 	public BotNumberDetector()
 	{
-		super(Arrays.asList(EGameStateNeutral.RUNNING));
+		super(EGameStateNeutral.RUNNING);
 	}
 	
 	
@@ -110,6 +109,10 @@ public class BotNumberDetector extends AViolationDetector
 	
 	private int getTeamOnFieldBotCount(final Collection<ITrackedBot> bots, final ETeamColor color)
 	{
+		/*
+		 * The filter mechanism uses the extended field to also catch bots which might be positioned partially outside the
+		 * regular field
+		 */
 		return (int) bots.stream()
 				.filter(ColorFilter.get(color))
 				.filter(bot -> Geometry.getFieldWBorders().isPointInShape(bot.getPos()))

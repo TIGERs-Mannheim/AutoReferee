@@ -328,12 +328,18 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		@Override
 		public void run()
 		{
-			updateCamFrameShapes();
-			updateVisFrameShapes();
-			panel.getFieldPanel().paintOffline();
-			
-			updateRobotsPanel();
-			panel.getRobotsPanel().repaint();
+			try
+			{
+				updateCamFrameShapes();
+				updateVisFrameShapes();
+				panel.getFieldPanel().paintOffline();
+				
+				updateRobotsPanel();
+				panel.getRobotsPanel().repaint();
+			} catch (Throwable e)
+			{
+				log.error("Exception in visualizer updater", e);
+			}
 		}
 	}
 	
@@ -377,6 +383,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 		List<ExtendedCamDetectionFrame> mergedFrames = new ArrayList<>(camFrames.values());
+		mergedFrames.sort((a, b) -> Long.compare(b.getBall().gettCapture(), a.getBall().gettCapture()));
 		for (ExtendedCamDetectionFrame mergedCamFrame : mergedFrames)
 		{
 			assert mergedCamFrame != null;
@@ -408,13 +415,19 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 				ballCircle.setFill(true);
 				shapes.add(ballCircle);
 			}
-			
+		}
+		
+		if (!mergedFrames.isEmpty())
+		{
 			Color ballColor = new Color(50, 100, 200);
-			DrawableCircle ballCircle = new DrawableCircle(mergedCamFrame.getBall().getPos().getXYVector(),
-					Geometry.getBallRadius() - 5, ballColor);
+			double age = (mergedFrames.get(0).gettCapture() - mergedFrames.get(0).getBall().gettCapture()) / 1e9;
+			double size = ((Geometry.getBallRadius() - 5) * (1 - Math.min(1, Math.max(0, age / 0.2)))) + 5;
+			DrawableCircle ballCircle = new DrawableCircle(mergedFrames.get(0).getBall().getPos().getXYVector(),
+					size, ballColor);
 			ballCircle.setFill(true);
 			shapes.add(ballCircle);
 		}
+		
 		
 		ShapeMap shapeMap = new ShapeMap();
 		IShapeLayer visionLayer = new VisionLayer();

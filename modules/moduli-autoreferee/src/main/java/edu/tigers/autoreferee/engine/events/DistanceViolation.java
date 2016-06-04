@@ -33,7 +33,22 @@ public class DistanceViolation extends GameEvent
 	public DistanceViolation(final EGameEvent eventType, final long timestamp, final BotID botAtFault,
 			final FollowUpAction followUp, final double distance)
 	{
-		super(eventType, timestamp, botAtFault, followUp);
+		this(eventType, timestamp, botAtFault, followUp, null, distance);
+	}
+	
+	
+	/**
+	 * @param eventType
+	 * @param timestamp
+	 * @param botAtFault
+	 * @param followUp
+	 * @param cardPenalty
+	 * @param distance in mm
+	 */
+	public DistanceViolation(final EGameEvent eventType, final long timestamp, final BotID botAtFault,
+			final FollowUpAction followUp, final CardPenalty cardPenalty, final double distance)
+	{
+		super(eventType, timestamp, botAtFault, followUp, cardPenalty);
 		this.distance = distance;
 	}
 	

@@ -326,4 +326,23 @@ public class GeoMathTestV2
 	}
 	
 	
+	/**
+	 * {@link GeoMath#intersectionPointLineHalfLine(ILine, ILine)}
+	 */
+	@Test
+	public void testIntersectionPointLineHalfLine()
+	{
+		final IVector2 d1 = new Vector2(1, 1);
+		final IVector2 d2 = new Vector2(-1, 1);
+		final ILine halfLine = new Line(ZERO_VECTOR, d1);
+		for (int i = 0; i < 1000; ++i)
+		{
+			final IVector2 s2 = d1.multiplyNew(i);
+			final ILine line = new Line(s2, d2);
+			final IVector2 result = GeoMath.intersectionPointLineHalfLine(line, halfLine);
+			assertTrue(s2.equals(result, TEST_ACCURANCY));
+		}
+	}
+	
+	
 }

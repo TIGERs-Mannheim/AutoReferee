@@ -30,22 +30,22 @@ import edu.tigers.sumatra.math.IVector2;
 public class TrackedBot extends ATrackedObject implements ITrackedBot
 {
 	private BotID		botId;
-							
+	
 	private IVector2	pos			= AVector2.ZERO_VECTOR;
 	/** m/s */
 	private IVector2	vel			= AVector2.ZERO_VECTOR;
-											
+	
 	/** [rad] */
 	private double		angle			= 0;
 	/** rad/s */
 	private double		aVel			= 0;
-											
-											
+	
+	
 	private boolean	ballContact	= false;
 	private boolean	visible		= true;
 	private IBot		bot;
-							
-							
+	
+	
 	@SuppressWarnings("unused")
 	protected TrackedBot()
 	{
@@ -60,10 +60,12 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	
 	
 	/**
+	 * @param timestamp
 	 * @param botId
 	 */
-	public TrackedBot(final BotID botId)
+	public TrackedBot(final long timestamp, final BotID botId)
 	{
+		super(timestamp);
 		this.botId = botId;
 		bot = new DummyBot(botId);
 	}
@@ -76,6 +78,7 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	 */
 	public TrackedBot(final ITrackedBot o)
 	{
+		super(o);
 		botId = o.getBotId();
 		pos = o.getPos();
 		vel = o.getVel();
@@ -122,6 +125,11 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public IVector2 getPosByTime(final double t)
 	{
+		if (bot.getCurrentTrajectory().isPresent()
+				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		{
+			return bot.getCurrentTrajectory().get().getPositionMM(getTimestamp() + (long) (t * 1e9)).getXYVector();
+		}
 		return getPos().addNew(getVel().multiplyNew(1000 * t));
 	}
 	
@@ -133,6 +141,11 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public IVector2 getVelByTime(final double t)
 	{
+		if (bot.getCurrentTrajectory().isPresent()
+				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		{
+			return bot.getCurrentTrajectory().get().getVelocity(getTimestamp() + (long) (t * 1e9)).getXYVector();
+		}
 		return getVel();
 	}
 	
@@ -144,6 +157,11 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public double getAngleByTime(final double t)
 	{
+		if (bot.getCurrentTrajectory().isPresent()
+				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		{
+			return bot.getCurrentTrajectory().get().getPosition(getTimestamp() + (long) (t * 1e9)).z();
+		}
 		return AngleMath.normalizeAngle(getAngle() + (getaVel() * t));
 	}
 	

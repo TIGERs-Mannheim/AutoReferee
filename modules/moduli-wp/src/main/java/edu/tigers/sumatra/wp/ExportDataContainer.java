@@ -541,7 +541,7 @@ public class ExportDataContainer
 		public ITrackedBot toTrackedBot()
 		{
 			BotID botId = BotID.createBotId(id, color);
-			TrackedBot tBot = new TrackedBot(botId);
+			TrackedBot tBot = new TrackedBot(timestamp, botId);
 			tBot.setPos(pos.getXYVector());
 			tBot.setVel(vel.getXYVector());
 			tBot.setAngle(pos.z());

@@ -34,108 +34,115 @@ import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 public class Geometry
 {
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				fieldLength								= 8090;
+	private static double					fieldLength								= 8090;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				fieldWidth								= 6050;
+	private static double					fieldWidth								= 6050;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				boundaryWidth							= 350;
+	private static double					boundaryWidth							= 350;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				boundaryLength							= 350;
+	private static double					boundaryLength							= 350;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				judgesBorderWidth						= 425;
+	private static double					boundaryOffset							= 0;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				judgesBorderLength					= 425;
+	private static double					judgesBorderWidth						= 425;
+	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
+	private static double					judgesBorderLength					= 425;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP" }, comment = "Distance (goal line - penalty mark)")
-	private static double				distanceToPenaltyMark				= 1000;
+	private static double					distanceToPenaltyMark				= 1000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP" }, comment = "radius of the two, small quarter circles at the sides of the penalty area.")
-	private static double				distanceToPenaltyArea				= 1000;
+	private static double					distanceToPenaltyArea				= 1000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP" }, comment = "the length of the short line of the penalty area, that is parallel to the goal line")
-	private static double				lengthOfPenaltyAreaFrontLine		= 500;
+	private static double					lengthOfPenaltyAreaFrontLine		= 500;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				goalSize									= 1000;
+	private static double					goalSize									= 1000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static double				centerCircleRadius					= 1000;
+	private static double					centerCircleRadius					= 1000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP" })
-	private static String				ballModelIdentifier					= "default";
-																							
-																							
+	private static String					ballModelIdentifier					= "default";
+	
+	
 	@Configurable
-	private static double				ballRadius								= 21.5;
+	private static double					ballRadius								= 21.5;
 	@Configurable
-	private static double				botRadius								= 90;
+	private static double					botRadius								= 90;
 	@Configurable
-	private static double				stopSpeed								= 1.5;
+	private static double					stopSpeed								= 1.5;
 	@Configurable
-	private static double				botToBallDistanceStop				= 500;
+	private static double					botToBallDistanceStop				= 500;
 	@Configurable
-	private static double				goalDepth								= 180;
+	private static double					goalDepth								= 180;
 	@Configurable(comment = "Bots must be behind this line on penalty shot")
-	private static double				distancePenaltyMarkToPenaltyLine	= 400;
-																							
+	private static double					distancePenaltyMarkToPenaltyLine	= 400;
+	
 	@Configurable
-	private static double				penaltyAreaMargin						= 100;
+	private static double					penaltyAreaMargin						= 100;
 	@Configurable
-	private static double				center2DribblerDistDefault			= 75;
-																							
+	private static double					center2DribblerDistDefault			= 75;
+	
 	@Configurable
-	private static Double[]				cameraHeights							= new Double[] { 3500.0, 3500.0, 3500.0, 3500.0 };
+	private static Double[]					cameraHeights							= new Double[] { 3500.0, 3500.0, 3500.0,
+			3500.0 };
 	@Configurable
-	private static Double[]				cameraFocalLength						= new Double[] { 0.0, 0.0, 0.0, 0.0 };
+	private static Double[]					cameraFocalLength						= new Double[] { 0.0, 0.0, 0.0, 0.0 };
 	@Configurable
-	private static Double[]				cameraPrincipalPointX				= new Double[] { 0.0, 0.0, 0.0, 0.0 };
+	private static Double[]					cameraPrincipalPointX				= new Double[] { 0.0, 0.0, 0.0, 0.0 };
 	@Configurable
-	private static Double[]				cameraPrincipalPointY				= new Double[] { 0.0, 0.0, 0.0, 0.0 };
-																							
-																							
+	private static Double[]					cameraPrincipalPointY				= new Double[] { 0.0, 0.0, 0.0, 0.0 };
+	
+	
 	@Configurable(comment = "If true, Geometry will be refreshed with data from vision, if available.")
-	private static boolean				receiveGeometry						= true;
-																							
-																							
+	private static boolean					receiveGeometry						= true;
+	
+	
 	/** Represents the field as a rectangle */
-	private final Rectangle				field;
+	private final Rectangle					field;
 	/** Represents the field WITH margin as a rectangle */
-	private final Rectangle				fieldWBorders;
+	private final Rectangle					fieldWBorders;
 	/** Represents the field with margin and referee area */
-	private final Rectangle				fieldWReferee;
+	private final Rectangle					fieldWReferee;
 	/** Our Goal */
-	private final Goal					goalOur;
+	private final Goal						goalOur;
 	/** Their Goal */
-	private final Goal					goalTheir;
+	private final Goal						goalTheir;
 	/** Tigers goal line */
-	private final Line					goalLineOur;
+	private final Line						goalLineOur;
 	/** Opponent goal line */
-	private final Line					goalLineTheir;
+	private final Line						goalLineTheir;
 	/** Our Penalty Area ("Strafraum") */
-	private final PenaltyArea			penaltyAreaOur;
+	private final PenaltyArea				penaltyAreaOur;
 	/** Their Penalty Area ("Strafraum") */
-	private final PenaltyArea			penaltyAreaTheir;
+	private final PenaltyArea				penaltyAreaTheir;
+	/** Our Penalty Area ("Strafraum") */
+	private final ExtendedPenaltyArea	penaltyAreaOurExt;
+	/** Their Penalty Area ("Strafraum") */
+	private final ExtendedPenaltyArea	penaltyAreaTheirExt;
 	/** The no-go area for all bots during a penalty kick */
-	private final Rectangle				penaltyKickAreaOur;
+	private final Rectangle					penaltyKickAreaOur;
 	/** The no-go area for all bots during a penalty kick */
-	private final Rectangle				penaltyKickAreaTheir;
+	private final Rectangle					penaltyKickAreaTheir;
 	/** Our penalty mark */
-	private final Vector2f				penaltyMarkOur;
+	private final Vector2f					penaltyMarkOur;
 	/** Their penalty mark */
-	private final Vector2f				penaltyMarkTheir;
+	private final Vector2f					penaltyMarkTheir;
 	/** penalty line on our side (bots must be behind this line when a penalty kick is executed) */
-	private final Vector2f				penaltyLineOur;
+	private final Vector2f					penaltyLineOur;
 	/** penalty line on their side (bots must be behind this line when a penalty kick is executed) */
-	private final Vector2f				penaltyLineTheir;
+	private final Vector2f					penaltyLineTheir;
 	/** The center of the field */
-	private final IVector2				center									= Vector2.ZERO_VECTOR;
+	private final IVector2					center									= Vector2.ZERO_VECTOR;
 	/** The center circle ("Mittelkreis") */
-	private final Circle					centerCircle;
-												
-	private final Rectangle				ourHalf;
+	private final Circle						centerCircle;
 	
-	private final Rectangle				theirHalf;
+	private final Rectangle					ourHalf;
 	
-	private final LearnedBallModel	ballModel;
-												
-												
+	private final Rectangle					theirHalf;
+	
+	private final LearnedBallModel		ballModel;
+	
+	
 	private static class ConfigCallback implements IConfigObserver
 	{
 		@Override
@@ -160,15 +167,19 @@ public class Geometry
 	private Geometry()
 	{
 		field = calcField(center, fieldLength, fieldWidth);
-		fieldWBorders = calcField(center, fieldLength + (boundaryLength * 2), fieldWidth + (boundaryWidth * 2));
-		fieldWReferee = calcField(center, fieldLength + (boundaryLength * 2) + (judgesBorderLength * 2), fieldWidth
-				+ (boundaryWidth * 2) + (judgesBorderWidth * 2));
+		fieldWBorders = calcField(center, fieldLength + ((boundaryOffset + boundaryLength) * 2),
+				fieldWidth + ((boundaryOffset + boundaryWidth) * 2));
+		fieldWReferee = calcField(center,
+				fieldLength + ((boundaryOffset + boundaryLength) * 2) + (judgesBorderLength * 2), fieldWidth
+						+ ((boundaryOffset + boundaryWidth) * 2) + (judgesBorderWidth * 2));
 		goalOur = calcOurGoal(goalSize, fieldLength);
 		goalTheir = calcTheirGoal(goalSize, fieldLength);
 		goalLineOur = calcGoalLine(goalOur.getGoalCenter(), AVector2.Y_AXIS);
 		goalLineTheir = calcGoalLine(goalTheir.getGoalCenter(), AVector2.Y_AXIS);
 		penaltyAreaOur = new PenaltyArea(ETeam.TIGERS);
 		penaltyAreaTheir = new PenaltyArea(ETeam.OPPONENTS);
+		penaltyAreaOurExt = new ExtendedPenaltyArea(penaltyAreaOur);
+		penaltyAreaTheirExt = new ExtendedPenaltyArea(penaltyAreaTheir);
 		
 		penaltyMarkOur = calcOurPenalityMark(fieldLength, distanceToPenaltyMark);
 		penaltyMarkTheir = calcTheirPenalityMark(fieldLength, distanceToPenaltyMark);
@@ -527,6 +538,28 @@ public class Geometry
 	
 	
 	/**
+	 * The extended penaltyArea includes the area behind the goal line as well
+	 * 
+	 * @return
+	 */
+	public static ExtendedPenaltyArea getPenaltyAreaOurExtended()
+	{
+		return instance.penaltyAreaOurExt;
+	}
+	
+	
+	/**
+	 * The extended penaltyArea includes the area behind the goal line as well
+	 * 
+	 * @return
+	 */
+	public static ExtendedPenaltyArea getPenaltyAreaTheirExtended()
+	{
+		return instance.penaltyAreaTheirExt;
+	}
+	
+	
+	/**
 	 * @return the ourHalf
 	 */
 	public static Rectangle getHalfOur()
@@ -571,7 +604,7 @@ public class Geometry
 	 */
 	public static double getBoundaryWidth()
 	{
-		return boundaryWidth;
+		return boundaryWidth + boundaryOffset;
 	}
 	
 	
@@ -600,7 +633,7 @@ public class Geometry
 	 */
 	public static final double getBoundaryLength()
 	{
-		return boundaryLength;
+		return boundaryLength + boundaryOffset;
 	}
 	
 	

@@ -22,14 +22,14 @@ public class TimeSync
 {
 	@SuppressWarnings("unused")
 	private static final Logger	log				= Logger.getLogger(TimeSync.class.getName());
-																
+	
 	private static final int		BUFFER_SIZE		= 30;
-																
+	
 	private long						offset			= 0;
 	private final Queue<Long>		offsetBuffer	= new CircularFifoQueue<>(BUFFER_SIZE);
 	private final Queue<Long>		diffBuffer		= new CircularFifoQueue<>(BUFFER_SIZE);
-																
-																
+	
+	
 	/**
 	 * @param timestamp
 	 */
@@ -49,7 +49,7 @@ public class TimeSync
 			offset = (long) average(offsetBuffer);
 			if (avgDiff < 100_000)
 			{
-				log.info("Synced with Vision clock. offset=" + offset + " diff=" + avgDiff);
+				log.info("Synced with Vision clock. offset=" + offset + "ns diff=" + avgDiff + "ns");
 				offsetBuffer.clear();
 			}
 		}

@@ -37,7 +37,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * 
  * @author Lukas Magel
  */
-public class DribblingDetector extends APreparingViolationDetector
+public class DribblingDetector extends APreparingGameEventDetector
 {
 	private static final int		priority								= 1;
 	private static final Logger	log									= Logger.getLogger(DribblingDetector.class);
@@ -57,7 +57,7 @@ public class DribblingDetector extends APreparingViolationDetector
 	
 	static
 	{
-		AViolationDetector.registerClass(DribblingDetector.class);
+		AGameEventDetector.registerClass(DribblingDetector.class);
 	}
 	
 	

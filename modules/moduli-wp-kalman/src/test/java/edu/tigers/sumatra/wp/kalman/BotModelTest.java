@@ -99,7 +99,7 @@ public class BotModelTest
 				{
 					contr = new Matrix(6, 1);
 				}
-				ITrackedBot tBot = s.motionToTrackedBot(botID);
+				ITrackedBot tBot = s.motionToTrackedBot(ts, botID);
 				exp.addValues(t,
 						tBot.getPos().x(), tBot.getPos().y(), tBot.getAngle(),
 						tBot.getVel().x(), tBot.getVel().y(), tBot.getaVel(),

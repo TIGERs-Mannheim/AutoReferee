@@ -24,7 +24,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class VelocityVisCalc implements IVisCalc
+public class VelocityVisCalc implements IWpCalc
 {
 	
 	

@@ -21,8 +21,8 @@ public class TrajWTimeImpl<RETURN_TYPE, TRAJ extends ITrajectory<RETURN_TYPE>>
 {
 	private final TRAJ	trajectory;
 	private final long	tStart;
-								
-								
+	
+	
 	@SuppressWarnings("unused")
 	protected TrajWTimeImpl()
 	{
@@ -68,7 +68,7 @@ public class TrajWTimeImpl<RETURN_TYPE, TRAJ extends ITrajectory<RETURN_TYPE>>
 	 */
 	public double getTrajectoryTime(final long tCur)
 	{
-		return Math.min((tCur - tStart) / 1e9, trajectory.getTotalTime());
+		return Math.max(0, Math.min((tCur - tStart) / 1e9, trajectory.getTotalTime()));
 	}
 	
 	

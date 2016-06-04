@@ -38,9 +38,10 @@ public abstract class ABotMotionResult extends AMotionResult
 	
 	
 	/**
+	 * @param timestamp
 	 * @param botId
 	 * @return
 	 */
-	public abstract ITrackedBot motionToTrackedBot(final BotID botId);
+	public abstract ITrackedBot motionToTrackedBot(long timestamp, final BotID botId);
 	
 }

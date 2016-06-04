@@ -8,54 +8,167 @@
  */
 package edu.tigers.sumatra.bot;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.IConfigClient;
+import com.github.g3force.configurable.IConfigObserver;
+import com.sleepycat.persist.model.Persistent;
+
+
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class MoveConstraints
+@Persistent
+public class MoveConstraints implements IConfigObserver
 {
-	private double	velLimitDefault	= -1;
-	private double	accLimitDefault	= -1;
-	private double	velLimit				= 0;
-	private double	accLimit				= 0;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
+	private double						velMax	= 3;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "10", "10" })
+	private double						velMaxW	= 10;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
+	private double						accMax	= 3;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "50", "50" })
+	private double						accMaxW	= 50;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
+	private double						jerkMax	= 3;
+	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "50", "50" })
+	private double						jerkMaxW	= 50;
 	
+	private final MoveConstraints	defConstraints;
 	
-	/**
-	 * @return the velLimit
-	 */
-	public double getVelLimit()
+	static
 	{
-		return velLimit;
+		ConfigRegistration.registerClass("botmgr", MoveConstraints.class);
 	}
 	
 	
 	/**
-	 * @return the accLimit
+	 * Default constraints
 	 */
-	public double getAccLimit()
+	public MoveConstraints()
 	{
-		return accLimit;
+		defConstraints = null;
 	}
 	
 	
 	/**
-	 * @param velLimit the velLimit to set
-	 * @return this for chaining
+	 * @param o
 	 */
-	public MoveConstraints setVelLimit(final double velLimit)
+	public MoveConstraints(final MoveConstraints o)
 	{
-		this.velLimit = velLimit;
-		return this;
+		velMax = o.velMax;
+		velMaxW = o.velMaxW;
+		accMax = o.accMax;
+		accMaxW = o.accMaxW;
+		jerkMax = o.jerkMax;
+		jerkMaxW = o.jerkMaxW;
+		defConstraints = o;
+	}
+	
+	
+	@Override
+	public void afterApply(final IConfigClient configClient)
+	{
 	}
 	
 	
 	/**
-	 * @param accLimit the accLimit to set
-	 * @return this for chaining
+	 * @return the velMax
 	 */
-	public MoveConstraints setAccLimit(final double accLimit)
+	public double getVelMax()
 	{
-		this.accLimit = accLimit;
-		return this;
+		return velMax;
+	}
+	
+	
+	/**
+	 * @param velMax the velMax to set
+	 */
+	public void setVelMax(final double velMax)
+	{
+		this.velMax = velMax;
+	}
+	
+	
+	/**
+	 * @return the velMaxW
+	 */
+	public double getVelMaxW()
+	{
+		return velMaxW;
+	}
+	
+	
+	/**
+	 * @param velMaxW the velMaxW to set
+	 */
+	public void setVelMaxW(final double velMaxW)
+	{
+		this.velMaxW = velMaxW;
+	}
+	
+	
+	/**
+	 * @return the accMax
+	 */
+	public double getAccMax()
+	{
+		return accMax;
+	}
+	
+	
+	/**
+	 * @param accMax the accMax to set
+	 */
+	public void setAccMax(final double accMax)
+	{
+		this.accMax = accMax;
+	}
+	
+	
+	/**
+	 * @return the accMaxW
+	 */
+	public double getAccMaxW()
+	{
+		return accMaxW;
+	}
+	
+	
+	/**
+	 * @param accMaxW the accMaxW to set
+	 */
+	public void setAccMaxW(final double accMaxW)
+	{
+		this.accMaxW = accMaxW;
+	}
+	
+	
+	/**
+	 * @return the defConstraints
+	 */
+	public MoveConstraints getDefConstraints()
+	{
+		return defConstraints;
+	}
+	
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append(velMax);
+		builder.append(",");
+		builder.append(velMaxW);
+		builder.append(",");
+		builder.append(accMax);
+		builder.append(",");
+		builder.append(accMaxW);
+		builder.append(",");
+		builder.append(jerkMax);
+		builder.append(",");
+		builder.append(jerkMaxW);
+		return builder.toString();
 	}
 	
 	
@@ -64,7 +177,7 @@ public class MoveConstraints
 	 */
 	public void setDefaultVelLimit()
 	{
-		velLimit = velLimitDefault;
+		velMax = defConstraints.velMax;
 	}
 	
 	
@@ -73,32 +186,42 @@ public class MoveConstraints
 	 */
 	public void setDefaultAccLimit()
 	{
-		accLimit = accLimitDefault;
+		accMax = defConstraints.accMax;
 	}
 	
 	
 	/**
-	 * @param velLimitDefault the velLimitDefault to set
+	 * @return the jerkMax
 	 */
-	public void setVelLimitDefault(final double velLimitDefault)
+	public double getJerkMax()
 	{
-		this.velLimitDefault = velLimitDefault;
-		if (velLimit == 0)
-		{
-			velLimit = velLimitDefault;
-		}
+		return jerkMax;
 	}
 	
 	
 	/**
-	 * @param accLimitDefault the accLimitDefault to set
+	 * @param jerkMax the jerkMax to set
 	 */
-	public void setAccLimitDefault(final double accLimitDefault)
+	public void setJerkMax(final double jerkMax)
 	{
-		this.accLimitDefault = accLimitDefault;
-		if (accLimit == 0)
-		{
-			accLimit = accLimitDefault;
-		}
+		this.jerkMax = jerkMax;
+	}
+	
+	
+	/**
+	 * @return the jerkMaxW
+	 */
+	public double getJerkMaxW()
+	{
+		return jerkMaxW;
+	}
+	
+	
+	/**
+	 * @param jerkMaxW the jerkMaxW to set
+	 */
+	public void setJerkMaxW(final double jerkMaxW)
+	{
+		this.jerkMaxW = jerkMaxW;
 	}
 }

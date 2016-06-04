@@ -183,7 +183,7 @@ public class Vector3 extends AVector3
 	 * @param f factor
 	 * @return this
 	 */
-	public Vector3 mutiply(final double f)
+	public Vector3 multiply(final double f)
 	{
 		x *= f;
 		y *= f;

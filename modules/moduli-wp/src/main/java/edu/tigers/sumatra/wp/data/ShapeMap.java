@@ -89,8 +89,8 @@ public class ShapeMap
 	{
 		final IShapeLayer			shapeLayer;
 		final List<ShapeList>	shapes	= new ArrayList<>();
-													
-													
+		
+		
 		@SuppressWarnings("unused")
 		private ShapeLayer()
 		{
@@ -174,8 +174,8 @@ public class ShapeMap
 	{
 		List<IDrawableShape>	shapes	= new ArrayList<>();
 		boolean					inverted	= false;
-												
-												
+		
+		
 		/**
 		 * 
 		 */
@@ -242,6 +242,10 @@ public class ShapeMap
 	 */
 	public void put(final IShapeLayer shapeLayer, final List<IDrawableShape> shapes)
 	{
+		for (IDrawableShape shape : shapes)
+		{
+			assert shape != null;
+		}
 		ShapeLayer sl = new ShapeLayer(shapeLayer);
 		ShapeList l = new ShapeList();
 		l.shapes = shapes;

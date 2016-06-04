@@ -22,7 +22,7 @@ public final class GeoMath
 {
 	private static final Logger	log		= Logger.getLogger(GeoMath.class.getName());
 														
-	private static final double	ACCURACY	= 0.001;
+	private static final double	ACCURACY	= 1e-3;
 														
 														
 	/**
@@ -91,11 +91,11 @@ public final class GeoMath
 		 * @param dir1
 		 * @param supp2
 		 * @param dir2
-		 * @throws MathException if the Lines are parallel or no true lines...
+		 * @throws RuntimeException if the Lines are parallel or no true lines...
 		 * @return the lambda for the first line
 		 */
 		public static double getLineIntersectionLambda(final IVector2 supp1, final IVector2 dir1, final IVector2 supp2,
-				final IVector2 dir2) throws MathException
+				final IVector2 dir2)
 		{
 			final double s1 = supp1.x();
 			final double s2 = supp1.y();
@@ -114,8 +114,8 @@ public final class GeoMath
 			
 			if (Math.abs(detDR) < (ACCURACY * ACCURACY))
 			{
-				throw new MathException(
-						"the two lines are parallel! Should not happen when there is a check if the lines are parallel");
+				throw new RuntimeException(
+						"the two lines are parallel! Should not happen but when it does tell KaiE as this means there might be a bug");
 			}
 			return (detRS - detRX) / detDR;
 		}
@@ -179,18 +179,14 @@ public final class GeoMath
 		 */
 		public static double getLeadPointLambda(final IVector2 point, final IVector2 supp, final IVector2 dir)
 		{
-			if ((Math.abs(dir.x()) + Math.abs(dir.y())) < (2 * ACCURACY * ACCURACY))
+			
+			final IVector2 ortho = new Vector2(dir.y(), -dir.x());
+			if (LowLevel.isLineParallel(supp, dir, point, ortho))
 			{
 				return 0;
 			}
-			final IVector2 ortho = new Vector2(dir.y(), -dir.x());
-			try
-			{
-				return getLineIntersectionLambda(supp, dir, point, ortho);
-			} catch (MathException e)
-			{
-				throw new RuntimeException("Error calculating a intersection!");
-			}
+			
+			return getLineIntersectionLambda(supp, dir, point, ortho);
 		}
 		
 	}
@@ -456,6 +452,20 @@ public final class GeoMath
 	
 	
 	/**
+	 * Checks if the given lines are parallel or degenerated
+	 * 
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
+	public static boolean isLineParallel(final ILine l1, final ILine l2)
+	{
+		return LowLevel.isLineParallel(l1.supportVector(), l1.directionVector(), l2.supportVector(),
+				l2.directionVector());
+	}
+	
+	
+	/**
 	 * Two line segments (Strecke) are given by two vectors each.
 	 * This method calculates the distance between the line segments.
 	 * If one or both of the lines are points (both vectors are the same) the distance from the line segment to the point
@@ -595,42 +605,27 @@ public final class GeoMath
 	
 	
 	/**
-	 * Two line segments (Strecke) are given by two vectors each.
-	 * This method calculates the nearest point to line segment one to on line segment two.
-	 * If one or both of the lines are points (both vectors are the same) the distance form the line segment to the point
-	 * is calculated
-	 * THIS FUNCTION IS NOT CORRECT, IT IS JUST AN APPROXIMATION
+	 * This Method returns the nearest point on the line-segment to a given point. When the line is degenerated
+	 * (l1p1=l1p2) the first point is returned. If the lead point of the argument is not on the segment the
+	 * nearest edge-point (l1p1,p1p2) is returned.
 	 * 
 	 * @param l1p1
 	 * @param l1p2
-	 * @param p2
-	 * @author Dirk, Felix
+	 * @param point
+	 * @author Dirk, Felix, KaiE
 	 * @return
-	 * @throws MathException if lines are parallel or equal or one of the vectors is zero
 	 */
-	public static IVector2 nearestPointOnLineSegment(final IVector2 l1p1, final IVector2 l1p2, final IVector2 p2)
-			throws MathException
+	public static IVector2 nearestPointOnLineSegment(final IVector2 l1p1, final IVector2 l1p2, final IVector2 point)
 	{
-		// line crossing
-		IVector2 lc = null;
-		// special cases: one or both lines are points
-		if (l1p1.equals(l1p2))
+		final IVector2 dir = l1p2.subtractNew(l1p1);
+		final double lambda = LowLevel.getLeadPointLambda(point, l1p1, dir);
+		if (LowLevel.isLambdaInRange(lambda, 0, 1))
 		{
-			return l1p1;
+			return LowLevel.getPointOnLineForLambda(l1p1, dir, lambda);
 		}
-		lc = leadPointOnLine(p2, new Line(l1p1, l1p2.subtractNew(l1p1)));
-		// limit to line segments
-		IVector2 nearestPointToCrossingForLineSegement1 = new Vector2(lc);
-		if (ratio(l1p1, lc, l1p2) > 1)
-		{
-			nearestPointToCrossingForLineSegement1 = new Vector2(l1p2);
-		}
-		if ((ratio(l1p2, lc, l1p1) > 1)
-				&& ((ratio(l1p1, lc, l1p2) < 1) || (ratio(l1p2, lc, l1p1) < ratio(l1p1, lc, l1p2))))
-		{
-			nearestPointToCrossingForLineSegement1 = new Vector2(l1p1);
-		}
-		return nearestPointToCrossingForLineSegement1;
+		final double dist1 = distancePPSqr(l1p1, point);
+		final double dist2 = distancePPSqr(l1p2, point);
+		return dist1 < dist2 ? l1p1 : l1p2;
 	}
 	
 	
@@ -710,35 +705,27 @@ public final class GeoMath
 	public static Vector2 intersectionPointPath(final IVector2 p1, final IVector2 v1, final IVector2 p2,
 			final IVector2 v2)
 	{
-		if (LowLevel.isLineParallel(v1, p1, p2, v2))
+		
+		if (LowLevel.isLineParallel(p1, v1, p2, v2))
 		{
 			return null;
 		}
-		double lambda;
-		
 		try
 		{
-			lambda = LowLevel.getLineIntersectionLambda(p1, v1, p2, v2);
-		} catch (MathException e)
+			final double lambda = LowLevel.getLineIntersectionLambda(p1, v1, p2, v2);
+			final double delta = LowLevel.getLineIntersectionLambda(p2, v2, p1, v1);
+			if (LowLevel.isLambdaInRange(lambda, 0, 1) && LowLevel.isLambdaInRange(delta, 0, 1))
+			{
+				return LowLevel.getPointOnLineForLambda(p1, v1, lambda);
+			}
+		} catch (RuntimeException e)
 		{
-			return null;
-		}
-		
-		double delta;
-		
-		try
-		{
-			delta = LowLevel.getLineIntersectionLambda(p2, v2, p1, v1);
-		} catch (MathException e)
-		{
-			return null;
-		}
-		
-		if (LowLevel.isLambdaInRange(lambda, 0, 1) && LowLevel.isLambdaInRange(delta, 0, 1))
-		{
-			return LowLevel.getPointOnLineForLambda(p1, v1, lambda);
+			log.error("Exception with parameter: p1=" + p1 + "v1=" + v1 + "p2=" + p2 + "v2=" + v2, e);
+			// no operation
 		}
 		return null;
+		
+		
 	}
 	
 	
@@ -760,42 +747,120 @@ public final class GeoMath
 	
 	
 	/**
-	 * Calculates the intersection point of two lines.
-	 * Throws MathException if lines are parallel, equal or intersection is off line boundaries.
-	 * Will not work with horizontal or vertical lines.
+	 * calculates the intersection point of a line with a line-segment (path).
 	 * 
-	 * @param l1
-	 * @param l2
-	 * @return Intersection point
-	 * @throws MathException
-	 * @author JulianT
+	 * @param line
+	 * @param pPath
+	 * @param vPath
+	 * @return the intersection point on the path or null if not intersecting
 	 */
-	public static Vector2 intersectionPointOnLine(final ILine l1, final ILine l2) throws MathException
+	public static IVector2 intersectionPointLinePath(final ILine line, final IVector2 pPath,
+			final IVector2 vPath)
 	{
-		IVector2 intersect = intersectionPoint(l1, l2);
-		
-		if (isPointOnLine(l1, intersect) && isPointOnLine(l2, intersect))
+		final IVector2 pLine = line.supportVector();
+		final IVector2 vLine = line.directionVector();
+		if (LowLevel.isLineParallel(pLine, vLine, pPath, vPath))
 		{
-			return (Vector2) intersect;
+			return null;
 		}
-		
-		throw new MathException("No intersection on line");
+		try
+		{
+			final double lambda = LowLevel.getLineIntersectionLambda(pPath, vPath, pLine, vLine);
+			if (LowLevel.isLambdaInRange(lambda, 0, 1))
+			{
+				return LowLevel.getPointOnLineForLambda(pPath, vPath, lambda);
+			}
+		} catch (RuntimeException e)
+		{
+			log.error("Exception with parameter: pLine=" + pLine + "vLine=" + vLine + "pPath=" + pPath + "vPath=" + vPath,
+					e);
+			// no operation
+		}
+		return null;
 		
 	}
 	
 	
 	/**
-	 * Calculates if a Point is on a Line.
+	 * calculates the intersection of a line with a given half line. The half line starts at the support-vector
+	 * and reaches to infinity in direction of the direction-vector.
+	 * 
+	 * @param line
+	 * @param halfLine
+	 * @return null if the lines are not intersecting else the point
+	 */
+	public static IVector2 intersectionPointLineHalfLine(final ILine line, final ILine halfLine)
+	{
+		if (isLineParallel(line, halfLine))
+		{
+			return null;
+		}
+		try
+		{
+			final IVector2 hLS = halfLine.supportVector();
+			final IVector2 hLD = halfLine.directionVector();
+			final IVector2 lS = line.supportVector();
+			final IVector2 lD = line.directionVector();
+			final double lambda = LowLevel.getLineIntersectionLambda(hLS, hLD, lS, lD);
+			if (lambda > -(ACCURACY * ACCURACY))
+			{
+				return LowLevel.getPointOnLineForLambda(hLS, hLD, lambda);
+			}
+		} catch (RuntimeException ex)
+		{
+			// catch to avoid runtime exception
+			log.error("Exception with parameter: line=" + line + "halfLine=" + halfLine, ex);
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * calculates the intersection point of an half line with a given path. If no intersection is found null
+	 * is returned
+	 * 
+	 * @param halfLine
+	 * @param pP support point
+	 * @param pD direction vector
+	 * @return
+	 */
+	public static IVector2 intersectionPointHalfLinePath(final ILine halfLine, final IVector2 pP, final IVector2 pD)
+	{
+		if (isLineParallel(new Line(pP, pD), halfLine))
+		{
+			return null;
+		}
+		try
+		{
+			final IVector2 hLS = halfLine.supportVector();
+			final IVector2 hLD = halfLine.directionVector();
+			final double lambda = LowLevel.getLineIntersectionLambda(hLS, hLD, pP, pD);
+			final double delta = LowLevel.getLineIntersectionLambda(pP, pD, hLS, hLD);
+			if ((lambda > -(ACCURACY * ACCURACY)) && LowLevel.isLambdaInRange(delta, 0, 1))
+			{
+				return LowLevel.getPointOnLineForLambda(hLS, hLD, lambda);
+			}
+		} catch (RuntimeException ex)
+		{
+			// catch to avoid runtime exception
+			log.error("Exception with parameter: path=" + new Line(pP, pD) + "halfLine=" + halfLine, ex);
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Calculates if a Point is on a path specified by the length of the direction vector.
 	 * 
 	 * @param line
 	 * @param point
 	 * @return True, if Point on Line
-	 * @author SimonS
+	 * @author SimonS, KaiE
 	 */
-	public static boolean isPointOnLine(final ILine line, final IVector2 point)
+	public static boolean isPointOnPath(final ILine line, final IVector2 point)
 	{
 		IVector2 lp = GeoMath.leadPointOnLine(point, line);
-		if (GeoMath.distancePP(point, lp) < 1e-4f)
+		if (GeoMath.distancePP(point, lp) < ACCURACY)
 		{
 			return isVectorBetween(point, line.supportVector(), line.supportVector().addNew(line.directionVector()));
 		}
@@ -1001,7 +1066,7 @@ public final class GeoMath
 		double closestDist = Double.MAX_VALUE;
 		for (IVector2 vec : list)
 		{
-			double dist = GeoMath.distancePP(vec, p);
+			double dist = GeoMath.distancePPSqr(vec, p);
 			if (closestDist > dist)
 			{
 				closestDist = dist;

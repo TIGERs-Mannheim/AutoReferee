@@ -14,7 +14,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public interface IVisCalc
+public interface IWpCalc
 {
 	/**
 	 * @param wfw

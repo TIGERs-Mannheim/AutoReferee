@@ -39,10 +39,10 @@ public class RunExtKalmanOnData
 {
 	@SuppressWarnings("unused")
 	private static final Logger	log	= Logger.getLogger(RunExtKalmanOnData.class.getName());
-													
+	
 	private final ExtKalman			kalman;
-											
-											
+	
+	
 	/**
 	 * 
 	 */
@@ -181,8 +181,8 @@ public class RunExtKalmanOnData
 							state.get(4, 0) / 1000, // v
 							state.get(5, 0), state.get(6, 0), // omega, eta
 							contr.get(0, 0), contr.get(0, 0), contr.get(1, 0));
-							
-					ITrackedBot tBot = s.motionToTrackedBot(botID);
+					
+					ITrackedBot tBot = s.motionToTrackedBot(swf.getTimestamp(), botID);
 					exp.addValues(cFrame.gettCapture(),
 							tBot.getPos().x(), tBot.getPos().y(), tBot.getAngle(),
 							tBot.getVel().x(), tBot.getVel().y(), tBot.getaVel(),

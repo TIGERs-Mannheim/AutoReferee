@@ -188,4 +188,11 @@ public interface IMotionModel
 	 */
 	void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot,
 			final double dt, final IVector targetVel);
+	
+	
+	/**
+	 * @param fullState
+	 * @return
+	 */
+	Matrix getDynamicsState(Matrix fullState);
 }

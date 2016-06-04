@@ -32,7 +32,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class BorderVisCalc implements IVisCalc
+public class BorderVisCalc implements IWpCalc
 {
 	
 	

@@ -14,6 +14,7 @@ import java.util.Map;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.IVector3;
+import edu.tigers.sumatra.math.Vector3;
 
 
 /**
@@ -36,8 +37,9 @@ public class MotionContext
 		private double				dribbleRpm				= 0;
 		private double				center2DribblerDist	= Geometry.getCenter2DribblerDistDefault();
 		private IVector			targetVelocity;
-										
-										
+		private IVector3			vel						= Vector3.ZERO_VECTOR;
+		
+		
 		/**
 		 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 		 * @param botId
@@ -155,6 +157,24 @@ public class MotionContext
 		public void setTargetVelocity(final IVector targetVelocity)
 		{
 			this.targetVelocity = targetVelocity;
+		}
+		
+		
+		/**
+		 * @return the vel
+		 */
+		public IVector3 getVel()
+		{
+			return vel;
+		}
+		
+		
+		/**
+		 * @param vel the vel to set
+		 */
+		public void setVel(final IVector3 vel)
+		{
+			this.vel = vel;
 		}
 	}
 	
