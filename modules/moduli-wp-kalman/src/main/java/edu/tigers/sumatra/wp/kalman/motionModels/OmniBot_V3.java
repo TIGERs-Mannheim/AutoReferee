@@ -3,7 +3,6 @@ package edu.tigers.sumatra.wp.kalman.motionModels;
 import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.wp.data.MotionContext;
@@ -35,18 +34,18 @@ public class OmniBot_V3 implements IMotionModel
 	private static final double	BASE_STDEV_ORI_ACC				= 1;
 	
 	/** m */
-	private static final double	BASE_STDEV_POSITION_MEAS		= 0.01;
+	private static final double	BASE_STDEV_POSITION_MEAS		= 0.03;
 	/** rad */
-	private static final double	BASE_STDEV_ORIENTATION_MEAS	= 0.1;
+	private static final double	BASE_STDEV_ORIENTATION_MEAS	= 0.2;
 	
 	/** m/s^2 */
-	private static final double	BASE_CRTL_MAX_ACCEL				= 5.0;
+	private static final double	BASE_CRTL_MAX_ACCEL				= 3.0;
 	/** m/s^2 */
-	private static final double	BASE_CRTL_MAX_BRAKE_ACCEL		= 5.0;
+	private static final double	BASE_CRTL_MAX_BRAKE_ACCEL		= 3.0;
 	/** rad/s^2 */
-	private static final double	BASE_CRTL_MAX_ANG_ACCEL			= 50.0;
+	private static final double	BASE_CRTL_MAX_ANG_ACCEL			= 5.0;
 	/** rad/s^2 */
-	private static final double	BASE_CRTL_MAX_ANG_BRAKE_ACCEL	= 50.0;
+	private static final double	BASE_CRTL_MAX_ANG_BRAKE_ACCEL	= 5.0;
 	private static final double	ACCEL_RAMP_PERCENT_SEC1			= 0.1;
 	private static final double	ACCEL_RAMP_PERCENT_SEC2			= 0.7;
 	private static final double	ACCEL_RAMP_PERCENT_SEC3			= 0.2;
@@ -110,7 +109,6 @@ public class OmniBot_V3 implements IMotionModel
 		double ay = state.get(7, 0);
 		double aw = state.get(8, 0);
 		
-		
 		if (control == null)
 		{
 			// dynamics
@@ -130,15 +128,23 @@ public class OmniBot_V3 implements IMotionModel
 			double aBrake = getBotCtrlMaxBrakeAccel();
 			double aAng = getBotCtrlMaxAngAccel();
 			double aAngBrake = getBotCtrlMaxAngBrakeAccel();
-			// a = Math.min(uA, a);
-			// aBrake = Math.min(uA, aBrake);
-			// aAng = Math.min(aO, aAng);
-			// aAngBrake = Math.min(aO, aAngBrake);
+			// double axy = Math.sqrt((ax * ax) + (ay * ay));
+			// a = Math.min(axy, a);
+			// aBrake = Math.min(axy, aBrake);
+			// aAng = Math.min(aw, aAng);
+			// aAngBrake = Math.min(aw, aAngBrake);
 			
 			// dynamics
-			x = x + (vx * dt);
-			y = y + (vy * dt);
-			w = w + (vw * dt);
+			// x = (x + (vx * dt)) + (0.5 * dt * dt * ax);
+			// y = (y + (vy * dt)) + (0.5 * dt * dt * ay);
+			// w = (w + (vw * dt)) + (0.5 * dt * dt * aw);
+			x = (x + (vx * dt));
+			y = (y + (vy * dt));
+			w = (w + (vw * dt));
+			
+			// vx = vx + (ax * dt);
+			// vy = vy + (ay * dt);
+			// vw = vw + (aw * dt);
 			
 			vx = estimateVelocity(vx, ux, dt, a, aBrake);
 			vy = estimateVelocity(vy, uy, dt, a, aBrake);
@@ -161,8 +167,8 @@ public class OmniBot_V3 implements IMotionModel
 	
 	
 	@Override
-	public void estimateControl(final IFilter bot, final AMotionResult os, final CamRobot newBot,
-			final double dt, final IVector targetVel)
+	public void estimateControl(final IFilter bot, final AMotionResult os, final CamRobot newBot, final CamRobot lastbot,
+			final double dt)
 	{
 		RobotMotionResult_V3 newState = (RobotMotionResult_V3) bot.getPrediction(bot.getTimestamp());
 		RobotMotionResult_V3 oldState = (RobotMotionResult_V3) os;
@@ -181,10 +187,21 @@ public class OmniBot_V3 implements IMotionModel
 		final double dY = (newY - oldY);
 		final double dW = (AngleMath.difference(newW, oldW));
 		
-		double vx = (dX / dt);
-		double vy = (dY / dt);
+		IVector2 vxy = new Vector2(dX, dY).multiply(1 / dt);
+		// double vx = (dX / dt);
+		// double vy = (dY / dt);
 		double vw = (dW / dt);
 		
+		// kreissehne
+		// double s = vxy.getLength();
+		// double angleDiff = Math.abs(vw);
+		// if (angleDiff > 1e-5)
+		// {
+		// // bogenlänge
+		// double b = (s * angleDiff) / Math.sin(angleDiff);
+		// vxy = vxy.multiplyNew(b / s);
+		// vxy = vxy.turnNew(-vw);
+		// }
 		
 		IVector2 velMeas = newBot.getPos().subtractNew(new Vector2(oldState.x, oldState.y)).multiply(1 / dt);
 		IVector2 vel = new Vector2(newState.x, newState.y).subtract(new Vector2(oldState.x, oldState.y)).multiply(1 / dt);
@@ -193,7 +210,7 @@ public class OmniBot_V3 implements IMotionModel
 		double ay = acc.y();
 		double aw = 0;
 		
-		bot.setControl(new OmnibotControl_V3(vx, vy, vw, ax, ay, aw));
+		bot.setControl(new OmnibotControl_V3(vxy.x(), vxy.y(), vw, ax, ay, aw));
 	}
 	
 	
@@ -223,9 +240,9 @@ public class OmniBot_V3 implements IMotionModel
 		a.set(5, 5, 1.0);
 		
 		// vel -> acc
-		a.set(3, 6, 0.5 * dt * dt);
-		a.set(4, 7, 0.5 * dt * dt);
-		a.set(5, 8, 0.5 * dt * dt);
+		a.set(3, 6, dt);
+		a.set(4, 7, dt);
+		a.set(5, 8, dt);
 		
 		// acc
 		a.set(6, 6, 1.0);
@@ -269,8 +286,11 @@ public class OmniBot_V3 implements IMotionModel
 		final double vx = state.get(3, 0);
 		final double vy = state.get(4, 0);
 		final double vw = state.get(5, 0);
+		final double ax = state.get(6, 0);
+		final double ay = state.get(7, 0);
+		final double aw = state.get(8, 0);
 		final double confidence = 1.0;
-		return new RobotMotionResult_V3(x, y, w, vx, vy, vw, confidence, onCam);
+		return new RobotMotionResult_V3(x, y, w, vx, vy, vw, ax, ay, aw, confidence, onCam);
 	}
 	
 	

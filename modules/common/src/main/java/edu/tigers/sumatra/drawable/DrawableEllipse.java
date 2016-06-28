@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -31,8 +30,8 @@ public class DrawableEllipse extends Ellipse implements IDrawableShape
 {
 	private Color		color	= Color.red;
 	private boolean	fill	= false;
-									
-									
+	
+	
 	@SuppressWarnings("unused")
 	private DrawableEllipse()
 	{
@@ -63,7 +62,6 @@ public class DrawableEllipse extends Ellipse implements IDrawableShape
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
-		g.setStroke(new BasicStroke(1));
 		// this may happen with old databases
 		if (color == null)
 		{

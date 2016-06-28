@@ -2,7 +2,6 @@ package edu.tigers.sumatra.wp.kalman.motionModels;
 
 import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamRobot;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.kalman.data.AMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.AWPCamObject;
@@ -183,11 +182,11 @@ public interface IMotionModel
 	 * @param bot
 	 * @param oldState
 	 * @param newBot
+	 * @param lastVisionBotCam
 	 * @param dt
-	 * @param targetVel
 	 */
 	void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot,
-			final double dt, final IVector targetVel);
+			CamRobot lastVisionBotCam, final double dt);
 	
 	
 	/**

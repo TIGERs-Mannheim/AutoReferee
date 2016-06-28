@@ -31,8 +31,10 @@ public class GameLogEntryBuilder
 	/** in nanoseconds */
 	private Long					timeSinceStart;
 	
+	private IGameEvent			gameEvent;
+	private boolean				acceptedByEngine;
+	
 	private EGameStateNeutral	gamestate;
-	private IGameEvent		gameEvent;
 	private RefereeMsg			refereeMsg;
 	private FollowUpAction		followUpAction;
 	private RefCommand			command;
@@ -83,10 +85,12 @@ public class GameLogEntryBuilder
 	
 	/**
 	 * @param gameEvent
+	 * @param acceptedByEngine If the game state was accepted by the autoref engine
 	 */
-	public void setGameEvent(final IGameEvent gameEvent)
+	public void setGameEvent(final IGameEvent gameEvent, final boolean acceptedByEngine)
 	{
 		this.gameEvent = gameEvent;
+		this.acceptedByEngine = acceptedByEngine;
 		setType(ELogEntryType.GAME_EVENT);
 	}
 	
@@ -131,7 +135,7 @@ public class GameLogEntryBuilder
 			throw new NullPointerException("Not all required fields have been set");
 		}
 		
-		return new GameLogEntry(timestamp, timeSinceStart, instant, type, gamestate, gameEvent, refereeMsg,
-				followUpAction, command);
+		return new GameLogEntry(timestamp, timeSinceStart, instant, type, gamestate, gameEvent, acceptedByEngine,
+				refereeMsg, followUpAction, command);
 	}
 }

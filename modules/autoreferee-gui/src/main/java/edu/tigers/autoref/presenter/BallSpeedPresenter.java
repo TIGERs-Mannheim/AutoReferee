@@ -8,28 +8,23 @@
  */
 package edu.tigers.autoref.presenter;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 
-import edu.tigers.autoref.view.panel.FixedTimeRangeChartPanel;
-import edu.tigers.autoref.view.panel.SumatraViewPanel;
+import edu.tigers.autoref.model.ballspeed.BallSpeedModel;
+import edu.tigers.autoref.view.ballspeed.BallSpeedPanel;
+import edu.tigers.autoref.view.ballspeed.IBallSpeedPanelListener;
+import edu.tigers.autoref.view.generic.FixedTimeRangeChartPanel;
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -58,7 +53,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  * @author "Lukas Magel"
  */
 public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObserver, IModuliStateObserver,
-		ActionListener
+		IBallSpeedPanelListener, ActionListener
 {
 	private enum PauseState
 	{
@@ -71,27 +66,20 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	}
 	
 	/** The period in ms at the end of which the chart is updated */
-	private static final int			chartUpdatePeriod		= 50;
+	private static final int	chartUpdatePeriod		= 50;
 	
 	/** The absolute time range displayed in the chart in seconds */
-	private int								timeRange				= 20;
-	private boolean						pauseWhenNotRunning	= false;
-	private boolean						pauseRequested			= false;
-	private boolean						resumeRequested		= false;
-	private PauseState					chartState				= PauseState.RUNNING;
+	private int						timeRange				= 20;
+	private boolean				pauseWhenNotRunning	= false;
+	private boolean				pauseRequested			= false;
+	private boolean				resumeRequested		= false;
+	private PauseState			chartState				= PauseState.RUNNING;
 	
-	private long							curTime					= 0L;
-	private BallSpeedModel				model						= new BallSpeedModel();
+	private long					curTime					= 0L;
+	private BallSpeedModel		model						= new BallSpeedModel();
 	
-	
-	private Timer							chartTimer;
-	
-	private SumatraViewPanel			mainPanel				= new SumatraViewPanel();
-	private JButton						pauseButton				= new JButton("Pause");
-	private JButton						resumeButton			= new JButton("Resume");
-	private FixedTimeRangeChartPanel	chartPanel;
-	private JCheckBox						stopChartCheckbox;
-	private JSlider						timeRangeSlider;
+	private Timer					chartTimer;
+	private BallSpeedPanel		panel;
 	
 	
 	/**
@@ -99,90 +87,19 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	 */
 	public BallSpeedPresenter()
 	{
-		setupGUI();
+		panel = new BallSpeedPanel(getTimeRange(), TimeUnit.MILLISECONDS.toNanos(chartUpdatePeriod));
+		panel.addObserver(this);
+		panel.setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
 		
 		chartTimer = new Timer(chartUpdatePeriod, this);
 		chartTimer.setDelay(chartUpdatePeriod);
-	}
-	
-	
-	private void setupGUI()
-	{
-		timeRangeSlider = new JSlider(SwingConstants.VERTICAL, 0, 120, timeRange);
-		timeRangeSlider.setPaintTicks(true);
-		timeRangeSlider.setPaintLabels(true);
-		timeRangeSlider.setMajorTickSpacing(30);
-		timeRangeSlider.setMinorTickSpacing(10);
-		timeRangeSlider.setBackground(Color.WHITE);
-		timeRangeSlider.setToolTipText("Adjust the ball speed time range [s] (Resets the graph!)");
-		timeRangeSlider.addChangeListener(e -> {
-			if (!timeRangeSlider.getValueIsAdjusting())
-			{
-				timeRange = Math.max(timeRangeSlider.getValue(), 1);
-				chartPanel.setRange(getTimeRange());
-				chartPanel.setPointBufferSizeWithPeriod(TimeUnit.MILLISECONDS.toNanos(chartUpdatePeriod));
-				chartPanel.clear();
-				curTime = 0;
-			}
-		});
-		
-		stopChartCheckbox = new JCheckBox("Pause when not RUNNING");
-		stopChartCheckbox.setBackground(Color.WHITE);
-		stopChartCheckbox.setSelected(pauseWhenNotRunning);
-		stopChartCheckbox.addActionListener(e -> {
-			pauseWhenNotRunning = stopChartCheckbox.isSelected();
-			
-			/*
-			 * The updateChartState() method only triggers on state transitions that occur after the pauseWhenNotRunning
-			 * variable has been altered. To also stop/restart the chart if the pauseWhenNotRunning feature is first
-			 * activated/deactivated the state update is performed directly inside the callback
-			 */
-				synchronized (model)
-				{
-					if (pauseWhenNotRunning)
-					{
-						if ((model.getLastState() != EGameStateNeutral.RUNNING) && (chartState == PauseState.RUNNING))
-						{
-							chartState = PauseState.AUTO;
-						}
-					} else
-					{
-						if (chartState == PauseState.AUTO)
-						{
-							chartState = PauseState.RUNNING;
-						}
-					}
-				}
-			});
-		
-		chartPanel = new FixedTimeRangeChartPanel(getTimeRange(), true);
-		chartPanel.setColor(Color.BLUE);
-		chartPanel.clipY(0, 15);
-		chartPanel.setXTitle("Time [s]");
-		chartPanel.setYTitle("Ball Speed [m/s]");
-		chartPanel.setPointBufferSizeWithPeriod(TimeUnit.MILLISECONDS.toNanos(chartUpdatePeriod));
-		setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
-		
-		pauseButton.addActionListener(e -> pauseRequested = true);
-		resumeButton.addActionListener(e -> resumeRequested = true);
-		
-		JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		southPanel.setBackground(Color.WHITE);
-		southPanel.add(pauseButton);
-		southPanel.add(resumeButton);
-		southPanel.add(stopChartCheckbox);
-		
-		mainPanel.setLayout(new BorderLayout());
-		mainPanel.add(chartPanel, BorderLayout.CENTER);
-		mainPanel.add(southPanel, BorderLayout.SOUTH);
-		mainPanel.add(timeRangeSlider, BorderLayout.EAST);
 		
 		ConfigRegistration.registerConfigurableCallback("autoreferee", new IConfigObserver()
 		{
 			@Override
 			public void afterApply(final IConfigClient configClient)
 			{
-				setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
+				panel.setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
 			}
 		});
 	}
@@ -191,14 +108,14 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	@Override
 	public Component getComponent()
 	{
-		return mainPanel;
+		return panel;
 	}
 	
 	
 	@Override
 	public ISumatraView getSumatraView()
 	{
-		return mainPanel;
+		return panel;
 	}
 	
 	
@@ -208,12 +125,6 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	private long getTimeRange()
 	{
 		return TimeUnit.SECONDS.toNanos(timeRange);
-	}
-	
-	
-	private void setMaxBallVelocityLine(final double value)
-	{
-		chartPanel.setHorizontalLine("Max", Color.RED, value);
 	}
 	
 	
@@ -239,21 +150,15 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		synchronized (model)
-		{
-			model.update(wFrameWrapper);
-		}
+		EventQueue.invokeLater(() -> model.update(wFrameWrapper));
 	}
 	
 	
 	@Override
 	public void actionPerformed(final ActionEvent e)
 	{
-		synchronized (model)
-		{
-			updateChart();
-			model.reset();
-		}
+		updateChart();
+		model.reset();
 	}
 	
 	
@@ -264,7 +169,7 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 		if (chartState == PauseState.RUNNING)
 		{
 			curTime += TimeUnit.MILLISECONDS.toNanos(chartUpdatePeriod);
-			chartPanel.addPoint(curTime, model.getLastBallSpeed());
+			panel.addPoint(curTime, model.getLastBallSpeed());
 		}
 	}
 	
@@ -323,6 +228,55 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 		{
 		}
 		return Optional.empty();
+	}
+	
+	
+	@Override
+	public void pauseButtonPressed()
+	{
+		pauseRequested = true;
+	}
+	
+	
+	@Override
+	public void resumeButtonPressed()
+	{
+		resumeRequested = true;
+	}
+	
+	
+	@Override
+	public void stopChartValueChanged(final boolean value)
+	{
+		pauseWhenNotRunning = value;
+		
+		/*
+		 * The updateChartState() method only triggers on state transitions that occur after the pauseWhenNotRunning
+		 * variable has been altered. To also stop/restart the chart if the pauseWhenNotRunning feature is first
+		 * activated/deactivated the state update is performed directly inside the callback
+		 */
+		if (pauseWhenNotRunning)
+		{
+			if ((model.getLastState() != EGameStateNeutral.RUNNING) && (chartState == PauseState.RUNNING))
+			{
+				chartState = PauseState.AUTO;
+			}
+		} else
+		{
+			if (chartState == PauseState.AUTO)
+			{
+				chartState = PauseState.RUNNING;
+			}
+		}
+	}
+	
+	
+	@Override
+	public void timeRangeSliderValueChanged(final int value)
+	{
+		timeRange = value;
+		panel.setTimeRange(getTimeRange());
+		curTime = 0;
 	}
 	
 	

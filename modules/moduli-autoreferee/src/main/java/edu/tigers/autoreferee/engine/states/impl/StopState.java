@@ -147,11 +147,10 @@ public class StopState extends AbstractAutoRefState
 		boolean ballIsCloselyPlaced = AutoRefMath.ballIsCloselyPlaced(ball, kickPos);
 		boolean closelyPlacedWaitTimeElapsed = timeElapsedSinceEntry(AutoRefConfig.getMaxCloselyPlacedWaitTime());
 		
-		boolean botsStationary = checkBotsStationary(frame, shapes);
 		boolean botsCorrectDistance = checkBotStopDistance(frame, shapes);
 		boolean readyWaitTimeOver = false;
 		
-		if ((ballPlaced && botsStationary && botsCorrectDistance)
+		if ((ballPlaced && botsCorrectDistance)
 				|| (maxUnplacedWaitTimeElapsed && ballStationary && ballInsideField && (AutoRefConfig
 						.getMaxUnplacedWaitTime() > 0))
 				|| (closelyPlacedWaitTimeElapsed && ballStationary && ballIsCloselyPlaced && (AutoRefConfig

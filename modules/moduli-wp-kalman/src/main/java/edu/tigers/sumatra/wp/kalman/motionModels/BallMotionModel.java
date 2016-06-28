@@ -12,7 +12,6 @@ import edu.tigers.sumatra.functions.EFunction;
 import edu.tigers.sumatra.functions.IFunction1D;
 import edu.tigers.sumatra.math.AVector2;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.IVector3;
 import edu.tigers.sumatra.math.Vector2;
@@ -585,8 +584,8 @@ public class BallMotionModel implements IMotionModel
 	
 	
 	@Override
-	public void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot, final double dt,
-			final IVector targetVel)
+	public void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot,
+			final CamRobot lastBot, final double dt)
 	{
 	}
 }

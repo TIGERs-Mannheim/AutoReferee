@@ -122,7 +122,8 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	@Override
 	public void onFieldClick(final IVector2 posIn, final MouseEvent e)
 	{
-		if ((lastWorldFrameWrapper == null) || (lastWorldFrameWrapper.getSimpleWorldFrame() == null))
+		WorldFrameWrapper lastFrame = lastWorldFrameWrapper;
+		if ((lastFrame == null) || (lastFrame.getSimpleWorldFrame() == null))
 		{
 			return;
 		}
@@ -137,7 +138,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			try
 			{
 				referee = (AReferee) SumatraModel.getInstance().getModule(AReferee.MODULE_ID);
-				IVector2 ballPos = lastWorldFrameWrapper.getSimpleWorldFrame().getBall().getPos();
+				IVector2 ballPos = lastFrame.getSimpleWorldFrame().getBall().getPos();
 				final IVector2 pos, vel;
 				if (ctrl && shift)
 				{
@@ -365,16 +366,17 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	
 	protected void updateVisFrameShapes()
 	{
-		if (lastWorldFrameWrapper == null)
+		WorldFrameWrapper worldFrame = lastWorldFrameWrapper;
+		if (worldFrame == null)
 		{
 			panel.getFieldPanel().clearField(EShapeLayerSource.WP);
 		} else
 		{
-			for (IShapeLayer sl : lastWorldFrameWrapper.getShapeMap().getAllShapeLayers())
+			for (IShapeLayer sl : worldFrame.getShapeMap().getAllShapeLayers())
 			{
 				panel.getOptionsMenu().addMenuEntry(sl);
 			}
-			panel.getFieldPanel().setShapeMap(EShapeLayerSource.WP, lastWorldFrameWrapper.getShapeMap(), false);
+			panel.getFieldPanel().setShapeMap(EShapeLayerSource.WP, worldFrame.getShapeMap(), false);
 		}
 	}
 	
@@ -438,9 +440,10 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	
 	protected void updateRobotsPanel()
 	{
-		if (lastWorldFrameWrapper != null)
+		WorldFrameWrapper lastFrame = lastWorldFrameWrapper;
+		if (lastFrame != null)
 		{
-			IBotIDMap<ITrackedBot> tBotsMap = lastWorldFrameWrapper.getSimpleWorldFrame().getBots();
+			IBotIDMap<ITrackedBot> tBotsMap = lastFrame.getSimpleWorldFrame().getBots();
 			for (ITrackedBot tBot : tBotsMap.values())
 			{
 				BotStatus status = panel.getRobotsPanel().getBotStatus(tBot.getBotId());

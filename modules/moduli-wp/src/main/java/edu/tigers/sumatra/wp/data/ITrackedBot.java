@@ -102,6 +102,12 @@ public interface ITrackedBot extends ITrackedObject
 	/**
 	 * @return
 	 */
+	double getaAcc();
+	
+	
+	/**
+	 * @return
+	 */
 	boolean isAvailableToAi();
 	
 	

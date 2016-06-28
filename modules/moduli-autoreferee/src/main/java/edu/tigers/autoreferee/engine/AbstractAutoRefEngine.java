@@ -14,10 +14,11 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.GameEventEngine;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.log.GameLog;
+import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -30,7 +31,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
 	private static final Logger	log					= Logger.getLogger(AbstractAutoRefEngine.class);
 	
-	private GameEventEngine	gameEventEngine	= null;
+	private GameEventEngine			gameEventEngine	= null;
 	protected EEngineState			engineState			= null;
 	protected GameLog					gameLog				= new GameLog();
 	
@@ -135,7 +136,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	
 	
 	@Override
-	public GameLog getGameLog()
+	public IGameLog getGameLog()
 	{
 		return gameLog;
 	}

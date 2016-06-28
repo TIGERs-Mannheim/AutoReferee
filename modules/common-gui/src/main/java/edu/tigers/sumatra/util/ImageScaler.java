@@ -50,8 +50,28 @@ public final class ImageScaler
 	 */
 	public static ImageIcon scaleImageIcon(final ImageIcon imageIcon, final int width, final int height)
 	{
+		return scale(imageIcon, width, height, java.awt.Image.SCALE_DEFAULT);
+	}
+	
+	
+	/**
+	 * Scale the image and reduce aliasing artifacts
+	 * 
+	 * @param imageIcon
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static ImageIcon scaleImageIconSmooth(final ImageIcon imageIcon, final int width, final int height)
+	{
+		return scale(imageIcon, width, height, java.awt.Image.SCALE_SMOOTH);
+	}
+	
+	
+	private static ImageIcon scale(final ImageIcon imageIcon, final int width, final int height, final int hints)
+	{
 		Image image = imageIcon.getImage();
-		Image newimg = image.getScaledInstance(width, height, java.awt.Image.SCALE_DEFAULT);
+		Image newimg = image.getScaledInstance(width, height, hints);
 		return new ImageIcon(newimg);
 	}
 	

@@ -115,4 +115,35 @@ public class FollowUpAction
 				throw new IllegalArgumentException("Please add the following action type to the switch case: " + actionType);
 		}
 	}
+	
+	
+	@Override
+	public boolean equals(final Object other)
+	{
+		if (this == other)
+		{
+			return true;
+		}
+		
+		if (other instanceof FollowUpAction)
+		{
+			FollowUpAction otherAction = (FollowUpAction) other;
+			return (otherAction.actionType == actionType)
+					&& (otherAction.teamInFavor == teamInFavor)
+					&& otherAction.newBallPos.equals(newBallPos);
+		}
+		return false;
+	}
+	
+	
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = (prime * result) + actionType.hashCode();
+		result = (prime * result) + ((teamInFavor == null) ? 0 : teamInFavor.hashCode());
+		result = (prime * result) + ((newBallPos == null) ? 0 : newBallPos.hashCode());
+		return result;
+	}
 }

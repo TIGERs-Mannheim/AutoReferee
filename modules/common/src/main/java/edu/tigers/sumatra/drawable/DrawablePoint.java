@@ -25,15 +25,16 @@ import edu.tigers.sumatra.math.Vector2f;
 @Persistent
 public class DrawablePoint extends Vector2f implements IDrawableShape
 {
-	private static int	pointSize	= 4;
+	/** Size of a point in field unit [mm] */
+	private static int	pointSize	= 25;
 	private Color			color			= Color.red;
 	private String			text			= "";
-												
-												
+	
+	
 	@SuppressWarnings("unused")
 	private DrawablePoint()
 	{
-	
+		
 	}
 	
 	
@@ -66,11 +67,13 @@ public class DrawablePoint extends Vector2f implements IDrawableShape
 	{
 		// --- from SSLVision-mm to java2d-coordinates ---
 		final IVector2 transPoint = tool.transformToGuiCoordinates(this, invert);
-		final int drawingX = (int) transPoint.x() - (pointSize / 2);
-		final int drawingY = (int) transPoint.y() - (pointSize / 2);
+		int guiPointSize = tool.scaleXLength(pointSize);
+		
+		final int drawingX = (int) transPoint.x() - (guiPointSize / 2);
+		final int drawingY = (int) transPoint.y() - (guiPointSize / 2);
 		
 		g.setColor(getColor());
-		g.fillOval(drawingX, drawingY, pointSize, pointSize);
+		g.fillOval(drawingX, drawingY, guiPointSize, guiPointSize);
 		g.drawString(text, drawingX, drawingY);
 	}
 	

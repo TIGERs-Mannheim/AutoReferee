@@ -67,6 +67,7 @@ public class RobotMotionResult_V2 extends ABotMotionResult
 		TrackedBot bot = new TrackedBot(timestamp, botId);
 		bot.setPos(pos);
 		bot.setVel(vel);
+		
 		bot.setAngle(angle);
 		bot.setaVel(aVel);
 		return bot;

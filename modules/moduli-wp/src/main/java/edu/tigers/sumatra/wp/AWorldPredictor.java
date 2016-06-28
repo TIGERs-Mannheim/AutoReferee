@@ -317,8 +317,8 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 			}
 			
 			double waitForNextBallTime = 0;
-			if (!Geometry.getField().isPointInShape(selectedBall.getPos().getXYVector()) &&
-					Geometry.getField().isPointInShape(lastSeenBall.getPos().getXYVector()))
+			if (!Geometry.getFieldWBorders().isPointInShape(selectedBall.getPos().getXYVector()) &&
+					Geometry.getFieldWBorders().isPointInShape(lastSeenBall.getPos().getXYVector()))
 			{
 				waitForNextBallTime += 1;
 			}
@@ -394,11 +394,11 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	}
 	
 	
-	protected void processMotionContext(final MotionContext context)
+	protected void processMotionContext(final MotionContext context, final long timestamp)
 	{
 		for (IWfPostProcessor pp : postProcessors)
 		{
-			pp.processMotionContext(context);
+			pp.processMotionContext(context, timestamp);
 		}
 	}
 	

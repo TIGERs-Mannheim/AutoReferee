@@ -3,7 +3,6 @@ package edu.tigers.sumatra.wp.kalman.motionModels;
 import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.wp.data.MotionContext;
 import edu.tigers.sumatra.wp.kalman.data.AMotionResult;
@@ -119,11 +118,11 @@ public class TigersMotionModel extends AOmniBot_V2
 	 * @param oldState
 	 * @param newBot
 	 * @param dt
-	 * @param targetVel
 	 */
 	@Override
 	public void estimateControl(final IFilter bot, final AMotionResult oldState, final CamRobot newBot,
-			final double dt, final IVector targetVel)
+			final CamRobot lastBot,
+			final double dt)
 	{
 		RobotMotionResult_V2 newState = (RobotMotionResult_V2) bot.getPrediction(bot.getTimestamp());
 		

@@ -11,7 +11,6 @@ package edu.tigers.sumatra.visualizer.view;
 import java.awt.BorderLayout;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
 
@@ -55,10 +54,6 @@ public class VisualizerPanel extends JPanel implements ISumatraView
 		
 		// --- set layout ---
 		panel.setLayout(new MigLayout("fill, inset 0", "[min!][max][right]", "[top]"));
-		
-		// --- right panel ---
-		final JPanel rightPanel = new JPanel();
-		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.PAGE_AXIS));
 		
 		// --- init panels ---
 		robotsPanel = new RobotsPanel();

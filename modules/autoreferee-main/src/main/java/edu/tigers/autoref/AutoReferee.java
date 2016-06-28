@@ -8,6 +8,8 @@
  */
 package edu.tigers.autoref;
 
+import java.awt.EventQueue;
+
 import edu.tigers.autoref.gui.AutoRefMainPresenter;
 
 
@@ -22,6 +24,6 @@ public class AutoReferee
 	 */
 	public static void main(final String[] args)
 	{
-		new AutoRefMainPresenter();
+		EventQueue.invokeLater(() -> new AutoRefMainPresenter());
 	}
 }

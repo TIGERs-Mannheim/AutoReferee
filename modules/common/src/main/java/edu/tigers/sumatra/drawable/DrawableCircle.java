@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -30,8 +29,8 @@ public class DrawableCircle extends Circle implements IDrawableShape
 {
 	private Color		color	= Color.red;
 	private boolean	fill	= false;
-									
-									
+	
+	
 	/**
 	 * For some reason, ObjectDB wants a no-arg constructor with this class...
 	 */
@@ -82,7 +81,6 @@ public class DrawableCircle extends Circle implements IDrawableShape
 		final double radius = tool.scaleXLength(radius());
 		
 		g.setColor(getColor());
-		g.setStroke(new BasicStroke(1));
 		g.drawOval((int) (center.x() - radius), (int) (center.y() - radius), (int) radius * 2, (int) radius * 2);
 		if (fill)
 		{

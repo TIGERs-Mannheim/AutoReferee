@@ -50,10 +50,12 @@ public class GameLogEntry
 	private final long					timeSinceStart;
 	
 	private final EGameStateNeutral	gamestate;
-	private final IGameEvent			gameEvent;
 	private final RefereeMsg			refereeMsg;
 	private final FollowUpAction		followUpAction;
 	private final RefCommand			command;
+	
+	private final IGameEvent			gameEvent;
+	private final boolean				acceptedByEngine;
 	
 	
 	/**
@@ -69,15 +71,18 @@ public class GameLogEntry
 	 */
 	protected GameLogEntry(final long timestamp, final long timeSinceStart, final Instant instant,
 			final ELogEntryType type, final EGameStateNeutral gamestate, final IGameEvent gameEvent,
-			final RefereeMsg refereeMsg, final FollowUpAction followUpAction, final RefCommand command)
+			final boolean acceptedByEngine, final RefereeMsg refereeMsg, final FollowUpAction followUpAction,
+			final RefCommand command)
 	{
 		this.type = type;
 		this.timeSinceStart = timeSinceStart;
 		this.timestamp = timestamp;
 		this.instant = instant;
 		
-		this.gamestate = gamestate;
 		this.gameEvent = gameEvent;
+		this.acceptedByEngine = acceptedByEngine;
+		
+		this.gamestate = gamestate;
 		this.refereeMsg = refereeMsg;
 		this.followUpAction = followUpAction;
 		this.command = command;
@@ -130,6 +135,19 @@ public class GameLogEntry
 	public IGameEvent getGameEvent()
 	{
 		return gameEvent;
+	}
+	
+	
+	/**
+	 * Returns true if the corresponding game event accessible over {@link #getGameEvent()} was accepted by the autoref
+	 * engine and initiated a referee command and/or change of game state. This flag is only set when the autoref runs in
+	 * active mode.
+	 * 
+	 * @return
+	 */
+	public boolean isAcceptedByEngine()
+	{
+		return acceptedByEngine;
 	}
 	
 	

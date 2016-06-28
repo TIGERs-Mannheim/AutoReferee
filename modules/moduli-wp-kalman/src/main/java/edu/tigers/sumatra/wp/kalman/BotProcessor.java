@@ -19,7 +19,6 @@ import java.util.Map;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.IVector;
 import edu.tigers.sumatra.wp.kalman.data.ABotMotionResult;
 import edu.tigers.sumatra.wp.kalman.data.PredictionContext;
 import edu.tigers.sumatra.wp.kalman.data.UnregisteredBot;
@@ -37,10 +36,10 @@ public class BotProcessor
 {
 	
 	private final PredictionContext		context;
-													
+	
 	private final Map<BotID, CamRobot>	lastDetections	= new HashMap<>();
-																		
-																		
+	
+	
 	/**
 	 * @param context
 	 */
@@ -74,7 +73,7 @@ public class BotProcessor
 				}
 			}
 			final IFilter existingBot = context.getYellowBots().get(botID);
-			processBot(botID, existingBot, visionBotCam, context.getNewYellowBots(), ETeamColor.YELLOW);
+			processBot(botID, existingBot, visionBotCam, last, context.getNewYellowBots(), ETeamColor.YELLOW);
 			lastDetections.put(visionBotCam.getBotId(), visionBotCam);
 		}
 		
@@ -92,13 +91,14 @@ public class BotProcessor
 				}
 			}
 			final IFilter existingBot = context.getBlueBots().get(botID);
-			processBot(botID, existingBot, visionBotCam, context.getNewBlueBots(), ETeamColor.BLUE);
+			processBot(botID, existingBot, visionBotCam, last, context.getNewBlueBots(), ETeamColor.BLUE);
 			lastDetections.put(visionBotCam.getBotId(), visionBotCam);
 		}
 	}
 	
 	
 	private void processBot(final int botID, final IFilter existingBot, final CamRobot visionBotCam,
+			final CamRobot lastVisionBotCam,
 			final Map<Integer, UnregisteredBot> contextNewBots, final ETeamColor color)
 	{
 		final WPCamBot visionBot = new WPCamBot(visionBotCam);
@@ -114,11 +114,9 @@ public class BotProcessor
 			
 			final ABotMotionResult oldState = (ABotMotionResult) existingBot
 					.getPrediction(existingBot.getTimestamp());
-			BotID botId = BotID.createBotId(visionBotCam.getRobotID(), color);
-			IVector targetVel = context.getMotionContext().getBots().get(botId).getTargetVelocity();
 			
 			existingBot.observation(visionBotCam.getTimestamp(), visionBot);
-			existingBot.getMotion().estimateControl(existingBot, oldState, visionBotCam, dt, targetVel);
+			existingBot.getMotion().estimateControl(existingBot, oldState, visionBotCam, lastVisionBotCam, dt);
 			return;
 		}
 		

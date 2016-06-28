@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -35,8 +34,8 @@ public class DrawableRectangle extends Rectangle implements IDrawableShape
 	
 	private Color		color;
 	private boolean	fill	= false;
-									
-									
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -88,7 +87,6 @@ public class DrawableRectangle extends Rectangle implements IDrawableShape
 		int height = Math.abs((int) (bottomRight.y() - topLeft.y()));
 		
 		g.setColor(getColor());
-		g.setStroke(new BasicStroke(1));
 		g.drawRect(x, y, width, height);
 		if (fill)
 		{

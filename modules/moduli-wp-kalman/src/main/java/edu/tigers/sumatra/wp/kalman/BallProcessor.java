@@ -15,7 +15,10 @@ package edu.tigers.sumatra.wp.kalman;
 import Jama.Matrix;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.math.IVector2;
+import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
+import edu.tigers.sumatra.wp.data.Geometry;
+import edu.tigers.sumatra.wp.data.MotionContext.BotInfo;
 import edu.tigers.sumatra.wp.kalman.data.PredictionContext;
 import edu.tigers.sumatra.wp.kalman.data.WPCamBall;
 
@@ -45,13 +48,26 @@ public class BallProcessor
 	public void process(final ExtendedCamDetectionFrame frame)
 	{
 		CamBall ball = frame.getBall();
-		final WPCamBall visionBall = new WPCamBall(ball);
 		double age = (frame.gettCapture() - ball.getTimestamp()) / 1e9;
 		if (age > 0.1)
 		{
+			for (BotInfo botInfo : context.getMotionContext().getBots().values())
+			{
+				if (botInfo.isBallContact())
+				{
+					IVector2 ballPos = botInfo.getPos().getXYVector().addNew(new Vector2(botInfo.getPos().z())
+							.scaleTo(botInfo.getCenter2DribblerDist() + Geometry.getBallRadius()));
+					CamBall camBall = new CamBall(0, 0, ballPos.x(), ballPos.y(), 0, 0, 0, frame.gettCapture(),
+							frame.gettSent(), frame.getCameraId(), frame.getFrameNumber());
+					final WPCamBall visionBall = new WPCamBall(camBall);
+					context.getBall().observation(frame.gettCapture(), visionBall);
+					return;
+				}
+			}
 			context.getBall().observation(frame.gettCapture(), null);
 		} else
 		{
+			final WPCamBall visionBall = new WPCamBall(ball);
 			context.getBall().observation(ball.getTimestamp(), visionBall);
 		}
 	}

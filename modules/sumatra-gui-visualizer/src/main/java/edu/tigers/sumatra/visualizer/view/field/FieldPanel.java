@@ -16,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -30,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import net.miginfocom.swing.MigLayout;
 import edu.tigers.sumatra.clock.FpsCounter;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -42,7 +44,6 @@ import edu.tigers.sumatra.visualizer.view.EVisualizerOptions;
 import edu.tigers.sumatra.visualizer.view.IFieldPanelObserver;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ShapeMap;
-import net.miginfocom.swing.MigLayout;
 
 
 /**
@@ -55,12 +56,12 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	/** color of field background */
 	public static final Color								FIELD_COLOR				= new Color(0,
-			180,
-			30);
+																										180,
+																										30);
 	/** color of field background */
 	public static final Color								FIELD_COLOR_REFEREE	= new Color(0,
-			150,
-			30);
+																										150,
+																										30);
 	
 	// --- repaint ---
 	private Image												offImage					= null;
@@ -77,9 +78,11 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	public static final int									FIELD_MARGIN			= 35;
 	private static final int								SCROLL_SPEED			= 20;
 	private static final int								DEF_FIELD_WIDTH		= 1000;
+	private static final Stroke							DEFAULT_STROKE			= new BasicStroke(4.0f);
 	
 	
-	private final int											fieldWidth				= DEF_FIELD_WIDTH;
+	private final int											fieldWidth;
+	private final Stroke										paintStroke;
 	
 	private final MouseEvents								mouseEventsListener	= new MouseEvents();
 	
@@ -90,14 +93,15 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	
 	private boolean											fancyPainting			= false;
+	private boolean											doPaintCoordinates	= true;
 	
 	private final Set<EShapeLayerSource>				showSources				= EnumSet
-			.allOf(
-					EShapeLayerSource.class);
+																										.allOf(
+																										EShapeLayerSource.class);
 	private final Map<EShapeLayerSource, Boolean>	teamInverted			= new EnumMap<>(
-			EShapeLayerSource.class);
+																										EShapeLayerSource.class);
 	private final Map<EShapeLayerSource, ShapeMap>	shapeMap					= new EnumMap<>(
-			EShapeLayerSource.class);
+																										EShapeLayerSource.class);
 	private final Map<String, Boolean>					shapeVisibilityMap	= new HashMap<>();
 	
 	private EFieldTurn										fieldTurn				= EFieldTurn.NORMAL;
@@ -109,11 +113,29 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
+	
 	/**
 	 * 
 	 */
 	public FieldPanel()
 	{
+		this(DEF_FIELD_WIDTH, DEFAULT_STROKE);
+	}
+	
+	
+	/**
+	 * Construct a new FieldPanel
+	 * The {@code feldWidth} parameter controls how large the internal field will be in pixels. If it is set to a high
+	 * value the rendering will take more time but will look less pixelated on large screens.
+	 * 
+	 * @param fieldWidth The width of the painted field in pixel
+	 * @param paintStroke The stroke used to paint the shapes
+	 */
+	public FieldPanel(final int fieldWidth, final Stroke paintStroke)
+	{
+		this.fieldWidth = fieldWidth;
+		this.paintStroke = paintStroke;
+		
 		setBorder(new EmptyBorder(0, 0, 0, 0));
 		setLayout(new MigLayout("inset 0"));
 		
@@ -212,6 +234,16 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public void paintOffline()
 	{
+		/*
+		 * Drawing only makes sense if we have a valid/existent drawing area because creating an image with size 0 will
+		 * produce an error. This scenario is possible if the moduli start up before the GUI layouting has been completed
+		 * and the component size is still 0|0.
+		 */
+		if ((getWidth() == 0) || (getHeight() == 0))
+		{
+			return;
+		}
+		
 		if ((offImage == null) || (offImage.getHeight(this) != getHeight()) || (offImage.getWidth(this) != getWidth()))
 		{
 			offImage = createImage(getWidth(), getHeight());
@@ -254,15 +286,21 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			
 			shapeVisibilityMap.entrySet().stream().filter((e) -> !e.getValue()).forEach((e) -> sm.remove(e.getKey()));
 			
+			// Set the default stroke for all shapes
+			g2.setStroke(paintStroke);
+			
 			sm.paint(g2, this);
 			
 			g2.scale(1.0 / scaleFactor, 1.0 / scaleFactor);
 			g2.translate(-fieldOriginX, -fieldOriginY);
 			
-			paintCoordinates(g2, ETeamColor.YELLOW,
-					teamInverted.getOrDefault(ETeamColor.YELLOW, TeamConfig.getLeftTeam() != ETeamColor.YELLOW));
-			paintCoordinates(g2, ETeamColor.BLUE,
-					teamInverted.getOrDefault(ETeamColor.BLUE, TeamConfig.getLeftTeam() != ETeamColor.BLUE));
+			if (doPaintCoordinates)
+			{
+				paintCoordinates(g2, ETeamColor.YELLOW,
+						teamInverted.getOrDefault(ETeamColor.YELLOW, TeamConfig.getLeftTeam() != ETeamColor.YELLOW));
+				paintCoordinates(g2, ETeamColor.BLUE,
+						teamInverted.getOrDefault(ETeamColor.BLUE, TeamConfig.getLeftTeam() != ETeamColor.BLUE));
+			}
 			paintFps(g2);
 		}
 		repaint();
@@ -710,36 +748,34 @@ public class FieldPanel extends JPanel implements IFieldPanel
 					showSources.remove(EShapeLayerSource.AI_YELLOW);
 				}
 				break;
+			case PAINT_COORD:
+				doPaintCoordinates = isSelected;
+				break;
+			default:
+				break;
 		}
 	}
 	
 	
 	private void resetField()
 	{
+		double heightScaleFactor = 1;
+		double widthScaleFactor = 1;
 		if (getWidth() > getHeight())
 		{
 			setFieldTurn(EFieldTurn.T90);
 			
-			if ((getFieldRatio() * getHeight()) > getWidth())
-			{
-				setScaleFactor((double) getWidth() / getFieldTotalHeight());
-			} else
-			{
-				setScaleFactor((double) getHeight() / getFieldTotalWidth());
-			}
+			heightScaleFactor = (double) getHeight() / getFieldTotalWidth();
+			widthScaleFactor = (double) getWidth() / getFieldTotalHeight();
 		} else
 		{
 			setFieldTurn(EFieldTurn.NORMAL);
 			
-			if ((getFieldRatio() * getWidth()) > getHeight())
-			{
-				setScaleFactor((double) getHeight() / getFieldTotalHeight());
-			} else
-			{
-				setScaleFactor((double) getHeight() / getFieldTotalWidth());
-			}
+			heightScaleFactor = ((double) getHeight()) / getFieldTotalHeight();
+			widthScaleFactor = ((double) getWidth()) / getFieldTotalWidth();
 		}
 		
+		setScaleFactor(Math.min(heightScaleFactor, widthScaleFactor));
 		setFieldOriginX(0);
 		setFieldOriginY(0);
 	}

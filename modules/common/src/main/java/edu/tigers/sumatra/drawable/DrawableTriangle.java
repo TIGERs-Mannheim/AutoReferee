@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -34,8 +33,8 @@ public class DrawableTriangle extends Triangle implements IDrawableShape
 	
 	private Color		color;
 	private boolean	fill	= false;
-									
-									
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -107,7 +106,6 @@ public class DrawableTriangle extends Triangle implements IDrawableShape
 		int number = 3;
 		
 		g.setColor(getColor());
-		g.setStroke(new BasicStroke(1));
 		g.drawPolygon(x, y, number);
 		if (fill)
 		{

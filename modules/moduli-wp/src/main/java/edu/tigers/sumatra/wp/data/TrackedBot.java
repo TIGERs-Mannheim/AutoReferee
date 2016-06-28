@@ -26,7 +26,7 @@ import edu.tigers.sumatra.math.IVector2;
  * @see ATrackedObject
  * @author Gero
  */
-@Persistent
+@Persistent(version = 1)
 public class TrackedBot extends ATrackedObject implements ITrackedBot
 {
 	private BotID		botId;
@@ -34,11 +34,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	private IVector2	pos			= AVector2.ZERO_VECTOR;
 	/** m/s */
 	private IVector2	vel			= AVector2.ZERO_VECTOR;
+	/** m/s */
+	private IVector2	acc			= AVector2.ZERO_VECTOR;
 	
 	/** [rad] */
 	private double		angle			= 0;
 	/** rad/s */
 	private double		aVel			= 0;
+	
+	private double		aAcc			= 0;
 	
 	
 	private boolean	ballContact	= false;
@@ -53,6 +57,7 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 		botId = BotID.get();
 		pos = AVector2.ZERO_VECTOR;
 		vel = AVector2.ZERO_VECTOR;
+		acc = AVector2.ZERO_VECTOR;
 		angle = 0;
 		aVel = 0;
 		bot = new DummyBot();
@@ -82,8 +87,10 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 		botId = o.getBotId();
 		pos = o.getPos();
 		vel = o.getVel();
+		acc = o.getAcc();
 		angle = o.getAngle();
 		aVel = o.getaVel();
+		aAcc = o.getaAcc();
 		ballContact = o.hasBallContact();
 		visible = o.isVisible();
 		bot = o.getBot();
@@ -99,8 +106,10 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 		TrackedBot nBot = new TrackedBot(this);
 		nBot.pos = pos.multiplyNew(-1);
 		nBot.vel = vel.multiplyNew(-1);
+		nBot.acc = acc.multiplyNew(-1);
 		nBot.angle = AngleMath.normalizeAngle(angle + AngleMath.PI);
 		nBot.aVel = aVel;
+		nBot.aAcc = aAcc;
 		return nBot;
 	}
 	
@@ -181,6 +190,13 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	
 	
 	@Override
+	public IVector2 getAcc()
+	{
+		return acc;
+	}
+	
+	
+	@Override
 	public BotID getBotId()
 	{
 		return botId;
@@ -214,6 +230,16 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	public double getaVel()
 	{
 		return aVel;
+	}
+	
+	
+	/**
+	 * @return the aVel
+	 */
+	@Override
+	public double getaAcc()
+	{
+		return aAcc;
 	}
 	
 	
@@ -305,6 +331,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	
 	
 	/**
+	 * @param acc the acc to set
+	 */
+	public void setAcc(final IVector2 acc)
+	{
+		this.acc = acc;
+	}
+	
+	
+	/**
 	 * @param angle the angle to set
 	 */
 	public void setAngle(final double angle)
@@ -319,6 +354,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	public void setaVel(final double aVel)
 	{
 		this.aVel = aVel;
+	}
+	
+	
+	/**
+	 * @param aAcc the aAcc to set
+	 */
+	public void setaAcc(final double aAcc)
+	{
+		this.aAcc = aAcc;
 	}
 	
 	

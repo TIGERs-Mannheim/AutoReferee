@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.BotNumberViolation;
@@ -38,6 +40,8 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public class BotNumberDetector extends AGameEventDetector
 {
 	private static final int	priority				= 1;
+	
+	@Configurable(comment = "Number of bots allowed on the field")
 	private static int			maxTeamBotCount	= 6;
 	
 	private int						blueLastDiff		= 0;

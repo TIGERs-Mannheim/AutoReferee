@@ -26,6 +26,7 @@ public interface IWfPostProcessor
 	
 	/**
 	 * @param context
+	 * @param timestamp
 	 */
-	void processMotionContext(MotionContext context);
+	void processMotionContext(MotionContext context, long timestamp);
 }

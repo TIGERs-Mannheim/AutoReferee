@@ -8,7 +8,7 @@
  */
 package edu.tigers.autoreferee.remote.impl;
 
-import static edu.tigers.autoreferee.AutoRefUtil.execAndCatchAll;
+import static edu.tigers.autoreferee.CheckedRunnable.execAndCatchAll;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

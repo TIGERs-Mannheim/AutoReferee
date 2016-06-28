@@ -10,6 +10,9 @@
  */
 package edu.tigers.sumatra.referee;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
@@ -234,5 +237,41 @@ public class RefereeMsg
 	public final long getFrameTimestamp()
 	{
 		return frameTimestamp;
+	}
+	
+	
+	/**
+	 * Get the current score of both teams as map
+	 * 
+	 * @return a map with keys value pairs for {@code BLUE} and {@code YELLOW}
+	 */
+	public Map<ETeamColor, Integer> getGoals()
+	{
+		int goalsYellow = teamInfoYellow.getScore();
+		int goalsBlue = teamInfoBlue.getScore();
+		
+		return buildMap(goalsBlue, goalsYellow);
+	}
+	
+	
+	/**
+	 * Return a map with the names of each team
+	 * 
+	 * @return
+	 */
+	public Map<ETeamColor, String> getTeamNames()
+	{
+		String yellowName = teamInfoYellow.getName();
+		String blueName = teamInfoBlue.getName();
+		return buildMap(blueName, yellowName);
+	}
+	
+	
+	private <T> Map<ETeamColor, T> buildMap(final T blue, final T yellow)
+	{
+		Map<ETeamColor, T> map = new EnumMap<>(ETeamColor.class);
+		map.put(ETeamColor.YELLOW, yellow);
+		map.put(ETeamColor.BLUE, blue);
+		return map;
 	}
 }

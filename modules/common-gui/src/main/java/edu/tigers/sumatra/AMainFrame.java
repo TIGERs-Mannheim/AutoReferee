@@ -383,7 +383,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	/**
 	 * Creates the root window and the views.
 	 */
-	private RootWindow createRootWindow()
+	protected RootWindow createRootWindow()
 	{
 		ViewMap viewMap = new ViewMap();
 		// The mixed view map makes it easy to mix static and dynamic views inside the same root window

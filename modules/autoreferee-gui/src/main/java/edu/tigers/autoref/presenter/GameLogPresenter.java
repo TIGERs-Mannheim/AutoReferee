@@ -17,16 +17,16 @@ import java.util.Set;
 
 import javax.swing.BoxLayout;
 
-import edu.tigers.autoref.presenter.gamelog.GameLogTableModel;
-import edu.tigers.autoref.view.panel.GameLogPanel;
-import edu.tigers.autoref.view.panel.SumatraViewPanel;
+import edu.tigers.autoref.model.gamelog.GameLogTableModel;
+import edu.tigers.autoref.view.gamelog.GameLogPanel;
+import edu.tigers.autoref.view.generic.SumatraViewPanel;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.IAutoRefStateObserver;
-import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
+import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
@@ -108,7 +108,7 @@ public class GameLogPresenter implements ISumatraViewPresenter, IModuliStateObse
 		if (state == AutoRefState.STARTED)
 		{
 			AutoRefUtil.ifAutoRefModulePresent(module -> {
-				GameLog log = module.getEngine().getGameLog();
+				IGameLog log = module.getEngine().getGameLog();
 				
 				GameLogTableModel model = new GameLogTableModel(log);
 				EventQueue.invokeLater(() -> gameLogPanel.setTableModel(model));

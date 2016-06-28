@@ -8,16 +8,17 @@
  */
 package edu.tigers.autoreferee.engine;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
 import edu.tigers.autoreferee.engine.states.impl.DummyAutoRefState;
@@ -41,7 +42,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	private static final Logger							log				= Logger
 																								.getLogger(ActiveAutoRefEngine.class);
 	
-	private List<IAutoRefEngineObserver>				engineObserver	= new ArrayList<>();
+	private List<IAutoRefEngineObserver>				engineObserver	= new CopyOnWriteArrayList<>();
 	private IAutoRefState									dummyState		= null;
 	private Map<EGameStateNeutral, IAutoRefState>	refStates		= new HashMap<>();
 	
@@ -84,6 +85,13 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		public boolean doProceed()
 		{
 			return doProceed;
+		}
+		
+		
+		@Override
+		public GameLog getGameLog()
+		{
+			return gameLog;
 		}
 		
 	}
@@ -235,13 +243,15 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		RefStateContext ctx = new RefStateContext();
 		
 		List<IGameEvent> gameEvents = getGameEvents(frame);
-		logGameEvents(gameEvents);
 		
 		boolean canProceed = state.canProceed();
 		if (gameEvents.size() > 0)
 		{
-			IGameEvent gameEvent = gameEvents.get(0);
-			state.handleGameEvent(gameEvent, ctx);
+			IGameEvent gameEvent = gameEvents.remove(0);
+			boolean accepted = state.handleGameEvent(gameEvent, ctx);
+			
+			gameLog.addEntry(gameEvent, accepted);
+			logGameEvents(gameEvents);
 		}
 		
 		state.update(frame, ctx);
@@ -292,7 +302,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	/**
 	 * @param observer
 	 */
-	public synchronized void addObserver(final IAutoRefEngineObserver observer)
+	public void addObserver(final IAutoRefEngineObserver observer)
 	{
 		engineObserver.add(observer);
 	}
@@ -301,7 +311,7 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 	/**
 	 * @param observer
 	 */
-	public synchronized void removeObserver(final IAutoRefEngineObserver observer)
+	public void removeObserver(final IAutoRefEngineObserver observer)
 	{
 		engineObserver.remove(observer);
 	}

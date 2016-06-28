@@ -10,8 +10,6 @@ package edu.tigers.sumatra.bot;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-import com.github.g3force.configurable.IConfigClient;
-import com.github.g3force.configurable.IConfigObserver;
 import com.sleepycat.persist.model.Persistent;
 
 
@@ -19,20 +17,20 @@ import com.sleepycat.persist.model.Persistent;
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent
-public class MoveConstraints implements IConfigObserver
+public class MoveConstraints
 {
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
-	private double						velMax	= 3;
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "10", "10" })
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "3.5", "3" })
+	private double						velMax	= 3.5;
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "10", "10" })
 	private double						velMaxW	= 10;
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "3", "3" })
 	private double						accMax	= 3;
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "50", "50" })
-	private double						accMaxW	= 50;
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "3", "3" })
-	private double						jerkMax	= 3;
-	@Configurable(spezis = { "", "TIGER_V3" }, defValueSpezis = { "50", "50" })
-	private double						jerkMaxW	= 50;
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "25", "25" })
+	private double						accMaxW	= 25;
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "50", "50" })
+	private double						jerkMax	= 50;
+	@Configurable(spezis = { "", "v2013" }, defValueSpezis = { "500", "500" })
+	private double						jerkMaxW	= 500;
 	
 	private final MoveConstraints	defConstraints;
 	
@@ -63,12 +61,6 @@ public class MoveConstraints implements IConfigObserver
 		jerkMax = o.jerkMax;
 		jerkMaxW = o.jerkMaxW;
 		defConstraints = o;
-	}
-	
-	
-	@Override
-	public void afterApply(final IConfigClient configClient)
-	{
 	}
 	
 	
@@ -160,11 +152,11 @@ public class MoveConstraints implements IConfigObserver
 		builder.append(velMax);
 		builder.append(",");
 		builder.append(velMaxW);
-		builder.append(",");
+		builder.append("|");
 		builder.append(accMax);
 		builder.append(",");
 		builder.append(accMaxW);
-		builder.append(",");
+		builder.append("|");
 		builder.append(jerkMax);
 		builder.append(",");
 		builder.append(jerkMaxW);

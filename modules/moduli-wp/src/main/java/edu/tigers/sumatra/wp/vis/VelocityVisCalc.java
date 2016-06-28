@@ -34,10 +34,13 @@ public class VelocityVisCalc implements IWpCalc
 		List<IDrawableShape> shapes = wfw.getShapeMap().get(EWpShapesLayer.VELOCITY);
 		
 		TrackedBall ball = wfw.getSimpleWorldFrame().getBall();
-		ILine ballVelLine = new Line(ball.getPos(), ball.getVel().multiplyNew(1000));
-		DrawableLine dBallVelLine = new DrawableLine(ballVelLine, Color.cyan);
-		dBallVelLine.setStroke(new BasicStroke(3));
-		shapes.add(dBallVelLine);
+		if (ball.getVel().getLength() > 0.1)
+		{
+			ILine ballVelLine = new Line(ball.getPos(), ball.getVel().multiplyNew(1000));
+			DrawableLine dBallVelLine = new DrawableLine(ballVelLine, Color.cyan);
+			dBallVelLine.setStroke(new BasicStroke(3));
+			shapes.add(dBallVelLine);
+		}
 		
 		for (ITrackedBot bot : wfw.getSimpleWorldFrame().getBots().values())
 		{

@@ -8,8 +8,12 @@
  */
 package edu.tigers.sumatra.panel;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JPanel;
 
@@ -27,6 +31,9 @@ public abstract class BasePanel<T> extends JPanel
 	/**  */
 	private static final long	serialVersionUID	= 1L;
 	
+	private static final int	ALPHA_MAX			= 255;
+	
+	private int						alpha					= ALPHA_MAX;
 	private List<T>				observer				= new ArrayList<>();
 	
 	
@@ -54,10 +61,48 @@ public abstract class BasePanel<T> extends JPanel
 	}
 	
 	
+	protected void informObserver(final Consumer<T> consumer)
+	{
+		observer.forEach(observer -> consumer.accept(observer));
+	}
+	
+	
+	/**
+	 * @param value [0,255]
+	 */
+	public void setAlphaValue(final int value)
+	{
+		alpha = Math.min(ALPHA_MAX, Math.max(0, alpha));
+	}
+	
+	
+	/**
+	 * @return [0,255]
+	 */
+	public float getAlphaValue()
+	{
+		return alpha;
+	}
+	
+	
+	@Override
+	public void paint(final Graphics g)
+	{
+		if ((alpha < ALPHA_MAX) && (g instanceof Graphics2D))
+		{
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) alpha / ALPHA_MAX));
+			
+		}
+		super.paint(g);
+	}
+	
+	
 	/**
 	 * Enable/disable the panel and all of its components
 	 * 
 	 * @param enabled
 	 */
 	public abstract void setPanelEnabled(boolean enabled);
+	
 }

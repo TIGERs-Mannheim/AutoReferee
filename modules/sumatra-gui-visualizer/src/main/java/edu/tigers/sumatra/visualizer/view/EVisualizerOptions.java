@@ -25,6 +25,8 @@ public enum EVisualizerOptions implements IShapeLayer
 	/**  */
 	RESET_FIELD("Visualizer", "reset field"),
 	/**  */
+	PAINT_COORD("Visualizer", "paint coord."),
+	/**  */
 	YELLOW_AI("Visualizer", "Yellow AI"),
 	/**  */
 	BLUE_AI("Visualizer", "Blue AI"),;

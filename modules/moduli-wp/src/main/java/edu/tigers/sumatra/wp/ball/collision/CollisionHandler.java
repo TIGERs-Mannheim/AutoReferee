@@ -194,6 +194,10 @@ public class CollisionHandler
 			return ballVel;
 		}
 		double angleNormalColl = GeoMath.angleBetweenVectorAndVector(ballVel, collisionNormal);
+		if (angleNormalColl < AngleMath.PI_HALF)
+		{
+			return ballVel;
+		}
 		double relDamp = Math.max(0, (angleNormalColl / AngleMath.PI_HALF) - 1);
 		double damp = relDamp * BALL_DAMP_KICKER_FACTOR;
 		double velInfAngle = ballVel.getAngle();

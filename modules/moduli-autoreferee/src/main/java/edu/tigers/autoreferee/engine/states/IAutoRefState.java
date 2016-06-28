@@ -34,8 +34,9 @@ public interface IAutoRefState
 	/**
 	 * @param gameEvent
 	 * @param ctx
+	 * @return Returns true if the event was accepted by the engine
 	 */
-	public void handleGameEvent(IGameEvent gameEvent, IAutoRefStateContext ctx);
+	public boolean handleGameEvent(IGameEvent gameEvent, IAutoRefStateContext ctx);
 	
 	
 	/**

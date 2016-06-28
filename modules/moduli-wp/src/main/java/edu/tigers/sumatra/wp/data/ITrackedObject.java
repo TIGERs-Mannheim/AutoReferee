@@ -31,6 +31,12 @@ public interface ITrackedObject
 	
 	
 	/**
+	 * @return the acc
+	 */
+	IVector2 getAcc();
+	
+	
+	/**
 	 * @return id
 	 */
 	AObjectID getBotId();

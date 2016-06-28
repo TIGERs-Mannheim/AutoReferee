@@ -55,6 +55,18 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 		double vy = state.getVel().y() * 1000;
 		double vz = state.getVel().z() * 1000;
 		
+		
+		IVector3 accTorque = state.getAccFromTorque();
+		if (accTorque.getLength2() <= action.getAccTorque().getLength2())
+		{
+			accTorque = accTorque.addNew(action.getAccTorque().subtractNew(state.getAccFromTorque()).multiply(0.9));
+		} else
+		{
+			double accTorqueXy = Math.max(0, accTorque.getLength2() - (30 * dt));
+			double accTorqueZ = Math.max(0, accTorque.z() - (30 * dt));
+			accTorque = new Vector3(accTorque.getXYVector().scaleToNew(accTorqueXy), accTorqueZ);
+		}
+		
 		final double ax;
 		final double ay;
 		double az = state.getAcc().z() * 1000;
@@ -85,7 +97,7 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 				az = 0;
 			}
 			
-			IVector2 targetAcc = state.getAccFromTorque().getXYVector().multiplyNew(1000);
+			IVector2 targetAcc = accTorque.getXYVector().multiplyNew(1000);
 			if (v > 2000)
 			{
 				targetAcc = targetAcc.addNew(dir.scaleToNew(accSlide));
@@ -120,16 +132,6 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 		IVector3 pos = new Vector3(x, y, z);
 		IVector3 vel = new Vector3(vx, vy, vz).multiply(1e-3);
 		IVector3 acc = new Vector3(ax, ay, az).multiply(1e-3);
-		IVector3 accTorque = state.getAccFromTorque();
-		if (accTorque.getLength2() <= action.getAccTorque().getLength2())
-		{
-			accTorque = accTorque.addNew(action.getAccTorque().subtractNew(state.getAccFromTorque()).multiply(0.5));
-		} else
-		{
-			double accTorqueXy = Math.max(0, accTorque.getLength2() - (30 * dt));
-			double accTorqueZ = Math.max(0, accTorque.z() - (30 * dt));
-			accTorque = new Vector3(accTorque.getXYVector().scaleToNew(accTorqueXy), accTorqueZ);
-		}
 		
 		return new BallState(pos, vel, acc, accTorque);
 	}

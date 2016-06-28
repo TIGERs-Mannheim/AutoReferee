@@ -20,11 +20,11 @@ import net.miginfocom.swing.MigLayout;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.autoref.view.panel.ActiveEnginePanel;
-import edu.tigers.autoref.view.panel.ActiveEnginePanel.IActiveEnginePanelObserver;
-import edu.tigers.autoref.view.panel.StartStopPanel;
-import edu.tigers.autoref.view.panel.StartStopPanel.IStartStopPanelObserver;
-import edu.tigers.autoref.view.panel.SumatraViewPanel;
+import edu.tigers.autoref.view.generic.SumatraViewPanel;
+import edu.tigers.autoref.view.main.ActiveEnginePanel;
+import edu.tigers.autoref.view.main.StartStopPanel;
+import edu.tigers.autoref.view.main.ActiveEnginePanel.IActiveEnginePanelObserver;
+import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefModule;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
 import edu.tigers.autoreferee.AutoRefUtil;

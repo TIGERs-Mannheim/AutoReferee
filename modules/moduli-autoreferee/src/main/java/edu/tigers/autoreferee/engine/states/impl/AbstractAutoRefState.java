@@ -158,13 +158,13 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	
 	
 	@Override
-	public void handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
+	public boolean handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
 	{
 		switch (gameEvent.getType())
 		{
 			case BOT_STOP_SPEED:
 			case BOT_COUNT:
-				return;
+				return false;
 			default:
 				break;
 		}
@@ -177,6 +177,7 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 		{
 			ctx.setFollowUpAction(followUp);
 		}
+		return true;
 	}
 	
 	

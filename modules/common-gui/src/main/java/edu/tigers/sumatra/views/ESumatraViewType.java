@@ -62,7 +62,9 @@ public enum ESumatraViewType
 	/**  */
 	AUTOREFEREE_GAME_LOG(41, "Game Log", true),
 	/**  */
-	BALL_SPEED(42, "Ball Speed", true);
+	BALL_SPEED(42, "Ball Speed", true),
+	/**  */
+	HUMAN_REF_VIEW(43, "Human Ref View");
 	
 	private final int			id;
 	private final String		title;

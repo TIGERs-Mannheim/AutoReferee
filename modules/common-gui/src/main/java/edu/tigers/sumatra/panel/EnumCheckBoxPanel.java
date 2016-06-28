@@ -106,7 +106,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	
 	private void onSelectionChange(final T type, final boolean value)
 	{
-		getObserver().forEach(obs -> obs.onValueTicked(type, value));
+		informObserver(obs -> obs.onValueTicked(type, value));
 	}
 	
 	

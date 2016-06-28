@@ -108,6 +108,13 @@ public class GameEvent implements IGameEvent
 	}
 	
 	
+	@Override
+	public EEventCategory getCategory()
+	{
+		return eventType.getCategory();
+	}
+	
+	
 	/**
 	 * @return timestamp in ns
 	 */

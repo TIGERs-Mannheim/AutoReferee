@@ -91,7 +91,7 @@ public class ExtKalman extends AWorldPredictor
 		long timestamp = frame.gettCapture() + (long) (context.getPredictionLookahead() * 1e9);
 		
 		context.updateMotionContext(timestamp);
-		processMotionContext(context.getMotionContext());
+		processMotionContext(context.getMotionContext(), timestamp);
 		
 		ballProcessor.process(frame);
 		final IFilter ball = context.getBall();

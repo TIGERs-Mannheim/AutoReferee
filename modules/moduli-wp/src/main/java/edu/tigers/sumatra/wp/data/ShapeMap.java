@@ -28,7 +28,7 @@ import edu.tigers.sumatra.drawable.IDrawableTool;
 @Persistent
 public class ShapeMap
 {
-	private final Map<String, ShapeLayer> categories = new HashMap<>();
+	private final Map<String, ShapeLayer>	categories	= new HashMap<>();
 	
 	/**
 	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
@@ -321,6 +321,10 @@ public class ShapeMap
 				.sorted()
 				.forEach(sl -> sl.shapes
 						.forEach(s -> s.shapes
-								.forEach(ss -> ss.paintShape(g, tool, s.inverted))));
+								.forEach(ss -> {
+									Graphics2D gDerived = (Graphics2D) g.create();
+									ss.paintShape(gDerived, tool, s.inverted);
+									gDerived.dispose();
+								})));
 	}
 }

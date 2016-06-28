@@ -31,21 +31,21 @@ import edu.tigers.sumatra.math.Vector3;
 public class TrackedBall extends ATrackedObject
 {
 	private final BallID		id				= new BallID();
-													
+	
 	/** mm */
 	private final IVector2	pos;
 	/** m/s */
 	private final IVector2	vel;
-									
+	
 	private final IVector3	acc;
-									
+	
 	private final double		height;
 	private final double		zVel;
-									
+	
 	private double				confidence	= 0;
 	private boolean			onCam			= true;
-													
-													
+	
+	
 	@SuppressWarnings("unused")
 	private TrackedBall()
 	{
@@ -220,6 +220,13 @@ public class TrackedBall extends ATrackedObject
 	public IVector2 getVel()
 	{
 		return vel;
+	}
+	
+	
+	@Override
+	public IVector2 getAcc()
+	{
+		return acc.getXYVector();
 	}
 	
 	

@@ -8,7 +8,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -41,13 +40,14 @@ public class DrawableLine extends Line implements IDrawableShape
 	private static final double	ARROW_HEAD_SIZE_ANGLE	= 0.5;
 	private static final double	ARROW_TEXT_OFFSET_LINE	= 0;
 	private static final double	ARROW_TEXT_OFFSET_DIST	= 10;
-																			
+	
 	private Color						color							= Color.red;
 	private String						text							= "";
 	private ETextLocation			textLocation				= ETextLocation.HEAD;
 	private boolean					drawArrowHead				= true;
-	private transient Stroke		stroke						= new BasicStroke(1);
-																			
+	/** If null the default stroke is used */
+	private transient Stroke		stroke						= null;
+	
 	/**
 	 * Specifies the location of the text string
 	 */
@@ -120,7 +120,12 @@ public class DrawableLine extends Line implements IDrawableShape
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
 		g.setColor(getColor());
-		g.setStroke(getStroke());
+		
+		Stroke customStroke = getStroke();
+		if (customStroke != null)
+		{
+			g.setStroke(customStroke);
+		}
 		
 		// draw line
 		final IVector2 lineStart = tool.transformToGuiCoordinates(supportVector(), invert);
@@ -163,7 +168,6 @@ public class DrawableLine extends Line implements IDrawableShape
 					dir.multiply(-1);
 				}
 				Vector2 txtbase = base.addNew(dir);
-				g.setStroke(new BasicStroke(1));
 				g.setFont(new Font("", Font.PLAIN, 10));
 				g.drawString(text, (float) txtbase.x(), (float) txtbase.y());
 			}
@@ -259,10 +263,6 @@ public class DrawableLine extends Line implements IDrawableShape
 	 */
 	public final Stroke getStroke()
 	{
-		if (stroke == null)
-		{
-			stroke = new BasicStroke(1);
-		}
 		return stroke;
 	}
 	

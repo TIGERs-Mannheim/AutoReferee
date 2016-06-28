@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.states;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefCommand;
+import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.remote.ICommandResult;
 
 
@@ -41,5 +42,11 @@ public interface IAutoRefStateContext
 	 * @return
 	 */
 	public boolean doProceed();
+	
+	
+	/**
+	 * @return
+	 */
+	public GameLog getGameLog();
 	
 }

@@ -12,7 +12,7 @@ import java.util.Set;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.log.GameLog;
+import edu.tigers.autoreferee.engine.log.IGameLog;
 
 
 /**
@@ -65,7 +65,7 @@ public interface IAutoRefEngine
 	/**
 	 * @return
 	 */
-	public GameLog getGameLog();
+	public IGameLog getGameLog();
 	
 	
 	/**

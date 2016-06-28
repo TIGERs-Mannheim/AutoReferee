@@ -12,11 +12,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
+import net.infonode.docking.RootWindow;
+import net.infonode.docking.properties.RootWindowProperties;
 import edu.dhbw.mannheim.tigers.sumatra.presenter.log.LogView;
-import edu.tigers.autoref.view.AutoRefView;
-import edu.tigers.autoref.view.BallSpeedView;
-import edu.tigers.autoref.view.GameLogView;
-import edu.tigers.autoref.view.VisualizerAutoRefView;
+import edu.tigers.autoref.view.ballspeed.BallSpeedView;
+import edu.tigers.autoref.view.gamelog.GameLogView;
+import edu.tigers.autoref.view.humanref.HumanRefView;
+import edu.tigers.autoref.view.main.AutoRefView;
+import edu.tigers.autoref.view.visualizer.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
 
@@ -43,6 +46,7 @@ public class AutoRefMainFrame extends AMainFrame
 		addView(new AutoRefView());
 		addView(new GameLogView());
 		addView(new BallSpeedView());
+		addView(new HumanRefView());
 		
 		updateViewMenu();
 		fillMenuBar();
@@ -73,5 +77,21 @@ public class AutoRefMainFrame extends AMainFrame
 	protected ImageIcon getFrameIcon()
 	{
 		return loadIconImage("/whistle.png");
+	}
+	
+	
+	@Override
+	protected RootWindow createRootWindow()
+	{
+		RootWindow rootWindow = super.createRootWindow();
+		
+		/*
+		 * Specifies that all floating windows should be created as separate JFrame instead of a JDialog.
+		 * This ensures that the HumanRefView Panel can be minimized/maximized independently.
+		 */
+		RootWindowProperties windowProps = rootWindow.getRootWindowProperties();
+		windowProps.getFloatingWindowProperties().setUseFrame(true);
+		
+		return rootWindow;
 	}
 }

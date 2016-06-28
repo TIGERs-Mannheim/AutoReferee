@@ -70,7 +70,8 @@ public class ExportDataContainer
 	{
 		IVector3 pos = new Vector3(tBot.getPos(), tBot.getAngle());
 		IVector3 vel = new Vector3(tBot.getVel(), tBot.getaVel());
-		return new WpBot(pos, vel, tBot.getBotId().getNumber(), tBot.getBotId().getTeamColor(), frameId, timestamp);
+		IVector3 acc = new Vector3(tBot.getAcc(), tBot.getaAcc());
+		return new WpBot(pos, vel, acc, tBot.getBotId().getNumber(), tBot.getBotId().getTeamColor(), frameId, timestamp);
 	}
 	
 	
@@ -482,13 +483,13 @@ public class ExportDataContainer
 	 */
 	public static class WpBot implements IJsonString, INumberListable
 	{
-		private int					id				= -1;
-		private ETeamColor		color			= ETeamColor.UNINITIALIZED;
-		private IVector3			pos			= Vector3.ZERO_VECTOR;
-		private IVector3			vel			= Vector3.ZERO_VECTOR;
-		private final IVector3	acc			= Vector3.ZERO_VECTOR;
-		private long				frameId		= -1;
-		private long				timestamp	= 0;
+		private int				id				= -1;
+		private ETeamColor	color			= ETeamColor.UNINITIALIZED;
+		private IVector3		pos			= Vector3.ZERO_VECTOR;
+		private IVector3		vel			= Vector3.ZERO_VECTOR;
+		private IVector3		acc			= Vector3.ZERO_VECTOR;
+		private long			frameId		= -1;
+		private long			timestamp	= 0;
 		
 		
 		/**
@@ -502,17 +503,19 @@ public class ExportDataContainer
 		/**
 		 * @param pos
 		 * @param vel
+		 * @param acc
 		 * @param id
 		 * @param color
 		 * @param frameId
 		 * @param timestamp
 		 */
-		public WpBot(final IVector3 pos, final IVector3 vel, final int id, final ETeamColor color,
+		public WpBot(final IVector3 pos, final IVector3 vel, final IVector3 acc, final int id, final ETeamColor color,
 				final long frameId, final long timestamp)
 		{
 			super();
 			this.pos = pos;
 			this.vel = vel;
+			this.acc = acc;
 			this.id = id;
 			this.color = color;
 			this.frameId = frameId;
@@ -526,12 +529,14 @@ public class ExportDataContainer
 		 */
 		public static WpBot fromNumberList(final List<? extends Number> list)
 		{
-			return new WpBot(AVector.fromNumberList(list.subList(0, 3)).getXYZVector(),
-					AVector.fromNumberList(list.subList(3, 6)).getXYZVector(),
-					list.get(9).intValue(),
-					ETeamColor.fromNumberList(list.get(10)),
-					list.size() > 11 ? list.get(11).longValue() : -1,
-					list.size() > 12 ? list.get(12).longValue() : -1);
+			throw new IllegalStateException("check");
+			// return new WpBot(AVector.fromNumberList(list.subList(0, 3)).getXYZVector(),
+			// AVector.fromNumberList(list.subList(3, 6)).getXYZVector(),
+			// AVector.fromNumberList(list.subList(6, 9)).getXYZVector(),
+			// list.get(9).intValue(),
+			// ETeamColor.fromNumberList(list.get(10)),
+			// list.size() > 11 ? list.get(11).longValue() : -1,
+			// list.size() > 12 ? list.get(12).longValue() : -1);
 		}
 		
 		
@@ -544,8 +549,10 @@ public class ExportDataContainer
 			TrackedBot tBot = new TrackedBot(timestamp, botId);
 			tBot.setPos(pos.getXYVector());
 			tBot.setVel(vel.getXYVector());
+			tBot.setAcc(acc.getXYVector());
 			tBot.setAngle(pos.z());
 			tBot.setaVel(vel.z());
+			tBot.setaAcc(acc.z());
 			return tBot;
 		}
 		
@@ -706,6 +713,24 @@ public class ExportDataContainer
 			builder.append(timestamp);
 			builder.append("]");
 			return builder.toString();
+		}
+		
+		
+		/**
+		 * @return the acc
+		 */
+		public IVector3 getAcc()
+		{
+			return acc;
+		}
+		
+		
+		/**
+		 * @param acc the acc to set
+		 */
+		public void setAcc(final IVector3 acc)
+		{
+			this.acc = acc;
 		}
 	}
 	

@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
@@ -26,14 +27,14 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 /**
  * @author "Lukas Magel"
  */
-public class GameLog
+public class GameLog implements IGameLog
 {
 	private static final Logger		log					= Logger.getLogger(GameLog.class);
 	
 	private long							startRefTimestamp	= 0;
 	private long							currentTimestamp	= 0;
 	private List<GameLogEntry>			entries				= new ArrayList<>();
-	private List<IGameLogObserver>	observer				= new ArrayList<>();
+	private List<IGameLogObserver>	observer				= new CopyOnWriteArrayList<>();
 	
 	
 	/**
@@ -62,6 +63,7 @@ public class GameLog
 	/**
 	 * @return a read only view of the log entries
 	 */
+	@Override
 	public List<GameLogEntry> getEntries()
 	{
 		return Collections.unmodifiableList(entries);
@@ -130,8 +132,19 @@ public class GameLog
 	 */
 	public GameLogEntry addEntry(final IGameEvent event)
 	{
+		return addEntry(event, false);
+	}
+	
+	
+	/**
+	 * @param event
+	 * @param acceptedByEngine true if the game event was accepted by the engine and caused a change of game state
+	 * @return
+	 */
+	public GameLogEntry addEntry(final IGameEvent event, final boolean acceptedByEngine)
+	{
 		log.info("Game event: " + event.toString());
-		return buildAndAddEntry(builder -> builder.setGameEvent(event));
+		return buildAndAddEntry(builder -> builder.setGameEvent(event, acceptedByEngine));
 	}
 	
 	
@@ -177,6 +190,7 @@ public class GameLog
 	/**
 	 * @param observer
 	 */
+	@Override
 	public void addObserver(final IGameLogObserver observer)
 	{
 		this.observer.add(observer);
@@ -186,6 +200,7 @@ public class GameLog
 	/**
 	 * @param observer
 	 */
+	@Override
 	public void removeObserver(final IGameLogObserver observer)
 	{
 		this.observer.remove(observer);

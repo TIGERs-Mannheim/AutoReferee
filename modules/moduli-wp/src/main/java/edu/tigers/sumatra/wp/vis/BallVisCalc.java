@@ -35,23 +35,22 @@ public class BallVisCalc implements IWpCalc
 		
 		TrackedBall ball = wfw.getSimpleWorldFrame().getBall();
 		
-		Color color = ball.getPos3().z() > BALL_FLY_TOL ? Color.red : Color.ORANGE;
-		DrawableCircle point = new DrawableCircle(ball.getPos(), Geometry.getBallRadius(), Color.ORANGE);
+		Color color = ball.getPos3().z() > BALL_FLY_TOL ? Color.magenta : Color.ORANGE;
+		DrawableCircle point = new DrawableCircle(ball.getPos(), Geometry.getBallRadius(), Color.red);
 		point.setFill(true);
 		shapes.add(point);
 		
-		DrawableCircle circle1 = new DrawableCircle(new Circle(ball.getPos(), 120), Color.YELLOW);
+		DrawableCircle circle1 = new DrawableCircle(new Circle(ball.getPos(), 120), Color.red);
 		shapes.add(circle1);
 		DrawableCircle circle2 = new DrawableCircle(new Circle(ball.getPos(), 105), color);
 		shapes.add(circle2);
 		
-		DrawableCircle dCircle = new DrawableCircle(ball.getPosByVel(0), Geometry.getBallRadius() + 5,
-				Color.red);
-		shapes.add(dCircle);
-		
 		IVector2 ballPos = ball.getPosByVel(0);
-		DrawableCircle dCircleStop = new DrawableCircle(ballPos, Geometry.getBallRadius() + 5, Color.red);
-		shapes.add(dCircleStop);
+		if (!ballPos.equals(ball.getPos(), 1))
+		{
+			DrawableCircle dCircleStop = new DrawableCircle(ballPos, Geometry.getBallRadius() + 5, Color.red);
+			shapes.add(dCircleStop);
+		}
 	}
 	
 }
