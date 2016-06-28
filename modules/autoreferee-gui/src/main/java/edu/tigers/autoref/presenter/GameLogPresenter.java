@@ -29,9 +29,9 @@ import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
-import edu.tigers.sumatra.panel.EnumCheckBoxPanel;
-import edu.tigers.sumatra.panel.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 

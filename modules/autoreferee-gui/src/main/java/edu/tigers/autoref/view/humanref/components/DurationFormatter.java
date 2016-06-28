@@ -23,16 +23,20 @@ import edu.tigers.autoref.view.generic.JFormatLabel.LabelFormatter;
 public class DurationFormatter implements LabelFormatter<Duration>
 {
 	
-	private Duration							lowValue;
+	private final Duration					lowValue;
+	private final Color						defaultColor;
+	
 	private static final DecimalFormat	format	= new DecimalFormat("00");
 	
 	
 	/**
 	 * @param lowValue
+	 * @param defaultColor
 	 */
-	public DurationFormatter(final Duration lowValue)
+	public DurationFormatter(final Duration lowValue, final Color defaultColor)
 	{
 		this.lowValue = lowValue;
+		this.defaultColor = defaultColor;
 	}
 	
 	
@@ -61,7 +65,7 @@ public class DurationFormatter implements LabelFormatter<Duration>
 		{
 			return Color.RED;
 		}
-		return Color.BLACK;
+		return defaultColor;
 	}
 	
 	

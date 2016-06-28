@@ -6,7 +6,7 @@
  * Author(s): "Lukas Magel"
  * *********************************************************
  */
-package edu.tigers.sumatra.panel;
+package edu.tigers.sumatra.components;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

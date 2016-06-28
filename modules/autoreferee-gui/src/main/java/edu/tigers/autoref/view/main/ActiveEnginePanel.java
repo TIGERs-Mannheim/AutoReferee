@@ -15,8 +15,8 @@ import javax.swing.JLabel;
 import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.main.ActiveEnginePanel.IActiveEnginePanelObserver;
 import edu.tigers.autoreferee.engine.FollowUpAction;
+import edu.tigers.sumatra.components.BasePanel;
 import edu.tigers.sumatra.math.IVector2;
-import edu.tigers.sumatra.panel.BasePanel;
 
 
 /**

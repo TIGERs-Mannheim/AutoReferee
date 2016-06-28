@@ -18,8 +18,8 @@ import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.util.AutoRefImageRegistry;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
+import edu.tigers.sumatra.components.JImagePanel;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.panel.JImagePanel;
 
 
 /**

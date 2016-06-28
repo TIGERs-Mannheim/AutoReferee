@@ -78,14 +78,16 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
  */
 public class StopState extends AbstractAutoRefState
 {
-	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state")
-	private static long	STOP_WAIT_TIME_MS					= 2_000; // ms
-																					
-	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly")
-	private static long	READY_WAIT_TIME_MS				= 3_000;
+	private static final Color	PLACEMENT_CIRCLE_COLOR			= Color.BLUE;
 	
-	private Long			readyTime;
-	private boolean		simulationPlacementAttempted	= false;
+	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state")
+	private static long			STOP_WAIT_TIME_MS					= 2_000;		// ms
+																									
+	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly")
+	private static long			READY_WAIT_TIME_MS				= 3_000;
+	
+	private Long					readyTime;
+	private boolean				simulationPlacementAttempted	= false;
 	
 	
 	static
@@ -202,10 +204,14 @@ public class StopState extends AbstractAutoRefState
 	{
 		double radius = AutoRefConfig.getBallPlacementAccuracy();
 		
-		shapes.add(new DrawableCircle(kickPos, radius, Color.BLUE));
+		shapes.add(new DrawableCircle(kickPos, radius, PLACEMENT_CIRCLE_COLOR));
+		shapes.add(new DrawableCircle(kickPos, radius * 2, PLACEMENT_CIRCLE_COLOR));
 		shapes.add(new DrawablePoint(kickPos, Color.BLACK));
-		IVector2 textPos = kickPos.addNew(new Vector2(radius, radius));
-		shapes.add(new DrawableText(textPos, "New Ball Pos", Color.BLACK));
+		
+		IVector2 textPos = kickPos.addNew(new Vector2(radius * 2, radius * 2));
+		DrawableText placementText = new DrawableText(textPos, "New Ball Pos", Color.BLACK);
+		placementText.setFontSize(placementText.getFontSize() * 2);
+		shapes.add(placementText);
 	}
 	
 	

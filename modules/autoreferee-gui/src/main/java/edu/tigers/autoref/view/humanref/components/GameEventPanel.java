@@ -18,9 +18,9 @@ import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.util.AutoRefImageRegistry;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.components.BasePanel;
+import edu.tigers.sumatra.components.JImagePanel;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.panel.BasePanel;
-import edu.tigers.sumatra.panel.JImagePanel;
 
 
 /**

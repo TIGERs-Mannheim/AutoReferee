@@ -8,6 +8,7 @@
  */
 package edu.tigers.autoref.view.humanref.components;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ComponentAdapter;
@@ -22,8 +23,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import edu.tigers.autoref.util.AutoRefImageRegistry;
+import edu.tigers.sumatra.components.JImagePanel;
+import edu.tigers.sumatra.components.ResizingLabel;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.panel.JImagePanel;
 
 
 /**
@@ -39,8 +41,8 @@ public class ScorePanel extends JPanel
 	
 	private JImagePanel					leftImagePanel		= new JImagePanel();
 	private JImagePanel					rightImagePanel	= new JImagePanel();
-	private JLabel							leftTeamLabel		= new JLabel();
-	private JLabel							rightTeamLabel		= new JLabel();
+	private ResizingLabel				leftTeamLabel		= new ResizingLabel();
+	private ResizingLabel				rightTeamLabel		= new ResizingLabel();
 	private JLabel							scoreLabel			= new JLabel();
 	
 	private Map<ETeamColor, String>	teamNames			= new EnumMap<>(ETeamColor.class);
@@ -79,8 +81,10 @@ public class ScorePanel extends JPanel
 	
 	private void setupUI(final Font teamFont, final Font scoreFont)
 	{
-		leftTeamLabel.setFont(teamFont);
-		rightTeamLabel.setFont(teamFont);
+		leftTeamLabel.setTargetFont(teamFont);
+		leftTeamLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
+		rightTeamLabel.setTargetFont(teamFont);
+		rightTeamLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
 		scoreLabel.setFont(scoreFont);
 		
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));

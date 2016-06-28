@@ -20,7 +20,7 @@ import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
-import edu.tigers.sumatra.panel.BasePanel;
+import edu.tigers.sumatra.components.BasePanel;
 
 
 /**

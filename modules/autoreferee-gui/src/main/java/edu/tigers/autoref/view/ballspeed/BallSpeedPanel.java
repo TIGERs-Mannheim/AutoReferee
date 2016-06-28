@@ -22,7 +22,7 @@ import javax.swing.SwingConstants;
 import org.apache.commons.lang.NotImplementedException;
 
 import edu.tigers.autoref.view.generic.FixedTimeRangeChartPanel;
-import edu.tigers.sumatra.panel.BasePanel;
+import edu.tigers.sumatra.components.BasePanel;
 import edu.tigers.sumatra.views.ISumatraView;
 
 

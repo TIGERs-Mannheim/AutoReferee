@@ -79,6 +79,7 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 		fieldPanel = new FieldPanel(FIELD_PANEL_WIDTH, new BasicStroke(STROKE_WIDTH));
 		fieldPanel.addObserver(new FieldPanelObserver());
 		fieldPanel.onOptionChanged(EVisualizerOptions.PAINT_COORD, false);
+		fieldPanel.onOptionChanged(EVisualizerOptions.FANCY, true);
 		setLayout(isVertical);
 	}
 	

@@ -8,7 +8,6 @@
  */
 package edu.tigers.autoref.view.humanref;
 
-import java.awt.BorderLayout;
 import java.time.Duration;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class BaseHumanRefPanel extends AHumanRefPanel
 	protected void setupGUI()
 	{
 		timePanel = new TimePanel(regularFont);
-		goalPanel = new ScorePanel(smallFont, regularFont);
+		goalPanel = new ScorePanel(smallFont, headerFont);
 		statePanel = new GameStatePanel(headerFont);
 		
 		super.setupGUI();
@@ -61,9 +60,9 @@ public class BaseHumanRefPanel extends AHumanRefPanel
 	@Override
 	protected void fillVerticalLayout()
 	{
-		JPanel timeAndGoalsPanel = new JPanel(new BorderLayout());
-		timeAndGoalsPanel.add(timePanel, BorderLayout.WEST);
-		timeAndGoalsPanel.add(goalPanel, BorderLayout.EAST);
+		JPanel timeAndGoalsPanel = new JPanel(new MigLayout("fillx", "[][]"));
+		timeAndGoalsPanel.add(timePanel, "alignx left");
+		timeAndGoalsPanel.add(goalPanel, "alignx right");
 		
 		JPanel headerPanel = getHeaderPanel();
 		headerPanel.setLayout(new MigLayout("fillx, ins 5", "[fill]"));

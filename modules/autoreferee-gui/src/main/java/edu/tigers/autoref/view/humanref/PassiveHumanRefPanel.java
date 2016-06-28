@@ -180,7 +180,7 @@ public class PassiveHumanRefPanel extends BaseHumanRefPanel
 				
 				if (height > 0)
 				{
-					LinearGradientPaint paint = new LinearGradientPaint(x, y, x, y + height, new float[] { 0.0f, 1.0f },
+					LinearGradientPaint paint = new LinearGradientPaint(x, y, x, y + height, new float[] { 0.0f, 0.7f },
 							new Color[] { transparent, opaque });
 					g2.setPaint(paint);
 					g2.fillRect(x, y, width, height);

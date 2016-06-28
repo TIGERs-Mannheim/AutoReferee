@@ -39,9 +39,9 @@ import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetecto
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
-import edu.tigers.sumatra.panel.EnumCheckBoxPanel;
-import edu.tigers.sumatra.panel.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 

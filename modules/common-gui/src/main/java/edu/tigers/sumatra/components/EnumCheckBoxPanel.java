@@ -6,7 +6,7 @@
  * Author(s): "Lukas Magel"
  * *********************************************************
  */
-package edu.tigers.sumatra.panel;
+package edu.tigers.sumatra.components;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +22,7 @@ import javax.swing.JCheckBox;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.sumatra.panel.EnumCheckBoxPanel.IEnumPanelObserver;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
 
 
 /**
