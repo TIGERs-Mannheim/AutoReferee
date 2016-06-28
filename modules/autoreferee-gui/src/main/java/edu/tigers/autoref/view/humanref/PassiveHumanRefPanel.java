@@ -123,13 +123,13 @@ public class PassiveHumanRefPanel extends BaseHumanRefPanel
 	
 	
 	/**
-	 * @param transparency [0,255]
+	 * @param transparency [0,1]
 	 */
-	public void setTransparency(final List<Integer> transparency)
+	public void setTransparency(final List<Float> transparency)
 	{
 		for (int i = 0; i < Math.min(transparency.size(), eventPanels.size()); i++)
 		{
-			eventPanels.get(i).setAlphaValue(transparency.get(i));
+			eventPanels.get(i).setTransparencyValue(transparency.get(i));
 		}
 	}
 	

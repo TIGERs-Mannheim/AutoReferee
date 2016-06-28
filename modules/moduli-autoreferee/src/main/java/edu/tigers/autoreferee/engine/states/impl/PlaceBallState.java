@@ -131,7 +131,7 @@ public class PlaceBallState extends AbstractAutoRefState
 	{
 		TrackedBall ball = frame.getBall();
 		boolean botDistanceCorrect = AutoRefMath.botStopDistanceIsCorrect(frame);
-		boolean ballPlaced = AutoRefMath.ballIsPlaced(ball, targetPos);
+		boolean ballPlaced = AutoRefMath.ballIsPlaced(ball, targetPos, AutoRefConfig.getRobotBallPlacementAccuracy());
 		boolean ballStationary = AutoRefMath.ballIsStationary(ball);
 		
 		

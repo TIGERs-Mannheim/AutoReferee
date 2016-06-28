@@ -97,7 +97,11 @@ public class ResizingLabel extends JLabel
 	{
 		String text = getText();
 		FontMetrics metrics = getFontMetrics(font);
-		int width = metrics.stringWidth(text);
+		int width = 0;
+		if (text != null)
+		{
+			width = metrics.stringWidth(text);
+		}
 		int height = metrics.getHeight();
 		return new Dimension(width, height);
 	}
@@ -110,7 +114,11 @@ public class ResizingLabel extends JLabel
 		int targetWidth = size.width;
 		int targetHeight = size.height;
 		
-		int textWidth = metrics.stringWidth(text);
+		int textWidth = 0;
+		if (text != null)
+		{
+			textWidth = metrics.stringWidth(text);
+		}
 		int textHeight = metrics.getHeight();
 		
 		float ratio = Math.min((float) targetWidth / textWidth, (float) targetHeight / textHeight);

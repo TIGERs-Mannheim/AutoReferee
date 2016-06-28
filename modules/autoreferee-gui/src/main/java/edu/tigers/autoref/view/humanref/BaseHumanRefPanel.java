@@ -60,7 +60,7 @@ public class BaseHumanRefPanel extends AHumanRefPanel
 	@Override
 	protected void fillVerticalLayout()
 	{
-		JPanel timeAndGoalsPanel = new JPanel(new MigLayout("fillx", "[][]"));
+		JPanel timeAndGoalsPanel = new JPanel(new MigLayout("fillx", "[]20[]"));
 		timeAndGoalsPanel.add(timePanel, "alignx left");
 		timeAndGoalsPanel.add(goalPanel, "alignx right");
 		

@@ -34,7 +34,10 @@ public class AutoRefConfig
 	private static ETeamColor	ballPlacementPreference			= ETeamColor.NEUTRAL;
 	
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed")
-	private static double		ballPlacementAccuracy			= 100;
+	private static double		ballPlacementAccuracy			= 200;
+	
+	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed by the robots")
+	private static double		robotBallPlacementAccuracy		= 100;
 	
 	@Configurable(comment = "[m/s] The maximum allowed ball velocity ingame")
 	private static double		maxBallVelocity					= 8.5d;
@@ -106,6 +109,15 @@ public class AutoRefConfig
 	public static double getBallPlacementAccuracy()
 	{
 		return ballPlacementAccuracy;
+	}
+	
+	
+	/**
+	 * @return
+	 */
+	public static double getRobotBallPlacementAccuracy()
+	{
+		return robotBallPlacementAccuracy;
 	}
 	
 	

@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -48,7 +49,11 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Configurable(comment = "[mm] Area behind the goal that is still considered to be part of the goal for better goal detection")
 	private static double		goalDepthMargin				= 100;
 	
+	@Configurable(comment = "[ms] Cooldown before an event is reported again")
+	private static long			cooldownTime					= 2_000;
+	
 	private boolean				ballOutsideField				= false;
+	private long					ballLeftFieldStamp			= 0;
 	
 	static
 	{
@@ -75,6 +80,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
+		long curTimestamp = frame.getTimestamp();
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		if (Geometry.getField().isPointInShape(ballPos) || ballInsideGoal(ballPos))
 		{
@@ -83,9 +89,12 @@ public class BallLeftFieldDetector extends AGameEventDetector
 			return Optional.empty();
 		}
 		
-		if (ballOutsideField == false)
+		boolean cooldownElapsed = (curTimestamp - ballLeftFieldStamp) > TimeUnit.MILLISECONDS.toNanos(cooldownTime);
+		if ((ballOutsideField == false) && cooldownElapsed)
 		{
 			ballOutsideField = true;
+			ballLeftFieldStamp = curTimestamp;
+			
 			IVector2 intersection = frame.getBallLeftFieldPos();
 			if (intersection == null)
 			{
@@ -199,6 +208,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	public void reset()
 	{
 		ballOutsideField = false;
+		ballLeftFieldStamp = 0;
 	}
 	
 	

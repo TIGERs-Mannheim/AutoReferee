@@ -137,4 +137,16 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 		
 		return filteredShapes;
 	}
+	
+	
+	@Override
+	public void start()
+	{
+	}
+	
+	
+	@Override
+	public void stop()
+	{
+	}
 }

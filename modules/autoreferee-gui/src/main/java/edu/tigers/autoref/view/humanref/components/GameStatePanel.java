@@ -105,45 +105,39 @@ public class GameStatePanel extends JPanel
 		switch (state)
 		{
 			case BALL_PLACEMENT_BLUE:
-				return "Ball Placement by ";
 			case BALL_PLACEMENT_YELLOW:
 				return "Ball Placement by ";
 			case BREAK:
 				return "Break";
 			case DIRECT_KICK_BLUE:
-				return "Direct Kick for ";
 			case DIRECT_KICK_YELLOW:
 				return "Direct Kick for ";
 			case HALTED:
 				return "Game halted";
 			case INDIRECT_KICK_BLUE:
-				return "Indirect Kick for ";
 			case INDIRECT_KICK_YELLOW:
 				return "Indirect Kick for ";
 			case PREPARE_KICKOFF_BLUE:
-			case KICKOFF_BLUE:
-				return "Kickoff for ";
 			case PREPARE_KICKOFF_YELLOW:
+				return "Prep. Kickoff for ";
+			case KICKOFF_BLUE:
 			case KICKOFF_YELLOW:
 				return "Kickoff for ";
 			case PENALTY_BLUE:
-				return "Penalty Kick for ";
 			case PENALTY_YELLOW:
 				return "Penalty Kick for ";
 			case POST_GAME:
 				return "Game over";
 			case PREPARE_PENALTY_BLUE:
-				return "Penalty Kick ";
 			case PREPARE_PENALTY_YELLOW:
-				return "Penalty Kick ";
+				return "Prep. Penalty Kick ";
 			case RUNNING:
 				return "Game running";
 			case STOPPED:
 				return "Game stopped";
 			case TIMEOUT_BLUE:
-				return "Timeout for Blue";
 			case TIMEOUT_YELLOW:
-				return "Timeout for Yellow";
+				return "Timeout for ";
 			case UNKNOWN:
 				return "Game state undetermined";
 			default:

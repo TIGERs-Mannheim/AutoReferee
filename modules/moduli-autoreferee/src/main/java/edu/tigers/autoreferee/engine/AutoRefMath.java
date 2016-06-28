@@ -204,7 +204,13 @@ public class AutoRefMath
 	}
 	
 	
-	private static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos, final double accuracy)
+	/**
+	 * @param ball
+	 * @param destPos
+	 * @param accuracy
+	 * @return
+	 */
+	public static boolean ballIsPlaced(final TrackedBall ball, final IVector2 destPos, final double accuracy)
 	{
 		double dist = GeoMath.distancePP(ball.getPos(), destPos);
 		if ((dist < accuracy) && ballIsStationary(ball))

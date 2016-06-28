@@ -20,6 +20,7 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.components.BasePanel;
 import edu.tigers.sumatra.components.JImagePanel;
+import edu.tigers.sumatra.components.ResizingLabel;
 import edu.tigers.sumatra.ids.BotID;
 
 
@@ -33,7 +34,7 @@ public class GameEventPanel extends BasePanel<Void>
 	private static final long	serialVersionUID	= 3329621495568274433L;
 	
 	private JImagePanel			iconPanel			= new JImagePanel();
-	private JLabel					causeLabel			= new JLabel();
+	private ResizingLabel		causeLabel			= new ResizingLabel();
 	private JLabel					teamPrefixLabel	= new JLabel();
 	private JTeamLabel			teamLabel			= new JTeamLabel();
 	
@@ -53,7 +54,7 @@ public class GameEventPanel extends BasePanel<Void>
 	 */
 	private void setupGUI(final Font headerFont, final Font font)
 	{
-		causeLabel.setFont(headerFont);
+		causeLabel.setTargetFont(headerFont);
 		causeLabel.setText("");
 		
 		teamPrefixLabel.setFont(font);
@@ -66,7 +67,7 @@ public class GameEventPanel extends BasePanel<Void>
 		teamLabel.setFont(font);
 		teamLabel.setText("");
 		
-		setLayout(new MigLayout("align left", "[]10[]"));
+		setLayout(new MigLayout("align left", "[shrinkprio 100]10[shrinkprio 200]"));
 		add(iconPanel, "spany 2, aligny top");
 		add(causeLabel, "wrap");
 		add(teamPrefixLabel, "skip, span, split 2");

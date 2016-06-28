@@ -30,10 +30,9 @@ public abstract class BasePanel<T> extends JPanel
 	
 	/**  */
 	private static final long	serialVersionUID	= 1L;
+	private static final float	TRANSPARENCY_MAX	= 1.0f;
 	
-	private static final int	ALPHA_MAX			= 255;
-	
-	private int						alpha					= ALPHA_MAX;
+	private float					transparency		= 0.0f;
 	private List<T>				observer				= new ArrayList<>();
 	
 	
@@ -68,31 +67,33 @@ public abstract class BasePanel<T> extends JPanel
 	
 	
 	/**
-	 * @param value [0,255]
+	 * @param value [0,1]
 	 */
-	public void setAlphaValue(final int value)
+	public void setTransparencyValue(final float value)
 	{
-		alpha = Math.min(ALPHA_MAX, Math.max(0, alpha));
+		transparency = Math.min(TRANSPARENCY_MAX, Math.max(0.0f, value));
+		repaint();
 	}
 	
 	
 	/**
-	 * @return [0,255]
+	 * @return [0,1]
 	 */
-	public float getAlphaValue()
+	public float getTransparencyValue()
 	{
-		return alpha;
+		return transparency;
 	}
 	
 	
 	@Override
 	public void paint(final Graphics g)
 	{
-		if ((alpha < ALPHA_MAX) && (g instanceof Graphics2D))
+		if ((transparency > 0.001f) && (g instanceof Graphics2D))
 		{
 			Graphics2D g2 = (Graphics2D) g;
-			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) alpha / ALPHA_MAX));
 			
+			float alpha = (TRANSPARENCY_MAX - transparency) / TRANSPARENCY_MAX;
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 		}
 		super.paint(g);
 	}

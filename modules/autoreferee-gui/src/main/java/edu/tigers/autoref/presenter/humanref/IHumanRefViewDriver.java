@@ -40,4 +40,16 @@ public interface IHumanRefViewDriver
 	 * 
 	 */
 	public void paintField();
+	
+	
+	/**
+	 * 
+	 */
+	public void start();
+	
+	
+	/**
+	 * 
+	 */
+	public void stop();
 }

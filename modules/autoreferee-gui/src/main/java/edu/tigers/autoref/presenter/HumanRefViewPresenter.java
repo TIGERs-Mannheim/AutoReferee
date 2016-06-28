@@ -191,14 +191,14 @@ public class HumanRefViewPresenter implements ISumatraViewPresenter, IAutoRefSta
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		driver.setNewWorldFrame(wFrameWrapper);
+		EventQueue.invokeLater(() -> driver.setNewWorldFrame(wFrameWrapper));
 	}
 	
 	
 	@Override
 	public void onNewAutoRefFrame(final IAutoRefFrame frame)
 	{
-		driver.setNewRefFrame(frame);
+		EventQueue.invokeLater(() -> driver.setNewRefFrame(frame));
 	}
 	
 	
@@ -218,13 +218,14 @@ public class HumanRefViewPresenter implements ISumatraViewPresenter, IAutoRefSta
 	@Override
 	public void onNewEntry(final int id, final GameLogEntry entry)
 	{
-		driver.setNewGameLogEntry(entry);
+		EventQueue.invokeLater(() -> driver.setNewGameLogEntry(entry));
 	}
 	
 	
 	private void setPanelType(final PanelType type)
 	{
 		BaseHumanRefPanel panel = null;
+		driver.stop();
 		switch (type)
 		{
 			case ACTIVE:
@@ -252,6 +253,8 @@ public class HumanRefViewPresenter implements ISumatraViewPresenter, IAutoRefSta
 		}
 		mainPanel.removeAll();
 		mainPanel.add(panel, BorderLayout.CENTER);
+		
+		driver.start();
 	}
 	
 	private enum PanelType
