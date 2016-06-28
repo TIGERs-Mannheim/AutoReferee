@@ -47,7 +47,9 @@ public class TimePanel extends JPanel
 		stageLabel.setAlignmentX(SwingConstants.CENTER);
 		stageLabel.setText("No Stage");
 		
-		timeLabel = new JFormatLabel<>(new DurationFormatter(Duration.ofSeconds(30), timeLabel.getForeground()));
+		timeLabel = new JFormatLabel<>(null);
+		timeLabel.setFormatter(new DurationFormatter(Duration.ofSeconds(30), timeLabel.getForeground()));
+		
 		timeLabel.setAlignmentX(SwingConstants.CENTER);
 		timeLabel.setText("00:00");
 		

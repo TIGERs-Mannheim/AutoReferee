@@ -61,6 +61,24 @@ public class JFormatLabel<T> extends JLabel
 		return value;
 	}
 	
+	
+	/**
+	 * @return
+	 */
+	public LabelFormatter<T> getFormatter()
+	{
+		return formatter;
+	}
+	
+	
+	/**
+	 * @param formatter
+	 */
+	public void setFormatter(final LabelFormatter<T> formatter)
+	{
+		this.formatter = formatter;
+	}
+	
 	/**
 	 * @author "Lukas Magel"
 	 * @param <T>
