@@ -29,14 +29,17 @@ public class ResizingLabel extends JLabel
 	private static final float	MIN_FONT_SIZE		= 3.0f;
 	private static final float	MAX_FONT_SIZE		= 100.0f;
 	
+	private final boolean		forceTargetHeight;
+	
 	private Font					targetFont;
 	
 	
 	/**
-	 * 
+	 * @param forceTargetHeight If set to true the label does not scale down if there is not enough vertical space
 	 */
-	public ResizingLabel()
+	public ResizingLabel(final boolean forceTargetHeight)
 	{
+		this.forceTargetHeight = forceTargetHeight;
 		targetFont = getFont();
 		addComponentListener(new ResizeListener());
 	}
@@ -67,7 +70,7 @@ public class ResizingLabel extends JLabel
 		{
 			return super.getMinimumSize();
 		}
-		return getSize(getTargetFont().deriveFont(MIN_FONT_SIZE));
+		return getSizeRespectForcedHeight(getTargetFont().deriveFont(MIN_FONT_SIZE));
 	}
 	
 	
@@ -78,7 +81,7 @@ public class ResizingLabel extends JLabel
 		{
 			return super.getPreferredSize();
 		}
-		return getSize(getTargetFont());
+		return getSizeRespectForcedHeight(getTargetFont());
 	}
 	
 	
@@ -89,7 +92,7 @@ public class ResizingLabel extends JLabel
 		{
 			return super.getMaximumSize();
 		}
-		return getSize(getTargetFont().deriveFont(MAX_FONT_SIZE));
+		return getSizeRespectForcedHeight(getTargetFont().deriveFont(MAX_FONT_SIZE));
 	}
 	
 	
@@ -104,6 +107,24 @@ public class ResizingLabel extends JLabel
 		}
 		int height = metrics.getHeight();
 		return new Dimension(width, height);
+	}
+	
+	
+	private Dimension getSizeRespectForcedHeight(final Font font)
+	{
+		Dimension size = getSize(font);
+		if (forceTargetHeight)
+		{
+			size.height = getTargetFontHeight();
+		}
+		return size;
+	}
+	
+	
+	private int getTargetFontHeight()
+	{
+		FontMetrics metrics = getFontMetrics(targetFont);
+		return metrics.getHeight();
 	}
 	
 	

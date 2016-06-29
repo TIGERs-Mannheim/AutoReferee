@@ -41,8 +41,8 @@ public class ScorePanel extends JPanel
 	
 	private JImagePanel					leftImagePanel		= new JImagePanel();
 	private JImagePanel					rightImagePanel	= new JImagePanel();
-	private ResizingLabel				leftTeamLabel		= new ResizingLabel();
-	private ResizingLabel				rightTeamLabel		= new ResizingLabel();
+	private ResizingLabel				leftTeamLabel		= new ResizingLabel(false);
+	private ResizingLabel				rightTeamLabel		= new ResizingLabel(false);
 	private JLabel							scoreLabel			= new JLabel();
 	
 	private Map<ETeamColor, String>	teamNames			= new EnumMap<>(ETeamColor.class);

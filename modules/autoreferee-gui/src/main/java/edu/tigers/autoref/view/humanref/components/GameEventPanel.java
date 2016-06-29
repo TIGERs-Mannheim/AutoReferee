@@ -13,12 +13,12 @@ import java.awt.Font;
 import java.util.Optional;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.util.AutoRefImageRegistry;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.sumatra.components.BasePanel;
 import edu.tigers.sumatra.components.JImagePanel;
 import edu.tigers.sumatra.components.ResizingLabel;
 import edu.tigers.sumatra.ids.BotID;
@@ -27,14 +27,14 @@ import edu.tigers.sumatra.ids.BotID;
 /**
  * @author "Lukas Magel"
  */
-public class GameEventPanel extends BasePanel<Void>
+public class GameEventPanel extends JPanel
 {
 	
 	/**  */
 	private static final long	serialVersionUID	= 3329621495568274433L;
 	
 	private JImagePanel			iconPanel			= new JImagePanel();
-	private ResizingLabel		causeLabel			= new ResizingLabel();
+	private ResizingLabel		causeLabel			= new ResizingLabel(true);
 	private JLabel					teamPrefixLabel	= new JLabel();
 	private JTeamLabel			teamLabel			= new JTeamLabel();
 	
@@ -187,11 +187,5 @@ public class GameEventPanel extends BasePanel<Void>
 			default:
 				return "";
 		}
-	}
-	
-	
-	@Override
-	public void setPanelEnabled(final boolean enabled)
-	{
 	}
 }
