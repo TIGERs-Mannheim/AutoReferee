@@ -9,7 +9,10 @@
 package edu.tigers.autoreferee;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -25,6 +28,7 @@ import edu.tigers.autoreferee.engine.calc.BotLastTouchedBallCalc;
 import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
 import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc;
+import edu.tigers.autoreferee.engine.log.appender.GameLogFileAppender;
 import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -58,16 +62,18 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		STOPPED
 	}
 	
-	private final static Logger			log			= Logger.getLogger(AutoRefModule.class);
+	private final static Logger			log				= Logger.getLogger(AutoRefModule.class);
+	private static final Path				LogDirectory	= Paths.get("gamelogs/");
 	/**  */
-	public static String						MODULE_ID	= "autoreferee";
+	public static String						MODULE_ID		= "autoreferee";
 	
-	private List<IRefereeCalc>				calculators	= new ArrayList<>();
-	private List<IAutoRefStateObserver>	refObserver	= new CopyOnWriteArrayList<>();
+	private List<IRefereeCalc>				calculators		= new ArrayList<>();
+	private List<IAutoRefStateObserver>	refObserver		= new CopyOnWriteArrayList<>();
 	
 	private IAutoRefEngine					autoRefEngine;
+	private GameLogFileAppender			logAppender;
 	
-	private AutoRefState						state			= AutoRefState.STOPPED;
+	private AutoRefState						state				= AutoRefState.STOPPED;
 	private IAutoRefFrame					lastFrame;
 	
 	
@@ -171,6 +177,13 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		{
 			setState(AutoRefState.STARTING);
 			
+			Path logName = Paths.get(String.format("%1$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS-%2$tL.log", mode.toString(),
+					new Date()));
+			Path fileName = LogDirectory.resolve(logName);
+			logAppender = new GameLogFileAppender(fileName);
+			logAppender.start();
+			
+			
 			if (mode == AutoRefMode.ACTIVE)
 			{
 				remote = new ThreadedTCPRefboxRemote(AutoRefConfig.getRefboxHostname(), AutoRefConfig.getRefboxPort());
@@ -182,6 +195,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 				autoRefEngine = new PassiveAutoRefEngine();
 			}
 			lastFrame = null;
+			autoRefEngine.getGameLog().addObserver(logAppender);
 			
 			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
 					.getInstance().getModule(AWorldPredictor.MODULE_ID);
@@ -236,6 +250,11 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 		if (autoRefEngine != null)
 		{
 			autoRefEngine.stop();
+		}
+		
+		if (logAppender != null)
+		{
+			logAppender.stop();
 		}
 	}
 	
