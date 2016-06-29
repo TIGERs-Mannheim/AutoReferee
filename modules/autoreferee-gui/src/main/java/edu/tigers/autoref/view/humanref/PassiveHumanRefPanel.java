@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.view.humanref.components.GameEventPanel;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 
@@ -51,7 +51,7 @@ public class PassiveHumanRefPanel extends BaseHumanRefPanel
 	protected void setupGUI()
 	{
 		containerPanel = new JPanel();
-		containerPanel.setLayout(new BoxLayout(containerPanel, BoxLayout.PAGE_AXIS));
+		containerPanel.setLayout(new MigLayout("fillx, wrap 1", "[fill]", ""));
 		
 		super.setupGUI();
 	}
