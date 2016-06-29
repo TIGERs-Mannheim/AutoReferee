@@ -72,18 +72,12 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 	
 	
 	/**
-	 * 
+	 * @throws IOException
 	 */
-	public void start()
+	public void start() throws IOException
 	{
-		try
-		{
-			writer = Files.newBufferedWriter(targetPath);
-			thread.start();
-		} catch (IOException e)
-		{
-			log.error("", e);
-		}
+		writer = Files.newBufferedWriter(targetPath);
+		thread.start();
 	}
 	
 	
