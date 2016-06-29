@@ -44,6 +44,8 @@ public class GameLogEntry
 	private final ELogEntryType		type;
 	/** frame timestamp in nanoseconds */
 	private final long					timestamp;
+	/** time of the game this entry was created at */
+	private final GameTime				gameTime;
 	/** The time instant this entry was created in */
 	private final Instant				instant;
 	/** in nanoseconds */
@@ -69,13 +71,14 @@ public class GameLogEntry
 	 * @param followUpAction
 	 * @param command
 	 */
-	protected GameLogEntry(final long timestamp, final long timeSinceStart, final Instant instant,
-			final ELogEntryType type, final EGameStateNeutral gamestate, final IGameEvent gameEvent,
-			final boolean acceptedByEngine, final RefereeMsg refereeMsg, final FollowUpAction followUpAction,
-			final RefCommand command)
+	protected GameLogEntry(final long timestamp, final GameTime gameTime, final long timeSinceStart,
+			final Instant instant, final ELogEntryType type, final EGameStateNeutral gamestate,
+			final IGameEvent gameEvent, final boolean acceptedByEngine, final RefereeMsg refereeMsg,
+			final FollowUpAction followUpAction, final RefCommand command)
 	{
 		this.type = type;
 		this.timeSinceStart = timeSinceStart;
+		this.gameTime = gameTime;
 		this.timestamp = timestamp;
 		this.instant = instant;
 		
@@ -106,6 +109,15 @@ public class GameLogEntry
 	public long getTimestamp()
 	{
 		return timestamp;
+	}
+	
+	
+	/**
+	 * @return the gameTime until the end of the stage
+	 */
+	public GameTime getGameTime()
+	{
+		return gameTime;
 	}
 	
 	

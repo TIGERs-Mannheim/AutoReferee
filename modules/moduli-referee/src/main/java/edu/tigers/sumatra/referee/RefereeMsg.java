@@ -39,6 +39,7 @@ public class RefereeMsg
 	/** in microseconds */
 	private final long			packetTimestamp;
 	private final Stage			stage;
+	/** microseconds left in the stage */
 	private final long			stageTimeLeft;
 	private final TeamInfo		teamInfoYellow;
 	private final TeamInfo		teamInfoBlue;
@@ -183,7 +184,9 @@ public class RefereeMsg
 	
 	
 	/**
-	 * @return
+	 * The number of microseconds left in the current stage ({@link #getStage()}
+	 * 
+	 * @return microseconds left in the stage
 	 */
 	public final long getStageTimeLeft()
 	{

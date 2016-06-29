@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -25,6 +26,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLog.IGameLogObserver;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogFormatter;
+import edu.tigers.autoreferee.engine.log.GameTime;
 
 
 /**
@@ -147,8 +149,10 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 	private String formatEntry(final GameLogEntry entry)
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append(formatInstant(entry.getInstant()));
 		
+		builder.append(formatGameTime(entry.getGameTime()));
+		builder.append(" | ");
+		builder.append(formatInstant(entry.getInstant()));
 		builder.append(" | ");
 		
 		switch (entry.getType())
@@ -204,6 +208,35 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 		builder.append(sFormat.format(date.getSecond()));
 		builder.append(":");
 		builder.append(msFormat.format(date.getNano() / 1_000_000));
+		
+		return builder.toString();
+	}
+	
+	
+	private String formatGameTime(final GameTime gameTime)
+	{
+		long micros = gameTime.getMicrosLeft();
+		
+		StringBuilder builder = new StringBuilder();
+		builder.append(gameTime.getStage());
+		builder.append(" ");
+		
+		if (micros < 0)
+		{
+			builder.append("-");
+			micros = Math.abs(micros);
+		}
+		
+		int minutes = (int) TimeUnit.MICROSECONDS.toMinutes(micros);
+		int seconds = (int) TimeUnit.MICROSECONDS.toSeconds(micros) % 60;
+		int ms = (int) TimeUnit.MICROSECONDS.toMillis(micros) % 1_000;
+		
+		
+		builder.append(minFormat.format(minutes));
+		builder.append(":");
+		builder.append(sFormat.format(seconds));
+		builder.append(":");
+		builder.append(msFormat.format(ms));
 		
 		return builder.toString();
 	}

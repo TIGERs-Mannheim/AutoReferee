@@ -26,6 +26,8 @@ public class GameLogEntryBuilder
 	private ELogEntryType		type;
 	/** frame timestamp in nanoseconds */
 	private Long					timestamp;
+	/** Game time left in the stage when the event was created */
+	private GameTime				gameTime;
 	/** The time instant this entry was created in */
 	private Instant				instant;
 	/** in nanoseconds */
@@ -52,6 +54,15 @@ public class GameLogEntryBuilder
 	public void setTimestamp(final long timestamp)
 	{
 		this.timestamp = timestamp;
+	}
+	
+	
+	/**
+	 * @param gameTime
+	 */
+	public void setGameTime(final GameTime gameTime)
+	{
+		this.gameTime = gameTime;
 	}
 	
 	
@@ -130,12 +141,12 @@ public class GameLogEntryBuilder
 	 */
 	public GameLogEntry toEntry()
 	{
-		if ((type == null) || (timestamp == null) || (timeSinceStart == null) || (instant == null))
+		if ((type == null) || (timestamp == null) || (gameTime == null) || (timeSinceStart == null) || (instant == null))
 		{
 			throw new NullPointerException("Not all required fields have been set");
 		}
 		
-		return new GameLogEntry(timestamp, timeSinceStart, instant, type, gamestate, gameEvent, acceptedByEngine,
-				refereeMsg, followUpAction, command);
+		return new GameLogEntry(timestamp, gameTime, timeSinceStart, instant, type, gamestate, gameEvent,
+				acceptedByEngine, refereeMsg, followUpAction, command);
 	}
 }

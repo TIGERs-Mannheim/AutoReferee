@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +19,7 @@ import edu.tigers.autoreferee.engine.events.GameEventEngine;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.log.GameLog;
+import edu.tigers.autoreferee.engine.log.GameTime;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.referee.RefereeMsg;
@@ -85,6 +87,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 			onFirstFrame(frame);
 		}
 		gameLog.setCurrentTimestamp(frame.getTimestamp());
+		gameLog.setCurrentGameTime(calcCurrentGameTime(frame));
 		
 		RefereeMsg curRefMsg = frame.getRefereeMsg();
 		RefereeMsg lastRefMsg = frame.getPreviousFrame().getRefereeMsg();
@@ -132,6 +135,14 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	protected void logGameEvents(final List<IGameEvent> gameEvents)
 	{
 		gameEvents.forEach(event -> gameLog.addEntry(event));
+	}
+	
+	
+	protected GameTime calcCurrentGameTime(final IAutoRefFrame frame)
+	{
+		RefereeMsg refMsg = frame.getRefereeMsg();
+		long diff = TimeUnit.NANOSECONDS.toMicros(frame.getTimestamp() - refMsg.getFrameTimestamp());
+		return GameTime.of(refMsg.getStage(), refMsg.getStageTimeLeft() - diff);
 	}
 	
 	

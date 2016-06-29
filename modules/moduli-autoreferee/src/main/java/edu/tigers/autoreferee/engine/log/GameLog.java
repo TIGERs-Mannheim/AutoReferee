@@ -33,6 +33,7 @@ public class GameLog implements IGameLog
 	
 	private long							startRefTimestamp	= 0;
 	private long							currentTimestamp	= 0;
+	private GameTime						currentGameTime	= GameTime.empty();
 	private List<GameLogEntry>			entries				= new ArrayList<>();
 	private List<IGameLogObserver>	observer				= new CopyOnWriteArrayList<>();
 	
@@ -82,6 +83,17 @@ public class GameLog implements IGameLog
 	}
 	
 	
+	/**
+	 * Set the current game time
+	 * 
+	 * @param time
+	 */
+	public void setCurrentGameTime(final GameTime time)
+	{
+		currentGameTime = time;
+	}
+	
+	
 	private void addEntryToLog(final GameLogEntry entry)
 	{
 		int id;
@@ -99,6 +111,7 @@ public class GameLog implements IGameLog
 	{
 		GameLogEntryBuilder builder = new GameLogEntryBuilder();
 		builder.setTimestamp(currentTimestamp);
+		builder.setGameTime(currentGameTime);
 		builder.setTimeSinceStart(getTimeSinceStart());
 		builder.setInstant(getCurrentInstant());
 		
