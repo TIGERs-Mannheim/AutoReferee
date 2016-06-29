@@ -127,11 +127,11 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 		separator.setForeground(Color.BLACK);
 		
 		JPanel centerPanel = new JPanel();
-		centerPanel.setLayout(new MigLayout("fillx", "[fill]"));
+		centerPanel.setLayout(new MigLayout("fill", "[fill]", "[][][fill]"));
 		
 		centerPanel.add(headerPanel, "wrap");
 		centerPanel.add(separator, "wrap 1%");
-		centerPanel.add(contentPanel, "wrap");
+		centerPanel.add(contentPanel, "pushy");
 		
 		setLayout(new BorderLayout());
 		add(fieldPanel, BorderLayout.WEST);
@@ -143,10 +143,10 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	
 	private void createHorizontalLayout()
 	{
-		setLayout(new MigLayout("fill", "[][fill]"));
-		add(headerPanel, "span, growx");
+		setLayout(new MigLayout("fill", "[][fill]", "[][fill]"));
+		add(headerPanel, "span, growx, wrap");
 		add(fieldPanel);
-		add(contentPanel, "aligny top");
+		add(contentPanel, "pushy");
 		
 		fillHorizontalLayout();
 	}

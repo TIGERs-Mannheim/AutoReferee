@@ -119,6 +119,7 @@ public class PassiveHumanRefPanel extends BaseHumanRefPanel
 		{
 			eventPanels.get(i).setEvent(events.get(i));
 		}
+		repaint();
 	}
 	
 	

@@ -114,6 +114,7 @@ public class JImagePanel extends JPanel
 		originalImage = image;
 		scaledImage = image;
 		scaleDimension = new Dimension();
+		repaint();
 	}
 	
 	
