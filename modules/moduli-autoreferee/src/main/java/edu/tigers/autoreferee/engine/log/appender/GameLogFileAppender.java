@@ -170,8 +170,12 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 				IGameEvent event = entry.getGameEvent();
 				builder.append("New event: ");
 				builder.append(event.toString());
-				builder.append(" | Next action: ");
-				builder.append(GameLogFormatter.formatFollowUp(event.getFollowUpAction()));
+				FollowUpAction action = event.getFollowUpAction();
+				if (action != null)
+				{
+					builder.append(" | Next action: ");
+					builder.append(GameLogFormatter.formatFollowUp(action));
+				}
 				break;
 			case GAME_STATE:
 				builder.append("Game state changed to: ");

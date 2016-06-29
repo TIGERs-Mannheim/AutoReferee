@@ -23,6 +23,7 @@ import javax.swing.table.TableColumn;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
 import edu.tigers.autoreferee.engine.FollowUpAction;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogFormatter;
 import edu.tigers.autoreferee.engine.log.GameTime;
@@ -121,12 +122,13 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 					case REFEREE_MSG:
 						return GameLogFormatter.formatRefMsg(entry.getRefereeMsg());
 					case GAME_EVENT:
+						IGameEvent event = entry.getGameEvent();
 						StringBuilder builder = new StringBuilder();
-						builder.append(entry.getGameEvent().toString());
-						if (entry.getFollowUpAction() != null)
+						builder.append(event.toString());
+						if (event.getFollowUpAction() != null)
 						{
-							builder.append(" | ");
-							builder.append(GameLogFormatter.formatFollowUp(entry.getFollowUpAction()));
+							builder.append(" | Next action: ");
+							builder.append(GameLogFormatter.formatFollowUp(event.getFollowUpAction()));
 						}
 						return builder.toString();
 				}
