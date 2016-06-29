@@ -116,4 +116,11 @@ public interface ITrackedBot extends ITrackedObject
 	 */
 	IBot getBot();
 	
+	
+	/**
+	 * @param t
+	 * @return
+	 */
+	IVector2 getBotKickerPosByTime(double t);
+	
 }

@@ -127,6 +127,14 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	}
 	
 	
+	@Override
+	public IVector2 getBotKickerPosByTime(final double t)
+	{
+		
+		return GeoMath.getBotKickerPos(getPosByTime(t), getAngle(), getCenter2DribblerDist());
+	}
+	
+	
 	/**
 	 * @param t
 	 * @return
@@ -134,12 +142,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public IVector2 getPosByTime(final double t)
 	{
-		if (bot.getCurrentTrajectory().isPresent()
-				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		synchronized (bot)
 		{
-			return bot.getCurrentTrajectory().get().getPositionMM(getTimestamp() + (long) (t * 1e9)).getXYVector();
+			if (bot.getCurrentTrajectory().isPresent()
+					&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+			{
+				return bot.getCurrentTrajectory().get().getPositionMM(getTimestamp() + (long) (t * 1e9)).getXYVector();
+			}
+			return getPos().addNew(getVel().multiplyNew(1000 * t));
 		}
-		return getPos().addNew(getVel().multiplyNew(1000 * t));
 	}
 	
 	
@@ -150,12 +161,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public IVector2 getVelByTime(final double t)
 	{
-		if (bot.getCurrentTrajectory().isPresent()
-				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		synchronized (bot)
 		{
-			return bot.getCurrentTrajectory().get().getVelocity(getTimestamp() + (long) (t * 1e9)).getXYVector();
+			if (bot.getCurrentTrajectory().isPresent()
+					&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+			{
+				return bot.getCurrentTrajectory().get().getVelocity(getTimestamp() + (long) (t * 1e9)).getXYVector();
+			}
+			return getVel();
 		}
-		return getVel();
 	}
 	
 	
@@ -166,12 +180,15 @@ public class TrackedBot extends ATrackedObject implements ITrackedBot
 	@Override
 	public double getAngleByTime(final double t)
 	{
-		if (bot.getCurrentTrajectory().isPresent()
-				&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+		synchronized (bot)
 		{
-			return bot.getCurrentTrajectory().get().getPosition(getTimestamp() + (long) (t * 1e9)).z();
+			if (bot.getCurrentTrajectory().isPresent()
+					&& (bot.getCurrentTrajectory().get().getRemainingTrajectoryTime(getTimestamp()) > 0.1))
+			{
+				return bot.getCurrentTrajectory().get().getPosition(getTimestamp() + (long) (t * 1e9)).z();
+			}
+			return AngleMath.normalizeAngle(getAngle() + (getaVel() * t));
 		}
-		return AngleMath.normalizeAngle(getAngle() + (getaVel() * t));
 	}
 	
 	

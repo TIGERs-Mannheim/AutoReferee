@@ -19,9 +19,9 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	FIELD_BORDERS("Field Borders", "FIELD", true),
 	/**  */
-	COORDINATE_SYSTEM("Coordinate System", "FIELD"),
+	@Deprecated COORDINATE_SYSTEM("Coordinate System", "FIELD"),
 	/**  */
-	REFEREE("Referee", "FIELD"),
+	REFEREE("Referee", "FIELD", true, 1000),
 	/**  */
 	CAM_INTERSECTION("Cam intersection", "VISION"),
 	
@@ -44,6 +44,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	private final String		name;
 	private final String		category;
 	private final boolean	visible;
+	private final int			orderId;
 	
 	
 	/**
@@ -63,6 +64,19 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.name = name;
 		this.category = category;
 		this.visible = visible;
+		orderId = 10 + ordinal();
+	}
+	
+	
+	/**
+	 * 
+	 */
+	private EWpShapesLayer(final String name, final String category, final boolean visible, final int orderId)
+	{
+		this.name = name;
+		this.category = category;
+		this.visible = visible;
+		this.orderId = orderId;
 	}
 	
 	
@@ -99,7 +113,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	@Override
 	public int getOrderId()
 	{
-		return 10 + ordinal();
+		return orderId;
 	}
 	
 	

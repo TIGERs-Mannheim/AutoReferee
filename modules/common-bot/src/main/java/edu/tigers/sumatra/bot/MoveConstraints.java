@@ -169,7 +169,10 @@ public class MoveConstraints
 	 */
 	public void setDefaultVelLimit()
 	{
-		velMax = defConstraints.velMax;
+		if (defConstraints != null)
+		{
+			velMax = defConstraints.velMax;
+		}
 	}
 	
 	
@@ -178,7 +181,10 @@ public class MoveConstraints
 	 */
 	public void setDefaultAccLimit()
 	{
-		accMax = defConstraints.accMax;
+		if (defConstraints != null)
+		{
+			accMax = defConstraints.accMax;
+		}
 	}
 	
 	

@@ -24,7 +24,7 @@ import edu.tigers.sumatra.math.IVector3;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent
+@Persistent(version = 1)
 public class DummyBot implements IBot
 {
 	private boolean					avail2Ai				= false;

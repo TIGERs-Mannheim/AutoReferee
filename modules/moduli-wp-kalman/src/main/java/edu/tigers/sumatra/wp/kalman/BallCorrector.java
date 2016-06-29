@@ -39,18 +39,19 @@ public class BallCorrector
 	
 	
 	@SuppressWarnings("unused")
-	private static final Logger	log						= Logger.getLogger(BallCorrector.class.getName());
-																		
+	private static final Logger		log						= Logger.getLogger(BallCorrector.class.getName());
+	
 	@Configurable(comment = "correct flying balls")
-	private static boolean			correctFlyingBalls	= false;
-	private static final double	MAX_DIST_BALL			= 50;
-	private static final double	MAX_ORIENTATION_DIFF	= 0.1;
-																		
-	private final Altigraph			altigraph;
-											
-	private CamBall					lastSeenBall			= new CamBall();
-																		
-																		
+	private static boolean				correctFlyingBalls	= false;
+	private static final double		MAX_DIST_BALL			= 50;
+	private static final double		MAX_ORIENTATION_DIFF	= 0.1;
+	
+	private final Altigraph				altigraph;
+	private final FlyingBallFitter	flyingBallFitter;
+	
+	private CamBall						lastSeenBall			= new CamBall();
+	
+	
 	static
 	{
 		ConfigRegistration.registerClass("wp", BallCorrector.class);
@@ -62,6 +63,7 @@ public class BallCorrector
 	public BallCorrector()
 	{
 		altigraph = new Altigraph();
+		flyingBallFitter = new FlyingBallFitter();
 	}
 	
 	
@@ -77,6 +79,10 @@ public class BallCorrector
 	{
 		CamBall ballToUse = findCurrentBall(balls);
 		
+		// currently use only the one selected ball
+		List<CamBall> selectedBall = new ArrayList<CamBall>();
+		selectedBall.add(ballToUse);
+		correctFlyingBalls = true;
 		if (correctFlyingBalls)
 		{
 			// get Data of Ball and Bots
@@ -91,6 +97,11 @@ public class BallCorrector
 				// append new fly
 				// log.trace("kicker zone identified: " + possShooter.getPos() + " " + possShooter.getOrientation());
 				altigraph.addKickerZoneIdentified(possShooter.getPos(), possShooter.getOrientation());
+				
+				flyingBallFitter.onBallCloseToBot(selectedBall);
+			} else
+			{
+				flyingBallFitter.onBallAwayFromBot(selectedBall);
 			}
 			
 			// append the ball to old and new flys

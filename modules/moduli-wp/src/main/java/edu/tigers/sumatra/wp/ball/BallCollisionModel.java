@@ -30,6 +30,25 @@ import edu.tigers.sumatra.wp.data.MotionContext.BotInfo;
  */
 public class BallCollisionModel implements IBallCollisionModel
 {
+	private boolean complexCollision = false;
+	
+	
+	/**
+	 * 
+	 */
+	public BallCollisionModel()
+	{
+	}
+	
+	
+	/**
+	 * @param complexCollision
+	 */
+	public BallCollisionModel(final boolean complexCollision)
+	{
+		this.complexCollision = complexCollision;
+	}
+	
 	
 	/**
 	 * @param state
@@ -42,7 +61,7 @@ public class BallCollisionModel implements IBallCollisionModel
 	public ICollisionState processCollision(final IState state, final IState newState, final double dt,
 			final MotionContext context)
 	{
-		CollisionHandler ch = new CollisionHandler();
+		CollisionHandler ch = new CollisionHandler(complexCollision);
 		
 		addCollisionObjects(ch, context);
 		
@@ -76,7 +95,7 @@ public class BallCollisionModel implements IBallCollisionModel
 	@Override
 	public IVector3 getImpulse(final ICollisionState state, final MotionContext context)
 	{
-		CollisionHandler ch = new CollisionHandler();
+		CollisionHandler ch = new CollisionHandler(complexCollision);
 		
 		addImpulseObjects(ch, context);
 		
@@ -87,7 +106,7 @@ public class BallCollisionModel implements IBallCollisionModel
 	@Override
 	public IVector3 getTorqueAcc(final IState state, final MotionContext context)
 	{
-		CollisionHandler ch = new CollisionHandler();
+		CollisionHandler ch = new CollisionHandler(complexCollision);
 		
 		addTorqueObjects(ch, context);
 		
@@ -99,18 +118,16 @@ public class BallCollisionModel implements IBallCollisionModel
 	{
 		for (BotInfo info : context.getBots().values())
 		{
-			Vector3 kickVel = new Vector3();
 			if (info.getKickSpeed() > 0)
 			{
+				Vector3 kickVel = new Vector3();
+				kickVel.set(new Vector2(info.getPos().z()).scaleTo(info.getKickSpeed()), 0);
 				if (info.isChip())
 				{
 					kickVel.set(2, info.getKickSpeed());
-				} else
-				{
-					kickVel.set(new Vector2(info.getPos().z()).scaleTo(info.getKickSpeed()), 0);
 				}
+				ch.addImpulseObject(new BotKickImpuls(info.getPos(), info.getCenter2DribblerDist(), kickVel));
 			}
-			ch.addImpulseObject(new BotKickImpuls(info.getPos(), info.getCenter2DribblerDist(), kickVel));
 		}
 	}
 	

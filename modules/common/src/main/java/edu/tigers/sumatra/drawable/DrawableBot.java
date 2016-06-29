@@ -8,6 +8,7 @@
  */
 package edu.tigers.sumatra.drawable;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -30,8 +31,8 @@ public class DrawableBot implements IDrawableShape
 {
 	private final DrawableCircle	circle;
 	private final DrawableLine		line;
-											
-											
+	
+	
 	@SuppressWarnings("unused")
 	private DrawableBot()
 	{
@@ -59,6 +60,7 @@ public class DrawableBot implements IDrawableShape
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
+		g.setStroke(new BasicStroke(1));
 		circle.paintShape(g, tool, invert);
 		line.paintShape(g, tool, invert);
 	}

@@ -8,8 +8,8 @@
  */
 package edu.tigers.sumatra.statistics;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -25,7 +25,7 @@ import com.sleepycat.persist.model.Persistent;
 @Persistent
 public class MarkovChain<MappedClass>
 {
-	private Map<MappedClass, Entry>	containedStates	= new ConcurrentHashMap<>();
+	private Map<MappedClass, MarkovChainEntry<MappedClass>>	containedStates	= new HashMap<>();
 	
 	
 	/**
@@ -36,7 +36,7 @@ public class MarkovChain<MappedClass>
 	 */
 	public void increaseCountTransitions(final MappedClass startState, final MappedClass goalState)
 	{
-		Entry entryToIncrease = containedStates.get(startState);
+		MarkovChainEntry<MappedClass> entryToIncrease = containedStates.get(startState);
 		
 		if (entryToIncrease != null)
 		{
@@ -53,7 +53,7 @@ public class MarkovChain<MappedClass>
 			entryToIncrease.transitions++;
 		} else
 		{
-			Entry newEntry = new Entry();
+			MarkovChainEntry<MappedClass> newEntry = new MarkovChainEntry<MappedClass>();
 			
 			newEntry.absoluteTransitions.put(goalState, 1);
 			
@@ -71,7 +71,7 @@ public class MarkovChain<MappedClass>
 	 */
 	public int getAbsoluteCountTransitions(final MappedClass startState, final MappedClass goalState)
 	{
-		Entry startEntry = containedStates.get(startState);
+		MarkovChainEntry<MappedClass> startEntry = containedStates.get(startState);
 		
 		if (startEntry != null)
 		{
@@ -99,7 +99,7 @@ public class MarkovChain<MappedClass>
 	{
 		int absoluteTransitions = getAbsoluteCountTransitions(startState, goalState);
 		
-		Entry startEntry = containedStates.get(startState);
+		MarkovChainEntry<MappedClass> startEntry = containedStates.get(startState);
 		
 		if (startEntry != null)
 		{
@@ -107,11 +107,5 @@ public class MarkovChain<MappedClass>
 		}
 		
 		return 0;
-	}
-	
-	private class Entry
-	{
-		public Map<MappedClass, Integer>	absoluteTransitions	= new ConcurrentHashMap<>();
-		public int								transitions				= 1;
 	}
 }

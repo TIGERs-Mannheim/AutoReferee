@@ -16,18 +16,15 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
-import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.visualizer.view.EVisualizerOptions;
-import edu.tigers.sumatra.visualizer.view.IFieldPanelObserver;
 import edu.tigers.sumatra.visualizer.view.field.FieldPanel;
 import edu.tigers.sumatra.visualizer.view.field.IFieldPanel;
 import edu.tigers.sumatra.wp.data.Geometry;
@@ -77,7 +74,6 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	protected void setupGUI()
 	{
 		fieldPanel = new FieldPanel(FIELD_PANEL_WIDTH, new BasicStroke(STROKE_WIDTH));
-		fieldPanel.addObserver(new FieldPanelObserver());
 		fieldPanel.onOptionChanged(EVisualizerOptions.PAINT_COORD, false);
 		fieldPanel.onOptionChanged(EVisualizerOptions.FANCY, true);
 		setLayout(isVertical);
@@ -231,22 +227,5 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 		{
 			resizeField();
 		}
-	}
-	
-	private class FieldPanelObserver implements IFieldPanelObserver
-	{
-		
-		@Override
-		public void onFieldClick(final IVector2 pos, final MouseEvent e)
-		{
-			if (e.getButton() == MouseEvent.BUTTON1)
-			{
-				setFieldOrientation(!getFieldOrientation());
-			} else if (e.getButton() == MouseEvent.BUTTON3)
-			{
-				turnField();
-			}
-		}
-		
 	}
 }

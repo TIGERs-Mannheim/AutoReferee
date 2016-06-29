@@ -22,10 +22,15 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
+import edu.tigers.sumatra.math.AVector3;
 import edu.tigers.sumatra.math.IVector2;
+import edu.tigers.sumatra.math.IVector3;
+import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
+import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.MotionContext.BotInfo;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.kalman.data.ABotMotionResult;
@@ -97,6 +102,23 @@ public class ExtKalman extends AWorldPredictor
 		final IFilter ball = context.getBall();
 		final BallMotionResult motion = (BallMotionResult) ball.getPrediction(timestamp);
 		TrackedBall trackedBall = motion.toTrackedBall();
+		
+		
+		double age = (frame.gettCapture() - ball.getTimestamp()) / 1e9;
+		if (age > 0.1)
+		{
+			for (BotInfo botInfo : context.getMotionContext().getBots().values())
+			{
+				if (botInfo.isBallContact())
+				{
+					IVector2 ballPos = botInfo.getPos().getXYVector().addNew(new Vector2(botInfo.getPos().z())
+							.scaleTo(botInfo.getCenter2DribblerDist() + Geometry.getBallRadius()));
+					IVector3 ballVel = botInfo.getVel();
+					trackedBall = new TrackedBall(ballPos, trackedBall.getPos3().z(), ballVel.getXYVector(), ballVel.z(),
+							AVector3.ZERO_VECTOR);
+				}
+			}
+		}
 		
 		
 		final BotIDMap<ITrackedBot> bots = new BotIDMap<>();

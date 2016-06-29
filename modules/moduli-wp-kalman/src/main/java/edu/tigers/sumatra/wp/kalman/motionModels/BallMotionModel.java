@@ -218,8 +218,8 @@ public class BallMotionModel implements IMotionModel
 	public Matrix getDynamicsCovariance(final Matrix state, final double dt)
 	{
 		final Matrix q = new Matrix(STATE_DYNAMICS_SIZE, STATE_DYNAMICS_SIZE);
-		double vx = state.get(13, 0);
-		double vy = state.get(14, 0);
+		double vx = state.get(3, 0); // + state.get(13, 0);
+		double vy = state.get(4, 0); // + state.get(14, 0);
 		
 		// sigma: max change within one dt,
 		// 2*sigma=95% range in data, so divide by 2 below
@@ -250,7 +250,7 @@ public class BallMotionModel implements IMotionModel
 		copyCovMatrix(q, pCov, 0);
 		
 		// the velocity can change from 0 to 8m/s within one dt (Ball kicked).
-		double vSigmaMax = 700;
+		double vSigmaMax = 400;
 		double vSigmaDef = 30;
 		double vSigmaMinWidth = 0.1;
 		double vSigmaMinLength = vel > maxRollingVelocity ? 10 : 5;

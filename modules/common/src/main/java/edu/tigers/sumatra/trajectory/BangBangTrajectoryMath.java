@@ -166,7 +166,7 @@ public final class BangBangTrajectoryMath
 			final IVector2 desiredPos, final double maxAcc, final double maxBrk, final double maxVel, final double time)
 	{
 		ITrajectory<IVector2> direct = new BangBangTrajectory2D(curPos.multiplyNew(1e-3), desiredPos.multiplyNew(1e-3),
-				initialVel.multiplyNew(1e-3), maxAcc, maxAcc, maxVel);
+				initialVel, maxAcc, maxAcc, maxVel);
 				
 		if (direct.getPositionMM(time).equals(desiredPos, 1.0))
 		{

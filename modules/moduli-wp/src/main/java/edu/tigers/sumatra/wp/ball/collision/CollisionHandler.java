@@ -32,6 +32,25 @@ public class CollisionHandler
 	private final List<ICollisionObject>	collisionObjects			= new ArrayList<>();
 	private final List<IImpulseObject>		impulseObjects				= new ArrayList<>();
 	
+	private boolean								complexCollision			= false;
+	
+	
+	/**
+	 * 
+	 */
+	public CollisionHandler()
+	{
+	}
+	
+	
+	/**
+	 * @param complexCollision
+	 */
+	public CollisionHandler(final boolean complexCollision)
+	{
+		this.complexCollision = complexCollision;
+	}
+	
 	
 	/**
 	 * @param object
@@ -144,25 +163,28 @@ public class CollisionHandler
 		
 		IVector2 outVel = ballCollision(curVel, colNormal);
 		
-		double hitBallAngle = AngleMath.PI;
-		if (!curVel.isZeroVector())
+		if (complexCollision)
 		{
-			hitBallAngle = GeoMath.angleBetweenVectorAndVector(curVel, objectVel);
-		}
-		double hitAngle = GeoMath.angleBetweenVectorAndVector(colNormal, objectVel);
-		double relAngle = Math.max(0, (-hitAngle / AngleMath.PI_HALF) + 1);
-		double hitVelAbs = objectVel.getLength() * relAngle;
-		IVector2 hitVel = colNormal.scaleToNew(hitVelAbs);
-		if ((hitBallAngle > AngleMath.PI_HALF))
-		{
-			// bot hits ball
-			outVel = outVel.addNew(hitVel);
-		}
-		
-		if ((hitBallAngle < AngleMath.PI_HALF) && (outVel.getLength() < hitVel.getLength()))
-		{
-			// bot touches/pushes ball, scale towards hitvel
-			outVel = outVel.addNew(hitVel).scaleTo(hitVel.getLength());
+			double hitBallAngle = AngleMath.PI;
+			if (!curVel.isZeroVector())
+			{
+				hitBallAngle = GeoMath.angleBetweenVectorAndVector(curVel, objectVel);
+			}
+			double hitAngle = GeoMath.angleBetweenVectorAndVector(colNormal, objectVel);
+			double relAngle = Math.max(0, (-hitAngle / AngleMath.PI_HALF) + 1);
+			double hitVelAbs = Math.max(0, objectVel.getLength() - curVel.getLength()) * relAngle;
+			IVector2 hitVel = colNormal.scaleToNew(hitVelAbs);
+			if ((hitBallAngle > AngleMath.PI_HALF))
+			{
+				// bot hits ball
+				outVel = outVel.addNew(hitVel);
+			}
+			
+			if ((hitBallAngle < AngleMath.PI_HALF) && (outVel.getLength() < hitVel.getLength()))
+			{
+				// bot touches/pushes ball, scale towards hitvel
+				outVel = outVel.addNew(hitVel).scaleTo(hitVel.getLength());
+			}
 		}
 		
 		if (outVel.isZeroVector())
@@ -179,9 +201,13 @@ public class CollisionHandler
 		newState.setVel(new Vector3(outVel, newState.getVel().z()));
 		newState.setAcc(AVector3.ZERO_VECTOR);
 		
-		double distOverObs = GeoMath.distancePP(colState.getPos().getXYVector(), colState.getCollision().get().getPos());
-		IVector2 corPos = colState.getCollision().get().getPos().addNew(outVel.scaleToNew(distOverObs));
-		newState.setPos(new Vector3(corPos, colState.getPos().z()));
+		if (complexCollision)
+		{
+			double distOverObs = GeoMath.distancePP(colState.getPos().getXYVector(),
+					colState.getCollision().get().getPos());
+			IVector2 corPos = colState.getCollision().get().getPos().addNew(outVel.scaleToNew(distOverObs));
+			newState.setPos(new Vector3(corPos, colState.getPos().z()));
+		}
 		
 		return newState;
 	}

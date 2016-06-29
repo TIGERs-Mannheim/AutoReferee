@@ -39,7 +39,7 @@ public class BotKickImpuls implements IImpulseObject
 	@Override
 	public IVector3 getImpulse(final IVector3 pos)
 	{
-		if ((pos.z() < 170) && kickerLine.isPointOnLine(pos.getXYVector(), 10))
+		if ((pos.z() < 170) && kickerLine.isPointOnLine(pos.getXYVector(), 20))
 		{
 			return kickVel;
 		}

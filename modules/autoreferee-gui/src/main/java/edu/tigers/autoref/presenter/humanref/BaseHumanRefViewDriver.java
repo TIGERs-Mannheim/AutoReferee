@@ -14,9 +14,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.IConfigClient;
+import com.github.g3force.configurable.IConfigObserver;
+
 import edu.tigers.autoref.view.humanref.BaseHumanRefPanel;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
+import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.referee.RefereeMsg;
 import edu.tigers.sumatra.visualizer.view.field.EShapeLayerSource;
 import edu.tigers.sumatra.visualizer.view.field.IFieldPanel;
@@ -34,6 +40,9 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 {
 	private static final List<IShapeLayer>	VALID_LAYERS;
 	
+	@Configurable
+	private static boolean						fieldFlipped	= false;
+	
 	private final BaseHumanRefPanel			panel;
 	
 	private WorldFrameWrapper					wFrame;
@@ -46,6 +55,8 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 				EWpShapesLayer.FIELD_BORDERS, EWpShapesLayer.AUTOREFEREE,
 				EWpShapesLayer.BALL_BUFFER);
 		VALID_LAYERS = Collections.unmodifiableList(validLayers);
+		
+		ConfigRegistration.registerClass("autoreferee", BaseHumanRefViewDriver.class);
 	}
 	
 	
@@ -55,6 +66,21 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 	public BaseHumanRefViewDriver(final BaseHumanRefPanel panel)
 	{
 		this.panel = panel;
+		
+		ConfigRegistration.registerConfigurableCallback("autoreferee", new IConfigObserver()
+		{
+			@Override
+			public void afterApply(final IConfigClient configClient)
+			{
+				IFieldPanel fieldPanel = panel.getFieldPanel();
+				EFieldTurn turn = fieldPanel.getFieldTurn();
+				if ((((turn == EFieldTurn.NORMAL) || (turn == EFieldTurn.T90)) && fieldFlipped)
+						|| (((turn == EFieldTurn.T180) || (turn == EFieldTurn.T270)) && !fieldFlipped))
+				{
+					panel.turnField();
+				}
+			}
+		});
 	}
 	
 	
