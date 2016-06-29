@@ -14,6 +14,7 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -24,6 +25,7 @@ import edu.tigers.autoref.model.gamelog.GameLogTableModel;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogFormatter;
+import edu.tigers.autoreferee.engine.log.GameTime;
 
 
 /**
@@ -60,7 +62,10 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		
 		styleComponent(entry, column);
 		
-		if ((column == 0) || (column == 1))
+		/*
+		 * Resize all but the last column to minimum size
+		 */
+		if ((column < (table.getColumnCount() - 1)))
 		{
 			doResize(table, column);
 		}
@@ -96,8 +101,10 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 			case 0:
 				return formatInstant(entry.getInstant());
 			case 1:
-				return entry.getType().toString();
+				return formatGameTime(entry.getGameTime());
 			case 2:
+				return entry.getType().toString();
+			case 3:
 				switch (entry.getType())
 				{
 					case COMMAND:
@@ -114,7 +121,14 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 					case REFEREE_MSG:
 						return GameLogFormatter.formatRefMsg(entry.getRefereeMsg());
 					case GAME_EVENT:
-						return entry.getGameEvent().toString();
+						StringBuilder builder = new StringBuilder();
+						builder.append(entry.getGameEvent().toString());
+						if (entry.getFollowUpAction() != null)
+						{
+							builder.append(" | ");
+							builder.append(GameLogFormatter.formatFollowUp(entry.getFollowUpAction()));
+						}
+						return builder.toString();
 				}
 			default:
 				throw new IllegalArgumentException("Column index out of range: " + colIndex);
@@ -193,6 +207,32 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		builder.append(sFormat.format(date.getSecond()));
 		builder.append(":");
 		builder.append(msFormat.format(date.getNano() / 1_000_000));
+		
+		return builder.toString();
+	}
+	
+	
+	private String formatGameTime(final GameTime gameTime)
+	{
+		StringBuilder builder = new StringBuilder();
+		
+		long micros = gameTime.getMicrosLeft();
+		if (micros < 0)
+		{
+			builder.append("-");
+			micros = Math.abs(micros);
+		}
+		
+		int minutes = (int) TimeUnit.MICROSECONDS.toMinutes(micros);
+		int seconds = (int) TimeUnit.MICROSECONDS.toSeconds(micros) % 60;
+		int ms = (int) TimeUnit.MICROSECONDS.toMillis(micros) % 1_000;
+		
+		
+		builder.append(minFormat.format(minutes));
+		builder.append(":");
+		builder.append(sFormat.format(seconds));
+		builder.append(":");
+		builder.append(msFormat.format(ms));
 		
 		return builder.toString();
 	}

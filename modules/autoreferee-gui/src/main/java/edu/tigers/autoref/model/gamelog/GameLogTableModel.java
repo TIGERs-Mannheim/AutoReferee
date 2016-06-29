@@ -43,7 +43,7 @@ public class GameLogTableModel extends AbstractTableModel implements IGameLogObs
 	
 	static
 	{
-		columns = Collections.unmodifiableList(Arrays.asList("Time [ms]", "Type", "Event"));
+		columns = Collections.unmodifiableList(Arrays.asList("Time [ms]", "GameTime [ms]", "Type", "Event"));
 	}
 	
 	
