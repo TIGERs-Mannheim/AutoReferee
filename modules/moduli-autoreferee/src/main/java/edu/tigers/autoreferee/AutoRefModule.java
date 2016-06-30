@@ -11,7 +11,6 @@ package edu.tigers.autoreferee;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,11 +22,6 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
-import edu.tigers.autoreferee.engine.calc.BallLeftFieldCalc;
-import edu.tigers.autoreferee.engine.calc.BotLastTouchedBallCalc;
-import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
-import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
-import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc;
 import edu.tigers.autoreferee.engine.log.appender.GameLogFileAppender;
 import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.AModule;
@@ -63,18 +57,17 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	}
 	
 	private final static Logger			log				= Logger.getLogger(AutoRefModule.class);
-	private static final Path				LogDirectory	= Paths.get("gamelogs/");
 	/**  */
-	public static String						MODULE_ID		= "autoreferee";
+	public static final String				MODULE_ID		= "autoreferee";
+	private static final Path				LogDirectory	= Paths.get("gamelogs/");
 	
-	private List<IRefereeCalc>				calculators		= new ArrayList<>();
 	private List<IAutoRefStateObserver>	refObserver		= new CopyOnWriteArrayList<>();
 	
+	private AutoRefFramePreprocessor		preprocessor	= new AutoRefFramePreprocessor();
 	private IAutoRefEngine					autoRefEngine;
 	private GameLogFileAppender			logAppender;
 	
 	private AutoRefState						state				= AutoRefState.STOPPED;
-	private IAutoRefFrame					lastFrame;
 	
 	
 	/**
@@ -82,10 +75,6 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	 */
 	public AutoRefModule(final SubnodeConfiguration config)
 	{
-		calculators.add(new BallLeftFieldCalc());
-		calculators.add(new BotLastTouchedBallCalc());
-		calculators.add(new GameStateHistoryCalc());
-		calculators.add(new PossibleGoalCalc());
 	}
 	
 	
@@ -194,7 +183,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 			{
 				autoRefEngine = new PassiveAutoRefEngine();
 			}
-			lastFrame = null;
+			preprocessor.clear();
 			autoRefEngine.getGameLog().addObserver(logAppender);
 			
 			AWorldPredictor predictor = (AWorldPredictor) SumatraModel
@@ -322,18 +311,16 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		if (lastFrame == null)
+		if (!preprocessor.hasLastFrame())
 		{
-			/*
-			 * Sit this one out since we need a first frame for initialization
-			 */
-			lastFrame = createNewRefFrame(wFrameWrapper);
+			preprocessor.setLastFrame(wFrameWrapper);
 			return;
 		}
-		AutoRefFrame currentFrame = createNewRefFrame(wFrameWrapper);
+		
+		AutoRefFrame currentFrame;
 		try
 		{
-			runCalculators(currentFrame);
+			currentFrame = preprocessor.process(wFrameWrapper);
 		} catch (Exception t)
 		{
 			log.error("Error while running autoref calculators", t);
@@ -358,27 +345,5 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 				log.error("Error in autoref state observer (" + (o != null ? o.toString() : "null") + ")", t);
 			}
 		}
-		
-		lastFrame = currentFrame;
 	}
-	
-	
-	private AutoRefFrame createNewRefFrame(final WorldFrameWrapper wFrameWrapper)
-	{
-		if (lastFrame != null)
-		{
-			lastFrame.cleanUp();
-		}
-		return new AutoRefFrame(lastFrame, wFrameWrapper);
-	}
-	
-	
-	private void runCalculators(final AutoRefFrame frame)
-	{
-		for (IRefereeCalc calc : calculators)
-		{
-			calc.process(frame);
-		}
-	}
-	
 }
