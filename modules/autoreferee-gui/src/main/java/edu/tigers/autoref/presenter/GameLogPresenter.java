@@ -109,20 +109,11 @@ public class GameLogPresenter implements ISumatraViewPresenter, IModuliStateObse
 		{
 			AutoRefUtil.ifAutoRefModulePresent(module -> {
 				IGameLog log = module.getEngine().getGameLog();
-				EventQueue.invokeLater(() -> setGameLog(log));
 				
+				GameLogTableModel model = new GameLogTableModel(log);
+				EventQueue.invokeLater(() -> gameLogPanel.setTableModel(model));
 			});
 		}
-	}
-	
-	
-	/**
-	 * @param log
-	 */
-	public void setGameLog(final IGameLog log)
-	{
-		GameLogTableModel model = new GameLogTableModel(log);
-		gameLogPanel.setTableModel(model);
 	}
 	
 	

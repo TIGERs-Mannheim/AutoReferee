@@ -48,6 +48,8 @@ public class GameLogEntry
 	private final GameTime				gameTime;
 	/** The time instant this entry was created in */
 	private final Instant				instant;
+	/** in nanoseconds */
+	private final long					timeSinceStart;
 	
 	private final EGameStateNeutral	gamestate;
 	private final RefereeMsg			refereeMsg;
@@ -60,6 +62,7 @@ public class GameLogEntry
 	
 	/**
 	 * @param timestamp
+	 * @param timeSinceStart
 	 * @param instant
 	 * @param type
 	 * @param gamestate
@@ -68,12 +71,13 @@ public class GameLogEntry
 	 * @param followUpAction
 	 * @param command
 	 */
-	protected GameLogEntry(final long timestamp, final GameTime gameTime, final Instant instant,
-			final ELogEntryType type, final EGameStateNeutral gamestate, final IGameEvent gameEvent,
-			final boolean acceptedByEngine, final RefereeMsg refereeMsg, final FollowUpAction followUpAction,
-			final RefCommand command)
+	protected GameLogEntry(final long timestamp, final GameTime gameTime, final long timeSinceStart,
+			final Instant instant, final ELogEntryType type, final EGameStateNeutral gamestate,
+			final IGameEvent gameEvent, final boolean acceptedByEngine, final RefereeMsg refereeMsg,
+			final FollowUpAction followUpAction, final RefCommand command)
 	{
 		this.type = type;
+		this.timeSinceStart = timeSinceStart;
 		this.gameTime = gameTime;
 		this.timestamp = timestamp;
 		this.instant = instant;
@@ -114,6 +118,17 @@ public class GameLogEntry
 	public GameTime getGameTime()
 	{
 		return gameTime;
+	}
+	
+	
+	/**
+	 * The number of nanoseconds since the autoreferee was started
+	 * 
+	 * @return time since the start in nanoseconds
+	 */
+	public long getTimeSinceStart()
+	{
+		return timeSinceStart;
 	}
 	
 	

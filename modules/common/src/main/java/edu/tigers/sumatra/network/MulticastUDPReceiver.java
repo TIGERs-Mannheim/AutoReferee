@@ -5,7 +5,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -174,12 +173,7 @@ public class MulticastUDPReceiver implements IReceiver
 		MulticastSocket socket;
 		try
 		{
-			socket = new MulticastSocket();
-			/*
-			 * We enable address reuse to allow other applications to also receive the referee messages
-			 */
-			socket.setReuseAddress(true);
-			socket.bind(new InetSocketAddress(port));
+			socket = new MulticastSocket(port);
 			socket.setNetworkInterface(iface);
 			int i;
 			socket_loop: for (i = 0; i < sockets.size(); i++)

@@ -31,10 +31,28 @@ public class GameLog implements IGameLog
 {
 	private static final Logger		log					= Logger.getLogger(GameLog.class);
 	
+	private long							startRefTimestamp	= 0;
 	private long							currentTimestamp	= 0;
 	private GameTime						currentGameTime	= GameTime.empty();
 	private List<GameLogEntry>			entries				= new ArrayList<>();
 	private List<IGameLogObserver>	observer				= new CopyOnWriteArrayList<>();
+	
+	
+	/**
+	 * @param timestamp
+	 */
+	public void initialize(final long timestamp)
+	{
+		log.debug("Initialized game log with timestamp: " + timestamp);
+		startRefTimestamp = timestamp;
+		currentTimestamp = timestamp;
+	}
+	
+	
+	private long getTimeSinceStart()
+	{
+		return currentTimestamp - startRefTimestamp;
+	}
 	
 	
 	private Instant getCurrentInstant()
@@ -94,6 +112,7 @@ public class GameLog implements IGameLog
 		GameLogEntryBuilder builder = new GameLogEntryBuilder();
 		builder.setTimestamp(currentTimestamp);
 		builder.setGameTime(currentGameTime);
+		builder.setTimeSinceStart(getTimeSinceStart());
 		builder.setInstant(getCurrentInstant());
 		
 		consumer.accept(builder);
