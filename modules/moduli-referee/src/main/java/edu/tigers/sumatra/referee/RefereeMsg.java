@@ -213,6 +213,29 @@ public class RefereeMsg
 	
 	
 	/**
+	 * Return the {@link TeamInfo} for the specified team {@code color}
+	 * 
+	 * @param color
+	 * @return {@code TeamInfo} of the specified team
+	 * @throws IllegalArgumentException if {@code color} is not {@link ETeamColor#BLUE} or {@link ETeamColor#YELLOW}
+	 */
+	public final TeamInfo getTeamInfo(final ETeamColor color)
+	{
+		switch (color)
+		{
+			case BLUE:
+				return teamInfoBlue;
+			case YELLOW:
+				return teamInfoYellow;
+			default:
+				throw new IllegalArgumentException("Please specify a valid team color. The following value is invalid: "
+						+ color);
+		}
+		
+	}
+	
+	
+	/**
 	 * @return the leftTeam
 	 */
 	public final ETeamColor getLeftTeam()

@@ -24,6 +24,7 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.referee.RefereeMsg;
+import edu.tigers.sumatra.referee.TeamInfo;
 import edu.tigers.sumatra.visualizer.view.field.EShapeLayerSource;
 import edu.tigers.sumatra.visualizer.view.field.IFieldPanel;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
@@ -118,7 +119,18 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 		RefereeMsg refMsg = frame.getRefereeMsg();
 		EGameStateNeutral state = frame.getGameState();
 		
-		panel.setTimeLeft(Duration.ofMillis(TimeUnit.MICROSECONDS.toMillis(refMsg.getStageTimeLeft())));
+		long microsLeft = 0;
+		if (state.isTimeout())
+		{
+			TeamInfo teamInfo = refMsg.getTeamInfo(state.getTeamColor());
+			microsLeft = teamInfo.getTimeoutTime();
+		} else
+		{
+			microsLeft = refMsg.getStageTimeLeft();
+		}
+		Duration timeLeft = Duration.ofMillis(TimeUnit.MICROSECONDS.toMillis(microsLeft));
+		
+		panel.setTimeLeft(timeLeft);
 		panel.setStage(refMsg.getStage());
 		panel.setGoals(refMsg.getGoals());
 		panel.setTeamNames(refMsg.getTeamNames());

@@ -191,20 +191,6 @@ public class AutoRefMath
 	
 	
 	/**
-	 * Returns true if the ball has been placed at {@code destPos} with a precision of
-	 * {@link AutoRefConfig#getBallCloselyPlacedAccuracy()} and is stationary.
-	 * 
-	 * @param ball
-	 * @param destPos
-	 * @return
-	 */
-	public static boolean ballIsCloselyPlaced(final TrackedBall ball, final IVector2 destPos)
-	{
-		return ballIsPlaced(ball, destPos, AutoRefConfig.getBallCloselyPlacedAccuracy());
-	}
-	
-	
-	/**
 	 * @param ball
 	 * @param destPos
 	 * @param accuracy

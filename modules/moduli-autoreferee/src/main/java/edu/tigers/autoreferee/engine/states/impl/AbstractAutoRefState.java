@@ -185,7 +185,14 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	{
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
+		return checkBotStopDistance(bots, ballPos, shapes);
 		
+	}
+	
+	
+	protected boolean checkBotStopDistance(final Collection<ITrackedBot> bots, final IVector2 ballPos,
+			final List<IDrawableShape> shapes)
+	{
 		List<ITrackedBot> violators = bots.stream()
 				.filter(bot -> GeoMath.distancePP(ballPos, bot.getPos()) < Geometry.getBotToBallDistanceStop())
 				.collect(Collectors.toList());

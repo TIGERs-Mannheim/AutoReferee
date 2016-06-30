@@ -113,21 +113,18 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	
 	protected void onFirstFrame(final IAutoRefFrame frame)
 	{
-		log.debug("On First Frame");
 		gameLog.initialize(frame.getTimestamp());
 	}
 	
 	
 	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
 	{
-		log.debug("On Gamestate Change to: " + newGameState);
 		gameLog.addEntry(newGameState);
 	}
 	
 	
 	protected void onStageChange(final Stage oldStage, final Stage newStage)
 	{
-		log.debug("On Stage Change to: " + newStage);
 	}
 	
 	

@@ -35,7 +35,6 @@ import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Vector2;
 import edu.tigers.sumatra.math.Vector3f;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
@@ -123,7 +122,6 @@ public class StopState extends AbstractAutoRefState
 		
 		FollowUpAction action = ctx.getFollowUpAction();
 		
-		Rectangle field = NGeometry.getField();
 		TrackedBall ball = frame.getWorldFrame().getBall();
 		List<IDrawableShape> shapes = frame.getShapes().get(EWpShapesLayer.AUTOREFEREE);
 		
@@ -143,20 +141,10 @@ public class StopState extends AbstractAutoRefState
 		boolean ballPlaced = checkBallPlaced(ball, kickPos, shapes);
 		boolean ballStationary = AutoRefMath.ballIsStationary(ball);
 		
-		boolean ballInsideField = field.isPointInShape(ball.getPos());
-		boolean maxUnplacedWaitTimeElapsed = timeElapsedSinceEntry(AutoRefConfig.getMaxUnplacedWaitTime());
-		
-		boolean ballIsCloselyPlaced = AutoRefMath.ballIsCloselyPlaced(ball, kickPos);
-		boolean closelyPlacedWaitTimeElapsed = timeElapsedSinceEntry(AutoRefConfig.getMaxCloselyPlacedWaitTime());
-		
 		boolean botsCorrectDistance = checkBotStopDistance(frame, shapes);
 		boolean readyWaitTimeOver = false;
 		
-		if ((ballPlaced && botsCorrectDistance)
-				|| (maxUnplacedWaitTimeElapsed && ballStationary && ballInsideField && (AutoRefConfig
-						.getMaxUnplacedWaitTime() > 0))
-				|| (closelyPlacedWaitTimeElapsed && ballStationary && ballIsCloselyPlaced && (AutoRefConfig
-						.getMaxCloselyPlacedWaitTime() > 0)))
+		if (ballPlaced && botsCorrectDistance)
 		{
 			if (readyTime == null)
 			{

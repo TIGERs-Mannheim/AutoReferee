@@ -312,6 +312,28 @@ public enum EGameStateNeutral
 	
 	
 	/**
+	 * Returns true if the specified {@code state} is either {@link #PENALTY_BLUE} or {@link #PENALTY_YELLOW}
+	 * 
+	 * @param state
+	 * @return
+	 */
+	public static boolean isTimeout(final EGameStateNeutral state)
+	{
+		return (state == TIMEOUT_BLUE) || (state == TIMEOUT_YELLOW);
+	}
+	
+	
+	/**
+	 * @see #isPenalty(EGameStateNeutral)
+	 * @return
+	 */
+	public boolean isTimeout()
+	{
+		return isPenalty(this);
+	}
+	
+	
+	/**
 	 * Returns the color of the supplied state
 	 * Example:
 	 * KICKOFF_BLUE -> Blue

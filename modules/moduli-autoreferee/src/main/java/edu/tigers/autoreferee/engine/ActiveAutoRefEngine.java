@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.log4j.Logger;
-
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLog;
@@ -39,9 +37,6 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 {
-	private static final Logger							log				= Logger
-																								.getLogger(ActiveAutoRefEngine.class);
-	
 	private List<IAutoRefEngineObserver>				engineObserver	= new CopyOnWriteArrayList<>();
 	private IAutoRefState									dummyState		= null;
 	private Map<EGameStateNeutral, IAutoRefState>	refStates		= new HashMap<>();
@@ -322,9 +317,6 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		followUp = action;
 		engineObserver.forEach(observer -> observer.onFollowUpChanged(followUp));
 		gameLog.addEntry(followUp);
-		
-		log.info("Follow up set to: " + (action != null ? action.getActionType() : "null"),
-				new Exception("FollowUpReset"));
 	}
 	
 	

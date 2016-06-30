@@ -60,15 +60,6 @@ public class AutoRefConfig
 	@Configurable(comment = "The port which will be used to connect to the refbox")
 	private static int			refboxPort							= 10007;
 	
-	@Configurable(comment = "[ms] Maximum time before sending the next signal although the ball is not placed - A value of 0 means to wait forever")
-	private static long			maxUnplacedWaitTime				= 0;
-	
-	@Configurable(comment = "[ms] Maximum time before sending the next signal although the ball is not entirely correctly placed - A value of 0 means to wait forever")
-	private static long			maxCloselyPlacedWaitTime		= 0;
-	
-	@Configurable(comment = "[mm] The ball is considered to be closely placed if the distance to the target position is below this threshold")
-	private static double		ballCloselyPlacedAccuracy		= 500;
-	
 	static
 	{
 		ConfigRegistration.registerClass("autoreferee", AutoRefConfig.class);
@@ -186,32 +177,4 @@ public class AutoRefConfig
 	{
 		return refboxPort;
 	}
-	
-	
-	/**
-	 * @return value in ms
-	 */
-	public static long getMaxCloselyPlacedWaitTime()
-	{
-		return maxCloselyPlacedWaitTime;
-	}
-	
-	
-	/**
-	 * @return in ms
-	 */
-	public static long getMaxUnplacedWaitTime()
-	{
-		return maxUnplacedWaitTime;
-	}
-	
-	
-	/**
-	 * @return in mm
-	 */
-	public static double getBallCloselyPlacedAccuracy()
-	{
-		return ballCloselyPlacedAccuracy;
-	}
-	
 }

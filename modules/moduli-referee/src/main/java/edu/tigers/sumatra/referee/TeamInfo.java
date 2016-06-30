@@ -35,10 +35,11 @@ public class TeamInfo
 	 */
 	private final List<Integer>	yellowCardsTimes;
 	private final int					timeouts;
+	/** in microseconds */
 	private final int					timeoutTime;
 	private final int					goalie;
-											
-											
+	
+	
 	@SuppressWarnings("unused")
 	TeamInfo()
 	{
@@ -128,7 +129,7 @@ public class TeamInfo
 	
 	
 	/**
-	 * @return the timeoutTime
+	 * @return the timeoutTime left for the team in microseconds
 	 */
 	public final int getTimeoutTime()
 	{

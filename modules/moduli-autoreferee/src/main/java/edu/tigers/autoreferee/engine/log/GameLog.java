@@ -134,7 +134,6 @@ public class GameLog implements IGameLog
 	 */
 	public GameLogEntry addEntry(final EGameStateNeutral gamestate)
 	{
-		log.info("Gamestate changed: " + gamestate);
 		return buildAndAddEntry(builder -> builder.setGamestate(gamestate));
 	}
 	
@@ -156,7 +155,6 @@ public class GameLog implements IGameLog
 	 */
 	public GameLogEntry addEntry(final IGameEvent event, final boolean acceptedByEngine)
 	{
-		log.info("Game event: " + event.toString());
 		return buildAndAddEntry(builder -> builder.setGameEvent(event, acceptedByEngine));
 	}
 	
@@ -167,7 +165,6 @@ public class GameLog implements IGameLog
 	 */
 	public GameLogEntry addEntry(final RefereeMsg refereeMsg)
 	{
-		log.info("Ref msg: " + GameLogFormatter.formatRefMsg(refereeMsg));
 		return buildAndAddEntry(builder -> builder.setRefereeMsg(refereeMsg));
 	}
 	
@@ -178,13 +175,6 @@ public class GameLog implements IGameLog
 	 */
 	public GameLogEntry addEntry(final FollowUpAction action)
 	{
-		if (action != null)
-		{
-			log.info("Follow up set: " + GameLogFormatter.formatFollowUp(action));
-		} else
-		{
-			log.info("Follow up reset");
-		}
 		return buildAndAddEntry(builder -> builder.setFollowUpAction(action));
 	}
 	
@@ -195,7 +185,6 @@ public class GameLog implements IGameLog
 	 */
 	public GameLogEntry addEntry(final RefCommand command)
 	{
-		log.info("Command sent: " + GameLogFormatter.formatCommand(command));
 		return buildAndAddEntry(builder -> builder.setCommand(command));
 	}
 	
