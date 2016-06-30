@@ -71,11 +71,6 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	private BotPosition				lastBot		= new BotPosition();
 	private ShapeMap					curShapes;
 	
-	static
-	{
-		ConfigRegistration.registerClass("autoreferee", BotLastTouchedBallCalc.class);
-	}
-	
 	
 	/**
 	  * 
@@ -293,5 +288,11 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	private List<IDrawableShape> getExtendedLayer()
 	{
 		return curShapes.get(EAutoRefShapesLayer.LAST_BALL_CONTACT_EXT);
+	}
+	
+	
+	static
+	{
+		ConfigRegistration.registerClass("autoreferee", BotLastTouchedBallCalc.class);
 	}
 }

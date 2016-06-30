@@ -49,7 +49,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	private static final Logger				log								= Logger.getLogger(DoubleTouchDetector.class);
 	
 	@Configurable(comment = "[mm] The bot may only once approach the ball by less than this value")
-	private static double						KICK_EXECUTED_TOLERANCE		= 50;
+	private static double						KICK_EXECUTED_TOLERANCE		= 75;
 	
 	@Configurable(comment = "[mm] The bot is considered to still touch the ball if distance is lower than this value")
 	private static double						BOT_BALL_CONTACT_TOLERANCE	= 30;
@@ -142,8 +142,8 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 			hasMovedAway = true;
 		}
 		
-		if ((!hasMovedAway && (ballToKickDist > KICK_EXECUTED_TOLERANCE))
-				|| (kickerID.equals(lastContact.getId()) && (lastContact.getTs() > kickTime)))
+		if ((ballToKickDist > KICK_EXECUTED_TOLERANCE)
+				&& (!hasMovedAway || (kickerID.equals(lastContact.getId()) && (lastContact.getTs() > kickTime))))
 		{
 			ETeamColor kickerColor = kickerID.getTeamColor();
 			
