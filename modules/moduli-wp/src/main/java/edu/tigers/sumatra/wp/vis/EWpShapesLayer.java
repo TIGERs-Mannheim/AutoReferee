@@ -19,7 +19,8 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	FIELD_BORDERS("Field Borders", "FIELD", true),
 	/**  */
-	@Deprecated COORDINATE_SYSTEM("Coordinate System", "FIELD"),
+	@Deprecated
+	COORDINATE_SYSTEM("Coordinate System", "FIELD"),
 	/**  */
 	REFEREE("Referee", "FIELD", true, 1000),
 	/**  */
@@ -38,6 +39,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	VELOCITY("Velocity", "VISION"),
 	/**  */
+	@Deprecated
 	AUTOREFEREE("AutoReferee", "VISION", true);
 	
 	

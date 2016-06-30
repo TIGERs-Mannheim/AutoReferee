@@ -20,6 +20,7 @@ import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 
 import edu.tigers.autoref.view.humanref.BaseHumanRefPanel;
+import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.sumatra.drawable.EFieldTurn;
@@ -53,7 +54,7 @@ public class BaseHumanRefViewDriver implements IHumanRefViewDriver
 	{
 		List<IShapeLayer> validLayers = Arrays.asList(
 				EWpShapesLayer.BALL, EWpShapesLayer.BOTS,
-				EWpShapesLayer.FIELD_BORDERS, EWpShapesLayer.AUTOREFEREE,
+				EWpShapesLayer.FIELD_BORDERS, EAutoRefShapesLayer.ENGINE,
 				EWpShapesLayer.BALL_BUFFER);
 		VALID_LAYERS = Collections.unmodifiableList(validLayers);
 		

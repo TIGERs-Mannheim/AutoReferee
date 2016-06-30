@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.RefCommand;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
@@ -26,7 +27,6 @@ import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
-import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 
 
 /**
@@ -68,7 +68,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		setCanProceed(true);
 		
 		ETeamColor shooterTeam = frame.getGameState().getTeamColor();
-		List<IDrawableShape> shapes = frame.getShapes().get(EWpShapesLayer.AUTOREFEREE);
+		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
 		SimpleWorldFrame wFrame = frame.getWorldFrame();
 		TrackedBall ball = wFrame.getBall();
 		

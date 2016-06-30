@@ -36,8 +36,6 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	protected EEngineState			engineState			= null;
 	protected GameLog					gameLog				= new GameLog();
 	
-	private boolean					firstFrame			= true;
-	
 	protected enum EEngineState
 	{
 		RUNNING,
@@ -80,11 +78,6 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	@Override
 	public synchronized void process(final IAutoRefFrame frame)
 	{
-		if (firstFrame == true)
-		{
-			firstFrame = false;
-			onFirstFrame(frame);
-		}
 		gameLog.setCurrentTimestamp(frame.getTimestamp());
 		gameLog.setCurrentGameTime(calcCurrentGameTime(frame));
 		
@@ -111,12 +104,6 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	}
 	
 	
-	protected void onFirstFrame(final IAutoRefFrame frame)
-	{
-		gameLog.initialize(frame.getTimestamp());
-	}
-	
-	
 	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
 	{
 		gameLog.addEntry(newGameState);
@@ -137,8 +124,6 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	protected GameTime calcCurrentGameTime(final IAutoRefFrame frame)
 	{
 		RefereeMsg refMsg = frame.getRefereeMsg();
-		// long diff = TimeUnit.NANOSECONDS.toMicros(frame.getTimestamp() - refMsg.getFrameTimestamp());
-		// return GameTime.of(refMsg.getStage(), refMsg.getStageTimeLeft() - diff);
 		return GameTime.of(refMsg);
 	}
 	

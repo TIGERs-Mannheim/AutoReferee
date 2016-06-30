@@ -98,12 +98,7 @@ public class WorldInfoProcessor implements IRefereeObserver
 	@Override
 	public void onNewRefereeMsg(final SSL_Referee refMsg)
 	{
-		long ts = lastWFTimestamp;
-		if (refMsg.getCommandCounter() == latestRefereeMsg.getCommandCounter())
-		{
-			ts = latestRefereeMsg.getFrameTimestamp();
-		}
-		latestRefereeMsg = new RefereeMsg(ts, refMsg);
+		latestRefereeMsg = new RefereeMsg(lastWFTimestamp, refMsg);
 	}
 	
 	

@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefConfig;
+import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -37,7 +38,6 @@ import edu.tigers.sumatra.math.Vector3f;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
 import edu.tigers.sumatra.wp.data.TrackedBall;
-import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 
 
 /**
@@ -123,7 +123,7 @@ public class StopState extends AbstractAutoRefState
 		FollowUpAction action = ctx.getFollowUpAction();
 		
 		TrackedBall ball = frame.getWorldFrame().getBall();
-		List<IDrawableShape> shapes = frame.getShapes().get(EWpShapesLayer.AUTOREFEREE);
+		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
 		
 		IVector2 kickPos = determineKickPos(action);
 		visualizeKickPos(shapes, kickPos);

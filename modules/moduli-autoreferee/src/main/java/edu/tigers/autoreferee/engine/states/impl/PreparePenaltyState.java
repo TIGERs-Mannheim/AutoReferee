@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
+import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefCommand;
@@ -39,7 +40,6 @@ import edu.tigers.sumatra.wp.data.Goal;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
-import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 
 
 /**
@@ -79,7 +79,7 @@ public class PreparePenaltyState extends AbstractAutoRefState
 	protected void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 		SimpleWorldFrame wFrame = frame.getWorldFrame();
-		List<IDrawableShape> shapes = frame.getShapes().get(EWpShapesLayer.AUTOREFEREE);
+		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
 		
 		shapes.add(new DrawableRectangle(penaltyKickArea, AREA_COLOR));
 		shapes.add(new DrawableRectangle(keeperArea, AREA_COLOR));

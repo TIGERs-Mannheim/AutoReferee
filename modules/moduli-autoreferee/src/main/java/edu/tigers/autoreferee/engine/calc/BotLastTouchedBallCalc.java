@@ -22,9 +22,11 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefFrame;
+import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.NGeometry.BotDistanceComparator;
 import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.IBotIDMap;
@@ -36,9 +38,9 @@ import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.math.Line;
 import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.ShapeMap;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
-import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 
 
 /**
@@ -60,11 +62,14 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		BALL_HEADING
 	}
 	
-	private static final Logger	log		= Logger.getLogger(BotLastTouchedBallCalc.class);
+	private static final Logger	log			= Logger.getLogger(BotLastTouchedBallCalc.class);
+	private static final Color		EXT_COLOR	= Color.WHITE;
 	
 	@Configurable(comment = "The algorithm to use for ball touch detection")
-	private static CalcMode			mode		= CalcMode.BALL_HEADING;
-	private BotPosition				lastBot	= new BotPosition();
+	private static CalcMode			mode			= CalcMode.BALL_HEADING;
+	
+	private BotPosition				lastBot		= new BotPosition();
+	private ShapeMap					curShapes;
 	
 	static
 	{
@@ -84,6 +89,8 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	@Override
 	public void process(final AutoRefFrame frame)
 	{
+		curShapes = frame.getShapes();
+		
 		BotPosition theChosenOne = null;
 		if (mode == CalcMode.BALL_HEADING)
 		{
@@ -108,11 +115,10 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	
 	private void addMark(final IAutoRefFrame frame, final BotID id, final Color color)
 	{
-		List<IDrawableShape> shapes = frame.getShapes().get(EWpShapesLayer.AUTOREFEREE);
 		ITrackedBot bot = frame.getWorldFrame().getBot(id);
 		if (bot != null)
 		{
-			shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 1.5d, color));
+			getRegularLayer().add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 1.5d, color));
 		}
 	}
 	
@@ -212,6 +218,9 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 			ILine reversedBallHeading = new Line(ballPos, curBall.getVel().multiplyNew(-1.0d));
 			List<ITrackedBot> closeBots = getBotsCloseToBall(frame);
 			
+			closeBots.forEach(bot -> getExtendedLayer().add(
+					new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, EXT_COLOR)));
+			getExtendedLayer().add(new DrawableLine(reversedBallHeading));
 			
 			Optional<ITrackedBot> optTouchedBot = closeBots.stream()
 					.filter(bot -> isBotInFrontOfLine(bot, reversedBallHeading))
@@ -267,8 +276,22 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		double ballTravelDist = ball.getVel().getLength() * TimeUnit.NANOSECONDS.toMillis(timeDelta_ns);
 		double radius = Math.max(ballTravelDist, MIN_SEARCH_RADIUS);
 		
+		getExtendedLayer().add(new DrawableCircle(ball.getPos(), radius, EXT_COLOR));
+		
 		return bots.values().stream()
 				.filter(bot -> GeoMath.distancePP(bot.getPos(), ball.getPos()) < radius)
 				.collect(Collectors.toList());
+	}
+	
+	
+	private List<IDrawableShape> getRegularLayer()
+	{
+		return curShapes.get(EAutoRefShapesLayer.LAST_BALL_CONTACT);
+	}
+	
+	
+	private List<IDrawableShape> getExtendedLayer()
+	{
+		return curShapes.get(EAutoRefShapesLayer.LAST_BALL_CONTACT_EXT);
 	}
 }

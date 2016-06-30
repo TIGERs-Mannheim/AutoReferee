@@ -30,8 +30,6 @@ public class GameLogEntryBuilder
 	private GameTime				gameTime;
 	/** The time instant this entry was created in */
 	private Instant				instant;
-	/** in nanoseconds */
-	private Long					timeSinceStart;
 	
 	private IGameEvent			gameEvent;
 	private boolean				acceptedByEngine;
@@ -72,15 +70,6 @@ public class GameLogEntryBuilder
 	public void setInstant(final Instant instant)
 	{
 		this.instant = instant;
-	}
-	
-	
-	/**
-	 * @param timeSinceStart
-	 */
-	public void setTimeSinceStart(final long timeSinceStart)
-	{
-		this.timeSinceStart = timeSinceStart;
 	}
 	
 	
@@ -141,12 +130,12 @@ public class GameLogEntryBuilder
 	 */
 	public GameLogEntry toEntry()
 	{
-		if ((type == null) || (timestamp == null) || (gameTime == null) || (timeSinceStart == null) || (instant == null))
+		if ((type == null) || (timestamp == null) || (gameTime == null) || (instant == null))
 		{
 			throw new NullPointerException("Not all required fields have been set");
 		}
 		
-		return new GameLogEntry(timestamp, gameTime, timeSinceStart, instant, type, gamestate, gameEvent,
-				acceptedByEngine, refereeMsg, followUpAction, command);
+		return new GameLogEntry(timestamp, gameTime, instant, type, gamestate, gameEvent, acceptedByEngine, refereeMsg,
+				followUpAction, command);
 	}
 }
