@@ -329,7 +329,7 @@ public enum EGameStateNeutral
 	 */
 	public boolean isTimeout()
 	{
-		return isPenalty(this);
+		return isTimeout(this);
 	}
 	
 	
