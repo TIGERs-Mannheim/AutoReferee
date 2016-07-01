@@ -52,6 +52,9 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	@Configurable(comment = "[mm] The bot may only once approach the ball by less than this value")
 	private static double						KICK_EXECUTED_TOLERANCE		= 75;
 	
+	@Configurable(comment = "[mm]")
+	private static double						BOT_SEPARATION_TOLERANCE	= 200;
+	
 	@Configurable(comment = "[mm] The bot is considered to still touch the ball if distance is lower than this value")
 	private static double						BOT_BALL_CONTACT_TOLERANCE	= 30;
 	
@@ -60,6 +63,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	private IVector2								ballKickPos;
 	private BotID									kickerID;
 	private long									kickTime;
+	private boolean								hasLostContact					= false;
 	private boolean								hasMovedAway					= false;
 	
 	static
@@ -103,6 +107,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 			kickerID = robots.stream().sorted(new BotDistanceComparator(ballKickPos))
 					.findFirst().map(bot -> bot.getBotId()).orElse(null);
 			kickTime = wFrame.getTimestamp();
+			hasLostContact = false;
 			hasMovedAway = false;
 		}
 	}
@@ -138,11 +143,15 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		double ballToKickDist = GeoMath.distancePP(ballPos, ballKickPos);
 		if (botBallDist > (BOT_BALL_CONTACT_TOLERANCE + Geometry.getBotRadius() + Geometry.getBallRadius()))
 		{
+			hasLostContact = true;
+		}
+		if (botBallDist > (BOT_SEPARATION_TOLERANCE + Geometry.getBotRadius() + Geometry.getBallRadius()))
+		{
 			hasMovedAway = true;
 		}
 		
 		if ((ballToKickDist > KICK_EXECUTED_TOLERANCE)
-				&& (!hasMovedAway || (kickerID.equals(lastContact.getId()) && (lastContact.getTs() > kickTime))))
+				&& (!hasLostContact || (kickerID.equals(lastContact.getId()) && (lastContact.getTs() > kickTime) && hasMovedAway)))
 		{
 			ETeamColor kickerColor = kickerID.getTeamColor();
 			
@@ -165,6 +174,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		ballKickPos = null;
 		kickerID = null;
 		kickTime = 0;
+		hasLostContact = false;
 		hasMovedAway = false;
 	}
 	

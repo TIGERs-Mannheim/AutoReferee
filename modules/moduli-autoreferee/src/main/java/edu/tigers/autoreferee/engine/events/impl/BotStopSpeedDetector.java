@@ -46,9 +46,12 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	private static final int		priority						= 1;
 	private static final Logger	log							= Logger.getLogger(BotStopSpeedDetector.class);
 	
+	@Configurable(comment = "[ms] Wait time before reporting any events")
+	private static long				INITIAL_WAIT_TIME_MS		= 2_500;
 	@Configurable(comment = "[ms] The number of milliseconds that a bot needs violate the stop speed limit to be reported")
 	private static long				VIOLATION_THRESHOLD_MS	= 300;
 	
+	private long						entryTime					= 0;
 	private Map<BotID, Long>		currentViolators			= new HashMap<>();
 	private Set<BotID>				lastViolators				= new HashSet<>();
 	
@@ -77,21 +80,21 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	@Override
 	protected void prepare(final IAutoRefFrame frame)
 	{
-		/*
-		 * The speed of some of the bots on the field might still be to high when the game state suddenly changes from
-		 * running to stopped. To avoid unnecessary violations all bots that violate the speed rule at the time the game
-		 * state changes are initially added to the list of last offenders. That way a violation will only be reported if
-		 * they increase their speed above the limit a second time.
-		 */
-		Set<BotID> violators = getViolators(frame.getWorldFrame().getBots().values());
-		violators.forEach(id -> currentViolators.put(id, TimeUnit.MILLISECONDS.toNanos(VIOLATION_THRESHOLD_MS)));
-		lastViolators.addAll(violators);
+		entryTime = frame.getTimestamp();
 	}
 	
 	
 	@Override
 	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
+		/*
+		 * We wait an initial time before reporting any events to give robots time to slow down after the STOP command
+		 */
+		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(INITIAL_WAIT_TIME_MS))
+		{
+			return Optional.empty();
+		}
+		
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
 		
 		Set<BotID> botIDs = AutoRefUtil.mapToID(bots);
@@ -188,6 +191,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	@Override
 	public void doReset()
 	{
+		entryTime = 0;
 		lastViolators.clear();
 		currentViolators.clear();
 	}
