@@ -87,47 +87,45 @@ public class BallCollisionModel implements IBallCollisionModel
 	protected void createGoalCollisionObjects(final Goal goal, final CollisionHandler ch)
 	{
 		int sign = goal.getGoalCenter().x() < 0 ? -1 : 1;
-		double depth = Geometry.getGoalDepth() * sign;
 		double radius = Geometry.getBallRadius();
 		double sRadius = radius * sign;
-		IVector2 depthV = new Vector2(depth, 0);
 		
 		IVector2 leftPost = goal.getGoalPostLeft();
-		IVector2 leftBackPost = leftPost.addNew(depthV);
+		IVector2 leftBackPost = goal.getGoalPostLeftBack();
 		IVector2 rightPost = goal.getGoalPostRight();
-		IVector2 rightBackPost = rightPost.addNew(depthV);
+		IVector2 rightBackPost = goal.getGoalPostRightBack();
 		
 		/*
 		 * Outer side of the goal
 		 */
-		IVector2 leftOuterPost = leftPost.addNew(new Vector2(-sRadius, sRadius));
-		IVector2 leftOuterBackPost = leftBackPost.addNew(new Vector2(radius, sRadius));
-		IVector2 rightOuterPost = rightPost.addNew(new Vector2(-sRadius, -sRadius));
-		IVector2 rightOuterBackPost = rightBackPost.addNew(new Vector2(radius, -sRadius));
+		IVector2 leftOuterPost = leftPost.addNew(new Vector2(-sRadius, radius));
+		IVector2 leftOuterBackPost = leftBackPost.addNew(new Vector2(sRadius, radius));
+		IVector2 rightOuterPost = rightPost.addNew(new Vector2(-sRadius, -radius));
+		IVector2 rightOuterBackPost = rightBackPost.addNew(new Vector2(sRadius, -radius));
 		
 		ILine leftOuterWall = Line.newLine(leftOuterPost, leftOuterBackPost);
 		ILine rightOuterWall = Line.newLine(rightOuterPost, rightOuterBackPost);
 		ILine backOuterWall = Line.newLine(leftOuterBackPost, rightOuterBackPost);
 		
 		ch.addObject(new LineCollision(backOuterWall, AVector2.ZERO_VECTOR, new Vector2(sRadius, 0)));
-		ch.addObject(new LineCollision(leftOuterWall, AVector2.ZERO_VECTOR, new Vector2(0, sRadius)));
-		ch.addObject(new LineCollision(rightOuterWall, AVector2.ZERO_VECTOR, new Vector2(0, -sRadius)));
+		ch.addObject(new LineCollision(leftOuterWall, AVector2.ZERO_VECTOR, new Vector2(0, radius)));
+		ch.addObject(new LineCollision(rightOuterWall, AVector2.ZERO_VECTOR, new Vector2(0, -radius)));
 		
 		/*
 		 * Inner side of the goal
 		 */
-		IVector2 leftInnerPost = leftPost.addNew(new Vector2(-sRadius, -sRadius));
-		IVector2 leftInnerBackPost = leftBackPost.addNew(new Vector2(-radius, -sRadius));
-		IVector2 rightInnerPost = rightPost.addNew(new Vector2(-sRadius, sRadius));
-		IVector2 rightInnerBackPost = rightBackPost.addNew(new Vector2(-radius, sRadius));
+		IVector2 leftInnerPost = leftPost.addNew(new Vector2(-sRadius, -radius));
+		IVector2 leftInnerBackPost = leftBackPost.addNew(new Vector2(-sRadius, -radius));
+		IVector2 rightInnerPost = rightPost.addNew(new Vector2(-sRadius, radius));
+		IVector2 rightInnerBackPost = rightBackPost.addNew(new Vector2(-sRadius, radius));
 		
 		ILine leftInnerWall = Line.newLine(leftInnerPost, leftInnerBackPost);
 		ILine rightInnerWall = Line.newLine(rightInnerPost, rightInnerBackPost);
 		ILine backInnerWall = Line.newLine(leftInnerBackPost, rightInnerBackPost);
 		
 		ch.addObject(new LineCollision(backInnerWall, AVector2.ZERO_VECTOR, new Vector2(-sRadius, 0)));
-		ch.addObject(new LineCollision(leftInnerWall, AVector2.ZERO_VECTOR, new Vector2(0, -sRadius)));
-		ch.addObject(new LineCollision(rightInnerWall, AVector2.ZERO_VECTOR, new Vector2(0, sRadius)));
+		ch.addObject(new LineCollision(leftInnerWall, AVector2.ZERO_VECTOR, new Vector2(0, -radius)));
+		ch.addObject(new LineCollision(rightInnerWall, AVector2.ZERO_VECTOR, new Vector2(0, radius)));
 		
 		/*
 		 * Right and left front side

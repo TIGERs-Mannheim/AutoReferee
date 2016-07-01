@@ -63,7 +63,7 @@ public class LineCollision implements ICollisionObject
 		}
 		
 		double dist2Line = lp2Pos.getLength();
-		if (dist2Line > 50)
+		if (dist2Line > 30)
 		{
 			return Optional.empty();
 		}
