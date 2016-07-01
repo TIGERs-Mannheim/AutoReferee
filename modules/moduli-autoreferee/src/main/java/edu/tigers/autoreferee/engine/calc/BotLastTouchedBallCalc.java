@@ -183,7 +183,9 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	}
 	
 	@Configurable(comment = "[degree]")
-	private static double	ANGLE_THRESHOLD_DEGREE	= 10;
+	private static double	ANGLE_THRESHOLD_DEGREE	= 5.0d;
+	@Configurable(comment = "[m/s] Min Gain in velocity that counts as kick")
+	private static double	VEL_GAIN_THRESHOLD		= 0.3d;
 	
 	/** in mm */
 	@Configurable(comment = "[mm]")
@@ -206,8 +208,7 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 			return null;
 		}
 		
-		double radAngle = GeoMath.angleBetweenVectorAndVector(prevHeading, curHeading);
-		if (radAngle > Math.toRadians(ANGLE_THRESHOLD_DEGREE))
+		if (ballTouched(curHeading, prevHeading))
 		{
 			IVector2 ballPos = curBall.getPos();
 			ILine reversedBallHeading = new Line(ballPos, curBall.getVel().multiplyNew(-1.0d));
@@ -276,6 +277,17 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 		return bots.values().stream()
 				.filter(bot -> GeoMath.distancePP(bot.getPos(), ball.getPos()) < radius)
 				.collect(Collectors.toList());
+	}
+	
+	
+	private boolean ballTouched(final IVector2 curHeading, final IVector2 prevHeading)
+	{
+		double radAngle = GeoMath.angleBetweenVectorAndVector(prevHeading, curHeading);
+		if (radAngle > Math.toRadians(ANGLE_THRESHOLD_DEGREE))
+		{
+			return true;
+		}
+		return (curHeading.getLength() - prevHeading.getLength()) > VEL_GAIN_THRESHOLD;
 	}
 	
 	

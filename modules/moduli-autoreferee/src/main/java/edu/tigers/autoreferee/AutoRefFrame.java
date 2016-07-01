@@ -39,6 +39,7 @@ public class AutoRefFrame implements IAutoRefFrame
 	private BotPosition					botTouchedBall;
 	
 	private IVector2						ballLeftFieldPos;
+	private IVector2						lastStopBallPos;
 	
 	private List<EGameStateNeutral>	stateHistory;
 	
@@ -132,6 +133,22 @@ public class AutoRefFrame implements IAutoRefFrame
 	public void setBallLeftFieldPos(final IVector2 getBallLeftFieldPos)
 	{
 		ballLeftFieldPos = getBallLeftFieldPos;
+	}
+	
+	
+	@Override
+	public IVector2 getLastStopBallPosition()
+	{
+		return lastStopBallPos;
+	}
+	
+	
+	/**
+	 * @param pos
+	 */
+	public void setLastStopBallPosition(final IVector2 pos)
+	{
+		lastStopBallPos = pos;
 	}
 	
 	

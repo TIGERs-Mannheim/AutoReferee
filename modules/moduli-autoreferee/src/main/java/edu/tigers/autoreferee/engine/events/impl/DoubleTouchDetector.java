@@ -33,6 +33,7 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.wp.data.Geometry;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
@@ -96,9 +97,8 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		if ((stateHistory.size() > 1) && VALID_PREVIOUS_STATES.contains(stateHistory.get(1)))
 		{
 			IAutoRefFrame lastFrame = frame.getPreviousFrame();
+			ballKickPos = frame.getLastStopBallPosition();
 			SimpleWorldFrame wFrame = lastFrame.getWorldFrame();
-			ballKickPos = wFrame.getBall().getPos();
-			
 			Collection<ITrackedBot> robots = wFrame.getBots().values();
 			kickerID = robots.stream().sorted(new BotDistanceComparator(ballKickPos))
 					.findFirst().map(bot -> bot.getBotId()).orElse(null);
@@ -136,8 +136,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		double botBallDist = GeoMath.distancePP(ballPos, kickerBot.getPos());
 		double ballToKickDist = GeoMath.distancePP(ballPos, ballKickPos);
-		
-		if (botBallDist > BOT_BALL_CONTACT_TOLERANCE)
+		if (botBallDist > (BOT_BALL_CONTACT_TOLERANCE + Geometry.getBotRadius() + Geometry.getBallRadius()))
 		{
 			hasMovedAway = true;
 		}

@@ -34,6 +34,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
+import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
 import edu.tigers.sumatra.referee.TeamConfig;
 import edu.tigers.sumatra.shapes.circle.Circle;
@@ -152,12 +153,20 @@ public class AttackerTouchKeeperDetector extends AGameEventDetector
 	private Set<BotID> getViolators(final IBotIDMap<ITrackedBot> bots, final ITrackedBot target)
 	{
 		ETeamColor targetColor = target.getBotId().getTeamColor();
+		PenaltyArea penArea = NGeometry.getPenaltyArea(targetColor);
 		Circle circle = new Circle(target.getPos(), TOUCH_DISTANCE + (Geometry.getBotRadius() * 2));
 		
 		List<ITrackedBot> attackingBots = AutoRefUtil.filterByColor(bots, targetColor.opposite());
 		
+		/*
+		 * We only consider a contact to be a violation if the contact occurs inside the defense area
+		 */
 		return attackingBots.stream()
 				.filter(bot -> circle.isPointInShape(bot.getPos(), 0))
+				.filter(bot -> {
+					IVector2 contactPoint = GeoMath.calcTwoPointCenter(bot.getPos(), target.getPos());
+					return penArea.isPointInShape(contactPoint);
+				})
 				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());
 	}

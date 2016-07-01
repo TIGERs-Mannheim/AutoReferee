@@ -592,4 +592,26 @@ public class GeoMathTest
 		assertEquals(1e-9f, circle.center().y(), Double.MIN_VALUE);
 	}
 	
+	
+	/**
+	 * 
+	 */
+	@Test
+	public void testCalcTwoPointCenter()
+	{
+		IVector2 p1 = new Vector2(0, 0);
+		IVector2 p2 = new Vector2(1, 1);
+		IVector2 expected = new Vector2(0.5, 0.5);
+		assertEquals(expected, GeoMath.calcTwoPointCenter(p1, p2));
+		
+		p2 = new Vector2(0, 0);
+		expected = new Vector2(0, 0);
+		assertEquals(expected, GeoMath.calcTwoPointCenter(p1, p2));
+		
+		p1 = new Vector2(10, 10);
+		p2 = p1.multiplyNew(-1.0);
+		expected = new Vector2(0.0, 0.0);
+		assertEquals(expected, GeoMath.calcTwoPointCenter(p1, p2));
+	}
+	
 }

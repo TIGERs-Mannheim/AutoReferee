@@ -265,22 +265,21 @@ public class NGeometry
 	
 	/**
 	 * Returns true if the specified position is located inside one of the two goals
-	 * The area behind the goal (abs(x) <= GoalDepth + goalDepthMargin) up to the margin is considered to be part of the
-	 * goal
+	 * The area behind the goal and on each side of the goal up to the margin is considered to be part of the goal.
 	 * 
 	 * @param pos
-	 * @param goalDepthMargin
+	 * @param goalMargin
 	 * @return
 	 */
-	public static boolean ballInsideGoal(final IVector2 pos, final double goalDepthMargin)
+	public static boolean ballInsideGoal(final IVector2 pos, final double goalMargin)
 	{
 		Rectangle field = getField();
 		double absXPos = Math.abs(pos.x());
 		double absYPos = Math.abs(pos.y());
 		
 		boolean xPosCorrect = (absXPos > (field.getxExtend() / 2))
-				&& (absXPos < ((field.getxExtend() / 2) + Geometry.getGoalDepth() + goalDepthMargin));
-		boolean yPosCorrect = absYPos < (Geometry.getGoalSize() / 2);
+				&& (absXPos < ((field.getxExtend() / 2) + Geometry.getGoalDepth() + goalMargin));
+		boolean yPosCorrect = absYPos < ((Geometry.getGoalSize() / 2) + goalMargin);
 		return xPosCorrect && yPosCorrect;
 	}
 	

@@ -1144,4 +1144,16 @@ public final class GeoMath
 		
 		return botPos.addNew(new Vector2(orientation).scaleTo(center2Dribbler));
 	}
+	
+	
+	/**
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	public static IVector2 calcTwoPointCenter(final IVector2 a, final IVector2 b)
+	{
+		Vector2 center = a.addNew(b);
+		return center.multiplyNew(0.5d);
+	}
 }

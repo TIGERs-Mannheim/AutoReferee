@@ -9,7 +9,6 @@
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -64,8 +63,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	 */
 	public BotStopSpeedDetector()
 	{
-		super(EnumSet.of(EGameStateNeutral.STOPPED,
-				EGameStateNeutral.PREPARE_KICKOFF_BLUE, EGameStateNeutral.PREPARE_KICKOFF_YELLOW));
+		super(EGameStateNeutral.STOPPED);
 	}
 	
 	

@@ -55,9 +55,19 @@ public class JTeamLabel extends JLabel
 	public void setRobot(final BotID id)
 	{
 		ETeamColor color = id.getTeamColor();
-		String text = getTeamText(color) + " " + id.getNumber();
+		String text = getText(id);
 		setColoring(color);
 		setText(text);
+	}
+	
+	
+	private String getText(final BotID id)
+	{
+		if (id.isUninitializedID())
+		{
+			return "Unknown";
+		}
+		return getTeamText(id.getTeamColor()) + " " + id.getNumber();
 	}
 	
 	

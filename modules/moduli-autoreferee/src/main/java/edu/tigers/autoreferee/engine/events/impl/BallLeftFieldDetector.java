@@ -47,7 +47,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	private static double		icingKickoffLineThreshold	= 200;
 	
 	@Configurable(comment = "[mm] Area behind the goal that is still considered to be part of the goal for better goal detection")
-	private static double		goalDepthMargin				= 100;
+	private static double		goalMargin						= 100;
 	
 	@Configurable(comment = "[ms] Cooldown before an event is reported again")
 	private static long			cooldownTime					= 2_000;
@@ -212,12 +212,17 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	}
 	
 	
+	/**
+	 * Check if the ball is located inside the goal.
+	 * We use a hysteresis like approach to avoid false positive detections that can occur if the physical goal is not
+	 * positioned correctly and the ball enters the virtual goal after having left the field.
+	 */
 	private boolean ballInsideGoal(final IVector2 ballPos)
 	{
-		double margin = 0.0d;
-		if (!ballOutsideField)
+		double margin = goalMargin;
+		if (ballOutsideField)
 		{
-			margin = goalDepthMargin;
+			margin = -goalMargin;
 		}
 		return NGeometry.ballInsideGoal(ballPos, margin);
 	}

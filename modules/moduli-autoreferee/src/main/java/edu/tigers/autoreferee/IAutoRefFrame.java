@@ -65,6 +65,12 @@ public interface IAutoRefFrame
 	/**
 	 * @return
 	 */
+	public IVector2 getLastStopBallPosition();
+	
+	
+	/**
+	 * @return
+	 */
 	public RefereeMsg getRefereeMsg();
 	
 	

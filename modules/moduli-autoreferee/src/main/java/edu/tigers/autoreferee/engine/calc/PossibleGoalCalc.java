@@ -17,7 +17,6 @@ import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
-import edu.tigers.sumatra.math.Line;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 
 
@@ -67,10 +66,14 @@ public class PossibleGoalCalc implements IRefereeCalc
 	@Configurable(comment = "[degree] The angle by which the ball heading needs to change while inside the goal to count as goal")
 	private static double	GOAL_BALL_CHANGE_ANGLE_DEGREE	= 45;
 	
+	@Configurable(comment = "[mm] The margin around the core zone which the ball must have entered")
+	private static double	CORE_AREA_MARGIN					= 50;
+	
 	private PossibleGoal		detectedGoal						= null;
 	
 	private long				tsOnGoalEntry						= 0;
 	private IVector2			ballHeadingOnGoalEntry			= null;
+	private boolean			ballEnteredCoreZone				= false;
 	
 	static
 	{
@@ -95,6 +98,10 @@ public class PossibleGoalCalc implements IRefereeCalc
 				tsOnGoalEntry = frame.getTimestamp();
 			}
 			
+			if (!ballEnteredCoreZone)
+			{
+				ballEnteredCoreZone = NGeometry.ballInsideGoal(ballPos, -CORE_AREA_MARGIN);
+			}
 			/*
 			 * The ball heading has changed by GOAL_BALL_CHANGE_ANGLE_DEGREE degrees --> Sufficient condition
 			 * This will avoid false positives if the ball is kicked over the goal
@@ -106,7 +113,7 @@ public class PossibleGoalCalc implements IRefereeCalc
 			 */
 			boolean ballStationary = ballIsStationary(ball);
 			
-			if ((ballHeadingChanged || ballStationary) && (detectedGoal == null))
+			if ((ballHeadingChanged || ballStationary) && ballEnteredCoreZone && (detectedGoal == null))
 			{
 				detectedGoal = new PossibleGoal(tsOnGoalEntry, getGoalColor(ballPos));
 			}
@@ -115,6 +122,7 @@ public class PossibleGoalCalc implements IRefereeCalc
 		{
 			detectedGoal = null;
 			ballHeadingOnGoalEntry = null;
+			ballEnteredCoreZone = false;
 		}
 		
 		frame.setPossibleGoal(detectedGoal);
@@ -123,14 +131,7 @@ public class PossibleGoalCalc implements IRefereeCalc
 	
 	private ETeamColor getGoalColor(final IVector2 ballPos)
 	{
-		Line blueGoalLine = NGeometry.getGoalLine(ETeamColor.BLUE);
-		Line yellowGoalLine = NGeometry.getGoalLine(ETeamColor.YELLOW);
-		
-		if (GeoMath.distancePL(ballPos, yellowGoalLine) < GeoMath.distancePL(ballPos, blueGoalLine))
-		{
-			return ETeamColor.YELLOW;
-		}
-		return ETeamColor.BLUE;
+		return NGeometry.getTeamOfClosestGoalLine(ballPos);
 	}
 	
 	
