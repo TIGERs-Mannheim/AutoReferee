@@ -137,4 +137,20 @@ public class Goal
 	}
 	
 	
+	/**
+	 * @return the goalPostLeftBack
+	 */
+	public Vector2 getGoalPostLeftBack()
+	{
+		return goalPostLeftBack;
+	}
+	
+	
+	/**
+	 * @return the goalPostRightBack
+	 */
+	public Vector2 getGoalPostRightBack()
+	{
+		return goalPostRightBack;
+	}
 }
