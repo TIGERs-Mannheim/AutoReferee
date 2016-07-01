@@ -22,8 +22,8 @@ import org.apache.log4j.Logger;
 
 import edu.tigers.autoref.view.generic.SumatraViewPanel;
 import edu.tigers.autoref.view.main.ActiveEnginePanel;
-import edu.tigers.autoref.view.main.StartStopPanel;
 import edu.tigers.autoref.view.main.ActiveEnginePanel.IActiveEnginePanelObserver;
+import edu.tigers.autoref.view.main.StartStopPanel;
 import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefModule;
 import edu.tigers.autoreferee.AutoRefModule.AutoRefState;
@@ -133,7 +133,9 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IModuliStateObse
 				Optional<AutoRefModule> optAutoref = AutoRefUtil.getAutoRefModule();
 				if (optAutoref.isPresent())
 				{
-					optAutoref.get().start(mode);
+					AutoRefModule autoref = optAutoref.get();
+					autoref.start(mode);
+					autoref.getEngine().setActiveGameEvents(gameEventPanel.getValues());
 				}
 			} catch (StartModuleException e)
 			{
