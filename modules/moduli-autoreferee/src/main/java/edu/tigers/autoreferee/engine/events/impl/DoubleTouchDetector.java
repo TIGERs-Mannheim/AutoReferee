@@ -136,7 +136,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		double botBallDist = GeoMath.distancePP(ballPos, kickerBot.getPos());
 		double ballToKickPosDist = GeoMath.distancePP(ballPos, ballKickPos);
-		double botBallRadius = Geometry.getBallRadius() + Geometry.getBotRadius();
+		double botBallRadius = Geometry.getBotAndBallRadius();
 		
 		if (botBallDist > (SEPARATION_DISTANCE + botBallRadius))
 		{

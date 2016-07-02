@@ -24,6 +24,7 @@ import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.GeoMath;
 import edu.tigers.sumatra.math.IVector2;
@@ -46,12 +47,10 @@ public class DribblingDetector extends APreparingGameEventDetector
 	private static double			MAX_DRIBBLING_LENGTH				= 1000;
 	
 	@Configurable(comment = "[mm] Any distance to the ball closer than this value is considered dribbling")
-	private static double			DRIBBLING_BOT_BALL_DISTANCE	= 100;
+	private static double			DRIBBLING_BOT_BALL_DISTANCE	= 40;
 	
 	/** The position where the currently dribbling bot first touched the ball */
 	private BotPosition				firstContact;
-	/** The position where the currently dribbling bot last touched the ball */
-	private BotPosition				lastContact;
 	
 	private long						resetTime;
 	
@@ -87,56 +86,49 @@ public class DribblingDetector extends APreparingGameEventDetector
 	@Override
 	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
-		BotPosition curLastContact = frame.getBotLastTouchedBall();
-		if (!(isSane(firstContact) && isSane(lastContact)))
+		BotPosition curContact = frame.getLastBotCloseToBall();
+		if (!isSane(firstContact))
 		{
-			if (isSane(curLastContact) && (curLastContact.getTs() >= resetTime))
+			if (isSane(curContact) && (curContact.getTs() >= resetTime))
 			{
-				firstContact = curLastContact;
-				lastContact = curLastContact;
+				firstContact = curContact;
 			} else
 			{
 				return Optional.empty();
 			}
 		}
 		
+		BotID dribblerID = firstContact.getId();
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
-		ETeamColor dribblerColor = lastContact.getId().getTeamColor();
-		ITrackedBot bot = frame.getWorldFrame().getBot(lastContact.getId());
-		if (bot == null)
+		ITrackedBot dribblerBot = frame.getWorldFrame().getBot(dribblerID);
+		if (dribblerBot == null)
 		{
-			log.warn("Bot that last touched the ball disappeard from the field: " + lastContact.getId());
+			log.warn("Bot that last touched the ball disappeard from the field: " + dribblerID);
 			return Optional.empty();
 		}
 		
-		if (lastContact.getTs() == curLastContact.getTs())
+		if (!curContact.getId().equals(dribblerID))
 		{
-			// The ball has not been touched since the last contact
-			if (GeoMath.distancePP(bot.getPos(), ballPos) > (DRIBBLING_BOT_BALL_DISTANCE + Geometry.getBotRadius()))
-			{
-				resetRule(frame.getTimestamp());
-				return Optional.empty();
-			}
-		} else
+			resetRule(curContact.getTs());
+			return Optional.empty();
+		}
+		
+		// The ball has not been touched since the last contact
+		if (GeoMath.distancePP(dribblerBot.getPos(), ballPos) > (DRIBBLING_BOT_BALL_DISTANCE + Geometry
+				.getBotAndBallRadius()))
 		{
-			// The ball has been touched by a new robot
-			if (lastContact.getId().equals(curLastContact.getId()))
-			{
-				lastContact = curLastContact;
-			} else
-			{
-				resetRule(curLastContact.getTs());
-				return Optional.empty();
-			}
+			resetRule(frame.getTimestamp());
+			return Optional.empty();
 		}
 		
 		double totalDistance = GeoMath.distancePP(firstContact.getPos(), ballPos);
 		if (totalDistance > MAX_DRIBBLING_LENGTH)
 		{
+			ETeamColor dribblerColor = dribblerID.getTeamColor();
 			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, dribblerColor.opposite());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, dribblerColor.opposite(), kickPos);
 			GameEvent violation = new DistanceViolation(EGameEvent.BALL_DRIBBLING, frame.getTimestamp(),
-					lastContact.getId(), followUp, totalDistance);
+					dribblerID, followUp, totalDistance);
 			resetRule(frame.getTimestamp());
 			return Optional.of(violation);
 		}
@@ -148,7 +140,6 @@ public class DribblingDetector extends APreparingGameEventDetector
 	public void doReset()
 	{
 		firstContact = null;
-		lastContact = null;
 	}
 	
 	

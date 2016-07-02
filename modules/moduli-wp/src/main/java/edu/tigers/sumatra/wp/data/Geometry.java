@@ -84,7 +84,7 @@ public class Geometry
 	
 	@Configurable
 	private static Double[]					cameraHeights							= new Double[] { 3500.0, 3500.0, 3500.0,
-			3500.0 };
+																								3500.0 };
 	@Configurable
 	private static Double[]					cameraFocalLength						= new Double[] { 0.0, 0.0, 0.0, 0.0 };
 	@Configurable
@@ -159,7 +159,7 @@ public class Geometry
 		ConfigRegistration.registerConfigurableCallback("geom", new ConfigCallback());
 	}
 	
-	private static Geometry instance = new Geometry();
+	private static Geometry	instance	= new Geometry();
 	
 	
 	/**
@@ -355,6 +355,15 @@ public class Geometry
 	public static double getBotRadius()
 	{
 		return botRadius;
+	}
+	
+	
+	/**
+	 * @return the sum of bot and ball radius
+	 */
+	public static double getBotAndBallRadius()
+	{
+		return getBotRadius() + getBallRadius();
 	}
 	
 	
