@@ -794,10 +794,39 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	/**
 	 * @param fieldTurn the fieldTurn to set
 	 */
-	private final void setFieldTurn(final EFieldTurn fieldTurn)
+	@Override
+	public final void setFieldTurn(final EFieldTurn fieldTurn)
 	{
 		this.fieldTurn = fieldTurn;
 		SumatraModel.getInstance().setUserProperty(FieldPanel.class.getCanonicalName() + ".fieldTurn", fieldTurn.name());
+	}
+	
+	
+	@Override
+	public boolean isFancyPainting()
+	{
+		return fancyPainting;
+	}
+	
+	
+	@Override
+	public void setFancyPainting(final boolean fancy)
+	{
+		fancyPainting = fancy;
+	}
+	
+	
+	@Override
+	public boolean isPaintCoordinates()
+	{
+		return doPaintCoordinates;
+	}
+	
+	
+	@Override
+	public void setPaintCoordinates(final boolean paint)
+	{
+		doPaintCoordinates = paint;
 	}
 	
 	

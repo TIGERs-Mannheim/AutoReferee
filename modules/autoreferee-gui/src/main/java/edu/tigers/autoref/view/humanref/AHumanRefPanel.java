@@ -24,7 +24,6 @@ import javax.swing.SwingConstants;
 import net.miginfocom.swing.MigLayout;
 import edu.tigers.sumatra.shapes.rectangle.Rectangle;
 import edu.tigers.sumatra.views.ISumatraView;
-import edu.tigers.sumatra.visualizer.view.EVisualizerOptions;
 import edu.tigers.sumatra.visualizer.view.field.FieldPanel;
 import edu.tigers.sumatra.visualizer.view.field.IFieldPanel;
 import edu.tigers.sumatra.wp.data.Geometry;
@@ -74,8 +73,8 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	protected void setupGUI()
 	{
 		fieldPanel = new FieldPanel(FIELD_PANEL_WIDTH, new BasicStroke(STROKE_WIDTH));
-		fieldPanel.onOptionChanged(EVisualizerOptions.PAINT_COORD, false);
-		fieldPanel.onOptionChanged(EVisualizerOptions.FANCY, true);
+		fieldPanel.setPaintCoordinates(false);
+		fieldPanel.setFancyPainting(true);
 		setLayout(isVertical);
 	}
 	
@@ -215,7 +214,7 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	{
 		for (int i = 0; i < 2; i++)
 		{
-			fieldPanel.onOptionChanged(EVisualizerOptions.TURN_NEXT, true);
+			fieldPanel.setFieldTurn(fieldPanel.getFieldTurn().getOpposite());
 		}
 	}
 	

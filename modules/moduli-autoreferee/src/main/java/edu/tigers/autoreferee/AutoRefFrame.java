@@ -35,6 +35,7 @@ public class AutoRefFrame implements IAutoRefFrame
 	
 	private IAutoRefFrame				previousFrame;
 	
+	private BotPosition					lastBotCloseToBall;
 	private BotPosition					botLastTouchedBall;
 	private BotPosition					botTouchedBall;
 	
@@ -117,6 +118,22 @@ public class AutoRefFrame implements IAutoRefFrame
 	public void setBotTouchedBall(final BotPosition botTouchedBall)
 	{
 		this.botTouchedBall = botTouchedBall;
+	}
+	
+	
+	@Override
+	public BotPosition getLastBotCloseToBall()
+	{
+		return lastBotCloseToBall;
+	}
+	
+	
+	/**
+	 * @param lastBotCloseToBall the lastBotCloseToBall to set
+	 */
+	public void setLastBotCloseToBall(final BotPosition lastBotCloseToBall)
+	{
+		this.lastBotCloseToBall = lastBotCloseToBall;
 	}
 	
 	

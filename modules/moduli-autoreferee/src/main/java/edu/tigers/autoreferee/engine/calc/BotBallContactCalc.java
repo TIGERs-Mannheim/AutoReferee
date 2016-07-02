@@ -49,7 +49,7 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class BotLastTouchedBallCalc implements IRefereeCalc
+public class BotBallContactCalc implements IRefereeCalc
 {
 	/**
 	 * @author "Lukas Magel"
@@ -57,25 +57,26 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	public enum CalcMode
 	{
 		/**  */
-		VICINITY,
+		REGULAR,
 		/**  */
-		BALL_HEADING
+		FALLBACK
 	}
 	
-	private static final Logger	log			= Logger.getLogger(BotLastTouchedBallCalc.class);
-	private static final Color		EXT_COLOR	= Color.WHITE;
+	private static final Logger	log						= Logger.getLogger(BotBallContactCalc.class);
+	private static final Color		EXT_COLOR				= Color.WHITE;
 	
 	@Configurable(comment = "The algorithm to use for ball touch detection")
-	private static CalcMode			mode			= CalcMode.BALL_HEADING;
+	private static CalcMode			mode						= CalcMode.REGULAR;
 	
-	private BotPosition				lastBot		= new BotPosition();
+	private BotPosition				lastBotCloseToBall	= new BotPosition();
+	private BotPosition				lastBotTouchedBall	= new BotPosition();
 	private ShapeMap					curShapes;
 	
 	
 	/**
 	  * 
 	  */
-	public BotLastTouchedBallCalc()
+	public BotBallContactCalc()
 	{
 		
 	}
@@ -86,25 +87,39 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	{
 		curShapes = frame.getShapes();
 		
-		BotPosition theChosenOne = null;
-		if (mode == CalcMode.BALL_HEADING)
+		BotPosition chosenBotCloseToBall = processByVicinity(frame);
+		
+		BotPosition chosenBotTouchedBall = null;
+		if (mode == CalcMode.REGULAR)
 		{
-			theChosenOne = processHeading(frame);
+			chosenBotTouchedBall = processByBallHeading(frame);
 		} else
 		{
-			theChosenOne = processVicinity(frame);
+			chosenBotTouchedBall = chosenBotCloseToBall;
 		}
 		
-		if (theChosenOne != null)
+		if (chosenBotCloseToBall != null)
 		{
-			frame.setBotTouchedBall(theChosenOne);
-			lastBot = theChosenOne;
-			addMark(frame, theChosenOne.getId(), Color.PINK);
+			lastBotCloseToBall = chosenBotCloseToBall;
 		}
 		
+		if (chosenBotTouchedBall != null)
+		{
+			frame.setBotTouchedBall(chosenBotTouchedBall);
+			lastBotTouchedBall = chosenBotTouchedBall;
+		}
 		
-		addMark(frame, lastBot.getId(), Color.ORANGE);
-		frame.setBotLastTouchedBall(lastBot);
+		if (lastBotCloseToBall.getId().equals(lastBotTouchedBall.getId()))
+		{
+			addMark(frame, lastBotTouchedBall.getId(), Color.MAGENTA);
+		} else
+		{
+			addMark(frame, lastBotTouchedBall.getId(), Color.BLUE);
+			addMark(frame, lastBotCloseToBall.getId(), Color.RED);
+		}
+		
+		frame.setBotLastTouchedBall(lastBotTouchedBall);
+		frame.setLastBotCloseToBall(lastBotCloseToBall);
 	}
 	
 	
@@ -123,7 +138,7 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	private static final double	ANGLE_EPSILON	= 0.1;
 	
 	
-	private BotPosition processVicinity(final IAutoRefFrame frame)
+	private BotPosition processByVicinity(final IAutoRefFrame frame)
 	{
 		long ts = frame.getTimestamp();
 		SimpleWorldFrame wFrame = frame.getWorldFrame();
@@ -195,7 +210,7 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	private static double	BOT_RADIUS_MARGIN			= 30;
 	
 	
-	private BotPosition processHeading(final IAutoRefFrame frame)
+	private BotPosition processByBallHeading(final IAutoRefFrame frame)
 	{
 		TrackedBall curBall = frame.getWorldFrame().getBall();
 		TrackedBall prevBall = frame.getPreviousFrame().getWorldFrame().getBall();
@@ -305,6 +320,6 @@ public class BotLastTouchedBallCalc implements IRefereeCalc
 	
 	static
 	{
-		ConfigRegistration.registerClass("autoreferee", BotLastTouchedBallCalc.class);
+		ConfigRegistration.registerClass("autoreferee", BotBallContactCalc.class);
 	}
 }

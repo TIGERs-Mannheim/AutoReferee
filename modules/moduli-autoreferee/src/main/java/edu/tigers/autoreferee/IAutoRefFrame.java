@@ -47,6 +47,12 @@ public interface IAutoRefFrame
 	/**
 	 * @return
 	 */
+	public BotPosition getLastBotCloseToBall();
+	
+	
+	/**
+	 * @return
+	 */
 	public BotPosition getBotLastTouchedBall();
 	
 	

@@ -17,6 +17,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
+import java.util.Base64;
+import java.util.Base64.Encoder;
+
+import org.apache.log4j.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -29,10 +33,13 @@ import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
  */
 public class RefboxRemoteSocket
 {
-	private static final int	INT_FIELD_SIZE	= 4;
+	private static final Logger	log				= Logger.getLogger(RefboxRemoteSocket.class);
+	private static final Encoder	b64Encoder		= Base64.getEncoder();
 	
-	private SocketChannel		socket;
-	private ByteBuffer			intBuffer;
+	private static final int		INT_FIELD_SIZE	= 4;
+	
+	private SocketChannel			socket;
+	private ByteBuffer				intBuffer;
 	
 	
 	/**
@@ -103,10 +110,9 @@ public class RefboxRemoteSocket
 		{
 			socket.read(intBuffer);
 		}
-		
 		intBuffer.flip();
 		int msgLength = intBuffer.getInt();
-		
+		log.debug("Attempting to receive remote reply with size: " + msgLength);
 		
 		prepareBuf(msgLength);
 		while (intBuffer.hasRemaining())
@@ -115,12 +121,26 @@ public class RefboxRemoteSocket
 		}
 		intBuffer.flip();
 		
-		return SSL_RefereeRemoteControlReply.parseFrom(intBuffer.array());
+		byte binData[] = intBuffer.array();
+		
+		try
+		{
+			SSL_RefereeRemoteControlReply reply = SSL_RefereeRemoteControlReply.parseFrom(binData);
+			log.debug("Received reply: " + reply.toString());
+			return reply;
+		} catch (Exception e)
+		{
+			log.error("Unable to parse following reply with binary size + " + msgLength + " (Base64): "
+					+ b64Encoder.encodeToString(binData));
+			throw e;
+		}
 	}
 	
 	
 	private void writeRequest(final SSL_RefereeRemoteControlRequest req) throws IOException
 	{
+		log.debug("Sending command with size (" + req.getSerializedSize() + "): " + req.toString());
+		
 		int totalSize = req.getSerializedSize() + INT_FIELD_SIZE;
 		prepareBuf(totalSize);
 		

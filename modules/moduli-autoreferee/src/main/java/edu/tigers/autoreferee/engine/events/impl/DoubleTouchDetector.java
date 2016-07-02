@@ -46,25 +46,23 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
  */
 public class DoubleTouchDetector extends APreparingGameEventDetector
 {
-	private static final int					priority							= 1;
-	private static final Logger				log								= Logger.getLogger(DoubleTouchDetector.class);
+	private static final int					priority						= 1;
+	private static final Logger				log							= Logger.getLogger(DoubleTouchDetector.class);
 	
 	@Configurable(comment = "[mm] The bot may only once approach the ball by less than this value")
-	private static double						KICK_EXECUTED_TOLERANCE		= 75;
+	private static double						SEPARATION_DISTANCE		= 75;
 	
-	@Configurable(comment = "[mm]")
-	private static double						BOT_SEPARATION_TOLERANCE	= 200;
+	@Configurable(comment = "[mm] The kick is executed if the ball has moved by this distance")
+	private static double						KICK_EXECUTED_DISTANCE	= 120;
 	
-	@Configurable(comment = "[mm] The bot is considered to still touch the ball if distance is lower than this value")
-	private static double						BOT_BALL_CONTACT_TOLERANCE	= 30;
+	private boolean								hasMovedAwayFromBall		= false;
+	private boolean								kickExecuted				= false;
+	private long									kickStamp					= 0;
+	
+	private IVector2								ballKickPos					= null;
+	private BotID									kickerID						= null;
 	
 	private static Set<EGameStateNeutral>	VALID_PREVIOUS_STATES;
-	
-	private IVector2								ballKickPos;
-	private BotID									kickerID;
-	private long									kickTime;
-	private boolean								hasLostContact					= false;
-	private boolean								hasMovedAway					= false;
 	
 	static
 	{
@@ -101,14 +99,13 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		if ((stateHistory.size() > 1) && VALID_PREVIOUS_STATES.contains(stateHistory.get(1)))
 		{
 			IAutoRefFrame lastFrame = frame.getPreviousFrame();
-			ballKickPos = frame.getLastStopBallPosition();
+			ballKickPos = lastFrame.getLastStopBallPosition();
+			
 			SimpleWorldFrame wFrame = lastFrame.getWorldFrame();
 			Collection<ITrackedBot> robots = wFrame.getBots().values();
 			kickerID = robots.stream().sorted(new BotDistanceComparator(ballKickPos))
 					.findFirst().map(bot -> bot.getBotId()).orElse(null);
-			kickTime = wFrame.getTimestamp();
-			hasLostContact = false;
-			hasMovedAway = false;
+			kickStamp = frame.getTimestamp();
 		}
 	}
 	
@@ -121,12 +118,10 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 			return Optional.empty();
 		}
 		
-		BotPosition lastContact = frame.getBotLastTouchedBall();
-		if ((kickerID.equals(lastContact.getId()) == false) && (lastContact.getTs() > kickTime))
+		BotPosition curLastCloseBotPos = frame.getLastBotCloseToBall();
+		if (!kickerID.equals(curLastCloseBotPos.getId()))
 		{
-			/*
-			 * The ball was touched by a different robot
-			 */
+			// The ball has been touched by another robot
 			doReset();
 			return Optional.empty();
 		}
@@ -134,32 +129,38 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		ITrackedBot kickerBot = frame.getWorldFrame().getBot(kickerID);
 		if (kickerBot == null)
 		{
-			log.warn("Tracked bot disappeard from the field: " + kickerID);
+			log.debug("Tracked bot disappeard from the field: " + kickerID);
 			return Optional.empty();
 		}
 		
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		double botBallDist = GeoMath.distancePP(ballPos, kickerBot.getPos());
-		double ballToKickDist = GeoMath.distancePP(ballPos, ballKickPos);
-		if (botBallDist > (BOT_BALL_CONTACT_TOLERANCE + Geometry.getBotRadius() + Geometry.getBallRadius()))
+		double ballToKickPosDist = GeoMath.distancePP(ballPos, ballKickPos);
+		double botBallRadius = Geometry.getBallRadius() + Geometry.getBotRadius();
+		
+		if (botBallDist > (SEPARATION_DISTANCE + botBallRadius))
 		{
-			hasLostContact = true;
-		}
-		if (botBallDist > (BOT_SEPARATION_TOLERANCE + Geometry.getBotRadius() + Geometry.getBallRadius()))
-		{
-			hasMovedAway = true;
+			hasMovedAwayFromBall = true;
 		}
 		
-		if ((ballToKickDist > KICK_EXECUTED_TOLERANCE)
-				&& (!hasLostContact || (kickerID.equals(lastContact.getId()) && (lastContact.getTs() > kickTime) && hasMovedAway)))
+		if (ballToKickPosDist > (KICK_EXECUTED_DISTANCE + botBallRadius))
+		{
+			kickExecuted = true;
+		}
+		
+		
+		if (kickExecuted && (
+				!hasMovedAwayFromBall
+				|| ((curLastCloseBotPos.getTs() > kickStamp) && curLastCloseBotPos.getId().equals(kickerID))
+				))
 		{
 			ETeamColor kickerColor = kickerID.getTeamColor();
 			
 			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, kickerColor.opposite());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, kickerColor.opposite(),
 					kickPos);
-			IGameEvent violation = new GameEvent(EGameEvent.DOUBLE_TOUCH, frame.getTimestamp(), kickerID, followUp);
-			
+			GameEvent violation = new GameEvent(EGameEvent.DOUBLE_TOUCH, frame.getTimestamp(),
+					kickerID, followUp);
 			doReset();
 			return Optional.of(violation);
 		}
@@ -171,11 +172,11 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	@Override
 	public void doReset()
 	{
+		kickExecuted = false;
+		hasMovedAwayFromBall = false;
+		kickStamp = 0;
 		ballKickPos = null;
 		kickerID = null;
-		kickTime = 0;
-		hasLostContact = false;
-		hasMovedAway = false;
 	}
 	
 	

@@ -8,6 +8,7 @@
  */
 package edu.tigers.sumatra.visualizer.view.field;
 
+import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.IDrawableTool;
 import edu.tigers.sumatra.visualizer.view.EVisualizerOptions;
 import edu.tigers.sumatra.visualizer.view.IFieldPanelObserver;
@@ -96,4 +97,34 @@ public interface IFieldPanel extends IDrawableTool
 	 * 
 	 */
 	void repaint();
+	
+	
+	/**
+	 * @param fieldTurn
+	 */
+	public void setFieldTurn(EFieldTurn fieldTurn);
+	
+	
+	/**
+	 * @return
+	 */
+	public boolean isFancyPainting();
+	
+	
+	/**
+	 * @param fancy
+	 */
+	public void setFancyPainting(boolean fancy);
+	
+	
+	/**
+	 * @return
+	 */
+	public boolean isPaintCoordinates();
+	
+	
+	/**
+	 * @param paint
+	 */
+	public void setPaintCoordinates(boolean paint);
 }
