@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Sep 12, 2015
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.control.motor;
 
@@ -16,10 +11,10 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 
-import edu.tigers.sumatra.math.IVector3;
-import edu.tigers.sumatra.math.IVectorN;
-import edu.tigers.sumatra.math.Vector3;
-import edu.tigers.sumatra.math.VectorN;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.IVectorN;
+import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.VectorN;
 
 
 /**
@@ -100,19 +95,19 @@ public class MatrixMotorModel extends AMotorModel
 	@Override
 	protected VectorN getWheelSpeedInternal(final IVector3 targetVel)
 	{
-		RealMatrix XYW = new Array2DRowRealMatrix(targetVel.toDoubleArray());
+		RealMatrix XYW = new Array2DRowRealMatrix(targetVel.toArray());
 		RealMatrix speedOverGround = D.multiply(XYW);
 		RealVector wheelSpeed = speedOverGround.getColumnVector(0).mapMultiply(1.0 / WHEEL_RADIUS);
-		return new VectorN(wheelSpeed);
+		return VectorN.fromReal(wheelSpeed);
 	}
 	
 	
 	@Override
 	protected Vector3 getXywSpeedInternal(final IVectorN wheelSpeed)
 	{
-		RealMatrix wheel = new Array2DRowRealMatrix(wheelSpeed.toDoubleArray());
+		RealMatrix wheel = new Array2DRowRealMatrix(wheelSpeed.toArray());
 		RealVector result = Dinv.multiply(wheel).getColumnVector(0).mapMultiply(WHEEL_RADIUS);
-		return new Vector3(result.getEntry(0),
+		return Vector3.fromXYZ(result.getEntry(0),
 				result.getEntry(1),
 				result.getEntry(2));
 	}

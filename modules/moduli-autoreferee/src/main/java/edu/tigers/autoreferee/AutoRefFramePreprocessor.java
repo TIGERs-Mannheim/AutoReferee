@@ -27,7 +27,7 @@ public class AutoRefFramePreprocessor
 {
 	private List<IRefereeCalc>	calculators	= new ArrayList<>();
 	
-	private IAutoRefFrame		lastFrame;
+	private AutoRefFrame			lastFrame;
 	
 	
 	/**
@@ -73,7 +73,7 @@ public class AutoRefFramePreprocessor
 	}
 	
 	
-	private void setLastFrame(final IAutoRefFrame frame)
+	private void setLastFrame(final AutoRefFrame frame)
 	{
 		if (lastFrame != null)
 		{

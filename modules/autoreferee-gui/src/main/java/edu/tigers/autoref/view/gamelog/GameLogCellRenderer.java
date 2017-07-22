@@ -1,22 +1,16 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Mar 24, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoref.view.gamelog;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -66,7 +60,7 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		/*
 		 * Resize all but the last column to minimum size
 		 */
-		if ((column < (table.getColumnCount() - 1)))
+		if (column < (table.getColumnCount() - 1))
 		{
 			doResize(table, column);
 		}
@@ -114,7 +108,7 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 						FollowUpAction action = entry.getFollowUpAction();
 						if (action == null)
 						{
-							return "Follow Up reset";
+							return "Follow-Up action was reset";
 						}
 						return GameLogFormatter.formatFollowUp(action);
 					case GAME_STATE:
@@ -145,28 +139,30 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		switch (entry.getType())
 		{
 			case COMMAND:
-				builder.append("Sent the command \"" + GameLogFormatter.formatCommand(entry.getCommand())
-						+ "\" to the refbox");
+				builder.append("Sent the command \"");
+				builder.append(GameLogFormatter.formatCommand(entry.getCommand()));
+				builder.append("\" to the refbox");
 				break;
 			case FOLLOW_UP:
 				FollowUpAction action = entry.getFollowUpAction();
 				if (action != null)
 				{
-					builder.append("Set the next action which is executed when the game reaches the Stopped state to: "
-							+ GameLogFormatter.formatFollowUp(action));
+					builder.append("Set the next action which is executed when the game reaches the Stopped state to: ");
+					builder.append(GameLogFormatter.formatFollowUp(action));
 					
 				} else
 				{
-					builder.append("Reset the follow up action."
-							+ " No actions will be taken when the game reaches the Stopped state");
+					builder.append(
+							"Reset the follow up action. No actions will be taken when the game reaches the Stopped state");
 				}
 				break;
 			case GAME_STATE:
-				builder.append("The game state of the AutoReferee has changed to " + entry.getGamestate());
+				builder.append("The game state of the AutoReferee has changed to ");
+				builder.append(entry.getGamestate());
 				break;
 			case REFEREE_MSG:
-				builder.append("Received a new referee msg from the refbox with command "
-						+ entry.getRefereeMsg().getCommand());
+				builder.append("Received a new referee msg from the refbox with command ");
+				builder.append(entry.getRefereeMsg().getCommand());
 				break;
 			case GAME_EVENT:
 				builder.append("The AutoReferee has registered the following game event");

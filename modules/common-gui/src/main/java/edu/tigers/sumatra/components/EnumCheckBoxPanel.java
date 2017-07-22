@@ -22,7 +22,7 @@ import javax.swing.JCheckBox;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
+import edu.tigers.sumatra.components.IEnumPanel.IEnumPanelObserver;
 
 
 /**
@@ -33,7 +33,7 @@ import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
  * @author "Lukas Magel"
  * @param <T> The enum class to use
  */
-public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelObserver<T>>
+public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelObserver<T>> implements IEnumPanel<T>
 {
 	/**  */
 	private static final long		serialVersionUID	= 5263861341015714105L;
@@ -117,11 +117,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	}
 	
 	
-	/**
-	 * Returns a set of all enum constants which are currently selected
-	 * 
-	 * @return modifiable non shared set instance
-	 */
+	@Override
 	public Set<T> getValues()
 	{
 		Set<T> values = new HashSet<>();
@@ -137,32 +133,12 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	}
 	
 	
-	/**
-	 * Select the boxes of all enums which are contained in the {@code enabledBoxes} set and unselect all others.
-	 * 
-	 * @param enabledBoxes
-	 */
+	@Override
 	public void setSelectedBoxes(final Set<T> enabledBoxes)
 	{
 		boxes.keySet().forEach(t -> {
 			boxes.get(t).setSelected(enabledBoxes.contains(t));
 		});
-	}
-	
-	/**
-	 * The observer interface of the {@link EnumCheckBoxPanel} class
-	 * 
-	 * @author "Lukas Magel"
-	 * @param <E>
-	 */
-	public interface IEnumPanelObserver<E>
-	{
-		
-		/**
-		 * @param type
-		 * @param value
-		 */
-		public void onValueTicked(E type, boolean value);
 	}
 	
 	private class CheckBoxActionListener implements ActionListener

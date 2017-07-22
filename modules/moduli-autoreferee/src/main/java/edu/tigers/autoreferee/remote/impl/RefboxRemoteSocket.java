@@ -8,7 +8,7 @@
  */
 package edu.tigers.autoreferee.remote.impl;
 
-import static edu.tigers.autoreferee.CheckedRunnable.execAndCatchAll;
+import static edu.tigers.autoreferee.generic.CheckedRunnable.execAndCatchAll;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -43,7 +43,7 @@ public class RefboxRemoteSocket
 	
 	
 	/**
-	 * 
+	 * Create new instance
 	 */
 	public RefboxRemoteSocket()
 	{
@@ -67,7 +67,7 @@ public class RefboxRemoteSocket
 	
 	
 	/**
-	 * 
+	 * Close the remote socket
 	 */
 	public synchronized void close()
 	{
@@ -86,7 +86,7 @@ public class RefboxRemoteSocket
 	 *            reopened.
 	 */
 	public SSL_RefereeRemoteControlReply sendRequest(final SSL_RefereeRemoteControlRequest request) throws IOException,
-			InterruptedException, InvalidProtocolBufferException
+			InterruptedException
 	{
 		try
 		{
@@ -121,7 +121,7 @@ public class RefboxRemoteSocket
 		}
 		intBuffer.flip();
 		
-		byte binData[] = intBuffer.array();
+		byte[] binData = intBuffer.array();
 		
 		try
 		{

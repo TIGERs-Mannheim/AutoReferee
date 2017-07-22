@@ -1,34 +1,33 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jun 30, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee;
 
-import edu.tigers.sumatra.wp.data.ShapeMap.IShapeLayer;
+
+import edu.tigers.sumatra.drawable.ShapeMap;
 
 
 /**
  * @author "Lukas Magel"
  */
-public enum EAutoRefShapesLayer implements IShapeLayer
+@SuppressWarnings("squid:S1192") // duplicated strings not avoidable here
+public enum EAutoRefShapesLayer implements ShapeMap.IShapeLayer
 {
 	/**  */
-	ENGINE("Engine", "AUTOREFEREE", true),
+	ENGINE("Engine", "AutoReferee", true),
 	/**  */
-	LAST_BALL_CONTACT("Ball Contact", "AUTOREFEREE", true),
+	LAST_BALL_CONTACT("Ball Contact", "AutoReferee", true),
 	/**  */
-	LAST_BALL_CONTACT_EXT("Ball Contact ext", "AUTOREFEREE", false);
+	LAST_BALL_CONTACT_EXT("Ball Contact ext", "AutoReferee", false),
+	/**  */
+	BALL_LEFT_FIELD("Ball Left Field", "AutoReferee", true);
 	
-	private final String		name;
-	private final String		category;
-	private final boolean	visible;
+	private final String name;
+	private final String category;
+	private final boolean visible;
 	
 	
-	private EAutoRefShapesLayer(final String name, final String category, final boolean visible)
+	EAutoRefShapesLayer(final String name, final String category, final boolean visible)
 	{
 		this.name = name;
 		this.category = category;
@@ -53,7 +52,7 @@ public enum EAutoRefShapesLayer implements IShapeLayer
 	@Override
 	public String getId()
 	{
-		return null;
+		return EAutoRefShapesLayer.class.getCanonicalName() + name();
 	}
 	
 	

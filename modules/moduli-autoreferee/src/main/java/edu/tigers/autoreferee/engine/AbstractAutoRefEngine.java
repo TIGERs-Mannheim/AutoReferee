@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Mar 3, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine;
 
@@ -21,8 +16,8 @@ import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.log.GameTime;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
-import edu.tigers.sumatra.referee.RefereeMsg;
-import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.referee.data.RefereeMsg;
 
 
 /**
@@ -44,9 +39,9 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	
 	
 	/**
-	 * 
+	 * Create new instance
 	 */
-	public AbstractAutoRefEngine()
+	protected AbstractAutoRefEngine()
 	{
 		gameEventEngine = new GameEventEngine();
 		engineState = EEngineState.RUNNING;
@@ -88,9 +83,9 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 			gameLog.addEntry(curRefMsg);
 		}
 		
-		EGameStateNeutral curGameState = frame.getGameState();
-		EGameStateNeutral lastGameState = frame.getPreviousFrame().getGameState();
-		if (curGameState != lastGameState)
+		GameState curGameState = frame.getGameState();
+		GameState lastGameState = frame.getPreviousFrame().getGameState();
+		if (!curGameState.equals(lastGameState))
 		{
 			onGameStateChange(lastGameState, curGameState);
 		}
@@ -104,7 +99,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	}
 	
 	
-	protected void onGameStateChange(final EGameStateNeutral oldGameState, final EGameStateNeutral newGameState)
+	protected void onGameStateChange(final GameState oldGameState, final GameState newGameState)
 	{
 		gameLog.addEntry(newGameState);
 	}
@@ -117,7 +112,7 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	
 	protected void logGameEvents(final List<IGameEvent> gameEvents)
 	{
-		gameEvents.forEach(event -> gameLog.addEntry(event));
+		gameEvents.forEach(gameLog::addEntry);
 	}
 	
 	

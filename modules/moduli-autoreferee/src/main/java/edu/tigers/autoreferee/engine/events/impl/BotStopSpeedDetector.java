@@ -32,7 +32,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.IBotIDMap;
-import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -43,37 +43,37 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BotStopSpeedDetector extends APreparingGameEventDetector
 {
-	private static final int		priority						= 1;
-	private static final Logger	log							= Logger.getLogger(BotStopSpeedDetector.class);
+	private static final int		PRIORITY					= 1;
+	private static final Logger	log						= Logger.getLogger(BotStopSpeedDetector.class);
 	
 	@Configurable(comment = "[ms] Wait time before reporting any events")
-	private static long				INITIAL_WAIT_TIME_MS		= 2_500;
+	private static long				initialWaitTimeMs		= 2_500;
 	@Configurable(comment = "[ms] The number of milliseconds that a bot needs violate the stop speed limit to be reported")
-	private static long				VIOLATION_THRESHOLD_MS	= 300;
-	
-	private long						entryTime					= 0;
-	private Map<BotID, Long>		currentViolators			= new HashMap<>();
-	private Set<BotID>				lastViolators				= new HashSet<>();
+	private static long				violationThresholdMs	= 300;
 	
 	static
 	{
 		AGameEventDetector.registerClass(BotStopSpeedDetector.class);
 	}
 	
+	private long					entryTime			= 0;
+	private Map<BotID, Long>	currentViolators	= new HashMap<>();
+	private Set<BotID>			lastViolators		= new HashSet<>();
+	
 	
 	/**
-	 * 
+	 * Create new instance
 	 */
 	public BotStopSpeedDetector()
 	{
-		super(EGameStateNeutral.STOPPED);
+		super(EGameState.STOP);
 	}
 	
 	
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -90,7 +90,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 		/*
 		 * We wait an initial time before reporting any events to give robots time to slow down after the STOP command
 		 */
-		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(INITIAL_WAIT_TIME_MS))
+		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(initialWaitTimeMs))
 		{
 			return Optional.empty();
 		}
@@ -113,12 +113,8 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 		Set<BotID> frameCountViolators = currentViolators.keySet().stream()
 				.filter(id -> {
 					long value = currentViolators.get(id);
-					if ((value >= TimeUnit.MILLISECONDS.toNanos(VIOLATION_THRESHOLD_MS))
-							|| (lastViolators.contains(id) && (value > 0)))
-					{
-						return true;
-					}
-					return false;
+					return (value >= TimeUnit.MILLISECONDS.toNanos(violationThresholdMs))
+							|| (lastViolators.contains(id) && (value > 0));
 				}).collect(Collectors.toSet());
 		
 		Set<BotID> oldViolators = Sets.difference(lastViolators, frameCountViolators).immutableCopy();
@@ -163,7 +159,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 			{
 				value = currentViolators.get(violator);
 			}
-			if (value < TimeUnit.MILLISECONDS.toNanos(VIOLATION_THRESHOLD_MS))
+			if (value < TimeUnit.MILLISECONDS.toNanos(violationThresholdMs))
 			{
 				value += timeDelta;
 			}

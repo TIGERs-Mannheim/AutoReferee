@@ -18,16 +18,20 @@
 		<module>modules/common-gui</module>
 		<module>modules/common-gui-config</module>
 		<module>modules/common-model</module>
+		<module>modules/common-math</module>
 
 		<module>modules/moduli-autoreferee</module>
 		<module>modules/moduli-cam</module>
 		<module>modules/moduli-referee</module>
 		<module>modules/moduli-timer</module>
 		<module>modules/moduli-wp</module>
-		<module>modules/moduli-wp-kalman</module>
+		<module>modules/moduli-geometry</module>
+		<module>modules/moduli-vision</module>
+		<module>modules/moduli-record</module>
 
 		<module>modules/sumatra-gui-log</module>
 		<module>modules/sumatra-gui-visualizer</module>
+		<module>modules/sumatra-parent</module>
 
 		<module>modules/autoreferee-gui</module>
 

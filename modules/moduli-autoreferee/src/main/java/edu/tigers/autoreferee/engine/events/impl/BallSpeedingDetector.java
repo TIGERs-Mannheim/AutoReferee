@@ -25,8 +25,8 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.IVector2;
-import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -37,10 +37,9 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BallSpeedingDetector extends AGameEventDetector
 {
-	private static int				priority						= 1;
 	private static final Logger	log							= Logger.getLogger(BallSpeedingDetector.class);
-	
 	private static final int		REQUIRED_SPEEDING_TIME	= 300;
+	private static final int		PRIORITY						= 1;
 	@Configurable(comment = "[m/s] The ball is not considered to be too fast if above this threshold to prevent false positives")
 	private static double			topSpeedThreshold			= 12.0d;
 	
@@ -49,18 +48,18 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	
 	/**
-	 *
+	 * Create new instance
 	 */
 	public BallSpeedingDetector()
 	{
-		super(EGameStateNeutral.RUNNING);
+		super(EGameState.RUNNING);
 	}
 	
 	
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -72,10 +71,10 @@ public class BallSpeedingDetector extends AGameEventDetector
 		{
 			speedingFrameTime += frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
 			if ((speedingFrameTime >= TimeUnit.MILLISECONDS.toNanos(REQUIRED_SPEEDING_TIME))
-					&& (speedingDetected == false))
+					&& !speedingDetected)
 			{
 				speedingDetected = true;
-				BotID violatorID = frame.getBotLastTouchedBall().getId();
+				BotID violatorID = frame.getBotLastTouchedBall().getBotID();
 				ITrackedBot violator = frame.getWorldFrame().getBot(violatorID);
 				if (violator == null)
 				{

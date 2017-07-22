@@ -1,27 +1,20 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jun 25, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoref.view.humanref.components;
 
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.util.Optional;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
-import net.miginfocom.swing.MigLayout;
 import edu.tigers.autoref.util.AutoRefImageRegistry;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.components.JImagePanel;
 import edu.tigers.sumatra.components.ResizingLabel;
 import edu.tigers.sumatra.ids.BotID;
+import net.miginfocom.swing.MigLayout;
 
 
 /**

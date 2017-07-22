@@ -31,12 +31,10 @@ public class SSLVisionCamGeometryTranslator
 	public CamGeometry translate(final SSL_GeometryData geometryData)
 	{
 		Map<Integer, CamCalibration> calibrations = new HashMap<>();
-		for (int i = 0; i < geometryData.getCalibCount(); i++)
-		{
-			CamCalibration calibration = new CamCalibration(geometryData.getCalib(i));
-			calibrations.put(calibration.getCameraId(), calibration);
-		}
+		geometryData.getCalibList().forEach(calib -> calibrations.put(calib.getCameraId(), new CamCalibration(calib)));
+		
 		CamFieldSize fieldSize = new CamFieldSize(geometryData.getField());
+		
 		return new CamGeometry(calibrations, fieldSize);
 	}
 }

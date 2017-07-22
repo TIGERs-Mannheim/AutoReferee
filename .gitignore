@@ -1,0 +1,4 @@
+*.iml
+.idea
+gamelogs/*.log
+logs/*.log

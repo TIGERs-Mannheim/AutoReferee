@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.sumatra.network;
 
 
@@ -5,11 +9,13 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,21 +37,16 @@ public class MulticastUDPReceiver implements IReceiver
 	private static final Logger				log						= Logger.getLogger(MulticastUDPReceiver.class.getName());
 	
 	private static final int					SO_TIMEOUT				= 100;
-	
-	// Connection
-	private final List<MulticastSocket>		sockets					= new LinkedList<MulticastSocket>();
-	private MulticastSocket						currentSocket			= null;
-	private InetAddress							group						= null;
-	
-	/** The internal state-switch of this transmitter */
-	private boolean								readyToReceive			= false;
-	
-	private final Set<MulticastSocket>		socketsTimedOut		= new HashSet<MulticastSocket>();
-	
 	private static final String[]				USELESS_PREFIXES		= { "tap", "tun", "ham", "WAN" };
 	private static final String[]				PREFERRED_PREFIXES	= { "lo", "eth", "enp" };
-	
-	private final List<IReceiverObserver>	observers				= new CopyOnWriteArrayList<IReceiverObserver>();
+	// Connection
+	private final List<MulticastSocket>		sockets					= new ArrayList<>();
+	private final Set<MulticastSocket>		socketsTimedOut		= new HashSet<>();
+	private final List<IReceiverObserver>	observers				= new CopyOnWriteArrayList<>();
+	private MulticastSocket						currentSocket			= null;
+	private InetAddress							group						= null;
+	/** The internal state-switch of this transmitter */
+	private boolean								readyToReceive			= false;
 	
 	
 	/**
@@ -113,7 +114,7 @@ public class MulticastUDPReceiver implements IReceiver
 	
 	private List<NetworkInterface> getNetworkInterfaces()
 	{
-		List<NetworkInterface> ifaces = new LinkedList<NetworkInterface>();
+		List<NetworkInterface> ifaces = new LinkedList<>();
 		try
 		{
 			ifaces = Collections.list(NetworkInterface.getNetworkInterfaces());
@@ -154,7 +155,7 @@ public class MulticastUDPReceiver implements IReceiver
 			}
 		} catch (SocketException err)
 		{
-			log.error("Could not determine iface properties");
+			log.error("Could not determine iface properties", err);
 		}
 		
 		for (String prefix : USELESS_PREFIXES)
@@ -168,12 +169,13 @@ public class MulticastUDPReceiver implements IReceiver
 	}
 	
 	
+	@SuppressWarnings("squid:S2095")
 	private void addSocket(final int port, final String groupStr, final NetworkInterface iface)
 	{
 		MulticastSocket socket;
 		try
 		{
-			socket = new MulticastSocket(port);
+			socket = new MulticastSocket(new InetSocketAddress(port));
 			socket.setNetworkInterface(iface);
 			int i;
 			socket_loop: for (i = 0; i < sockets.size(); i++)
@@ -219,11 +221,11 @@ public class MulticastUDPReceiver implements IReceiver
 		} catch (IOException err)
 		{
 			log.error("Could not resolve address: " + group, err);
-			return;
 		}
 	}
 	
 	
+	@SuppressWarnings("squid:S2583")
 	@Override
 	public DatagramPacket receive(final DatagramPacket store) throws IOException
 	{
@@ -245,7 +247,7 @@ public class MulticastUDPReceiver implements IReceiver
 				log.error("EOF error, buffer may be too small!", eof);
 			} catch (SocketTimeoutException e)
 			{
-				log.debug("Timed out on primary socket.");
+				log.debug("Timed out on primary socket.", e);
 				// go on below
 				for (IReceiverObserver obs : observers)
 				{
@@ -281,7 +283,7 @@ public class MulticastUDPReceiver implements IReceiver
 				{
 					if (!socketsTimedOut.contains(socket))
 					{
-						log.debug("Socket timed out on iface " + socket.getNetworkInterface().getDisplayName());
+						log.debug("Socket timed out on iface " + socket.getNetworkInterface().getDisplayName(), e);
 						socketsTimedOut.add(socket);
 					}
 					socketChanged = true;

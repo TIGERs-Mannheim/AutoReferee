@@ -1,32 +1,21 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jun 26, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
  */
+
 package edu.tigers.autoref.view.humanref;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
-import net.miginfocom.swing.MigLayout;
-import edu.tigers.sumatra.shapes.rectangle.Rectangle;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.visualizer.view.field.FieldPanel;
 import edu.tigers.sumatra.visualizer.view.field.IFieldPanel;
-import edu.tigers.sumatra.wp.data.Geometry;
+import net.miginfocom.swing.MigLayout;
 
 
 /**
@@ -39,7 +28,6 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	
 	/** Per thumb size of the field panel in pixels for non pixelated display */
 	private static final int	FIELD_PANEL_WIDTH	= 2000;
-	private static final float	STROKE_WIDTH		= 7.0f;
 	
 	private boolean				isVertical			= true;
 	
@@ -54,9 +42,9 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	
 	
 	/**
-	 * 
+	 * Default
 	 */
-	public AHumanRefPanel()
+	protected AHumanRefPanel()
 	{
 		Font defaultFont = getFont().deriveFont(Font.BOLD);
 		smallFont = defaultFont.deriveFont(35.0f);
@@ -72,7 +60,7 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 	
 	protected void setupGUI()
 	{
-		fieldPanel = new FieldPanel(FIELD_PANEL_WIDTH, new BasicStroke(STROKE_WIDTH));
+		fieldPanel = new FieldPanel(FIELD_PANEL_WIDTH);
 		fieldPanel.setPaintCoordinates(false);
 		fieldPanel.setFancyPainting(true);
 		setLayout(isVertical);
@@ -163,11 +151,11 @@ public abstract class AHumanRefPanel extends JPanel implements ISumatraView
 		int containerWidth = getWidth() - insets.left - insets.right;
 		int containerHeight = getHeight() - insets.top - insets.bottom;
 		
-		Rectangle field = Geometry.getFieldWBorders();
-		double ratio = field.getyExtend() / field.getxExtend();
+		IRectangle field = Geometry.getFieldWBorders();
+		double ratio = field.yExtent() / field.xExtent();
 		
-		int preferredWidth = 0;
-		int preferredHeight = 0;
+		int preferredWidth;
+		int preferredHeight;
 		if (isVertical)
 		{
 			preferredWidth = (int) (containerHeight * ratio);

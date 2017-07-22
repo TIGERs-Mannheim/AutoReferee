@@ -24,14 +24,10 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 {
 	
 	protected final Logger		log			= Logger.getLogger(getClass());
-	
-	
+	private final int				targetPort;
 	// Communication
 	private MulticastSocket		socket		= null;
-	
 	private InetAddress			targetAddr	= null;
-	private final int				targetPort;
-	
 	private DatagramPacket		tempPacket	= null;
 	
 	/** The internal state-switch of this transmitter */
@@ -79,7 +75,6 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 			} catch (SocketException err)
 			{
 				log.info("Port " + localPort + " used, will try " + ++localPort + " instead!");
-				continue;
 			} catch (IOException err)
 			{
 				log.error("Error while creating MulticastSocket!", err);
@@ -105,7 +100,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	public boolean send(final byte[] data)
 	{
 		// Synchronize access to socket as it belongs to the 'state'
-		DatagramSocket socket = null;
+		DatagramSocket synchroninzedSocket;
 		synchronized (this)
 		{
 			if (!isReady())
@@ -114,7 +109,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 				return false;
 			}
 			
-			socket = this.socket;
+			synchroninzedSocket = this.socket;
 		}
 		
 		tempPacket = new DatagramPacket(data, data.length, targetAddr, targetPort);
@@ -122,7 +117,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 		// Receive _outside_ the synchronized state, to prevent blocking of the state
 		try
 		{
-			socket.send(tempPacket); // DatagramPacket is sent...
+			synchroninzedSocket.send(tempPacket); // DatagramPacket is sent...
 		} catch (NoRouteToHostException nrh)
 		{
 			log.warn("No route to host: '" + targetAddr + "'. Dropping packet...");

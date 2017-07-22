@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2010, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 22.07.2010
- * Author(s): Gero
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -60,12 +55,12 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	private final SSLVisionCamGeometryTranslator	geometryTranslator	= new SSLVisionCamGeometryTranslator();
 	
 	
-	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH" }, defValueSpezis = { "10006", "40102", "10006",
+	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH", "ANDRE" }, defValueSpezis = { "10006", "40102", "10006",
 			"10006" })
-	private int												port						= 10006;
+	private int												port						= 10010;
 	@Configurable(defValue = "224.5.23.2")
 	private String											address					= "224.5.23.2";
-	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP" }, defValue = "")
+	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "ANDRE" }, defValue = "")
 	private String											network					= "";
 	
 	private NetworkInterface							nif;
@@ -113,7 +108,6 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 		{
 			log.debug("Chose nif for vision-cam: " + nif.getDisplayName() + ".");
 		}
-		
 		if (getNif() == null)
 		{
 			MulticastUDPReceiver recv = new MulticastUDPReceiver(getPort(), getAddress());
@@ -188,6 +182,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					continue;
 				}
 				
+				notifyNewVisionPacket(sslPacket);
 				
 				if (sslPacket.hasGeometry())
 				{
@@ -252,7 +247,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 				receiver.cleanup();
 			} catch (final IOException err)
 			{
-				log.debug("Socket closed...");
+				log.debug("Socket closed...", err);
 			}
 			
 			receiver = null;

@@ -53,7 +53,7 @@
 	</module>
 
 	<!-- <module id="recorder" type="RecordManager">
-		<implementation> edu.tigers.sumatra.persistance.RecordManager
+		<implementation> edu.tigers.sumatra.persistence.RecordManager
 		</implementation>
 
 		<properties>

@@ -9,9 +9,9 @@
 package edu.tigers.autoreferee.engine.calc;
 
 import edu.tigers.autoreferee.AutoRefFrame;
-import edu.tigers.sumatra.math.AVector2;
-import edu.tigers.sumatra.math.IVector2;
-import edu.tigers.sumatra.wp.data.EGameStateNeutral;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.data.EGameState;
 
 
 /**
@@ -19,13 +19,13 @@ import edu.tigers.sumatra.wp.data.EGameStateNeutral;
  */
 public class LastStopBallPositionCalc implements IRefereeCalc
 {
-	private IVector2	lastPos	= AVector2.ZERO_VECTOR;
+	private IVector2 lastPos = Vector2.ZERO_VECTOR;
 	
 	
 	@Override
 	public void process(final AutoRefFrame frame)
 	{
-		if (frame.getGameState() == EGameStateNeutral.STOPPED)
+		if (frame.getGameState().getState() == EGameState.STOP)
 		{
 			lastPos = frame.getWorldFrame().getBall().getPos();
 		}

@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jun 17, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events;
 
@@ -42,6 +37,8 @@ public enum EGameEvent
 	DEFENDER_TO_KICK_POINT_DISTANCE(EEventCategory.VIOLATION),
 	/** If the kick was not taken after a certain amount of time */
 	KICK_TIMEOUT(EEventCategory.VIOLATION),
+	/** If there is no progress in game */
+	NO_PROGRESS_IN_GAME(EEventCategory.VIOLATION),
 	/**  */
 	MULTIPLE_DEFENDER(EEventCategory.VIOLATION),
 	/**  */
@@ -51,10 +48,10 @@ public enum EGameEvent
 	/**  */
 	GOAL(EEventCategory.GENERAL);
 	
-	private final EEventCategory	category;
+	private final EEventCategory category;
 	
 	
-	private EGameEvent(final EEventCategory category)
+	EGameEvent(final EEventCategory category)
 	{
 		this.category = category;
 	}
