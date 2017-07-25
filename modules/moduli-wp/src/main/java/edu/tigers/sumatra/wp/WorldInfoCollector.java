@@ -90,9 +90,9 @@ public class WorldInfoCollector extends AWorldPredictor
 	private final CurrentBallDetector currentBallDetector = new CurrentBallDetector();
 	private final BotInterchangeCalculator botInterchangeCalculator = new BotInterchangeCalculator();
 	
-	private AVisionFilter						visionFilter;
-	private ABotManager							botManager;
-	private BotParamsManager					botParamsManager;
+	private AVisionFilter visionFilter;
+	private ABotManager botManager;
+	private BotParamsManager botParamsManager;
 	
 	private long lastWFTimestamp = 0;
 	private WorldFrameWrapper lastWorldFrameWrapper = null;
@@ -277,7 +277,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		addBotsFromBotmanager(bots, ball);
 		updateVisionFilterWithRobotInfo(bots);
 		Set<BotID> toInterchange = botInterchangeCalculator.computeBotsToInterchange(bots, latestRefereeMsg);
-
+		
 		SimpleWorldFrame swf = new SimpleWorldFrame(bots, ball, kickEvent, frameNumber, lastWFTimestamp);
 		
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
@@ -399,8 +399,11 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Override
 	public final void stopModule()
 	{
-		visionFilter.removeObserver(this);
-		visionFilter = null;
+		if (visionFilter != null)
+		{
+			visionFilter.removeObserver(this);
+			visionFilter = null;
+		}
 		try
 		{
 			AReferee referee = (AReferee) SumatraModel.getInstance().getModule(AReferee.MODULE_ID);
@@ -496,8 +499,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		return lastWorldFrameWrapper;
 	}
-
-
+	
+	
 	private void initBotToAiAssignment()
 	{
 		for (BotID botID : BotID.getAll())
@@ -518,8 +521,8 @@ public class WorldInfoCollector extends AWorldPredictor
 			}
 		}
 	}
-
-
+	
+	
 	private void saveBotToAiAssignment()
 	{
 		for (Map.Entry<BotID, EAiType> entry : botToAiMap.entrySet())
@@ -536,15 +539,15 @@ public class WorldInfoCollector extends AWorldPredictor
 			}
 		}
 	}
-
-
+	
+	
 	@Override
 	public void updateBot2AiAssignment(BotID botID, EAiType aiTeam)
 	{
 		botToAiMap.put(botID, aiTeam);
 	}
-
-
+	
+	
 	@Override
 	public Map<BotID, EAiType> getBotToAiMap()
 	{

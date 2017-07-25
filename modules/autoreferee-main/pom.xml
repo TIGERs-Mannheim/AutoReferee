@@ -42,6 +42,11 @@
 
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>moduli-wp-kalman</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
             <artifactId>common-gui</artifactId>
         </dependency>
 
