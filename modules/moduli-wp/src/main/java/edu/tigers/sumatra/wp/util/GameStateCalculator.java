@@ -73,8 +73,10 @@ public class GameStateCalculator
 			
 			lastRefCmd = refereeMsg.getCommand();
 		}
-		
-		processBallMovement(ballPos, builder);
+
+		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT) {
+			processBallMovement(ballPos, builder);
+		}
 		
 		// we build this with NEUTRAL ourTeam because we don't know our team yet
 		return builder.withOurTeam(ETeamColor.NEUTRAL).build();

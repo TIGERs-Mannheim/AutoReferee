@@ -167,14 +167,12 @@ public class PenaltyArea implements IPenaltyArea
 				if (point.y() < 0)
 				{
 					return arcNeg.center().addNew(Vector2.fromY(-getRadius()));
-				} else
-				{
-					return arcPos.center().addNew(Vector2.fromY(getRadius()));
 				}
-			} else
-			{
-				return null;
+				
+				return arcPos.center().addNew(Vector2.fromY(getRadius()));
 			}
+			
+			return null;
 		}
 		return penaltyAreaIntersections.get(0);
 	}
@@ -365,7 +363,7 @@ public class PenaltyArea implements IPenaltyArea
 	
 	private boolean isBehindGoalLine(final IVector2 point)
 	{
-		return point.x() < arcNeg.center().x();
+		return point.x() <= arcNeg.center().x();
 	}
 	
 	

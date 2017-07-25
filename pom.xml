@@ -28,6 +28,10 @@
 		<module>modules/moduli-geometry</module>
 		<module>modules/moduli-vision</module>
 		<module>modules/moduli-record</module>
+		<module>modules/moduli-bot-params</module>
+		<module>modules/moduli-botmanager</module>
+		<module>modules/moduli-cam-logfile</module>
+		<module>modules/moduli-gamelog</module>
 
 		<module>modules/sumatra-gui-log</module>
 		<module>modules/sumatra-gui-visualizer</module>

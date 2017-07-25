@@ -166,4 +166,10 @@ public interface IBot
 	 * @return
 	 */
 	ERobotMode getRobotMode();
+
+	/**
+	 * Is true iff the bot is completely okay. (Used for automatic interchange)
+	 * @return
+	 */
+	boolean isOK();
 }

@@ -84,7 +84,7 @@ public interface IBotIDMap<T> extends Serializable, Iterable<Entry<BotID, T>>
 	 * @param value
 	 * @return
 	 */
-	boolean containsValue(Object value);
+	boolean containsValue(T value);
 	
 	
 	/**
@@ -100,7 +100,7 @@ public interface IBotIDMap<T> extends Serializable, Iterable<Entry<BotID, T>>
 	
 	
 	/**
-	 *
+	 * Clears the map
 	 */
 	void clear();
 	

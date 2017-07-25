@@ -30,20 +30,30 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	// --------------------------------------------------------------------------
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
-	private static final long		serialVersionUID	= -5736073179625081902L;
-																	
-	private final Map<BotID, T>	map;
-											
-											
+	private static final long serialVersionUID = -5736073179625081902L;
+	
+	private final Map<BotID, T> map;
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
+
 	/**
+	 * Creates an empty map
 	 */
 	public BotIDMap()
 	{
-		map = new HashMap<BotID, T>();
+		map = new HashMap<>();
 	}
+
+    /**
+     * Creates BotIDMap from existing Java-Map, shallow copy
+     * @param initialMap
+     */
+	public BotIDMap(final Map<BotID, T> initialMap) {
+	    map = initialMap;
+    }
 	
 	
 	/**
@@ -51,7 +61,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final int initialCapacity)
 	{
-		map = new HashMap<BotID, T>(initialCapacity);
+		map = new HashMap<>(initialCapacity);
 	}
 	
 	
@@ -61,7 +71,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final int initialCapacity, final float loadFactor)
 	{
-		map = new HashMap<BotID, T>(initialCapacity, loadFactor);
+		map = new HashMap<>(initialCapacity, loadFactor);
 	}
 	
 	
@@ -70,7 +80,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final IBotIDMap<T> iMap)
 	{
-		map = new HashMap<BotID, T>(iMap.size());
+		map = new HashMap<>(iMap.size());
 		for (final Entry<BotID, T> entry : iMap.entrySet())
 		{
 			map.put(entry.getKey(), entry.getValue());
@@ -146,7 +156,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	
 	
 	@Override
-	public boolean containsValue(final Object value)
+	public boolean containsValue(final T value)
 	{
 		return map.containsValue(value);
 	}

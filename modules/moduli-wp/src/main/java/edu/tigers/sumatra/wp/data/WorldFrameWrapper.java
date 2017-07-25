@@ -5,11 +5,14 @@
 package edu.tigers.sumatra.wp.data;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.EAiTeam;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -26,6 +29,7 @@ public class WorldFrameWrapper
 	private final SimpleWorldFrame simpleWorldFrame;
 	private final RefereeMsg refereeMsg;
 	private final ShapeMap shapeMap = new ShapeMap();
+    private Set<BotID>                                        botsToInterchange = new HashSet<>();
 	private GameState gameState = GameState.HALT;
 	
 	private final transient Map<EAiTeam, WorldFrame> worldFrames = new EnumMap<>(EAiTeam.class);
@@ -43,15 +47,17 @@ public class WorldFrameWrapper
 	 * @param swf
 	 * @param refereeMsg
 	 * @param gameState
+	 * @param botsToInterchange
 	 */
 	public WorldFrameWrapper(final SimpleWorldFrame swf, final RefereeMsg refereeMsg,
-			final GameState gameState)
+			final GameState gameState, final Set<BotID> botsToInterchange)
 	{
 		assert refereeMsg != null;
 		assert swf != null;
 		simpleWorldFrame = swf;
 		this.refereeMsg = refereeMsg;
 		this.gameState = gameState;
+		this.botsToInterchange = botsToInterchange;
 	}
 	
 	
@@ -65,6 +71,7 @@ public class WorldFrameWrapper
 		shapeMap.merge(wfw.shapeMap);
 		worldFrames.putAll(wfw.worldFrames);
 		gameState = wfw.gameState;
+		botsToInterchange = wfw.botsToInterchange;
 	}
 	
 	
@@ -80,11 +87,11 @@ public class WorldFrameWrapper
 		final WorldFrame wf;
 		if (refereeMsg.getLeftTeam() == aiTeam.getTeamColor())
 		{
-			wf = new WorldFrame(swf, aiTeam, false);
+			wf = new WorldFrame(swf, botsToInterchange, aiTeam, false);
 		} else
 		{
 			// right team will be mirrored
-			wf = new WorldFrame(swf.mirrored(), aiTeam, true);
+			wf = new WorldFrame(swf.mirrored(), botsToInterchange, aiTeam, true);
 		}
 		return wf;
 	}
@@ -134,4 +141,12 @@ public class WorldFrameWrapper
 	{
 		return shapeMap;
 	}
+
+
+    /**
+     * @return the bots to interchange
+     */
+	public final Set<BotID> getBotsToInterchange() {
+	    return botsToInterchange;
+    }
 }

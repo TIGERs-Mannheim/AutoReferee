@@ -48,6 +48,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final IVector3 internalVel;
 	private final boolean isBarrierInterrupted;
 	private final IBotParams botParams;
+	private final boolean 									isOk;
 	
 	
 	@SuppressWarnings("unused")
@@ -77,6 +78,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		internalPose = builder.internalPose;
 		internalVel = builder.internalVel;
 		isBarrierInterrupted = builder.isBarrierInterrupted;
+		isOk = builder.isOk;
 	}
 	
 	
@@ -128,7 +130,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withDribbleRpm(0)
 				.withHardwareId(255)
 				.withInternalPose(null)
-				.withInternalVel(null);
+				.withInternalVel(null)
+				.withOk(true);
 	}
 	
 	
@@ -156,6 +159,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.hardwareId = copy.hardwareId;
 		builder.internalPose = copy.internalPose;
 		builder.internalVel = copy.internalVel;
+		builder.isOk = copy.isOk;
 		return builder;
 	}
 	
@@ -283,8 +287,11 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	{
 		return hardwareId;
 	}
-	
-	
+
+	public boolean isOk() {
+		return isOk;
+	}
+
 	/**
 	 * @return the internal bot position, if known
 	 */
@@ -331,6 +338,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private IVector3 internalVel;
 		private boolean isBarrierInterrupted;
 		private IBotParams botParams;
+		private boolean								isOk;
 		
 		
 		private Builder()
@@ -349,7 +357,18 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			botId = val;
 			return this;
 		}
-		
+
+
+		/**
+		 * Sets if the robot is ok (thus usable for the AI)
+		 * @param ok
+		 * @return
+		 */
+		public Builder withOk(boolean ok) {
+			isOk = ok;
+			return this;
+		}
+
 		
 		/**
 		 * Sets the {@code timestamp} and returns a reference to this Builder so that the methods can be chained together.

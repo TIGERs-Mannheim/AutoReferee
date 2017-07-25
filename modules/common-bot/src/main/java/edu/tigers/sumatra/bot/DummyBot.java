@@ -210,8 +210,13 @@ public class DummyBot implements IBot
 	{
 		return ERobotMode.READY;
 	}
-	
-	
+
+	@Override
+	public boolean isOK() {
+		return true;
+	}
+
+
 	@Override
 	public IBotParams getBotParams()
 	{
