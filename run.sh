@@ -7,7 +7,7 @@ if ! type mvn &> /dev/null; then
 	exit 1
 fi
 
-mvn -pl modules/autoreferee-main exec:java
+mvn -o -pl modules/autoreferee-main exec:java
 
 if [ "$?" != "0" ]; then
 	echo
