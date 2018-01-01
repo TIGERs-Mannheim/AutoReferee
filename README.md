@@ -35,11 +35,11 @@ The following guides provide detailed instructions on how to install and run the
 4. Change directory into the repository and issue the following command to build the project:
 
 	```
-	mvn install -DskipTests -Dmaven.javadoc.skip=true
+	./build.sh
 	```
 	
 	This step can take some time if this is the first time that Maven is used on the machine as Maven will populate its local repository with all the dependencies it requires to perform the build steps.
-5. Run the `run.sh` script to start the application
+5. Run the `./run.sh` script to start the application
 
 ### Possible issues:
 - If the build fails with the following error please verify that you have correctly set up Java 8.
@@ -113,7 +113,7 @@ No matter which mode is chosen the AutoReferee always employs multiple detector 
 Whenever the game is stopped after a rule violation or a goal the autoref will send a ball placement command (see the Ball Placement section for more details) to have the ball placed at the desired position. If the placement fails or no teams are capable of placing the ball it will visualize the desired position on the field visualizer and wait for the ball to be placed. After the ball has been placed the autoref will wait until all robots have come to a stop and then send the next command. If for some reason the bots do not come to a stop it is possible to manually start the transition by clicking the **Proceed** button in the **AutoReferee** view. Another alternative is to simply issue the command manually using the refbox.
 
 ## Detecting Goals
-At the moment it is not possible to deduct the vertical position of the ball from the vision data. This can produce false positives if the ball is chip kicked over the goal. To avoid these situations the autoref tries to detect goals by monitoring the direction in which the ball is headed while being located inside the goal perimeter. It checks the following sufficient conditions for a goal:
+The autoref tries to detect goals by monitoring the direction in which the ball is headed while being located inside the goal perimeter. It checks the following sufficient conditions for a goal:
 - The ball comes to a stop while being inside the goal
 - The heading of the ball changes by more than 45 degrees while the ball is inside the goal
 
