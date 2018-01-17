@@ -7,9 +7,15 @@ if ! type mvn &> /dev/null; then
 	exit 1
 fi
 
+mode="`echo $1 | tr '[:lower:]' '[:upper:]'`"
+if [ "$mode" != "ACTIVE" ] && [ "$mode" != "PASSIVE" ]; then
+    echo "Please specify a valid mode to start with: active | passive"
+    exit 1
+fi
+
 # the productive=true flag controls some behavior for real games like automatic recording
 mvn -pl modules/autoreferee-main exec:exec -Dmaven.repo.local=repository \
-    -Dexec.args="-Dautoref.mode=PASSIVE -Dproductive=true \
+    -Dexec.args="-Dautoref.mode=$mode -Dproductive=true \
     -Xms128m -Xmx1G -server -Xnoclassgc -Xverify:none -Dsun.java2d.d3d=false -XX:+UseG1GC -Djava.net.preferIPv4Stack=true -XX:-OmitStackTraceInFastThrow \
     -classpath %classpath \
     edu.tigers.autoref.AutoReferee"
