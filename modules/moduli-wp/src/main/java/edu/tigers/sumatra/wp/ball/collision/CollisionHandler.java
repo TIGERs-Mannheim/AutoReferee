@@ -21,7 +21,7 @@ import edu.tigers.sumatra.wp.ball.dynamics.IState;
  */
 public class CollisionHandler
 {
-	private static final double				BALL_DAMP_FACTOR	= 0.9;
+	private static final double BALL_DAMP_FACTOR = -0.0;
 	
 	private final List<ICollisionObject>	collisionObjects	= new ArrayList<>();
 	
@@ -113,7 +113,7 @@ public class CollisionHandler
 		IVector2 curVel = colState.getVel().getXYVector();
 		IVector3 objectVel = colState.getCollision().get().getObjectVel();
 		IVector2 colNormal = colState.getCollision().get().getNormal();
-		IVector2 relativeVel = curVel.subtractNew(objectVel);
+		IVector2 relativeVel = curVel.subtractNew(objectVel.getXYVector());
 		
 		double dampFactor = BALL_DAMP_FACTOR;
 		if (colState.getCollision().get().isSticky())

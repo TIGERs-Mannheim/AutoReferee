@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import com.fasterxml.jackson.core.util.DefaultIndenter;
@@ -33,11 +32,6 @@ import edu.tigers.sumatra.botparams.BotParamsDatabase.IBotParamsDatabaseObserver
  */
 public class BotParamsManager extends AModule implements IBotParamsDatabaseObserver
 {
-	/** */
-	public static final String MODULE_TYPE = "BotParams";
-	/** */
-	public static final String MODULE_ID = "botparams";
-	
 	private static final String DATABASE_FILE = "config/botParamsDatabase.json";
 	
 	private BotParamsDatabase database = new BotParamsDatabase();
@@ -46,17 +40,6 @@ public class BotParamsManager extends AModule implements IBotParamsDatabaseObser
 			.getLogger(BotParamsManager.class.getName());
 	
 	private final List<IBotParamsManagerObserver> observers = new CopyOnWriteArrayList<>();
-	
-	
-	/**
-	 * Moduli constructor.
-	 * 
-	 * @param subnodeConfiguration
-	 */
-	public BotParamsManager(final SubnodeConfiguration subnodeConfiguration)
-	{
-		// not used
-	}
 	
 	
 	@Override
@@ -213,7 +196,7 @@ public class BotParamsManager extends AModule implements IBotParamsDatabaseObser
 	 * BotParamsManager observer.
 	 */
 	@FunctionalInterface
-	public static interface IBotParamsManagerObserver
+	public interface IBotParamsManagerObserver
 	{
 		/**
 		 * Bot parameters of a specific label have changed.

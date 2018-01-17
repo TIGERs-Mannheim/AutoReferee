@@ -19,6 +19,24 @@ public class Percentage
 	private int all = 1;
 	
 	
+	public Percentage()
+	{
+	}
+	
+	
+	/**
+	 * Constructor for setting current and all value
+	 * 
+	 * @param cur
+	 * @param all
+	 */
+	public Percentage(final int cur, final int all)
+	{
+		current = cur;
+		this.all = all;
+	}
+	
+	
 	/**
 	 * Returns current value of this Percentage
 	 * 
@@ -30,6 +48,12 @@ public class Percentage
 	}
 	
 	
+	public int getAll()
+	{
+		return all;
+	}
+	
+	
 	/**
 	 * Increments current value by one
 	 * 
@@ -38,6 +62,18 @@ public class Percentage
 	public Percentage inc()
 	{
 		current = current + 1;
+		return this;
+	}
+	
+	
+	/**
+	 * Increments all value by one
+	 *
+	 * @return this for chaining
+	 */
+	public Percentage incAll()
+	{
+		all = all + 1;
 		return this;
 	}
 	
@@ -57,5 +93,12 @@ public class Percentage
 	public double getPercent()
 	{
 		return (double) current / all;
+	}
+	
+	
+	@Override
+	public String toString()
+	{
+		return getCurrent() + "/" + getAll() + " = " + getPercent();
 	}
 }

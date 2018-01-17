@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.bots.communication.udp;
 
@@ -55,7 +55,7 @@ public class TransmitterUDP implements ITransmitterUDP
 			sendQueue.put(cmd);
 		} catch (InterruptedException err)
 		{
-			log.error("Could not queue cmd.", err);
+			log.debug("Could not queue cmd.", err);
 			Thread.currentThread().interrupt();
 		}
 	}

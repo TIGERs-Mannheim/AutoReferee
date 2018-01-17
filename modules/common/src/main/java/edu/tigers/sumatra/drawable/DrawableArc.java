@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Arc2D;
 
 import com.sleepycat.persist.model.Persistent;
@@ -12,8 +14,8 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.IArc;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -30,7 +32,7 @@ public class DrawableArc extends Arc implements IDrawableShape
 	 */
 	protected DrawableArc()
 	{
-		super(AVector2.ZERO_VECTOR, 1, 0, 1);
+		super(Vector2f.ZERO_VECTOR, 1, 0, 1);
 		color = Color.black;
 	}
 	

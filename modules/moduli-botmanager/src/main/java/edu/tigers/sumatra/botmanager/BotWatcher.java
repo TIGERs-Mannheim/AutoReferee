@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jun 5, 2015
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager;
 
@@ -23,9 +18,9 @@ import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqDelays;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqMotorModel;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqVelocity;
 import edu.tigers.sumatra.export.CSVExporter;
-import edu.tigers.sumatra.math.vector.AVector3;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 
 
 /**
@@ -127,7 +122,7 @@ public class BotWatcher implements IABotObserver
 		nbrs.addAll(bot.getColor().getNumberList());
 		nbrs.addAll(pos.getNumberList());
 		nbrs.addAll(vel.getNumberList());
-		nbrs.addAll(AVector3.ZERO_VECTOR.getNumberList());
+		nbrs.addAll(Vector3f.ZERO_VECTOR.getNumberList());
 		nbrs.add(frameId);
 		nbrs.add(System.nanoTime());
 		nbrs.add(cmd.isPositionValid() ? 1 : 0);

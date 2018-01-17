@@ -1,13 +1,14 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.collision;
 
 import java.util.Optional;
 
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 
 
 /**
@@ -56,6 +57,15 @@ public interface ICollisionObject
 	 */
 	default IVector3 getImpulse(final IVector3 prePos)
 	{
-		return Vector3.ZERO_VECTOR;
+		return Vector3f.ZERO_VECTOR;
+	}
+	
+	
+	/**
+	 * @return the bot id of the colliding robot or no_bot
+	 */
+	default BotID getBotID()
+	{
+		return BotID.noBot();
 	}
 }

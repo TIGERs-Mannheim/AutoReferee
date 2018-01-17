@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -7,8 +7,8 @@ package edu.tigers.sumatra.vision.data;
 import org.apache.commons.lang.Validate;
 
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -120,7 +120,7 @@ public class FilteredVisionBot
 		 */
 		public static FilteredVisionBot emptyBot()
 		{
-			return new FilteredVisionBot(BotID.noBot(), AVector2.ZERO_VECTOR, AVector2.ZERO_VECTOR, 0, 0, 0);
+			return new FilteredVisionBot(BotID.noBot(), Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR, 0, 0, 0);
 		}
 		
 		

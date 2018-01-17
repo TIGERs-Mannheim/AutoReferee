@@ -41,4 +41,14 @@ public interface IToolbarObserver
 	default void onSwitchSides()
 	{
 	}
+	
+	
+	/**
+	 * Change match mode
+	 * 
+	 * @param matchMode
+	 */
+	default void onChangeTelegramMode(final boolean matchMode)
+	{
+	}
 }

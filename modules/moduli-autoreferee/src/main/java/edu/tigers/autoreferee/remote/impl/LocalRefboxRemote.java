@@ -32,7 +32,7 @@ public class LocalRefboxRemote implements IRefboxRemote
 		
 		try
 		{
-			AReferee refBox = (AReferee) SumatraModel.getInstance().getModule(AReferee.MODULE_ID);
+			AReferee refBox = SumatraModel.getInstance().getModule(AReferee.class);
 			refBox.handleControlRequest(request);
 		} catch (ModuleNotFoundException e)
 		{

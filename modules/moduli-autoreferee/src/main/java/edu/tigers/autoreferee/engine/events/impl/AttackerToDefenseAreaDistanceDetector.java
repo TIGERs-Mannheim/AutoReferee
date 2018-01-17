@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
@@ -22,6 +22,7 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -37,13 +38,12 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDetector
 {
-	private static final int					priority								= 1;
+	private static final int PRIORITY = 1;
 	
-	/** The minimum allowed distance between the bots of the attacking team and the defense area */
-	private static final double				MIN_ATTACKER_DEFENSE_DISTANCE	= 200;
-	private static final Set<EGameState>	ALLOWED_PREVIOUS_STATES;
+	private static final double INACCURACY_TOLERANCE = 5;
+	private static final Set<EGameState> ALLOWED_PREVIOUS_STATES;
 	
-	private boolean								active								= false;
+	private boolean active = false;
 	
 	static
 	{
@@ -54,7 +54,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	
 	
 	/**
-	 * 
+	 * Default constructor
 	 */
 	public AttackerToDefenseAreaDistanceDetector()
 	{
@@ -65,7 +65,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -111,14 +111,16 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	 */
 	private static class Evaluator
 	{
-		private final double							requiredMargin	= MIN_ATTACKER_DEFENSE_DISTANCE + Geometry.getBotRadius();
+		private final double requiredMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard()
+				+ Geometry.getBotRadius()
+				- INACCURACY_TOLERANCE;
 		
-		private final IAutoRefFrame				frame;
-		private final ETeamColor					attackerColor;
+		private final IAutoRefFrame frame;
+		private final ETeamColor attackerColor;
 		private final IPenaltyArea defenderPenArea;
 		
-		private final ITrackedBall					ball;
-		private final Collection<ITrackedBot>	bots;
+		private final ITrackedBall ball;
+		private final Collection<ITrackedBot> bots;
 		
 		
 		public Evaluator(final IAutoRefFrame frame, final ETeamColor attackerColor)
@@ -131,7 +133,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 		}
 		
 		
-		public Optional<IGameEvent> evaluate()
+		private Optional<IGameEvent> evaluate()
 		{
 			Optional<ITrackedBot> optOffender = bots.stream()
 					.filter(ColorFilter.get(attackerColor))

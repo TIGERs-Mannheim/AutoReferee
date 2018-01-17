@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -34,10 +34,10 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
@@ -68,14 +68,14 @@ public class CamFilter
 	private Optional<IRectangle> viewport = Optional.empty();
 	private long lastDetectionFrameTimestamp = 0;
 	
-	private IVector2 lastKnownBallPosition = AVector2.ZERO_VECTOR;
+	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
 	private long lastBallVisibleTimestamp = 0;
 	
 	private final Map<BotID, RobotTracker> robots = new HashMap<>();
 	
 	private final List<BallTracker> balls = new ArrayList<>();
 	
-	private List<RobotInfo> robotInfos = new ArrayList<>();
+	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
 	
 	private CircularFifoQueue<CamBall> ballHistory = new CircularFifoQueue<>(100);
 	
@@ -102,6 +102,15 @@ public class CamFilter
 	
 	@Configurable(defValue = "true", comment = "Restrict viewport to minimize overlap (from CameraArchitect).")
 	private static boolean restrictViewport = true;
+	
+	@Configurable(defValue = "0.6", comment = "Max. velocity loss at ball-bot hull collisions")
+	private static double maxBallBotHullLoss = 0.6;
+	
+	@Configurable(defValue = "1.0", comment = "Max. velocity loss at ball-bot front collisions")
+	private static double maxBallBotFrontLoss = 1.0;
+	
+	@Configurable(defValue = "130.0", comment = "Max. height for ball-bot collision check")
+	private static double maxHeightForCollision = 130.0;
 	
 	static
 	{
@@ -132,7 +141,7 @@ public class CamFilter
 	{
 		processDtFilter(frame);
 		processRobots(frame, lastFilteredFrame.getBots());
-		processBalls(frame, lastFilteredFrame.getBall());
+		processBalls(frame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots());
 	}
 	
 	
@@ -171,9 +180,9 @@ public class CamFilter
 	}
 	
 	
-	public void setRobotInfoFrame(final List<RobotInfo> robotInfos)
+	public void setRobotInfoMap(final Map<BotID, RobotInfo> robotInfos)
 	{
-		this.robotInfos = robotInfos;
+		robotInfoMap = robotInfos;
 	}
 	
 	
@@ -189,34 +198,35 @@ public class CamFilter
 	}
 	
 	
-	private List<RobotCollisionShape> getRobotCollisionShapes(final CamDetectionFrame frame)
+	private List<RobotCollisionShape> getRobotCollisionShapes(final List<FilteredVisionBot> mergedRobots)
 	{
 		List<RobotCollisionShape> shapes = new ArrayList<>();
-		List<CamRobot> camBots = frame.getRobots();
 		
-		for (CamRobot bot : camBots)
+		for (FilteredVisionBot bot : mergedRobots)
 		{
-			Optional<RobotInfo> info = robotInfos.stream()
-					.filter(ri -> ri.getBotId() == bot.getBotId())
-					.findFirst();
+			RobotInfo robotInfo = robotInfoMap.get(bot.getBotID());
 			
 			final double center2Drib;
-			if (info.isPresent())
+			final double botRadius;
+			if (robotInfo != null)
 			{
-				center2Drib = info.get().getCenter2DribblerDist();
+				center2Drib = robotInfo.getCenter2DribblerDist();
+				botRadius = robotInfo.getBotParams().getDimensions().getDiameter() * 0.5;
 			} else
 			{
 				center2Drib = Geometry.getOpponentCenter2DribblerDist();
+				botRadius = Geometry.getBotRadius();
 			}
 			
-			shapes.add(new RobotCollisionShape(bot.getPos(), bot.getOrientation(), Geometry.getBotRadius(), center2Drib));
+			shapes.add(new RobotCollisionShape(bot.getPos(), bot.getOrientation(), botRadius, center2Drib,
+					maxBallBotHullLoss, maxBallBotFrontLoss));
 		}
 		
 		return shapes;
 	}
 	
 	
-	private List<CamBall> getVirtualBalls(final long timestamp)
+	private List<CamBall> getVirtualBalls(final long timestamp, final long frameId)
 	{
 		List<CamBall> virtualBalls = new ArrayList<>();
 		
@@ -225,7 +235,7 @@ public class CamFilter
 			return virtualBalls;
 		}
 		
-		for (RobotInfo r : robotInfos)
+		for (RobotInfo r : robotInfoMap.values())
 		{
 			RobotTracker tracker = robots.get(r.getBotId());
 			if (tracker == null)
@@ -235,12 +245,12 @@ public class CamFilter
 			
 			IVector2 ballAtDribblerPos = tracker.getPosition(timestamp)
 					.addNew(Vector2.fromAngle(tracker.getOrientation(timestamp))
-							.scaleTo(r.getCenter2DribblerDist() + (Geometry.getBallRadius() * 0.5)));
+							.scaleTo(r.getCenter2DribblerDist() + Geometry.getBallRadius()));
 			
 			if ((ballAtDribblerPos.distanceTo(lastKnownBallPosition) < maxVirtualBallDistance) && r.isBarrierInterrupted())
 			{
-				CamBall camBall = new CamBall(0, 0, Vector3.from2d(ballAtDribblerPos, 0), AVector2.ZERO_VECTOR,
-						timestamp, timestamp, camId, 0);
+				CamBall camBall = new CamBall(0, 0, Vector3.from2d(ballAtDribblerPos, 0), Vector2f.ZERO_VECTOR,
+						timestamp, camId, frameId);
 				virtualBalls.add(camBall);
 			}
 		}
@@ -266,30 +276,10 @@ public class CamFilter
 	 * 
 	 * @return
 	 */
-	public Optional<IVector2> getCameraXYPosition()
+	private Optional<IVector3> getCameraPosition()
 	{
-		if (calibration.isPresent())
-		{
-			return Optional.of(calibration.get().getCameraPosition().getXYVector());
-		}
+		return calibration.map(CamCalibration::getCameraPosition);
 		
-		return Optional.empty();
-	}
-	
-	
-	/**
-	 * Get camera position from calibration data.
-	 * 
-	 * @return
-	 */
-	public Optional<IVector3> getCameraPosition()
-	{
-		if (calibration.isPresent())
-		{
-			return Optional.of(calibration.get().getCameraPosition());
-		}
-		
-		return Optional.empty();
 	}
 	
 	
@@ -312,12 +302,9 @@ public class CamFilter
 						e -> ((frame.gettCapture() - e.getValue().getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeRobot);
 		
 		// remove trackers out of field
-		if (fieldRectWithBoundary.isPresent())
-		{
-			robots.entrySet()
-					.removeIf(
-							e -> !fieldRectWithBoundary.get().isPointInShape(e.getValue().getPosition(frame.gettCapture())));
-		}
+		fieldRectWithBoundary.ifPresent(iRectangle -> robots.entrySet()
+				.removeIf(
+						e -> !iRectangle.isPointInShape(e.getValue().getPosition(frame.gettCapture()))));
 		
 		// do a prediction on all trackers
 		for (RobotTracker r : robots.values())
@@ -380,7 +367,8 @@ public class CamFilter
 	}
 	
 	
-	private void processBalls(final CamDetectionFrame frame, final FilteredVisionBall ball)
+	private void processBalls(final CamDetectionFrame frame, final FilteredVisionBall ball,
+			final List<FilteredVisionBot> mergedRobots)
 	{
 		// remove trackers of balls that have not been visible for some time
 		balls.removeIf(e -> ((frame.gettCapture() - e.getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeBall);
@@ -388,19 +376,19 @@ public class CamFilter
 		// remove trackers of balls that were out of the field for too long
 		balls.removeIf(e -> ((frame.gettCapture() - e.getLastInFieldTimestamp()) * 1e-9) > invisibleLifetimeBall);
 		
-		List<RobotCollisionShape> colShapes = getRobotCollisionShapes(frame);
+		List<RobotCollisionShape> colShapes = getRobotCollisionShapes(mergedRobots);
 		
 		// do a prediction on all trackers
 		for (BallTracker b : balls)
 		{
-			b.predict(frame.gettCapture(), getAverageFrameDt(), colShapes);
+			b.predict(frame.gettCapture(), getAverageFrameDt(), colShapes, ball.getPos().z() > maxHeightForCollision);
 		}
 		
 		List<CamBall> camBalls = new ArrayList<>();
 		camBalls.addAll(frame.getBalls());
 		if (frame.getBalls().isEmpty())
 		{
-			camBalls.addAll(getVirtualBalls(frame.gettCapture()));
+			camBalls.addAll(getVirtualBalls(frame.gettCapture(), frame.getFrameNumber()));
 		}
 		
 		// iterate over all balls on the camera

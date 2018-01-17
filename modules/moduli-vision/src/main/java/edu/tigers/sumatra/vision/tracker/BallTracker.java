@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 24.11.2016
- * Author(s): AndreR <andre@ryll.cc>
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.tracker;
 
@@ -21,12 +16,13 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.filter.tracking.TrackingFilterPosVel2D;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.CamBallInternal;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape.CollisionResult;
+import edu.tigers.sumatra.vision.data.RobotCollisionShape.ECollisionLocation;
 
 
 /**
@@ -37,38 +33,41 @@ import edu.tigers.sumatra.vision.data.RobotCollisionShape.CollisionResult;
 public class BallTracker
 {
 	@SuppressWarnings("unused")
-	private static final Logger				log									= Logger
+	private static final Logger log = Logger
 			.getLogger(BallTracker.class.getName());
 	
-	private final TrackingFilterPosVel2D	filter;
+	private final TrackingFilterPosVel2D filter;
 	
 	
-	private long									lastPredictTimestamp;
-	private long									lastInFieldTimestamp;
-	private double									lastDtDeviation					= 0.0;
+	private long lastPredictTimestamp;
+	private long lastInFieldTimestamp;
+	private double lastDtDeviation = 0.0;
 	
-	private int										health								= 2;
+	private int health = 2;
+	private int age = 0;
 	
-	private CamBall								lastCamBall;
-	private boolean								updated								= false;
+	private CamBall lastCamBall;
+	private boolean updated = false;
 	
-	private double									maxDistance							= -1.0;
+	private double maxDistance = -1.0;
 	
 	
 	@Configurable(defValue = "100.0")
-	private static double						initialCovarianceXY				= 100.0;
+	private static double initialCovarianceXY = 100.0;
 	@Configurable(defValue = "0.1")
-	private static double						modelError							= 0.1;
+	private static double modelError = 0.1;
 	@Configurable(defValue = "2.0")
-	private static double						measError							= 2.0;
+	private static double measError = 2.0;
 	@Configurable(defValue = "10000.0", comment = "Maximum assumed ball speed in [mm/s] to filter outliers")
-	private static double						maxLinearVel						= 10000.0;
+	private static double maxLinearVel = 10000.0;
 	@Configurable(defValue = "1000.0", comment = "Increase measurement error depending on frame time deviation from average.")
-	private static double						measErrorDtDeviationPenalty	= 1000.0;
+	private static double measErrorDtDeviationPenalty = 1000.0;
 	@Configurable(defValue = "1.5", comment = "Factor to weight stdDeviation during tracker merging, reasonable range: 1.0 - 2.0. High values lead to more jitter")
-	private static double						mergePower							= 1.5;
+	private static double mergePower = 1.5;
 	@Configurable(defValue = "20", comment = "Reciprocal health is used as uncertainty, increased on update, decreased on prediction")
-	private static int							maxHealth							= 20;
+	private static int maxHealth = 20;
+	@Configurable(defValue = "3", comment = "How many updates are required until this tracker is grown up?")
+	private static int grownUpAge = 3;
 	
 	static
 	{
@@ -100,8 +99,13 @@ public class BallTracker
 	 */
 	public BallTracker(final CamBall camBall, final FilteredVisionBall filtBall)
 	{
+		IVector2 filtVel = filtBall.getVel().getXYVector();
+		if (filtVel.getLength2() > maxLinearVel)
+		{
+			filtVel = filtVel.scaleToNew(maxLinearVel);
+		}
 		RealVector initState = camBall.getPos().getXYVector().toRealVector()
-				.append(filtBall.getVel().getXYVector().toRealVector());
+				.append(filtVel.toRealVector());
 		filter = new TrackingFilterPosVel2D(initState, initialCovarianceXY, modelError, measError,
 				camBall.gettCapture());
 		
@@ -117,8 +121,10 @@ public class BallTracker
 	 * @param timestamp time in [ns]
 	 * @param avgFrameDt average frame delta time in [s]
 	 * @param bots
+	 * @param airborne
 	 */
-	public void predict(final long timestamp, final double avgFrameDt, final List<RobotCollisionShape> bots)
+	public void predict(final long timestamp, final double avgFrameDt, final List<RobotCollisionShape> bots,
+			final boolean airborne)
 	{
 		double dtInSec = (timestamp - lastPredictTimestamp) * 1e-9;
 		
@@ -130,7 +136,10 @@ public class BallTracker
 			lastDtDeviation = avgFrameDt - dtInSec;
 		}
 		
-		processCollisions(bots);
+		if (!airborne)
+		{
+			processCollisions(bots);
+		}
 		
 		filter.setMeasurementError(measError + (Math.abs(lastDtDeviation) * measErrorDtDeviationPenalty));
 		
@@ -181,6 +190,10 @@ public class BallTracker
 		if (health < maxHealth)
 		{
 			health += 2;
+			if (age < grownUpAge)
+			{
+				++age;
+			}
 		}
 		
 		// run correction on tracking filter
@@ -211,18 +224,13 @@ public class BallTracker
 		for (RobotCollisionShape col : bots)
 		{
 			CollisionResult result = col.getCollision(filter.getPositionEstimate(), filter.getVelocityEstimate());
-			switch (result.getLocation())
+			if (result.getLocation() != ECollisionLocation.NONE)
 			{
-				case CIRCLE:
-					filter.resetCovariance(initialCovarianceXY);
-					break;
-				case FRONT:
-					filter.setVelocity(AVector2.ZERO_VECTOR);
-					filter.resetCovariance(initialCovarianceXY);
-					break;
-				case NONE:
-				default:
-					break;
+				filter.resetCovariance(initialCovarianceXY);
+				if (result.getBallReflectedVel() != null)
+				{
+					filter.setVelocity(result.getBallReflectedVel());
+				}
 			}
 		}
 	}
@@ -231,6 +239,17 @@ public class BallTracker
 	public double getUncertainty()
 	{
 		return 1.0 / health;
+	}
+	
+	
+	/**
+	 * Is this tracker old enough.
+	 * 
+	 * @return
+	 */
+	public boolean isGrownUp()
+	{
+		return age >= grownUpAge;
 	}
 	
 	
@@ -318,9 +337,9 @@ public class BallTracker
 		Validate.isTrue(totalPosUnc > 0);
 		Validate.isTrue(totalVelUnc > 0);
 		
-		IVector2 pos = AVector2.ZERO_VECTOR;
-		IVector2 posCam = AVector2.ZERO_VECTOR;
-		IVector2 vel = AVector2.ZERO_VECTOR;
+		IVector2 pos = Vector2f.ZERO_VECTOR;
+		IVector2 posCam = Vector2f.ZERO_VECTOR;
+		IVector2 vel = Vector2f.ZERO_VECTOR;
 		
 		// take all trackers and calculate their pos/vel sum weighted by uncertainty.
 		// Trackers with high uncertainty have less influence on the merged result.
@@ -349,11 +368,11 @@ public class BallTracker
 	 */
 	public static class MergedBall
 	{
-		private final IVector2			filtPos;
-		private final IVector2			camPos;
-		private final IVector2			filtVel;
-		private final long				timestamp;
-		private final CamBallInternal	latestCamBall;
+		private final IVector2 filtPos;
+		private final IVector2 camPos;
+		private final IVector2 filtVel;
+		private final long timestamp;
+		private final CamBallInternal latestCamBall;
 		
 		
 		/**

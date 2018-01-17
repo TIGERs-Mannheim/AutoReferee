@@ -6,6 +6,10 @@ package edu.tigers.sumatra.wp.data;
 
 import static edu.tigers.sumatra.wp.data.BallTrajectoryState.aBallState;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang.Validate;
 
 import com.sleepycat.persist.model.Persistent;
@@ -32,16 +36,17 @@ import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
 @Persistent
 public class TrackedBall implements ITrackedBall
 {
-	private final long								timestamp;
-	private final BallTrajectoryState			state;
-	private final long								lastVisibleTimestamp;
+	private final long timestamp;
+	private final long tAssembly;
+	private final BallTrajectoryState state;
+	private final long lastVisibleTimestamp;
 	
 	// cache some fields on demand to increase performance
-	private transient IVector2						pos;
-	private transient IVector2						vel;
-	private transient IBallTrajectory			ballTrajectory;
-	private transient IStraightBallConsultant	straightBallConsultant;
-	private transient IChipBallConsultant		chipBallConsultant;
+	private transient IVector2 pos;
+	private transient IVector2 vel;
+	private transient IBallTrajectory ballTrajectory;
+	private transient IStraightBallConsultant straightBallConsultant;
+	private transient IChipBallConsultant chipBallConsultant;
 	
 	
 	/**
@@ -52,6 +57,7 @@ public class TrackedBall implements ITrackedBall
 		state = new BallTrajectoryState();
 		lastVisibleTimestamp = 0;
 		timestamp = 0;
+		tAssembly = 0;
 	}
 	
 	
@@ -65,6 +71,7 @@ public class TrackedBall implements ITrackedBall
 		this.timestamp = timestamp;
 		this.state = state;
 		this.lastVisibleTimestamp = lastVisibleTimestamp;
+		tAssembly = System.nanoTime();
 		
 		Validate.isTrue(Double.isFinite(state.getvSwitchToRoll()) && (state.getvSwitchToRoll() >= 0));
 	}
@@ -198,21 +205,21 @@ public class TrackedBall implements ITrackedBall
 	@Override
 	public IVector3 getPos3()
 	{
-		return state.getPos();
+		return state.getPos().getXYZVector();
 	}
 	
 	
 	@Override
 	public IVector3 getVel3()
 	{
-		return state.getVel().multiplyNew(0.001);
+		return state.getVel().multiplyNew(0.001).getXYZVector();
 	}
 	
 	
 	@Override
 	public IVector3 getAcc3()
 	{
-		return state.getAcc().multiplyNew(0.001);
+		return state.getAcc().multiplyNew(0.001).getXYZVector();
 	}
 	
 	
@@ -277,5 +284,38 @@ public class TrackedBall implements ITrackedBall
 	public BallTrajectoryState getState()
 	{
 		return state;
+	}
+	
+	
+	@Override
+	public List<Number> getNumberList()
+	{
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(timestamp);
+		numbers.addAll(getPos3().getNumberList());
+		numbers.addAll(getVel3().getNumberList());
+		numbers.addAll(getAcc3().getNumberList());
+		numbers.add(lastVisibleTimestamp);
+		numbers.add(state.getvSwitchToRoll());
+		numbers.add(state.isChipped() ? 1 : 0);
+		numbers.add(tAssembly);
+		return numbers;
+	}
+	
+	
+	@Override
+	public List<String> getHeaders()
+	{
+		return Arrays.asList("timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x", "acc_y", "acc_z",
+				"lastVisibleTimestamp", "vSwitchToRoll", "chipped", "tAssembly");
+	}
+	
+	
+	/**
+	 * @return timestamp [ns] of assembly of this ball
+	 */
+	public long gettAssembly()
+	{
+		return tAssembly;
 	}
 }

@@ -22,70 +22,70 @@ import edu.tigers.sumatra.math.vector.Vector2;
 public class BotSkillPenaltyShooter extends ABotSkill
 {
 	
-	private final int[]	ballPos						= new int[2];
-	
 	@SerialData(type = SerialData.ESerialDataType.INT16)
-	private int				targetAngle					= 0;
+	private int targetAngle = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				timeToShoot					= 0;
+	private int timeToShoot = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT16)
-	private int				approachSpeed				= 0;
+	private int approachSpeed = 0;
 	
-	@SerialData(type = SerialData.ESerialDataType.UINT16)
-	private int				translationalPushInTurn	= 0;
+	@SerialData(type = SerialData.ESerialDataType.INT8)
+	private int speedInTurnX = 0;
+	
+	@SerialData(type = SerialData.ESerialDataType.INT8)
+	private int speedInTurnY = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.INT16)
-	private int				rotationSpeed				= 0;
+	private int rotationSpeed = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				penaltyKickSpeed			= 250;
+	private int penaltyKickSpeed = 250;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				dribblerSpeed				= 100;
+	private int dribblerSpeed = 100;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				accMax						= 0;
+	private int accMax = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				accMaxW						= 0;
+	private int accMaxW = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				jerkMax						= 0;
+	private int jerkMax = 0;
 	
 	@SerialData(type = SerialData.ESerialDataType.UINT8)
-	private int				jerkMaxW						= 0;
+	private int jerkMaxW = 0;
 	
 	
 	/**
 	 * Create PenaltyShooter Bot Skill
 	 * 
-	 * @param ballPos Position of the ball
 	 * @param angle Angle to turn
 	 * @param timeToShoot Time to wait to confuse opposing keeper
 	 * @param approachSpeed local speed to approach the ball
 	 * @param rotationSpeed rotation speed
 	 * @param penaltyKickSpeed kick speed
-	 * @param translationalPushInTurn additional translation velocity component when turning with ball
-     * @param accMax maximum acceleration in translational direction
-     * @param accMaxW maximum acceleration in rotational direction
-     * @param jerkMax maximum jerk in translational direction
-     * @param jerkMaxW maximum jerk in rotational direction
-     * @param dribbleSpeed
+	 * @param speedInTurn additional translation velocity component when turning with ball
+	 * @param accMax maximum acceleration in translational direction
+	 * @param accMaxW maximum acceleration in rotational direction
+	 * @param jerkMax maximum jerk in translational direction
+	 * @param jerkMaxW maximum jerk in rotational direction
+	 * @param dribbleSpeed
 	 */
 	@SuppressWarnings("squid:S00107")
-	public BotSkillPenaltyShooter(final IVector2 ballPos, double angle, double timeToShoot, double approachSpeed,
-			double rotationSpeed, double penaltyKickSpeed, double translationalPushInTurn, double accMax, double accMaxW,
-			double jerkMax, double jerkMaxW, double dribbleSpeed)
+	public BotSkillPenaltyShooter(final double angle, final double timeToShoot, final double approachSpeed,
+			final double rotationSpeed, final double penaltyKickSpeed, final IVector2 speedInTurn, final double accMax,
+			final double accMaxW,
+			final double jerkMax, final double jerkMaxW, final double dribbleSpeed)
 	{
 		this();
-		setBallPos(ballPos);
 		setTimeToShoot(timeToShoot);
 		setTargetAngle(angle);
 		setApproachSpeed(approachSpeed);
 		setRotationSpeed(rotationSpeed);
-		setTranslationalPushInTurn(translationalPushInTurn);
+		setSpeedInTurn(speedInTurn);
 		setPenaltyKickSpeed(penaltyKickSpeed);
 		setAccMax(accMax);
 		setAccMaxW(accMaxW);
@@ -102,7 +102,8 @@ public class BotSkillPenaltyShooter extends ABotSkill
 	{
 		super(EBotSkill.PENALTY_SHOOTER_SKILL);
 	}
-
+	
+	
 	public void setRotationSpeed(final double rotationSpeed)
 	{
 		this.rotationSpeed = (int) (1e3 * rotationSpeed);
@@ -151,15 +152,17 @@ public class BotSkillPenaltyShooter extends ABotSkill
 	{
 		jerkMaxW = DriveLimits.toUInt8(val, DriveLimits.MAX_JERK_W);
 	}
-
-
-    /**
-     * Set dribbler speed in rpm
-     * @param translationalPushInTurn
-     */
-	public void setTranslationalPushInTurn(double translationalPushInTurn)
+	
+	
+	/**
+	 * Set translational motion while in turn motion
+	 * 
+	 * @param speed
+	 */
+	public void setSpeedInTurn(final IVector2 speed)
 	{
-		this.translationalPushInTurn = (int) (1e3 * translationalPushInTurn);
+		speedInTurnX = (int) (speed.x() * 1e2);
+		speedInTurnY = (int) (speed.y() * 1e2);
 	}
 	
 	
@@ -169,26 +172,13 @@ public class BotSkillPenaltyShooter extends ABotSkill
 	}
 	
 	
-	public double getTranslationalPushInTurn()
+	public IVector2 getSpeedInTurn()
 	{
-		return translationalPushInTurn * 1e-3;
+		return Vector2.fromXY(speedInTurnX, speedInTurnY).multiply(1e-2);
 	}
 	
 	
-	public IVector2 getBallPos()
-	{
-		return Vector2.fromXY(ballPos[0], ballPos[1]);
-	}
-	
-	
-	public void setBallPos(final IVector2 ballPos)
-	{
-		this.ballPos[0] = (int) ballPos.x();
-		this.ballPos[1] = (int) ballPos.y();
-	}
-	
-	
-	public void setPenaltyKickSpeed(double penaltyKickSpeed)
+	public void setPenaltyKickSpeed(final double penaltyKickSpeed)
 	{
 		this.penaltyKickSpeed = (int) ((penaltyKickSpeed / 0.04) + 0.5);
 	}
@@ -212,13 +202,13 @@ public class BotSkillPenaltyShooter extends ABotSkill
 	}
 	
 	
-	public void setTargetAngle(double targetAngle)
+	public void setTargetAngle(final double targetAngle)
 	{
 		this.targetAngle = (int) (1e3 * targetAngle);
 	}
 	
 	
-	public void setApproachSpeed(double approachSpeed)
+	public void setApproachSpeed(final double approachSpeed)
 	{
 		this.approachSpeed = (int) (1e3 * approachSpeed);
 	}
@@ -246,18 +236,17 @@ public class BotSkillPenaltyShooter extends ABotSkill
 	 */
 	public static final class Builder
 	{
-		private IVector2	ballPos;
-		private double		timeToShoot;
-		private double		targetAngle;
-		private double		approachSpeed;
-		private double		rotationSpeed;
-		private double		penaltyKickSpeed;
-		private double		translationalVelocityOffset;
-		private double		accMax	= 3.0;
-		private double		accMaxW	= 50;
-		private double		jerkMax	= 30;
-		private double		jerkMaxW = 500;
-		private double      dribbleSpeed = 1500;
+		private double timeToShoot;
+		private double targetAngle;
+		private double approachSpeed;
+		private double rotationSpeed;
+		private double penaltyKickSpeed;
+		private IVector2 speedInTurn;
+		private double accMax = 3.0;
+		private double accMaxW = 50;
+		private double jerkMax = 30;
+		private double jerkMaxW = 500;
+		private double dribbleSpeed = 1500;
 		
 		
 		/**
@@ -272,28 +261,16 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		
 		
 		/**
-		 * ball position
+		 * dribble speed
 		 * 
-		 * @param ballPos
+		 * @param dribbleSpeed
 		 * @return
 		 */
-		public Builder ballPos(final IVector2 ballPos)
+		public Builder dribbleSpeed(final double dribbleSpeed)
 		{
-			this.ballPos = ballPos;
+			this.dribbleSpeed = dribbleSpeed;
 			return this;
 		}
-
-
-        /**
-         * dribble speed
-         * @param dribbleSpeed
-         * @return
-         */
-		public Builder dribbleSpeed(final double dribbleSpeed)
-        {
-            this.dribbleSpeed = dribbleSpeed;
-            return this;
-        }
 		
 		
 		/**
@@ -305,6 +282,19 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		public Builder timeToShoot(final double timeToShoot)
 		{
 			this.timeToShoot = timeToShoot;
+			return this;
+		}
+		
+		
+		/**
+		 * Set additional speed while in quick turn motion
+		 * 
+		 * @param speedInTurn
+		 * @return
+		 */
+		public Builder speedInTurn(final IVector2 speedInTurn)
+		{
+			this.speedInTurn = speedInTurn;
 			return this;
 		}
 		
@@ -362,25 +352,12 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		
 		
 		/**
-		 * additional translation velocity component when turning with ball
-		 * 
-		 * @param velocity
-		 * @return
-		 */
-		public Builder translationalTurnVelocityOffset(final double velocity)
-		{
-			this.translationalVelocityOffset = velocity;
-			return this;
-		}
-		
-		
-		/**
 		 * limit for translational acceleration
 		 * 
 		 * @param accMax
 		 * @return
 		 */
-		public Builder accMax(double accMax)
+		public Builder accMax(final double accMax)
 		{
 			this.accMax = accMax;
 			return this;
@@ -393,7 +370,7 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		 * @param accMaxW
 		 * @return
 		 */
-		public Builder accMaxW(double accMaxW)
+		public Builder accMaxW(final double accMaxW)
 		{
 			this.accMaxW = accMaxW;
 			return this;
@@ -406,7 +383,7 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		 * @param jerkMax
 		 * @return
 		 */
-		public Builder jerkMax(double jerkMax)
+		public Builder jerkMax(final double jerkMax)
 		{
 			this.jerkMax = jerkMax;
 			return this;
@@ -419,7 +396,7 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		 * @param jerkMaxW
 		 * @return
 		 */
-		public Builder jerkMaxW(double jerkMaxW)
+		public Builder jerkMaxW(final double jerkMaxW)
 		{
 			this.jerkMaxW = jerkMaxW;
 			return this;
@@ -428,16 +405,14 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		
 		/**
 		 * validate
-		 * 
-		 * @return
 		 */
 		private void validate()
 		{
-			Validate.notNull(ballPos);
 			Validate.isTrue(timeToShoot > 0);
 			Validate.isTrue(targetAngle > 0);
 			Validate.isTrue(approachSpeed > 0);
 			Validate.isTrue(abs(rotationSpeed) > 0);
+			Validate.notNull(speedInTurn);
 			Validate.isTrue(penaltyKickSpeed > 0);
 		}
 		
@@ -450,8 +425,8 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		public BotSkillPenaltyShooter build()
 		{
 			validate();
-			return new BotSkillPenaltyShooter(ballPos, targetAngle, timeToShoot, approachSpeed,
-					rotationSpeed, penaltyKickSpeed, translationalVelocityOffset,
+			return new BotSkillPenaltyShooter(targetAngle, timeToShoot, approachSpeed,
+					rotationSpeed, penaltyKickSpeed, speedInTurn,
 					accMax, accMaxW, jerkMax, jerkMaxW, dribbleSpeed);
 		}
 	}

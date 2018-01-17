@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -85,6 +85,7 @@ public class GameStateCalculator
 	
 	private void processStage(final Stage stage, final GameState.Builder builder)
 	{
+		builder.withPenalyShootout(false);
 		switch (stage)
 		{
 			case NORMAL_HALF_TIME:

@@ -18,7 +18,7 @@ import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -42,8 +42,8 @@ public class Tube implements ITube
 	@SuppressWarnings("unused")
 	private Tube()
 	{
-		startCenter = Vector2.zero();
-		endCenter = Vector2.zero();
+		startCenter = Vector2f.ZERO_VECTOR;
+		endCenter = Vector2f.ZERO_VECTOR;
 		radius = 1;
 	}
 	

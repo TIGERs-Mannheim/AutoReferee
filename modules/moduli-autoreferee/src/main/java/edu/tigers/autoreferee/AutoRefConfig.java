@@ -34,9 +34,6 @@ public class AutoRefConfig
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed by the robots")
 	private static double robotBallPlacementAccuracy = 100;
 	
-	@Configurable(comment = "[m/s] The maximum allowed ball velocity ingame")
-	private static double maxBallVelocity = 8.5d;
-	
 	@Configurable(comment = "[m/s] The maximum bot velocity during game stoppage")
 	private static double maxBotStopSpeed = 1.7d; // in m/s
 	
@@ -119,15 +116,6 @@ public class AutoRefConfig
 	public static double getRobotBallPlacementAccuracy()
 	{
 		return robotBallPlacementAccuracy;
-	}
-	
-	
-	/**
-	 * @return The maximum allowed ball velocity in m/s
-	 */
-	public static double getMaxBallVelocity()
-	{
-		return maxBallVelocity;
 	}
 	
 	

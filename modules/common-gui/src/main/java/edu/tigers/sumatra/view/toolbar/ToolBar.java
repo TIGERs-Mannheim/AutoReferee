@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -46,6 +47,8 @@ public class ToolBar
 	private final JButton btnRecSave;
 	private final JButton btnSwitchSides;
 	
+	
+	private JCheckBox telegramMode = new JCheckBox("Telegram");
 	private final FpsPanel fpsPanel = new FpsPanel();
 	private final JProgressBar heapBar = new JProgressBar();
 	private final JLabel heapLabel = new JLabel();
@@ -102,6 +105,10 @@ public class ToolBar
 		JPanel toolBarPanel = new JPanel();
 		toolBarPanel.setLayout(new MigLayout("inset 1"));
 		
+		JPanel matchModePanel = new JPanel(new BorderLayout());
+		telegramMode.addActionListener(new ChangeMatchModeListener());
+		matchModePanel.add(telegramMode);
+		
 		// --- add buttons ---
 		toolBarPanel.add(btnStartStop, "left");
 		toolBarPanel.add(btnEmergency, "left");
@@ -109,6 +116,7 @@ public class ToolBar
 		toolBarPanel.add(btnSwitchSides, "left");
 		toolBarPanel.add(fpsPanel, "left");
 		toolBarPanel.add(heapPanel, "left");
+		toolBarPanel.add(matchModePanel, "right");
 		toolBar.add(toolBarPanel);
 		
 		// initialize icons
@@ -207,6 +215,17 @@ public class ToolBar
 	
 	
 	/**
+	 * Sets the current telegram mode
+	 * 
+	 * @param enabled
+	 */
+	public void setTelegramStatus(boolean enabled)
+	{
+		telegramMode.setSelected(enabled);
+	}
+	
+	
+	/**
 	 * @param enabled
 	 */
 	public void setActive(final boolean enabled)
@@ -293,6 +312,18 @@ public class ToolBar
 			for (IToolbarObserver observer : observers)
 			{
 				observer.onSwitchSides();
+			}
+		}
+	}
+	
+	private class ChangeMatchModeListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(final ActionEvent actionEvent)
+		{
+			for (IToolbarObserver observer : observers)
+			{
+				observer.onChangeTelegramMode(telegramMode.isSelected());
 			}
 		}
 	}

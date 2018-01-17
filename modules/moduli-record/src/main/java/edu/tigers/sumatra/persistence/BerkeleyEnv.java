@@ -19,6 +19,10 @@ import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
 
+import edu.tigers.sumatra.persistence.proxy.ColorProxy;
+import edu.tigers.sumatra.persistence.proxy.ConcurrentHashMapProxy;
+import edu.tigers.sumatra.persistence.proxy.EnumMapProxy;
+import edu.tigers.sumatra.persistence.proxy.LinkedHashSetProxy;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
@@ -43,6 +47,15 @@ public class BerkeleyEnv
 	private StoreConfig storeConfig = new StoreConfig();
 	
 	private static final Map<File, DatabaseSession> SESSIONS = new HashMap<>();
+	
+	
+	public BerkeleyEnv()
+	{
+		model.registerClass(ColorProxy.class);
+		model.registerClass(EnumMapProxy.class);
+		model.registerClass(ConcurrentHashMapProxy.class);
+		model.registerClass(LinkedHashSetProxy.class);
+	}
 	
 	
 	/**

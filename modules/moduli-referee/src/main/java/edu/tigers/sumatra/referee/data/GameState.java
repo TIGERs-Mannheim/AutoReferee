@@ -8,10 +8,10 @@ import org.apache.commons.lang.Validate;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.referee.TeamConfig;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -44,7 +44,7 @@ public class GameState
 		forTeam = ETeamColor.NEUTRAL;
 		ourTeam = ETeamColor.NEUTRAL;
 		penaltyShootout = false;
-		ballPlacementPosition = AVector2.ZERO_VECTOR;
+		ballPlacementPosition = Vector2f.ZERO_VECTOR;
 	}
 	
 	
@@ -96,7 +96,7 @@ public class GameState
 	 */
 	public IVector2 getBallPlacementPositionForUs()
 	{
-		if (ourTeam != TeamConfig.getLeftTeam())
+		if (ourTeam != Geometry.getNegativeHalfTeam())
 		{
 			return ballPlacementPosition.multiplyNew(-1.0d);
 		}
@@ -527,7 +527,7 @@ public class GameState
 		private ETeamColor forTeam;
 		private ETeamColor ourTeam;
 		private boolean penaltyShootout;
-		private IVector2 ballPlacementPosition = AVector2.ZERO_VECTOR;
+		private IVector2 ballPlacementPosition = Vector2f.ZERO_VECTOR;
 		
 		
 		private Builder()

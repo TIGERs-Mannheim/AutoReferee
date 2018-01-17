@@ -23,13 +23,13 @@ import edu.tigers.sumatra.botmanager.serial.SerialData.ESerialDataType;
 public class BotSkillWheelVelocity extends AMoveBotSkill
 {
 	@SerialData(type = ESerialDataType.INT16)
-	private final int[]						vel						= new int[4];
+	private final int[] vel = new int[4];
 	
 	@SerialData(type = ESerialDataType.EMBEDDED)
-	private KickerDribblerCommands	kickerDribbler			= new KickerDribblerCommands();
+	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int									dataAcqusitionMode	= 0;
+	private int dataAcqusitionMode = 0;
 	
 	
 	/** Constructor. */

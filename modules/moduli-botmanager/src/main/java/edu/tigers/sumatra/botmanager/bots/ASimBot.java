@@ -57,7 +57,7 @@ public abstract class ASimBot extends ABot implements IConfigObserver
 	
 	
 	@Override
-	public void onIncommingBotCommand(final ACommand cmd)
+	public void onIncomingBotCommand(final ACommand cmd)
 	{
 	}
 	

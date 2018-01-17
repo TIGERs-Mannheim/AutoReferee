@@ -6,6 +6,7 @@ package edu.tigers.sumatra.wp.data;
 
 import edu.tigers.sumatra.bot.MoveConstraints;
 import edu.tigers.sumatra.bot.RobotInfo;
+import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -14,7 +15,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public interface ITrackedBot extends ITrackedObject
+public interface ITrackedBot extends ITrackedObject, IExportable
 {
 	@Override
 	ITrackedBot mirrored();

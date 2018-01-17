@@ -20,11 +20,11 @@ import edu.tigers.sumatra.export.IJsonString;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
-import edu.tigers.sumatra.math.vector.AVector3;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 
 
 /**
@@ -62,7 +62,7 @@ public class CamCalibration implements IJsonString
 		this.distortion = distortion;
 		rotationQuaternion = q;
 		translation = t;
-		cameraPosition = transformToWorld(AVector3.ZERO_VECTOR);
+		cameraPosition = transformToWorld(Vector3f.ZERO_VECTOR);
 	}
 	
 	
@@ -278,7 +278,7 @@ public class CamCalibration implements IJsonString
 		}
 		
 		double a = distortion;
-		double b = (-9.0 * a * a * ru) + (a * Math.sqrt(a * (12.0 + (81.0 * a * ru * ru))));
+		double b = (-9.0 * a * a * ru) + (a * SumatraMath.sqrt(a * (12.0 + (81.0 * a * ru * ru))));
 		if (b < 0.0)
 		{
 			b = -Math.pow(b, 1.0 / 3.0);

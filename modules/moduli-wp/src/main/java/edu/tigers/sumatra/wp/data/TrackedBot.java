@@ -4,6 +4,10 @@
 
 package edu.tigers.sumatra.wp.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang.Validate;
 
 import com.sleepycat.persist.model.Persistent;
@@ -15,8 +19,9 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.botshape.BotShape;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.Vector3;
 
 
 /**
@@ -27,14 +32,15 @@ import edu.tigers.sumatra.math.vector.IVector2;
 @Persistent(version = 1)
 public final class TrackedBot implements ITrackedBot
 {
-	private final long		timestamp;
-	private final BotID		botId;
-	private final IVector2	pos;
-	private final IVector2	vel;
-	private final double		orientation;
-	private final double		angularVel;
-	private final boolean	visible;
-	private final RobotInfo	robotInfo;
+	private final long timestamp;
+	private final long tAssembly;
+	private final BotID botId;
+	private final IVector2 pos;
+	private final IVector2 vel;
+	private final double orientation;
+	private final double angularVel;
+	private final boolean visible;
+	private final RobotInfo robotInfo;
 	
 	
 	@SuppressWarnings("unused")
@@ -42,12 +48,13 @@ public final class TrackedBot implements ITrackedBot
 	{
 		timestamp = 0;
 		botId = BotID.noBot();
-		pos = AVector2.ZERO_VECTOR;
-		vel = AVector2.ZERO_VECTOR;
+		pos = Vector2f.ZERO_VECTOR;
+		vel = Vector2f.ZERO_VECTOR;
 		orientation = 0;
 		angularVel = 0;
 		visible = false;
 		robotInfo = null;
+		tAssembly = 0;
 	}
 	
 	
@@ -61,6 +68,7 @@ public final class TrackedBot implements ITrackedBot
 		angularVel = builder.angularVel;
 		visible = builder.visible;
 		robotInfo = builder.robotInfo;
+		tAssembly = System.nanoTime();
 	}
 	
 	
@@ -104,9 +112,9 @@ public final class TrackedBot implements ITrackedBot
 		return newBuilder()
 				.withBotId(botID)
 				.withTimestamp(timestamp)
-				.withPos(AVector2.ZERO_VECTOR)
+				.withPos(Vector2f.ZERO_VECTOR)
 				.withOrientation(0)
-				.withVel(AVector2.ZERO_VECTOR)
+				.withVel(Vector2f.ZERO_VECTOR)
 				.withAngularVel(0)
 				.withVisible(false)
 				.withBotInfo(RobotInfo.stub(botID, timestamp));
@@ -217,7 +225,7 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public IVector2 getAcc()
 	{
-		return AVector2.ZERO_VECTOR;
+		return Vector2f.ZERO_VECTOR;
 	}
 	
 	
@@ -291,6 +299,15 @@ public final class TrackedBot implements ITrackedBot
 	}
 	
 	
+	/**
+	 * @return the timestamp [ns] of assembly of this bot
+	 */
+	public long gettAssembly()
+	{
+		return tAssembly;
+	}
+	
+	
 	@Override
 	public String toString()
 	{
@@ -308,19 +325,46 @@ public final class TrackedBot implements ITrackedBot
 	}
 	
 	
+	@Override
+	public List<Number> getNumberList()
+	{
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(getBotId().getNumber());
+		numbers.addAll(getBotId().getTeamColor().getNumberList());
+		numbers.add(timestamp);
+		numbers.addAll(Vector3.from2d(pos, orientation).getNumberList());
+		numbers.addAll(Vector3.from2d(vel, angularVel).getNumberList());
+		numbers.addAll(Vector3.from2d(getAcc(), getaAcc()).getNumberList());
+		numbers.add(visible ? 1 : 0);
+		numbers.add(robotInfo.getKickSpeed());
+		numbers.add(robotInfo.isChip() ? 1 : 0);
+		numbers.add(robotInfo.getDribbleRpm());
+		numbers.add(robotInfo.isBarrierInterrupted() ? 1 : 0);
+		numbers.add(tAssembly);
+		return numbers;
+	}
+	
+	
+	@Override
+	public List<String> getHeaders()
+	{
+		return Arrays.asList("id", "color", "timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x",
+				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleRpm", "barrierInterrupted", "tAssembly");
+	}
+	
 	/**
 	 * {@code TrackedBot} builder static inner class.
 	 */
 	public static final class Builder
 	{
-		private BotID		botId;
-		private Long		timestamp;
-		private IVector2	pos;
-		private IVector2	vel;
-		private Double		orientation;
-		private Double		angularVel;
-		private Boolean	visible;
-		private RobotInfo	robotInfo;
+		private BotID botId;
+		private Long timestamp;
+		private IVector2 pos;
+		private IVector2 vel;
+		private Double orientation;
+		private Double angularVel;
+		private Boolean visible;
+		private RobotInfo robotInfo;
 		
 		
 		private Builder()

@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 24.11.2016
- * Author(s): AndreR <andre@ryll.cc>
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.tracker;
 
@@ -26,9 +21,10 @@ import edu.tigers.sumatra.filter.tracking.TrackingFilterPosVel1D;
 import edu.tigers.sumatra.filter.tracking.TrackingFilterPosVel2D;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 
 
@@ -39,44 +35,46 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBot;
  */
 public class RobotTracker
 {
-	private final TrackingFilterPosVel2D	filterXY;
-	private final TrackingFilterPosVel1D	filterW;
-	private final BotID							botId;
-	private final int								camId;
-	private final List<Long>					updateTimestamps					= new ArrayList<>();
+	private final TrackingFilterPosVel2D filterXY;
+	private final TrackingFilterPosVel1D filterW;
+	private final BotID botId;
+	private final int camId;
+	private final List<Long> updateTimestamps = new ArrayList<>();
 	
-	private long									lastUpdateTimestamp;
-	private long									lastPredictTimestamp;
+	private long lastUpdateTimestamp;
+	private long lastPredictTimestamp;
 	
-	private double									visionQuality;
-	private double									lastCamOrientation;
-	private long									orientationTurns					= 0;
+	private double visionQuality;
+	private double lastCamOrientation;
+	private long orientationTurns = 0;
 	
-	private int										health								= 2;
+	private int health = 2;
 	
 	
 	@Configurable(defValue = "100.0")
-	private static double						initialCovarianceXY				= 100.0;
+	private static double initialCovarianceXY = 100.0;
 	@Configurable(defValue = "0.1")
-	private static double						modelErrorXY						= 0.1;
+	private static double modelErrorXY = 0.1;
 	@Configurable(defValue = "2.0")
-	private static double						measErrorXY							= 2.0;
+	private static double measErrorXY = 2.0;
 	@Configurable(defValue = "100.0")
-	private static double						initialCovarianceW				= 100.0;
+	private static double initialCovarianceW = 100.0;
 	@Configurable(defValue = "0.1")
-	private static double						modelErrorW							= 0.1;
+	private static double modelErrorW = 0.1;
 	@Configurable(defValue = "2.0")
-	private static double						measErrorW							= 2.0;
+	private static double measErrorW = 2.0;
 	@Configurable(defValue = "1.5", comment = "Factor to weight stdDeviation during tracker merging, reasonable range: 1.0 - 2.0. High values lead to more jitter")
-	private static double						mergePower							= 1.5;
+	private static double mergePower = 1.5;
 	@Configurable(defValue = "6000.0", comment = "Maximum assumed robot speed in [mm/s] to filter outliers")
-	private static double						maxLinearVel						= 6000.0;
+	private static double maxLinearVel = 6000.0;
 	@Configurable(defValue = "30.0", comment = "Maximum assumed angular robot speed in [rad/s] to filter outliers")
-	private static double						maxAngularVel						= 30.0;
+	private static double maxAngularVel = 30.0;
 	@Configurable(defValue = "1000.0", comment = "Increase measurement error depending on frame time deviation from average.")
-	private static double						measErrorDtDeviationPenalty	= 1000.0;
+	private static double measErrorDtDeviationPenalty = 1000.0;
 	@Configurable(defValue = "20", comment = "Reciprocal health is used as uncertainty, increased on update, decreased on prediction")
-	private static int							maxHealth							= 20;
+	private static int maxHealth = 20;
+	@Configurable(defValue = "0.0", comment = "Prediction horizon for robots.")
+	private static double predictionTime = 0.0;
 	
 	static
 	{
@@ -290,10 +288,11 @@ public class RobotTracker
 	 * @param id BotID of the final robot.
 	 * @param robots List of robot trackers. Must not be empty.
 	 * @param timestamp Extrapolation time stamp to use for the final robot.
+	 * @param trajAcc
 	 * @return Merged filtered vision robot.
 	 */
 	public static FilteredVisionBot mergeRobotTrackers(final BotID id, final List<RobotTracker> robots,
-			final long timestamp)
+			final long timestamp, final IVector3 trajAcc)
 	{
 		Validate.notEmpty(robots);
 		
@@ -324,8 +323,8 @@ public class RobotTracker
 		Validate.isTrue(totalOrientUnc > 0);
 		Validate.isTrue(totalAVelUnc > 0);
 		
-		IVector2 pos = AVector2.ZERO_VECTOR;
-		IVector2 vel = AVector2.ZERO_VECTOR;
+		IVector2 pos = Vector2f.ZERO_VECTOR;
+		IVector2 vel = Vector2f.ZERO_VECTOR;
 		double orient = 0;
 		double aVel = 0;
 		
@@ -350,6 +349,10 @@ public class RobotTracker
 		vel = vel.multiplyNew(1.0 / totalVelUnc);
 		orient /= totalOrientUnc;
 		aVel /= totalAVelUnc;
+		
+		pos = pos.addNew(vel.multiplyNew(predictionTime))
+				.add(trajAcc.getXYVector().multiplyNew(0.5 * predictionTime * predictionTime));
+		vel = vel.addNew(trajAcc.getXYVector().multiplyNew(predictionTime));
 		
 		return FilteredVisionBot.Builder.create()
 				.withId(id)
@@ -394,7 +397,7 @@ public class RobotTracker
 		double orient = getOrientation(timestamp);
 		
 		DrawableBotShape botShape = new DrawableBotShape(pos, orient, 120, 100);
-		botShape.setFill(false);
+		botShape.setFillColor(null);
 		shapes.add(botShape);
 		
 		DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(botId.getNumber()), true);

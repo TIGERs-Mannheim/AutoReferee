@@ -30,9 +30,7 @@ import edu.tigers.sumatra.botmanager.bots.communication.udp.UnicastTransceiverUD
 import edu.tigers.sumatra.botmanager.commands.ACommand;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationACommand;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationAuth;
-import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV2;
-import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV2.BSModuleConfig;
-import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV2.EWifiSpeed;
+import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV3;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationEthStats;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationPing;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationWifiStats;
@@ -60,58 +58,48 @@ import edu.tigers.sumatra.thread.Watchdog;
 public class TigersBaseStation extends ABaseStation implements ITransceiverUDPObserver, IWatchdogObserver
 {
 	
-	private static final Logger					log				= Logger.getLogger(TigersBaseStation.class.getName());
-	private final UnicastTransceiverUDP			transceiver		= new UnicastTransceiverUDP(false);
+	private static final Logger log = Logger.getLogger(TigersBaseStation.class.getName());
+	private final UnicastTransceiverUDP transceiver = new UnicastTransceiverUDP(false);
 	
 	@Configurable(defValue = "10200")
-	private int											localPort		= 10200;
-	@Configurable(defValue = "192.168.20.210", spezis = { "ROBOCUP", "LAB", "ANDRE" })
-	private String										host				= "192.168.20.210";
+	private int localPort = 10200;
+	@Configurable(defValue = "192.168.20.210", spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH" })
+	private String host = "192.168.20.210";
 	@Configurable(defValue = "10201")
-	private int											dstPort			= 10201;
+	private int dstPort = 10201;
 	
-	@Configurable(spezis = { "ROBOCUP", "LAB", "ANDRE" }, defValue = "121")
-	private int											channel			= 0;
+	@Configurable(spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH" }, defValue = "121")
+	private int channel = 0;
 	@Configurable(comment = "Fix the runtime regardless of the number of bot that are connected.", defValue = "true")
-	private boolean									fixedRuntime	= true;
+	private boolean fixedRuntime = true;
 	@Configurable(comment = "Max communication slots to open for communication to bots", defValue = "8")
-	private int											maxBots			= 8;
-	@Configurable(comment = "timeout when bot is considered to be offline.", defValue = "1000")
-	private int											timeout			= 1000;
-	@Configurable(comment = "wifi speed (must be consistent with bots wifi speed!)", defValue = "WIFI_SPEED_2M")
-	private EWifiSpeed								speed				= EWifiSpeed.WIFI_SPEED_2M;
+	private int maxBots = 8;
 	
-	@Configurable(defValue = "10010")
-	private int											rstPort			= 10010;
-	@Configurable(defValue = "50")
-	private int											rstRate			= 50;
-	@Configurable(defValue = "false")
-	private boolean									rstEnabled		= false;
+	private int visionPort = -1;
+	private String visionAddress = "";
 	
-	private int											visionPort		= -1;
-	private String										visionAddress	= "";
+	private ScheduledExecutorService pingService = null;
+	private PingThread pingThread = null;
+	private Connector connectTimer = null;
 	
-	private ScheduledExecutorService				pingService		= null;
-	private PingThread								pingThread		= null;
-	private Connector									connectTimer	= null;
+	private static final int BASE_STATION_TIMEOUT = 1000;
+	private final Watchdog watchdog = new Watchdog(BASE_STATION_TIMEOUT);
+	private ENetworkState netState = ENetworkState.OFFLINE;
 	
-	private final Watchdog							watchdog			= new Watchdog(timeout);
-	private ENetworkState							netState			= ENetworkState.OFFLINE;
+	private Set<BotID> lastBots = new HashSet<>();
 	
-	private Set<BotID>								lastBots			= new HashSet<>();
+	private final int key;
 	
-	private final int									key;
+	private static final int STAT_ENTRIES = 10;
+	private final Queue<BaseStationWifiStats> wifiStats = new LinkedList<>();
+	private final Queue<BaseStationEthStats> ethStats = new LinkedList<>();
 	
-	private static final int						STAT_ENTRIES	= 10;
-	private final Queue<BaseStationWifiStats>	wifiStats		= new LinkedList<>();
-	private final Queue<BaseStationEthStats>	ethStats			= new LinkedList<>();
+	private int updateRate = 0;
 	
-	private int											updateRate		= 0;
-	
-	private BotParamsManager						botParamsManager;
+	private BotParamsManager botParamsManager;
 	
 	
-	private static final String					CONFIG_CAT		= "botmgr";
+	private static final String CONFIG_CAT = "botmgr";
 	static
 	{
 		ConfigRegistration.registerClass(CONFIG_CAT, TigersBaseStation.class);
@@ -137,7 +125,7 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 		final NetworkInterface nif = NetworkUtility.chooseNetworkInterface(host, 3);
 		if (nif == null)
 		{
-			log.error("No proper nif for base station in network '" + host + "' found!");
+			log.warn("No proper nif for base station in network '" + host + "' found!");
 		} else
 		{
 			log.info("Chose nif for base station: " + nif.getDisplayName() + ".");
@@ -145,7 +133,7 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 		
 		try
 		{
-			SSLVisionCam cam = (SSLVisionCam) SumatraModel.getInstance().getModule(ACam.MODULE_ID);
+			SSLVisionCam cam = (SSLVisionCam) SumatraModel.getInstance().getModule(ACam.class);
 			visionAddress = cam.getAddress();
 			visionPort = cam.getPort();
 		} catch (ModuleNotFoundException err)
@@ -155,7 +143,7 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 		
 		try
 		{
-			botParamsManager = (BotParamsManager) SumatraModel.getInstance().getModule(BotParamsManager.MODULE_ID);
+			botParamsManager = SumatraModel.getInstance().getModule(BotParamsManager.class);
 		} catch (ModuleNotFoundException err)
 		{
 			log.error("Could not find BotParamsManager module", err);
@@ -399,18 +387,12 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	
 	private void sendConfig()
 	{
-		BaseStationConfigV2 config = new BaseStationConfigV2();
+		BaseStationConfigV3 config = new BaseStationConfigV3();
 		config.setVisionIp(visionAddress);
 		config.setVisionPort(visionPort);
-		config.setRstPort(rstPort);
-		config.setRstRate(rstRate);
-		config.setRstEnabled(rstEnabled);
-		BSModuleConfig modConf = config.getModuleConfig(0);
-		modConf.setChannel(channel);
-		modConf.setFixedRuntime(fixedRuntime);
-		modConf.setMaxBots(maxBots);
-		modConf.setSpeed(speed);
-		modConf.setTimeout(timeout);
+		config.setChannel(channel);
+		config.setFixedRuntime(fixedRuntime);
+		config.setMaxBots(maxBots);
 		enqueueCommand(config);
 	}
 	
@@ -576,10 +558,10 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	
 	private class PingThread implements Runnable
 	{
-		private int								id					= 0;
-		private int								payloadLength	= 0;
+		private int id = 0;
+		private int payloadLength = 0;
 		
-		private final Map<Integer, Long>	activePings		= new HashMap<>();
+		private final Map<Integer, Long> activePings = new HashMap<>();
 		
 		
 		/**

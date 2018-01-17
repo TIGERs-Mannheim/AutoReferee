@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
@@ -39,26 +39,22 @@ import edu.tigers.sumatra.model.SumatraModel;
  */
 public class BotManager extends ABotManager implements IConfigObserver
 {
-	private static final Logger log = Logger.getLogger(BotManager.class
-			.getName());
+	private static final Logger log = Logger.getLogger(BotManager.class.getName());
 	private static final String PROP_AUTO_CHARGE = BotManager.class.getName() + ".autoCharge";
 	private boolean autoCharge = true;
 	
+	private final Map<BotID, ABot> botTable = new ConcurrentSkipListMap<>(BotID.getComparator());
 	private final List<IBaseStation> baseStations = new ArrayList<>();
-	private final List<BasestationObserver> basestationObservers = new ArrayList<>();
+	private final List<BaseStationObserver> baseStationObservers = new ArrayList<>();
 	
 	
-	/**
-	 * Setup properties.
-	 * 
-	 * @param subnodeConfiguration Properties for module-configuration
-	 */
-	public BotManager(final SubnodeConfiguration subnodeConfiguration)
+	@Override
+	public void initModule() throws InitModuleException
 	{
 		autoCharge = Boolean.valueOf(SumatraModel.getInstance().getUserProperty(
 				PROP_AUTO_CHARGE, String.valueOf(true)));
 		
-		String[] bsImplsArr = subnodeConfiguration.getStringArray("basestation-impl");
+		String[] bsImplsArr = getSubnodeConfiguration().getStringArray("basestation-impl");
 		for (String impl : bsImplsArr)
 		{
 			try
@@ -81,13 +77,6 @@ public class BotManager extends ABotManager implements IConfigObserver
 	
 	
 	@Override
-	public void initModule() throws InitModuleException
-	{
-		// empty
-	}
-	
-	
-	@Override
 	public void deinitModule()
 	{
 		// empty
@@ -101,8 +90,8 @@ public class BotManager extends ABotManager implements IConfigObserver
 		CommandFactory.getInstance().loadCommands();
 		for (IBaseStation baseStation : baseStations)
 		{
-			BasestationObserver bso = new BasestationObserver();
-			basestationObservers.add(bso);
+			BaseStationObserver bso = new BaseStationObserver();
+			baseStationObservers.add(bso);
 			baseStation.addObserver(bso);
 			baseStation.connect();
 		}
@@ -117,13 +106,13 @@ public class BotManager extends ABotManager implements IConfigObserver
 		for (IBaseStation baseStation : baseStations)
 		{
 			baseStation.disconnect();
-			for (IBaseStationObserver obs : basestationObservers)
+			for (IBaseStationObserver obs : baseStationObservers)
 			{
 				baseStation.removeObserver(obs);
 			}
 		}
-		basestationObservers.clear();
-		Collection<ABot> bots = new ArrayList<>(getBotTable().values());
+		baseStationObservers.clear();
+		Collection<ABot> bots = new ArrayList<>(botTable.values());
 		for (IBot bot : bots)
 		{
 			removeBot(bot.getBotId());
@@ -135,24 +124,28 @@ public class BotManager extends ABotManager implements IConfigObserver
 	@Override
 	public void chargeAll()
 	{
-		for (final ABot bot : getAllBots().values())
+		for (final ABot bot : botTable.values())
 		{
 			bot.getMatchCtrl().setKickerAutocharge(true);
 		}
-		autoCharge = true;
-		SumatraModel.getInstance().setUserProperty(PROP_AUTO_CHARGE,
-				String.valueOf(autoCharge));
+		setAutoCharge(true);
 	}
 	
 	
 	@Override
 	public void dischargeAll()
 	{
-		for (final ABot bot : getAllBots().values())
+		for (final ABot bot : botTable.values())
 		{
 			bot.getMatchCtrl().setKickerAutocharge(false);
 		}
-		autoCharge = false;
+		setAutoCharge(false);
+	}
+	
+	
+	private void setAutoCharge(boolean autoCharge)
+	{
+		this.autoCharge = autoCharge;
 		SumatraModel.getInstance().setUserProperty(PROP_AUTO_CHARGE,
 				String.valueOf(autoCharge));
 	}
@@ -161,7 +154,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 	@Override
 	public void removeBot(final BotID id)
 	{
-		ABot bot = getBotTable().remove(id);
+		ABot bot = botTable.remove(id);
 		if (bot == null)
 		{
 			log.warn("Tried to remove a non-existing bot with id " + id);
@@ -180,9 +173,9 @@ public class BotManager extends ABotManager implements IConfigObserver
 	
 	
 	@Override
-	public Map<BotID, ABot> getAllBots()
+	public Map<BotID, ABot> getBots()
 	{
-		return Collections.unmodifiableMap(getBotTable());
+		return Collections.unmodifiableMap(botTable);
 	}
 	
 	
@@ -200,25 +193,22 @@ public class BotManager extends ABotManager implements IConfigObserver
 		{
 			bs.afterApply(configClient);
 		}
-		for (ABot bot : getBotTable().values())
+		for (ABot bot : botTable.values())
 		{
 			bot.afterApply(configClient);
 		}
 	}
 	
-	private class BasestationObserver implements IBaseStationObserver
+	private class BaseStationObserver implements IBaseStationObserver
 	{
-		
-		
 		@Override
-		public void onIncommingBotCommand(final BotID id, final ACommand command)
+		public void onIncomingBotCommand(final BotID id, final ACommand command)
 		{
-			for (ABot bot : getAllBots().values())
+			ABot bot = botTable.get(id);
+			if (bot != null)
 			{
-				if (id.equals(bot.getBotId()))
-				{
-					bot.onIncommingBotCommand(command);
-				}
+				bot.onIncomingBotCommand(command);
+				notifyIncomingBotCommand(botTable.get(id), command);
 			}
 		}
 		
@@ -226,7 +216,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 		@Override
 		public void onBotOffline(final BotID id)
 		{
-			ABot bot = getBotTable().get(id);
+			ABot bot = botTable.get(id);
 			if (bot != null)
 			{
 				bot.stop();
@@ -238,9 +228,9 @@ public class BotManager extends ABotManager implements IConfigObserver
 		@Override
 		public void onBotOnline(final ABot bot)
 		{
-			if (!getBotTable().containsKey(bot.getBotId()))
+			if (!botTable.containsKey(bot.getBotId()))
 			{
-				getBotTable().put(bot.getBotId(), bot);
+				botTable.put(bot.getBotId(), bot);
 				bot.getMatchCtrl().setKickerAutocharge(autoCharge);
 				bot.start();
 				updateColorOfAllRobotsToMajority(bot);
@@ -257,9 +247,9 @@ public class BotManager extends ABotManager implements IConfigObserver
 			
 			if (SumatraModel.getInstance().isProductive())
 			{
-				long numY = getBotTable().values().stream().map(b -> b.getBotId().getTeamColor())
+				long numY = botTable.values().stream().map(b -> b.getBotId().getTeamColor())
 						.filter(tc -> tc.equals(ETeamColor.YELLOW)).count();
-				long numB = getBotTable().size() - numY;
+				long numB = botTable.size() - numY;
 				String command = null;
 				if (numY > numB)
 				{

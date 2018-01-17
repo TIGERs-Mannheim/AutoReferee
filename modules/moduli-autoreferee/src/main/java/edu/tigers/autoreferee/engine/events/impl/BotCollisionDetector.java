@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
@@ -24,6 +24,7 @@ import edu.tigers.autoreferee.engine.events.SpeedViolation;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -184,7 +185,7 @@ public class BotCollisionDetector extends AGameEventDetector
 		double angle = va.angleToAbs(vb).orElse(0.0);
 		double a = va.getLength();
 		double b = vb.getLength();
-		return (Math.sin(angle / 2) * (a + b)) + (Math.cos(angle / 2) * Math.abs(a - b));
+		return (SumatraMath.sin(angle / 2) * (a + b)) + (SumatraMath.cos(angle / 2) * Math.abs(a - b));
 	}
 	
 	

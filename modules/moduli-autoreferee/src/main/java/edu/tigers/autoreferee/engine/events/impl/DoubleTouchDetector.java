@@ -24,6 +24,7 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
@@ -38,8 +39,10 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	private static final int PRIORITY = 1;
 	private static final Set<EGameState> VALID_PREVIOUS_STATES = Collections.unmodifiableSet(EnumSet.of(
 			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE));
-	@Configurable(comment = "[mm] The Tolerance for considering the ball to touch the bot")
-	private static double touchTolerance = 10;
+	private static final double ALLOWED_BALL_MOVE_DISTANCE_WHILE_TOUCHING = 50;
+	@Configurable(comment = "[mm] additional offset to allowed 50mm movement (considering accuracy of position = 10mm)", defValue = "20")
+	private static double distanceErrorOffset = 20;
+	
 	
 	static
 	{
@@ -102,20 +105,28 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		
-		if ((ballPos.distanceTo(ballKickPos) > 50) && frame.getBotTouchedBall().isPresent()
-				&& frame.getBotTouchedBall().get().getBotID().equals(kickerID))
+		if ((ballPos.distanceTo(ballKickPos) > ALLOWED_BALL_MOVE_DISTANCE_WHILE_TOUCHING + distanceErrorOffset)
+				&& frame.getBotTouchedBall().isPresent())
 		{
-			ETeamColor kickerColor = kickerID.getTeamColor();
-			
-			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, kickerColor.opposite());
-			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, kickerColor.opposite(),
-					kickPos);
-			GameEvent violation = new GameEvent(EGameEvent.DOUBLE_TOUCH, frame.getTimestamp(),
-					kickerID, followUp);
-			doReset();
-			return Optional.of(violation);
+			BotID justTouched = frame.getBotTouchedBall().get().getBotID();
+			if (justTouched.equals(kickerID))
+			{
+				ITrackedBot botJustTouched = frame.getPreviousFrame().getWorldFrame().getBot(justTouched);
+				if (botJustTouched != null && botJustTouched.getBotKickerPos()
+						.distanceTo(ballKickPos) > ALLOWED_BALL_MOVE_DISTANCE_WHILE_TOUCHING + distanceErrorOffset)
+				{
+					ETeamColor kickerColor = kickerID.getTeamColor();
+					
+					IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, kickerColor.opposite());
+					FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, kickerColor.opposite(),
+							kickPos);
+					GameEvent violation = new GameEvent(EGameEvent.DOUBLE_TOUCH, frame.getTimestamp(),
+							kickerID, followUp);
+					doReset();
+					return Optional.of(violation);
+				}
+			}
 		}
-		
 		return Optional.empty();
 	}
 	

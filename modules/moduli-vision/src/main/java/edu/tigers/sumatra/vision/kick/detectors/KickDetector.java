@@ -21,9 +21,9 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FrameRecord;
 import edu.tigers.sumatra.vision.data.KickEvent;
@@ -55,7 +55,7 @@ public class KickDetector implements IKickDetector
 	
 	private List<IKickValidator>		kickValidators				= new ArrayList<>();
 	private String							lastKVText					= "";
-	private IVector2						lastKnownBallPosition	= AVector2.ZERO_VECTOR;
+	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
 	
 	@Configurable(defValue = "0.1", comment = "Minimum time between two kicks [s]")
 	private static double				minDeltaTime				= 0.1;

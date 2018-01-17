@@ -91,12 +91,6 @@ public interface IBot
 	
 	
 	/**
-	 * @return the excludeFromAi
-	 */
-	boolean isHideFromAi();
-	
-	
-	/**
 	 * @return the hideFromRcm
 	 */
 	boolean isHideFromRcm();
@@ -127,7 +121,6 @@ public interface IBot
 	 * Get internal position from sensory data
 	 *
 	 * @return
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
 	Optional<IVector3> getSensoryPos();
 	
@@ -136,7 +129,6 @@ public interface IBot
 	 * Get internal velcoity from sensory data
 	 *
 	 * @return
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
 	 */
 	Optional<IVector3> getSensoryVel();
 	
@@ -166,10 +158,4 @@ public interface IBot
 	 * @return
 	 */
 	ERobotMode getRobotMode();
-
-	/**
-	 * Is true iff the bot is completely okay. (Used for automatic interchange)
-	 * @return
-	 */
-	boolean isOK();
 }

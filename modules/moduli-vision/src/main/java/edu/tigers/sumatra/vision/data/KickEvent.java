@@ -14,8 +14,8 @@ import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.line.Line;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 
 
@@ -37,7 +37,7 @@ public class KickEvent implements IKickEvent
 	@SuppressWarnings("unused")
 	private KickEvent()
 	{
-		this(AVector2.ZERO_VECTOR, FilteredVisionBot.Builder.emptyBot(), 0, Collections.emptyList(), false);
+		this(Vector2f.ZERO_VECTOR, FilteredVisionBot.Builder.emptyBot(), 0, Collections.emptyList(), false);
 	}
 	
 	
@@ -117,11 +117,7 @@ public class KickEvent implements IKickEvent
 				.collect(Collectors.toList());
 		
 		Optional<Line> line = Line.fromPointsList(points);
-		if (line.isPresent())
-		{
-			return Optional.of(line.get().directionVector());
-		}
+		return line.map(Line::directionVector);
 		
-		return Optional.empty();
 	}
 }

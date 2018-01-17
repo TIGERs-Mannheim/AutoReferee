@@ -23,24 +23,24 @@ import edu.tigers.sumatra.math.vector.Vector2;
 public class BotSkillFastGlobalPosition extends AMoveBotSkill
 {
 	@SerialData(type = ESerialDataType.INT16)
-	private final int[]					pos						= new int[3];
+	private final int[] pos = new int[3];
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								velMax					= 0;
+	private int velMax = 0;
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								velMaxW					= 0;
+	private int velMaxW = 0;
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								accMax					= 0;
+	private int accMax = 0;
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								accMaxW					= 0;
+	private int accMaxW = 0;
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								accMaxFast				= 0;
+	private int accMaxFast = 0;
 	
 	@SerialData(type = ESerialDataType.EMBEDDED)
-	private KickerDribblerCommands	kickerDribbler			= new KickerDribblerCommands();
+	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								dataAcqusitionMode	= 0;
+	private int flags = 0;
 	
 	
 	/**
@@ -278,7 +278,7 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 	@Override
 	public EDataAcquisitionMode getDataAcquisitionMode()
 	{
-		return EDataAcquisitionMode.getModeConstant(dataAcqusitionMode);
+		return EDataAcquisitionMode.getModeConstant(flags & 0x7F);
 	}
 	
 	
@@ -288,6 +288,20 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 	@Override
 	public void setDataAcquisitionMode(final EDataAcquisitionMode dataAcqusitionMode)
 	{
-		this.dataAcqusitionMode = dataAcqusitionMode.getId();
+		this.flags &= 0x80;
+		this.flags |= dataAcqusitionMode.getId();
+	}
+	
+	
+	@Override
+	public void setStrictVelocityLimit(final boolean enable)
+	{
+		if (enable)
+		{
+			flags |= 0x80;
+		} else
+		{
+			flags &= 0x7F;
+		}
 	}
 }

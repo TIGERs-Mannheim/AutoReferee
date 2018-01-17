@@ -9,6 +9,7 @@ import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.wp.data.MotionContext;
 
@@ -48,7 +49,7 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 		double az;
 		
 		// velocity
-		final double v = Math.sqrt((vx * vx) + (vy * vy));
+		final double v = SumatraMath.sqrt((vx * vx) + (vy * vy));
 		IVector2 dir = Vector2.fromXY(vx, vy);
 		
 		if ((z > 0) || (vz > 0))
@@ -90,7 +91,7 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 			{
 				vx = 0.0;
 				vy = 0.0;
-				targetAcc = Vector2.zero();
+				targetAcc = Vector2f.ZERO_VECTOR;
 			}
 			
 			ax = targetAcc.x();

@@ -32,16 +32,16 @@ public class ReceiverUDP implements IReceiver
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
 	// Logger
-	private static final Logger					log									= Logger.getLogger(ReceiverUDP.class
+	private static final Logger log = Logger.getLogger(ReceiverUDP.class
 			.getName());
 	
 	/** [ms] */
-	private static final int						PORT_UNREACHABLE_RETRY_WAIT	= 1500;
-	private final Statistics						stats									= new Statistics();
-	private final List<IReceiverUDPObserver>	observers							= new ArrayList<>();
-	private DatagramSocket							socket								= null;
-	private Thread										receiverThread						= null;
-	private boolean									legacy								= false;
+	private static final int PORT_UNREACHABLE_RETRY_WAIT = 1500;
+	private final Statistics stats = new Statistics();
+	private final List<IReceiverUDPObserver> observers = new ArrayList<>();
+	private DatagramSocket socket = null;
+	private Thread receiverThread = null;
+	private boolean legacy = false;
 	
 	
 	// --------------------------------------------------------------------------
@@ -58,7 +58,6 @@ public class ReceiverUDP implements IReceiver
 	
 	/**
 	 * @param newSocket
-	 * @throws IOException
 	 */
 	public ReceiverUDP(final DatagramSocket newSocket)
 	{

@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -28,6 +29,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
 import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
@@ -61,12 +63,10 @@ public class VisionFilterImpl extends AVisionFilter
 	
 	
 	/**
-	 * @param config moduli config
+	 * Create new instance
 	 */
-	public VisionFilterImpl(final SubnodeConfiguration config)
+	public VisionFilterImpl()
 	{
-		super(config);
-		
 		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
 		lastBallFilterOutput = new BallFilterOutput(lastFilteredFrame.getBall(), lastFilteredFrame.getBall().getPos(),
 				EBallState.ROLLING, new BallFilterPreprocessorOutput(null, null, null));
@@ -82,10 +82,10 @@ public class VisionFilterImpl extends AVisionFilter
 		int camId = camDetectionFrame.getCameraId();
 		
 		// add camera if it does not exist yet
-		cams.putIfAbsent(camId, new CamFilter(camId));
+		cams.computeIfAbsent(camId, CamFilter::new);
 		
 		// update robot infos on all camera filters
-		cams.get(camId).setRobotInfoFrame(getRobotInfoFrames());
+		cams.get(camId).setRobotInfoMap(getRobotInfoMap());
 		
 		// set latest ball info on all camera filters (to generate virtual balls from barrier info)
 		cams.get(camId).setBallInfo(lastBallFilterOutput);
@@ -142,10 +142,19 @@ public class VisionFilterImpl extends AVisionFilter
 		Map<BotID, List<RobotTracker>> trackersById = allTrackers.stream()
 				.collect(Collectors.groupingBy(RobotTracker::getBotId));
 		
+		List<FilteredVisionBot> mergedBots = new ArrayList<>();
+		
 		// merge all trackers in each group and get filtered vision bot from it
-		return trackersById.entrySet().stream()
-				.map(e -> RobotTracker.mergeRobotTrackers(e.getKey(), e.getValue(), timestamp))
-				.collect(Collectors.toList());
+		for (Entry<BotID, List<RobotTracker>> entry : trackersById.entrySet())
+		{
+			IVector3 robotAcc = Optional.ofNullable(getRobotInfoMap().get(entry.getKey()))
+					.map(i -> i.getTrajectory().orElse(null)).map(t -> t.getAcceleration(0).multiplyNew(1e3))
+					.orElse(Vector3.zero());
+			
+			mergedBots.add(RobotTracker.mergeRobotTrackers(entry.getKey(), entry.getValue(), timestamp, robotAcc));
+		}
+		
+		return mergedBots;
 	}
 	
 	
@@ -154,6 +163,7 @@ public class VisionFilterImpl extends AVisionFilter
 	{
 		List<BallTracker> allTrackers = camFilters.stream()
 				.flatMap(f -> f.getBalls().stream())
+				.filter(BallTracker::isGrownUp)
 				.collect(Collectors.toList());
 		
 		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(lastFilteredFrame.getBall(), allTrackers,
@@ -199,13 +209,23 @@ public class VisionFilterImpl extends AVisionFilter
 		super.start();
 		try
 		{
-			ABotManager botmanager = (ABotManager) SumatraModel.getInstance().getModule(ABotManager.MODULE_ID);
+			ABotManager botmanager = SumatraModel.getInstance().getModule(ABotManager.class);
 			viewportArchitect = new ViewportArchitect(botmanager.getBaseStations());
 		} catch (ModuleNotFoundException e)
 		{
 			viewportArchitect = new ViewportArchitect(Collections.emptyList());
 			log.debug("No Botmanager found. No Basestation will be notified", e);
 		}
+	}
+	
+	
+	@Override
+	protected void stop()
+	{
+		super.stop();
+		cams.clear();
+		ballFilterPreprocessor.clear();
+		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
 	}
 	
 	

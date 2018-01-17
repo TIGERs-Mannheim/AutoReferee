@@ -6,8 +6,6 @@ package edu.tigers.autoreferee;
 import java.util.List;
 import java.util.Optional;
 
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.autoreferee.generic.TimedPosition;
@@ -22,11 +20,9 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 /**
  * @author "Lukas Magel"
  */
-@Persistent
 public class AutoRefFrame implements IAutoRefFrame
 {
-	
-	private final ShapeMap shapes;
+	private final ShapeMap shapes = new ShapeMap();
 	private WorldFrameWrapper worldFrameWrapper;
 	private AutoRefFrame previousFrame;
 	
@@ -49,7 +45,6 @@ public class AutoRefFrame implements IAutoRefFrame
 	@SuppressWarnings("unused")
 	private AutoRefFrame()
 	{
-		shapes = new ShapeMap();
 	}
 	
 	
@@ -64,7 +59,6 @@ public class AutoRefFrame implements IAutoRefFrame
 		botTouchedBall = null;
 		previousFrame = previous;
 		this.worldFrameWrapper = worldFrameWrapper;
-		shapes = new ShapeMap();
 		
 		ballLeftFieldPos = new TimedPosition();
 		isBallInsideField = true;

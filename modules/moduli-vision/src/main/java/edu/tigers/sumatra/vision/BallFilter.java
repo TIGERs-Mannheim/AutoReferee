@@ -10,15 +10,18 @@ import java.util.Optional;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.math.vector.AVector3;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
 import edu.tigers.sumatra.vision.data.EBallState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
@@ -30,10 +33,18 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
  */
 public class BallFilter
 {
-	private EBallState							ballState			= EBallState.ROLLING;
-	private IVector2								ballPosHint;
-	private IVector3								lastKnownPosition	= AVector3.ZERO_VECTOR;
-	private CircularFifoQueue<MergedBall>	mergedBallHistory	= new CircularFifoQueue<>(50);
+	private EBallState ballState = EBallState.ROLLING;
+	private IVector2 ballPosHint;
+	private IVector3 lastKnownPosition = Vector3f.ZERO_VECTOR;
+	private CircularFifoQueue<MergedBall> mergedBallHistory = new CircularFifoQueue<>(50);
+	
+	@Configurable(defValue = "true", comment = "Always use merged ball velocity instead of kick model velocity.")
+	private static boolean alwaysUseMergedBallVelocity = true;
+	
+	static
+	{
+		ConfigRegistration.registerClass("vision", BallFilter.class);
+	}
 	
 	
 	/**
@@ -63,8 +74,8 @@ public class BallFilter
 		{
 			FilteredVisionBall ball = FilteredVisionBall.Builder.create()
 					.withPos(Vector3.from2d(ballPosHint, 0))
-					.withVel(AVector3.ZERO_VECTOR)
-					.withAcc(AVector3.ZERO_VECTOR)
+					.withVel(Vector3f.ZERO_VECTOR)
+					.withAcc(Vector3f.ZERO_VECTOR)
 					.withIsChipped(false)
 					.withvSwitch(0)
 					.withLastVisibleTimestamp(timestamp)
@@ -80,8 +91,8 @@ public class BallFilter
 		{
 			FilteredVisionBall ball = FilteredVisionBall.Builder.create()
 					.withPos(lastFilteredBall.getPos())
-					.withVel(AVector3.ZERO_VECTOR)
-					.withAcc(AVector3.ZERO_VECTOR)
+					.withVel(Vector3f.ZERO_VECTOR)
+					.withAcc(Vector3f.ZERO_VECTOR)
 					.withIsChipped(false)
 					.withvSwitch(0)
 					.withLastVisibleTimestamp(lastFilteredBall.getLastVisibleTimestamp())
@@ -123,6 +134,11 @@ public class BallFilter
 			{
 				ballState = EBallState.KICKED;
 				pos = Vector3.from2d(mergedBall.getCamPos(), 0);
+			}
+			
+			if (alwaysUseMergedBallVelocity)
+			{
+				vel = Vector3.from2d(vel.getXYVector().scaleToNew(mergedBall.getFiltVel().getLength2()), vel.z());
 			}
 		} else
 		{
@@ -191,10 +207,10 @@ public class BallFilter
 	 */
 	public static class BallFilterOutput
 	{
-		private final FilteredVisionBall					filteredBall;
-		private final IVector3								lastKnownPosition;
-		private final EBallState							ballState;
-		private final BallFilterPreprocessorOutput	preprocessorOutput;
+		private final FilteredVisionBall filteredBall;
+		private final IVector3 lastKnownPosition;
+		private final EBallState ballState;
+		private final BallFilterPreprocessorOutput preprocessorOutput;
 		
 		
 		/**

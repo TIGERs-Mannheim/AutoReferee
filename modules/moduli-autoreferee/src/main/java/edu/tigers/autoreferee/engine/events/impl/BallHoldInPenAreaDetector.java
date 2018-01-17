@@ -18,6 +18,7 @@ import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.LineMath;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -103,7 +104,7 @@ public class BallHoldInPenAreaDetector extends APreparingGameEventDetector
 	{
 		IVector2 newBallPos = penAreas.get(teamColor).nearestPointOutside(frame.getWorldFrame().getBall().getPos());
 		newBallPos = LineMath.stepAlongLine(newBallPos, frame.getWorldFrame().getBall().getPos(),
-				-(Geometry.getBotToBallDistanceStop() + Geometry.getBotToPenaltyAreaMarginStandard()));
+				-(RuleConstraints.getStopRadius() + RuleConstraints.getBotToPenaltyAreaMarginStandard()));
 		return NGeometry.getField().nearestPointInside(newBallPos, -Geometry.getBotRadius());
 	}
 }

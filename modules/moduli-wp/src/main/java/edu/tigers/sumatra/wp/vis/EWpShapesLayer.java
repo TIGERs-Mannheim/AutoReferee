@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
 
-import edu.tigers.sumatra.drawable.ShapeMap.IShapeLayer;
+import edu.tigers.sumatra.drawable.IShapeLayer;
 
 
 /**
@@ -25,6 +25,8 @@ public enum EWpShapesLayer implements IShapeLayer
 	BOTS("Bots", "Field", true),
 	/**  */
 	BALL("Ball", "Field", true),
+	/** */
+	BALL_PREDICTION("Ball prediction", "Field", false),
 	/**  */
 	VELOCITY("Velocities", "Field"),
 	
@@ -45,10 +47,11 @@ public enum EWpShapesLayer implements IShapeLayer
 	AUTOREFEREE("AutoReferee", "Field", true),;
 	
 	
-	private final String		name;
-	private final String		category;
-	private final boolean	visible;
-	private final int			orderId;
+	private final String name;
+	private final String category;
+	private final boolean visible;
+	private final int orderId;
+	private final String id;
 	
 	
 	/**
@@ -69,6 +72,7 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.category = category;
 		this.visible = visible;
 		orderId = 10 + ordinal();
+		id = EWpShapesLayer.class.getCanonicalName() + name;
 	}
 	
 	
@@ -81,12 +85,10 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.category = category;
 		this.visible = visible;
 		this.orderId = orderId;
+		id = EWpShapesLayer.class.getCanonicalName() + name;
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	@Override
 	public String getLayerName()
 	{
@@ -94,23 +96,10 @@ public enum EWpShapesLayer implements IShapeLayer
 	}
 	
 	
-	/**
-	 * @return the category
-	 */
 	@Override
 	public final String getCategory()
 	{
 		return category;
-	}
-	
-	
-	/**
-	 * @return the persist
-	 */
-	@Override
-	public final boolean persist()
-	{
-		return true;
 	}
 	
 	
@@ -124,7 +113,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	@Override
 	public String getId()
 	{
-		return EWpShapesLayer.class.getCanonicalName() + name();
+		return id;
 	}
 	
 	

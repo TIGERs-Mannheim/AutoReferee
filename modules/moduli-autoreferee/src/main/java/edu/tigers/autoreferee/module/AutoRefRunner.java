@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.module;
 
@@ -54,12 +54,12 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private final BlockingDeque<RefStateChange> requestStateChanges = new LinkedBlockingDeque<>();
 	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
 	private AutoRefState refState = AutoRefState.STOPPED;
-	private IAutoRefFrame latestAutoRefFrame;
 	private boolean isRunning = false;
 	private IAutoRefEngine engine;
 	private GameLogFileAppender gameLogAppender;
 	private final ERemoteControlType remoteControlType;
 	private final boolean log2File;
+	private AWorldPredictor wp;
 	
 	
 	/**
@@ -96,6 +96,10 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	private void setState(final AutoRefState state)
 	{
+		if (refState != state && state != AutoRefState.RUNNING)
+		{
+			wp.notifyClearShapeMap("AUTO_REF");
+		}
 		refState = state;
 		try
 		{
@@ -113,6 +117,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	 */
 	public void start(final AutoRefMode mode) throws StartModuleException
 	{
+		wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		IRefboxRemote remote = null;
 		IAutoRefEngine refEngine = null;
 		
@@ -211,7 +216,6 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 				log.error("Interrupted while awaiting termination", e);
 				Thread.currentThread().interrupt();
 			}
-			latestAutoRefFrame = null;
 		}
 	}
 	
@@ -269,7 +273,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	}
 	
 	
-	private void doLoop() throws InterruptedException, ModuleNotFoundException
+	private void doLoop() throws InterruptedException
 	{
 		while (!Thread.currentThread().isInterrupted())
 		{
@@ -350,7 +354,6 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	private void pushFrameToObserver(final IAutoRefFrame frame)
 	{
-		latestAutoRefFrame = frame;
 		for (IAutoRefStateObserver o : observer)
 		{
 			try
@@ -361,25 +364,21 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 				log.error("Error in autoref state observer (" + o + ")", t);
 			}
 		}
+		wp.notifyNewShapeMap(frame.getTimestamp(), frame.getShapes(), "AUTO_REF");
 	}
 	
 	
-	private void registerWithWorldPredictor() throws ModuleNotFoundException
+	private void registerWithWorldPredictor()
 	{
-		AWorldPredictor predictor = (AWorldPredictor) SumatraModel.getInstance().getModule(AWorldPredictor.MODULE_ID);
-		predictor.addObserver(this);
+		wp.addObserver(this);
 	}
 	
 	
 	private void deregisterFromPredictor()
 	{
-		try
+		if (wp != null)
 		{
-			AWorldPredictor predictor = (AWorldPredictor) SumatraModel.getInstance().getModule(AWorldPredictor.MODULE_ID);
-			predictor.removeObserver(this);
-		} catch (ModuleNotFoundException err)
-		{
-			log.warn("Could not find a module", err);
+			wp.removeObserver(this);
 		}
 	}
 	
@@ -387,10 +386,6 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		if (latestAutoRefFrame != null)
-		{
-			wFrameWrapper.getShapeMap().merge(latestAutoRefFrame.getShapes());
-		}
 		consumableFrames.pollLast();
 		consumableFrames.offerFirst(wFrameWrapper);
 	}

@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Aug 6, 2015
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.drawable;
 
@@ -14,8 +9,8 @@ import java.awt.Graphics2D;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -33,7 +28,7 @@ public class DrawableBorderText implements IDrawableShape
 	@SuppressWarnings("unused")
 	private DrawableBorderText()
 	{
-		pos = AVector2.ZERO_VECTOR;
+		pos = Vector2f.ZERO_VECTOR;
 		text = "";
 		color = Color.red;
 	}

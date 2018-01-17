@@ -131,7 +131,7 @@ public class BotShape implements IBotShape
 	@Override
 	public ILine getKickerLine()
 	{
-		double orient2CornerAngle = Math.acos(center2Dribbler / radius);
+		double orient2CornerAngle = SumatraMath.acos(center2Dribbler / radius);
 		
 		IVector2 p1 = position.addNew(Vector2.fromAngle(orientation + orient2CornerAngle).scaleTo(radius));
 		IVector2 p2 = position.addNew(Vector2.fromAngle(orientation - orient2CornerAngle).scaleTo(radius));
@@ -175,8 +175,8 @@ public class BotShape implements IBotShape
 	@Override
 	public double getKickerWidth()
 	{
-		double orient2CornerAngle = Math.acos(center2Dribbler / radius);
-		return Math.sin(orient2CornerAngle) * radius * 2.0;
+		double orient2CornerAngle = SumatraMath.acos(center2Dribbler / radius);
+		return SumatraMath.sin(orient2CornerAngle) * radius * 2.0;
 	}
 	
 	

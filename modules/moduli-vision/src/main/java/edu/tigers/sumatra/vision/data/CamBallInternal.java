@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.data;
 
@@ -25,18 +25,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class CamBallInternal extends CamBall
 {
 	private final double dtDeviation;
-	
-	
-	/**
-	 * Create an internal cam ball from a vision cam ball.
-	 * 
-	 * @param orig
-	 */
-	public CamBallInternal(final CamBall orig)
-	{
-		super(orig);
-		dtDeviation = 0;
-	}
 	
 	
 	/**

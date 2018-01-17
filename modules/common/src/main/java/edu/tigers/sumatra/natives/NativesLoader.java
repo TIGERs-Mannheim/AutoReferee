@@ -38,7 +38,7 @@ public class NativesLoader
 	private static final String							JAVA_LIBRARY_PATH_KEY	= "java.library.path";
 	
 	/**  */
-	private static final Map<OsIdentifier, String>	DEFAULT_FOLDER_MAP		= new HashMap<OsIdentifier, String>();
+	private static final Map<OsIdentifier, String> DEFAULT_FOLDER_MAP = new HashMap<>();
 	
 	static
 	{
@@ -56,7 +56,7 @@ public class NativesLoader
 	private static final String					DELIMITER	= System.getProperty("file.separator");
 	
 	private String										basePath;
-	private final Map<OsIdentifier, String>	folderMap	= new HashMap<OsIdentifier, String>();
+	private final Map<OsIdentifier, String> folderMap = new HashMap<>();
 	
 	
 	// --------------------------------------------------------------------------
@@ -120,7 +120,7 @@ public class NativesLoader
 		if (applyLibraryPathHack)
 		{
 			// Add all paths in the folder map to the library path
-			StringBuffer newPath = new StringBuffer();
+			StringBuilder newPath = new StringBuilder();
 			newPath.append(System.getProperty(JAVA_LIBRARY_PATH_KEY));
 			for (final Entry<OsIdentifier, String> entry : this.folderMap.entrySet())
 			{
@@ -140,33 +140,30 @@ public class NativesLoader
 			{
 				final Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
 				AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-					fieldSysPath.setAccessible(true);
-					try
-					{
-						fieldSysPath.set(null, null);
-					} catch (Exception err)
-					{
-						log.fatal("Unable to perform library-path hack!", err);
-					}
-					fieldSysPath.setAccessible(false);
+					nullifySystemPath(fieldSysPath);
 					return null; // nothing to return
 				});
-			} catch (final NoSuchFieldException err)
-			{
-				log.fatal("Unable to perform library-path hack!", err);
-			} catch (final SecurityException err)
-			{
-				log.fatal("Unable to perform library-path hack!", err);
-			} catch (final IllegalArgumentException err)
+			} catch (final NoSuchFieldException | SecurityException | IllegalArgumentException err)
 			{
 				log.fatal("Unable to perform library-path hack!", err);
 			}
-			//
-			// } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException err)
-			// {
-			// log.fatal("Unable to perform library-path hack!", err);
-			// }
 		}
+	}
+	
+	
+	private void nullifySystemPath(final Field fieldSysPath)
+	{
+		fieldSysPath.setAccessible(true);
+		
+		try
+		{
+			fieldSysPath.set(null, null);
+		} catch (Exception err)
+		{
+			log.fatal("Unable to perform library-path hack!", err);
+		}
+		
+		fieldSysPath.setAccessible(false);
 	}
 	
 	
@@ -269,21 +266,23 @@ public class NativesLoader
 	/**
 	 * @param basePath the basePath to set
 	 */
-	public void setBasePath(String basePath)
+	public void setBasePath(final String basePath)
 	{
-		char c = basePath.charAt(basePath.length() - 1);
+		String basePathCopy = basePath;
+		
+		char c = basePathCopy.charAt(basePathCopy.length() - 1);
 		while ((c == '\\') || (c == '/'))
 		{
 			// Cut trailing delimiter
-			basePath = basePath.substring(0, basePath.length() - 1);
-			c = basePath.charAt(basePath.length() - 1);
+			basePathCopy = basePathCopy.substring(0, basePathCopy.length() - 1);
+			c = basePathCopy.charAt(basePathCopy.length() - 1);
 		}
-		// this.basePath = new File(basePath).getAbsolutePath();
 		
-		this.basePath = basePath;
+		this.basePath = basePathCopy;
 	}
 	
 	/**
+	 * Exception to be thrown if there is an exception in this class
 	 */
 	public static class LoaderException extends Exception
 	{
@@ -336,7 +335,7 @@ public class NativesLoader
 			{
 				name = name.substring(0, name.length() - 2);
 			}
-			return name.toLowerCase().equals(libName.toLowerCase());
+			return name.equalsIgnoreCase(libName.toLowerCase());
 		}
 	}
 }

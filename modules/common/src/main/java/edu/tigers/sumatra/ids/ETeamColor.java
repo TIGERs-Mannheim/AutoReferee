@@ -43,7 +43,7 @@ public enum ETeamColor implements INumberListable
 	}
 	
 	
-	private ETeamColor(final int id)
+	ETeamColor(final int id)
 	{
 		this.id = id;
 	}
@@ -137,7 +137,7 @@ public enum ETeamColor implements INumberListable
 	public List<Number> getNumberList()
 	{
 		List<Number> numbers = new ArrayList<>();
-		numbers.add(this == ETeamColor.BLUE ? 1 : this == ETeamColor.YELLOW ? 0 : -1);
+		numbers.add(this.getId());
 		return numbers;
 	}
 	

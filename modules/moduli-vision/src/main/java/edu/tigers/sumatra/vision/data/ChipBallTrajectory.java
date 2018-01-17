@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.data;
 
 import edu.tigers.sumatra.geometry.BallParameters;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -32,8 +33,8 @@ public class ChipBallTrajectory extends ABallTrajectory
 		
 		IVector3 a = Vector3.fromXYZ(0, 0, -g);
 		
-		double tInAir = -(Math.sqrt((vz1 * vz1) + (2.0 * g * pz1)) - vz1) / g;
-		double vKickZ = Math.sqrt((vz1 * vz1) + (2.0 * g * pz1));
+		double tInAir = -(SumatraMath.sqrt((vz1 * vz1) + (2.0 * g * pz1)) - vz1) / g;
+		double vKickZ = SumatraMath.sqrt((vz1 * vz1) + (2.0 * g * pz1));
 		
 		kickPos = p.addNew(v.multiplyNew(tInAir)).addNew(a.multiplyNew(0.5 * tInAir * tInAir));
 		kickVel = Vector3.from2d(v.getXYVector(), vKickZ);

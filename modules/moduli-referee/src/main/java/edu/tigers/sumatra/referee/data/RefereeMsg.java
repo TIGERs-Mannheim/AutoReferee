@@ -11,11 +11,12 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.referee.TeamConfig;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -38,7 +39,7 @@ public class RefereeMsg
 	private final TeamInfo teamInfoYellow;
 	private final TeamInfo teamInfoBlue;
 	
-	private final ETeamColor leftTeam;
+	private final ETeamColor negativeHalfTeam;
 	private final IVector2 ballPlacementPos;
 	
 	
@@ -56,14 +57,16 @@ public class RefereeMsg
 		stageTimeLeft = 0;
 		teamInfoYellow = new TeamInfo();
 		teamInfoBlue = new TeamInfo();
-		leftTeam = TeamConfig.getLeftTeam();
-		ballPlacementPos = Vector2.zero();
+		ballPlacementPos = Vector2f.ZERO_VECTOR;
+		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 	}
 	
 	
 	/**
-	 * @param frameTimestamp
-	 * @param sslRefereeMsg
+	 * Create a referee message based on a protobuf message
+	 * 
+	 * @param frameTimestamp the Sumatra-internal timestamp
+	 * @param sslRefereeMsg the protobuf message
 	 */
 	public RefereeMsg(final long frameTimestamp, final SSL_Referee sslRefereeMsg)
 	{
@@ -84,15 +87,17 @@ public class RefereeMsg
 			ballPlacementPos = Vector2.fromXY(msgBallPos.getX(), msgBallPos.getY());
 		} else
 		{
-			ballPlacementPos = Vector2.zero();
+			ballPlacementPos = Vector2f.ZERO_VECTOR;
 		}
 		
-		leftTeam = TeamConfig.getLeftTeam();
+		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 	}
 	
 	
 	/**
-	 * @param refereeMsg
+	 * Copy constructor
+	 * 
+	 * @param refereeMsg the message to copy
 	 */
 	public RefereeMsg(final RefereeMsg refereeMsg)
 	{
@@ -105,14 +110,16 @@ public class RefereeMsg
 		stageTimeLeft = refereeMsg.stageTimeLeft;
 		teamInfoYellow = refereeMsg.teamInfoYellow;
 		teamInfoBlue = refereeMsg.teamInfoBlue;
-		leftTeam = refereeMsg.leftTeam;
+		negativeHalfTeam = refereeMsg.negativeHalfTeam;
 		ballPlacementPos = refereeMsg.getBallPlacementPos();
 	}
 	
 	
 	/**
-	 * @param color
-	 * @return
+	 * Get the keeper id for a team
+	 * 
+	 * @param color the team color
+	 * @return the bot id
 	 */
 	public final BotID getKeeperBotID(final ETeamColor color)
 	{
@@ -209,7 +216,7 @@ public class RefereeMsg
 	/**
 	 * Return the {@link TeamInfo} for the specified team {@code color}
 	 * 
-	 * @param color
+	 * @param color the team color
 	 * @return {@code TeamInfo} of the specified team
 	 * @throws IllegalArgumentException if {@code color} is not {@link ETeamColor#BLUE} or {@link ETeamColor#YELLOW}
 	 */
@@ -230,11 +237,11 @@ public class RefereeMsg
 	
 	
 	/**
-	 * @return the leftTeam
+	 * @return the negativeHalfTeam
 	 */
-	public final ETeamColor getLeftTeam()
+	public final ETeamColor getNegativeHalfTeam()
 	{
-		return leftTeam;
+		return negativeHalfTeam;
 	}
 	
 	
@@ -309,7 +316,7 @@ public class RefereeMsg
 				", stageTimeLeft=" + stageTimeLeft +
 				", teamInfoYellow=" + teamInfoYellow +
 				", teamInfoBlue=" + teamInfoBlue +
-				", leftTeam=" + leftTeam +
+				", negativeHalfTeam=" + negativeHalfTeam +
 				", ballPlacementPos=" + ballPlacementPos +
 				'}';
 	}

@@ -92,27 +92,6 @@ public enum EAiTeam
 		}
 		throw new IllegalArgumentException("Can not map team color: " + teamColor);
 	}
-
-	/**
-	 * Create EAiTeam from color and type
-	 *
-	 * @param color
-	 * @param type
-	 * @return
-	 */
-	public static EAiTeam ofTypeAndColor(ETeamColor color, EAiType type) {
-		if (color == ETeamColor.YELLOW && type == EAiType.PRIMARY) {
-			return EAiTeam.YELLOW_PRIMARY;
-		} else if (color == ETeamColor.YELLOW && type == EAiType.SECONDARY) {
-			return EAiTeam.YELLOW_SECONDARY;
-		} else if (color == ETeamColor.BLUE && type == EAiType.PRIMARY) {
-			return EAiTeam.BLUE_PRIMARY;
-		} else if (color == ETeamColor.BLUE && type == EAiType.SECONDARY) {
-			return EAiTeam.BLUE_SECONDARY;
-		} else {
-			throw new IllegalArgumentException("Combination " + color.toString() + " and " + type.toString() + " not supported.");
-		}
-	}
 	
 	
 	/**
@@ -120,7 +99,7 @@ public enum EAiTeam
 	 */
 	public boolean isPrimary()
 	{
-		return this == YELLOW_PRIMARY || this == BLUE_PRIMARY;
+		return aiType == EAiType.PRIMARY;
 	}
 	
 	
@@ -129,6 +108,6 @@ public enum EAiTeam
 	 */
 	public boolean isSecondary()
 	{
-		return this == YELLOW_SECONDARY || this == BLUE_SECONDARY;
+		return aiType == EAiType.SECONDARY;
 	}
 }

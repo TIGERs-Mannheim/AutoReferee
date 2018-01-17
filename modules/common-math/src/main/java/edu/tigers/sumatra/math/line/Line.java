@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.line;
@@ -17,9 +17,9 @@ import org.apache.commons.math3.linear.SingularMatrixException;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -42,7 +42,7 @@ public class Line extends ALine
 	@SuppressWarnings("unused")
 	private Line()
 	{
-		this(AVector2.ZERO_VECTOR, AVector2.ZERO_VECTOR);
+		this(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
 	}
 	
 	
@@ -128,8 +128,8 @@ public class Line extends ALine
 		double x1 = points.get(0).x();
 		double x2 = points.get(points.size() - 1).x();
 		
-		Vector2 p1 = Vector2.fromXY(x1, (x1 * slope) + offset);
-		Vector2 p2 = Vector2.fromXY(x2, (x2 * slope) + offset);
+		IVector2 p1 = Vector2f.fromXY(x1, (x1 * slope) + offset);
+		IVector2 p2 = Vector2f.fromXY(x2, (x2 * slope) + offset);
 		
 		return Optional.of(Line.fromPoints(p1, p2));
 	}

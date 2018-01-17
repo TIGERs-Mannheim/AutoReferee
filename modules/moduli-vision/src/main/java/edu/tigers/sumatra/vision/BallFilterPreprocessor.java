@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -22,9 +22,9 @@ import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.Line;
-import edu.tigers.sumatra.math.vector.AVector2;
-import edu.tigers.sumatra.math.vector.AVector3;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.KickEvent;
@@ -49,18 +49,18 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 public class BallFilterPreprocessor
 {
 	@SuppressWarnings("unused")
-	private static final Logger		log								= Logger
+	private static final Logger log = Logger
 			.getLogger(BallFilterPreprocessor.class.getName());
 	
-	private final BallTrackerMerger	ballTrackerMerger				= new BallTrackerMerger();
-	private final KickDetectors		kickDetectors					= new KickDetectors();
-	private final KickEstimators		kickEstimators					= new KickEstimators();
+	private final BallTrackerMerger ballTrackerMerger = new BallTrackerMerger();
+	private final KickDetectors kickDetectors = new KickDetectors();
+	private final KickEstimators kickEstimators = new KickEstimators();
 	
 	@Configurable(comment = "Minimum search radius for cam balls around last known position [mm]")
-	private static double				minSearchRadius				= 300;
+	private static double minSearchRadius = 300;
 	
 	@Configurable(defValue = "0.2", comment = "Factor by which a estimator must be better than the last one to use it")
-	private static double				estimatorSwitchHysteresis	= 0.2;
+	private static double estimatorSwitchHysteresis = 0.2;
 	
 	static
 	{
@@ -113,10 +113,10 @@ public class BallFilterPreprocessor
 	
 	private class KickEstimators
 	{
-		private final List<IKickEstimator>		estimators			= new ArrayList<>();
-		private IKickEstimator						lastBestEstimator;
-		private long									lastKickTimestamp	= 0;
-		private CircularFifoQueue<KickEvent>	kickEventHistory	= new CircularFifoQueue<>(10);
+		private final List<IKickEstimator> estimators = new ArrayList<>();
+		private IKickEstimator lastBestEstimator;
+		private long lastKickTimestamp = 0;
+		private CircularFifoQueue<KickEvent> kickEventHistory = new CircularFifoQueue<>(10);
 		
 		
 		private KickEstimators()
@@ -237,7 +237,8 @@ public class BallFilterPreprocessor
 			if (bestEstimator.isPresent())
 			{
 				IKickEstimator est = bestEstimator.get();
-				if ((lastBestEstimator == null) || ((est != lastBestEstimator) && (est.getFitResult().get()
+				boolean noLastBestEstimator = (lastBestEstimator == null) || !estimators.contains(lastBestEstimator);
+				if (noLastBestEstimator || ((est != lastBestEstimator) && (est.getFitResult().get()
 						.getAvgDistance() < (lastBestEstimator.getFitResult().get().getAvgDistance()
 								* (1.0 - estimatorSwitchHysteresis))))
 						|| (lastBestEstimator.getType() == est.getType()))
@@ -258,7 +259,7 @@ public class BallFilterPreprocessor
 					estimators
 							.removeIf(k -> k.getFitResult()
 									.orElse(new KickFitResult(null, 0,
-											new StraightBallTrajectory(AVector2.ZERO_VECTOR, AVector3.ZERO_VECTOR, 0)))
+											new StraightBallTrajectory(Vector2f.ZERO_VECTOR, Vector3f.ZERO_VECTOR, 0)))
 									.getAvgDistance() > bestKickFitResult.getAvgDistance());
 				}
 				
@@ -308,8 +309,8 @@ public class BallFilterPreprocessor
 	
 	private class KickDetectors
 	{
-		private final KickDetector			slowDetector	= new KickDetector();
-		private final EarlyKickDetector	earlyDetector	= new EarlyKickDetector();
+		private final KickDetector slowDetector = new KickDetector();
+		private final EarlyKickDetector earlyDetector = new EarlyKickDetector();
 		
 		
 		private KickEvent process(final MergedBall mergedBall, final List<FilteredVisionBot> mergedRobots)
@@ -358,9 +359,9 @@ public class BallFilterPreprocessor
 	
 	private class BallTrackerMerger
 	{
-		private double				lastBallSearchRadius		= 1;
-		private List<IVector2>	lastSearchPositions		= new ArrayList<>();
-		private long				lastBallUpdateTimestamp	= 0;
+		private double lastBallSearchRadius = 1;
+		private List<IVector2> lastSearchPositions = new ArrayList<>();
+		private long lastBallUpdateTimestamp = 0;
 		
 		
 		private MergedBall process(final List<BallTracker> ballTrackers, final long timestamp,
@@ -465,9 +466,9 @@ public class BallFilterPreprocessor
 	 */
 	public static class BallFilterPreprocessorOutput
 	{
-		private final MergedBall			mergedBall;
-		private final KickEvent				kickEvent;
-		private final FilteredVisionBall	kickFitState;
+		private final MergedBall mergedBall;
+		private final KickEvent kickEvent;
+		private final FilteredVisionBall kickFitState;
 		
 		
 		/**

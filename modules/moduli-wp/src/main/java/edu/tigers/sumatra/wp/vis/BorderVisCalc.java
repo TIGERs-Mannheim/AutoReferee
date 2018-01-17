@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 
-import edu.tigers.sumatra.drawable.DrawableArc;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -29,37 +29,22 @@ public class BorderVisCalc implements IWpCalc
 	
 	
 	@Override
-	public void process(final WorldFrameWrapper wfw)
+	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
 	{
-		List<IDrawableShape> shapes = wfw.getShapeMap().get(EWpShapesLayer.FIELD_BORDERS);
-		
-		double center2PenArea = (Geometry.getFieldLength() / 2.0)
-				- Geometry.getPenaltyAreaOur().getRadius();
-		double penAreaFrontLineHalf = Geometry.getPenaltyAreaOur().getFrontLineHalfLength();
-		
+		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS);
+
 		shapes.add(new DrawableRectangle(Geometry.getField(), Color.WHITE));
 		shapes.add(new DrawableCircle(Geometry.getCenterCircle(), Color.WHITE));
 		shapes.add(new DrawableLine(Line.fromPoints(Vector2.fromXY(0, -Geometry.getFieldWidth() / 2.0),
 				Vector2.fromXY(0, Geometry.getFieldWidth() / 2.0)), Color.WHITE));
-				
-		shapes.add(new DrawableLine(Line.fromPoints(
-				Vector2.fromXY(center2PenArea, -penAreaFrontLineHalf),
-				Vector2.fromXY(center2PenArea, penAreaFrontLineHalf)),
-				Color.WHITE));
-		shapes.add(new DrawableLine(Line.fromPoints(
-				Vector2.fromXY(-center2PenArea, -penAreaFrontLineHalf),
-				Vector2.fromXY(-center2PenArea, penAreaFrontLineHalf)),
-				Color.WHITE));
-				
-		shapes.add(new DrawableArc(Geometry.getPenaltyAreaOur().getArcNeg(), Color.white));
-		shapes.add(new DrawableArc(Geometry.getPenaltyAreaOur().getArcPos(), Color.white));
-		shapes.add(new DrawableArc(Geometry.getPenaltyAreaTheir().getArcNeg(), Color.white));
-		shapes.add(new DrawableArc(Geometry.getPenaltyAreaTheir().getArcPos(), Color.white));
-				
-		Color ourColor = wfw.getRefereeMsg().getLeftTeam() == ETeamColor.BLUE ? Color.blue : Color.yellow;
+
+		shapes.add(new DrawableRectangle(Geometry.getPenaltyAreaOur().getRectangle(), Color.WHITE));
+		shapes.add(new DrawableRectangle(Geometry.getPenaltyAreaTheir().getRectangle(), Color.WHITE));
+
+		Color ourColor = wfw.getRefereeMsg().getNegativeHalfTeam() == ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalOur(), shapes, ourColor);
 		
-		Color theirColor = wfw.getRefereeMsg().getLeftTeam() != ETeamColor.BLUE ? Color.blue : Color.yellow;
+		Color theirColor = wfw.getRefereeMsg().getNegativeHalfTeam() != ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalTheir(), shapes, theirColor);
 	}
 	

@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2012, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 24.01.2012
- * Author(s): AndreR
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.ids;
 
@@ -100,7 +95,7 @@ public interface IBotIDMap<T> extends Serializable, Iterable<Entry<BotID, T>>
 	
 	
 	/**
-	 * Clears the map
+	 * Clear map
 	 */
 	void clear();
 	

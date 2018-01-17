@@ -26,6 +26,7 @@ import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.VectorMath;
@@ -183,7 +184,7 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 			final List<IDrawableShape> shapes)
 	{
 		List<ITrackedBot> violators = bots.stream()
-				.filter(bot -> VectorMath.distancePP(ballPos, bot.getPos()) < Geometry.getBotToBallDistanceStop())
+				.filter(bot -> VectorMath.distancePP(ballPos, bot.getPos()) < RuleConstraints.getStopRadius())
 				.collect(Collectors.toList());
 		
 		violators.forEach(bot -> shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED)));

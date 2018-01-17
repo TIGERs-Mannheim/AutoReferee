@@ -24,8 +24,8 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.LineMath;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -41,7 +41,6 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
  */
 public class BotLastTouchedBallCalculator
 {
-	
 	private static final Logger log = Logger.getLogger(BotLastTouchedBallCalculator.class);
 	private static final double MIN_DIST = Geometry.getBotRadius() + Geometry.getBallRadius() + 10;
 	private static final double EXTENDED_DIST = MIN_DIST + 25;
@@ -49,7 +48,7 @@ public class BotLastTouchedBallCalculator
 	
 	@Configurable(comment = "[degree]")
 	private static double angleThresholdDegree = 5.0d;
-	@Configurable(comment = "[m/s] Min Gain in velocity that counts as kick")
+	@Configurable(comment = "[m/s] Min Gain in velocity that counts as kick", defValue = "0.3")
 	private static double velGainThreshold = 0.3d;
 	/** in mm */
 	@Configurable(comment = "[mm]")
@@ -86,7 +85,6 @@ public class BotLastTouchedBallCalculator
 	 */
 	public BotID processByVicinity()
 	{
-		
 		BotID theChosenOne = BotID.noBot();
 		
 		IVector2 ball = wFrame.getBall().getPos();
@@ -95,7 +93,6 @@ public class BotLastTouchedBallCalculator
 		bots.addAll(wFrame.getBots().values());
 		double smallestDist = Double.MAX_VALUE;
 		double smallestAngle = Double.MAX_VALUE;
-		boolean foundBotTouchedBall = false;
 		for (ITrackedBot bot : bots)
 		{
 			double dist = VectorMath.distancePP(ball, bot.getPos());
@@ -106,13 +103,12 @@ public class BotLastTouchedBallCalculator
 			{
 				smallestDist = distResult;
 				theChosenOne = bot.getBotId();
-				foundBotTouchedBall = true;
 				continue;
 			}
 			
 			// if ball is still too fast check if it was kicked (fast acceleration in kicker direction)
 			IVector2 ballVel = wFrame.getBall().getVel();
-			if (!ballVel.equals(AVector2.ZERO_VECTOR))
+			if (!ballVel.equals(Vector2f.ZERO_VECTOR))
 			{
 				double ballAngle = ballVel.getAngle(0);
 				double botAngle = bot.getOrientation();
@@ -121,17 +117,12 @@ public class BotLastTouchedBallCalculator
 				{
 					smallestAngle = angleDiff;
 					theChosenOne = bot.getBotId();
-					foundBotTouchedBall = true;
 				}
 			}
 			
 		}
 		
-		if (foundBotTouchedBall)
-		{
-			return theChosenOne;
-		}
-		return null;
+		return theChosenOne;
 	}
 	
 	
@@ -168,7 +159,7 @@ public class BotLastTouchedBallCalculator
 		
 		if (curHeading.isZeroVector())
 		{
-			return null;
+			return BotID.noBot();
 		}
 		if (ballTouched(curHeading, prevHeading))
 		{
@@ -178,8 +169,7 @@ public class BotLastTouchedBallCalculator
 			
 			Optional<ITrackedBot> optTouchedBot = closeBots.stream()
 					.filter(bot -> isBotInFrontOfLine(bot, reversedBallHeading))
-					.sorted(Comparator.comparingDouble(bot -> ballPos.distanceTo(bot.getPos())))
-					.findFirst();
+					.min(Comparator.comparingDouble(bot -> ballPos.distanceTo(bot.getPos())));
 			
 			if (optTouchedBot.isPresent())
 			{
@@ -187,7 +177,7 @@ public class BotLastTouchedBallCalculator
 				return touchedBot.getBotId();
 			}
 		}
-		return null;
+		return BotID.noBot();
 	}
 	
 	
@@ -240,7 +230,7 @@ public class BotLastTouchedBallCalculator
 	{
 		double radAngle = curHeading.angleToAbs(prevHeading).orElse(0.0d);
 		
-		boolean angleChanged = radAngle > Math.toRadians(angleThresholdDegree);
+		boolean angleChanged = radAngle > AngleMath.deg2rad(angleThresholdDegree);
 		boolean velocityGained = (curHeading.getLength() - prevHeading.getLength()) > velGainThreshold;
 		
 		return angleChanged || velocityGained;

@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
 
 import java.awt.Color;
-import java.util.List;
 
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.animated.AnimatedCrosshair;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -29,26 +29,24 @@ public class BallVisCalc implements IWpCalc
 	
 	
 	@Override
-	public void process(final WorldFrameWrapper wfw)
+	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
 	{
-		List<IDrawableShape> shapes = wfw.getShapeMap().get(EWpShapesLayer.BALL);
-		
 		ITrackedBall ball = wfw.getSimpleWorldFrame().getBall();
 		
 		double heightFactor = Math.abs(FLYING_BALL_SCALING * ball.getHeight()) + 1;
 		
 		ICircle ballCircle = Circle.createCircle(ball.getPos(), 20 * Geometry.getBallRadius());
 		IDrawableShape crossHair = AnimatedCrosshair.aCrosshairWithContinuousRotation(ballCircle, 1.5f, Color.RED);
-		shapes.add(crossHair);
+		shapeMap.get(EWpShapesLayer.BALL).add(crossHair);
 		
 		DrawableCircle point = new DrawableCircle(ball.getPos(), heightFactor * Geometry.getBallRadius(), Color.ORANGE);
 		point.setFill(true);
-		shapes.add(point);
+		shapeMap.get(EWpShapesLayer.BALL).add(point);
 		
 		for (IVector2 touch : ball.getTrajectory().getTouchdownLocations())
 		{
 			DrawableCircle land = new DrawableCircle(touch, 30, Color.GREEN);
-			shapes.add(land);
+			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(land);
 		}
 		
 		for (ILine line : ball.getTrajectory().getTravelLinesInterceptable())
@@ -57,7 +55,7 @@ public class BallVisCalc implements IWpCalc
 			{
 				DrawableLine inter = new DrawableLine(line, Color.DARK_GRAY);
 				inter.setStrokeWidth(15);
-				shapes.add(inter);
+				shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(inter);
 			}
 		}
 		
@@ -66,7 +64,7 @@ public class BallVisCalc implements IWpCalc
 		{
 			DrawableLine roll = new DrawableLine(rollLine, Color.orange);
 			roll.setStrokeWidth(5);
-			shapes.add(roll);
+			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(roll);
 		}
 	}
 }

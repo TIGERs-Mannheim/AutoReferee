@@ -3,12 +3,12 @@
  */
 package edu.tigers.sumatra.wp.ball.trajectory.flat;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
+import static edu.tigers.sumatra.math.SumatraMath.sqrt;
 import static java.lang.Math.max;
+import static java.lang.Math.pow;
 
-import edu.tigers.sumatra.math.vector.AVector2;
-import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
 import edu.tigers.sumatra.wp.ball.trajectory.flat.TwoPhaseFixedVelBallTrajectory.TwoPhaseFixedVelParameters;
 
@@ -81,7 +81,7 @@ public class TwoPhaseFixedVelConsultant implements IStraightBallConsultant
 	public double getTimeForKick(final double distance, final double kickVel)
 	{
 		return TwoPhaseFixedVelBallTrajectory
-				.fromKick(AVector2.ZERO_VECTOR, Vector3.fromXYZ(kickVel * 1000, 0, 0), params)
+				.fromKick(Vector2f.ZERO_VECTOR, Vector2.fromXY(kickVel * 1000, 0), params)
 				.getTimeByDist(distance);
 	}
 	

@@ -3,3 +3,4 @@
 gamelogs/*.log
 logs/*.log
 repository
+data/*

@@ -6,7 +6,6 @@ package edu.tigers.autoreferee.module;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.AutoRefConfig;
@@ -27,30 +26,18 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 {
 	private static final Logger log = Logger.getLogger(AutoRefModule.class.getName());
 	
-	/**  */
-	public static final String MODULE_ID = "autoreferee";
-	
 	private List<IAutoRefStateObserver> refObserver = new CopyOnWriteArrayList<>();
 	private AutoRefRunner runner;
-	private final ERemoteControlType remoteControlType;
-	private final boolean log2File;
-	
-	
-	/**
-	 * @param config
-	 */
-	public AutoRefModule(final SubnodeConfiguration config)
-	{
-		remoteControlType = ERemoteControlType.valueOf(
-				config.getString("remoteControlType", ERemoteControlType.REMOTE_SSL_REFBOX.name()));
-		log2File = config.getBoolean("log2file", true);
-	}
+	private ERemoteControlType remoteControlType;
+	private boolean log2File;
 	
 	
 	@Override
 	public void initModule() throws InitModuleException
 	{
-		// No startup needed
+		remoteControlType = ERemoteControlType.valueOf(
+				getSubnodeConfiguration().getString("remoteControlType", ERemoteControlType.REMOTE_SSL_REFBOX.name()));
+		log2File = getSubnodeConfiguration().getBoolean("log2file", true);
 	}
 	
 	

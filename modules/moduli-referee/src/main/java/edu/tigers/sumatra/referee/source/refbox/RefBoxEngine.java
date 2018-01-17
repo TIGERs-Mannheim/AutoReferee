@@ -360,4 +360,16 @@ public class RefBoxEngine
 		
 		return Outcome.OK;
 	}
+	
+	
+	/**
+	 * Update the keeper id of the given team
+	 * 
+	 * @param teamColor the team color
+	 * @param id the keeper id
+	 */
+	public void setKeeperId(ETeamColor teamColor, int id)
+	{
+		teams.get(teamColor).setGoalie(id);
+	}
 }

@@ -25,7 +25,17 @@ public class MatrixMotorModel extends AMotorModel
 	private static final double	BOT_RADIUS		= 0.076;
 	private static final double	WHEEL_RADIUS	= 0.025;
 	
-	private final RealMatrix		D, Dinv;
+	private final RealMatrix D;
+	private final RealMatrix Dinv;
+	
+	
+	/**
+	 * Default constructor
+	 */
+	public MatrixMotorModel()
+	{
+		this(30, 45);
+	}
 	
 	
 	/**
@@ -35,6 +45,32 @@ public class MatrixMotorModel extends AMotorModel
 	public MatrixMotorModel(final RealMatrix D)
 	{
 		this.D = D;
+		Dinv = new SingularValueDecomposition(D).getSolver().getInverse();
+	}
+	
+	
+	/**
+	 * Create motor model with given angles.
+	 *
+	 * @param frontAngleDeg
+	 * @param backAngleDeg
+	 */
+	public MatrixMotorModel(final double frontAngleDeg, final double backAngleDeg)
+	{
+		// convert to radian
+		final double frontAngleRad = frontAngleDeg * Math.PI / 180.0;
+		final double backAngleRad = backAngleDeg * Math.PI / 180.0;
+		
+		// construct angle vector
+		RealVector theta = new ArrayRealVector(
+				new double[] { frontAngleRad, Math.PI - frontAngleRad, Math.PI + backAngleRad,
+						(2 * Math.PI) - backAngleRad });
+		
+		// construct matrix for conversion from XYW to M1..M4
+		D = new Array2DRowRealMatrix(4, 3);
+		D.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
+		D.setColumnVector(1, theta.map(new Cos()));
+		D.setColumnVector(2, new ArrayRealVector(4, BOT_RADIUS));
 		Dinv = new SingularValueDecomposition(D).getSolver().getInverse();
 	}
 	
@@ -55,40 +91,6 @@ public class MatrixMotorModel extends AMotorModel
 			}
 		}
 		return new MatrixMotorModel(D);
-	}
-	
-	
-	/**
-	 * 
-	 */
-	public MatrixMotorModel()
-	{
-		this(30, 45);
-	}
-	
-	
-	/**
-	 * Create motor model with given angles.
-	 * 
-	 * @param frontAngle
-	 * @param backAngle
-	 */
-	public MatrixMotorModel(double frontAngle, double backAngle)
-	{
-		// convert to radian
-		frontAngle *= Math.PI / 180.0;
-		backAngle *= Math.PI / 180.0;
-		
-		// construct angle vector
-		RealVector theta = new ArrayRealVector(new double[] { frontAngle, Math.PI - frontAngle, Math.PI + backAngle,
-				(2 * Math.PI) - backAngle });
-		
-		// construct matrix for conversion from XYW to M1..M4
-		D = new Array2DRowRealMatrix(4, 3);
-		D.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
-		D.setColumnVector(1, theta.map(new Cos()));
-		D.setColumnVector(2, new ArrayRealVector(4, BOT_RADIUS));
-		Dinv = new SingularValueDecomposition(D).getSolver().getInverse();
 	}
 	
 	

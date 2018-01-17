@@ -6,6 +6,8 @@ package edu.tigers.sumatra.geometry;
 
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -26,6 +28,7 @@ public class Goal
 	private final Vector2f leftPost;
 	private final Vector2f rightPost;
 	private final ILine line;
+	private final ILineSegment lineSegment;
 	
 	
 	/**
@@ -42,6 +45,7 @@ public class Goal
 		leftPost = Vector2f.fromXY(center.x(), center.y() + (width / 2.0));
 		rightPost = Vector2f.fromXY(center.x(), center.y() - (width / 2.0));
 		line = Line.fromPoints(leftPost, rightPost);
+		lineSegment = Lines.segmentFromPoints(leftPost, rightPost);
 	}
 	
 	
@@ -101,14 +105,44 @@ public class Goal
 	
 	
 	/**
+	 * @return the goal line from left to right post
+	 */
+	public ILineSegment getLineSegment()
+	{
+		return lineSegment;
+	}
+	
+	
+	/**
 	 * @param point
 	 * @param margin
 	 * @return
 	 */
-	public boolean isPointInShape(IVector2 point, double margin)
+	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		IRectangle goalRectangle = Rectangle.fromPoints(leftPost,
 				rightPost.addNew(Vector2.fromX(Math.signum(center.x()) * depth)));
 		return goalRectangle.isPointInShape(point, margin);
+	}
+	
+	
+	/**
+	 * @param margin [mm]
+	 * @return
+	 */
+	public Goal withMargin(double margin)
+	{
+		return withMargin(margin, margin);
+	}
+	
+	
+	/**
+	 * @param xMargin [mm]
+	 * @param yMargin [mm]
+	 * @return
+	 */
+	public Goal withMargin(double xMargin, double yMargin)
+	{
+		return new Goal(width + 2 * yMargin, center, depth + 2 * xMargin);
 	}
 }

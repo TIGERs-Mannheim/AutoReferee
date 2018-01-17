@@ -123,9 +123,9 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 	
 	
 	@Override
-	public void onIncommingBotCommand(final ACommand cmd)
+	public void onIncomingBotCommand(final ACommand cmd)
 	{
-		super.onIncommingBotCommand(cmd);
+		super.onIncomingBotCommand(cmd);
 		
 		reliableCmdManager.incommingCommand(cmd);
 		
@@ -221,13 +221,8 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 		}
 		return ERobotMode.IDLE;
 	}
-
-	@Override
-	public boolean isOK() {
-		return true;
-	}
-
-
+	
+	
 	@Override
 	public void sendMatchCommand()
 	{

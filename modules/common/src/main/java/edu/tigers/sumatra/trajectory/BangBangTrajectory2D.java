@@ -70,8 +70,8 @@ public class BangBangTrajectory2D implements ITrajectory<IVector2>, IPlanarCurve
 		// binary search, some iterations (fixed)
 		while (inc > 1e-7)
 		{
-			double cA = Math.cos(alpha);
-			double sA = Math.sin(alpha);
+			double cA = SumatraMath.cos(alpha);
+			double sA = SumatraMath.sin(alpha);
 			
 			x = new BangBangTrajectory1D(s0.x(), s1.x(), v0.x(), vmax * cA, acc * cA);
 			y = new BangBangTrajectory1D(s0.y(), s1.y(), v0.y(), vmax * sA, acc * sA);

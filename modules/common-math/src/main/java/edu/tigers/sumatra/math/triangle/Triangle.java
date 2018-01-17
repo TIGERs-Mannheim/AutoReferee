@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.triangle;
@@ -16,7 +16,7 @@ import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -25,11 +25,12 @@ import edu.tigers.sumatra.math.vector.Vector2;
  * @author Malte
  */
 @Persistent
-public class Triangle extends ATriangle
+public final class Triangle extends ATriangle
 {
-	private final IVector2	a;
-	private final IVector2	b;
-	private final IVector2	c;
+	private final IVector2 a;
+	private final IVector2 b;
+	private final IVector2 c;
+	private final List<IVector2> corners;
 	
 	
 	@SuppressWarnings("unused")
@@ -38,6 +39,7 @@ public class Triangle extends ATriangle
 		a = null;
 		b = null;
 		c = null;
+		corners = null;
 	}
 	
 	
@@ -54,6 +56,10 @@ public class Triangle extends ATriangle
 		this.a = a;
 		this.b = b;
 		this.c = c;
+		corners = new ArrayList<>(3);
+		corners.add(a);
+		corners.add(b);
+		corners.add(c);
 	}
 	
 	
@@ -65,6 +71,7 @@ public class Triangle extends ATriangle
 		a = triangle.a;
 		b = triangle.b;
 		c = triangle.c;
+		corners = triangle.corners;
 	}
 	
 	
@@ -92,7 +99,7 @@ public class Triangle extends ATriangle
 	{
 		ILine ab = Line.fromPoints(a, b);
 		ILine ac = Line.fromPoints(a, c);
-		ILine nbnc = Line.fromDirection(x, Vector2.fromXY(x.y() - a.y(), a.x() - x.x()));
+		ILine nbnc = Line.fromDirection(x, Vector2f.fromXY(x.y() - a.y(), a.x() - x.x()));
 		
 		Optional<IVector2> nb = LineMath.intersectionPoint(ab, nbnc);
 		Optional<IVector2> nc = LineMath.intersectionPoint(ac, nbnc);
@@ -129,10 +136,6 @@ public class Triangle extends ATriangle
 	@Override
 	public List<IVector2> getCorners()
 	{
-		List<IVector2> corners = new ArrayList<>(3);
-		corners.add(a);
-		corners.add(b);
-		corners.add(c);
 		return corners;
 	}
 	

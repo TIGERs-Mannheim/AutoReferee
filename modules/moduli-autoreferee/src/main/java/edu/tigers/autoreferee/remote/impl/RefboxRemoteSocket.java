@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 import java.util.Base64;
 import java.util.Base64.Encoder;
@@ -85,14 +84,15 @@ public class RefboxRemoteSocket
 	 *            usually indicates that sender and receiver are out of sync and the connection should be closed and
 	 *            reopened.
 	 */
-	public SSL_RefereeRemoteControlReply sendRequest(final SSL_RefereeRemoteControlRequest request) throws IOException,
-			InterruptedException
+	@SuppressWarnings("squid:S1166")
+	public SSL_RefereeRemoteControlReply sendRequest(final SSL_RefereeRemoteControlRequest request)
+			throws InterruptedException
 	{
 		try
 		{
 			writeRequest(request);
 			return readReply();
-		} catch (AsynchronousCloseException e)
+		} catch (IOException e)
 		{
 			/*
 			 * We rethrow the AsynchronousCloseException as InterruptedException in order to be able to distinguish an

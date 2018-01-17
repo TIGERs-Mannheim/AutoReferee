@@ -4,15 +4,11 @@
 
 package edu.tigers.sumatra.vision;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import edu.tigers.moduli.AModule;
@@ -39,52 +35,19 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(AVisionFilter.class.getName());
 	
-	/** */
-	public static final String MODULE_TYPE = "AVisionFilter";
-	/** */
-	public static final String MODULE_ID = "visionFilter";
-	
-	private final Map<BotID, RobotInfo> robotInfoFrameMap = new HashMap<>();
+	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
 	private final Set<IVisionFilterObserver> observers = new CopyOnWriteArraySet<>();
 	
 	
-	/**
-	 * @param config moduli config
-	 */
-	public AVisionFilter(final SubnodeConfiguration config)
+	public Map<BotID, RobotInfo> getRobotInfoMap()
 	{
-		// nothing to do here
+		return robotInfoMap;
 	}
 	
 	
-	/**
-	 * @param robotInfoFrame
-	 */
-	public final void updateRobotInfo(final RobotInfo robotInfoFrame)
+	public void setRobotInfoMap(final Map<BotID, RobotInfo> robotInfoMap)
 	{
-		robotInfoFrameMap.put(robotInfoFrame.getBotId(), robotInfoFrame);
-	}
-	
-	
-	/**
-	 * Receive robot information, if present.<br>
-	 * Note: Check the age of this info, it may be outdated!
-	 *
-	 * @param botID the id of the robot to get the info for
-	 * @return a robot info frame, if available. An empty optional otherwise
-	 */
-	public final Optional<RobotInfo> getRobotInfo(final BotID botID)
-	{
-		return Optional.ofNullable(robotInfoFrameMap.get(botID));
-	}
-	
-	
-	/**
-	 * @return a copy (thread safe) list of currently known robot infos
-	 */
-	public final List<RobotInfo> getRobotInfoFrames()
-	{
-		return new ArrayList<>(robotInfoFrameMap.values());
+		this.robotInfoMap = robotInfoMap;
 	}
 	
 	
@@ -95,12 +58,12 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 */
 	protected abstract void updateCamDetectionFrame(CamDetectionFrame camDetectionFrame);
 	
-	
 	/**
 	 * Called once uppon moduli start
 	 */
 	protected void start()
 	{
+		// nothing to do
 	}
 	
 	
@@ -109,7 +72,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 */
 	protected void stop()
 	{
-		robotInfoFrameMap.clear();
+		robotInfoMap = new HashMap<>();
 	}
 	
 	
@@ -179,7 +142,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 		start();
 		try
 		{
-			ACam cam = (ACam) SumatraModel.getInstance().getModule(ACam.MODULE_ID);
+			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
 			cam.addObserver(this);
 		} catch (ModuleNotFoundException e)
 		{
@@ -193,7 +156,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	{
 		try
 		{
-			ACam cam = (ACam) SumatraModel.getInstance().getModule(ACam.MODULE_ID);
+			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
 			cam.removeObserver(this);
 		} catch (ModuleNotFoundException e)
 		{
@@ -219,6 +182,6 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	@Override
 	public void onClearCamFrame()
 	{
-		robotInfoFrameMap.clear();
+		robotInfoMap = new HashMap<>();
 	}
 }

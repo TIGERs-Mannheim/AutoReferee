@@ -9,7 +9,6 @@ import java.net.DatagramPacket;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
@@ -37,51 +36,39 @@ import edu.tigers.sumatra.network.NetworkUtility;
 public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, IConfigObserver
 {
 	
-	private static final Logger						log						= Logger
+	private static final Logger log = Logger
 			.getLogger(SSLVisionCam.class.getName());
 	
 	// Constants
-	private static final int							BUFFER_SIZE				= 10000;
-	private final byte[]									bufferArr				= new byte[BUFFER_SIZE];
+	private static final int BUFFER_SIZE = 10000;
+	private final byte[] bufferArr = new byte[BUFFER_SIZE];
 	
 	// Connection
-	private Thread											cam;
-	private IReceiver										receiver;
+	private Thread cam;
+	private IReceiver receiver;
 	
 	
-	private boolean										expectIOE				= false;
+	private boolean expectIOE = false;
 	
 	// Translation
-	private final SSLVisionCamGeometryTranslator	geometryTranslator	= new SSLVisionCamGeometryTranslator();
+	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
 	
 	
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "TISCH", "ANDRE" }, defValueSpezis = { "10006", "40102", "10006",
 			"10006" })
-	private int												port						= 10010;
+	private int port = 10010;
 	@Configurable(defValue = "224.5.23.2")
-	private String											address					= "224.5.23.2";
+	private String address = "224.5.23.2";
 	@Configurable(spezis = { "LAB", "GRSIM", "ROBOCUP", "ANDRE" }, defValue = "")
-	private String											network					= "";
+	private String network = "";
 	
-	private NetworkInterface							nif;
-	private final TimeSync								timeSync					= new TimeSync();
+	private NetworkInterface nif;
+	private final TimeSync timeSync = new TimeSync();
 	
 	
 	static
 	{
 		ConfigRegistration.registerClass("user", SSLVisionCam.class);
-	}
-	
-	
-	// --------------------------------------------------------------------------
-	// --- constructor(s) -------------------------------------------------------
-	// --------------------------------------------------------------------------
-	/**
-	 * @param subnodeConfiguration
-	 */
-	public SSLVisionCam(final SubnodeConfiguration subnodeConfiguration)
-	{
-		super(subnodeConfiguration);
 	}
 	
 	
@@ -204,6 +191,9 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					log.error("Error while receiving SSLVision-Packet!", err);
 					break;
 				}
+			} catch (Throwable err)
+			{
+				log.error("Error in SSL vision cam", err);
 			}
 		}
 		

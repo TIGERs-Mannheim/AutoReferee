@@ -4,11 +4,12 @@
 
 package edu.tigers.autoreferee.engine.states.impl;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
@@ -27,9 +28,7 @@ import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
-import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.vector.AVector3;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3f;
@@ -83,10 +82,10 @@ public class StopState extends AbstractAutoRefState
 	private static final Color PLACEMENT_CIRCLE_COLOR = Color.BLUE;
 	
 	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state")
-	private static long STOP_WAIT_TIME_MS = 2_000; // ms
+	private static long stopWaitTimeMs = 2_000; // ms
 	
 	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly")
-	private static long READY_WAIT_TIME_MS = 3_000;
+	private static long readyWaitTimeMs = 3_000;
 	
 	@Configurable()
 	private static boolean moveBallSlowlyToTarget = true;
@@ -101,10 +100,11 @@ public class StopState extends AbstractAutoRefState
 	
 	
 	/**
-	 *
+	 * Creates a new StopState
 	 */
 	public StopState()
 	{
+		// Nothing to do
 	}
 	
 	
@@ -116,6 +116,7 @@ public class StopState extends AbstractAutoRefState
 	}
 	
 	
+	@SuppressWarnings("squid:MethodCyclomaticComplexity")
 	@Override
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
@@ -131,7 +132,7 @@ public class StopState extends AbstractAutoRefState
 		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
 		
 		IVector2 kickPos = determineKickPos(action);
-		double penAreaMargin = Geometry.getBotToPenaltyAreaMarginStandard() + Geometry.getBotToBallDistanceStop();
+		double penAreaMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard() + RuleConstraints.getStopRadius();
 		kickPos = NGeometry.getPenaltyArea(ETeamColor.YELLOW).withMargin(penAreaMargin).nearestPointOutside(kickPos);
 		kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(penAreaMargin).nearestPointOutside(kickPos);
 		kickPos = NGeometry.getField().withMargin(-AutoRefMath.THROW_IN_DISTANCE).nearestPointInside(kickPos);
@@ -141,7 +142,7 @@ public class StopState extends AbstractAutoRefState
 		/*
 		 * Wait a minimum amount of time before doing anything
 		 */
-		if (!timeElapsedSinceEntry(STOP_WAIT_TIME_MS))
+		if (!timeElapsedSinceEntry(stopWaitTimeMs))
 		{
 			return;
 		}
@@ -161,8 +162,8 @@ public class StopState extends AbstractAutoRefState
 				readyTime = frame.getTimestamp();
 			}
 			long waitTimeNS = frame.getTimestamp() - readyTime;
-			readyWaitTimeOver = waitTimeNS > TimeUnit.MILLISECONDS.toNanos(READY_WAIT_TIME_MS);
-			drawReadyCircle((int) ((TimeUnit.NANOSECONDS.toMillis(waitTimeNS) * 100L) / READY_WAIT_TIME_MS),
+			readyWaitTimeOver = waitTimeNS > TimeUnit.MILLISECONDS.toNanos(readyWaitTimeMs);
+			drawReadyCircle((int) ((TimeUnit.NANOSECONDS.toMillis(waitTimeNS) * 100L) / readyWaitTimeMs),
 					ball.getPos(), shapes);
 		} else
 		{
@@ -206,7 +207,7 @@ public class StopState extends AbstractAutoRefState
 		double radius = AutoRefConfig.getBallPlacementAccuracy();
 		
 		shapes.add(new DrawableCircle(kickPos, radius, PLACEMENT_CIRCLE_COLOR));
-		shapes.add(new DrawableCircle(kickPos, Geometry.getBotToBallDistanceStop(), PLACEMENT_CIRCLE_COLOR));
+		shapes.add(new DrawableCircle(kickPos, RuleConstraints.getStopRadius(), PLACEMENT_CIRCLE_COLOR));
 		shapes.add(new DrawablePoint(kickPos, Color.BLACK));
 		
 		IVector2 textPos = kickPos;
@@ -224,7 +225,7 @@ public class StopState extends AbstractAutoRefState
 	private RefboxRemoteCommand getPlacementCommand(final IVector2 kickPos, final ETeamColor kickExecutingTeam)
 	{
 		List<ETeamColor> capableTeams = AutoRefConfig.getBallPlacementTeams();
-		if (capableTeams.size() == 0)
+		if (capableTeams.isEmpty())
 		{
 			return null;
 		}
@@ -237,7 +238,7 @@ public class StopState extends AbstractAutoRefState
 		ETeamColor placingTeam = capableTeams.get(0);
 		
 		ETeamColor preference = AutoRefConfig.getBallPlacementPreference();
-		if ((capableTeams.size() > 1))
+		if (capableTeams.size() > 1)
 		{
 			/*
 			 * At this point both teams are capable of placing the ball which means that we need to pick one of them. The
@@ -269,7 +270,8 @@ public class StopState extends AbstractAutoRefState
 			case DIRECT_FREE:
 			case INDIRECT_FREE:
 			case FORCE_START:
-				return action.getNewBallPosition().get();
+				return action.getNewBallPosition()
+						.orElseThrow(() -> new IllegalArgumentException("Ball position not present"));
 			case KICK_OFF:
 				return NGeometry.getCenter();
 			case PENALTY:
@@ -305,7 +307,7 @@ public class StopState extends AbstractAutoRefState
 	
 	private boolean placementWasAttempted(final IAutoRefFrame frame)
 	{
-		return determineAttemptedPlacements(frame).size() >= 1;
+		return !determineAttemptedPlacements(frame).isEmpty();
 	}
 	
 	
@@ -313,8 +315,8 @@ public class StopState extends AbstractAutoRefState
 	{
 		try
 		{
-			AVisionFilter vf = (AVisionFilter) SumatraModel.getInstance().getModule(AVisionFilter.MODULE_ID);
-			vf.resetBall(Vector3f.from2d(pos, 0), AVector3.ZERO_VECTOR);
+			AVisionFilter vf = SumatraModel.getInstance().getModule(AVisionFilter.class);
+			vf.resetBall(Vector3f.from2d(pos, 0), Vector3f.ZERO_VECTOR);
 		} catch (ModuleNotFoundException e)
 		{
 			log.error("Could not find vision filter module.", e);

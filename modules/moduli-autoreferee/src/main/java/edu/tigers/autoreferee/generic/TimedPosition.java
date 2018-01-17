@@ -1,16 +1,13 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Sep 28, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.generic;
 
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.Vector3;
 
 
 /**
@@ -22,15 +19,17 @@ public class TimedPosition
 {
 	private final long		timestamp;
 	private final IVector2	position;
+	private final IVector3 pos3D;
 	
 	
 	/**
-	 * 
+	 * default constructor
 	 */
 	public TimedPosition()
 	{
 		timestamp = 0;
-		position = Vector2.ZERO_VECTOR;
+		position = Vector2f.ZERO_VECTOR;
+		pos3D = Vector3.zero();
 	}
 	
 	
@@ -42,6 +41,15 @@ public class TimedPosition
 	{
 		this.position = position;
 		this.timestamp = timestamp;
+		pos3D = position.getXYZVector();
+	}
+	
+	
+	public TimedPosition(final long timestamp, final IVector3 position)
+	{
+		this.timestamp = timestamp;
+		this.pos3D = position;
+		this.position = position.getXYVector();
 	}
 	
 	
@@ -59,4 +67,9 @@ public class TimedPosition
 		return position;
 	}
 	
+	
+	public IVector3 getPos3D()
+	{
+		return pos3D;
+	}
 }

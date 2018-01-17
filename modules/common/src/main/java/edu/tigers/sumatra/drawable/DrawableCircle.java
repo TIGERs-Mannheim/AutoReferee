@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -32,7 +33,7 @@ public class DrawableCircle extends ADrawableWithStroke
 	@SuppressWarnings("unused")
 	private DrawableCircle()
 	{
-		circle = Circle.createCircle(Vector2.ZERO_VECTOR, 1);
+		circle = Circle.createCircle(Vector2f.ZERO_VECTOR, 1);
 	}
 	
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.line.v2;
@@ -7,7 +7,7 @@ package edu.tigers.sumatra.math.line.v2;
 import java.util.Optional;
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -17,22 +17,19 @@ import edu.tigers.sumatra.math.vector.Vector2;
  */
 final class LineSegment extends ALine implements ILineSegment
 {
-	private final IVector2	start;
-	private final IVector2	end;
+	private final Vector2f start;
+	private final Vector2f end;
 	
-	private final boolean	isValid;
-	private final IVector2	directionVector;
-	private final IVector2	displacement;
+	/** this field is calculated on demand */
+	private IVector2 directionVector;
+	/** this field is calculated on demand */
+	private IVector2 displacement;
 	
 	
 	private LineSegment(final IVector2 start, final IVector2 end)
 	{
-		this.start = start;
-		this.end = end;
-		
-		this.displacement = end.subtractNew(start);
-		this.directionVector = displacement.normalizeNew();
-		this.isValid = !directionVector.isZeroVector();
+		this.start = Vector2f.copy(start);
+		this.end = Vector2f.copy(end);
 	}
 	
 	
@@ -52,7 +49,7 @@ final class LineSegment extends ALine implements ILineSegment
 	public static ILineSegment fromOffset(final IVector2 supportVector, final IVector2 offset)
 	{
 		IVector2 end = supportVector.addNew(offset);
-		return createNewFromVectorCopy(supportVector, end);
+		return fromPoints(supportVector, end);
 	}
 	
 	
@@ -70,23 +67,14 @@ final class LineSegment extends ALine implements ILineSegment
 	 */
 	public static ILineSegment fromPoints(final IVector2 start, final IVector2 end)
 	{
-		return createNewFromVectorCopy(start, end);
-	}
-	
-	
-	private static ILineSegment createNewFromVectorCopy(final IVector2 start, final IVector2 end)
-	{
-		IVector2 segmentStart = Vector2.copy(start);
-		IVector2 segmentEnd = Vector2.copy(end);
-		
-		return new LineSegment(segmentStart, segmentEnd);
+		return new LineSegment(start, end);
 	}
 	
 	
 	@Override
 	public boolean isValid()
 	{
-		return isValid;
+		return !directionVector().isZeroVector();
 	}
 	
 	
@@ -132,8 +120,12 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	
 	@Override
-	public IVector2 getDisplacement()
+	public synchronized IVector2 getDisplacement()
 	{
+		if (displacement == null)
+		{
+			displacement = end.subtractNew(start);
+		}
 		return displacement;
 	}
 	
@@ -141,13 +133,17 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public double getLength()
 	{
-		return getEnd().subtractNew(getStart()).getLength();
+		return getDisplacement().getLength();
 	}
 	
 	
 	@Override
-	public IVector2 directionVector()
+	public synchronized IVector2 directionVector()
 	{
+		if (directionVector == null)
+		{
+			directionVector = getDisplacement().normalizeNew();
+		}
 		return directionVector;
 	}
 	
@@ -176,9 +172,7 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public ILineSegment copy()
 	{
-		IVector2 segmentStart = getStart();
-		IVector2 segmentEnd = getEnd();
-		return createNewFromVectorCopy(segmentStart, segmentEnd);
+		return fromPoints(getStart(), getEnd());
 	}
 	
 	

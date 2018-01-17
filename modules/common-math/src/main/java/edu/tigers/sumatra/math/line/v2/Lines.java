@@ -76,6 +76,21 @@ public final class Lines
 	
 	
 	/**
+	 * Create a new line instance from a legacy line.
+	 *
+	 * @param line
+	 *           A legacy line
+	 * @return
+	 * 			A new line instance
+	 * @throws IllegalArgumentException If the {@code displacement} has a length of zero
+	 */
+	public static ILine lineFromLegacyLine(final edu.tigers.sumatra.math.line.ILine line)
+	{
+		return Line.fromDirection(line.supportVector(), line.directionVector());
+	}
+	
+	
+	/**
 	 * Create a new {@link IHalfLine} instance which extends from the specified {@code supportVector} in the direction of
 	 * {@code directionVector} indefinitely.
 	 *

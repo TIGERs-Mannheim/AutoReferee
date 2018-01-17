@@ -1,18 +1,15 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
 
-import edu.tigers.sumatra.drawable.ShapeMap;
-import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.EAiTeam;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -23,13 +20,15 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent
+@Entity
 public class WorldFrameWrapper
 {
+	@PrimaryKey
+	private final long timestamp;
+	
+	private final long timestampMs = System.currentTimeMillis();
 	private final SimpleWorldFrame simpleWorldFrame;
 	private final RefereeMsg refereeMsg;
-	private final ShapeMap shapeMap = new ShapeMap();
-    private Set<BotID>                                        botsToInterchange = new HashSet<>();
 	private GameState gameState = GameState.HALT;
 	
 	private final transient Map<EAiTeam, WorldFrame> worldFrames = new EnumMap<>(EAiTeam.class);
@@ -38,6 +37,7 @@ public class WorldFrameWrapper
 	@SuppressWarnings("unused")
 	private WorldFrameWrapper()
 	{
+		timestamp = 0;
 		simpleWorldFrame = null;
 		refereeMsg = new RefereeMsg();
 	}
@@ -47,17 +47,16 @@ public class WorldFrameWrapper
 	 * @param swf
 	 * @param refereeMsg
 	 * @param gameState
-	 * @param botsToInterchange
 	 */
 	public WorldFrameWrapper(final SimpleWorldFrame swf, final RefereeMsg refereeMsg,
-			final GameState gameState, final Set<BotID> botsToInterchange)
+			final GameState gameState)
 	{
 		assert refereeMsg != null;
 		assert swf != null;
+		timestamp = swf.getTimestamp();
 		simpleWorldFrame = swf;
 		this.refereeMsg = refereeMsg;
 		this.gameState = gameState;
-		this.botsToInterchange = botsToInterchange;
 	}
 	
 	
@@ -66,12 +65,11 @@ public class WorldFrameWrapper
 	 */
 	public WorldFrameWrapper(final WorldFrameWrapper wfw)
 	{
+		timestamp = wfw.getSimpleWorldFrame().getTimestamp();
 		simpleWorldFrame = wfw.simpleWorldFrame;
 		refereeMsg = wfw.refereeMsg;
-		shapeMap.merge(wfw.shapeMap);
 		worldFrames.putAll(wfw.worldFrames);
 		gameState = wfw.gameState;
-		botsToInterchange = wfw.botsToInterchange;
 	}
 	
 	
@@ -85,15 +83,30 @@ public class WorldFrameWrapper
 	private WorldFrame createWorldFrame(final SimpleWorldFrame swf, final EAiTeam aiTeam)
 	{
 		final WorldFrame wf;
-		if (refereeMsg.getLeftTeam() == aiTeam.getTeamColor())
+		if (refereeMsg.getNegativeHalfTeam() == aiTeam.getTeamColor())
 		{
-			wf = new WorldFrame(swf, botsToInterchange, aiTeam, false);
+			wf = new WorldFrame(swf, aiTeam, false);
 		} else
 		{
 			// right team will be mirrored
-			wf = new WorldFrame(swf.mirrored(), botsToInterchange, aiTeam, true);
+			wf = new WorldFrame(swf.mirrored(), aiTeam, true);
 		}
 		return wf;
+	}
+	
+	
+	public long getTimestamp()
+	{
+		return timestamp;
+	}
+	
+	
+	/**
+	 * @return the unix timestamp in [ms]
+	 */
+	public final long getUnixTimestamp()
+	{
+		return timestampMs;
 	}
 	
 	
@@ -132,21 +145,4 @@ public class WorldFrameWrapper
 	{
 		return gameState;
 	}
-	
-	
-	/**
-	 * @return the shapeMap
-	 */
-	public final ShapeMap getShapeMap()
-	{
-		return shapeMap;
-	}
-
-
-    /**
-     * @return the bots to interchange
-     */
-	public final Set<BotID> getBotsToInterchange() {
-	    return botsToInterchange;
-    }
 }

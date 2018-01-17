@@ -8,16 +8,15 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.WindowConstants;
 
-import net.infonode.docking.RootWindow;
-import net.infonode.docking.properties.RootWindowProperties;
-import edu.dhbw.mannheim.tigers.sumatra.presenter.log.LogView;
+import edu.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.autoref.view.ballspeed.BallSpeedView;
 import edu.tigers.autoref.view.gamelog.GameLogView;
-import edu.tigers.autoref.view.humanref.HumanRefView;
 import edu.tigers.autoref.view.main.AutoRefView;
 import edu.tigers.autoref.view.visualizer.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
+import net.infonode.docking.RootWindow;
+import net.infonode.docking.properties.RootWindowProperties;
 
 
 /**
@@ -42,7 +41,6 @@ public class AutoRefMainFrame extends AMainFrame
 		addView(new AutoRefView());
 		addView(new GameLogView());
 		addView(new BallSpeedView());
-		addView(new HumanRefView());
 		
 		updateViewMenu();
 		fillMenuBar();

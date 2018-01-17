@@ -39,4 +39,13 @@ public abstract class AMoveBotSkill extends ABotSkill
 	 */
 	public abstract void setDataAcquisitionMode(final EDataAcquisitionMode acqMode);
 	
+	
+	/**
+	 * @param enable
+	 */
+	public void setStrictVelocityLimit(final boolean enable)
+	{
+		// not used by default
+	}
+	
 }

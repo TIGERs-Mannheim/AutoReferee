@@ -7,7 +7,6 @@ package edu.tigers.sumatra.timer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.log4j.Logger;
 
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -33,18 +32,6 @@ public class SumatraTimer extends ATimer
 	private Thread										dormouse;
 	private final Map<TimerIdentifier, Long>	startTimes	= new ConcurrentHashMap<>();
 	private final TimerInfo							timings		= new TimerInfo();
-	
-	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
-	/**
-	 * @param subnodeConfiguration
-	 */
-	public SumatraTimer(final SubnodeConfiguration subnodeConfiguration)
-	{
-		
-	}
 	
 	
 	// --------------------------------------------------------------------------

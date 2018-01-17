@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2013, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 04.06.2013
- * Author(s): AndreR
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.bots;
 
@@ -50,89 +45,53 @@ public class Bootloader implements IBaseStationObserver
 		void onBootloaderProgress(BotID botId, EProcessorID procId, long bytesRead, long totalSize);
 	}
 	
-	/**
-	 * Bot processor ID.
-	 */
-	public enum EProcessorID
-	{
-		/** */
-		PROC_ID_MAIN(0, "main.bin"),
-		/** */
-		PROC_ID_MEDIA(1, "media.bin"),
-		/** */
-		PROC_ID_LEFT(2, "left.bin"),
-		/** */
-		PROC_ID_RIGHT(3, "right.bin"),
-		/** */
-		PROC_ID_KD(4, "kd.bin"),
-		/** */
-		PROC_ID_MAIN2016(5, "main2016.bin"),
-		/** */
-		PROC_ID_UNKNOWN(6, "unknown.bin");
-		
-		private String	name;
-		private int		id;
-		
-		
-		private EProcessorID(final int id, final String filename)
-		{
-			name = filename;
-			this.id = id;
-		}
-		
-		
-		/**
-		 * @return the name
-		 */
-		public String getFilename()
-		{
-			return name;
-		}
-		
-		
-		/**
-		 * @return the id
-		 */
-		public int getId()
-		{
-			return id;
-		}
-		
-		
-		/**
-		 * Convert procID to enum.
-		 * 
-		 * @param id
-		 * @return
-		 */
-		public static EProcessorID getProcessorIDConstant(final int id)
-		{
-			for (EProcessorID t : values())
-			{
-				if (t.getId() == id)
-				{
-					return t;
-				}
-			}
-			
-			return PROC_ID_UNKNOWN;
-		}
-	}
 	
-	private final IBaseStation						baseStation;
-	private final List<IBootloaderObserver>	observers	= new CopyOnWriteArrayList<>();
-	private static String							programFolder;
+	private static String programFolder;
+	private final IBaseStation baseStation;
+	private final List<IBootloaderObserver> observers = new CopyOnWriteArrayList<>();
 	
 	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * @param bs
 	 */
 	public Bootloader(final IBaseStation bs)
 	{
 		baseStation = bs;
+	}
+	
+	
+	// --------------------------------------------------------------------------
+	// --- constructors ---------------------------------------------------------
+	// --------------------------------------------------------------------------
+	
+	/**
+	 * Set the folder containing main.bin, media.bin, ...
+	 *
+	 * @param folder
+	 */
+	public static void setProgramFolder(final String folder)
+	{
+		programFolder = folder;
+	}
+	
+	
+	@Override
+	public void onIncomingBotCommand(final BotID id, final ACommand command)
+	{
+		switch (command.getType())
+		{
+			case CMD_BOOTLOADER_REQUEST_SIZE:
+				handleRequestSize(id, command);
+				break;
+			case CMD_BOOTLOADER_REQUEST_CRC:
+				handleRequestCrc(id, command);
+				break;
+			case CMD_BOOTLOADER_REQUEST_DATA:
+				handleRequestData(id, command);
+				break;
+			default:
+				break;
+		}
 	}
 	
 	
@@ -164,17 +123,6 @@ public class Bootloader implements IBaseStationObserver
 	}
 	
 	
-	/**
-	 * Set the folder containing main.bin, media.bin, ...
-	 * 
-	 * @param folder
-	 */
-	public static void setProgramFolder(final String folder)
-	{
-		programFolder = folder;
-	}
-	
-	
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -186,22 +134,72 @@ public class Bootloader implements IBaseStationObserver
 	}
 	
 	
-	@Override
-	public void onIncommingBotCommand(final BotID id, final ACommand command)
+	/**
+	 * Bot processor ID.
+	 */
+	public enum EProcessorID
 	{
-		switch (command.getType())
+		/** */
+		PROC_ID_MAIN(0, "main.bin"),
+		/** */
+		PROC_ID_MEDIA(1, "media.bin"),
+		/** */
+		PROC_ID_LEFT(2, "left.bin"),
+		/** */
+		PROC_ID_RIGHT(3, "right.bin"),
+		/** */
+		PROC_ID_KD(4, "kd.bin"),
+		/** */
+		PROC_ID_MAIN2016(5, "main2016.bin"),
+		/** */
+		PROC_ID_UNKNOWN(6, "unknown.bin");
+		
+		private String	name;
+		private int		id;
+		
+		
+		EProcessorID(final int id, final String filename)
 		{
-			case CMD_BOOTLOADER_REQUEST_SIZE:
-				handleRequestSize(id, command);
-				break;
-			case CMD_BOOTLOADER_REQUEST_CRC:
-				handleRequestCrc(id, command);
-				break;
-			case CMD_BOOTLOADER_REQUEST_DATA:
-				handleRequestData(id, command);
-				break;
-			default:
-				break;
+			name = filename;
+			this.id = id;
+		}
+		
+		
+		/**
+		 * @return the name
+		 */
+		public String getFilename()
+		{
+			return name;
+		}
+		
+		
+		/**
+		 * @return the id
+		 */
+		public int getId()
+		{
+			return id;
+		}
+		
+		
+		/**
+		 * Convert procID to enum.
+		 *
+		 * @param id
+		 * @return
+		 */
+		public static EProcessorID getProcessorIDConstant(final int id)
+		{
+			for (EProcessorID t : values())
+			{
+				if (t.getId() == id)
+				{
+					return t;
+				}
+			}
+			
+			return PROC_ID_UNKNOWN;
 		}
 	}
 	

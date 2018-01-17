@@ -9,7 +9,7 @@ import com.github.g3force.instanceables.InstanceableClass;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationACommand;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationAuth;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationCameraViewport;
-import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV2;
+import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationConfigV3;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationEthStats;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationPing;
 import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationWifiStats;
@@ -80,9 +80,9 @@ public enum ECommand implements IInstanceableEnum
 	/** */
 	CMD_BASE_ETH_STATS(0x0807, new InstanceableClass(BaseStationEthStats.class)),
 	/** */
-	CMD_BASE_CONFIG_V2(0x0808, new InstanceableClass(BaseStationConfigV2.class)),
-	/** */
 	CMD_BASE_CAM_VIEWPORT(0x0809, new InstanceableClass(BaseStationCameraViewport.class)),
+	/** */
+	CMD_BASE_CONFIG_V3(0x080A, new InstanceableClass(BaseStationConfigV3.class)),
 	
 	// ### 09 - BOOTLOADER ###
 	/** */
@@ -125,8 +125,8 @@ public enum ECommand implements IInstanceableEnum
 	CMD_DATA_ACQ_VELOCITY(0x0D03, new InstanceableClass(TigerDataAcqVelocity.class)),;
 	
 	
-	private final InstanceableClass	clazz;
-	private final int						id;
+	private final InstanceableClass clazz;
+	private final int id;
 	
 	
 	/**

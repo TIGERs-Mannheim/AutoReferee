@@ -51,5 +51,6 @@ public interface CheckedRunnable
 	/**
 	 * @throws Exception
 	 */
+	@SuppressWarnings("squid:S00112")
 	void run() throws Exception;
 }

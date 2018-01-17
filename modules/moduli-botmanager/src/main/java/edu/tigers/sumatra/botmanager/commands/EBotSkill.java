@@ -7,7 +7,16 @@ import com.github.g3force.instanceables.IInstanceableEnum;
 import com.github.g3force.instanceables.InstanceableClass;
 import com.github.g3force.instanceables.InstanceableParameter;
 
-import edu.tigers.sumatra.botmanager.commands.botskills.*;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillCircleBall;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillFastGlobalPosition;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalPosition;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalVelXyPosW;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalVelocity;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillLocalVelocity;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillMotorsOff;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillPenaltyShooter;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillSine;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillWheelVelocity;
 import edu.tigers.sumatra.botmanager.commands.other.EKickerDevice;
 import edu.tigers.sumatra.botmanager.commands.other.EKickerMode;
 import edu.tigers.sumatra.math.AngleMath;
@@ -105,18 +114,17 @@ public enum EBotSkill implements IInstanceableEnum
 			new InstanceableParameter(EKickerMode.class, "kickMode", "DISARM"))),
 	
 	PENALTY_SHOOTER_SKILL(9, new InstanceableClass(BotSkillPenaltyShooter.class,
-			new InstanceableParameter(IVector2.class, "ballPos", "0,0"),
-			new InstanceableParameter(Double.TYPE, "targetAngle", Double.toString(AngleMath.deg2rad(30.0))),
+			new InstanceableParameter(Double.TYPE, "targetAngle", Double.toString(AngleMath.deg2rad(18.0))),
 			new InstanceableParameter(Double.TYPE, "timeToShoot", "0.05"),
-			new InstanceableParameter(Double.TYPE, "approachSpeed", "0.2"),
-			new InstanceableParameter(Double.TYPE, "rotationSpeed", "2.0"),
-			new InstanceableParameter(Double.TYPE, "penaltyKickSpeed", "7.0"),
-			new InstanceableParameter(Double.TYPE, "translationalOffsetOnSpeed", "0.5"),
+			new InstanceableParameter(Double.TYPE, "approachSpeed", "0.05"),
+			new InstanceableParameter(Double.TYPE, "rotationSpeed", "30.0"),
+			new InstanceableParameter(Double.TYPE, "penaltyKickSpeed", "8.0"),
+			new InstanceableParameter(IVector2.class, "speedInTurn", "0.1,0.1"),
 			new InstanceableParameter(Double.TYPE, "accMax", "3"),
-			new InstanceableParameter(Double.TYPE, "accMaxW", "50"),
-			new InstanceableParameter(Double.TYPE, "jerkMax", "30"),
+			new InstanceableParameter(Double.TYPE, "accMaxW", "150"),
+			new InstanceableParameter(Double.TYPE, "jerkMax", "300"),
 			new InstanceableParameter(Double.TYPE, "jerkMaxW", "500"),
-			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "1500")));
+			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "3000")));
 	
 	
 	private final InstanceableClass	clazz;

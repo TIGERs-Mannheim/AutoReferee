@@ -10,9 +10,9 @@ import edu.tigers.sumatra.botmanager.commands.botskills.data.DriveLimits;
 import edu.tigers.sumatra.botmanager.commands.botskills.data.KickerDribblerCommands;
 import edu.tigers.sumatra.botmanager.serial.SerialData;
 import edu.tigers.sumatra.botmanager.serial.SerialData.ESerialDataType;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -21,28 +21,28 @@ import edu.tigers.sumatra.math.vector.Vector2;
 public class BotSkillGlobalVelXyPosW extends AMoveBotSkill
 {
 	@SerialData(type = ESerialDataType.INT16)
-	private final int[]					vel						= new int[2];
+	private final int[] vel = new int[2];
 	
 	@SerialData(type = ESerialDataType.INT16)
-	private final int						targetAngle;
+	private final int targetAngle;
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								accMax					= 0;
+	private int accMax = 0;
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								jerkMax					= 0;
+	private int jerkMax = 0;
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								velMaxW					= 0;
+	private int velMaxW = 0;
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								accMaxW					= 0;
+	private int accMaxW = 0;
 	
 	@SerialData(type = ESerialDataType.EMBEDDED)
-	private KickerDribblerCommands	kickerDribbler			= new KickerDribblerCommands();
+	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
 	@SerialData(type = ESerialDataType.UINT8)
-	private int								dataAcqusitionMode	= 0;
+	private int dataAcqusitionMode = 0;
 	
 	
 	/**
@@ -50,7 +50,7 @@ public class BotSkillGlobalVelXyPosW extends AMoveBotSkill
 	 */
 	public BotSkillGlobalVelXyPosW()
 	{
-		this(AVector2.ZERO_VECTOR, 0);
+		this(Vector2f.ZERO_VECTOR, 0);
 	}
 	
 	

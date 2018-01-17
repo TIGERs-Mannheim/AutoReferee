@@ -35,14 +35,14 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class DribblingDetector extends APreparingGameEventDetector
 {
-	private static final int		priority								= 1;
+	private static final int PRIORITY = 1;
 	private static final Logger	log									= Logger.getLogger(DribblingDetector.class);
 	
 	@Configurable(comment = "[mm] Any dribbling distance above this value is considered a violation")
-	private static double			MAX_DRIBBLING_LENGTH				= 1000;
+	private static double maxDribblingLength = 1000;
 	
 	@Configurable(comment = "[mm] Any distance to the ball closer than this value is considered dribbling")
-	private static double			DRIBBLING_BOT_BALL_DISTANCE	= 40;
+	private static double dribblingBotBallDistance = 40;
 	
 	static
 	{
@@ -55,7 +55,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	
 	
 	/**
-	 * 
+	 * Default constructor
 	 */
 	public DribblingDetector()
 	{
@@ -66,7 +66,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -108,7 +108,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 		}
 		
 		// The ball has not been touched since the last contact
-		if (VectorMath.distancePP(dribblerBot.getPos(), ballPos) > (DRIBBLING_BOT_BALL_DISTANCE + Geometry
+		if (VectorMath.distancePP(dribblerBot.getPos(), ballPos) > (dribblingBotBallDistance + Geometry
 				.getBotRadius() + Geometry.getBallRadius()))
 		{
 			resetRule(frame.getTimestamp());
@@ -116,7 +116,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 		}
 		
 		double totalDistance = VectorMath.distancePP(firstContact.getPos(), ballPos);
-		if (totalDistance > MAX_DRIBBLING_LENGTH)
+		if (totalDistance > maxDribblingLength)
 		{
 			ETeamColor dribblerColor = dribblerID.getTeamColor();
 			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, dribblerColor.opposite());
@@ -146,14 +146,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	
 	private boolean isSane(final BotPosition pos)
 	{
-		if (pos == null)
-		{
-			return false;
-		} else if (pos.getBotID().isUninitializedID())
-		{
-			return false;
-		}
-		return true;
+		return pos != null && !pos.getBotID().isUninitializedID();
 	}
 	
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam.data;
 
@@ -21,30 +21,32 @@ import com.sleepycat.persist.model.Persistent;
 public class CamDetectionFrame
 {
 	/** time-stamp in System.nanotime() */
-	private final long							tCapture;
+	private final long tCapture;
 	
 	/** time-stamp in System.nanotime() */
-	private final long							tSent;
+	private final long tSent;
 	
-	/** ID 0 or 1 */
-	private final int								cameraId;
+	private final long tAssembly;
+	
+	/** ID 0..n */
+	private final int cameraId;
+	private final long camFrameNumber;
 	
 	/** independent frame number, continuous */
-	private final long							frameNumber;
-	private final List<CamBall>				balls;
-	private final List<CamRobot>				robotsYellow;
-	private final List<CamRobot>				robotsBlue;
-	private final transient List<CamRobot>	robots	= new ArrayList<>();
+	private final long frameNumber;
+	private final List<CamBall> balls;
+	private final List<CamRobot> robotsYellow;
+	private final List<CamRobot> robotsBlue;
+	private final transient List<CamRobot> robots = new ArrayList<>();
 	
 	
-	/**
-	 * 
-	 */
 	protected CamDetectionFrame()
 	{
 		tCapture = 0;
 		tSent = 0;
+		tAssembly = 0;
 		cameraId = 0;
+		camFrameNumber = 0;
 		frameNumber = 0;
 		balls = null;
 		robotsYellow = Collections.emptyList();
@@ -56,25 +58,30 @@ public class CamDetectionFrame
 	 * @param tCapture
 	 * @param tSent
 	 * @param cameraId
+	 * @param camFrameNumber
 	 * @param frameNumber
 	 * @param balls
 	 * @param yellowBots
 	 * @param blueBots
 	 */
+	@SuppressWarnings("squid:S00107") // number of parameters - we accept this for performance reasons here
 	public CamDetectionFrame(final long tCapture, final long tSent, final int cameraId,
-			final long frameNumber,
+			final long camFrameNumber, final long frameNumber,
 			final List<CamBall> balls, final List<CamRobot> yellowBots, final List<CamRobot> blueBots)
 	{
 		// Fields
 		this.tCapture = tCapture;
 		this.tSent = tSent;
 		this.cameraId = cameraId;
+		this.camFrameNumber = camFrameNumber;
 		this.frameNumber = frameNumber;
 		
 		// Collections
 		this.balls = balls;
 		robotsYellow = yellowBots;
 		robotsBlue = blueBots;
+		
+		tAssembly = System.nanoTime();
 	}
 	
 	
@@ -85,7 +92,9 @@ public class CamDetectionFrame
 	{
 		tCapture = f.tCapture;
 		tSent = f.tSent;
+		tAssembly = f.tAssembly;
 		cameraId = f.cameraId;
+		camFrameNumber = f.camFrameNumber;
 		frameNumber = f.frameNumber;
 		balls = f.balls;
 		robotsBlue = f.robotsBlue;
@@ -104,7 +113,9 @@ public class CamDetectionFrame
 	{
 		tCapture = f.tCapture;
 		tSent = f.tSent;
+		tAssembly = f.tAssembly;
 		cameraId = f.cameraId;
+		camFrameNumber = f.camFrameNumber;
 		frameNumber = f.frameNumber;
 		
 		this.balls = balls;
@@ -148,6 +159,15 @@ public class CamDetectionFrame
 	public int getCameraId()
 	{
 		return cameraId;
+	}
+	
+	
+	/**
+	 * @return the frameNumber for the current camera
+	 */
+	public long getCamFrameNumber()
+	{
+		return camFrameNumber;
 	}
 	
 	
@@ -198,5 +218,14 @@ public class CamDetectionFrame
 			robots.addAll(robotsBlue);
 		}
 		return Collections.unmodifiableList(robots);
+	}
+	
+	
+	/**
+	 * @return the assembly timestamp in [ns]
+	 */
+	public long gettAssembly()
+	{
+		return tAssembly;
 	}
 }

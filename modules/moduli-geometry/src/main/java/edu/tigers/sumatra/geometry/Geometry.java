@@ -23,12 +23,12 @@ import edu.tigers.sumatra.cam.data.CamFieldArc;
 import edu.tigers.sumatra.cam.data.CamFieldLine;
 import edu.tigers.sumatra.cam.data.CamFieldSize;
 import edu.tigers.sumatra.cam.data.CamGeometry;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -63,6 +63,8 @@ public class Geometry
 	private static double goalWidth = 1000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double goalDepth = 180;
+	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	private static double goalHeight = 155;
 	@Configurable(comment = "Name of the CenterCircle arc defined in SSL-Vision")
 	private static String centerCircleName = "CenterCircle";
 	
@@ -72,13 +74,13 @@ public class Geometry
 	 */
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP", "ANDRE" }, comment = "Distance (goal line - penalty mark)")
-	private static double distanceToPenaltyMark = 1000;
+	private static double distanceToPenaltyMark = 1200;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH",
-			"ROBOCUP", "ANDRE" }, comment = "radius of the two, small quarter circles at the sides of the penalty area.")
-	private static double penaltyAreaRadius = 1000;
+			"ROBOCUP", "ANDRE" }, comment = "depth of the penalty area.")
+	private static double penaltyAreaDepth = 1200;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP",
 			"ANDRE" }, comment = "the length of the short line of the penalty area, that is parallel to the goal line")
-	private static double penaltyAreaFrontLineLength = 500;
+	private static double penaltyAreaFrontLineLength = 2400;
 	@Configurable(defValue = "LeftPenaltyStretch", comment = "Name of the LeftPenaltyStretch line defined in SSL-Vision")
 	private static String leftPenaltyStretchName = "LeftPenaltyStretch";
 	@Configurable(defValue = "RightPenaltyStretch", comment = "Name of the RightPenaltyStretch line defined in SSL-Vision")
@@ -95,17 +97,7 @@ public class Geometry
 	private static double opponentCenter2DribblerDist = 85;
 	
 	
-	/**
-	 * Rules
-	 */
-	@Configurable
-	private static double botToBallDistanceStop = 500;
-	@Configurable(comment = "Bots must be behind this line on penalty shot")
-	private static double distancePenaltyMarkToPenaltyLine = 400;
-	@Configurable
-	private static double stopSpeed = 1.5;
-	@Configurable
-	private static double botToPenaltyAreaDistanceStandard = 200;
+
 	
 	
 	/**
@@ -131,7 +123,8 @@ public class Geometry
 	private CamGeometry lastCamGeometry;
 	
 	private static BallParameters ballParameters = new BallParameters();
-	
+	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;
+
 	
 	private static class ConfigCallback implements IConfigObserver
 	{
@@ -157,15 +150,15 @@ public class Geometry
 	private Geometry()
 	{
 		// noinspection SuspiciousNameCombination
-		field = Rectangle.fromCenter(AVector2.ZERO_VECTOR, fieldLength, fieldWidth);
+		field = Rectangle.fromCenter(Vector2f.ZERO_VECTOR, fieldLength, fieldWidth);
 		fieldWBorders = field.withMargin(boundaryOffset + boundaryWidth);
 		fieldWReferee = fieldWBorders.withMargin(judgesBorderWidth);
 		goalOur = calcOurGoal(goalWidth, goalDepth, fieldLength);
 		goalTheir = calcTheirGoal(goalWidth, goalDepth, fieldLength);
-		penaltyAreaOur = new PenaltyArea(penaltyAreaRadius, penaltyAreaFrontLineLength);
-		penaltyAreaTheir = new OpponentPenaltyArea(penaltyAreaRadius, penaltyAreaFrontLineLength);
+		penaltyAreaOur = new PenaltyArea(goalOur.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
+		penaltyAreaTheir = new PenaltyArea(goalTheir.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
 		
-		centerCircle = calcCenterCircle(AVector2.ZERO_VECTOR, centerCircleRadius);
+		centerCircle = calcCenterCircle(Vector2f.ZERO_VECTOR, centerCircleRadius);
 		
 		ourHalf = Rectangle.fromCenter(field.center().subtractNew(Vector2.fromXY(field.xExtent() / 4, 0)),
 				field.xExtent() / 2,
@@ -220,7 +213,7 @@ public class Geometry
 		
 		update();
 		
-		instance.lastCamGeometry = geometry;
+		instance.lastCamGeometry.update(geometry);
 	}
 	
 	
@@ -267,8 +260,8 @@ public class Geometry
 				log.error("Penalty area is beyond field!");
 			} else
 			{
-				penaltyAreaRadius = fieldHalfLength - leftDist;
-				distanceToPenaltyMark = penaltyAreaRadius;
+				penaltyAreaDepth = fieldHalfLength - leftDist;
+				distanceToPenaltyMark = penaltyAreaDepth;
 			}
 		} else
 		{
@@ -320,6 +313,24 @@ public class Geometry
 	
 	
 	/**
+	 * @return depth of the penaltyArea
+	 */
+	public static double getPenaltyAreaDepth()
+	{
+		return penaltyAreaDepth;
+	}
+
+
+	/**
+	 * @return length of the penaltyArea front line
+	 */
+	public static double getPenaltyAreaFrontLineLength()
+	{
+		return penaltyAreaFrontLineLength;
+	}
+
+
+	/**
 	 * Returns our goal.
 	 * 
 	 * @return goal object
@@ -342,23 +353,24 @@ public class Geometry
 	
 	
 	/**
+	 * @return [mm] height from field bottom where goal bar starts
+	 */
+	public static double getGoalHeight()
+	{
+		return goalHeight;
+	}
+	
+	
+	/**
 	 * @return the ballRadius [mm]
 	 */
 	public static double getBallRadius()
 	{
 		return ballRadius;
 	}
-	
-	
-	/**
-	 * @return the stopSpeed
-	 */
-	public static double getStopSpeed()
-	{
-		return stopSpeed;
-	}
-	
-	
+
+
+
 	/**
 	 * @return the botRadius [mm]
 	 */
@@ -437,7 +449,7 @@ public class Geometry
 	 */
 	public static IVector2 getCenter()
 	{
-		return AVector2.ZERO_VECTOR;
+		return Vector2f.ZERO_VECTOR;
 	}
 	
 	
@@ -486,13 +498,7 @@ public class Geometry
 	}
 	
 	
-	/**
-	 * @return distance from penalty mark to penalty line
-	 */
-	public static double getDistancePenaltyMarkToPenaltyLine()
-	{
-		return distancePenaltyMarkToPenaltyLine;
-	}
+
 	
 	
 	/**
@@ -500,7 +506,7 @@ public class Geometry
 	 */
 	public static IVector2 getPenaltyMarkOur()
 	{
-		return Vector2f.fromXY(-fieldLength / 2 + distanceToPenaltyMark, 0.0);
+		return Vector2f.fromXY((-fieldLength / 2) + distanceToPenaltyMark, 0.0);
 	}
 	
 	
@@ -509,7 +515,7 @@ public class Geometry
 	 */
 	public static IVector2 getPenaltyMarkTheir()
 	{
-		return Vector2f.fromXY(fieldLength / 2 - distanceToPenaltyMark, 0.0);
+		return Vector2f.fromXY((fieldLength / 2) - distanceToPenaltyMark, 0.0);
 	}
 	
 	
@@ -530,29 +536,7 @@ public class Geometry
 		return boundaryWidth + boundaryOffset;
 	}
 	
-	
-	/**
-	 * distance between ball and bot required during stop signal (without ball and bot radius!)
-	 *
-	 * @return distance
-	 */
-	public static double getBotToBallDistanceStop()
-	{
-		return botToBallDistanceStop;
-	}
-	
-	
-	/**
-	 * Additional margin to opponents penalty area in our standard situations
-	 * 
-	 * @return margin
-	 */
-	public static double getBotToPenaltyAreaMarginStandard()
-	{
-		return botToPenaltyAreaDistanceStandard;
-	}
-	
-	
+
 	/**
 	 * The default penalty Area margin. Use this is your base margin.
 	 * You may want to set a relative margin to this one.
@@ -579,5 +563,19 @@ public class Geometry
 	public static BallParameters getBallParameters()
 	{
 		return ballParameters;
+	}
+
+
+
+
+	public static ETeamColor getNegativeHalfTeam()
+	{
+		return negativeHalfTeam;
+	}
+
+
+	public static void setNegativeHalfTeam(final ETeamColor negativeHalfTeam)
+	{
+		Geometry.negativeHalfTeam = negativeHalfTeam;
 	}
 }

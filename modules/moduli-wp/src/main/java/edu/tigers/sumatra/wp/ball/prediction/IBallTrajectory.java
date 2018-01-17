@@ -8,8 +8,8 @@ import java.util.List;
 
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.planarcurve.IPlanarCurveProvider;
 
 
@@ -24,7 +24,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * @param time in [s]
 	 * @return the position after <code>time</code> seconds
 	 */
-	IVector3 getPos3ByTime(double time);
+	IVector getPosByTime(double time);
 	
 	
 	/**
@@ -33,7 +33,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * @param time in [s]
 	 * @return the velocity after <code>time</code> seconds
 	 */
-	IVector3 getVel3ByTime(double time);
+	IVector getVelByTime(double time);
 	
 	
 	/**
@@ -42,34 +42,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * @param time in [s]
 	 * @return the acceleration after <code>time</code> seconds
 	 */
-	IVector3 getAcc3ByTime(double time);
-	
-	
-	/**
-	 * Get the position for a given time
-	 *
-	 * @param time in [s]
-	 * @return the position after <code>time</code> seconds
-	 */
-	IVector2 getPosByTime(double time);
-	
-	
-	/**
-	 * Get the velocity for a given time
-	 *
-	 * @param time in [s]
-	 * @return the velocity after <code>time</code> seconds
-	 */
-	IVector2 getVelByTime(double time);
-	
-	
-	/**
-	 * Get the acceleration for a given time
-	 *
-	 * @param time in [s]
-	 * @return the acceleration after <code>time</code> seconds
-	 */
-	IVector2 getAccByTime(double time);
+	IVector getAccByTime(double time);
 	
 	
 	/**
@@ -79,7 +52,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * @param targetVelocity in [m/s]
 	 * @return the position when the ball's velocity is smaller than or equal to the targetVelocity for the first time.
 	 */
-	IVector2 getPosByVel(double targetVelocity);
+	IVector getPosByVel(double targetVelocity);
 	
 	
 	/**

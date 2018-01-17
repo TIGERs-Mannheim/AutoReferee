@@ -11,6 +11,7 @@ import edu.tigers.sumatra.botmanager.commands.botskills.data.EDriveMode;
 import edu.tigers.sumatra.botmanager.commands.other.EKickerDevice;
 import edu.tigers.sumatra.botmanager.commands.other.EKickerMode;
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.VectorN;
 
@@ -21,11 +22,12 @@ import edu.tigers.sumatra.math.vector.VectorN;
 public class BotSkillPenaltyShooterSim implements IBotSkillSim
 {
 	
-	private double										currentAngleDifference	= 0;
-	private long										startTime					= 0;
-	private BotSkillPenaltyShooter				penaltyShooter;
+	private double currentAngleDifference = 0;
+	private long startTime = 0;
+	private BotSkillPenaltyShooter penaltyShooter;
+	private IVector2 startPos = null;
 	
-	private EBotSkillPenaltyShooterSimState	state;
+	private EBotSkillPenaltyShooterSimState state;
 	
 	private enum EBotSkillPenaltyShooterSimState
 	{
@@ -44,6 +46,10 @@ public class BotSkillPenaltyShooterSim implements IBotSkillSim
 		outputBuilder.kickDevice(EKickerDevice.STRAIGHT);
 		outputBuilder.kickMode(EKickerMode.NONE);
 		outputBuilder.driveLimits(penaltyShooter.getMoveConstraints());
+		if (startPos == null)
+		{
+			startPos = input.getCurPos().getXYVector();
+		}
 		
 		switch (state)
 		{
@@ -60,6 +66,7 @@ public class BotSkillPenaltyShooterSim implements IBotSkillSim
 				performKick(outputBuilder);
 				break;
 			case FINISHED:
+				startPos = null;
 				break;
 		}
 		return outputBuilder.build();
@@ -70,8 +77,7 @@ public class BotSkillPenaltyShooterSim implements IBotSkillSim
 	{
 		outputBuilder.modeXY(EDriveMode.LOCAL_VEL);
 		outputBuilder.modeW(EDriveMode.LOCAL_VEL);
-		outputBuilder.targetVelLocal(
-				Vector3.fromXYZ(0, penaltyShooter.getTranslationalPushInTurn(), penaltyShooter.getRotationSpeed()));
+		outputBuilder.targetVelLocal(Vector3.from2d(penaltyShooter.getSpeedInTurn(), penaltyShooter.getRotationSpeed()));
 		double nextAngleDifference = AngleMath
 				.normalizeAngle(penaltyShooter.getTargetAngle() - input.getCurPos().z());
 		if (nextAngleDifference * currentAngleDifference < .0)
@@ -113,8 +119,12 @@ public class BotSkillPenaltyShooterSim implements IBotSkillSim
 	 */
 	private boolean isBallReached(final BotSkillInput botSkillInput)
 	{
-		double distance = penaltyShooter.getBallPos().subtractNew(botSkillInput.getCurPos()).getLength2();
-		return distance <= 87;
+		if (null == startPos)
+		{
+			return false;
+		}
+		double distance = botSkillInput.getCurPos().getXYVector().distanceTo(startPos);
+		return distance >= 87;
 	}
 	
 	

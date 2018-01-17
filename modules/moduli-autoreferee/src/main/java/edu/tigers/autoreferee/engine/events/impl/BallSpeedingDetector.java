@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -67,7 +67,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
 		double ballVelocity = frame.getWorldFrame().getBall().getVel().getLength2();
-		if ((ballVelocity > AutoRefConfig.getMaxBallVelocity()) && (ballVelocity < topSpeedThreshold))
+		if ((ballVelocity > RuleConstraints.getMaxBallSpeed()) && (ballVelocity < topSpeedThreshold))
 		{
 			speedingFrameTime += frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
 			if ((speedingFrameTime >= TimeUnit.MILLISECONDS.toNanos(REQUIRED_SPEEDING_TIME))

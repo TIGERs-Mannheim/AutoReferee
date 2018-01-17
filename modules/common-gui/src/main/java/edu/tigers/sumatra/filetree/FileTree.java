@@ -3,14 +3,17 @@
  */
 package edu.tigers.sumatra.filetree;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -28,14 +31,14 @@ import org.apache.log4j.Logger;
 public class FileTree extends JPanel
 {
 	/**  */
-	private static final long					serialVersionUID	= 6901756711335047357L;
+	private static final long serialVersionUID = 6901756711335047357L;
 	@SuppressWarnings("unused")
-	private static final Logger				log					= Logger.getLogger(FileTree.class.getName());
+	private static final Logger log = Logger.getLogger(FileTree.class.getName());
 	
-	private final List<IFileTreeObserver>	observers			= new CopyOnWriteArrayList<IFileTreeObserver>();
-	private final JTree							tree;
+	private final List<IFileTreeObserver> observers = new CopyOnWriteArrayList<>();
+	private final JTree tree;
 	
-	private final List<String>					selectedPaths		= new ArrayList<>();
+	private final List<String> selectedPaths = new ArrayList<>();
 	
 	
 	/**
@@ -46,6 +49,36 @@ public class FileTree extends JPanel
 	public FileTree(final File dir)
 	{
 		this(dir, null);
+	}
+	
+	
+	/**
+	 * Construct a FileTree
+	 *
+	 * @param dir
+	 * @param preFileTree
+	 */
+	public FileTree(final File dir, final FileTree preFileTree)
+	{
+		setLayout(new BorderLayout());
+		
+		// Make a tree list with all the nodes, and make it a JTree
+		tree = new JTree(addNodes(null, dir));
+		tree.setRootVisible(false);
+		
+		if (preFileTree != null)
+		{
+			setupFromPreFileTree(preFileTree);
+		}
+		
+		// Add a listener
+		tree.addTreeSelectionListener(new FileTreeSelectionListener());
+		
+		// Lastly, put the JTree into a JScrollPane.
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.getViewport().add(tree);
+		scrollPane.setPreferredSize(new Dimension(250, 0));
+		add(BorderLayout.CENTER, scrollPane);
 	}
 	
 	
@@ -68,76 +101,28 @@ public class FileTree extends JPanel
 	}
 	
 	
-	/**
-	 * Construct a FileTree
-	 * 
-	 * @param dir
-	 * @param preFileTree
-	 */
-	public FileTree(final File dir, final FileTree preFileTree)
+	@SuppressWarnings("squid:S134")
+	private void setupFromPreFileTree(final FileTree preFileTree)
 	{
-		setLayout(new BorderLayout());
-		
-		// Make a tree list with all the nodes, and make it a JTree
-		tree = new JTree(addNodes(null, dir));
-		tree.setRootVisible(false);
-		
-		if (preFileTree != null)
+		JTree preTree = preFileTree.tree;
+		int nextRow = 0;
+		for (int preRow = 0; preRow < preTree.getRowCount(); preRow++)
 		{
-			JTree preTree = preFileTree.tree;
-			int nextRow = 0;
-			for (int preRow = 0; preRow < preTree.getRowCount(); preRow++)
+			TreePath preTp = preTree.getPathForRow(preRow);
+			for (int row = nextRow; row < tree.getRowCount(); row++)
 			{
-				TreePath preTp = preTree.getPathForRow(preRow);
-				for (int row = nextRow; row < tree.getRowCount(); row++)
+				TreePath tp = tree.getPathForRow(row);
+				if (equalTreePaths(preTp, tp))
 				{
-					TreePath tp = tree.getPathForRow(row);
-					if (equalTreePaths(preTp, tp))
+					if (preTree.isExpanded(preRow))
 					{
-						if (preTree.isExpanded(preRow))
-						{
-							tree.expandPath(tp);
-						}
-						nextRow = row + 1;
-						break;
+						tree.expandPath(tp);
 					}
+					nextRow = row + 1;
+					break;
 				}
 			}
 		}
-		
-		// Add a listener
-		tree.addTreeSelectionListener(new TreeSelectionListener()
-		{
-			@Override
-			public void valueChanged(final TreeSelectionEvent e)
-			{
-				for (TreePath tp : e.getPaths())
-				{
-					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
-					Element el = (Element) node.getUserObject();
-					String filename = el.file.getAbsolutePath();
-					boolean isNew = e.isAddedPath(tp);
-					if (isNew && !selectedPaths.contains(filename))
-					{
-						selectedPaths.add(filename);
-					}
-					if (!isNew)
-					{
-						selectedPaths.remove(filename);
-					}
-				}
-				for (IFileTreeObserver o : observers)
-				{
-					o.onFileSelected(selectedPaths);
-				}
-			}
-		});
-		
-		// Lastly, put the JTree into a JScrollPane.
-		JScrollPane scrollpane = new JScrollPane();
-		scrollpane.getViewport().add(tree);
-		scrollpane.setPreferredSize(new Dimension(250, 0));
-		add(BorderLayout.CENTER, scrollpane);
 	}
 	
 	
@@ -194,29 +179,31 @@ public class FileTree extends JPanel
 		String[] tmp = dir.list();
 		if (tmp == null)
 		{
-			log.error("Directory does not exist: " + dir.getAbsolutePath());
+			log.info("Directory does not exist and will be created: " + dir.getAbsolutePath());
+			// noinspection ResultOfMethodCallIgnored
+			dir.mkdirs();
 			return curDir;
 		}
-		for (String element : tmp)
-		{
-			ol.add(element);
-		}
-		Collections.sort(ol, String.CASE_INSENSITIVE_ORDER);
+		
+		ol.addAll(Arrays.asList(tmp));
+		ol.sort(String.CASE_INSENSITIVE_ORDER);
 		File f;
 		List<File> files = new ArrayList<>();
+		
 		// Make two passes, one for Dirs and one for Files. This is #1.
-		for (int i = 0; i < ol.size(); i++)
+		for (String thisObject : ol)
 		{
-			String thisObject = ol.get(i);
 			String newPath;
-			if (curPath.file.getPath().equals("."))
+			if (".".equals(curPath.file.getPath()))
 			{
 				newPath = thisObject;
 			} else
 			{
 				newPath = curPath.file.getPath() + File.separator + thisObject;
 			}
-			if ((f = new File(newPath)).isDirectory())
+			
+			f = new File(newPath);
+			if (f.isDirectory())
 			{
 				addNodes(curDir, f);
 			} else
@@ -224,11 +211,13 @@ public class FileTree extends JPanel
 				files.add(f);
 			}
 		}
+		
 		// Pass two: for files.
-		for (int fnum = 0; fnum < files.size(); fnum++)
+		for (File file : files)
 		{
-			curDir.add(new DefaultMutableTreeNode(new Element(files.get(fnum))));
+			curDir.add(new DefaultMutableTreeNode(new Element(file)));
 		}
+		
 		return curDir;
 	}
 	
@@ -246,7 +235,7 @@ public class FileTree extends JPanel
 	
 	private static class Element
 	{
-		File	file;
+		File file;
 		
 		
 		Element(final File file)
@@ -299,6 +288,33 @@ public class FileTree extends JPanel
 				return false;
 			}
 			return true;
+		}
+	}
+	
+	private class FileTreeSelectionListener implements TreeSelectionListener
+	{
+		@Override
+		public void valueChanged(final TreeSelectionEvent e)
+		{
+			for (TreePath tp : e.getPaths())
+			{
+				DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
+				Element el = (Element) node.getUserObject();
+				String filename = el.file.getAbsolutePath();
+				boolean isNew = e.isAddedPath(tp);
+				if (isNew && !selectedPaths.contains(filename))
+				{
+					selectedPaths.add(filename);
+				}
+				if (!isNew)
+				{
+					selectedPaths.remove(filename);
+				}
+			}
+			for (IFileTreeObserver o : observers)
+			{
+				o.onFileSelected(selectedPaths);
+			}
 		}
 	}
 }

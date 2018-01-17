@@ -1,29 +1,34 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.bot.params.IBotMovementLimits;
+import edu.tigers.sumatra.data.collector.IExportable;
 
 
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent
-public class MoveConstraints
+public class MoveConstraints implements IExportable
 {
-	private double		velMax		= 0;
-	private double		accMax		= 0;
-	private double		jerkMax		= 0;
-	private double		velMaxW		= 0;
-	private double		accMaxW		= 0;
-	private double		jerkMaxW		= 0;
-	private double		velMaxFast	= 0;
-	private double		accMaxFast	= 0;
-	private boolean	fastMove		= false;
+	private double velMax = 0;
+	private double accMax = 0;
+	private double jerkMax = 0;
+	private double velMaxW = 0;
+	private double accMaxW = 0;
+	private double jerkMaxW = 0;
+	private double velMaxFast = 0;
+	private double accMaxFast = 0;
+	private boolean fastMove = false;
 	
 	
 	/**
@@ -109,9 +114,35 @@ public class MoveConstraints
 				", velMaxW=" + velMaxW +
 				", accMaxW=" + accMaxW +
 				", jerkMaxW=" + jerkMaxW +
+				", velMaxFast=" + velMaxFast +
 				", accMaxFast=" + accMaxFast +
 				", fastMove=" + fastMove +
 				'}';
+	}
+	
+	
+	@Override
+	public List<Number> getNumberList()
+	{
+		List<Number> nbrs = new ArrayList<>();
+		nbrs.add(velMax);
+		nbrs.add(accMax);
+		nbrs.add(jerkMax);
+		nbrs.add(velMaxW);
+		nbrs.add(accMaxW);
+		nbrs.add(jerkMaxW);
+		nbrs.add(velMaxFast);
+		nbrs.add(accMaxFast);
+		nbrs.add(fastMove ? 1 : 0);
+		return nbrs;
+	}
+	
+	
+	@Override
+	public List<String> getHeaders()
+	{
+		return Arrays.asList("velMax", "accMax", "jerkMax", "velMaxW", "accMaxW", "jerkMaxW", "velMaxFast", "accMaxFast",
+				"fastMove");
 	}
 	
 	
@@ -129,6 +160,7 @@ public class MoveConstraints
 	 */
 	public void setVelMax(final double velMax)
 	{
+		assert velMax >= 0;
 		this.velMax = velMax;
 	}
 	
@@ -147,6 +179,7 @@ public class MoveConstraints
 	 */
 	public void setVelMaxW(final double velMaxW)
 	{
+		assert velMaxW >= 0;
 		this.velMaxW = velMaxW;
 	}
 	
@@ -165,6 +198,7 @@ public class MoveConstraints
 	 */
 	public void setAccMax(final double accMax)
 	{
+		assert accMax >= 0;
 		this.accMax = accMax;
 	}
 	
@@ -183,6 +217,7 @@ public class MoveConstraints
 	 */
 	public void setAccMaxW(final double accMaxW)
 	{
+		assert accMaxW >= 0;
 		this.accMaxW = accMaxW;
 	}
 	
@@ -201,6 +236,7 @@ public class MoveConstraints
 	 */
 	public void setJerkMax(final double jerkMax)
 	{
+		assert jerkMax >= 0;
 		this.jerkMax = jerkMax;
 	}
 	
@@ -219,6 +255,7 @@ public class MoveConstraints
 	 */
 	public void setJerkMaxW(final double jerkMaxW)
 	{
+		assert jerkMaxW >= 0;
 		this.jerkMaxW = jerkMaxW;
 	}
 	
@@ -254,6 +291,7 @@ public class MoveConstraints
 	 */
 	public void setVelMaxFast(final double velMaxFast)
 	{
+		assert velMaxFast >= 0;
 		this.velMaxFast = velMaxFast;
 	}
 	
@@ -272,6 +310,7 @@ public class MoveConstraints
 	 */
 	public void setAccMaxFast(final double accMaxFast)
 	{
+		assert accMaxFast >= 0;
 		this.accMaxFast = accMaxFast;
 	}
 }

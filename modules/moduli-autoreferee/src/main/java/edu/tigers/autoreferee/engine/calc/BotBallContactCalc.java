@@ -4,7 +4,7 @@
 
 package edu.tigers.autoreferee.engine.calc;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.List;
 
 import com.github.g3force.configurable.ConfigRegistration;
@@ -74,14 +74,16 @@ public class BotBallContactCalc implements IRefereeCalc
 			chosenBotTouchedBall = chosenBotCloseToBall;
 		}
 		
-		if (chosenBotCloseToBall != null)
+		ITrackedBot botCloseToBall = frame.getWorldFrame().getBot(chosenBotCloseToBall);
+		if (botCloseToBall != null)
 		{
-			lastBotCloseToBall = new BotPosition(ts, frame.getWorldFrame().getBot(chosenBotCloseToBall));
+			lastBotCloseToBall = new BotPosition(ts, botCloseToBall);
 		}
 		
-		if (chosenBotTouchedBall != null)
+		ITrackedBot botTouchedBall = frame.getWorldFrame().getBot(chosenBotTouchedBall);
+		if (botTouchedBall != null)
 		{
-			frame.setBotTouchedBall(new BotPosition(ts, frame.getWorldFrame().getBot(chosenBotTouchedBall)));
+			frame.setBotTouchedBall(new BotPosition(ts, botTouchedBall));
 			lastBotTouchedBall = new BotPosition(ts, frame.getWorldFrame().getBot(chosenBotTouchedBall));
 		}
 		

@@ -19,15 +19,6 @@ import edu.tigers.moduli.AModule;
  */
 public abstract class ATimer extends AModule implements ITimer
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	/** */
-	public static final String				MODULE_TYPE	= "ATimer";
-	/** */
-	public static final String				MODULE_ID	= "timer";
-	
-	
 	private final List<ITimerObserver>	observers	= new CopyOnWriteArrayList<>();
 	
 	

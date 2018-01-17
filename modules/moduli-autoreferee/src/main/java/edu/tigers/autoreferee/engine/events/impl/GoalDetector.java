@@ -1,13 +1,11 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
@@ -31,11 +29,12 @@ import edu.tigers.sumatra.referee.data.GameState;
  */
 public class GoalDetector extends APreparingGameEventDetector
 {
-	private static final int	PRIORITY				= 1;
+	private static final int PRIORITY = 1;
 	
-	private BotPosition			indirectKickPos	= null;
-	private boolean				indirectStillHot	= false;
-	private boolean				goalDetected		= false;
+	private BotPosition indirectKickPos = null;
+	private PossibleGoal lastGoal = null;
+	private boolean indirectStillHot = false;
+	private boolean goalDetected = false;
 	
 	
 	/**
@@ -77,23 +76,21 @@ public class GoalDetector extends APreparingGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
-		Set<BotID> keepers = new HashSet<>();
-		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.BLUE));
-		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.YELLOW));
 		if ((indirectKickPos != null) && indirectStillHot)
 		{
 			BotID kickerId = indirectKickPos.getBotID();
 			BotPosition lastKickPos = frame.getBotLastTouchedBall();
-			if (!kickerId.equals(lastKickPos.getBotID()) && (!keepers.contains(lastKickPos.getBotID())))
+			if (!kickerId.equals(lastKickPos.getBotID()))
 			{
 				indirectStillHot = false;
 			}
 		}
 		
 		Optional<PossibleGoal> optGoalShot = frame.getPossibleGoal();
-		if (optGoalShot.isPresent())
+		if (optGoalShot.isPresent() && !optGoalShot.get().equals(lastGoal))
 		{
 			PossibleGoal goalShot = optGoalShot.get();
+			lastGoal = goalShot;
 			IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 			
 			if (!goalDetected)

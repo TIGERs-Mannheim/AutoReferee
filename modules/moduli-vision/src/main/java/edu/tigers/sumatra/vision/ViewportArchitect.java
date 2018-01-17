@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -22,9 +22,9 @@ import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -34,18 +34,18 @@ import edu.tigers.sumatra.math.vector.Vector2;
  */
 public class ViewportArchitect
 {
-	private final List<IBaseStation>			baseStations;
-	private Map<Integer, CamCalibration>	calibrations			= new HashMap<>();
-	private Map<Integer, Viewport>			viewports				= new HashMap<>();
+	private final List<IBaseStation> baseStations;
+	private Map<Integer, CamCalibration> calibrations = new HashMap<>();
+	private Map<Integer, Viewport> viewports = new HashMap<>();
 	
 	@Configurable(defValue = "200", comment = "Maximum camera overlap. [mm]")
-	private static double						maxViewportOverlap	= 200;
+	private static double maxViewportOverlap = 200;
 	
 	@Configurable(defValue = "780,580", comment = "Pixel size of camera sensor")
-	private static IVector2						sensorPixelSize		= Vector2.fromXY(780, 580);
+	private static IVector2 sensorPixelSize = Vector2.fromXY(780, 580);
 	
 	@Configurable(defValue = "false", comment = "Add debug shapes")
-	private static boolean						debugShapes				= false;
+	private static boolean debugShapes = false;
 	
 	static
 	{
@@ -86,7 +86,7 @@ public class ViewportArchitect
 		}
 		
 		// adjust all viewports
-		Viewport field = new Viewport(AVector2.ZERO_VECTOR, geometry.getField().getFieldWithBoundary());
+		Viewport field = new Viewport(Vector2f.ZERO_VECTOR, geometry.getField().getFieldWithBoundary());
 		adjustViewports(field);
 		
 		// send viewports to BS
@@ -171,9 +171,9 @@ public class ViewportArchitect
 	
 	private static class Viewport
 	{
-		private IVector2	center;
-		private Vector2	min;
-		private Vector2	max;
+		private IVector2 center;
+		private Vector2 min;
+		private Vector2 max;
 		
 		
 		private Viewport(final IVector2 center, final IRectangle rect)
@@ -249,7 +249,7 @@ public class ViewportArchitect
 		
 		// draw inner camera rectangles (axes-aligned)
 		IRectangle rect = calibration.getApproximatedViewport(sensorPixelSize);
-		DrawableRectangle drawRect = new DrawableRectangle(rect, new Color(50 + (calibration.getCameraId() * 50), 0, 0));
+		DrawableRectangle drawRect = new DrawableRectangle(rect, new Color(50 + (calibration.getCameraId() * 25), 0, 0));
 		shapes.add(drawRect);
 		
 		if (debugShapes)

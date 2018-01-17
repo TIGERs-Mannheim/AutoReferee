@@ -19,6 +19,7 @@ import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
@@ -70,7 +71,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	
 	private void updateBuffer(final SimpleWorldFrame frame)
 	{
-		TimedPosition pos = new TimedPosition(frame.getTimestamp(), frame.getBall().getPos());
+		TimedPosition pos = new TimedPosition(frame.getTimestamp(), frame.getBall().getPos3());
 		
 		if (buffer.size() >= BUFFER_SIZE)
 		{
@@ -122,7 +123,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 		for (int i = 0; i < CERTAINTY; i++)
 		{
 			TimedPosition pos = buffer.get(i);
-			if (isBallInsideFieldPerimeter(pos.getPos(), currentlyInside) == currentlyInside)
+			if (isBallInsideFieldPerimeter(pos.getPos3D(), currentlyInside) == currentlyInside)
 			{
 				ballStateChanged = false;
 				break;
@@ -132,9 +133,9 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	}
 	
 	
-	private boolean isBallInsideFieldPerimeter(final IVector2 ballPos, final boolean currentlyInside)
+	private boolean isBallInsideFieldPerimeter(final IVector3 ballPos, final boolean currentlyInside)
 	{
-		return Geometry.getField().isPointInShape(ballPos) || ballInsideGoal(ballPos, currentlyInside);
+		return Geometry.getField().isPointInShape(ballPos.getXYVector()) || ballInsideGoal(ballPos, currentlyInside);
 	}
 	
 	
@@ -143,8 +144,8 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	 * We use a hysteresis like approach to avoid false positive detections that can occur if the physical goal is not
 	 * positioned correctly and the ball enters the virtual goal after having left the field.
 	 */
-	private boolean ballInsideGoal(final IVector2 ballPos, final boolean currentlyInside)
+	private boolean ballInsideGoal(final IVector3 ballPos, final boolean currentlyInside)
 	{
-		return currentlyInside && NGeometry.ballInsideGoal(ballPos, goalMargin);
+		return currentlyInside && NGeometry.ballInsideGoal(ballPos, 0, goalMargin);
 	}
 }

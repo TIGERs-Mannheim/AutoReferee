@@ -25,11 +25,11 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  */
 public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
-	private static final Logger	log					= Logger.getLogger(AbstractAutoRefEngine.class);
+	private static final Logger log = Logger.getLogger(AbstractAutoRefEngine.class);
 	
-	private GameEventEngine			gameEventEngine	= null;
-	protected EEngineState			engineState			= null;
-	protected GameLog					gameLog				= new GameLog();
+	private GameEventEngine gameEventEngine = null;
+	protected EEngineState engineState = null;
+	protected GameLog gameLog = new GameLog();
 	
 	protected enum EEngineState
 	{
@@ -99,6 +99,8 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	}
 	
 	
+	// oldGameState needed for child method
+	@SuppressWarnings("squid:S1172")
 	protected void onGameStateChange(final GameState oldGameState, final GameState newGameState)
 	{
 		gameLog.addEntry(newGameState);

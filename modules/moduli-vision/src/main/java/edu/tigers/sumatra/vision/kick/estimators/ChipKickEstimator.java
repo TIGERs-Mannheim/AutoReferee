@@ -58,36 +58,36 @@ import edu.tigers.sumatra.vision.data.KickEvent;
 public class ChipKickEstimator implements IKickEstimator
 {
 	@SuppressWarnings("unused")
-	private static final Logger						log							= Logger
+	private static final Logger log = Logger
 			.getLogger(ChipKickEstimator.class.getName());
 	
-	private final long									kickTimestamp;
-	private final IVector2								kickPosition;
-	private final Map<Integer, CamCalibration>	camCalib;
+	private final long kickTimestamp;
+	private final IVector2 kickPosition;
+	private final Map<Integer, CamCalibration> camCalib;
 	
-	private List<CamBallInternal>						records						= new ArrayList<>();
-	private KickFitResult								fitResult					= null;
+	private List<CamBallInternal> records = new ArrayList<>();
+	private KickFitResult fitResult = null;
 	
-	private IVector3										kickVelEst					= Vector3.fromXYZ(0, 0, 2000);
-	private boolean										doKickVelEstimation		= true;
+	private IVector3 kickVelEst = Vector3.fromXYZ(0, 0, 2000);
+	private boolean doKickVelEstimation = true;
 	
-	private int												failures						= 0;
+	private int failures = 0;
 	
-	private RealVector									start;
+	private RealVector start;
 	
-	private final BallParameters						ballParams;
+	private final BallParameters ballParams;
 	
 	@Configurable(comment = "Minimum number of records to start estimation")
-	private static int									minRecords					= 8;
+	private static int minRecords = 8;
 	
 	@Configurable(comment = "Max fitting failures until this estimator is dropped")
-	private static int									maxFailures					= 12;
+	private static int maxFailures = 12;
 	
 	@Configurable(comment = "Max fitting error until this estimator is dropped [mm]")
-	private static double								maxFittingError			= 100;
+	private static double maxFittingError = 100;
 	
 	@Configurable(comment = "Stop initial velocity estimation after first hop flight time * factor")
-	private static double								stopVelEstimationFactor	= 1.3;
+	private static double stopVelEstimationFactor = 1.3;
 	
 	static
 	{
@@ -334,8 +334,8 @@ public class ChipKickEstimator implements IKickEstimator
 				.checker(new EvaluationRmsChecker(1e-6))
 				.parameterValidator(model)
 				.lazyEvaluation(false)
-				.maxEvaluations(10)
-				.maxIterations(10)
+				.maxEvaluations(20)
+				.maxIterations(20)
 				.build();
 		
 		LeastSquaresOptimizer.Optimum optimum = null;
@@ -367,21 +367,21 @@ public class ChipKickEstimator implements IKickEstimator
 	
 	private class TwoBounceModel implements MultivariateJacobianFunction, ParameterValidator
 	{
-		private double			g	= 9810;
+		private double g = 9810;
 		
-		private double			px0;
-		private double			py0;
-		private double			vx0;
-		private double			vy0;
-		private double			vz0;
-		private double			tf0;
-		private double			fX;
-		private double			fY;
-		private double			fZ;
-		private double			t;
+		private double px0;
+		private double py0;
+		private double vx0;
+		private double vy0;
+		private double vz0;
+		private double tf0;
+		private double fX;
+		private double fY;
+		private double fZ;
+		private double t;
 		
-		private RealVector	value;
-		private RealMatrix	jacobian;
+		private RealVector value;
+		private RealMatrix jacobian;
 		
 		
 		@Override
@@ -526,12 +526,12 @@ public class ChipKickEstimator implements IKickEstimator
 	
 	private class FittedCamBall extends CamBallInternal
 	{
-		private final double		height;
-		private final IVector2	orthoPos;
-		private final double		timeToKickTimestamp;
+		private final double height;
+		private final IVector2 orthoPos;
+		private final double timeToKickTimestamp;
 		
-		private IVector2			snappedPos;
-		private double				distToSupportVec;
+		private IVector2 snappedPos;
+		private double distToSupportVec;
 		
 		
 		public FittedCamBall(final CamBallInternal ball)
@@ -602,11 +602,11 @@ public class ChipKickEstimator implements IKickEstimator
 	
 	private class FittedCamBallBin
 	{
-		private final List<FittedCamBall>	samples;
-		private final double						tFly;
-		private double								velAbs;
-		private List<IVector2>					ground;
-		private double								distToCamSum;
+		private final List<FittedCamBall> samples;
+		private final double tFly;
+		private double velAbs;
+		private List<IVector2> ground;
+		private double distToCamSum;
 		
 		
 		public FittedCamBallBin(final List<FittedCamBall> balls, final double tMin, final double tMax)

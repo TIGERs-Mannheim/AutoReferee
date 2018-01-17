@@ -12,6 +12,7 @@ import org.apache.commons.lang.Validate;
 
 import edu.tigers.sumatra.geometry.BallParameters;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -71,8 +72,8 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 		
 		IVector3 a = Vector3.fromXYZ(0, 0, -g);
 		
-		double tInAir = -(Math.sqrt((vz1 * vz1) + (2.0 * g * pz1)) - vz1) / g;
-		double vKickZ = Math.sqrt((vz1 * vz1) + (2.0 * g * pz1));
+		double tInAir = -(SumatraMath.sqrt((vz1 * vz1) + (2.0 * g * pz1)) - vz1) / g;
+		double vKickZ = SumatraMath.sqrt((vz1 * vz1) + (2.0 * g * pz1));
 		
 		IVector3 kickPos = posNow.addNew(velNow.multiplyNew(tInAir)).addNew(a.multiplyNew(0.5 * tInAir * tInAir));
 		IVector3 kickVel = Vector3.from2d(velNow.getXYVector(), vKickZ);
@@ -92,8 +93,8 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 					.withVSwitchToRoll(kickVel.getLength2()).withChipped(true).build();
 		}
 		
-		Vector3 posNow = Vector3.copy(kickPos);
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 posNow = Vector3.copy(kickPos.getXYZVector());
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
 		
 		// go through hops while max. height is above 10mm
@@ -153,8 +154,8 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 			return new PlanarCurve(segments);
 		}
 		
-		Vector3 posNow = Vector3.copy(state.getPos());
-		Vector3 velNow = Vector3.copy(state.getVel());
+		Vector3 posNow = Vector3.copy(state.getPos().getXYZVector());
+		Vector3 velNow = Vector3.copy(state.getVel().getXYZVector());
 		double tNow = 0;
 		
 		// go through hops while max. height is above minHopHeight
@@ -192,7 +193,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	@Override
 	public double getTimeAtRest()
 	{
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
 		
 		// go through hops while max. height is above 10mm
@@ -218,7 +219,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	@Override
 	protected double getTimeByDistanceInMillimeters(final double distance)
 	{
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
 		double distNow = 0;
 		
@@ -254,7 +255,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 			return tNow + tStop;
 		}
 		
-		double timeToDist = ((Math.sqrt((v * v) + (2.0 * a * p) + 1e-6) - v) / a) + 1e-6;
+		double timeToDist = ((SumatraMath.sqrt((v * v) + (2.0 * a * p) + 1e-6) - v) / a) + 1e-6;
 		if (timeToDist < 1e-3)
 		{
 			timeToDist = 0.0; // numerical issues...
@@ -268,7 +269,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	@Override
 	protected double getTimeByVelocityInMillimetersPerSec(final double velocity)
 	{
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
 		
 		// go through hops while max. height is above 10mm
@@ -300,7 +301,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	@Override
 	public ABallTrajectory mirrored()
 	{
-		IVector3 vel = Vector3.from2d(kickVel.getXYVector().multiplyNew(-1), kickVel.z());
+		IVector3 vel = Vector3.from2d(kickVel.getXYVector().multiplyNew(-1), kickVel.getXYZVector().z());
 		IVector2 pos = kickPos.getXYVector().multiplyNew(-1);
 		
 		return FixedLossPlusRollingBallTrajectory.fromKick(pos, vel, params);
@@ -312,8 +313,8 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	{
 		List<IVector2> locations = new ArrayList<>();
 		
-		Vector3 posNow = Vector3.copy(kickPos);
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 posNow = Vector3.copy(kickPos.getXYZVector());
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		
 		// go through hops while max. height is above minHeight
 		while (((velNow.z() * velNow.z()) / (2.0 * 9810)) > params.getMinHopHeight())
@@ -341,7 +342,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 			return getTravelLine();
 		}
 		
-		IVector2 finalPos = getPosByVel(0);
+		IVector2 finalPos = getPosByVel(0).getXYVector();
 		return Line.fromPoints(locs.get(locs.size() - 1), finalPos);
 	}
 	
@@ -352,20 +353,20 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 		final double g = 9810;
 		final double h = params.getMaxInterceptableHeight();
 		List<ILine> lines = new ArrayList<>();
-		Vector3 posNow = Vector3.copy(kickPos);
-		Vector3 velNow = Vector3.copy(kickVel);
+		Vector3 posNow = Vector3.copy(kickPos.getXYZVector());
+		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
 		
 		double t1;
 		double t2;
-		IVector2 p2 = getPosByTime(0);
+		IVector2 p2 = getPosByTime(0).getXYVector();
 		// go through hops while max. height is above 150mm
 		while (((velNow.z() * velNow.z()) / (2.0 * g)) > h)
 		{
 			double vz = velNow.z();
 			double tFly = (2 * vz) / g;
 			
-			t1 = -(Math.sqrt((vz * vz) - (2 * g * h)) - vz) / g;
+			t1 = -(SumatraMath.sqrt((vz * vz) - (2 * g * h)) - vz) / g;
 			
 			IVector2 p1 = posNow.addNew(velNow.multiplyNew(t1)).add(Vector3.fromXYZ(0, 0, -0.5 * g * t1 * t1))
 					.getXYVector();
@@ -375,7 +376,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 				lines.add(Line.fromPoints(p2, p1));
 			}
 			
-			t2 = (Math.sqrt((vz * vz) - (2 * g * h)) + vz) / g;
+			t2 = (SumatraMath.sqrt((vz * vz) - (2 * g * h)) + vz) / g;
 			
 			if ((tNow + t2) < tKickToNow)
 			{
@@ -391,7 +392,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 			tNow += tFly;
 		}
 		
-		IVector2 p1 = getPosByVel(0);
+		IVector2 p1 = getPosByVel(0).getXYVector();
 		lines.add(Line.fromPoints(p2, p1));
 		
 		return lines;

@@ -1,16 +1,11 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2012, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 24.01.2012
- * Author(s): AndreR
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.ids;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -27,33 +22,18 @@ import com.sleepycat.persist.model.Persistent;
 @Persistent
 public class BotIDMap<T> implements IBotIDMap<T>
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
 	private static final long serialVersionUID = -5736073179625081902L;
 	
 	private final Map<BotID, T> map;
 	
 	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
-
 	/**
-	 * Creates an empty map
+	 * Default
 	 */
 	public BotIDMap()
 	{
-		map = new HashMap<>();
+		map = new LinkedHashMap<>();
 	}
-
-    /**
-     * Creates BotIDMap from existing Java-Map, shallow copy
-     * @param initialMap
-     */
-	public BotIDMap(final Map<BotID, T> initialMap) {
-	    map = initialMap;
-    }
 	
 	
 	/**
@@ -61,7 +41,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final int initialCapacity)
 	{
-		map = new HashMap<>(initialCapacity);
+		map = new LinkedHashMap<>(initialCapacity);
 	}
 	
 	
@@ -71,7 +51,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final int initialCapacity, final float loadFactor)
 	{
-		map = new HashMap<>(initialCapacity, loadFactor);
+		map = new LinkedHashMap<>(initialCapacity, loadFactor);
 	}
 	
 	
@@ -80,7 +60,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final IBotIDMap<T> iMap)
 	{
-		map = new HashMap<>(iMap.size());
+		map = new LinkedHashMap<>(iMap.size());
 		for (final Entry<BotID, T> entry : iMap.entrySet())
 		{
 			map.put(entry.getKey(), entry.getValue());

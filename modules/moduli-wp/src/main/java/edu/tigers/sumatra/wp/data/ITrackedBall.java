@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.wp.data;
 
+import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
 import edu.tigers.sumatra.wp.ball.prediction.IChipBallConsultant;
@@ -13,7 +14,7 @@ import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public interface ITrackedBall extends ITrackedObject
+public interface ITrackedBall extends ITrackedObject, IExportable
 {
 	@Override
 	ITrackedBall mirrored();

@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.math.SumatraMath;
+
 
 /**
  * Bang Bang Trajectory for one dimension.
@@ -207,7 +209,7 @@ public class BangBangTrajectory1D implements ITrajectory<Double>
 			double sq = ((a * (s2 - s0)) + (0.5 * v0 * v0)) / (a * a);
 			if (sq > 0.0)
 			{
-				t2 = Math.sqrt(sq);
+				t2 = SumatraMath.sqrt(sq);
 			} else
 			{
 				t2 = 0;
@@ -222,7 +224,7 @@ public class BangBangTrajectory1D implements ITrajectory<Double>
 			double sq = ((a * (s0 - s2)) + (0.5 * v0 * v0)) / (a * a);
 			if (sq > 0.0f)
 			{
-				t2 = Math.sqrt(sq);
+				t2 = SumatraMath.sqrt(sq);
 			} else
 			{
 				t2 = 0;

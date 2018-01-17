@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math;
@@ -65,7 +65,7 @@ public final class AngleMath
 	 */
 	public static double cos(final double number)
 	{
-		return Math.cos(number);
+		return SumatraMath.cos(number);
 	}
 	
 	
@@ -75,7 +75,7 @@ public final class AngleMath
 	 */
 	public static double sin(final double number)
 	{
-		return Math.sin(number);
+		return SumatraMath.sin(number);
 	}
 	
 	
@@ -85,7 +85,7 @@ public final class AngleMath
 	 */
 	public static double tan(final double number)
 	{
-		return Math.tan(number);
+		return SumatraMath.tan(number);
 	}
 	
 	

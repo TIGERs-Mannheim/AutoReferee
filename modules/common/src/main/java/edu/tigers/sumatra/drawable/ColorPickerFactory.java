@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.drawable;
 
@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.Validate;
 
 
 /**
@@ -18,7 +20,7 @@ import java.util.List;
 public final class ColorPickerFactory
 {
 	
-	private static final List<Color>	colors	= new ArrayList<Color>();
+	private static final List<Color> colors = new ArrayList<>();
 	
 	static
 	{
@@ -131,11 +133,12 @@ public final class ColorPickerFactory
 			@Override
 			public Color getColor(final double relValue)
 			{
+				Validate.isTrue(relValue >= 0);
+				Validate.isTrue(relValue <= 1);
 				int red = (int) ((color2.getRed() * relValue) + (color1.getRed() * (1 - relValue)));
 				int green = (int) ((color2.getGreen() * relValue) + (color1.getGreen() * (1 - relValue)));
 				int blue = (int) ((color2.getBlue() * relValue) + (color1.getBlue() * (1 - relValue)));
-				Color stepColor = new Color(red, green, blue);
-				return stepColor;
+				return new Color(red, green, blue);
 			}
 		};
 	}

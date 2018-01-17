@@ -10,9 +10,8 @@ import java.awt.Graphics2D;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -31,7 +30,7 @@ public class DrawableAnnotation implements IDrawableShape
 	private final IVector2	center;
 	private final String		text;
 	
-	private IVector2			offset					= Vector2.ZERO_VECTOR;
+	private IVector2 offset = Vector2f.ZERO_VECTOR;
 	private boolean			centerHorizontally	= false;
 	private Color				color						= Color.BLACK;
 	private int					fontHeight				= 50;
@@ -41,7 +40,7 @@ public class DrawableAnnotation implements IDrawableShape
 	@SuppressWarnings("unused")
 	private DrawableAnnotation()
 	{
-		center = AVector2.ZERO_VECTOR;
+		center = Vector2f.ZERO_VECTOR;
 		text = "";
 	}
 	

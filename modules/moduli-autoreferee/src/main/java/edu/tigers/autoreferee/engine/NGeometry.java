@@ -16,8 +16,8 @@ import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.VectorMath;
-import edu.tigers.sumatra.referee.TeamConfig;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -39,7 +39,7 @@ public final class NGeometry
 	 */
 	public static Goal getGoal(final ETeamColor color)
 	{
-		if (color == TeamConfig.getLeftTeam())
+		if (color == Geometry.getNegativeHalfTeam())
 		{
 			return Geometry.getGoalOur();
 		}
@@ -71,7 +71,7 @@ public final class NGeometry
 	 */
 	public static IRectangle getFieldSide(final ETeamColor color)
 	{
-		if (color == TeamConfig.getLeftTeam())
+		if (color == Geometry.getNegativeHalfTeam())
 		{
 			return Geometry.getFieldHalfOur();
 		}
@@ -94,7 +94,7 @@ public final class NGeometry
 	 */
 	public static IPenaltyArea getPenaltyArea(final ETeamColor color)
 	{
-		if (color == TeamConfig.getLeftTeam())
+		if (color == Geometry.getNegativeHalfTeam())
 		{
 			return Geometry.getPenaltyAreaOur();
 		}
@@ -108,7 +108,7 @@ public final class NGeometry
 	 */
 	public static IVector2 getPenaltyMark(final ETeamColor color)
 	{
-		if (color == TeamConfig.getLeftTeam())
+		if (color == Geometry.getNegativeHalfTeam())
 		{
 			return Geometry.getPenaltyMarkOur();
 		}
@@ -165,9 +165,9 @@ public final class NGeometry
 	 * @param pos
 	 * @return
 	 */
-	public static boolean ballInsideGoal(final IVector2 pos)
+	public static boolean ballInsideGoal(final IVector3 pos)
 	{
-		return ballInsideGoal(pos, 0);
+		return ballInsideGoal(pos, 0, 0);
 	}
 	
 	
@@ -176,19 +176,21 @@ public final class NGeometry
 	 * The area behind the goal and on each side of the goal up to the margin is considered to be part of the goal.
 	 *
 	 * @param pos
-	 * @param goalMargin
+	 * @param goalLineMarginX [mm] moves goal line in x direction (adds margin to field)
+	 * @param goalMarginDepth [mm] margin to add to goal depth
 	 * @return
 	 */
-	public static boolean ballInsideGoal(final IVector2 pos, final double goalMargin)
+	public static boolean ballInsideGoal(final IVector3 pos, final double goalLineMarginX, final double goalMarginDepth)
 	{
 		IRectangle field = getField();
 		double absXPos = Math.abs(pos.x());
 		double absYPos = Math.abs(pos.y());
 		
-		boolean xPosCorrect = (absXPos > (field.xExtent() / 2))
-				&& (absXPos < ((field.xExtent() / 2) + Geometry.getGoalOur().getDepth() + goalMargin));
+		boolean xPosCorrect = (absXPos > (field.withMargin(goalLineMarginX).xExtent() / 2))
+				&& (absXPos < ((field.xExtent() / 2) + Geometry.getGoalOur().getDepth() + goalMarginDepth));
 		boolean yPosCorrect = absYPos < (Geometry.getGoalOur().getWidth() / 2);
-		return xPosCorrect && yPosCorrect;
+		boolean zPosCorrect = pos.z() < Geometry.getGoalHeight();
+		return xPosCorrect && yPosCorrect && zPosCorrect;
 	}
 	
 	

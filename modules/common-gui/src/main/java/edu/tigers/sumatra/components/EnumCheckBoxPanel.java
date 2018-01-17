@@ -36,12 +36,12 @@ import edu.tigers.sumatra.components.IEnumPanel.IEnumPanelObserver;
 public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelObserver<T>> implements IEnumPanel<T>
 {
 	/**  */
-	private static final long		serialVersionUID	= 5263861341015714105L;
-	private static final Logger	log					= Logger.getLogger(EnumCheckBoxPanel.class);
+	private static final long serialVersionUID = 5263861341015714105L;
+	private static final Logger log = Logger.getLogger(EnumCheckBoxPanel.class);
 	
-	private Function<T, String>	formatter;
-	private Class<T>					enumClass;
-	private Map<T, JCheckBox>		boxes;
+	private Function<T, String> formatter;
+	private Class<T> enumClass;
+	private Map<T, JCheckBox> boxes;
 	
 	
 	/**
@@ -104,12 +104,6 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	}
 	
 	
-	private void onSelectionChange(final T type, final boolean value)
-	{
-		informObserver(obs -> obs.onValueTicked(type, value));
-	}
-	
-	
 	@Override
 	public void setPanelEnabled(final boolean enabled)
 	{
@@ -121,12 +115,12 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	public Set<T> getValues()
 	{
 		Set<T> values = new HashSet<>();
-		for (T type : boxes.keySet())
+		for (Map.Entry<T, JCheckBox> entry : boxes.entrySet())
 		{
-			JCheckBox box = boxes.get(type);
+			JCheckBox box = entry.getValue();
 			if (box.isSelected())
 			{
-				values.add(type);
+				values.add(entry.getKey());
 			}
 		}
 		return values;
@@ -136,9 +130,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	@Override
 	public void setSelectedBoxes(final Set<T> enabledBoxes)
 	{
-		boxes.keySet().forEach(t -> {
-			boxes.get(t).setSelected(enabledBoxes.contains(t));
-		});
+		boxes.keySet().forEach(t -> boxes.get(t).setSelected(enabledBoxes.contains(t)));
 	}
 	
 	private class CheckBoxActionListener implements ActionListener
@@ -154,8 +146,14 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 				onSelectionChange(enumValue, value);
 			} catch (IllegalArgumentException ex)
 			{
-				log.warn("Unable to parse \"" + e.getActionCommand() + "\" to enum value");
+				log.warn("Unable to parse \"" + e.getActionCommand() + "\" to enum value", ex);
 			}
+		}
+		
+		
+		private void onSelectionChange(final T type, final boolean value)
+		{
+			informObserver(obs -> obs.onValueTicked(type, value));
 		}
 	}
 }

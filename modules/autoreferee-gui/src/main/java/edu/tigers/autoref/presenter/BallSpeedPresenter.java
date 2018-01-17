@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoref.presenter;
@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Timer;
 
@@ -21,10 +23,10 @@ import edu.tigers.autoref.model.ballspeed.BallSpeedModel;
 import edu.tigers.autoref.view.ballspeed.BallSpeedPanel;
 import edu.tigers.autoref.view.ballspeed.IBallSpeedPanelListener;
 import edu.tigers.autoref.view.generic.FixedTimeRangeChartPanel;
-import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.views.ISumatraView;
@@ -66,13 +68,13 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	
 	
 	/**
-	 *
+	 * Default constructor
 	 */
 	public BallSpeedPresenter()
 	{
 		panel = new BallSpeedPanel(getTimeRange(), TimeUnit.MILLISECONDS.toNanos(CHART_UPDATE_PERIOD));
 		panel.addObserver(this);
-		panel.setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
+		panel.setMaxBallVelocityLine(RuleConstraints.getMaxBallSpeed());
 		
 		chartTimer = new Timer(CHART_UPDATE_PERIOD, this);
 		chartTimer.setDelay(CHART_UPDATE_PERIOD);
@@ -82,7 +84,7 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 			@Override
 			public void afterApply(final IConfigClient configClient)
 			{
-				panel.setMaxBallVelocityLine(AutoRefConfig.getMaxBallVelocity());
+				panel.setMaxBallVelocityLine(RuleConstraints.getMaxBallSpeed());
 			}
 		});
 	}
@@ -205,10 +207,11 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	{
 		try
 		{
-			AWorldPredictor predictor = (AWorldPredictor) SumatraModel.getInstance().getModule(AWorldPredictor.MODULE_ID);
+			AWorldPredictor predictor = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 			return Optional.of(predictor);
 		} catch (ModuleNotFoundException e)
 		{
+			Logger.getAnonymousLogger().log(Level.FINE, "WP Module not found.", e);
 		}
 		return Optional.empty();
 	}

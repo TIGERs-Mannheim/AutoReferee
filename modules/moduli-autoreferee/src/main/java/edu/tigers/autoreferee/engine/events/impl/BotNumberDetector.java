@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
@@ -34,13 +34,18 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BotNumberDetector extends AGameEventDetector
 {
-	private static final int	priority				= 1;
+	private static final int PRIORITY = 1;
 	
-	@Configurable(comment = "Number of bots allowed on the field")
-	private static int			maxTeamBotCount	= 6;
+	@Configurable(comment = "Number of bots allowed on the field", defValue = "8")
+	private static int maxTeamBotCount = 8;
 	
-	private int						blueLastDiff		= 0;
-	private int						yellowLastDiff		= 0;
+	static
+	{
+		AGameEventDetector.registerClass(BotInDefenseAreaDetector.class);
+	}
+	
+	private int blueLastDiff = 0;
+	private int yellowLastDiff = 0;
 	
 	
 	/**
@@ -51,11 +56,10 @@ public class BotNumberDetector extends AGameEventDetector
 		super(EGameState.RUNNING);
 	}
 	
-	
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -94,12 +98,12 @@ public class BotNumberDetector extends AGameEventDetector
 	private int getAllowedTeamBotCount(final RefereeMsg msg, final ETeamColor color, final long curTime_ns)
 	{
 		TeamInfo teamInfo = color == ETeamColor.BLUE ? msg.getTeamInfoBlue() : msg.getTeamInfoYellow();
-		long msgTime_ns = msg.getFrameTimestamp();
-		long passedTime_us = TimeUnit.NANOSECONDS.toMicros(curTime_ns - msgTime_ns);
+		long msgTimeNs = msg.getFrameTimestamp();
+		long passedTimeUs = TimeUnit.NANOSECONDS.toMicros(curTime_ns - msgTimeNs);
 		
 		int yellowCards = (int) teamInfo.getYellowCardsTimes().stream()
-				.map(cardTime_us -> cardTime_us - passedTime_us)
-				.filter(cardTime_us -> cardTime_us > 0)
+				.map(cardTimeUs -> cardTimeUs - passedTimeUs)
+				.filter(cardTimeUs -> cardTimeUs > 0)
 				.count();
 		
 		return maxTeamBotCount - yellowCards;

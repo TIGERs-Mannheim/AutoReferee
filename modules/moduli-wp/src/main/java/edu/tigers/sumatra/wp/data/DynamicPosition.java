@@ -6,11 +6,12 @@ package edu.tigers.sumatra.wp.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
-import com.github.g3force.s2vconverter.String2ValueConverter;
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.geometry.Geometry;
@@ -23,6 +24,7 @@ import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
 
 
@@ -35,15 +37,10 @@ import edu.tigers.sumatra.model.SumatraModel;
 @Persistent(version = 1)
 public class DynamicPosition extends AVector2
 {
-	static
-	{
-		String2ValueConverter.getDefault().addConverter(new DynamicPositionConverter());
-	}
-	
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(DynamicPosition.class.getName());
 	
-	private IVector2 pos = Vector2.ZERO_VECTOR;
+	private IVector2 pos = Vector2f.ZERO_VECTOR;
 	private AObjectID trackedId;
 	private double lookahead = 0;
 	private boolean useKickerPos = true;
@@ -54,6 +51,7 @@ public class DynamicPosition extends AVector2
 	 */
 	public DynamicPosition(final AObjectID objId)
 	{
+		Objects.requireNonNull(objId, "Object ID must not be null");
 		trackedId = objId;
 	}
 	
@@ -63,6 +61,7 @@ public class DynamicPosition extends AVector2
 	 */
 	public DynamicPosition(final ITrackedObject obj)
 	{
+		Objects.requireNonNull(obj, "Tracked object must not be null");
 		trackedId = obj.getId();
 		pos = obj.getPos();
 	}
@@ -74,9 +73,8 @@ public class DynamicPosition extends AVector2
 	 */
 	public DynamicPosition(final ITrackedObject obj, final double lookahead)
 	{
-		trackedId = obj.getId();
-		pos = obj.getPos();
-		this.lookahead = lookahead;
+		this(obj);
+		setLookahead(lookahead);
 	}
 	
 	
@@ -85,7 +83,7 @@ public class DynamicPosition extends AVector2
 	 */
 	public DynamicPosition(final IVector2 pos)
 	{
-		this.pos = pos;
+		setPos(pos);
 		trackedId = new UninitializedID();
 	}
 	
@@ -104,10 +102,6 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
-	
 	/**
 	 * Update position by consulting {@link SimpleWorldFrame}
 	 * 
@@ -119,7 +113,7 @@ public class DynamicPosition extends AVector2
 		{
 			if (lookahead > 1e-5)
 			{
-				pos = swf.getBall().getTrajectory().getPosByTime(lookahead);
+				pos = swf.getBall().getTrajectory().getPosByTime(lookahead).getXYVector();
 			} else
 			{
 				pos = swf.getBall().getPos();
@@ -181,6 +175,7 @@ public class DynamicPosition extends AVector2
 	 */
 	public final void setPos(final IVector2 pos)
 	{
+		Objects.requireNonNull(pos, "Position must not be null");
 		this.pos = pos;
 	}
 	
@@ -298,6 +293,7 @@ public class DynamicPosition extends AVector2
 	 */
 	public void setLookahead(final double lookahead)
 	{
+		Validate.isTrue(lookahead >= 0, "The lookahead must be greater than or equal to zero");
 		this.lookahead = lookahead;
 	}
 	
