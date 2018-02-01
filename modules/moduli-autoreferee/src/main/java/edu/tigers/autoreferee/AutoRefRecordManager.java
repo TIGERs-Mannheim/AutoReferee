@@ -2,7 +2,7 @@
  * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.autoref;
+package edu.tigers.autoreferee;
 
 import com.sleepycat.persist.evolve.Mutations;
 

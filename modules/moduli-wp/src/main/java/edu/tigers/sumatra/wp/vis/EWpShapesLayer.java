@@ -4,7 +4,10 @@
 
 package edu.tigers.sumatra.wp.vis;
 
+import static edu.tigers.sumatra.drawable.ShapeMap.EShapeLayerPersistenceType.NEVER_PERSIST;
+
 import edu.tigers.sumatra.drawable.IShapeLayer;
+import edu.tigers.sumatra.drawable.ShapeMap.EShapeLayerPersistenceType;
 
 
 /**
@@ -18,9 +21,9 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	REFEREE("Referee", "Field", true, 1000),
 	/**  */
-	BALL_BUFFER("Ball buffer", "Field"),
+	BALL_BUFFER("Ball buffer", "Field", false, NEVER_PERSIST),
 	/**  */
-	BOT_BUFFER("Bot buffer", "Field"),
+	BOT_BUFFER("Bot buffer", "Field", false, NEVER_PERSIST),
 	/**  */
 	BOTS("Bots", "Field", true),
 	/**  */
@@ -30,21 +33,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	VELOCITY("Velocities", "Field"),
 	
-	/** */
-	@Deprecated
-	BOTS_AVAILABLE("Bots available", "Field"),
-	/**  */
-	@Deprecated
-	VISION("Vision", "Field"),
-	/**  */
-	@Deprecated
-	CAM_INTERSECTION("Cam intersection", "Field"),
-	/**  */
-	@Deprecated
-	COORDINATE_SYSTEM("Coordinate System", "Field"),
-	/**  */
-	@Deprecated
-	AUTOREFEREE("AutoReferee", "Field", true),;
+	;
 	
 	
 	private final String name;
@@ -52,6 +41,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	private final boolean visible;
 	private final int orderId;
 	private final String id;
+	private final EShapeLayerPersistenceType persistenceType;
 	
 	
 	/**
@@ -71,7 +61,22 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.name = name;
 		this.category = category;
 		this.visible = visible;
+		this.persistenceType = EShapeLayerPersistenceType.ALWAYS_PERSIST;
 		orderId = 10 + ordinal();
+		id = EWpShapesLayer.class.getCanonicalName() + name;
+	}
+	
+	
+	/**
+	 *
+	 */
+	EWpShapesLayer(final String name, final String category, final boolean visible, final int orderId)
+	{
+		this.name = name;
+		this.category = category;
+		this.visible = visible;
+		this.persistenceType = EShapeLayerPersistenceType.ALWAYS_PERSIST;
+		this.orderId = orderId;
 		id = EWpShapesLayer.class.getCanonicalName() + name;
 	}
 	
@@ -79,12 +84,14 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**
 	 * 
 	 */
-	EWpShapesLayer(final String name, final String category, final boolean visible, final int orderId)
+	EWpShapesLayer(final String name, final String category, final boolean visible,
+			final EShapeLayerPersistenceType persistenceType)
 	{
 		this.name = name;
 		this.category = category;
 		this.visible = visible;
-		this.orderId = orderId;
+		this.persistenceType = persistenceType;
+		this.orderId = 10 + ordinal();
 		id = EWpShapesLayer.class.getCanonicalName() + name;
 	}
 	
@@ -118,8 +125,17 @@ public enum EWpShapesLayer implements IShapeLayer
 	
 	
 	@Override
+	public EShapeLayerPersistenceType getPersistenceType()
+	{
+		return persistenceType;
+	}
+	
+	
+	@Override
 	public boolean isVisibleByDefault()
 	{
 		return visible;
 	}
+	
+	
 }

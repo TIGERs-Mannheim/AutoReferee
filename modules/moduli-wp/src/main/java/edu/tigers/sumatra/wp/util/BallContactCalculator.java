@@ -21,10 +21,11 @@ import edu.tigers.sumatra.wp.data.ITrackedBall;
  */
 public class BallContactCalculator
 {
-	private static final double			BALL_POSS_TOLERANCE_HAS	= 60;
-	private static final double			BALL_POSS_TOLERANCE_GET	= 20;
 	
-	private final Map<BotID, Boolean>	ballContactLastFrame		= new HashMap<>();
+	private static final double BALL_POSS_TOLERANCE_HAS = 60;
+	private static final double BALL_POSS_TOLERANCE_GET = 20;
+	
+	private final Map<BotID, Boolean> ballContactLastFrame = new HashMap<>();
 	
 	
 	/**

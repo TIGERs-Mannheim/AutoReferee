@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.clock;
@@ -11,12 +11,12 @@ package edu.tigers.sumatra.clock;
  */
 public class FpsCounter
 {
-	private static final int	UPDATE_FREQ	= 10;
-	private long					lastTime		= 0;
-	private double					fps			= 0;
-	private int						counter		= 0;
-	private int						updateFreq	= UPDATE_FREQ;
-	private long					totalFrames	= 0;
+	private static final int UPDATE_FREQ = 10;
+	private long lastTime = 0;
+	private double fps = 0;
+	private int counter = 0;
+	private int updateFreq = UPDATE_FREQ;
+	private long totalFrames = 0;
 	
 	
 	/**
@@ -48,11 +48,15 @@ public class FpsCounter
 		boolean fpsChanged = false;
 		if (counter >= updateFreq)
 		{
-			double newFps = updateFreq / ((timestamp - lastTime) / 1e9);
-			fpsChanged = Math.abs(fps - newFps) > 0.01;
-			fps = newFps;
-			lastTime = timestamp;
-			counter = 0;
+			long timeDiff = timestamp - lastTime;
+			if (timeDiff != 0)
+			{
+				double newFps = updateFreq / (timeDiff / 1e9);
+				fpsChanged = Math.abs(fps - newFps) > 0.01;
+				fps = newFps;
+				lastTime = timestamp;
+				counter = 0;
+			}
 		}
 		counter++;
 		totalFrames++;

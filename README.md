@@ -6,7 +6,6 @@ You can either build the application using the Maven buildtool or launch it thro
 
 The following guides provide detailed instructions on how to install and run the AutoReferee on Ubuntu 14.04:
 
-## Maven
 
 1. Installing OpenJDK 8
 	
@@ -39,7 +38,7 @@ The following guides provide detailed instructions on how to install and run the
 	```
 	
 	This step can take some time if this is the first time that Maven is used on the machine as Maven will populate its local repository with all the dependencies it requires to perform the build steps.
-5. Run the `./run.sh` script to start the application
+5. Run the `./run.sh passive|active` script to start the application
 
 ### Possible issues:
 - If the build fails with the following error please verify that you have correctly set up Java 8.
@@ -47,34 +46,6 @@ The following guides provide detailed instructions on how to install and run the
 	```
 	Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.3:compile (default-compile) on project common: Fatal error compiling: invalid target release: 1.8 -> [Help 1]
 	```
-
-## Eclipse
-
-1. Install Java 8 as explained in the first step of the Maven guide above
-2. Clone the AutoReferee repository into a directory of your choosing:
-
-	```
-	git clone http://gitlab.tigers-mannheim.de/open-source/AutoReferee.git
-	```
-
-3. Download Eclipse with EGit/Maven support (The Java EE edition already contains all necessary plugins): [Eclipse Downloads](http://www.eclipse.org/downloads/)
-4. Extract and launch Eclipse
-5. Eclipse will only detect the Java version that you used to run it with. If you did not set up your system to use Java 8 as default then you will have to add the Java 8 JRE manually. See this link for more details: [Adding a new JRE definition](http://help.eclipse.org/mars/topic/org.eclipse.jdt.doc.user/tasks/task-add_new_jre.htm)
-6. Import the projects:
-	- Open the Import dialogue under `File->Import...`
-	- Choose the entry `General->Existing Projects into Workspace`
-	- Select the repository directory as `root directory` and make sure that `Search for nested projects` is ticked.
-	- Select all listed projects and hit Finish
-7. Eclipse will now import all projects and instruct Maven to download all necessary dependencies. This can take some time.
-8. You can now launch the application by opening the drop down menu next to the green play button and selecting the `AutoReferee` entry.
-
-	If Eclipse did not automatically pick up the launch configuration and the drop down menu is empty you can also launch the project by expanding the **autoreferee-main** project, right-clicking on the `AutoReferee.launch` file and selecting `Run as -> AutoReferee`
-
-### Possible issues:
-- Eclipse will automatically compile the **.proto** files in the **moduli-cam** and **moduli-referee** projects. If you encounter errors in these projects try to refresh the configuration by selecting all projects in the Package Explorer, right clicking and choosing `Maven->Update Project..` Uncheck the checkbox labeled `Update Project configuration from pom.xml` in the dialogue that pops up (as that would override the Eclipse project configuration) and then select `OK`.
-
-	The Java files which the protobuf compiler generates do not comply with the strict compiler settings for the projects. This is why the classpath folders that contain the generated protobuf files are marked to ignore optional compiler errors. These settings are overriden by Eclipse when updating the projects from the Maven configuration. If Eclipse complains about compile errors in these classpath folders check if the **.classpath** file has been modified and **checkout** possible changes. Refresh the projects afterwards.
-
 
 # Usage
 
@@ -143,3 +114,7 @@ If the freekick is not to be taken from a well defined position (like a Thrown-i
 - If the ball is located closer than 700m from the defense area of the attacking team -> Place it 600mm from the goal line and 100mm from the touch line
 - If the ball is located closer than 700m from the defense area of the defending team -> Place it at a point that is closest to the original position and located 700mm away from the defense area
 - Move the ball away from the goal line/ touch line if the kick position is located closer than 100m to these lines
+
+## Recording Gameplay
+The autoref will automatically start and stop recordings when a game starts/stops. To disable this feature, go to the Cfg View -> user -> RecordManager -> autoRecord = false.
+You can access the replay by right-clicking a row in the GameLog view. This will jump directly to the time, the infringement occurred (30 seconds before).   

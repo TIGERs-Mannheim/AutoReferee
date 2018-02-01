@@ -19,12 +19,12 @@ import edu.tigers.sumatra.math.vector.IVector3;
  */
 public class FilteredVisionBall
 {
-	private final IVector3	pos;
-	private final IVector3	vel;
-	private final IVector3	acc;
-	private final boolean	chipped;
-	private final double		vSwitch;
-	private final long		lastVisibleTimestamp;
+	private final IVector3 pos;
+	private final IVector3 vel;
+	private final IVector3 acc;
+	private final boolean chipped;
+	private final double vSwitch;
+	private final long lastVisibleTimestamp;
 	
 	
 	private FilteredVisionBall(final Builder builder)
@@ -95,6 +95,39 @@ public class FilteredVisionBall
 	}
 	
 	
+	/**
+	 * Extrapolate ball by using trajectory.
+	 * 
+	 * @param timestampNow
+	 * @param timestampFuture
+	 * @return
+	 */
+	public FilteredVisionBall extrapolate(final long timestampNow, final long timestampFuture)
+	{
+		if (timestampFuture < timestampNow)
+		{
+			return this;
+		}
+		
+		ABallTrajectory trajectory;
+		if (chipped)
+		{
+			trajectory = new ChipBallTrajectory(timestampNow, this);
+		} else
+		{
+			if (acc.getLength2() < 1e-6)
+			{
+				return this;
+			}
+			
+			long switchTimestamp = timestampNow + (long) (((vel.getLength2() - vSwitch) / acc.getLength2()) * 1e9);
+			trajectory = new StraightBallTrajectory(timestampNow, pos, vel, switchTimestamp);
+		}
+		
+		return trajectory.getStateAtTimestamp(timestampFuture);
+	}
+	
+	
 	@Override
 	public String toString()
 	{
@@ -110,12 +143,12 @@ public class FilteredVisionBall
 	 */
 	public static final class Builder
 	{
-		private IVector3	pos;
-		private IVector3	vel;
-		private IVector3	acc;
-		private Boolean	chipped;
-		private double		vSwitch					= -1;
-		private long		lastVisibleTimestamp	= 0;
+		private IVector3 pos;
+		private IVector3 vel;
+		private IVector3 acc;
+		private Boolean chipped;
+		private double vSwitch = -1;
+		private long lastVisibleTimestamp = 0;
 		
 		
 		private Builder()

@@ -16,6 +16,7 @@ import edu.tigers.sumatra.botmanager.commands.tigerv2.TigerSystemMatchFeedback;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqBotModel;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqDelays;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqMotorModel;
+import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqSetMode;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqVelocity;
 import edu.tigers.sumatra.export.CSVExporter;
 import edu.tigers.sumatra.math.vector.IVector3;
@@ -29,11 +30,11 @@ import edu.tigers.sumatra.math.vector.Vector3f;
  */
 public class BotWatcher implements IABotObserver
 {
-	private final ABot						bot;
-	private final EDataAcquisitionMode	acqMode;
-	private CSVExporter						exporter			= null;
-	private long								frameId			= 0;
-	private boolean							dataReceived	= false;
+	private final ABot bot;
+	private final EDataAcquisitionMode acqMode;
+	private CSVExporter exporter = null;
+	private long frameId = 0;
+	private boolean dataReceived = false;
 	
 	
 	/**
@@ -81,7 +82,7 @@ public class BotWatcher implements IABotObserver
 			default:
 				throw new IllegalStateException();
 		}
-		bot.getMatchCtrl().setDataAcquisitionMode(acqMode);
+		bot.execute(new TigerDataAcqSetMode(acqMode));
 		
 		dataReceived = false;
 		bot.addObserver(this);
@@ -93,7 +94,7 @@ public class BotWatcher implements IABotObserver
 	 */
 	public void stop()
 	{
-		bot.getMatchCtrl().setDataAcquisitionMode(EDataAcquisitionMode.NONE);
+		bot.execute(new TigerDataAcqSetMode(EDataAcquisitionMode.NONE));
 		bot.removeObserver(this);
 		exporter.close();
 	}
@@ -222,5 +223,14 @@ public class BotWatcher implements IABotObserver
 		nbrs.addAll(mm.getMotorVelocityList());
 		exporter.addValues(nbrs);
 		dataReceived = true;
+	}
+	
+	
+	/**
+	 * @return the acqMode
+	 */
+	public EDataAcquisitionMode getAcqMode()
+	{
+		return acqMode;
 	}
 }

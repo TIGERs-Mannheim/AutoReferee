@@ -43,7 +43,6 @@
         <dependency>
             <groupId>idw-gpl</groupId>
             <artifactId>idw-gpl</artifactId>
-            <version>1.6.1</version>
         </dependency>
 
         <dependency>
@@ -69,16 +68,6 @@
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>sumatra-gui-visualizer</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-wp</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sleepycat</groupId>
-            <artifactId>je</artifactId>
         </dependency>
     </dependencies>
 

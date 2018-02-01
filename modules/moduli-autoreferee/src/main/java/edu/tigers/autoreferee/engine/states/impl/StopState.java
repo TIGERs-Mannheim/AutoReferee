@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.states.impl;
@@ -8,9 +8,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import edu.tigers.sumatra.geometry.RuleConstraints;
-import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -22,12 +19,12 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -77,8 +74,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBall;
  */
 public class StopState extends AbstractAutoRefState
 {
-	private static final Logger log = Logger.getLogger(StopState.class);
-	
 	private static final Color PLACEMENT_CIRCLE_COLOR = Color.BLUE;
 	
 	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state")
@@ -313,13 +308,10 @@ public class StopState extends AbstractAutoRefState
 	
 	private void tryPlaceBallInSimulation(final IVector2 pos)
 	{
-		try
+		if (SumatraModel.getInstance().isModuleLoaded(AVisionFilter.class))
 		{
 			AVisionFilter vf = SumatraModel.getInstance().getModule(AVisionFilter.class);
-			vf.resetBall(Vector3f.from2d(pos, 0), Vector3f.ZERO_VECTOR);
-		} catch (ModuleNotFoundException e)
-		{
-			log.error("Could not find vision filter module.", e);
+			vf.placeBall(Vector3f.from2d(pos, 0), Vector3f.ZERO_VECTOR);
 		}
 	}
 	

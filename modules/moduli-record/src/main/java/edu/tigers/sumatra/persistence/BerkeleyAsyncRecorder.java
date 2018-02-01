@@ -24,7 +24,7 @@ public class BerkeleyAsyncRecorder
 {
 	private static final Logger log = Logger.getLogger(BerkeleyAsyncRecorder.class.getName());
 	
-	private static final int TIME_OFFSET = 1000;
+	private static final int TIME_OFFSET = 100;
 	
 	private final RecordSaver recordSaver = new RecordSaver();
 	private final BerkeleyDb db;

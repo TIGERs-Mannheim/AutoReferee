@@ -39,9 +39,6 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 	@SerialData(type = ESerialDataType.EMBEDDED)
 	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
-	@SerialData(type = ESerialDataType.UINT8)
-	private int flags = 0;
-	
 	
 	/**
 	 * 
@@ -269,39 +266,5 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 	public double getDribbleSpeed()
 	{
 		return kickerDribbler.getDribblerSpeed();
-	}
-	
-	
-	/**
-	 * @return the dataAcqusitionMode
-	 */
-	@Override
-	public EDataAcquisitionMode getDataAcquisitionMode()
-	{
-		return EDataAcquisitionMode.getModeConstant(flags & 0x7F);
-	}
-	
-	
-	/**
-	 * @param dataAcqusitionMode the dataAcqusitionMode to set
-	 */
-	@Override
-	public void setDataAcquisitionMode(final EDataAcquisitionMode dataAcqusitionMode)
-	{
-		this.flags &= 0x80;
-		this.flags |= dataAcqusitionMode.getId();
-	}
-	
-	
-	@Override
-	public void setStrictVelocityLimit(final boolean enable)
-	{
-		if (enable)
-		{
-			flags |= 0x80;
-		} else
-		{
-			flags &= 0x7F;
-		}
 	}
 }

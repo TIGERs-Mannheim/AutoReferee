@@ -22,7 +22,6 @@ import edu.tigers.sumatra.filter.tracking.TrackingFilterPosVel2D;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
@@ -73,8 +72,6 @@ public class RobotTracker
 	private static double measErrorDtDeviationPenalty = 1000.0;
 	@Configurable(defValue = "20", comment = "Reciprocal health is used as uncertainty, increased on update, decreased on prediction")
 	private static int maxHealth = 20;
-	@Configurable(defValue = "0.0", comment = "Prediction horizon for robots.")
-	private static double predictionTime = 0.0;
 	
 	static
 	{
@@ -288,11 +285,10 @@ public class RobotTracker
 	 * @param id BotID of the final robot.
 	 * @param robots List of robot trackers. Must not be empty.
 	 * @param timestamp Extrapolation time stamp to use for the final robot.
-	 * @param trajAcc
 	 * @return Merged filtered vision robot.
 	 */
 	public static FilteredVisionBot mergeRobotTrackers(final BotID id, final List<RobotTracker> robots,
-			final long timestamp, final IVector3 trajAcc)
+			final long timestamp)
 	{
 		Validate.notEmpty(robots);
 		
@@ -349,10 +345,6 @@ public class RobotTracker
 		vel = vel.multiplyNew(1.0 / totalVelUnc);
 		orient /= totalOrientUnc;
 		aVel /= totalAVelUnc;
-		
-		pos = pos.addNew(vel.multiplyNew(predictionTime))
-				.add(trajAcc.getXYVector().multiplyNew(0.5 * predictionTime * predictionTime));
-		vel = vel.addNew(trajAcc.getXYVector().multiplyNew(predictionTime));
 		
 		return FilteredVisionBot.Builder.create()
 				.withId(id)

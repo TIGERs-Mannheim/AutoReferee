@@ -29,7 +29,6 @@ public class BotSkillGlobalPositionSim implements IBotSkillSim
 				.kickMode(pos.getMode())
 				.kickSpeed(pos.getKickSpeed())
 				.dribblerRPM(pos.getDribbleSpeed())
-				.addCommands(BotSkillSimulator.parseDataAcquisitionMode(input, pos.getDataAcquisitionMode()))
 				.build();
 	}
 }

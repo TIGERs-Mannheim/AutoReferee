@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -281,7 +281,7 @@ public class RobotsPanel extends JPanel
 	 * @param botId
 	 * @return existing BotStatus, or new one if not in Map
 	 */
-	public synchronized BotStatus getBotStatus(final BotID botId)
+	public BotStatus getBotStatus(final BotID botId)
 	{
 		return botStati.computeIfAbsent(botId, k -> new BotStatus());
 	}
@@ -290,7 +290,7 @@ public class RobotsPanel extends JPanel
 	/**
 	 * @return map of existing BotStati
 	 */
-	public synchronized Map<BotID, BotStatus> getBotStati()
+	public Map<BotID, BotStatus> getBotStati()
 	{
 		return botStati;
 	}

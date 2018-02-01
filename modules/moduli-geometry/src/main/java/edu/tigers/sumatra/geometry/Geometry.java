@@ -4,10 +4,13 @@
 
 package edu.tigers.sumatra.geometry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.math3.complex.Quaternion;
 import org.apache.log4j.Logger;
@@ -27,6 +30,9 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.line.v2.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -97,9 +103,6 @@ public class Geometry
 	private static double opponentCenter2DribblerDist = 85;
 	
 	
-
-	
-	
 	/**
 	 * TIGERs internal
 	 */
@@ -119,12 +122,14 @@ public class Geometry
 	private final ICircle centerCircle;
 	private final IRectangle ourHalf;
 	private final IRectangle theirHalf;
+	private final ILine halfLine;
+	private final List<ILineSegment> touchLines;
 	
 	private CamGeometry lastCamGeometry;
 	
 	private static BallParameters ballParameters = new BallParameters();
 	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;
-
+	
 	
 	private static class ConfigCallback implements IConfigObserver
 	{
@@ -168,6 +173,11 @@ public class Geometry
 				field.xExtent() / 2,
 				field.yExtent());
 		
+		halfLine = calcHalfLine();
+		touchLines = new ArrayList<>();
+		touchLines.addAll(calcTouchLines());
+		
+		
 		Map<Integer, CamCalibration> calibs = new HashMap<>();
 		
 		// lab
@@ -185,6 +195,23 @@ public class Geometry
 				Vector3.fromXYZ(1641.2815, 1019.6022, 2520.0)));
 		lastCamGeometry = new CamGeometry(calibs,
 				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()));
+	}
+	
+	
+	private Set<ILineSegment> calcTouchLines()
+	{
+		Set<ILineSegment> lines = new HashSet<>();
+		lines.add(Lines.segmentFromPoints(Vector2.fromXY(-fieldLength / 2, fieldWidth / 2),
+				Vector2.fromXY(fieldLength / 2, fieldWidth / 2)));
+		lines.add(Lines.segmentFromPoints(Vector2.fromXY(-fieldLength / 2, -fieldWidth / 2),
+				Vector2.fromXY(fieldLength / 2, -fieldWidth / 2)));
+		return lines;
+	}
+	
+	
+	private ILine calcHalfLine()
+	{
+		return Lines.lineFromPoints(Vector2.fromY(-fieldWidth / 2), Vector2.fromY(fieldWidth / 2));
 	}
 	
 	
@@ -319,8 +346,8 @@ public class Geometry
 	{
 		return penaltyAreaDepth;
 	}
-
-
+	
+	
 	/**
 	 * @return length of the penaltyArea front line
 	 */
@@ -328,8 +355,8 @@ public class Geometry
 	{
 		return penaltyAreaFrontLineLength;
 	}
-
-
+	
+	
 	/**
 	 * Returns our goal.
 	 * 
@@ -368,9 +395,8 @@ public class Geometry
 	{
 		return ballRadius;
 	}
-
-
-
+	
+	
 	/**
 	 * @return the botRadius [mm]
 	 */
@@ -498,9 +524,6 @@ public class Geometry
 	}
 	
 	
-
-	
-	
 	/**
 	 * @return the penaltyMark from us
 	 */
@@ -536,7 +559,7 @@ public class Geometry
 		return boundaryWidth + boundaryOffset;
 	}
 	
-
+	
 	/**
 	 * The default penalty Area margin. Use this is your base margin.
 	 * You may want to set a relative margin to this one.
@@ -564,16 +587,26 @@ public class Geometry
 	{
 		return ballParameters;
 	}
-
-
-
-
+	
+	
+	public static ILine getHalfLine()
+	{
+		return instance.halfLine;
+	}
+	
+	
+	public static List<ILineSegment> getTouchLines()
+	{
+		return instance.touchLines;
+	}
+	
+	
 	public static ETeamColor getNegativeHalfTeam()
 	{
 		return negativeHalfTeam;
 	}
-
-
+	
+	
 	public static void setNegativeHalfTeam(final ETeamColor negativeHalfTeam)
 	{
 		Geometry.negativeHalfTeam = negativeHalfTeam;

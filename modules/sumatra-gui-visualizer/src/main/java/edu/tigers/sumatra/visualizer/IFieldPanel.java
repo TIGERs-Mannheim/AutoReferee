@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.visualizer;
 
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.IDrawableTool;
 import edu.tigers.sumatra.drawable.ShapeMap;
-import edu.tigers.sumatra.ids.ETeamColor;
 
 
 /**
@@ -26,12 +25,6 @@ public interface IFieldPanel extends IDrawableTool
 	 * 
 	 */
 	void stop();
-	
-	
-	/**
-	 * @param invertedTeam the team that's coordinates are inverted
-	 */
-	void setInvertedTeam(ETeamColor invertedTeam);
 	
 	
 	/**

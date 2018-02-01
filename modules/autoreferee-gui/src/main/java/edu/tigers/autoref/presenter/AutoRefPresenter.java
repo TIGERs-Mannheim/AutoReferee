@@ -213,6 +213,9 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 					AutoRefModule autoref = optAutoref.get();
 					autoref.start(mode);
 					autoref.getEngine().setActiveGameEvents(mainPanel.getEventPanel().getValues());
+				} else
+				{
+					log.error("AutoRef module not found");
 				}
 			} catch (StartModuleException e)
 			{

@@ -221,8 +221,13 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 		}
 		return ERobotMode.IDLE;
 	}
-	
-	
+
+	@Override
+	public boolean isOK() {
+		return true;
+	}
+
+
 	@Override
 	public void sendMatchCommand()
 	{

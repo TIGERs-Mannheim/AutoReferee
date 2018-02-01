@@ -26,18 +26,24 @@ public class FilteredVisionFrame
 	private final long tAssembly;
 	private final FilteredVisionBall ball;
 	private final List<FilteredVisionBot> bots;
-	private final ShapeMap shapeMap = new ShapeMap();
+	private final ShapeMap shapeMap;
 	private final IKickEvent kickEvent;
 	
 	
-	private FilteredVisionFrame(final long id, final long timestamp, final FilteredVisionBall ball,
-			final List<FilteredVisionBot> bots, final IKickEvent kickEvent)
+	private FilteredVisionFrame(final Builder builder)
 	{
-		this.id = id;
-		this.timestamp = timestamp;
-		this.ball = ball;
-		this.bots = bots;
-		this.kickEvent = kickEvent;
+		id = builder.id;
+		timestamp = builder.timestamp;
+		ball = builder.ball;
+		bots = builder.bots;
+		kickEvent = builder.kickEvent;
+		if (builder.shapeMap != null)
+		{
+			shapeMap = builder.shapeMap;
+		} else
+		{
+			shapeMap = new ShapeMap();
+		}
 		
 		tAssembly = System.nanoTime();
 	}
@@ -109,6 +115,7 @@ public class FilteredVisionFrame
 		private FilteredVisionBall ball;
 		private List<FilteredVisionBot> bots;
 		private IKickEvent kickEvent;
+		private ShapeMap shapeMap = null;
 		
 		
 		private Builder()
@@ -204,6 +211,17 @@ public class FilteredVisionFrame
 		
 		
 		/**
+		 * @param map
+		 * @return
+		 */
+		public Builder withShapeMap(final ShapeMap map)
+		{
+			shapeMap = map;
+			return this;
+		}
+		
+		
+		/**
 		 * @return new instance
 		 */
 		public FilteredVisionFrame build()
@@ -212,7 +230,7 @@ public class FilteredVisionFrame
 			Validate.notNull(timestamp);
 			Validate.notNull(ball);
 			Validate.notNull(bots);
-			return new FilteredVisionFrame(id, timestamp, ball, bots, kickEvent);
+			return new FilteredVisionFrame(this);
 		}
 	}
 }

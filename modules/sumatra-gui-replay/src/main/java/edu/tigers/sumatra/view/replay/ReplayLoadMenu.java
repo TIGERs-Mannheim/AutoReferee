@@ -3,10 +3,12 @@
  */
 package edu.tigers.sumatra.view.replay;
 
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileFilter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,12 +19,15 @@ import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.RecordManager;
 
 
 /**
@@ -88,6 +93,7 @@ public class ReplayLoadMenu extends JMenu
 		observers.remove(observer);
 	}
 	
+	
 	private void addFileToMenu(final File file, final JMenu menu)
 	{
 		if (file.isDirectory())
@@ -124,10 +130,7 @@ public class ReplayLoadMenu extends JMenu
 	@FunctionalInterface
 	public interface IReplayLoadMenuObserver
 	{
-		/**
-		 * @param filename
-		 */
-		void onLoadPersistence(String filename);
+		void onOpenReplay(BerkeleyDb db);
 	}
 	
 	
@@ -200,11 +203,8 @@ public class ReplayLoadMenu extends JMenu
 		@Override
 		public void actionPerformed(final ActionEvent arg0)
 		{
-			for (IReplayLoadMenuObserver o : observers)
-			{
-				o.onLoadPersistence(fileName);
-			}
-			
+			Thread loadThread = new Thread(new LoadDatabase(fileName), "LoadDatabase");
+			loadThread.start();
 		}
 	}
 	
@@ -223,5 +223,43 @@ public class ReplayLoadMenu extends JMenu
 			}
 		}
 		
+	}
+	
+	private final class LoadDatabase implements Runnable
+	{
+		final String filename;
+		
+		
+		private LoadDatabase(final String filename)
+		{
+			this.filename = filename;
+		}
+		
+		
+		@Override
+		public void run()
+		{
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			BerkeleyDb db = null;
+			try
+			{
+				RecordManager recordManager = SumatraModel.getInstance().getModule(RecordManager.class);
+				db = recordManager.newBerkeleyDb(Paths.get(filename));
+				db.open();
+				BerkeleyDb dbOut = db;
+				observers.forEach(o -> o.onOpenReplay(dbOut));
+			} catch (Exception e)
+			{
+				log.error("An exception occurred on load. See log.", e);
+				JOptionPane.showMessageDialog(ReplayLoadMenu.this, "An exception occurred while loading database. See log.",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				if (db != null)
+				{
+					db.close();
+				}
+			}
+			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
 	}
 }

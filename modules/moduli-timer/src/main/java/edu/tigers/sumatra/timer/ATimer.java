@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.timer;
@@ -19,21 +19,14 @@ import edu.tigers.moduli.AModule;
  */
 public abstract class ATimer extends AModule implements ITimer
 {
-	private final List<ITimerObserver>	observers	= new CopyOnWriteArrayList<>();
+	private final List<ITimerObserver> observers = new CopyOnWriteArrayList<>();
 	
-	
-	// --------------------------------------------------------------------------
-	// --- getter/setter --------------------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * @param observer
 	 */
 	public void addObserver(final ITimerObserver observer)
 	{
-		synchronized (observers)
-		{
-			observers.add(observer);
-		}
+		observers.add(observer);
 	}
 	
 	
@@ -42,17 +35,14 @@ public abstract class ATimer extends AModule implements ITimer
 	 */
 	public void removeObserver(final ITimerObserver observer)
 	{
-		synchronized (observers)
-		{
-			observers.remove(observer);
-		}
+		observers.remove(observer);
 	}
 	
 	
 	/**
 	 * @return the observers
 	 */
-	public final synchronized List<ITimerObserver> getObservers()
+	public final List<ITimerObserver> getObservers()
 	{
 		return observers;
 	}

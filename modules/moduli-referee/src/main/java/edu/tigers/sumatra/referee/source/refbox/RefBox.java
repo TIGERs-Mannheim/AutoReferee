@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.source.refbox;
@@ -59,8 +59,14 @@ public class RefBox extends ARefereeMessageSource implements Runnable
 	@Override
 	public void start()
 	{
-		thread = new Thread(this, "RefBox");
-		thread.start();
+		if (thread == null)
+		{
+			thread = new Thread(this, "RefBox");
+			thread.start();
+		} else
+		{
+			log.warn("Refbox already started!");
+		}
 	}
 	
 	

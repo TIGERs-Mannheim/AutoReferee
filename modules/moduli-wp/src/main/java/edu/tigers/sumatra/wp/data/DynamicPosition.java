@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -195,7 +195,7 @@ public class DynamicPosition extends AVector2
 	
 	
 	@Override
-	public synchronized String getSaveableString()
+	public String getSaveableString()
 	{
 		if (trackedId.isBot())
 		{
@@ -210,7 +210,7 @@ public class DynamicPosition extends AVector2
 	
 	
 	@Override
-	public synchronized String toString()
+	public String toString()
 	{
 		return "[" + pos + "," + trackedId + "]";
 	}
@@ -300,7 +300,7 @@ public class DynamicPosition extends AVector2
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized JSONObject toJSON()
+	public JSONObject toJSON()
 	{
 		JSONObject jsonMapping = super.toJSON();
 		jsonMapping.put("trackedId", trackedId.getNumber());
@@ -310,7 +310,7 @@ public class DynamicPosition extends AVector2
 	
 	
 	@Override
-	public synchronized List<Number> getNumberList()
+	public List<Number> getNumberList()
 	{
 		List<Number> numbers = super.getNumberList();
 		numbers.add(trackedId.getNumber());

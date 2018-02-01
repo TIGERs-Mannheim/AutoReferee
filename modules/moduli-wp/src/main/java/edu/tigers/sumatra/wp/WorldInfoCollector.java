@@ -10,6 +10,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -43,7 +44,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.RecordManager;
 import edu.tigers.sumatra.referee.AReferee;
@@ -68,6 +68,7 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
+import edu.tigers.sumatra.wp.util.BotInterchangeCalculator;
 import edu.tigers.sumatra.wp.util.CurrentBallDetector;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 
@@ -87,6 +88,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private final WorldFrameVisualization worldFrameVisualization = new WorldFrameVisualization();
 	private final BallContactCalculator ballContactCalculator = new BallContactCalculator();
 	private final CurrentBallDetector currentBallDetector = new CurrentBallDetector();
+	private final BotInterchangeCalculator botInterchangeCalculator = new BotInterchangeCalculator();
 	
 	private AVisionFilter visionFilter;
 	private ABotManager botManager;
@@ -155,6 +157,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withTrajectory(trajectory)
 				.withType(bot.getType())
 				.withRobotMode(bot.getRobotMode())
+				.withOk(bot.isOK())
 				.build();
 	}
 	
@@ -293,13 +296,14 @@ public class WorldInfoCollector extends AWorldPredictor
 		visionFilter.setRobotInfoMap(robotInfoMap);
 		IBotIDMap<ITrackedBot> bots = convertToBotMap(filteredVisionFrame.getBots(), robotInfoMap, ball);
 		IKickEvent kickEvent = getKickEvent(filteredVisionFrame);
+		Set<BotID> toInterchange = botInterchangeCalculator.computeBotsToInterchange(bots, latestRefereeMsg);
 		addBotsFromBotmanager(bots, robotInfoMap, ball);
 		
 		SimpleWorldFrame swf = new SimpleWorldFrame(bots, ball, kickEvent, frameNumber, lastWFTimestamp);
 		
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
 		
-		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState);
+		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState, toInterchange);
 		for (IWorldFrameObserver c : consumers)
 		{
 			c.onNewWorldFrame(wfw);
@@ -481,13 +485,6 @@ public class WorldInfoCollector extends AWorldPredictor
 			Geometry.setNegativeHalfTeam(refMsg.getBlueTeamOnPositiveHalf() ? ETeamColor.YELLOW : ETeamColor.BLUE);
 		}
 		latestRefereeMsg = new RefereeMsg(ts, refMsg);
-	}
-	
-	
-	@Override
-	public void setLatestBallPosHint(final IVector2 pos)
-	{
-		visionFilter.resetBall(Vector3.from2d(pos, 0), Vector3f.ZERO_VECTOR);
 	}
 	
 	

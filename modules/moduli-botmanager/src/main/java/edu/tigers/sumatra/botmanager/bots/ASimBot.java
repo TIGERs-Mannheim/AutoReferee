@@ -116,4 +116,9 @@ public abstract class ASimBot extends ABot implements IConfigObserver
 	{
 		return ERobotMode.READY;
 	}
+
+	@Override
+	public boolean isOK() {
+		return true;
+	}
 }

@@ -38,9 +38,6 @@ public class BotVisCalc implements IWpCalc
 			if (bot.getRobotInfo().getAiType() == EAiType.PRIMARY)
 			{
 				shape.setBorderColor(Color.black);
-			} else if (bot.getRobotInfo().getAiType() == EAiType.SECONDARY)
-			{
-				shape.setBorderColor(Color.white);
 			} else
 			{
 				shape.setBorderColor(null);

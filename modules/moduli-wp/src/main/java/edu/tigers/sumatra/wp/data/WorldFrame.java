@@ -5,6 +5,10 @@
 package edu.tigers.sumatra.wp.data;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.ids.BotID;
@@ -33,6 +37,12 @@ public class WorldFrame extends SimpleWorldFrame
 	/** tiger bots that were detected by the WorldPredictor AND are connected */
 	public final IBotIDMap<ITrackedBot> tigerBotsAvailable;
 	
+	/**
+	 * tigers bots that are available to ai, but need to be interchanged.
+	 * They are not available to others plays than RobotInterchangePlay
+	 */
+	private final IBotIDMap<ITrackedBot> tigerBotsToBeInterchanged;
+	
 	private final IBotIDMap<ITrackedBot> allBots;
 	
 	private final ETeamColor teamColor;
@@ -42,46 +52,27 @@ public class WorldFrame extends SimpleWorldFrame
 	
 	/**
 	 * @param simpleWorldFrame
+	 * @param botIDSToInterchange
 	 * @param team
 	 * @param invert
 	 */
-	public WorldFrame(final SimpleWorldFrame simpleWorldFrame, final EAiTeam team, final boolean invert)
+	public WorldFrame(final SimpleWorldFrame simpleWorldFrame, final Set<BotID> botIDSToInterchange, final EAiTeam team,
+			final boolean invert)
 	{
 		super(simpleWorldFrame);
 		this.teamColor = team.getTeamColor();
 		inverted = invert;
 		
-		BotIDMap<ITrackedBot> foes = new BotIDMap<>();
-		BotIDMap<ITrackedBot> tigersVisible = new BotIDMap<>();
-		BotIDMap<ITrackedBot> tigersAvailable = new BotIDMap<>();
-		for (Map.Entry<BotID, ITrackedBot> entry : simpleWorldFrame.getBots().entrySet())
-		{
-			final BotID botID = entry.getKey();
-			ITrackedBot bot = entry.getValue();
-			
-			if (bot.getBotId().getTeamColor() == getTeamColor())
-			{
-				tigersVisible.put(botID, bot);
-				if (bot.getRobotInfo().getAiType() == team.getAiType())
-				{
-					tigersAvailable.put(botID, bot);
-				}
-			} else
-			{
-				RobotInfo robotInfo = RobotInfo.stub(bot.getBotId(), bot.getTimestamp());
-				bot = TrackedBot.newCopyBuilder(bot)
-						.withBotInfo(robotInfo)
-						.build();
-				foes.put(botID, bot);
-			}
-		}
-		foeBots = BotIDMapConst.unmodifiableBotIDMap(foes);
-		tigerBotsAvailable = BotIDMapConst.unmodifiableBotIDMap(tigersAvailable);
-		tigerBotsVisible = BotIDMapConst.unmodifiableBotIDMap(tigersVisible);
+		foeBots = BotIDMapConst.unmodifiableBotIDMap(computeFoeBots(simpleWorldFrame, team));
+		tigerBotsAvailable = BotIDMapConst
+				.unmodifiableBotIDMap(computeAvailableTigers(simpleWorldFrame, botIDSToInterchange, team));
+		tigerBotsVisible = BotIDMapConst.unmodifiableBotIDMap(computeTigersVisible(simpleWorldFrame, team));
+		tigerBotsToBeInterchanged = BotIDMapConst
+				.unmodifiableBotIDMap(computeTigersToBeInterchanged(simpleWorldFrame, botIDSToInterchange, team));
 		
 		BotIDMap<ITrackedBot> bots = new BotIDMap<>();
 		bots.putAll(foeBots);
-		bots.putAll(tigersVisible);
+		bots.putAll(tigerBotsVisible);
 		allBots = BotIDMapConst.unmodifiableBotIDMap(bots);
 	}
 	
@@ -89,7 +80,7 @@ public class WorldFrame extends SimpleWorldFrame
 	/**
 	 * Providing a <strong>shallow</strong> copy of original (Thus new collections are created, but filled with the same
 	 * values
-	 * 
+	 *
 	 * @param original
 	 */
 	public WorldFrame(final WorldFrame original)
@@ -100,7 +91,63 @@ public class WorldFrame extends SimpleWorldFrame
 		foeBots = BotIDMapConst.unmodifiableBotIDMap(original.getFoeBots());
 		tigerBotsAvailable = original.getTigerBotsAvailable();
 		tigerBotsVisible = BotIDMapConst.unmodifiableBotIDMap(original.getTigerBotsVisible());
+		tigerBotsToBeInterchanged = BotIDMapConst.unmodifiableBotIDMap(original.getTigerBotsToBeInterchanged());
 		allBots = original.allBots;
+	}
+	
+	
+	private Stream<ITrackedBot> createStreamOfAiTeam(final SimpleWorldFrame swf, EAiTeam aiTeam)
+	{
+		return swf.getBots().values().stream()
+				.filter(bot -> aiTeam.matchesTypeAndColor(bot.getTeamColor(), bot.getRobotInfo().getAiType()));
+	}
+	
+	
+	private BotIDMap<ITrackedBot> computeAvailableTigers(final SimpleWorldFrame simpleWorldFrame,
+			final Set<BotID> botIDSToInterchange, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> availableTigers = createStreamOfAiTeam(simpleWorldFrame, aiTeam)
+				.filter(bot -> !botIDSToInterchange.contains(bot.getBotId()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return new BotIDMap<>(availableTigers);
+	}
+	
+	
+	private BotIDMap<ITrackedBot> computeTigersToBeInterchanged(final SimpleWorldFrame simpleWorldFrame,
+			final Set<BotID> botIDSToInterchange, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> tigersToBeInterchanged = createStreamOfAiTeam(simpleWorldFrame, aiTeam)
+				.filter(bot -> botIDSToInterchange.contains(bot.getBotId()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return new BotIDMap<>(tigersToBeInterchanged);
+	}
+	
+	
+	private BotIDMap<ITrackedBot> computeFoeBots(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> foes = simpleWorldFrame.getBots().values().stream()
+				.filter(bot -> bot.getBotId().getTeamColor() == aiTeam.getTeamColor().opposite())
+				.map(bot -> {
+					RobotInfo info = RobotInfo.stub(bot.getBotId(), bot.getTimestamp());
+					return TrackedBot.newCopyBuilder(bot).withBotInfo(info).build();
+				})
+				.collect(Collectors.toMap(TrackedBot::getBotId, Function.identity()));
+		return new BotIDMap<>(foes);
+	}
+	
+	
+	private BotIDMap<ITrackedBot> computeTigersVisible(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
+				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return new BotIDMap<>(visible);
+	}
+	
+	
+	public IBotIDMap<ITrackedBot> getTigerBotsToBeInterchanged()
+	{
+		return tigerBotsToBeInterchanged;
 	}
 	
 	

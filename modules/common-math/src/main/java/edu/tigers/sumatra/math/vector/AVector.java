@@ -1,15 +1,13 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -32,7 +30,7 @@ import edu.tigers.sumatra.math.SumatraMath;
 @Persistent
 public abstract class AVector implements IVector
 {
-	protected static final double EQUAL_TOL = SumatraMath.getEqualTol();
+	private static final DecimalFormat df = new DecimalFormat("0.000");
 	
 	
 	@Override
@@ -186,7 +184,7 @@ public abstract class AVector implements IVector
 	{
 		for (int d = 0; d < getNumDimensions(); d++)
 		{
-			if (Math.abs(get(d)) > EQUAL_TOL)
+			if (Math.abs(get(d)) > SumatraMath.getEqualTol())
 			{
 				return false;
 			}
@@ -231,8 +229,6 @@ public abstract class AVector implements IVector
 	@Override
 	public String toString()
 	{
-		DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
-		df.applyPattern("0.000");
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');
 		if (getNumDimensions() > 0)
@@ -328,7 +324,7 @@ public abstract class AVector implements IVector
 	@Override
 	public boolean isCloseTo(final IVector vec)
 	{
-		return isCloseTo(vec, EQUAL_TOL);
+		return isCloseTo(vec, SumatraMath.getEqualTol());
 	}
 	
 	

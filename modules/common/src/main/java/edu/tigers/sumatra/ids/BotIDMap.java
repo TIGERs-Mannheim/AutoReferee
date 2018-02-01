@@ -37,6 +37,17 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	
 	
 	/**
+	 * Creates BotIDMap from existing Java-Map, shallow copy
+	 * 
+	 * @param initialMap
+	 */
+	public BotIDMap(final Map<BotID, T> initialMap)
+	{
+		map = initialMap;
+	}
+	
+	
+	/**
 	 * @param initialCapacity
 	 */
 	public BotIDMap(final int initialCapacity)

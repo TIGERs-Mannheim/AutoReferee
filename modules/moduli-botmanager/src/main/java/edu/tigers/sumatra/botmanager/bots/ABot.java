@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.botmanager.bots;
@@ -311,7 +311,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	
 	
 	@Override
-	public synchronized Optional<TrajectoryWithTime<IVector3>> getCurrentTrajectory()
+	public Optional<TrajectoryWithTime<IVector3>> getCurrentTrajectory()
 	{
 		return Optional.ofNullable(curTrajectory);
 	}
@@ -320,7 +320,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	/**
 	 * @param curTrajectory
 	 */
-	public synchronized void setCurrentTrajectory(final TrajectoryWithTime<IVector3> curTrajectory)
+	public void setCurrentTrajectory(final TrajectoryWithTime<IVector3> curTrajectory)
 	{
 		this.curTrajectory = curTrajectory;
 	}

@@ -41,9 +41,6 @@ public class BotSkillGlobalVelXyPosW extends AMoveBotSkill
 	@SerialData(type = ESerialDataType.EMBEDDED)
 	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
-	@SerialData(type = ESerialDataType.UINT8)
-	private int dataAcqusitionMode = 0;
-	
 	
 	/**
 	 * Constructor.
@@ -209,25 +206,5 @@ public class BotSkillGlobalVelXyPosW extends AMoveBotSkill
 	public void setKickerDribbler(final KickerDribblerCommands kickerDribbler)
 	{
 		this.kickerDribbler = kickerDribbler;
-	}
-	
-	
-	/**
-	 * @return the dataAcqusitionMode
-	 */
-	@Override
-	public EDataAcquisitionMode getDataAcquisitionMode()
-	{
-		return EDataAcquisitionMode.getModeConstant(dataAcqusitionMode);
-	}
-	
-	
-	/**
-	 * @param dataAcqusitionMode the dataAcqusitionMode to set
-	 */
-	@Override
-	public void setDataAcquisitionMode(final EDataAcquisitionMode dataAcqusitionMode)
-	{
-		this.dataAcqusitionMode = dataAcqusitionMode.getId();
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.line.v2;
@@ -120,7 +120,7 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	
 	@Override
-	public synchronized IVector2 getDisplacement()
+	public IVector2 getDisplacement()
 	{
 		if (displacement == null)
 		{
@@ -138,7 +138,7 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	
 	@Override
-	public synchronized IVector2 directionVector()
+	public IVector2 directionVector()
 	{
 		if (directionVector == null)
 		{

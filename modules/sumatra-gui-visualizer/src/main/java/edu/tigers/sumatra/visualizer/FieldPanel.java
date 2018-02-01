@@ -61,7 +61,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	// --- repaint ---
 	private transient Image offImage = null;
-	private final transient Object offImageSync = new Object();
+	private final transient OfflineFieldSync offImageSync = new OfflineFieldSync()
+	{
+	};
 	
 	/**  */
 	private static final long serialVersionUID = 4330620225157027091L;
@@ -94,7 +96,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	private transient IVector2 lastMousePoint = Vector2f.ZERO_VECTOR;
 	private final transient FpsCounter fpsCounter = new FpsCounter();
-	private ETeamColor invertedTeam = ETeamColor.YELLOW;
 	
 	
 	/**
@@ -191,13 +192,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	
 	@Override
-	public void setInvertedTeam(ETeamColor invertedTeam)
-	{
-		this.invertedTeam = invertedTeam;
-	}
-	
-	
-	@Override
 	public void paint(final Graphics g1)
 	{
 		if (offImage != null)
@@ -267,8 +261,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			g2.scale(1.0 / scaleFactor, 1.0 / scaleFactor);
 			g2.translate(-fieldOriginX, -fieldOriginY);
 			
-			paintCoordinates(g2, ETeamColor.YELLOW, invertedTeam == ETeamColor.YELLOW);
-			paintCoordinates(g2, ETeamColor.BLUE, invertedTeam == ETeamColor.BLUE);
+			paintCoordinates(g2, ETeamColor.YELLOW, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
+			paintCoordinates(g2, ETeamColor.BLUE, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
 			
 			paintFps(g2);
 		}
@@ -826,5 +820,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	{
 		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
 		return (int) ((Geometry.getBoundaryWidth()) * yScaleFactor);
+	}
+	
+	private interface OfflineFieldSync
+	{
 	}
 }

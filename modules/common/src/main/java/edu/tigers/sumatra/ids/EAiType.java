@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.ids;
@@ -11,8 +11,6 @@ public enum EAiType
 {
 	/** */
 	PRIMARY,
-	/** */
-	SECONDARY,
 	/** */
 	NONE,
 }

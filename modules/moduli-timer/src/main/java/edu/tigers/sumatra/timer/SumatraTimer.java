@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.timer;
@@ -9,8 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.clock.Dormouse;
 
 
@@ -23,23 +21,13 @@ import edu.tigers.sumatra.clock.Dormouse;
  */
 public class SumatraTimer extends ATimer
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	private static final Logger					log			= Logger.getLogger(SumatraTimer.class.getName());
-	
-	
-	private Thread										dormouse;
-	private final Map<TimerIdentifier, Long>	startTimes	= new ConcurrentHashMap<>();
-	private final TimerInfo							timings		= new TimerInfo();
-	
-	
-	// --------------------------------------------------------------------------
-	// --- life-cycle -----------------------------------------------------------
-	// --------------------------------------------------------------------------
+	private static final Logger log = Logger.getLogger(SumatraTimer.class.getName());
+	private final Map<TimerIdentifier, Long> startTimes = new ConcurrentHashMap<>();
+	private final TimerInfo timings = new TimerInfo();
+	private Thread dormouse;
 	
 	@Override
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		dormouse = new Thread(Dormouse.getInstance(), "Dormouse");
 		dormouse.start();
@@ -47,7 +35,7 @@ public class SumatraTimer extends ATimer
 	
 	
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		// nothing to do
 	}
@@ -58,10 +46,7 @@ public class SumatraTimer extends ATimer
 	{
 		dormouse.interrupt();
 		
-		synchronized (getObservers())
-		{
-			getObservers().clear();
-		}
+		getObservers().clear();
 		
 		timings.clear();
 		startTimes.clear();

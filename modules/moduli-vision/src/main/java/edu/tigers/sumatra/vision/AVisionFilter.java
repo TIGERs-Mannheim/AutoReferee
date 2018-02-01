@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -12,9 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.log4j.Logger;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
@@ -58,6 +56,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 */
 	protected abstract void updateCamDetectionFrame(CamDetectionFrame camDetectionFrame);
 	
+	
 	/**
 	 * Called once uppon moduli start
 	 */
@@ -88,14 +87,23 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	
 	
 	/**
-	 * Reset the ball to a new position. Can be used to:<br>
-	 * - select another ball, if multiple balls are detected (real filter)
-	 * - actively put the ball somewhere else (simulator)
+	 * Reset the ball to a new position. Can be used to
+	 * select another ball, if multiple balls are detected (real filter)
 	 * 
 	 * @param pos where the ball should be reset to
 	 * @param vel
 	 */
 	public void resetBall(final IVector3 pos, final IVector3 vel)
+	{
+	}
+	
+	
+	/**
+	 * Place the ball to a new position. This should only be implemented by the simulator
+	 * 
+	 * @param pos
+	 */
+	public void placeBall(final IVector3 pos, final IVector3 vel)
 	{
 	}
 	
@@ -123,7 +131,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	
 	
 	@Override
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		// nothing to do
 	}
@@ -137,7 +145,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	
 	
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		start();
 		try

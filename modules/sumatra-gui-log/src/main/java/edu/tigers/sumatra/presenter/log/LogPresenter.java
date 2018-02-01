@@ -3,7 +3,8 @@
  */
 package edu.tigers.sumatra.presenter.log;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 
-import edu.tigers.sumatra.view.log.IFilterPanelObserver;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -22,12 +22,11 @@ import org.apache.log4j.Priority;
 import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
 
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.view.log.IFilterPanelObserver;
 import edu.tigers.sumatra.view.log.ISlidePanelObserver;
 import edu.tigers.sumatra.view.log.ITreePanelObserver;
 import edu.tigers.sumatra.view.log.LogPanel;
-import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 
@@ -56,37 +55,39 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 	
 	// colors
 	/** */
-	public static final Color						DEFAULT_COLOR_ALL		= new Color(0, 0, 0);
+	public static final Color DEFAULT_COLOR_ALL = new Color(0, 0, 0);
 	/** */
-	public static final Color						DEFAULT_COLOR_FATAL	= new Color(128, 0, 128);
+	public static final Color DEFAULT_COLOR_FATAL = new Color(128, 0, 128);
 	/** */
-	public static final Color						DEFAULT_COLOR_ERROR	= new Color(255, 0, 0);
+	public static final Color DEFAULT_COLOR_ERROR = new Color(255, 0, 0);
 	/** */
-	public static final Color						DEFAULT_COLOR_WARN	= new Color(0, 0, 255);
+	public static final Color DEFAULT_COLOR_WARN = new Color(0, 0, 255);
 	/** */
-	public static final Color						DEFAULT_COLOR_INFO	= new Color(0, 128, 0);
+	public static final Color DEFAULT_COLOR_INFO = new Color(0, 128, 0);
 	/** */
-	public static final Color						DEFAULT_COLOR_DEBUG	= new Color(96, 96, 96);
+	public static final Color DEFAULT_COLOR_DEBUG = new Color(96, 96, 96);
 	/** */
-	public static final Color						DEFAULT_COLOR_TRACE	= new Color(0, 0, 0);
-	/** */
-	public static final Color						DEFAULT_COLOR			= new Color(0, 0, 0);
-	/** */
-	private static final int						DISPLAY_CAPACITY		= 1000;
-	private static final String					LOG_LEVEL_KEY			= LogPresenter.class.getName() + ".loglevel";
-	private final LogEventBuffer					eventBuffer				= new LogEventBuffer();
-	private final Map<Integer, AttributeSet>	attributeSets			= new HashMap<>();
-	private final Object								eventSync				= new Object();
-	private LogPanel									logPanel					= null;
-	private List<String>								allowedClasses			= new ArrayList<>();
-	private List<String>								allowedStrings			= new ArrayList<>();
-	private Level										logLevel;
-	private int											numFatals				= 0;
-	private int											numErrors				= 0;
-	private int											numWarnings				= 0;
-	private boolean									freeze					= false;
-																						
-																						
+	public static final Color DEFAULT_COLOR_TRACE = new Color(0, 0, 0);
+	
+	private static final int DISPLAY_CAPACITY = 1000;
+	private static final String LOG_LEVEL_KEY = LogPresenter.class.getName() + ".loglevel";
+	private final LogEventBuffer eventBuffer = new LogEventBuffer();
+	private final Map<Integer, AttributeSet> attributeSets = new HashMap<>();
+	
+	private final LogEventSync eventSync = new LogEventSync()
+	{
+	};
+	
+	private LogPanel logPanel;
+	private List<String> allowedClasses = new ArrayList<>();
+	private List<String> allowedStrings = new ArrayList<>();
+	private Level logLevel;
+	private int numFatals = 0;
+	private int numErrors = 0;
+	private int numWarnings = 0;
+	private boolean freeze = false;
+	
+	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -333,12 +334,6 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 	
 	
 	@Override
-	public void onModuliStateChanged(final ModulesState state)
-	{
-	}
-	
-	
-	@Override
 	public void onFreeze(final boolean freeze)
 	{
 		this.freeze = freeze;
@@ -347,5 +342,9 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 		{
 			reappendAllEvents();
 		}
+	}
+	
+	private interface LogEventSync
+	{
 	}
 }

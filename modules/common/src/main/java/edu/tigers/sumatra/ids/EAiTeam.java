@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.ids;
@@ -11,14 +11,11 @@ package edu.tigers.sumatra.ids;
 public enum EAiTeam
 {
 	/** */
-	YELLOW_PRIMARY(ETeamColor.YELLOW, EAiType.PRIMARY, true),
+	YELLOW(ETeamColor.YELLOW, EAiType.PRIMARY, true),
 	/** */
-	BLUE_PRIMARY(ETeamColor.BLUE, EAiType.PRIMARY, true),
-	
-	/** */
-	YELLOW_SECONDARY(ETeamColor.YELLOW, EAiType.SECONDARY, false),
-	/** */
-	BLUE_SECONDARY(ETeamColor.BLUE, EAiType.SECONDARY, false),;
+	BLUE(ETeamColor.BLUE, EAiType.PRIMARY, true),
+
+	;
 	
 	private ETeamColor teamColor;
 	private EAiType aiType;
@@ -66,33 +63,14 @@ public enum EAiTeam
 	{
 		if (teamColor == ETeamColor.BLUE)
 		{
-			return BLUE_PRIMARY;
+			return BLUE;
 		} else if (teamColor == ETeamColor.YELLOW)
 		{
-			return YELLOW_PRIMARY;
+			return YELLOW;
 		}
 		throw new IllegalArgumentException("Can not map team color: " + teamColor);
 	}
-	
-	
-	/**
-	 * Get the secondary team of the given team color
-	 *
-	 * @param teamColor
-	 * @return
-	 */
-	public static EAiTeam secondary(ETeamColor teamColor)
-	{
-		if (teamColor == ETeamColor.BLUE)
-		{
-			return BLUE_SECONDARY;
-		} else if (teamColor == ETeamColor.YELLOW)
-		{
-			return YELLOW_SECONDARY;
-		}
-		throw new IllegalArgumentException("Can not map team color: " + teamColor);
-	}
-	
+
 	
 	/**
 	 * @return true, if it is a primary AI
@@ -101,13 +79,41 @@ public enum EAiTeam
 	{
 		return aiType == EAiType.PRIMARY;
 	}
-	
-	
-	/**
-	 * @return true, if it is a secondary AI
-	 */
-	public boolean isSecondary()
-	{
-		return aiType == EAiType.SECONDARY;
-	}
+
+
+    /**
+     * Check if color of aiteam matches color
+     *
+     * @param color
+     * @return
+     */
+    public boolean matchesColor(ETeamColor color)
+    {
+        return color == teamColor;
+    }
+
+
+    /**
+     * Check if type of aiteam matches aitype
+     *
+     * @param type
+     * @return
+     */
+    public boolean matchesType(EAiType type)
+    {
+        return type == aiType;
+    }
+
+
+    /**
+     * Check if type and color match
+     *
+     * @param color
+     * @param type
+     * @return
+     */
+    public boolean matchesTypeAndColor(ETeamColor color, EAiType type)
+    {
+        return matchesColor(color) && matchesType(type);
+    }
 }

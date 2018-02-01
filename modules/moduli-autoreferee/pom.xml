@@ -86,5 +86,15 @@
             <artifactId>sumatra-model</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.sleepycat</groupId>
+            <artifactId>je</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>moduli-record</artifactId>
+        </dependency>
+
     </dependencies>
 </project>

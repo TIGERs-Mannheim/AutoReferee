@@ -116,9 +116,15 @@
             <groupId>com.github.g3force</groupId>
             <artifactId>configurable</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>moduli-record</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
     </dependencies>

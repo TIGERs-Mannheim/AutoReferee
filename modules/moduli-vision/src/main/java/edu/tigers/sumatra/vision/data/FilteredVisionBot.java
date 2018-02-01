@@ -7,6 +7,7 @@ package edu.tigers.sumatra.vision.data;
 import org.apache.commons.lang.Validate;
 
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
@@ -18,12 +19,12 @@ import edu.tigers.sumatra.math.vector.Vector2f;
  */
 public class FilteredVisionBot
 {
-	private final BotID		botID;
-	private final IVector2	pos;
-	private final IVector2	vel;
-	private final double		orientation;
-	private final double		angularVel;
-	private final double		quality;
+	private final BotID botID;
+	private final IVector2 pos;
+	private final IVector2 vel;
+	private final double orientation;
+	private final double angularVel;
+	private final double quality;
 	
 	
 	private FilteredVisionBot(final BotID botID, final IVector2 pos, final IVector2 vel,
@@ -74,6 +75,33 @@ public class FilteredVisionBot
 	}
 	
 	
+	/**
+	 * Extrapolate bot into future.
+	 * 
+	 * @param timestampNow
+	 * @param timestampFuture
+	 * @return
+	 */
+	public FilteredVisionBot extrapolate(final long timestampNow, final long timestampFuture)
+	{
+		if (timestampFuture < timestampNow)
+		{
+			return this;
+		}
+		
+		double dt = (timestampFuture - timestampNow) * 1e-9;
+		
+		return Builder.create()
+				.withId(botID)
+				.withQuality(quality)
+				.withPos(pos.addNew(vel.multiplyNew(dt * 1e3)))
+				.withVel(vel)
+				.withOrientation(AngleMath.normalizeAngle(orientation + (angularVel * dt)))
+				.withAVel(angularVel)
+				.build();
+	}
+	
+	
 	@Override
 	public String toString()
 	{
@@ -91,12 +119,12 @@ public class FilteredVisionBot
 	 */
 	public static final class Builder
 	{
-		private BotID		botID;
-		private IVector2	pos;
-		private IVector2	vel;
-		private Double		orientation;
-		private Double		angularVel;
-		private double		quality	= 0;
+		private BotID botID;
+		private IVector2 pos;
+		private IVector2 vel;
+		private Double orientation;
+		private Double angularVel;
+		private double quality = 0;
 		
 		
 		private Builder()

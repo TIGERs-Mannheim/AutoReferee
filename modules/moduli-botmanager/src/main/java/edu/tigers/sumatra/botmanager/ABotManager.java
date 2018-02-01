@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager;
 
@@ -65,10 +65,7 @@ public abstract class ABotManager extends AModule
 	 */
 	public void addObserver(final IBotManagerObserver o)
 	{
-		synchronized (observers)
-		{
-			observers.add(o);
-		}
+		observers.add(o);
 	}
 	
 	
@@ -77,45 +74,33 @@ public abstract class ABotManager extends AModule
 	 */
 	public void removeObserver(final IBotManagerObserver o)
 	{
-		synchronized (observers)
-		{
-			observers.remove(o);
-		}
+		observers.remove(o);
 	}
 	
 	
 	protected void notifyBotAdded(final ABot bot)
 	{
-		synchronized (observers)
+		for (final IBotManagerObserver o : observers)
 		{
-			for (final IBotManagerObserver o : observers)
-			{
-				o.onBotAdded(bot);
-			}
+			o.onBotAdded(bot);
 		}
 	}
 	
 	
 	protected void notifyBotRemoved(final ABot bot)
 	{
-		synchronized (observers)
+		for (final IBotManagerObserver o : observers)
 		{
-			for (final IBotManagerObserver o : observers)
-			{
-				o.onBotRemoved(bot);
-			}
+			o.onBotRemoved(bot);
 		}
 	}
 	
 	
 	protected void notifyIncomingBotCommand(ABot bot, ACommand command)
 	{
-		synchronized (observers)
+		for (final IBotManagerObserver o : observers)
 		{
-			for (final IBotManagerObserver o : observers)
-			{
-				o.onIncomingBotCommand(bot, command);
-			}
+			o.onIncomingBotCommand(bot, command);
 		}
 	}
 }

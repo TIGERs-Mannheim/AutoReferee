@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.botmanager.basestation;
@@ -63,12 +63,12 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	
 	@Configurable(defValue = "10200")
 	private int localPort = 10200;
-	@Configurable(defValue = "192.168.20.210", spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH" })
+	@Configurable(defValue = "192.168.20.210", spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH", "NICOLAI" })
 	private String host = "192.168.20.210";
 	@Configurable(defValue = "10201")
 	private int dstPort = 10201;
 	
-	@Configurable(spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH" }, defValue = "121")
+	@Configurable(spezis = { "ROBOCUP", "LAB", "ANDRE", "TISCH", "NICOLAI" }, defValue = "121")
 	private int channel = 0;
 	@Configurable(comment = "Fix the runtime regardless of the number of bot that are connected.", defValue = "true")
 	private boolean fixedRuntime = true;

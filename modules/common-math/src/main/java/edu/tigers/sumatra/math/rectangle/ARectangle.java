@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.rectangle;
@@ -230,7 +230,7 @@ abstract class ARectangle implements IRectangle
 	
 	
 	@Override
-	public synchronized JSONObject toJSON()
+	public JSONObject toJSON()
 	{
 		Map<String, Object> jsonMapping = new LinkedHashMap<>();
 		jsonMapping.put("center", center().toJSONArray());

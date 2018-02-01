@@ -215,12 +215,6 @@
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>moduli-wp-bot</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>moduli-wp-export</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -324,12 +318,6 @@
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>sumatra-record-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>sumatra-shared-radio</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

@@ -12,6 +12,7 @@ import edu.tigers.sumatra.botmanager.commands.other.EKickerDevice;
 import edu.tigers.sumatra.botmanager.commands.other.EKickerMode;
 import edu.tigers.sumatra.botmanager.serial.SerialData;
 import edu.tigers.sumatra.botmanager.serial.SerialData.ESerialDataType;
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
@@ -36,8 +37,9 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 	@SerialData(type = ESerialDataType.EMBEDDED)
 	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
+	/** 360°/255 */
 	@SerialData(type = ESerialDataType.UINT8)
-	private int flags = 0;
+	private int primaryDirection = 0;
 	
 	
 	/**
@@ -240,36 +242,8 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 	}
 	
 	
-	/**
-	 * @return the dataAcqusitionMode
-	 */
-	@Override
-	public EDataAcquisitionMode getDataAcquisitionMode()
+	public void setPrimaryDirection(final double orientation)
 	{
-		return EDataAcquisitionMode.getModeConstant(flags & 0x7F);
-	}
-	
-	
-	/**
-	 * @param dataAcqusitionMode the dataAcqusitionMode to set
-	 */
-	@Override
-	public void setDataAcquisitionMode(final EDataAcquisitionMode dataAcqusitionMode)
-	{
-		this.flags &= 0x80;
-		this.flags |= dataAcqusitionMode.getId();
-	}
-	
-	
-	@Override
-	public void setStrictVelocityLimit(final boolean enable)
-	{
-		if (enable)
-		{
-			flags |= 0x80;
-		} else
-		{
-			flags &= 0x7F;
-		}
+		primaryDirection = (int) ((AngleMath.normalizeAngle(orientation) * 255.0) / Math.PI);
 	}
 }

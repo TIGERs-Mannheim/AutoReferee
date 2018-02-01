@@ -15,7 +15,6 @@ import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.EAiType;
-import edu.tigers.sumatra.math.vector.IVector2;
 
 
 /**
@@ -104,14 +103,6 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 			o.onClearShapeMap(source);
 		}
 	}
-	
-	
-	/**
-	 * Reset the ball to given position
-	 * 
-	 * @param pos of the ball
-	 */
-	public abstract void setLatestBallPosHint(final IVector2 pos);
 	
 	
 	/**

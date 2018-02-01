@@ -10,7 +10,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -75,6 +77,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	private ScheduledExecutorService execService;
 	private WorldFrameWrapper lastWorldFrameWrapper = null;
 	private BotID selectedRobotId = BotID.noBot();
+	private Queue<Runnable> runnables = new ConcurrentLinkedQueue<>();
 	
 	
 	/**
@@ -161,7 +164,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			vel = Vector3f.ZERO_VECTOR;
 			pos = posIn;
 		}
-		referee.resetBall(Vector3.from2d(pos, 0), vel);
+		referee.placeBall(Vector3.from2d(pos, 0), vel);
 	}
 	
 	
@@ -314,6 +317,12 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	@Override
 	public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final String source)
 	{
+		runnables.add(() -> newShapeMap(shapeMap, source));
+	}
+	
+	
+	private void newShapeMap(final ShapeMap shapeMap, final String source)
+	{
 		panel.getOptionsMenu().addSourceMenuIfNotPresent(source);
 		if (shapeMap != null)
 		{
@@ -439,6 +448,10 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		{
 			try
 			{
+				Queue<Runnable> nextRunnables = new ConcurrentLinkedQueue<>();
+				Queue<Runnable> currentRunnables = runnables;
+				runnables = nextRunnables;
+				currentRunnables.forEach(Runnable::run);
 				updateCamFrameShapes();
 				panel.getFieldPanel().paintOffline();
 				

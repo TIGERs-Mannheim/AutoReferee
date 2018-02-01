@@ -35,6 +35,7 @@ import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerConfigWrite;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqBotModel;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqDelays;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqMotorModel;
+import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqSetMode;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqVelocity;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerSystemPerformance;
 
@@ -122,7 +123,9 @@ public enum ECommand implements IInstanceableEnum
 	/**  */
 	CMD_DATA_ACQ_DELAYS(0x0D02, new InstanceableClass(TigerDataAcqDelays.class)),
 	/**  */
-	CMD_DATA_ACQ_VELOCITY(0x0D03, new InstanceableClass(TigerDataAcqVelocity.class)),;
+	CMD_DATA_ACQ_VELOCITY(0x0D03, new InstanceableClass(TigerDataAcqVelocity.class)),
+	/**  */
+	CMD_DATA_ACQ_SET_MODE(0x0D04, new InstanceableClass(TigerDataAcqSetMode.class));
 	
 	
 	private final InstanceableClass clazz;

@@ -76,7 +76,6 @@ public class BotSkillCircleBallSim implements IBotSkillSim
 				.kickMode(kickerMode)
 				.kickSpeed(skill.getKickSpeed())
 				.dribblerRPM(skill.getDribbleSpeed())
-				.addCommands(BotSkillSimulator.parseDataAcquisitionMode(input, skill.getDataAcquisitionMode()))
 				.build();
 	}
 }

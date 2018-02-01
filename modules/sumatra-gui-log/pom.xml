@@ -25,10 +25,6 @@
             <artifactId>log4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>edu.tigers.moduli</groupId>
-            <artifactId>moduli</artifactId>
-        </dependency>
-        <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>sumatra-model</artifactId>
         </dependency>

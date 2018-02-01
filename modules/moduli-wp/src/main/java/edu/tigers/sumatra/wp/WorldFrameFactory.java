@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
 
+import java.util.HashSet;
 import java.util.Random;
 
 import edu.tigers.sumatra.bot.RobotInfo;
@@ -58,7 +59,7 @@ public class WorldFrameFactory
 	 */
 	public static WorldFrame createWorldFrame(final long frameNumber, final long timestamp)
 	{
-		return new WorldFrame(createSimpleWorldFrame(frameNumber, timestamp), EAiTeam.YELLOW_PRIMARY, false);
+		return new WorldFrame(createSimpleWorldFrame(frameNumber, timestamp), new HashSet<>(), EAiTeam.YELLOW, false);
 	}
 	
 	

@@ -41,7 +41,7 @@
 
 
     <module id="edu.tigers.sumatra.persistence.RecordManager">
-        <implementation>edu.tigers.autoref.AutoRefRecordManager</implementation>
+        <implementation>edu.tigers.autoreferee.AutoRefRecordManager</implementation>
     </module>
 
     <module id="edu.tigers.autoreferee.module.AutoRefModule">

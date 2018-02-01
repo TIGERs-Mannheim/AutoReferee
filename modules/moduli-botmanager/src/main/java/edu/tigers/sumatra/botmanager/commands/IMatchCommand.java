@@ -9,7 +9,6 @@
 package edu.tigers.sumatra.botmanager.commands;
 
 import edu.tigers.sumatra.botmanager.commands.botskills.ABotSkill;
-import edu.tigers.sumatra.botmanager.commands.botskills.EDataAcquisitionMode;
 
 
 /**
@@ -22,12 +21,6 @@ public interface IMatchCommand
 	 * @param skill
 	 */
 	void setSkill(ABotSkill skill);
-	
-	
-	/**
-	 * @param freq
-	 */
-	void setFeedbackFreq(final int freq);
 	
 	
 	/**
@@ -49,7 +42,7 @@ public interface IMatchCommand
 	
 	
 	/**
-	 * @param acqMode
+	 * @param enable
 	 */
-	void setDataAcquisitionMode(final EDataAcquisitionMode acqMode);
+	public void setStrictVelocityLimit(final boolean enable);
 }
