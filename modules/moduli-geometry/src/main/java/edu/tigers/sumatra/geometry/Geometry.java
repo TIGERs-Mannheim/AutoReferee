@@ -70,9 +70,11 @@ public class Geometry
 	private static double goalDepth = 180;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double goalHeight = 155;
-	@Configurable(comment = "Name of the CenterCircle arc defined in SSL-Vision")
+	@Configurable(comment = "Name of the CenterCircle arc defined in SSL-Vision", defValue = "CenterCircle")
 	private static String centerCircleName = "CenterCircle";
 	
+	@Configurable(comment = "The team on the negative half", defValue = "BLUE")
+	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;
 	
 	/**
 	 * Penalty Area
@@ -133,7 +135,6 @@ public class Geometry
 	private CamGeometry lastCamGeometry;
 	
 	private static BallParameters ballParameters = new BallParameters();
-	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;
 	
 	
 	private static class ConfigCallback implements IConfigObserver
