@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
@@ -24,12 +24,10 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 @Persistent
 public class DrawableArc extends Arc implements IDrawableShape
 {
-	private final Color color;
+	private Color color;
 	
 	
-	/**
-	 * 
-	 */
+	@SuppressWarnings("unused") // used by berkeley
 	protected DrawableArc()
 	{
 		super(Vector2f.ZERO_VECTOR, 1, 0, 1);
@@ -65,4 +63,10 @@ public class DrawableArc extends Arc implements IDrawableShape
 		g.draw(arcShape);
 	}
 	
+	
+	@Override
+	public void setColor(final Color color)
+	{
+		this.color = color;
+	}
 }

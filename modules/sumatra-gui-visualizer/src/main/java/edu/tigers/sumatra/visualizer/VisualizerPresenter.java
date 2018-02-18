@@ -357,7 +357,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			for (ITrackedBot tBot : tBotsMap.values())
 			{
 				BotStatus status = panel.getRobotsPanel().getBotStatus(tBot.getBotId());
-				status.setVisible(tBot.isVisible());
+				status.setVisible(tBot.getFilteredState().isPresent());
 			}
 			Map<BotID, BotStatus> botStati = panel.getRobotsPanel().getBotStati();
 			// set all bots invisible that are not tracked any longer

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.wp.data;
 
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -30,7 +31,10 @@ public interface ITrackedObject extends IMirrorable<ITrackedObject>
 	/**
 	 * @return the acc
 	 */
-	IVector2 getAcc();
+	default IVector2 getAcc()
+	{
+		return Vector2f.zero();
+	}
 	
 	
 	/**

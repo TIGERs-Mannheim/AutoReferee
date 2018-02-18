@@ -28,6 +28,7 @@ public class FilteredVisionFrame
 	private final List<FilteredVisionBot> bots;
 	private final ShapeMap shapeMap;
 	private final IKickEvent kickEvent;
+	private final FilteredVisionBall kickFitState;
 	
 	
 	private FilteredVisionFrame(final Builder builder)
@@ -37,6 +38,7 @@ public class FilteredVisionFrame
 		ball = builder.ball;
 		bots = builder.bots;
 		kickEvent = builder.kickEvent;
+		kickFitState = builder.kickFitState;
 		if (builder.shapeMap != null)
 		{
 			shapeMap = builder.shapeMap;
@@ -85,6 +87,12 @@ public class FilteredVisionFrame
 	}
 	
 	
+	public Optional<FilteredVisionBall> getKickFitState()
+	{
+		return Optional.ofNullable(kickFitState);
+	}
+	
+	
 	/**
 	 * @return the assembly timestamp in [ns]
 	 */
@@ -116,6 +124,7 @@ public class FilteredVisionFrame
 		private List<FilteredVisionBot> bots;
 		private IKickEvent kickEvent;
 		private ShapeMap shapeMap = null;
+		private FilteredVisionBall kickFitState;
 		
 		
 		private Builder()
@@ -206,6 +215,17 @@ public class FilteredVisionFrame
 		public Builder withKickEvent(final IKickEvent event)
 		{
 			kickEvent = event;
+			return this;
+		}
+		
+		
+		/**
+		 * @param ball
+		 * @return
+		 */
+		public Builder withKickFitState(final FilteredVisionBall ball)
+		{
+			kickFitState = ball;
 			return this;
 		}
 		

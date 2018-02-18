@@ -160,7 +160,7 @@ public class RefereeVisCalc implements IWpCalc
 	private void paintAutomatedPlacementShapes(final List<IDrawableShape> shapes, final WorldFrameWrapper wfw)
 	{
 		RefereeMsg refMsg = wfw.getRefereeMsg();
-		IVector2 ballTargetPos = wfw.getGameState().getBallPlacementPosition();
+		IVector2 ballTargetPos = wfw.getGameState().getBallPlacementPositionNeutral();
 		
 		Color distToBallColor = new Color(255, 0, 0, 100);
 		Color targetCircleColor = new Color(20, 255, 255, 210);

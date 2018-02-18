@@ -109,22 +109,34 @@ public class FilteredVisionBall
 			return this;
 		}
 		
+		return getTrajectory(timestampNow).getStateAtTimestamp(timestampFuture);
+	}
+	
+	
+	/**
+	 * Get ball trajectory.
+	 * 
+	 * @param timestampNow
+	 * @return
+	 */
+	public ABallTrajectory getTrajectory(final long timestampNow)
+	{
 		ABallTrajectory trajectory;
 		if (chipped)
 		{
 			trajectory = new ChipBallTrajectory(timestampNow, this);
 		} else
 		{
-			if (acc.getLength2() < 1e-6)
+			long switchTimestamp = timestampNow;
+			if (acc.getLength2() > 1e-6)
 			{
-				return this;
+				switchTimestamp = timestampNow + (long) (((vel.getLength2() - vSwitch) / acc.getLength2()) * 1e9);
 			}
 			
-			long switchTimestamp = timestampNow + (long) (((vel.getLength2() - vSwitch) / acc.getLength2()) * 1e9);
 			trajectory = new StraightBallTrajectory(timestampNow, pos, vel, switchTimestamp);
 		}
 		
-		return trajectory.getStateAtTimestamp(timestampFuture);
+		return trajectory;
 	}
 	
 	

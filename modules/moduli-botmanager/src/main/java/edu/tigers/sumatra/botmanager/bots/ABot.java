@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.github.g3force.configurable.IConfigObserver;
 
+import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.EBotType;
 import edu.tigers.sumatra.bot.EFeature;
 import edu.tigers.sumatra.bot.EFeatureState;
@@ -50,9 +51,6 @@ public abstract class ABot implements IBot, IConfigObserver
 	private transient double kickerLevelMax = 200;
 	private transient String controlledBy = "";
 	private transient boolean hideFromRcm = false;
-	
-	/** [Hz] desired number of package to receive */
-	private transient double updateRate = 100;
 	
 	
 	/**
@@ -106,7 +104,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	}
 	
 	
-	protected void notifyIncommingBotCommand(final ACommand cmd)
+	private void notifyIncomingBotCommand(final ACommand cmd)
 	{
 		for (IABotObserver observer : observers)
 		{
@@ -115,7 +113,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	}
 	
 	
-	protected Map<EFeature, EFeatureState> getDefaultFeatureStates()
+	private Map<EFeature, EFeatureState> getDefaultFeatureStates()
 	{
 		Map<EFeature, EFeatureState> result = EFeature.createFeatureList();
 		result.put(EFeature.DRIBBLER, EFeatureState.WORKING);
@@ -168,7 +166,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	 */
 	public void onIncomingBotCommand(final ACommand cmd)
 	{
-		notifyIncommingBotCommand(cmd);
+		notifyIncomingBotCommand(cmd);
 	}
 	
 	
@@ -262,24 +260,6 @@ public abstract class ABot implements IBot, IConfigObserver
 	}
 	
 	
-	/**
-	 * @return the updateRate
-	 */
-	public final double getUpdateRate()
-	{
-		return updateRate;
-	}
-	
-	
-	/**
-	 * @param updateRate the updateRate to set
-	 */
-	public final void setUpdateRate(final double updateRate)
-	{
-		this.updateRate = updateRate;
-	}
-	
-	
 	@Override
 	public String getName()
 	{
@@ -297,14 +277,7 @@ public abstract class ABot implements IBot, IConfigObserver
 	
 	
 	@Override
-	public Optional<IVector3> getSensoryPos()
-	{
-		return Optional.empty();
-	}
-	
-	
-	@Override
-	public Optional<IVector3> getSensoryVel()
+	public Optional<BotState> getSensoryState(long timestamp)
 	{
 		return Optional.empty();
 	}

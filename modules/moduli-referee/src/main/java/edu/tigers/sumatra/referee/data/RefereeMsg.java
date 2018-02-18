@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.data;
 
@@ -111,7 +111,7 @@ public class RefereeMsg
 		teamInfoYellow = refereeMsg.teamInfoYellow;
 		teamInfoBlue = refereeMsg.teamInfoBlue;
 		negativeHalfTeam = refereeMsg.negativeHalfTeam;
-		ballPlacementPos = refereeMsg.getBallPlacementPos();
+		ballPlacementPos = refereeMsg.getBallPlacementPosNeutral();
 	}
 	
 	
@@ -250,7 +250,7 @@ public class RefereeMsg
 	 * 
 	 * @return the ballPlacementPos in vision coordinates
 	 */
-	public IVector2 getBallPlacementPos()
+	public IVector2 getBallPlacementPosNeutral()
 	{
 		return ballPlacementPos;
 	}

@@ -15,6 +15,7 @@ import edu.tigers.sumatra.botmanager.serial.SerialData.ESerialDataType;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -22,6 +23,8 @@ import edu.tigers.sumatra.math.vector.Vector2;
  */
 public class BotSkillGlobalPosition extends AMoveBotSkill
 {
+	private static final int UNUSED_PRIMARY_DIRECTION = -128;
+	
 	@SerialData(type = ESerialDataType.INT16)
 	private final int[] pos = new int[3];
 	
@@ -38,8 +41,8 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 	private KickerDribblerCommands kickerDribbler = new KickerDribblerCommands();
 	
 	/** 360°/255 */
-	@SerialData(type = ESerialDataType.UINT8)
-	private int primaryDirection = 0;
+	@SerialData(type = ESerialDataType.INT8)
+	private int primaryDirection = UNUSED_PRIMARY_DIRECTION;
 	
 	
 	/**
@@ -71,6 +74,7 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 		setVelMaxW(mc.getVelMaxW());
 		setAccMax(mc.getAccMax());
 		setAccMaxW(mc.getAccMaxW());
+		setPrimaryDirection(mc.getPrimaryDirection());
 	}
 	
 	
@@ -83,9 +87,11 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 	 * @param velMaxW
 	 * @param accMax
 	 * @param accMaxW
+	 * @param primaryDirection
 	 */
 	public BotSkillGlobalPosition(final IVector2 xy, final double orientation,
-			final double velMax, final double velMaxW, final double accMax, final double accMaxW)
+			final double velMax, final double velMaxW, final double accMax, final double accMaxW,
+			final IVector2 primaryDirection)
 	{
 		this();
 		
@@ -98,6 +104,7 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 		setVelMaxW(velMaxW);
 		setAccMax(accMax);
 		setAccMaxW(accMaxW);
+		setPrimaryDirection(primaryDirection);
 	}
 	
 	
@@ -242,8 +249,41 @@ public class BotSkillGlobalPosition extends AMoveBotSkill
 	}
 	
 	
-	public void setPrimaryDirection(final double orientation)
+	/**
+	 * @param direction
+	 */
+	public void setPrimaryDirection(final IVector2 direction)
 	{
-		primaryDirection = (int) ((AngleMath.normalizeAngle(orientation) * 255.0) / Math.PI);
+		if (direction.isZeroVector())
+		{
+			primaryDirection = UNUSED_PRIMARY_DIRECTION;
+		} else
+		{
+			setPrimaryDirection(direction.getAngle());
+		}
+	}
+	
+	
+	/**
+	 * @param angle
+	 */
+	public void setPrimaryDirection(final double angle)
+	{
+		primaryDirection = (int) ((AngleMath.normalizeAngle(angle) * 127.0) / Math.PI);
+	}
+	
+	
+	/**
+	 * @return primary move direction
+	 */
+	public IVector2 getPrimaryDirection()
+	{
+		if (primaryDirection == UNUSED_PRIMARY_DIRECTION)
+		{
+			return Vector2f.ZERO_VECTOR;
+		}
+		
+		double angle = (primaryDirection / 127.0) * Math.PI;
+		return Vector2.fromAngle(angle);
 	}
 }

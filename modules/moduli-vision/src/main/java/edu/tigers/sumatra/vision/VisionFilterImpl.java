@@ -187,6 +187,7 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable
 				.withBall(ball)
 				.withBots(mergedRobots)
 				.withKickEvent(lastKickEvent)
+				.withKickFitState(lastBallFilterOutput.getPreprocessorOutput().getKickFitState().orElse(null))
 				.build();
 		
 		// forward frame for inspection

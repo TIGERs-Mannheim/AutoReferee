@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.persistence;
 
@@ -23,6 +23,7 @@ import edu.tigers.sumatra.persistence.proxy.ColorProxy;
 import edu.tigers.sumatra.persistence.proxy.ConcurrentHashMapProxy;
 import edu.tigers.sumatra.persistence.proxy.EnumMapProxy;
 import edu.tigers.sumatra.persistence.proxy.LinkedHashSetProxy;
+import edu.tigers.sumatra.persistence.proxy.TreeMapProxy;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
@@ -55,6 +56,7 @@ public class BerkeleyEnv
 		model.registerClass(EnumMapProxy.class);
 		model.registerClass(ConcurrentHashMapProxy.class);
 		model.registerClass(LinkedHashSetProxy.class);
+		model.registerClass(TreeMapProxy.class);
 	}
 	
 	

@@ -36,7 +36,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public class BotInterchangeCalculator
 {
 	@SuppressWarnings("unused")
-	private static final Logger log = Logger.getLogger(BallContactCalculator.class);
+	private static final Logger log = Logger.getLogger(BotInterchangeCalculator.class);
 	
 	@Configurable(comment = "Disable automatic robot interchange", defValue = "false")
 	private static boolean disableAutomaticRobotInterchange = false;

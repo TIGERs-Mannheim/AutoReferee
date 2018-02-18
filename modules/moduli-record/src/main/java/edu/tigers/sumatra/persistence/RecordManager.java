@@ -52,7 +52,6 @@ public class RecordManager extends AModule implements IRefereeObserver
 	/**
 	 * @param observer
 	 */
-	@SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 	public void addObserver(final IRecordObserver observer)
 	{
 		observers.add(observer);
@@ -62,17 +61,21 @@ public class RecordManager extends AModule implements IRefereeObserver
 	/**
 	 * @param observer
 	 */
-	@SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 	public void removeObserver(final IRecordObserver observer)
 	{
 		observers.remove(observer);
 	}
 	
 	
-	@SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 	public void addHook(IBerkeleyRecorderHook hook)
 	{
 		hooks.add(hook);
+	}
+	
+	
+	public void removeHook(IBerkeleyRecorderHook hook)
+	{
+		hooks.remove(hook);
 	}
 	
 	

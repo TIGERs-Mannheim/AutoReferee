@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -172,14 +172,14 @@ public class KickDetector implements IKickDetector
 			FilteredVisionBot bot = kickedBot.get(0);
 			log.debug("Kick detected, Bot: " + bot.getBotID());
 			
-			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot, balls.get(0).getTimestamp(), balls, false);
+			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot.getBotID(), balls.get(0).getTimestamp(), balls, false);
 			lastKickTimestamp = balls.get(0).getTimestamp();
 			
 			Optional<Pair<Long, IVector2>> backtrack = DirectionValidator.backtrack(kickedBot, balls);
 			if (backtrack.isPresent())
 			{
 				log.debug("Backtrack possible");
-				kick = new KickEvent(backtrack.get().getSecond(), bot, backtrack.get().getFirst(), balls, false);
+				kick = new KickEvent(backtrack.get().getSecond(), bot.getBotID(), backtrack.get().getFirst(), balls, false);
 				lastKickTimestamp = backtrack.get().getFirst();
 			}
 			

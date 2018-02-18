@@ -19,13 +19,19 @@ public enum EWpShapesLayer implements IShapeLayer
 	/**  */
 	FIELD_BORDERS("Field Borders", "Field", true),
 	/**  */
-	REFEREE("Referee", "Field", true, 1000),
+	REFEREE("Referee", "Field", true, 1000, EShapeLayerPersistenceType.ALWAYS_PERSIST),
 	/**  */
 	BALL_BUFFER("Ball buffer", "Field", false, NEVER_PERSIST),
 	/**  */
 	BOT_BUFFER("Bot buffer", "Field", false, NEVER_PERSIST),
 	/**  */
 	BOTS("Bots", "Field", true),
+	/**  */
+	BOT_FEEDBACK("Bot Feedback", "Field", false, EShapeLayerPersistenceType.DEBUG_PERSIST),
+	/**  */
+	BOT_FILTER("Bot Filter", "Field", false, EShapeLayerPersistenceType.DEBUG_PERSIST),
+	/** */
+	BOT_BUFFERED_TRAJ("Bot Buffered Traj", "Field", false, EShapeLayerPersistenceType.DEBUG_PERSIST),
 	/**  */
 	BALL("Ball", "Field", true),
 	/** */
@@ -53,9 +59,6 @@ public enum EWpShapesLayer implements IShapeLayer
 	}
 	
 	
-	/**
-	 * 
-	 */
 	EWpShapesLayer(final String name, final String category, final boolean visible)
 	{
 		this.name = name;
@@ -63,20 +66,6 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.visible = visible;
 		this.persistenceType = EShapeLayerPersistenceType.ALWAYS_PERSIST;
 		orderId = 10 + ordinal();
-		id = EWpShapesLayer.class.getCanonicalName() + name;
-	}
-	
-	
-	/**
-	 *
-	 */
-	EWpShapesLayer(final String name, final String category, final boolean visible, final int orderId)
-	{
-		this.name = name;
-		this.category = category;
-		this.visible = visible;
-		this.persistenceType = EShapeLayerPersistenceType.ALWAYS_PERSIST;
-		this.orderId = orderId;
 		id = EWpShapesLayer.class.getCanonicalName() + name;
 	}
 	
@@ -93,6 +82,18 @@ public enum EWpShapesLayer implements IShapeLayer
 		this.persistenceType = persistenceType;
 		this.orderId = 10 + ordinal();
 		id = EWpShapesLayer.class.getCanonicalName() + name;
+	}
+	
+	
+	EWpShapesLayer(final String name, final String category, final boolean visible, final int orderId,
+			final EShapeLayerPersistenceType persistenceType)
+	{
+		this.name = name;
+		this.category = category;
+		this.visible = visible;
+		this.orderId = orderId;
+		id = EWpShapesLayer.class.getCanonicalName() + name;
+		this.persistenceType = persistenceType;
 	}
 	
 	
@@ -136,6 +137,4 @@ public enum EWpShapesLayer implements IShapeLayer
 	{
 		return visible;
 	}
-	
-	
 }

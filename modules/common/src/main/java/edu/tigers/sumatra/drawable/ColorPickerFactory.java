@@ -174,7 +174,7 @@ public final class ColorPickerFactory
 	
 	
 	/**
-	 * Get color from a static color map
+	 * Get color from a static color map, scaled from red (zero) to green (one)
 	 * 
 	 * @return
 	 */

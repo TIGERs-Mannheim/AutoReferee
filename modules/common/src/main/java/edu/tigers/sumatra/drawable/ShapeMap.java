@@ -104,7 +104,7 @@ public class ShapeMap
 	private boolean persist(IShapeLayer identifier)
 	{
 		return identifier.getPersistenceType() == EShapeLayerPersistenceType.ALWAYS_PERSIST ||
-				(persistDebugShapes && identifier.getPersistenceType() != EShapeLayerPersistenceType.DEBUG_PERSIST);
+				(persistDebugShapes && identifier.getPersistenceType() == EShapeLayerPersistenceType.DEBUG_PERSIST);
 	}
 	
 	

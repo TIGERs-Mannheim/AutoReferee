@@ -8,6 +8,7 @@ import java.awt.Color;
 
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
+import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.animated.AnimatedCrosshair;
@@ -65,6 +66,12 @@ public class BallVisCalc implements IWpCalc
 			DrawableLine roll = new DrawableLine(rollLine, Color.orange);
 			roll.setStrokeWidth(5);
 			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(roll);
+		}
+		
+		if (wfw.getSimpleWorldFrame().getKickEvent().isPresent())
+		{
+			shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
+					.add(new DrawablePoint(wfw.getSimpleWorldFrame().getKickEvent().get().getPosition(), Color.red).withSize(50));
 		}
 	}
 }

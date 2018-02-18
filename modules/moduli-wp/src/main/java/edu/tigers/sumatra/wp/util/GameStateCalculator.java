@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -67,7 +67,7 @@ public class GameStateCalculator
 			lastRefMsgCounter = refereeMsg.getCommandCounter();
 			
 			processCommand(refereeMsg.getCommand(), lastRefCmd, builder);
-			processBallPlacement(refereeMsg.getCommand(), refereeMsg.getBallPlacementPos(), builder);
+			processBallPlacement(refereeMsg.getCommand(), refereeMsg.getBallPlacementPosNeutral(), builder);
 			processStage(refereeMsg.getStage(), builder);
 			storeBallPosition(refereeMsg.getCommand(), ballPos);
 			

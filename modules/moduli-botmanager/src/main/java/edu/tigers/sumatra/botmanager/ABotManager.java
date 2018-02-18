@@ -4,7 +4,6 @@
 package edu.tigers.sumatra.botmanager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.moduli.AModule;
@@ -19,7 +18,7 @@ import edu.tigers.sumatra.ids.BotID;
  * 
  * @author Gero
  */
-public abstract class ABotManager extends AModule
+public abstract class ABotManager extends AModule implements BotProvider
 {
 	private final List<IBotManagerObserver> observers = new CopyOnWriteArrayList<>();
 	
@@ -34,12 +33,6 @@ public abstract class ABotManager extends AModule
 	 * @param baseStation
 	 */
 	public abstract void addBasestation(IBaseStation baseStation);
-	
-	
-	/**
-	 * @return
-	 */
-	public abstract Map<BotID, ABot> getBots();
 	
 	
 	/**

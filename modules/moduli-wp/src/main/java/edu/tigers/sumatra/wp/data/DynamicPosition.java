@@ -44,6 +44,7 @@ public class DynamicPosition extends AVector2
 	private AObjectID trackedId;
 	private double lookahead = 0;
 	private boolean useKickerPos = true;
+	private double receiverRange = 0;
 	
 	
 	/**
@@ -329,5 +330,17 @@ public class DynamicPosition extends AVector2
 	public void setUseKickerPos(final boolean useKickerPos)
 	{
 		this.useKickerPos = useKickerPos;
+	}
+	
+	
+	public double getReceiverRange()
+	{
+		return receiverRange;
+	}
+	
+	
+	public void setReceiverRange(final double receiverRange)
+	{
+		this.receiverRange = receiverRange;
 	}
 }

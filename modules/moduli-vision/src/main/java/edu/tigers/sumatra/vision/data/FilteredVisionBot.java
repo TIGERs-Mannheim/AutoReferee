@@ -1,15 +1,19 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
 
 import org.apache.commons.lang.Validate;
 
+import edu.tigers.sumatra.bot.BotState;
+import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.Vector3;
 
 
 /**
@@ -99,6 +103,12 @@ public class FilteredVisionBot
 				.withOrientation(AngleMath.normalizeAngle(orientation + (angularVel * dt)))
 				.withAVel(angularVel)
 				.build();
+	}
+	
+	
+	public BotState toBotState()
+	{
+		return BotState.of(botID, State.of(Pose.from(pos, orientation), Vector3.from2d(vel, angularVel)));
 	}
 	
 	

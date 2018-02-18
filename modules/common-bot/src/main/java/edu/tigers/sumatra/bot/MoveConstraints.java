@@ -12,6 +12,8 @@ import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.bot.params.IBotMovementLimits;
 import edu.tigers.sumatra.data.collector.IExportable;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -29,6 +31,7 @@ public class MoveConstraints implements IExportable
 	private double velMaxFast = 0;
 	private double accMaxFast = 0;
 	private boolean fastMove = false;
+	private IVector2 primaryDirection = Vector2f.ZERO_VECTOR;
 	
 	
 	/**
@@ -73,6 +76,7 @@ public class MoveConstraints implements IExportable
 		velMaxFast = o.velMaxFast;
 		accMaxFast = o.accMaxFast;
 		fastMove = o.fastMove;
+		primaryDirection = o.primaryDirection;
 	}
 	
 	
@@ -91,6 +95,7 @@ public class MoveConstraints implements IExportable
 		jerkMaxW = mergeDouble(jerkMaxW, o.jerkMaxW);
 		accMaxFast = mergeDouble(accMaxFast, o.accMaxFast);
 		fastMove = o.fastMove;
+		primaryDirection = o.primaryDirection;
 	}
 	
 	
@@ -117,6 +122,7 @@ public class MoveConstraints implements IExportable
 				", velMaxFast=" + velMaxFast +
 				", accMaxFast=" + accMaxFast +
 				", fastMove=" + fastMove +
+				", primaryDirection=" + primaryDirection +
 				'}';
 	}
 	
@@ -134,6 +140,8 @@ public class MoveConstraints implements IExportable
 		nbrs.add(velMaxFast);
 		nbrs.add(accMaxFast);
 		nbrs.add(fastMove ? 1 : 0);
+		nbrs.add(primaryDirection.x());
+		nbrs.add(primaryDirection.y());
 		return nbrs;
 	}
 	
@@ -142,7 +150,7 @@ public class MoveConstraints implements IExportable
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("velMax", "accMax", "jerkMax", "velMaxW", "accMaxW", "jerkMaxW", "velMaxFast", "accMaxFast",
-				"fastMove");
+				"fastMove", "primaryDirectionX", "primaryDirectionY");
 	}
 	
 	
@@ -312,5 +320,23 @@ public class MoveConstraints implements IExportable
 	{
 		assert accMaxFast >= 0;
 		this.accMaxFast = accMaxFast;
+	}
+	
+	
+	/**
+	 * @param primaryDirection
+	 */
+	public void setPrimaryDirection(final IVector2 primaryDirection)
+	{
+		this.primaryDirection = primaryDirection;
+	}
+	
+	
+	/**
+	 * @return the primaryDirection
+	 */
+	public IVector2 getPrimaryDirection()
+	{
+		return primaryDirection;
 	}
 }

@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
+import java.util.Optional;
+
 import edu.tigers.sumatra.bot.MoveConstraints;
 import edu.tigers.sumatra.bot.RobotInfo;
+import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -46,12 +49,6 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 * @return the ballContact
 	 */
 	boolean hasBallContact();
-	
-	
-	/**
-	 * @return the visible
-	 */
-	boolean isVisible();
 	
 	
 	/**
@@ -96,12 +93,6 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	/**
 	 * @return
 	 */
-	double getaAcc();
-	
-	
-	/**
-	 * @return
-	 */
 	RobotInfo getRobotInfo();
 	
 	
@@ -117,4 +108,21 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 */
 	MoveConstraints getMoveConstraints();
 	
+	
+	/**
+	 * @return the current robot state
+	 */
+	State getBotState();
+	
+	
+	/**
+	 * @return the current robot state as reported by the vision filter
+	 */
+	Optional<State> getFilteredState();
+	
+	
+	/**
+	 * @return the buffered state of the current trajectory, synchronized with the filtered state
+	 */
+	Optional<State> getBufferedTrajState();
 }

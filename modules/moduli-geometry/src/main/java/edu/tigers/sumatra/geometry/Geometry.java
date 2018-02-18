@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -49,24 +49,23 @@ import edu.tigers.sumatra.model.SumatraModel;
  */
 public class Geometry
 {
-	private static final Logger log = Logger
-			.getLogger(Geometry.class.getName());
+	private static final Logger log = Logger.getLogger(Geometry.class.getName());
 	
 	/**
 	 * Field Geometry
 	 */
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double fieldLength = 9000;
+	private static double fieldLength = 12000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double fieldWidth = 6000;
+	private static double fieldWidth = 9000;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double boundaryWidth = 300;
+	private static double boundaryWidth = 350;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double judgesBorderWidth = 400;
+	private static double judgesBorderWidth = 425;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double centerCircleRadius = 500;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double goalWidth = 1000;
+	private static double goalWidth = 1200;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double goalDepth = 180;
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
@@ -91,6 +90,10 @@ public class Geometry
 	private static String leftPenaltyStretchName = "LeftPenaltyStretch";
 	@Configurable(defValue = "RightPenaltyStretch", comment = "Name of the RightPenaltyStretch line defined in SSL-Vision")
 	private static String rightPenaltyStretchName = "RightPenaltyStretch";
+	@Configurable(defValue = "LeftFieldRightPenaltyArc")
+	private static String leftFieldRightPenaltyArcName = "LeftFieldRightPenaltyArc";
+	@Configurable(defValue = "false", spezis = { "SUMATRA" })
+	private static boolean legacyPenArea = false;
 	
 	/**
 	 * Object Geometry
@@ -101,6 +104,8 @@ public class Geometry
 	private static double botRadius = 90;
 	@Configurable
 	private static double opponentCenter2DribblerDist = 85;
+	@Configurable
+	private static double goalWallThickness = 20;
 	
 	
 	/**
@@ -160,8 +165,16 @@ public class Geometry
 		fieldWReferee = fieldWBorders.withMargin(judgesBorderWidth);
 		goalOur = calcOurGoal(goalWidth, goalDepth, fieldLength);
 		goalTheir = calcTheirGoal(goalWidth, goalDepth, fieldLength);
-		penaltyAreaOur = new PenaltyArea(goalOur.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
-		penaltyAreaTheir = new PenaltyArea(goalTheir.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
+		
+		if (legacyPenArea)
+		{
+			penaltyAreaOur = new LegacyPenArea(penaltyAreaDepth, penaltyAreaFrontLineLength, -1);
+			penaltyAreaTheir = new LegacyPenArea(penaltyAreaDepth, penaltyAreaFrontLineLength, 1);
+		} else
+		{
+			penaltyAreaOur = new PenaltyArea(goalOur.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
+			penaltyAreaTheir = new PenaltyArea(goalTheir.getCenter(), penaltyAreaDepth, penaltyAreaFrontLineLength);
+		}
 		
 		centerCircle = calcCenterCircle(Vector2f.ZERO_VECTOR, centerCircleRadius);
 		
@@ -249,6 +262,8 @@ public class Geometry
 		List<CamFieldLine> lines = geometry.getField().getFieldLines();
 		List<CamFieldArc> arcs = geometry.getField().getFieldArcs();
 		
+		legacyPenArea = arcs.stream().anyMatch(l -> l.getName().equalsIgnoreCase(leftFieldRightPenaltyArcName));
+		
 		Optional<CamFieldLine> leftPenaltyStretch = lines.stream()
 				.filter(l -> l.getName().equals(leftPenaltyStretchName))
 				.findFirst();
@@ -323,13 +338,13 @@ public class Geometry
 	
 	private Goal calcOurGoal(final double goalSize, final double goalDepth, final double fieldLength)
 	{
-		return new Goal(goalSize, Vector2f.fromXY(-fieldLength / 2, 0), goalDepth);
+		return new Goal(goalSize, Vector2f.fromXY(-fieldLength / 2, 0), goalDepth, goalWallThickness);
 	}
 	
 	
 	private Goal calcTheirGoal(final double goalSize, final double goalDepth, final double fieldLength)
 	{
-		return new Goal(goalSize, Vector2f.fromXY(fieldLength / 2, 0), goalDepth);
+		return new Goal(goalSize, Vector2f.fromXY(fieldLength / 2, 0), goalDepth, goalWallThickness);
 	}
 	
 	

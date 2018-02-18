@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.ids;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -24,7 +25,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 {
 	private static final long serialVersionUID = -5736073179625081902L;
 	
-	private final Map<BotID, T> map;
+	private final SortedMap<BotID, T> map;
 	
 	
 	/**
@@ -32,7 +33,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap()
 	{
-		map = new LinkedHashMap<>();
+		map = new TreeMap<>();
 	}
 	
 	
@@ -43,26 +44,7 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final Map<BotID, T> initialMap)
 	{
-		map = initialMap;
-	}
-	
-	
-	/**
-	 * @param initialCapacity
-	 */
-	public BotIDMap(final int initialCapacity)
-	{
-		map = new LinkedHashMap<>(initialCapacity);
-	}
-	
-	
-	/**
-	 * @param initialCapacity
-	 * @param loadFactor
-	 */
-	public BotIDMap(final int initialCapacity, final float loadFactor)
-	{
-		map = new LinkedHashMap<>(initialCapacity, loadFactor);
+		map = new TreeMap<>(initialMap);
 	}
 	
 	
@@ -71,17 +53,10 @@ public class BotIDMap<T> implements IBotIDMap<T>
 	 */
 	public BotIDMap(final IBotIDMap<T> iMap)
 	{
-		map = new LinkedHashMap<>(iMap.size());
-		for (final Entry<BotID, T> entry : iMap.entrySet())
-		{
-			map.put(entry.getKey(), entry.getValue());
-		}
+		map = new TreeMap<>(iMap.getContentMap());
 	}
 	
 	
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
 	@Override
 	public T get(final BotID id) throws NoObjectWithThisIDException
 	{
@@ -187,10 +162,6 @@ public class BotIDMap<T> implements IBotIDMap<T>
 		return map.entrySet().iterator();
 	}
 	
-	
-	// --------------------------------------------------------------------------
-	// --- getter/setter --------------------------------------------------------
-	// --------------------------------------------------------------------------
 	
 	@Override
 	public Map<BotID, T> getContentMap()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -27,17 +27,17 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 @Persistent
 public class KickEvent implements IKickEvent
 {
-	private final BotID								kickingBot;
-	private final IVector2							position;
-	private final long								timestamp;
-	private final transient List<MergedBall>	recordsSinceKick	= new ArrayList<>();
-	private final boolean							isEarlyDetection;
+	private final BotID kickingBot;
+	private final IVector2 position;
+	private final long timestamp;
+	private final transient List<MergedBall> recordsSinceKick = new ArrayList<>();
+	private final boolean isEarlyDetection;
 	
 	
 	@SuppressWarnings("unused")
 	private KickEvent()
 	{
-		this(Vector2f.ZERO_VECTOR, FilteredVisionBot.Builder.emptyBot(), 0, Collections.emptyList(), false);
+		this(Vector2f.ZERO_VECTOR, BotID.noBot(), 0, Collections.emptyList(), false);
 	}
 	
 	
@@ -48,11 +48,11 @@ public class KickEvent implements IKickEvent
 	 * @param recordsSinceKick
 	 * @param earlyDetection
 	 */
-	public KickEvent(final IVector2 position, final FilteredVisionBot kickingBot, final long timestamp,
+	public KickEvent(final IVector2 position, final BotID kickingBot, final long timestamp,
 			final List<MergedBall> recordsSinceKick, final boolean earlyDetection)
 	{
 		this.position = position;
-		this.kickingBot = kickingBot.getBotID();
+		this.kickingBot = kickingBot;
 		this.timestamp = timestamp;
 		this.recordsSinceKick.addAll(recordsSinceKick);
 		isEarlyDetection = earlyDetection;
@@ -86,6 +86,13 @@ public class KickEvent implements IKickEvent
 	public long getTimestamp()
 	{
 		return timestamp;
+	}
+	
+	
+	@Override
+	public IKickEvent mirrored()
+	{
+		return new KickEvent(position.multiplyNew(-1), kickingBot, timestamp, recordsSinceKick, isEarlyDetection);
 	}
 	
 	

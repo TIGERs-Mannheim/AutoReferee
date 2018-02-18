@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
 
 import java.util.List;
 
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
@@ -100,4 +101,10 @@ public interface IPenaltyArea extends I2DShape
 	 * @return the projected point
 	 */
 	IVector2 projectPointOnToPenaltyAreaBorder(IVector2 point);
+	
+	
+	/**
+	 * @return the drawable shapes to draw this penalty area
+	 */
+	List<IDrawableShape> getDrawableShapes();
 }

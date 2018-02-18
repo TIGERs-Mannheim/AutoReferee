@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.math.botshape;
 
@@ -8,6 +8,7 @@ import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
@@ -109,6 +110,20 @@ public class BotShape implements IBotShape
 			final double center2Dribbler)
 	{
 		return botPos.addNew(Vector2.fromAngle(orientation).scaleTo(center2Dribbler));
+	}
+	
+	
+	/**
+	 * Calculates the position of the dribbler/kicker depending on bot position and orientation (angle)
+	 *
+	 * @param pose
+	 * @param center2Dribbler
+	 * @return kick position of a bot that is located at botPos
+	 */
+	public static IVector2 getKickerCenterPos(final Pose pose,
+			final double center2Dribbler)
+	{
+		return pose.getPos().addNew(Vector2.fromAngle(pose.getOrientation()).scaleTo(center2Dribbler));
 	}
 	
 	

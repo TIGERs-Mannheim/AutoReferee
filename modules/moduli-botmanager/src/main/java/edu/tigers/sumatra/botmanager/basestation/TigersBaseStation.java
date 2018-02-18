@@ -94,8 +94,6 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	private final Queue<BaseStationWifiStats> wifiStats = new LinkedList<>();
 	private final Queue<BaseStationEthStats> ethStats = new LinkedList<>();
 	
-	private int updateRate = 0;
-	
 	private BotParamsManager botParamsManager;
 	
 	
@@ -106,9 +104,6 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	}
 	
 	
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * Default constructor.
 	 */
@@ -243,7 +238,6 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 			// this gives a nice report over the last second every 100ms :)
 			stats = new BaseStationWifiStats(stats, wifiStats.remove());
 		}
-		updateRate = stats.getUpdateRate();
 		
 		Set<BotID> curBots = new HashSet<>();
 		for (BotStats botStats : stats.getBotStats())
@@ -266,7 +260,6 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 			if (!lastBots.contains(botId))
 			{
 				TigerBotV3 botV3 = new TigerBotV3(botId, this, botParamsManager);
-				botV3.setUpdateRate(updateRate - 10.0);
 				notifyBotOnline(botV3);
 			}
 		}
@@ -547,19 +540,10 @@ public class TigersBaseStation extends ABaseStation implements ITransceiverUDPOb
 	}
 	
 	
-	/**
-	 * @return the updateRate
-	 */
-	public final int getUpdateRate()
-	{
-		return updateRate;
-	}
-	
-	
 	private class PingThread implements Runnable
 	{
 		private int id = 0;
-		private int payloadLength = 0;
+		private final int payloadLength;
 		
 		private final Map<Integer, Long> activePings = new HashMap<>();
 		

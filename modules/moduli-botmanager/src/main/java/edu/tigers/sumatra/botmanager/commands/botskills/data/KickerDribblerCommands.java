@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.botmanager.commands.botskills.data;
@@ -73,7 +73,7 @@ public class KickerDribblerCommands
 			origKickSpeed = 10;
 		} else
 		{
-			origKickSpeed = Math.min(8, Math.max(0, kickSpeed));
+			origKickSpeed = kickSpeed;
 		}
 		this.device = device;
 		this.mode = mode;

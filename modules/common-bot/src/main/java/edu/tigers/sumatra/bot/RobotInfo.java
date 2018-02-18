@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
@@ -16,11 +16,8 @@ import edu.tigers.sumatra.bot.params.BotParams;
 import edu.tigers.sumatra.bot.params.IBotParams;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.EAiType;
-import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IMirrorable;
-import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 
 
@@ -34,8 +31,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final long timestamp;
 	private final EBotType type;
 	private final ERobotMode robotMode;
-	private final boolean ballContact;
-	private final EAiType aiType;
+	private final transient EAiType aiType;
 	private final transient ITrajectory<IVector3> trajectory;
 	private final Map<EFeature, EFeatureState> botFeatures;
 	private final float kickSpeed;
@@ -44,8 +40,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final float kickerVoltage;
 	private final float dribbleRpm;
 	private final int hardwareId;
-	private final IVector3 internalPose;
-	private final IVector3 internalVel;
+	private final BotState internalState;
 	private final boolean isBarrierInterrupted;
 	private final IBotParams botParams;
 	private final boolean isOk;
@@ -64,7 +59,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		timestamp = builder.timestamp;
 		type = builder.type;
 		robotMode = builder.robotMode;
-		ballContact = builder.ballContact;
 		aiType = builder.aiType;
 		botParams = builder.botParams;
 		trajectory = builder.trajectory;
@@ -75,8 +69,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		kickerVoltage = builder.kickerVoltage;
 		dribbleRpm = builder.dribbleRpm;
 		hardwareId = builder.hardwareId;
-		internalPose = builder.internalPose;
-		internalVel = builder.internalVel;
+		internalState = builder.internalState;
 		isBarrierInterrupted = builder.barrierInterrupted;
 		isOk = builder.isOk;
 	}
@@ -118,7 +111,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withTimestamp(timestamp)
 				.withType(EBotType.UNKNOWN)
 				.withRobotMode(ERobotMode.IDLE)
-				.withBallContact(false)
 				.withAiType(EAiType.NONE)
 				.withBotParams(new BotParams())
 				.withTrajectory(null)
@@ -129,8 +121,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withKickerVoltage(0)
 				.withDribbleRpm(0)
 				.withHardwareId(255)
-				.withInternalPose(null)
-				.withInternalVel(null)
+				.withInternalState(null)
 				.withOk(true);
 	}
 	
@@ -146,7 +137,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.timestamp = copy.timestamp;
 		builder.type = copy.type;
 		builder.robotMode = copy.robotMode;
-		builder.ballContact = copy.ballContact;
 		builder.aiType = copy.aiType;
 		builder.botParams = copy.botParams;
 		builder.trajectory = copy.trajectory;
@@ -157,8 +147,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.kickerVoltage = copy.kickerVoltage;
 		builder.dribbleRpm = copy.dribbleRpm;
 		builder.hardwareId = copy.hardwareId;
-		builder.internalPose = copy.internalPose;
-		builder.internalVel = copy.internalVel;
+		builder.internalState = copy.internalState;
 		builder.isOk = copy.isOk;
 		return builder;
 	}
@@ -177,17 +166,13 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	public RobotInfo mirrored()
 	{
 		Builder builder = copyBuilder(this);
-		if (internalPose != null)
+		if (internalState != null)
 		{
-			IVector2 pos = internalPose.getXYVector().multiplyNew(-1);
-			double orientation = AngleMath.normalizeAngle(internalPose.z() + AngleMath.PI);
-			builder.withInternalPose(Vector3.from2d(pos, orientation));
+			builder.withInternalState(internalState.mirrored());
 		}
-		if (internalVel != null)
+		if (trajectory != null)
 		{
-			IVector2 vel = internalVel.getXYVector().multiplyNew(-1);
-			double zVel = internalVel.z();
-			builder.withInternalVel(Vector3.from2d(vel, zVel));
+			builder.withTrajectory(trajectory.mirrored());
 		}
 		return builder.build();
 	}
@@ -214,12 +199,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	public ERobotMode getRobotMode()
 	{
 		return robotMode;
-	}
-	
-	
-	public boolean isBallContact()
-	{
-		return ballContact;
 	}
 	
 	
@@ -295,27 +274,15 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 	
 	
-	/**
-	 * @return the internal bot position, if known
-	 */
-	public Optional<IVector3> getInternalPose()
-	{
-		return Optional.ofNullable(internalPose);
-	}
-	
-	
-	/**
-	 * @return the internal bot velocity, if known
-	 */
-	public Optional<IVector3> getInternalVel()
-	{
-		return Optional.ofNullable(internalVel);
-	}
-	
-	
 	public boolean isBarrierInterrupted()
 	{
 		return isBarrierInterrupted;
+	}
+	
+	
+	public Optional<BotState> getInternalState()
+	{
+		return Optional.ofNullable(internalState);
 	}
 	
 	/**
@@ -327,7 +294,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private Long timestamp;
 		private EBotType type;
 		private ERobotMode robotMode;
-		private Boolean ballContact;
 		private EAiType aiType;
 		private ITrajectory<IVector3> trajectory;
 		private Map<EFeature, EFeatureState> botFeatures;
@@ -337,11 +303,10 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private Float kickerVoltage;
 		private Float dribbleRpm;
 		private int hardwareId;
-		private IVector3 internalPose;
-		private IVector3 internalVel;
+		private BotState internalState;
 		private boolean barrierInterrupted;
 		private IBotParams botParams;
-		private boolean isOk;
+		private boolean isOk = true;
 		
 		
 		private Builder()
@@ -411,20 +376,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		public Builder withRobotMode(final ERobotMode val)
 		{
 			robotMode = val;
-			return this;
-		}
-		
-		
-		/**
-		 * Sets the {@code ballContact} and returns a reference to this Builder so that the methods can be chained
-		 * together.
-		 *
-		 * @param val the {@code ballContact} to set
-		 * @return a reference to this Builder
-		 */
-		public Builder withBallContact(final boolean val)
-		{
-			ballContact = val;
 			return this;
 		}
 		
@@ -567,29 +518,15 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		
 		
 		/**
-		 * Sets the {@code internalPose} and returns a reference to this Builder so that the methods can be chained
+		 * Sets the {@code internalState} and returns a reference to this Builder so that the methods can be chained
 		 * together.
 		 *
-		 * @param internalPose the {@code internalPose} to set
+		 * @param internalState the {@code internalState} to set
 		 * @return a reference to this Builder
 		 */
-		public Builder withInternalPose(final IVector3 internalPose)
+		public Builder withInternalState(final BotState internalState)
 		{
-			this.internalPose = internalPose;
-			return this;
-		}
-		
-		
-		/**
-		 * Sets the {@code internalVel} and returns a reference to this Builder so that the methods can be chained
-		 * together.
-		 *
-		 * @param internalVel the {@code internalVel} to set
-		 * @return a reference to this Builder
-		 */
-		public Builder withInternalVel(final IVector3 internalVel)
-		{
-			this.internalVel = internalVel;
+			this.internalState = internalState;
 			return this;
 		}
 		
@@ -619,7 +556,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			Validate.notNull(botId);
 			Validate.notNull(type);
 			Validate.notNull(robotMode);
-			Validate.notNull(ballContact);
 			Validate.notNull(aiType);
 			Validate.notNull(botParams);
 			Validate.notNull(botFeatures);

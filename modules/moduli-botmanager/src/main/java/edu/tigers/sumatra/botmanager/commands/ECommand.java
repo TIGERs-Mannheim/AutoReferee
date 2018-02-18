@@ -38,6 +38,7 @@ import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqMotorModel;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqSetMode;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqVelocity;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerSystemPerformance;
+import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerSystemVersion;
 
 
 /**
@@ -62,6 +63,8 @@ public enum ECommand implements IInstanceableEnum
 	CMD_SYSTEM_MATCH_FEEDBACK(0x000E, new InstanceableClass(TigerSystemMatchFeedback.class)),
 	/** */
 	CMD_SYSTEM_PERFORMANCE(0x000F, new InstanceableClass(TigerSystemPerformance.class)),
+	/** */
+	CMD_SYSTEM_VERSION(0x0012, new InstanceableClass(TigerSystemVersion.class)),
 	/** */
 	CMD_SYSTEM_ACK(0x00F0, new InstanceableClass(TigerSystemAck.class)),
 	

@@ -72,7 +72,8 @@ public enum EBotSkill implements IInstanceableEnum
 			new InstanceableParameter(Double.TYPE, "velMax", "3"),
 			new InstanceableParameter(Double.TYPE, "velMaxW", "10"),
 			new InstanceableParameter(Double.TYPE, "accMax", "3"),
-			new InstanceableParameter(Double.TYPE, "accMaxW", "50"))),
+			new InstanceableParameter(Double.TYPE, "accMaxW", "50"),
+			new InstanceableParameter(IVector2.class, "primeDir", "0,0"))),
 	
 	/**  */
 	GLOBAL_VEL_XY_POS_W(5, new InstanceableClass(BotSkillGlobalVelXyPosW.class,
@@ -127,8 +128,8 @@ public enum EBotSkill implements IInstanceableEnum
 			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "3000")));
 	
 	
-	private final InstanceableClass	clazz;
-	private final int						id;
+	private final InstanceableClass clazz;
+	private final int id;
 	
 	
 	/**

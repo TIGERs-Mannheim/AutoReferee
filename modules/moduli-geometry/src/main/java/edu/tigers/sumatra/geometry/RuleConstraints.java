@@ -32,6 +32,8 @@ public class RuleConstraints
 	private static double stopSpeed = 1.5;
 	@Configurable(comment = "Distance between bots and penalty area in standard situations", defValue = "200.0")
 	private static double botToPenaltyAreaDistanceStandard = 200;
+	@Configurable(comment = "Ball placement accuracy tolerance of referee", defValue = "100.0")
+	private static double ballPlacementTolerance = 100;
 	
 	static
 	{
@@ -101,5 +103,11 @@ public class RuleConstraints
 	public static double getMaxBallSpeed()
 	{
 		return maxBallSpeed;
+	}
+	
+	
+	public static double getBallPlacementTolerance()
+	{
+		return ballPlacementTolerance;
 	}
 }

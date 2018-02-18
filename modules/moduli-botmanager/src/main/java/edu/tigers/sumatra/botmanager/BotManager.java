@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.botmanager;
@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.log4j.Logger;
@@ -17,7 +18,6 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 
-import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.sumatra.bot.IBot;
 import edu.tigers.sumatra.botmanager.basestation.IBaseStation;
 import edu.tigers.sumatra.botmanager.basestation.IBaseStationObserver;
@@ -49,7 +49,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 	
 	
 	@Override
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		autoCharge = Boolean.valueOf(SumatraModel.getInstance().getUserProperty(
 				PROP_AUTO_CHARGE, String.valueOf(true)));
@@ -197,6 +197,13 @@ public class BotManager extends ABotManager implements IConfigObserver
 		{
 			bot.afterApply(configClient);
 		}
+	}
+	
+	
+	@Override
+	public Optional<ABot> getBot(final BotID botID)
+	{
+		return Optional.ofNullable(getBots().get(botID));
 	}
 	
 	private class BaseStationObserver implements IBaseStationObserver

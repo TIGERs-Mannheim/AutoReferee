@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -122,7 +122,7 @@ public class EarlyKickDetector implements IKickDetector
 				.filter(b -> b.getTimestamp() >= kickBall.getTimestamp())
 				.collect(Collectors.toList());
 		
-		KickEvent kickEvent = new KickEvent(kickBall.getCamPos(), kickingBot, kickBall.getTimestamp(),
+		KickEvent kickEvent = new KickEvent(kickBall.getCamPos(), kickingBot.getBotID(), kickBall.getTimestamp(),
 				allBalls, true);
 		
 		log.debug("Early kick detected, bot: " + kickingBot.getBotID());

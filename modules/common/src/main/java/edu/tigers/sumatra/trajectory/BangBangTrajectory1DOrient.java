@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 19.07.2015
- * Author(s): AndreR
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.trajectory;
 
@@ -68,5 +63,13 @@ public class BangBangTrajectory1DOrient extends BangBangTrajectory1D
 	public Double getPositionMM(final double t)
 	{
 		return AngleMath.normalizeAngle(getValuesAtTime(t).pos);
+	}
+	
+	
+	@Override
+	public BangBangTrajectory1DOrient mirrored()
+	{
+		return new BangBangTrajectory1DOrient(AngleMath.mirror(initialPos), AngleMath.mirror(finalPos), -initialVel,
+				maxVel, maxAcc);
 	}
 }

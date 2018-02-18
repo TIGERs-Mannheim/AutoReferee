@@ -1,31 +1,48 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.sleepycat.persist.model.Persistent;
+
+import edu.tigers.sumatra.drawable.DrawableRectangle;
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
- * Class representing a penalty area
- * </pre>
+ * Class representing a rectangular penalty area
  */
+@Persistent
 public class PenaltyArea implements IPenaltyArea
 {
-	private Rectangle rectangle;
-	private Vector2f goalCenter;
+	private final double goalCenterX;
+	private final double length;
+	private final double depth;
+	
+	private transient Rectangle rectangle;
+	private transient IVector2 goalCenter;
+	
+	
+	@SuppressWarnings("unused") // used by berkeley
+	private PenaltyArea()
+	{
+		goalCenterX = 0;
+		length = 0;
+		depth = 0;
+	}
 	
 	
 	/**
@@ -37,19 +54,31 @@ public class PenaltyArea implements IPenaltyArea
 	 */
 	public PenaltyArea(final IVector2 goalCenter, final double depth, final double length)
 	{
-		double centerOffset = Math.signum(goalCenter.x()) * depth / -2.;
-		IVector2 center = goalCenter.addNew(Vector2.fromX(centerOffset));
-		rectangle = Rectangle.fromCenter(center, depth, length);
-		this.goalCenter = Vector2f.copy(goalCenter);
+		this.goalCenterX = goalCenter.x();
+		this.length = length;
+		this.depth = depth;
+		ensureInitialized();
+	}
+	
+	
+	private void ensureInitialized()
+	{
+		if (rectangle == null || goalCenter == null)
+		{
+			double centerOffset = Math.signum(goalCenterX) * depth / -2.;
+			IVector2 center = Vector2.fromX(goalCenterX + centerOffset);
+			rectangle = Rectangle.fromCenter(center, depth, length);
+			this.goalCenter = Vector2.fromX(goalCenterX);
+		}
 	}
 	
 	
 	@Override
 	public IPenaltyArea withMargin(final double margin)
 	{
-		double depth = Math.max(0, rectangle.xExtent() + margin);
-		double length = Math.max(0, rectangle.yExtent() + margin * 2);
-		return new PenaltyArea(goalCenter, depth, length);
+		double newDepth = Math.max(0, this.depth + margin);
+		double newLength = Math.max(0, this.length + margin * 2);
+		return new PenaltyArea(goalCenter, newDepth, newLength);
 	}
 	
 	
@@ -200,5 +229,14 @@ public class PenaltyArea implements IPenaltyArea
 	private double getDepth()
 	{
 		return rectangle.xExtent();
+	}
+	
+	
+	@Override
+	public List<IDrawableShape> getDrawableShapes()
+	{
+		List<IDrawableShape> shapes = new ArrayList<>(1);
+		shapes.add(new DrawableRectangle(getRectangle(), Color.white));
+		return shapes;
 	}
 }

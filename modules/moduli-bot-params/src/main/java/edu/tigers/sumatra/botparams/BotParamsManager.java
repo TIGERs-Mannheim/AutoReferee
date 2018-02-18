@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botparams;
 
@@ -18,8 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.bot.params.BotParams;
 import edu.tigers.sumatra.bot.params.IBotParams;
 import edu.tigers.sumatra.botparams.BotParamsDatabase.IBotParamsDatabaseObserver;
@@ -30,7 +28,7 @@ import edu.tigers.sumatra.botparams.BotParamsDatabase.IBotParamsDatabaseObserver
  * 
  * @author AndreR <andre@ryll.cc>
  */
-public class BotParamsManager extends AModule implements IBotParamsDatabaseObserver
+public class BotParamsManager extends AModule implements IBotParamsDatabaseObserver, BotParamsProvider
 {
 	private static final String DATABASE_FILE = "config/botParamsDatabase.json";
 	
@@ -50,14 +48,14 @@ public class BotParamsManager extends AModule implements IBotParamsDatabaseObser
 	
 	
 	@Override
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		loadDatabase();
 	}
 	
 	
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		// not used
 	}
@@ -81,13 +79,8 @@ public class BotParamsManager extends AModule implements IBotParamsDatabaseObser
 	}
 	
 	
-	/**
-	 * Get robot parameters for a specific label.
-	 * 
-	 * @param label
-	 * @return
-	 */
-	public IBotParams getBotParams(final EBotParamLabel label)
+	@Override
+	public IBotParams get(final EBotParamLabel label)
 	{
 		return database.getSelectedParams(label);
 	}
@@ -161,7 +154,7 @@ public class BotParamsManager extends AModule implements IBotParamsDatabaseObser
 	{
 		saveDatabase();
 		
-		notifyBotParamsUpdated(label, getBotParams(label));
+		notifyBotParamsUpdated(label, get(label));
 	}
 	
 	

@@ -32,15 +32,15 @@ public class BorderVisCalc implements IWpCalc
 	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
 	{
 		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS);
-
+		
 		shapes.add(new DrawableRectangle(Geometry.getField(), Color.WHITE));
 		shapes.add(new DrawableCircle(Geometry.getCenterCircle(), Color.WHITE));
 		shapes.add(new DrawableLine(Line.fromPoints(Vector2.fromXY(0, -Geometry.getFieldWidth() / 2.0),
 				Vector2.fromXY(0, Geometry.getFieldWidth() / 2.0)), Color.WHITE));
-
-		shapes.add(new DrawableRectangle(Geometry.getPenaltyAreaOur().getRectangle(), Color.WHITE));
-		shapes.add(new DrawableRectangle(Geometry.getPenaltyAreaTheir().getRectangle(), Color.WHITE));
-
+		
+		shapes.addAll(Geometry.getPenaltyAreaOur().getDrawableShapes());
+		shapes.addAll(Geometry.getPenaltyAreaTheir().getDrawableShapes());
+		
 		Color ourColor = wfw.getRefereeMsg().getNegativeHalfTeam() == ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalOur(), shapes, ourColor);
 		

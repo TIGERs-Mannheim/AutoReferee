@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.data;
@@ -37,7 +37,7 @@ public class GameState
 	public static final GameState HALT = Builder.empty().withState(EGameState.HALT).build();
 	
 	
-	// Required for persistance
+	@SuppressWarnings("unused") // Required for persistence
 	private GameState()
 	{
 		state = EGameState.HALT;
@@ -85,7 +85,7 @@ public class GameState
 	/**
 	 * @return Ball placement coordinates in vision frame.
 	 */
-	public IVector2 getBallPlacementPosition()
+	public IVector2 getBallPlacementPositionNeutral()
 	{
 		return ballPlacementPosition;
 	}

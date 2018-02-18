@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -17,10 +17,10 @@ public class BallParameters
 	private double	avgKickVelThresholdForAcc	= 1000.0;
 	
 	@Configurable(defValue = "-3600", comment = "Ball sliding acceleration [mm/s^2]", spezis = { "GRSIM", "SUMATRA",
-			"LAB", "TISCH", "ROBOCUP", "ANDRE" })
+			"LAB", "TISCH", "ROBOCUP", "ANDRE","NICOLAI" })
 	private double	accSlide							= -3600.0;
 	@Configurable(defValue = "-400", comment = "Ball rolling acceleration [mm/s^2]", spezis = { "GRSIM", "SUMATRA",
-			"LAB", "TISCH", "ROBOCUP", "ANDRE" })
+			"LAB", "TISCH", "ROBOCUP", "ANDRE","NICOLAI" })
 	private double	accRoll							= -400.0;
 	@Configurable(defValue = "0.62", comment = "Fraction of the initial velocity where the ball starts to roll")
 	private double	kSwitch							= 0.62;
