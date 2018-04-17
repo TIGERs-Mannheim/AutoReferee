@@ -34,22 +34,15 @@ import edu.tigers.sumatra.math.vector.Vector3;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
+public class TigerBot extends ABot implements IBotParamsManagerObserver
 {
-	private static final Logger log = Logger.getLogger(TigerBotV3.class
-			.getName());
+	private static final Logger log = Logger.getLogger(TigerBot.class.getName());
 	private final transient ReliableCmdManager reliableCmdManager = new ReliableCmdManager(this);
-	private transient TigerSystemMatchFeedback latestFeedbackCmd = null;
+	private transient TigerSystemMatchFeedback latestFeedbackCmd;
 	private transient BotParamsManager paramsManager;
 	private IBotParams botParamsV2013 = new BotParams();
 	private IBotParams botParamsV2016 = new BotParams();
 	private transient TigerSystemVersion latestVersionCmd = new TigerSystemVersion();
-	
-	
-	@SuppressWarnings("unused")
-	private TigerBotV3()
-	{
-	}
 	
 	
 	/**
@@ -57,23 +50,13 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 	 * @param baseStation
 	 * @param paramsManager
 	 */
-	public TigerBotV3(final BotID botId, final IBaseStation baseStation, final BotParamsManager paramsManager)
+	public TigerBot(final BotID botId, final IBaseStation baseStation, final BotParamsManager paramsManager)
 	{
-		this(EBotType.TIGER_V3, botId, baseStation);
+		super(EBotType.TIGER_V3, botId, baseStation);
+		latestFeedbackCmd = new TigerSystemMatchFeedback();
+		log.debug("New TigerBot with ID " + botId);
 		
 		this.paramsManager = paramsManager;
-	}
-	
-	
-	/**
-	 * @param botId
-	 * @param baseStation
-	 */
-	private TigerBotV3(final EBotType type, final BotID botId, final IBaseStation baseStation)
-	{
-		super(type, botId, baseStation);
-		latestFeedbackCmd = new TigerSystemMatchFeedback();
-		log.debug("New TigerBot V3 with ID" + botId);
 	}
 	
 	
@@ -89,6 +72,7 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 	@Override
 	public void start()
 	{
+		log.debug("Starting bot " + getBotId());
 		if (paramsManager != null)
 		{
 			botParamsV2013 = paramsManager.get(EBotParamLabel.TIGER_V2013);
@@ -101,6 +85,7 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 	@Override
 	public void stop()
 	{
+		log.debug("Stopping bot " + getBotId());
 		if (paramsManager != null)
 		{
 			paramsManager.removeObserver(this);
@@ -139,9 +124,6 @@ public class TigerBotV3 extends ABot implements IBotParamsManagerObserver
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	@Override
 	public int getHardwareId()
 	{

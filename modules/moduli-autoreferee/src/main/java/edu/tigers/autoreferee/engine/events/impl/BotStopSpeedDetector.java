@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Feb 13, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
@@ -132,7 +127,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 			}
 			lastViolators.add(violator);
 			
-			SpeedViolation violation = new SpeedViolation(EGameEvent.BOT_STOP_SPEED, frame.getTimestamp(), violator,
+			SpeedViolation violation = new SpeedViolation(EGameEvent.ROBOT_STOP_SPEED, frame.getTimestamp(), violator,
 					null, bot.getVel().getLength());
 			return Optional.of(violation);
 		}
@@ -144,7 +139,8 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	private Set<BotID> getViolators(final Collection<ITrackedBot> bots)
 	{
 		return bots.stream()
-				.filter(bot -> bot.getVel().getLength() > AutoRefConfig.getMaxBotStopSpeed())
+				.filter(bot -> bot.getFilteredState().orElse(bot.getBotState()).getVel2().getLength() > AutoRefConfig
+						.getMaxBotStopSpeed())
 				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());
 	}

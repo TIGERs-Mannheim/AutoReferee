@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.states.impl;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.ConfigRegistration;
 
-import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -22,6 +21,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
 import edu.tigers.autoreferee.remote.ICommandResult;
+import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -39,15 +39,15 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public abstract class AbstractAutoRefState implements IAutoRefState
 {
-	private boolean			firstRun		= true;
+	private boolean firstRun = true;
 	/** in ns */
-	private long				entryTime	= 0;
+	private long entryTime = 0;
 	/** in ns */
-	private long				currentTime	= 0;
+	private long currentTime = 0;
 	
-	private ICommandResult	lastCommand	= null;
+	private ICommandResult lastCommand = null;
 	
-	private boolean			canProceed;
+	private boolean canProceed;
 	
 	
 	protected static void registerClass(final Class<?> clazz)
@@ -61,7 +61,7 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	{
 		if (firstRun)
 		{
-			prepare(frame);
+			prepare(frame, ctx);
 			entryTime = frame.getTimestamp();
 			firstRun = false;
 		}
@@ -80,7 +80,13 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	}
 	
 	
-	protected void prepare(final IAutoRefFrame frame)
+	protected long getEntryTime()
+	{
+		return entryTime;
+	}
+	
+	
+	protected void prepare(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 	}
 	
@@ -88,12 +94,6 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	protected void doReset()
 	{
 		
-	}
-	
-	
-	protected long getEntryTime()
-	{
-		return entryTime;
 	}
 	
 	
@@ -127,7 +127,8 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	}
 	
 	
-	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd, final boolean doProceed)
+	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd,
+			final boolean doProceed)
 	{
 		if (doProceed)
 		{
@@ -152,15 +153,18 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	{
 		switch (gameEvent.getType())
 		{
-			case BOT_STOP_SPEED:
-			case BOT_COUNT:
+			case ROBOT_STOP_SPEED:
+			case NUMBER_OF_PLAYERS:
 				return false;
 			default:
 				break;
 		}
 		
-		ctx.sendCommand(new RefboxRemoteCommand(Command.STOP));
-		gameEvent.getCardPenalty().ifPresent(cardPenalty -> ctx.sendCommand(cardPenalty.toRefCommand()));
+		final SSL_Referee_Game_Event refereeGameEvent = gameEvent.toProtobuf();
+		ctx.sendCommand(new RefboxRemoteCommand(Command.STOP, refereeGameEvent));
+		
+		gameEvent.getCardPenalty()
+				.ifPresent(c -> ctx.sendCommand(new RefboxRemoteCommand(c.getType(), c.getCardTeam(), refereeGameEvent)));
 		
 		FollowUpAction followUp = gameEvent.getFollowUpAction();
 		if (followUp != null)
@@ -185,20 +189,6 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	{
 		List<ITrackedBot> violators = bots.stream()
 				.filter(bot -> VectorMath.distancePP(ballPos, bot.getPos()) < RuleConstraints.getStopRadius())
-				.collect(Collectors.toList());
-		
-		violators.forEach(bot -> shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED)));
-		
-		return violators.isEmpty();
-	}
-	
-	
-	protected boolean checkBotsStationary(final IAutoRefFrame frame, final List<IDrawableShape> shapes)
-	{
-		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
-		
-		List<ITrackedBot> violators = bots.stream()
-				.filter(bot -> bot.getVel().getLength() > AutoRefConfig.getBotStationarySpeedThreshold())
 				.collect(Collectors.toList());
 		
 		violators.forEach(bot -> shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED)));

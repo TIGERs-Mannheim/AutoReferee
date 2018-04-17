@@ -1,16 +1,13 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Nov 8, 2015
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events;
 
 import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
+import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
+import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event.Originator;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 
@@ -20,15 +17,15 @@ import edu.tigers.sumatra.ids.ETeamColor;
  */
 public class GameEvent implements IGameEvent
 {
-	private final EGameEvent		eventType;
-	private final long				timestamp;						// ns
-	private final ETeamColor		responsibleTeam;
-	private final BotID				responsibleBot;
+	private final EGameEvent eventType;
+	private final long timestamp; // ns
+	private final ETeamColor responsibleTeam;
+	private final BotID responsibleBot;
 	
-	private final FollowUpAction	followUpAction;
-	private final CardPenalty		cardPenalty;
+	private final FollowUpAction followUpAction;
+	private final CardPenalty cardPenalty;
 	
-	private String						cachedLogString	= null;
+	private String cachedLogString = null;
 	
 	
 	/**
@@ -98,6 +95,35 @@ public class GameEvent implements IGameEvent
 	}
 	
 	
+	@Override
+	public SSL_Referee_Game_Event toProtobuf()
+	{
+		SSL_Referee_Game_Event.Builder event = SSL_Referee_Game_Event.newBuilder();
+		event.setGameEventType(eventType.getGameEventType());
+		Originator.Builder originator = Originator.newBuilder();
+		originator.setTeam(getOriginatingTeam());
+		if (responsibleBot != null && responsibleBot.isBot())
+		{
+			originator.setBotId(responsibleBot.getNumber());
+		}
+		event.setOriginator(originator);
+		return event.build();
+	}
+	
+	
+	private SSL_Referee_Game_Event.Team getOriginatingTeam()
+	{
+		if (responsibleTeam == ETeamColor.YELLOW)
+		{
+			return SSL_Referee_Game_Event.Team.TEAM_YELLOW;
+		} else if (responsibleTeam == ETeamColor.BLUE)
+		{
+			return SSL_Referee_Game_Event.Team.TEAM_BLUE;
+		}
+		return SSL_Referee_Game_Event.Team.TEAM_UNKNOWN;
+	}
+	
+	
 	/**
 	 * @return
 	 */
@@ -143,17 +169,11 @@ public class GameEvent implements IGameEvent
 	
 	
 	@Override
-	public String buildLogString()
+	public synchronized String buildLogString()
 	{
 		if (cachedLogString == null)
 		{
-			synchronized (this)
-			{
-				if (cachedLogString == null)
-				{
-					cachedLogString = generateLogString();
-				}
-			}
+			cachedLogString = generateLogString();
 		}
 		return cachedLogString;
 	}

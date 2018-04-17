@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.wp.ball.trajectory.chipped;
 
@@ -15,6 +15,8 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -334,16 +336,16 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	
 	
 	@Override
-	public ILine getTravelLineRolling()
+	public ILineSegment getTravelLineRolling()
 	{
 		List<IVector2> locs = getTouchdownLocations();
 		if (locs.isEmpty())
 		{
-			return getTravelLine();
+			return getTravelLineSegment();
 		}
 		
 		IVector2 finalPos = getPosByVel(0).getXYVector();
-		return Line.fromPoints(locs.get(locs.size() - 1), finalPos);
+		return Lines.segmentFromPoints(locs.get(locs.size() - 1), finalPos);
 	}
 	
 	

@@ -45,7 +45,7 @@ public final class BotID extends AObjectID
 	private BotID()
 	{
 		super();
-		teamColor = ETeamColor.UNINITIALIZED;
+		teamColor = ETeamColor.NEUTRAL;
 	}
 	
 	
@@ -91,7 +91,7 @@ public final class BotID extends AObjectID
 		{
 			case BLUE:
 				return createBotId(BLUE_BOT_IDS, number, color);
-			case UNINITIALIZED:
+			case NEUTRAL:
 				return createBotId(UNKNOWN_BOT_IDS, number, color);
 			case YELLOW:
 				return createBotId(YELLOW_BOT_IDS, number, color);

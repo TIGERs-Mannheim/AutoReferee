@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.commands.basestation;
 
@@ -74,7 +74,7 @@ public class BaseStationACommand extends ACommand
 	{
 		if (child == null)
 		{
-			child = CommandFactory.getInstance().decode(childData, false);
+			child = CommandFactory.getInstance().decode(childData);
 		}
 		
 		return child;
@@ -86,7 +86,7 @@ public class BaseStationACommand extends ACommand
 	 */
 	public void setChild(final ACommand child)
 	{
-		childData = CommandFactory.getInstance().encode(child, false);
+		childData = CommandFactory.getInstance().encode(child);
 		this.child = child;
 	}
 	

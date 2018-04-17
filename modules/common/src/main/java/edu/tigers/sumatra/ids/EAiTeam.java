@@ -11,26 +11,23 @@ package edu.tigers.sumatra.ids;
 public enum EAiTeam
 {
 	/** */
-	YELLOW(ETeamColor.YELLOW, EAiType.PRIMARY, true),
+	YELLOW(ETeamColor.YELLOW, true),
 	/** */
-	BLUE(ETeamColor.BLUE, EAiType.PRIMARY, true),
-
+	BLUE(ETeamColor.BLUE, true),
+	
 	;
 	
 	private ETeamColor teamColor;
-	private EAiType aiType;
 	private boolean activeByDefault;
 	
 	
 	/**
 	 * @param teamColor the associated team color
-	 * @param aiType the ai type
 	 * @param activeByDefault active by default
 	 */
-	EAiTeam(ETeamColor teamColor, EAiType aiType, boolean activeByDefault)
+	EAiTeam(ETeamColor teamColor, boolean activeByDefault)
 	{
 		this.teamColor = teamColor;
-		this.aiType = aiType;
 		this.activeByDefault = activeByDefault;
 	}
 	
@@ -44,12 +41,6 @@ public enum EAiTeam
 	public boolean isActiveByDefault()
 	{
 		return activeByDefault;
-	}
-	
-	
-	public EAiType getAiType()
-	{
-		return aiType;
 	}
 	
 	
@@ -70,50 +61,16 @@ public enum EAiTeam
 		}
 		throw new IllegalArgumentException("Can not map team color: " + teamColor);
 	}
-
+	
 	
 	/**
-	 * @return true, if it is a primary AI
+	 * Check if color of aiteam matches color
+	 *
+	 * @param color
+	 * @return
 	 */
-	public boolean isPrimary()
+	public boolean matchesColor(ETeamColor color)
 	{
-		return aiType == EAiType.PRIMARY;
+		return color == teamColor;
 	}
-
-
-    /**
-     * Check if color of aiteam matches color
-     *
-     * @param color
-     * @return
-     */
-    public boolean matchesColor(ETeamColor color)
-    {
-        return color == teamColor;
-    }
-
-
-    /**
-     * Check if type of aiteam matches aitype
-     *
-     * @param type
-     * @return
-     */
-    public boolean matchesType(EAiType type)
-    {
-        return type == aiType;
-    }
-
-
-    /**
-     * Check if type and color match
-     *
-     * @param color
-     * @param type
-     * @return
-     */
-    public boolean matchesTypeAndColor(ETeamColor color, EAiType type)
-    {
-        return matchesColor(color) && matchesType(type);
-    }
 }

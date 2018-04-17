@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.trajectory;
@@ -12,6 +12,8 @@ import org.apache.commons.lang.Validate;
 
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
@@ -190,9 +192,17 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	
 	
 	@Override
-	public ILine getTravelLineRolling()
+	public ILineSegment getTravelLineSegment()
 	{
-		return getTravelLine();
+		IVector2 finalPos = getPosByTime(getTimeAtRest() - tKickToNow).getXYVector();
+		return Lines.segmentFromPoints(getPosByTime(0).getXYVector(), finalPos);
+	}
+	
+	
+	@Override
+	public ILineSegment getTravelLineRolling()
+	{
+		return getTravelLineSegment();
 	}
 	
 	

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
@@ -23,8 +23,8 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 @Persistent
 public class DrawableCircle extends ADrawableWithStroke
 {
-	private ICircle	circle;
-	private boolean	fill	= false;
+	private ICircle circle;
+	private boolean fill = false;
 	
 	
 	/**
@@ -94,5 +94,16 @@ public class DrawableCircle extends ADrawableWithStroke
 	public void setFill(final boolean fill)
 	{
 		this.fill = fill;
+	}
+	
+	
+	/**
+	 * @param fill
+	 * @return this
+	 */
+	public DrawableCircle withFill(final boolean fill)
+	{
+		this.fill = fill;
+		return this;
 	}
 }

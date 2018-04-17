@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -506,24 +506,24 @@ public class CamFilter
 		
 		// Draw camera id
 		DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(camId));
-		id.setOffset(Vector2.fromXY(-30, -80));
+		id.withOffset(Vector2.fromXY(-30, -80));
 		id.setColor(Color.CYAN);
-		id.setFontHeight(120);
+		id.withFontHeight(120);
 		shapes.add(id);
 		
 		// Draw update rate of this camera (smoothed)
 		DrawableAnnotation camRate = new DrawableAnnotation(pos,
 				String.format("Rate: %.1fHz", 1.0 / getAverageFrameDt()));
-		camRate.setOffset(Vector2.fromXY(40, -60));
-		camRate.setFontHeight(50);
+		camRate.withOffset(Vector2.fromXY(40, -60));
+		camRate.withFontHeight(50);
 		camRate.setColor(Color.GRAY);
 		shapes.add(camRate);
 		
 		// Annotate mounting height of this cam
 		DrawableAnnotation height = new DrawableAnnotation(pos,
 				String.format("Height: %.2fm", pos3D.z() * 0.001));
-		height.setOffset(Vector2.fromXY(40, 60));
-		height.setFontHeight(50);
+		height.withOffset(Vector2.fromXY(40, 60));
+		height.withFontHeight(50);
 		height.setColor(Color.GRAY);
 		shapes.add(height);
 		
@@ -548,14 +548,14 @@ public class CamFilter
 			IVector2 pos = tracker.getPosition(timestamp);
 			
 			DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(camId), true);
-			id.setOffset(Vector2.fromY(-150));
+			id.withOffset(Vector2.fromY(-150));
 			id.setColor(tracker.getBotId().getTeamColor().getColor());
 			shapes.add(id);
 			
 			DrawableAnnotation age = new DrawableAnnotation(pos,
 					String.format("%d: %.3fs", camId,
 							(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9));
-			age.setOffset(Vector2.fromXY(150, (camId * 45.0) - 100.0));
+			age.withOffset(Vector2.fromXY(150, (camId * 45.0) - 100.0));
 			age.setColor(Color.GREEN);
 			shapes.add(age);
 			
@@ -591,8 +591,8 @@ public class CamFilter
 			shapes.add(pos);
 			
 			DrawableAnnotation id = new DrawableAnnotation(b.getFlatPos(), Integer.toString(camId));
-			id.setFontHeight(24);
-			id.setCenterHorizontally(true);
+			id.withFontHeight(24);
+			id.withCenterHorizontally(true);
 			id.setColor(Color.BLACK);
 			id.setStrokeWidth(2);
 			shapes.add(id);

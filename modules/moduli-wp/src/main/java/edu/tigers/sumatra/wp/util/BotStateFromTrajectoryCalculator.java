@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.g3force.configurable.ConfigRegistration;
-
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.bot.State;
@@ -23,11 +21,6 @@ import edu.tigers.sumatra.trajectory.ITrajectory;
 public class BotStateFromTrajectoryCalculator
 {
 	private static final int BUFFER_SIZE = 30;
-	
-	static
-	{
-		ConfigRegistration.registerClass("wp", BotStateFromTrajectoryCalculator.class);
-	}
 	
 	private final Map<BotID, DataSync<BotState>> botStateBuffer = new HashMap<>();
 	

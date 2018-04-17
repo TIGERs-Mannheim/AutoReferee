@@ -1,20 +1,21 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
-
-import edu.tigers.moduli.Moduli;
-import org.apache.log4j.Appender;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+
+import org.apache.log4j.Appender;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
+import edu.tigers.moduli.Moduli;
 
 
 /**
@@ -130,7 +131,7 @@ public final class SumatraModel extends Moduli
 	/**
 	 * @return The {@link File} which represents the user-properties file
 	 */
-	public File getUserPropertiesFile()
+	private File getUserPropertiesFile()
 	{
 		final String userName = System.getProperty("user.name");
 		final String filename = CONFIG_SETTINGS_PATH + userName + ".props";
@@ -163,14 +164,6 @@ public final class SumatraModel extends Moduli
 	// --------------------------------------------------------------------------
 	// --- app properties -------------------------------------------------------
 	// --------------------------------------------------------------------------
-	/**
-	 * @param userSettings the appProperties to set
-	 */
-	public void setUserSettings(final Properties userSettings)
-	{
-		this.userSettings = userSettings;
-	}
-	
 	
 	/**
 	 * @return The applications {@link Properties}
@@ -324,15 +317,6 @@ public final class SumatraModel extends Moduli
 				log.warn("Could not close " + uf.getPath() + ", configuration is not saved", e);
 			}
 		}
-	}
-	
-	
-	/**
-	 * Switch the logger of
-	 */
-	public static void noLogging()
-	{
-		Logger.getRootLogger().setLevel(Level.OFF);
 	}
 	
 	

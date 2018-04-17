@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.collision;
@@ -95,8 +95,14 @@ public class BotCollision implements ICollisionObject
 			impulse = Vector2.fromAngle(pos.z()).scaleTo(kickSpeed).getXYZVector();
 		}
 		
+		if (sticky)
+		{
+			lineCollision.setAcc(Vector2.fromAngle(pos.z()).scaleTo(-10));
+		}
+		
 		lineCollision.setImpulse(impulse);
 		lineCollision.setSticky(sticky);
+		lineCollision.setDampFactor(1);
 	}
 	
 	
@@ -140,13 +146,7 @@ public class BotCollision implements ICollisionObject
 			{
 				IVector2 normal = Vector2.fromAngle(pos.z());
 				IVector2 colPos;
-				if (lineCollision.isSticky())
-				{
-					colPos = pos.getXYVector().addNew(normal.scaleToNew(center2DribblerDist + Geometry.getBallRadius()));
-				} else
-				{
-					colPos = frontLine.leadPointOf(prePos.getXYVector());
-				}
+				colPos = frontLine.leadPointOf(prePos.getXYVector());
 				Collision collision = new Collision(colPos, normal, this);
 				return Optional.of(collision);
 			}

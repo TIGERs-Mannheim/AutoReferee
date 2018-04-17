@@ -122,7 +122,7 @@ public class AutoRefMath
 	}
 	
 	
-	private static IVector2 getOffenseKickPos(final IVector2 pos)
+	public static IVector2 getOffenseKickPos(final IVector2 pos)
 	{
 		IPenaltyArea penArea = NGeometry.getPenaltyArea(NGeometry.getTeamOfClosestGoalLine(pos))
 				.withMargin(OFFENSE_FREE_KICK_DISTANCE);

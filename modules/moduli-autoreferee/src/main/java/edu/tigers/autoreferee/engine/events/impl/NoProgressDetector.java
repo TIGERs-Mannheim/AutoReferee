@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.GameEvent;
@@ -75,8 +76,9 @@ public class NoProgressDetector extends APreparingGameEventDetector
 		
 		if ((frame.getTimestamp() - lastTime) / 1e9 > TIMEOUT)
 		{
+			IVector2 placementPos = AutoRefMath.getOffenseKickPos(ballPos);
 			FollowUpAction followUp = new FollowUpAction(FollowUpAction.EActionType.FORCE_START, ETeamColor.NEUTRAL,
-					ballPos);
+					placementPos);
 			GameEvent violation = new GameEvent(EGameEvent.NO_PROGRESS_IN_GAME, frame.getTimestamp(), ETeamColor.NEUTRAL,
 					followUp);
 			lastTime = 0;

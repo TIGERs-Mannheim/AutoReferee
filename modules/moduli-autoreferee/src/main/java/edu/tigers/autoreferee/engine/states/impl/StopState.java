@@ -7,6 +7,7 @@ package edu.tigers.autoreferee.engine.states.impl;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
@@ -19,6 +20,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
+import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -92,22 +94,27 @@ public class StopState extends AbstractAutoRefState
 	
 	private Long readyTime;
 	private boolean simulationPlacementAttempted = false;
+	private Referee.SSL_Referee.Stage lastStage = null;
 	
-	
-	/**
-	 * Creates a new StopState
-	 */
-	public StopState()
-	{
-		// Nothing to do
-	}
+	private final Random rnd = new Random(System.currentTimeMillis());
 	
 	
 	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void prepare(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 		readyTime = null;
 		simulationPlacementAttempted = false;
+	}
+	
+	
+	private void updatePlacementCounter(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
+	{
+		Referee.SSL_Referee.Stage stage = frame.getRefereeMsg().getStage();
+		if (lastStage == null || lastStage != stage)
+		{
+			lastStage = stage;
+			ctx.getAutoRefGlobalState().getFailedBallPlacements().clear();
+		}
 	}
 	
 	
@@ -115,6 +122,7 @@ public class StopState extends AbstractAutoRefState
 	@Override
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
+		updatePlacementCounter(frame, ctx);
 		if (ctx.getFollowUpAction() == null)
 		{
 			setCanProceed(false);
@@ -165,12 +173,17 @@ public class StopState extends AbstractAutoRefState
 			readyTime = null;
 		}
 		
-		if (!placementWasAttempted(frame) && (!AutoRefConfig.getBallPlacementTeams().isEmpty()) && ball.isOnCam())
+		
+		final ETeamColor placementTeam = getPlacementTeam(action, ctx);
+		if (placementTeam != ETeamColor.NEUTRAL && !placementWasAttemptedBy(frame, placementTeam) && ball.isOnCam())
 		{
 			if (ballStationary && !ballPlaced)
 			{
 				// Try to place the ball
-				sendCommandIfReady(ctx, getPlacementCommand(kickPos, action.getTeamInFavor()));
+				final RefboxRemoteCommand placementCommand = new RefboxRemoteCommand(
+						placementCommand(placementTeam),
+						kickPos, null);
+				sendCommandIfReady(ctx, placementCommand);
 				return;
 			}
 		} else if (moveBallSlowlyToTarget)
@@ -184,7 +197,7 @@ public class StopState extends AbstractAutoRefState
 		
 		if (readyWaitTimeOver || ctx.doProceed())
 		{
-			RefboxRemoteCommand cmd = new RefboxRemoteCommand(action.getCommand());
+			RefboxRemoteCommand cmd = new RefboxRemoteCommand(action.getCommand(), null);
 			if (ctx.doProceed())
 			{
 				sendCommand(ctx, cmd);
@@ -207,54 +220,60 @@ public class StopState extends AbstractAutoRefState
 		
 		IVector2 textPos = kickPos;
 		DrawableAnnotation placementText = new DrawableAnnotation(textPos, "New Ball Pos", Color.BLACK);
-		placementText.setFontHeight(100);
-		placementText.setCenterHorizontally(true);
-		placementText.setOffset(Vector2.fromY(-radius - 100));
+		placementText.withFontHeight(100);
+		placementText.withCenterHorizontally(true);
+		placementText.withOffset(Vector2.fromY(-radius - 100));
 		shapes.add(placementText);
 	}
 	
 	
-	/**
-	 * @return
-	 */
-	private RefboxRemoteCommand getPlacementCommand(final IVector2 kickPos, final ETeamColor kickExecutingTeam)
+	private ETeamColor getPlacementTeam(final FollowUpAction followUpAction, final IAutoRefStateContext ctx)
 	{
+		ETeamColor kickExecutingTeam = followUpAction.getTeamInFavor();
 		List<ETeamColor> capableTeams = AutoRefConfig.getBallPlacementTeams();
+		capableTeams.removeIf(t -> ctx.getAutoRefGlobalState().getFailedBallPlacements().getOrDefault(t, 0) >= 5);
 		if (capableTeams.isEmpty())
 		{
-			return null;
+			return ETeamColor.NEUTRAL;
 		}
 		
-		/*
-		 * At this point we know that the size of the list of capable teams is greater than zero. We pick the first entry
-		 * in the list by default and perform further checks if the size is greater than 1 which means both teams are
-		 * capable of placing the ball.
-		 */
-		ETeamColor placingTeam = capableTeams.get(0);
-		
-		ETeamColor preference = AutoRefConfig.getBallPlacementPreference();
-		if (capableTeams.size() > 1)
+		if (kickExecutingTeam == ETeamColor.NEUTRAL)
 		{
-			/*
-			 * At this point both teams are capable of placing the ball which means that we need to pick one of them. The
-			 * preference setting takes precedence but is only considered if it is initialized. If it is not initialized we
-			 * try to let the team which will later on execute the kick place the ball. If this fails too, we simply fall
-			 * back to the first team in the list which has already been set before.
-			 */
-			if (preference.isNonNeutral())
+			if (capableTeams.size() == 2)
 			{
-				placingTeam = preference;
+				return rnd.nextInt(2) == 0 ? ETeamColor.BLUE : ETeamColor.YELLOW;
+			}
+			return capableTeams.get(0);
+		}
+		return ballPlacingTeam(followUpAction);
+	}
+	
+	
+	private Command placementCommand(ETeamColor teamColor)
+	{
+		return teamColor == ETeamColor.BLUE
+				? Command.BALL_PLACEMENT_BLUE
+				: Command.BALL_PLACEMENT_YELLOW;
+	}
+	
+	
+	private ETeamColor ballPlacingTeam(final FollowUpAction followUpAction)
+	{
+		ETeamColor teamInFavor = followUpAction.getTeamInFavor();
+		List<ETeamColor> capableTeams = AutoRefConfig.getBallPlacementTeams();
+		if (!capableTeams.contains(teamInFavor))
+		{
+			if (capableTeams.contains(teamInFavor.opposite())
+					// rules: ball for penalty kicks are not placed by opponent team
+					&& followUpAction.getActionType() != FollowUpAction.EActionType.PENALTY)
+			{
+				teamInFavor = teamInFavor.opposite();
 			} else
 			{
-				if (kickExecutingTeam.isNonNeutral())
-				{
-					placingTeam = kickExecutingTeam;
-				}
+				teamInFavor = ETeamColor.NEUTRAL;
 			}
 		}
-		
-		Command cmd = placingTeam == ETeamColor.BLUE ? Command.BALL_PLACEMENT_BLUE : Command.BALL_PLACEMENT_YELLOW;
-		return new RefboxRemoteCommand(cmd, kickPos);
+		return teamInFavor;
 	}
 	
 	
@@ -300,9 +319,9 @@ public class StopState extends AbstractAutoRefState
 	}
 	
 	
-	private boolean placementWasAttempted(final IAutoRefFrame frame)
+	private boolean placementWasAttemptedBy(final IAutoRefFrame frame, final ETeamColor teamColor)
 	{
-		return !determineAttemptedPlacements(frame).isEmpty();
+		return determineAttemptedPlacements(frame).contains(teamColor);
 	}
 	
 	

@@ -7,6 +7,8 @@ package edu.tigers.autoreferee.engine.events.impl;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -20,6 +22,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
 
@@ -30,6 +33,14 @@ import edu.tigers.sumatra.referee.data.GameState;
 public class GoalDetector extends APreparingGameEventDetector
 {
 	private static final int PRIORITY = 1;
+	
+	@Configurable(comment = "Continue the game with a kick off after goals", defValue = "false")
+	private static boolean continueGameAfterGoal = false;
+	
+	static
+	{
+		AGameEventDetector.registerClass(GoalDetector.class);
+	}
 	
 	private BotPosition indirectKickPos = null;
 	private PossibleGoal lastGoal = null;
@@ -113,14 +124,24 @@ public class GoalDetector extends APreparingGameEventDetector
 				
 				goalDetected = true;
 				ETeamColor goalColor = goalShot.getGoalColor();
-				FollowUpAction followUp = new FollowUpAction(EActionType.KICK_OFF, goalColor, Geometry.getCenter());
+				
+				FollowUpAction followUp = continueGame()
+						? new FollowUpAction(EActionType.KICK_OFF, goalColor, Geometry.getCenter())
+						: null;
 				return Optional.of(new GameEvent(EGameEvent.GOAL, frame.getTimestamp(), goalColor.opposite(), followUp));
 			}
 		} else
+		
 		{
 			goalDetected = false;
 		}
 		return Optional.empty();
+	}
+	
+	
+	private boolean continueGame()
+	{
+		return "SUMATRA".equals(SumatraModel.getInstance().getEnvironment()) || continueGameAfterGoal;
 	}
 	
 	

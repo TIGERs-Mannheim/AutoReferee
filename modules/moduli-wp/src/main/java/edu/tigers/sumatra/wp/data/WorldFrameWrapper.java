@@ -5,14 +5,11 @@
 package edu.tigers.sumatra.wp.data;
 
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.EAiTeam;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -32,7 +29,6 @@ public class WorldFrameWrapper
 	private final long timestampMs = System.currentTimeMillis();
 	private final SimpleWorldFrame simpleWorldFrame;
 	private final RefereeMsg refereeMsg;
-	private Set<BotID> botsToInterchange = new HashSet<>();
 	private GameState gameState = GameState.HALT;
 	
 	private final transient Map<EAiTeam, WorldFrame> worldFrames = new EnumMap<>(EAiTeam.class);
@@ -47,14 +43,7 @@ public class WorldFrameWrapper
 	}
 	
 	
-	/**
-	 * @param swf
-	 * @param refereeMsg
-	 * @param gameState
-	 * @param botsToInterchange
-	 */
-	public WorldFrameWrapper(final SimpleWorldFrame swf, final RefereeMsg refereeMsg,
-			final GameState gameState, final Set<BotID> botsToInterchange)
+	public WorldFrameWrapper(final SimpleWorldFrame swf, final RefereeMsg refereeMsg, final GameState gameState)
 	{
 		assert refereeMsg != null;
 		assert swf != null;
@@ -62,7 +51,6 @@ public class WorldFrameWrapper
 		simpleWorldFrame = swf;
 		this.refereeMsg = refereeMsg;
 		this.gameState = gameState;
-        this.botsToInterchange = botsToInterchange;
 		worldFrames.computeIfAbsent(EAiTeam.YELLOW, t -> createWorldFrame(swf, t));
 		worldFrames.computeIfAbsent(EAiTeam.BLUE, t -> createWorldFrame(swf, t));
 	}
@@ -78,7 +66,6 @@ public class WorldFrameWrapper
 		refereeMsg = wfw.refereeMsg;
 		worldFrames.putAll(wfw.worldFrames);
 		gameState = wfw.gameState;
-		botsToInterchange = wfw.botsToInterchange;
 	}
 	
 	
@@ -94,11 +81,11 @@ public class WorldFrameWrapper
 		final WorldFrame wf;
 		if (refereeMsg.getNegativeHalfTeam() == aiTeam.getTeamColor())
 		{
-			wf = new WorldFrame(swf, botsToInterchange, aiTeam, false);
+			wf = new WorldFrame(swf, aiTeam, false);
 		} else
 		{
 			// right team will be mirrored
-			wf = new WorldFrame(swf.mirrored(), botsToInterchange, aiTeam, true);
+			wf = new WorldFrame(swf.mirrored(), aiTeam, true);
 		}
 		return wf;
 	}
@@ -153,14 +140,5 @@ public class WorldFrameWrapper
 	public final GameState getGameState()
 	{
 		return gameState;
-	}
-
-
-	/**
-	 * @return the bots to interchange
-	 */
-	public final Set<BotID> getBotsToInterchange()
-	{
-		return botsToInterchange;
 	}
 }

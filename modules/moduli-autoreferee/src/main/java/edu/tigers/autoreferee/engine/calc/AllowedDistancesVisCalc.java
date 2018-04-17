@@ -11,7 +11,6 @@ import edu.tigers.autoreferee.AutoRefFrame;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.sumatra.drawable.DrawableCircle;
-import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
@@ -28,9 +27,8 @@ public class AllowedDistancesVisCalc implements IRefereeCalc
 		if (frame.getGameState().isStandardSituation())
 		{
 			NGeometry.getPenaltyAreas().stream()
-					.map(p -> p.withMargin(RuleConstraints.getBotToPenaltyAreaMarginStandard()).getRectangle())
-					.map(r -> new DrawableRectangle(r, Color.red))
-					.forEach(shapes::add);
+					.map(p -> p.withMargin(RuleConstraints.getBotToPenaltyAreaMarginStandard()).getDrawableShapes())
+					.forEach(shapes::addAll);
 		}
 		
 		if (frame.getGameState().isStoppedGame())
@@ -38,5 +36,6 @@ public class AllowedDistancesVisCalc implements IRefereeCalc
 			shapes.add(new DrawableCircle(Circle.createCircle(frame.getWorldFrame().getBall().getPos(),
 					RuleConstraints.getStopRadius() + Geometry.getBallRadius())));
 		}
+		shapes.forEach(s -> s.setColor(Color.red));
 	}
 }

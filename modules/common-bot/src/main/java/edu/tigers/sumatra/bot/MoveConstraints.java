@@ -328,6 +328,7 @@ public class MoveConstraints implements IExportable
 	 */
 	public void setPrimaryDirection(final IVector2 primaryDirection)
 	{
+		assert primaryDirection != null;
 		this.primaryDirection = primaryDirection;
 	}
 	

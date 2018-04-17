@@ -76,6 +76,12 @@ public class BangBangTrajectory2DAsync extends BangBangTrajectory2D
 	}
 	
 	
+	public double getTotalTimeToPrimaryDirection()
+	{
+		return getY().getTotalTime();
+	}
+	
+	
 	@Override
 	public Vector2 getPositionMM(final double t)
 	{

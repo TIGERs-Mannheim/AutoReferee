@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.states.impl;
@@ -92,7 +92,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		
 		if (readyWaitTimeOver || ctx.doProceed())
 		{
-			sendCommandIfReady(ctx, new RefboxRemoteCommand(Command.NORMAL_START), ctx.doProceed());
+			sendCommandIfReady(ctx, new RefboxRemoteCommand(Command.NORMAL_START, null), ctx.doProceed());
 		}
 	}
 	

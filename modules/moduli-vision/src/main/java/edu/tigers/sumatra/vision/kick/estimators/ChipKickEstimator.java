@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
@@ -289,10 +289,7 @@ public class ChipKickEstimator implements IKickEstimator
 				return true;
 			}
 			
-			if (!Geometry.getField().withMargin(100).isPointInShape(posNow))
-			{
-				return true;
-			}
+			return !Geometry.getField().withMargin(100).isPointInShape(posNow);
 		}
 		
 		return false;
@@ -756,7 +753,7 @@ public class ChipKickEstimator implements IKickEstimator
 			
 			DrawableAnnotation err = new DrawableAnnotation(fit.getKickPos(),
 					String.format("%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().z()));
-			err.setOffset(Vector2.fromX(80));
+			err.withOffset(Vector2.fromX(80));
 			err.setColor(Color.CYAN);
 			shapes.add(err);
 		}

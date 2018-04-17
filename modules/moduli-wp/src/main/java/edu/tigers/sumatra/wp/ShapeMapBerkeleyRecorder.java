@@ -26,6 +26,7 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	private final Deque<ShapeMapWithSource> buffer = new ConcurrentLinkedDeque<>();
 	private long latestWrittenTimestamp = 0;
 	private long latestReceivedTimestamp = 0;
+	private boolean running = false;
 	
 	
 	/**
@@ -42,6 +43,7 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	{
 		AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		wp.addObserver(wfwObserver);
+		running = true;
 	}
 	
 	
@@ -50,6 +52,7 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	{
 		AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		wp.removeObserver(wfwObserver);
+		running = false;
 	}
 	
 	@Override
@@ -86,7 +89,7 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	
 	private boolean isBuffering(long timestamp)
 	{
-		return timestamp >= latestReceivedTimestamp - BUFFER_TIME;
+		return running && timestamp >= latestReceivedTimestamp - BUFFER_TIME;
 	}
 	
 	private static class ShapeMapWithSource

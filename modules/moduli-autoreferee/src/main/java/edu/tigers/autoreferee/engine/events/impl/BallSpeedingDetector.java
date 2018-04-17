@@ -1,19 +1,10 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Feb 7, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import edu.tigers.sumatra.geometry.RuleConstraints;
-import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -24,10 +15,11 @@ import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.vision.data.IKickEvent;
 
 
 /**
@@ -37,14 +29,20 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BallSpeedingDetector extends AGameEventDetector
 {
-	private static final Logger	log							= Logger.getLogger(BallSpeedingDetector.class);
-	private static final int		REQUIRED_SPEEDING_TIME	= 300;
-	private static final int		PRIORITY						= 1;
-	@Configurable(comment = "[m/s] The ball is not considered to be too fast if above this threshold to prevent false positives")
-	private static double			topSpeedThreshold			= 12.0d;
+	private static final int PRIORITY = 2;
+	@Configurable(comment = "[m/s] The ball is not considered to be too fast if above this threshold to prevent false positives", defValue = "12.0")
+	private static double topSpeedThreshold = 12.0d;
 	
-	private boolean					speedingDetected			= true;
-	private long						speedingFrameTime			= 0;
+	@Configurable(comment = "Max waiting time [s]", defValue = "1.0")
+	private static double maxWaitingTime = 1;
+
+	private double lastSpeedEstimate = 0;
+	private IKickEvent lastKickEvent;
+
+	static
+	{
+		AGameEventDetector.registerClass(BallSpeedingDetector.class);
+	}
 	
 	
 	/**
@@ -66,33 +64,23 @@ public class BallSpeedingDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
-		double ballVelocity = frame.getWorldFrame().getBall().getVel().getLength2();
-		if ((ballVelocity > RuleConstraints.getMaxBallSpeed()) && (ballVelocity < topSpeedThreshold))
+		if (frame.getWorldFrame().getKickFitState().isPresent() && frame.getWorldFrame().getKickEvent().isPresent()
+				&& isNewOrSameKicker(frame.getWorldFrame().getKickEvent().get(), frame.getTimestamp())
+				&& isBallInGame(frame))
 		{
-			speedingFrameTime += frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
-			if ((speedingFrameTime >= TimeUnit.MILLISECONDS.toNanos(REQUIRED_SPEEDING_TIME))
-					&& !speedingDetected)
+			lastSpeedEstimate = frame.getWorldFrame().getKickFitState().get().getKickVel().getLength() / 1000.;
+			if (lastKickEvent == null)
 			{
-				speedingDetected = true;
-				BotID violatorID = frame.getBotLastTouchedBall().getBotID();
-				ITrackedBot violator = frame.getWorldFrame().getBot(violatorID);
-				if (violator == null)
-				{
-					log.debug("Ball Speed Violator disappeard from the field: " + violatorID);
-					return Optional.empty();
-				}
-				
-				IVector2 kickPos = AutoRefMath.getClosestFreekickPos(violator.getPos(), violator.getTeamColor().opposite());
-				
-				FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, violator.getTeamColor().opposite(),
-						kickPos);
-				
-				SpeedViolation violation = new SpeedViolation(EGameEvent.BALL_SPEEDING, frame.getTimestamp(),
-						violatorID, action, ballVelocity);
-				return Optional.of(violation);
+				lastKickEvent = frame.getWorldFrame().getKickEvent().get();
 			}
 		} else
 		{
+			if (lastSpeedEstimate > RuleConstraints.getMaxBallSpeed() && (lastSpeedEstimate < topSpeedThreshold))
+			{
+				SpeedViolation violation = createViolation(lastKickEvent.getKickingBot(), frame.getTimestamp());
+				reset();
+				return Optional.of(violation);
+			}
 			reset();
 		}
 		
@@ -100,11 +88,38 @@ public class BallSpeedingDetector extends AGameEventDetector
 	}
 	
 	
+	private boolean isBallInGame(IAutoRefFrame frame)
+	{
+		return frame.isBallInsideField() && !frame.getPossibleGoal().isPresent();
+	}
+
+
+	private boolean isNewOrSameKicker(IKickEvent event, long timestamp)
+	{
+		return lastKickEvent == null
+				|| (lastKickEvent.getKickingBot() == event.getKickingBot()
+						&& (timestamp - lastKickEvent.getTimestamp()) / 1_000_000_000. < maxWaitingTime);
+	}
+
+
+	private SpeedViolation createViolation(BotID violator, long timestamp)
+	{
+		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastKickEvent.getPosition(),
+				violator.getTeamColor().opposite());
+
+		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, violator.getTeamColor().opposite(),
+				kickPos);
+
+		return new SpeedViolation(EGameEvent.BALL_SPEED, timestamp,
+				violator, action, lastSpeedEstimate);
+	}
+
+
 	@Override
 	public void reset()
 	{
-		speedingDetected = false;
-		speedingFrameTime = 0;
+		lastSpeedEstimate = 0;
+		lastKickEvent = null;
 	}
 	
 }

@@ -393,13 +393,13 @@ public class RobotTracker
 		shapes.add(botShape);
 		
 		DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(botId.getNumber()), true);
-		id.setOffset(Vector2.fromY(150));
+		id.withOffset(Vector2.fromY(150));
 		id.setColor(botId.getTeamColor().getColor());
 		shapes.add(id);
 		
 		DrawableAnnotation unc = new DrawableAnnotation(pos,
 				String.format("%3.2f", filterXY.getPositionUncertainty().getLength() * getUncertainty()));
-		unc.setOffset(Vector2.fromX(-150));
+		unc.withOffset(Vector2.fromX(-150));
 		unc.setColor(botId.getTeamColor().getColor());
 		shapes.add(unc);
 		

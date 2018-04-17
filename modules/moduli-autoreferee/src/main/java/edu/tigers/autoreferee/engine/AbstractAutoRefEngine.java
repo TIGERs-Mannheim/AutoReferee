@@ -27,9 +27,11 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 {
 	private static final Logger log = Logger.getLogger(AbstractAutoRefEngine.class);
 	
-	private GameEventEngine gameEventEngine = null;
+	private GameEventEngine gameEventEngine;
 	protected EEngineState engineState = null;
 	protected GameLog gameLog = new GameLog();
+	protected AutoRefGlobalState autoRefGlobalState = new AutoRefGlobalState();
+	
 	
 	protected enum EEngineState
 	{

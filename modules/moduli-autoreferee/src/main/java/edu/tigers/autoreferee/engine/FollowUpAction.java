@@ -99,17 +99,38 @@ public class FollowUpAction
 		switch (actionType)
 		{
 			case DIRECT_FREE:
-				return teamInFavor == ETeamColor.BLUE ? Command.DIRECT_FREE_BLUE : Command.DIRECT_FREE_YELLOW;
+				return chooseCommandByTeam(Command.DIRECT_FREE_BLUE,
+						Command.DIRECT_FREE_YELLOW);
+			case INDIRECT_FREE:
+				return chooseCommandByTeam(Command.INDIRECT_FREE_BLUE,
+						Command.INDIRECT_FREE_YELLOW);
+			case KICK_OFF:
+				return chooseCommandByTeam(Command.PREPARE_KICKOFF_BLUE,
+						Command.PREPARE_KICKOFF_YELLOW);
 			case FORCE_START:
 				return Command.FORCE_START;
-			case INDIRECT_FREE:
-				return teamInFavor == ETeamColor.BLUE ? Command.INDIRECT_FREE_BLUE : Command.INDIRECT_FREE_YELLOW;
-			case KICK_OFF:
-				return teamInFavor == ETeamColor.BLUE ? Command.PREPARE_KICKOFF_BLUE : Command.PREPARE_KICKOFF_YELLOW;
 			default:
 				throw new IllegalArgumentException(
 						"Please add the following action type to the switch case: " + actionType);
 		}
+	}
+	
+	
+	private Command chooseCommandByTeam(
+			final Command blue,
+			final Command yellow)
+	{
+		if (teamInFavor == ETeamColor.BLUE)
+		{
+			return blue;
+		} else if (teamInFavor == ETeamColor.YELLOW)
+		{
+			return yellow;
+		} else if (Math.random() >= 0.5)
+		{
+			return blue;
+		}
+		return yellow;
 	}
 	
 	
@@ -138,7 +159,7 @@ public class FollowUpAction
 		final int prime = 31;
 		int result = 1;
 		result = (prime * result) + actionType.hashCode();
-		result = (prime * result) + ((teamInFavor == null) ? 0 : teamInFavor.hashCode());
+		result = prime * result + teamInFavor.hashCode();
 		result = (prime * result) + ((newBallPos == null) ? 0 : newBallPos.hashCode());
 		return result;
 	}

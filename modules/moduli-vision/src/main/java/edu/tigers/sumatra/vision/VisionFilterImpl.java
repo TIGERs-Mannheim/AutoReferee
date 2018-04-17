@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -131,6 +131,7 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable
 				.withBall(frame.getBall().extrapolate(timestampNow, timestampFuture))
 				.withBots(extrapolatedBots)
 				.withKickEvent(frame.getKickEvent().orElse(null))
+				.withKickFitState(frame.getBall())
 				.withShapeMap(frame.getShapeMap())
 				.build();
 	}
@@ -382,21 +383,21 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable
 				shapes.add(ballPos);
 				
 				DrawableAnnotation camId = new DrawableAnnotation(pos, Integer.toString(camFilter.getCamId()), true);
-				camId.setOffset(Vector2.fromY(-100));
+				camId.withOffset(Vector2.fromY(-100));
 				camId.setColor(Color.WHITE);
 				shapes.add(camId);
 				
 				DrawableAnnotation unc = new DrawableAnnotation(pos,
 						String.format("%.2f",
 								tracker.getFilter().getPositionUncertainty().getLength() * tracker.getUncertainty()));
-				unc.setOffset(Vector2.fromX(-80));
+				unc.withOffset(Vector2.fromX(-80));
 				unc.setColor(Color.WHITE);
 				shapes.add(unc);
 				
 				DrawableAnnotation age = new DrawableAnnotation(pos,
 						String.format("%d: %.3fs", camFilter.getCamId(),
 								(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9));
-				age.setOffset(Vector2.fromXY(120, (camFilter.getCamId() * 45.0) - 100.0));
+				age.withOffset(Vector2.fromXY(120, (camFilter.getCamId() * 45.0) - 100.0));
 				age.setColor(Color.GREEN);
 				shapes.add(age);
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -40,43 +40,43 @@ import edu.tigers.sumatra.vision.tracker.RobotTracker;
  */
 public class QualityInspector
 {
-	private List<CamCalibration>			problematicCams				= new ArrayList<>();
-	private List<RobotDeviationIssue>	deviationIssues				= new ArrayList<>();
-	private List<RobotInvisibleIssue>	invisibleIssues				= new ArrayList<>();
-	private List<FilteredVisionBot>		filteredBots					= new ArrayList<>();
+	private List<CamCalibration> problematicCams = new ArrayList<>();
+	private List<RobotDeviationIssue> deviationIssues = new ArrayList<>();
+	private List<RobotInvisibleIssue> invisibleIssues = new ArrayList<>();
+	private List<FilteredVisionBot> filteredBots = new ArrayList<>();
 	
 	@Configurable(defValue = "true", comment = "Draw camera issues in quality layer.")
-	private static boolean					drawCameraIssues				= true;
+	private static boolean drawCameraIssues = true;
 	
 	@Configurable(defValue = "true", comment = "Draw robot deviation issues in quality layer.")
-	private static boolean					drawRobotDeviationIssues	= true;
+	private static boolean drawRobotDeviationIssues = true;
 	
 	@Configurable(defValue = "true", comment = "Draw invisible robot issues in quality layer.")
-	private static boolean					drawRobotInvisibleIssues	= true;
+	private static boolean drawRobotInvisibleIssues = true;
 	
 	@Configurable(defValue = "true", comment = "Draw robot vision quality issues in quality layer.")
-	private static boolean					drawRobotQualityIssues		= true;
+	private static boolean drawRobotQualityIssues = true;
 	
 	@Configurable(defValue = "300", comment = "Maximum allowed camera height difference to median height. [mm]")
-	private static double					maxHeightDifference			= 300;
+	private static double maxHeightDifference = 300;
 	
 	@Configurable(defValue = "50", comment = "Maximum allowed distance between a robot on two cameras. [mm]")
-	private static double					maxOverlapDist					= 50;
+	private static double maxOverlapDist = 50;
 	
 	@Configurable(defValue = "10", comment = "Time until issues are removed. [s]")
-	private static double					issueTimeout					= 10;
+	private static double issueTimeout = 10;
 	
 	@Configurable(defValue = "1", comment = "Robots faster than this will not be checked for position deviation. [m/s]")
-	private static double					maxSpeedForDeviation			= 1;
+	private static double maxSpeedForDeviation = 1;
 	
 	@Configurable(defValue = "0.02", comment = "Maximum difference between different camera timestamps. [s]")
-	private static double					maxTimeDiffForDeviation		= 0.02;
+	private static double maxTimeDiffForDeviation = 0.02;
 	
 	@Configurable(defValue = "1.5", comment = "Robots faster than this will be checked for invisibility. [m/s]")
-	private static double					minSpeedForInvisibleCheck	= 1.5;
+	private static double minSpeedForInvisibleCheck = 1.5;
 	
 	@Configurable(defValue = "0.1", comment = "Time until an invisible fast robot is reported. [s]")
-	private static double					minInvisibleTime				= 0.1;
+	private static double minInvisibleTime = 0.1;
 	
 	static
 	{
@@ -230,12 +230,12 @@ public class QualityInspector
 	
 	private static class RobotDeviationIssue
 	{
-		private IVector2	firstPos;
-		private IVector2	secondPos;
-		private int			firstCam;
-		private int			secondCam;
-		private BotID		botId;
-		private long		lastOccurence;
+		private IVector2 firstPos;
+		private IVector2 secondPos;
+		private int firstCam;
+		private int secondCam;
+		private BotID botId;
+		private long lastOccurence;
 		
 		
 		private IVector2 getCenterPos()
@@ -246,10 +246,10 @@ public class QualityInspector
 	
 	private static class RobotInvisibleIssue
 	{
-		private IVector2	firstPos;
-		private IVector2	lastPos;
-		private BotID		botId;
-		private long		lastOccurence;
+		private IVector2 firstPos;
+		private IVector2 lastPos;
+		private BotID botId;
+		private long lastOccurence;
 		
 		
 		private IVector2 getCenterPos()
@@ -297,8 +297,7 @@ public class QualityInspector
 		
 		double median = StatisticsMath.median(camHeights);
 		
-		List<CamCalibration> calibrations = new ArrayList<>();
-		calibrations.addAll(geometry.getCalibrations().values());
+		List<CamCalibration> calibrations = new ArrayList<>(geometry.getCalibrations().values());
 		
 		problematicCams = calibrations.stream()
 				.filter(c -> Math.abs(median - c.getCameraPosition().z()) > maxHeightDifference)
@@ -326,9 +325,7 @@ public class QualityInspector
 				
 				DrawableAnnotation warn = new DrawableAnnotation(
 						calib.getCameraPosition().getXYVector().addNew(Vector2.fromXY(0, 280)), "CAM_HEIGHT", true);
-				warn.setColor(Color.RED);
-				warn.setFontHeight(100);
-				warn.setBold(true);
+				warn.withFontHeight(100).withBold(true).setColor(Color.RED);
 				shapes.add(warn);
 			}
 		}
@@ -349,22 +346,22 @@ public class QualityInspector
 				DrawableAnnotation botId = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, 240)),
 						issue.botId.toString(), true);
 				botId.setColor(Color.ORANGE);
-				botId.setFontHeight(100);
-				botId.setBold(true);
+				botId.withFontHeight(100);
+				botId.withBold(true);
 				shapes.add(botId);
 				
 				DrawableAnnotation camIds = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, -240)),
 						issue.firstCam + " <-> " + issue.secondCam, true);
 				camIds.setColor(Color.ORANGE);
-				camIds.setFontHeight(100);
-				camIds.setBold(true);
+				camIds.withFontHeight(100);
+				camIds.withBold(true);
 				shapes.add(camIds);
 				
 				DrawableAnnotation dist = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, -340)),
 						String.format("%.1fmm", issue.firstPos.distanceTo(issue.secondPos)), true);
 				dist.setColor(Color.ORANGE);
-				dist.setFontHeight(80);
-				dist.setBold(true);
+				dist.withFontHeight(80);
+				dist.withBold(true);
 				shapes.add(dist);
 			}
 		}
@@ -385,8 +382,8 @@ public class QualityInspector
 				DrawableAnnotation botId = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, 240)),
 						issue.botId.toString(), true);
 				botId.setColor(Color.YELLOW);
-				botId.setFontHeight(100);
-				botId.setBold(true);
+				botId.withFontHeight(100);
+				botId.withBold(true);
 				shapes.add(botId);
 			}
 		}
@@ -402,9 +399,9 @@ public class QualityInspector
 				
 				DrawableAnnotation unc = new DrawableAnnotation(bot.getPos(),
 						String.format("%.0f", bot.getQuality() * 100), true);
-				unc.setOffset(Vector2.fromY(120));
+				unc.withOffset(Vector2.fromY(120));
 				unc.setColor(bot.getBotID().getTeamColor().getColor());
-				unc.setFontHeight(60);
+				unc.withFontHeight(60);
 				shapes.add(unc);
 			}
 		}

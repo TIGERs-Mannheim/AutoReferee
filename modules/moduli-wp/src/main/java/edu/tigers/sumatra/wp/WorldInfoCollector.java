@@ -64,7 +64,6 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
-import edu.tigers.sumatra.wp.util.BotInterchangeCalculator;
 import edu.tigers.sumatra.wp.util.BotStateFromTrajectoryCalculator;
 import edu.tigers.sumatra.wp.util.CurrentBallDetector;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
@@ -79,33 +78,34 @@ import edu.tigers.sumatra.wp.util.RobotInfoProvider;
 public class WorldInfoCollector extends AWorldPredictor
 		implements IRefereeObserver, IVisionFilterObserver, ICamFrameObserver
 {
-	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(WorldInfoCollector.class.getName());
 	
-	private final GameStateCalculator gameStateCalculator = new GameStateCalculator();
-	private final WorldFrameVisualization worldFrameVisualization = new WorldFrameVisualization();
-	private final BallContactCalculator ballContactCalculator = new BallContactCalculator();
-	private final CurrentBallDetector currentBallDetector = new CurrentBallDetector();
-	private final BotInterchangeCalculator botInterchangeCalculator = new BotInterchangeCalculator();
+	
+	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
+	
+	
 	@Configurable(comment = "Use robot feedback for position and velocity.", defValue = "true")
 	private static boolean preferRobotFeedback = true;
-	private final BotStateFromTrajectoryCalculator botStateFromTrajectoryCalculator = new BotStateFromTrajectoryCalculator();
+	@Configurable(comment = "Prefer the state of the current trajectory that the bot executes", defValue = "true")
+	private static boolean preferTrajState = true;
+	@Configurable(defValue = "100.0")
+	private static double maxPositionDiff = 100.0;
+	@Configurable(comment = "Add a faked ball. Set pos,vel,acc in code.", defValue = "false")
+	private static boolean fakeBall = false;
 	
+	
+	private GameStateCalculator gameStateCalculator;
+	private WorldFrameVisualization worldFrameVisualization;
+	private BallContactCalculator ballContactCalculator;
+	private CurrentBallDetector currentBallDetector;
+	private BotStateFromTrajectoryCalculator botStateFromTrajectoryCalculator;
 	private AVisionFilter visionFilter;
 	private RobotInfoProvider robotInfoProvider;
 	
-	private long lastWFTimestamp = 0;
-	private RefereeMsg latestRefereeMsg = new RefereeMsg();
-	private IKickEvent lastKickEvent = null;
-	@Configurable(comment = "Prefer the state of the current trajectory that the bot executes", defValue = "true")
-	private static boolean preferTrajState = true;
+	private long lastWFTimestamp;
+	private RefereeMsg latestRefereeMsg;
+	private IKickEvent lastKickEvent;
 	
-	@Configurable(defValue = "100.0")
-	private static double maxPositionDiff = 100.0;
-	
-	@Configurable(comment = "Add a faked ball. Set pos,vel,acc in code.", defValue = "false")
-	private static boolean fakeBall = false;
-	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
 	
 	static
 	{
@@ -150,24 +150,27 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 	
 	
-	private boolean hasBallContact(final RobotInfo robotInfo, final Pose pose)
+	private long getLastBallContact(final RobotInfo robotInfo, final Pose pose)
 	{
 		return ballContactCalculator.ballContact(robotInfo, pose, robotInfo.getCenter2DribblerDist());
 	}
 	
 	
-	private TrackedBot createTrackedBot(RobotInfo robotInfo, BotState filterState, BotState internalState)
+	private TrackedBot createTrackedBot(RobotInfo robotInfo, Map<BotID, BotState> filteredBotStates,
+			BotState filterState, BotState internalState)
 	{
 		BotState currentBotState = select(filterState, internalState);
 		Optional<BotState> trajState = botStateFromTrajectoryCalculator.getState(robotInfo);
 		boolean similar = trajState.map(s -> isSimilar(s, currentBotState)).orElse(false);
-		BotState botState = similar && preferTrajState
-				? botStateFromTrajectoryCalculator.getLatestState(robotInfo.getBotId()).orElse(currentBotState)
-				: currentBotState;
-		if (trajState.isPresent() && !similar)
+		if (trajState.isPresent() && (!similar || botCollidingWithOtherBot(filteredBotStates, trajState.get())))
 		{
 			botStateFromTrajectoryCalculator.reset(robotInfo.getBotId());
 		}
+		
+		BotState botState = similar && preferTrajState
+				? botStateFromTrajectoryCalculator.getLatestState(robotInfo.getBotId()).orElse(currentBotState)
+				: currentBotState;
+		
 		return TrackedBot.newBuilder()
 				.withBotId(botState.getBotID())
 				.withTimestamp(lastWFTimestamp)
@@ -175,8 +178,16 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withFilteredState(filterState)
 				.withBufferedTrajState(trajState.orElse(null))
 				.withBotInfo(robotInfo)
-				.withBallContact(hasBallContact(robotInfo, botState.getPose()))
+				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
 				.build();
+	}
+	
+	
+	private boolean botCollidingWithOtherBot(final Map<BotID, BotState> filteredBotStates, final BotState trajState)
+	{
+		return filteredBotStates.values().stream()
+				.filter(b -> !b.getBotID().equals(trajState.getBotID()))
+				.anyMatch(s -> s.getPos().distanceTo(trajState.getPos()) < Geometry.getBotRadius() * 2);
 	}
 	
 	
@@ -194,7 +205,8 @@ public class WorldInfoCollector extends AWorldPredictor
 		Map<BotID, BotState> internalBotStates = getInternalBotStates(robotInfo);
 		
 		Map<BotID, ITrackedBot> trackedBots = robotInfo.stream()
-				.map(r -> createTrackedBot(r, filteredBotStates.get(r.getBotId()), internalBotStates.get(r.getBotId())))
+				.map(r -> createTrackedBot(r, filteredBotStates, filteredBotStates.get(r.getBotId()),
+						internalBotStates.get(r.getBotId())))
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return new BotIDMap<>(trackedBots);
 	}
@@ -250,24 +262,24 @@ public class WorldInfoCollector extends AWorldPredictor
 		lastWFTimestamp = filteredVisionFrame.getTimestamp();
 		robotInfoProvider.setLastWFTimestamp(lastWFTimestamp);
 		
-		ITrackedBall ball = getTrackedBall(filteredVisionFrame);
-		ballContactCalculator.setTrackedBall(ball);
+		ballContactCalculator.setBallPos(filteredVisionFrame.getBall().getPos().getXYVector());
 		
 		Map<BotID, RobotInfo> robotInfo = collectRobotInfo(filteredVisionFrame.getBots());
 		visionFilter.setRobotInfoMap(robotInfo);
 		
 		IBotIDMap<ITrackedBot> bots = collectTrackedBots(filteredVisionFrame.getBots(), robotInfo.values());
 		
+		ITrackedBall ball = getTrackedBall(filteredVisionFrame);
+		
 		IKickEvent kickEvent = getKickEvent(filteredVisionFrame);
 		BallKickFitState kickFitState = getKickFitState(filteredVisionFrame);
-		Set<BotID> toInterchange = botInterchangeCalculator.computeBotsToInterchange(bots, latestRefereeMsg);
 		
 		long frameNumber = filteredVisionFrame.getId();
 		SimpleWorldFrame swf = new SimpleWorldFrame(bots, ball, kickEvent, kickFitState, frameNumber, lastWFTimestamp);
 		
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
 		
-		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState, toInterchange);
+		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState);
 		consumers.forEach(c -> c.onNewWorldFrame(wfw));
 		observers.forEach(c -> c.onNewWorldFrame(wfw));
 		
@@ -315,12 +327,12 @@ public class WorldInfoCollector extends AWorldPredictor
 		Geometry.refresh();
 		clearObservers();
 		
+		initState();
+		
 		registerToVisionFilterModule();
 		registerToRefereeModule();
 		registerToCamModule();
 		registerToRecordManagerModule();
-		
-		initRobotInfoProvider();
 		
 		BallFactory.updateConfigs();
 		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isProductive());
@@ -428,9 +440,17 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 	
 	
-	private void initRobotInfoProvider()
+	private void initState()
 	{
 		robotInfoProvider = new RobotInfoProvider(getBotProvider(), getBotParamsProvider());
+		gameStateCalculator = new GameStateCalculator();
+		worldFrameVisualization = new WorldFrameVisualization();
+		ballContactCalculator = new BallContactCalculator();
+		currentBallDetector = new CurrentBallDetector();
+		botStateFromTrajectoryCalculator = new BotStateFromTrajectoryCalculator();
+		lastWFTimestamp = 0;
+		latestRefereeMsg = new RefereeMsg();
+		lastKickEvent = null;
 	}
 	
 	

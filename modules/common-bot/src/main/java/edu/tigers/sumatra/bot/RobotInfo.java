@@ -60,7 +60,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		type = builder.type;
 		robotMode = builder.robotMode;
 		aiType = builder.aiType;
-		botParams = builder.botParams;
 		trajectory = builder.trajectory;
 		botFeatures = builder.botFeatures;
 		kickSpeed = builder.kickSpeed;
@@ -71,6 +70,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		hardwareId = builder.hardwareId;
 		internalState = builder.internalState;
 		isBarrierInterrupted = builder.barrierInterrupted;
+		botParams = builder.botParams;
 		isOk = builder.isOk;
 	}
 	
@@ -112,7 +112,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withType(EBotType.UNKNOWN)
 				.withRobotMode(ERobotMode.IDLE)
 				.withAiType(EAiType.NONE)
-				.withBotParams(new BotParams())
 				.withTrajectory(null)
 				.withBotFeatures(new HashMap<>())
 				.withKickSpeed(0)
@@ -122,6 +121,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withDribbleRpm(0)
 				.withHardwareId(255)
 				.withInternalState(null)
+				.withBarrierInterrupted(false)
+				.withBotParams(new BotParams())
 				.withOk(true);
 	}
 	
@@ -138,7 +139,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.type = copy.type;
 		builder.robotMode = copy.robotMode;
 		builder.aiType = copy.aiType;
-		builder.botParams = copy.botParams;
 		builder.trajectory = copy.trajectory;
 		builder.botFeatures = copy.botFeatures;
 		builder.kickSpeed = copy.kickSpeed;
@@ -148,6 +148,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.dribbleRpm = copy.dribbleRpm;
 		builder.hardwareId = copy.hardwareId;
 		builder.internalState = copy.internalState;
+		builder.barrierInterrupted = copy.isBarrierInterrupted;
+		builder.botParams = copy.botParams;
 		builder.isOk = copy.isOk;
 		return builder;
 	}

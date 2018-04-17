@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.rectangle;
@@ -40,6 +40,7 @@ public class Rectangle extends ARectangle
 	
 	private Rectangle(final IVector2 center, final double xExtent, final double yExtent)
 	{
+		assert center != null;
 		assert xExtent >= 0 : xExtent;
 		assert yExtent >= 0 : yExtent;
 		this.center = Vector2f.copy(center);

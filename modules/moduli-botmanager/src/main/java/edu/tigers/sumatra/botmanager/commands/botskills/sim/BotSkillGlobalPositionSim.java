@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.commands.botskills.sim;
 
@@ -30,6 +30,7 @@ public class BotSkillGlobalPositionSim implements IBotSkillSim
 				.kickSpeed(pos.getKickSpeed())
 				.dribblerRPM(pos.getDribbleSpeed())
 				.primaryDirection(pos.getPrimaryDirection())
+				.strictVelocityLimit(input.isStrictVelocityLimit())
 				.build();
 	}
 }

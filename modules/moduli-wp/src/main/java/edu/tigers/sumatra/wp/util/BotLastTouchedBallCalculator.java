@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -46,14 +46,14 @@ public class BotLastTouchedBallCalculator
 	private static final double EXTENDED_DIST = MIN_DIST + 25;
 	private static final double ANGLE_EPSILON = 0.1;
 	
-	@Configurable(comment = "[degree]")
-	private static double angleThresholdDegree = 5.0d;
+	@Configurable(comment = "[degree]", defValue = "5.0")
+	private static double angleThresholdDegree = 5.0;
 	@Configurable(comment = "[m/s] Min Gain in velocity that counts as kick", defValue = "0.3")
-	private static double velGainThreshold = 0.3d;
+	private static double velGainThreshold = 0.3;
 	/** in mm */
-	@Configurable(comment = "[mm]")
+	@Configurable(comment = "[mm]", defValue = "300.0")
 	private static double minSearchRadius = 300;
-	@Configurable(comment = "[mm]")
+	@Configurable(comment = "[mm]", defValue = "30.0")
 	private static double botRadiusMargin = 30;
 	
 	static

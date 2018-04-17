@@ -196,9 +196,9 @@ public class KickDetector implements IKickDetector
 		List<IDrawableShape> shapes = new ArrayList<>();
 		
 		DrawableAnnotation kvText = new DrawableAnnotation(lastKnownBallPosition, lastKVText);
-		kvText.setOffset(Vector2.fromXY(0, 30));
-		kvText.setCenterHorizontally(true);
-		kvText.setFontHeight(20);
+		kvText.withOffset(Vector2.fromXY(0, 30));
+		kvText.withCenterHorizontally(true);
+		kvText.withFontHeight(20);
 		kvText.setColor(Color.MAGENTA);
 		shapes.add(kvText);
 		

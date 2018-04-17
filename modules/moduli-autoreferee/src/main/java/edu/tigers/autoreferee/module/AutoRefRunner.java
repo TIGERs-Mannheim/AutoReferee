@@ -252,13 +252,9 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		try
 		{
 			doLoop();
-		} catch (InterruptedException iex)
-		{
-			log.warn("Unexpected interruption during AutoRef execution");
-			Thread.currentThread().interrupt();
 		} catch (Exception e)
 		{
-			log.error("Unexpected exception during AutoRef execution", e);
+			log.error("Unhandled exception during AutoRef execution", e);
 		} finally
 		{
 			setState(AutoRefState.STOPPED);

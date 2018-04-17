@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.BotNumberViolation;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -35,9 +34,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public class BotNumberDetector extends AGameEventDetector
 {
 	private static final int PRIORITY = 1;
-	
-	@Configurable(comment = "Number of bots allowed on the field", defValue = "8")
-	private static int maxTeamBotCount = 8;
 	
 	static
 	{
@@ -106,7 +102,7 @@ public class BotNumberDetector extends AGameEventDetector
 				.filter(cardTimeUs -> cardTimeUs > 0)
 				.count();
 		
-		return maxTeamBotCount - yellowCards;
+		return RuleConstraints.getBotsPerTeam() - yellowCards;
 	}
 	
 	

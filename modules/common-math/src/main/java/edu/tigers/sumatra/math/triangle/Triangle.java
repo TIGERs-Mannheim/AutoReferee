@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.math.triangle;
 
+import static edu.tigers.sumatra.math.SumatraMath.sqrt;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +17,8 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.LineMath;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
@@ -158,6 +162,52 @@ public final class Triangle extends ATriangle
 				&& b.equals(triangle.getB())
 				&& c.equals(triangle.getC());
 		
+	}
+	
+	
+	@Override
+	public double area()
+	{
+		double lineA = a.distanceTo(b);
+		double lineB = b.distanceTo(c);
+		double lineC = c.distanceTo(a);
+		double s = (lineA + lineB + lineC) / 2.;
+		return sqrt(s * (s - lineA) * (s - lineB) * (s - lineC));
+	}
+	
+	
+	@Override
+	public boolean isNeighbour(ITriangle triangle)
+	{
+		int counter = 0;
+		for (IVector2 c1 : this.getCorners())
+		{
+			for (IVector2 c2 : triangle.getCorners())
+			{
+				if (c1.distanceTo(c2) <= 0)
+				{
+					counter++;
+				}
+			}
+		}
+		return counter == 2;
+	}
+	
+	
+	@Override
+	public List<IVector2> lineIntersections(final ILine line)
+	{
+		ILineSegment ab = Lines.segmentFromPoints(a, b);
+		ILineSegment bc = Lines.segmentFromPoints(b, c);
+		ILineSegment ac = Lines.segmentFromPoints(a, c);
+		ILineSegment[] lines = new ILineSegment[] { ab, ac, bc };
+		List<IVector2> intersections = new ArrayList<>();
+		for (ILineSegment segment : lines)
+		{
+			Optional<IVector2> intersection = segment.intersectLine(Lines.lineFromLegacyLine(line));
+			intersection.ifPresent(intersections::add);
+		}
+		return intersections;
 	}
 	
 	

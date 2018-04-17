@@ -224,6 +224,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 		public void onBotOffline(final BotID id)
 		{
 			ABot bot = botTable.get(id);
+			log.debug("Bot is offline: " + bot);
 			if (bot != null)
 			{
 				bot.stop();
@@ -235,6 +236,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 		@Override
 		public void onBotOnline(final ABot bot)
 		{
+			log.debug("Bot is online: " + bot);
 			if (!botTable.containsKey(bot.getBotId()))
 			{
 				botTable.put(bot.getBotId(), bot);
@@ -251,7 +253,6 @@ public class BotManager extends ABotManager implements IConfigObserver
 		
 		private void updateColorOfAllRobotsToMajority(ABot bot)
 		{
-			
 			if (SumatraModel.getInstance().isProductive())
 			{
 				long numY = botTable.values().stream().map(b -> b.getBotId().getTeamColor())

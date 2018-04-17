@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -192,8 +192,8 @@ public class BallFilter
 		}
 		
 		DrawableAnnotation state = new DrawableAnnotation(lastKnownPosition.getXYVector(), ballState.toString());
-		state.setOffset(Vector2.fromXY(0, -100));
-		state.setCenterHorizontally(true);
+		state.withOffset(Vector2.fromXY(0, -100));
+		state.withCenterHorizontally(true);
 		state.setStrokeWidth(30);
 		shapes.add(state);
 		

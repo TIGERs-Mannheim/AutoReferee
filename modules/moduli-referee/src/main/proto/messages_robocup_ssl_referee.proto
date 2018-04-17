@@ -1,5 +1,6 @@
 syntax = "proto2";
 package edu.tigers.sumatra;
+import "messages_robocup_ssl_game_event.proto";
 
 option java_outer_classname = "Referee";
 
@@ -159,4 +160,7 @@ message SSL_Referee {
 	// Obviously, the yellow team will play on the opposide half
 	// For compatibility, this field is optional
 	optional bool blueTeamOnPositiveHalf = 10;
+
+    // The game event that caused the referee command
+    optional SSL_Referee_Game_Event gameEvent = 11;
 }

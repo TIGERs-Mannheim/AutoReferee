@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.collision;
@@ -13,6 +13,7 @@ import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
 
@@ -27,7 +28,9 @@ public class SingleSidedLineCollision implements ICollisionObject
 	private final IVector2 normal;
 	private final BotID botID;
 	private IVector3 impulse = Vector3f.ZERO_VECTOR;
+	private IVector2 acc = Vector2f.ZERO_VECTOR;
 	private boolean sticky;
+	private double dampFactor;
 	
 	
 	/**
@@ -70,9 +73,35 @@ public class SingleSidedLineCollision implements ICollisionObject
 	}
 	
 	
+	@Override
+	public double getDampFactor()
+	{
+		return dampFactor;
+	}
+	
+	
 	public void setSticky(final boolean sticky)
 	{
 		this.sticky = sticky;
+	}
+	
+	
+	public void setDampFactor(final double dampFactor)
+	{
+		this.dampFactor = dampFactor;
+	}
+	
+	
+	@Override
+	public IVector2 getAcc()
+	{
+		return acc;
+	}
+	
+	
+	public void setAcc(final IVector2 acc)
+	{
+		this.acc = acc;
 	}
 	
 	

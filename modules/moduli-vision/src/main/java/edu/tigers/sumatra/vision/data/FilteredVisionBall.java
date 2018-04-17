@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -174,6 +174,21 @@ public class FilteredVisionBall
 		public static Builder create()
 		{
 			return new Builder();
+		}
+		
+		
+		/**
+		 * @return new builder based on given base
+		 */
+		public static Builder create(FilteredVisionBall base)
+		{
+			return new Builder()
+					.withPos(base.pos)
+					.withVel(base.vel)
+					.withAcc(base.acc)
+					.withIsChipped(base.chipped)
+					.withvSwitch(base.vSwitch)
+					.withLastVisibleTimestamp(base.lastVisibleTimestamp);
 		}
 		
 		

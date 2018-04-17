@@ -14,7 +14,6 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 
@@ -33,7 +32,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	
 	@Override
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		remoteControlType = ERemoteControlType.valueOf(
 				getSubnodeConfiguration().getString("remoteControlType", ERemoteControlType.REMOTE_SSL_REFBOX.name()));
@@ -49,7 +48,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		// Load all classes to execute the static blocks for config registration
 		new ActiveAutoRefEngine(null);

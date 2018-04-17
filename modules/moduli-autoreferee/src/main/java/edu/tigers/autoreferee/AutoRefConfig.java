@@ -25,9 +25,6 @@ public class AutoRefConfig
 	@Configurable(comment = "Enable ball placement calls for the blue teams")
 	private static boolean ballPlacementYellowEnabled = false;
 	
-	@Configurable(comment = "Enable ball placement calls for the blue teams")
-	private static ETeamColor ballPlacementPreference = ETeamColor.NEUTRAL;
-	
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed")
 	private static double ballPlacementAccuracy = 200;
 	
@@ -89,15 +86,6 @@ public class AutoRefConfig
 		}
 		
 		return teams;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public static ETeamColor getBallPlacementPreference()
-	{
-		return ballPlacementPreference;
 	}
 	
 	

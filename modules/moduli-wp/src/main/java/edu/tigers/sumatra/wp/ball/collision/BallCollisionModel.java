@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.collision;
@@ -42,6 +42,17 @@ public class BallCollisionModel implements IBallCollisionModel
 	
 	private void addCollisionObjects(final CollisionHandler ch, final MotionContext context)
 	{
+		context.getBots().values().stream()
+				.map(info -> new BotCollision(
+						info.getPos(),
+						info.getVel(),
+						info.getCenter2DribblerDist(),
+						info.getBotId(),
+						info.getDribbleRpm() > 0,
+						info.getKickSpeed(),
+						info.isChip()))
+				.forEach(ch::addObject);
+		
 		ILine goalLine1 = Line.fromPoints(
 				Geometry.getGoalOur().getLeftPost()
 						.addNew(Vector2.fromXY(-Geometry.getGoalOur().getDepth() + Geometry.getBallRadius(), 0)),
@@ -55,16 +66,5 @@ public class BallCollisionModel implements IBallCollisionModel
 						.addNew(Vector2.fromXY(Geometry.getGoalOur().getDepth() - Geometry.getBallRadius(), 0)));
 		ch.addObject(new SingleSidedLineCollision(goalLine2, Vector3f.ZERO_VECTOR, Vector2f.X_AXIS.multiplyNew(-1),
 				BotID.noBot()));
-		
-		context.getBots().values().stream()
-				.map(info -> new BotCollision(
-						info.getPos(),
-						info.getVel(),
-						info.getCenter2DribblerDist(),
-						info.getBotId(),
-						info.getDribbleRpm() > 0,
-						info.getKickSpeed(),
-						info.isChip()))
-				.forEach(ch::addObject);
 	}
 }

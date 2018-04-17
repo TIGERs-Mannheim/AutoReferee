@@ -37,25 +37,8 @@ public class BangBangTrajectory1DOrient extends BangBangTrajectory1D
 		this.maxAcc = maxAcc;
 		this.maxVel = maxVel;
 		
-		double sDiffShort = AngleMath.normalizeAngle(finalPos - initialPos);
-		double sDiffLong;
-		if (sDiffShort < 0)
-		{
-			sDiffLong = sDiffShort + (2 * AngleMath.PI);
-		} else
-		{
-			sDiffLong = sDiffShort - (2 * AngleMath.PI);
-		}
-		
-		generateTrajectory(initialPos, initialVel, initialPos + sDiffLong, maxVel, maxAcc);
-		double tLong = getTotalTime();
+		double sDiffShort = AngleMath.difference(finalPos, initialPos);
 		generateTrajectory(initialPos, initialVel, initialPos + sDiffShort, maxVel, maxAcc);
-		double tShort = getTotalTime();
-		
-		if (tLong < tShort)
-		{
-			generateTrajectory(initialPos, initialVel, initialPos + sDiffLong, maxVel, maxAcc);
-		}
 	}
 	
 	

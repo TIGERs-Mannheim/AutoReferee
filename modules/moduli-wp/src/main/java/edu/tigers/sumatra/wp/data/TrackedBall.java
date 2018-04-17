@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -226,7 +226,14 @@ public class TrackedBall implements ITrackedBall
 	@Override
 	public boolean isOnCam()
 	{
-		return lastVisibleTimestamp == 0 || ((getTimestamp() - lastVisibleTimestamp) * 1e-9) < 0.5;
+		return isOnCam(0.5);
+	}
+	
+	
+	@Override
+	public boolean isOnCam(final double horizon)
+	{
+		return lastVisibleTimestamp == 0 || ((getTimestamp() - lastVisibleTimestamp) * 1e-9) < horizon;
 	}
 	
 	

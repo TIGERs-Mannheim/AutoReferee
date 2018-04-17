@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.wp;
 
-import java.util.HashSet;
 import java.util.Random;
 
 import edu.tigers.sumatra.bot.RobotInfo;
@@ -59,7 +58,7 @@ public class WorldFrameFactory
 	 */
 	public static WorldFrame createWorldFrame(final long frameNumber, final long timestamp)
 	{
-		return new WorldFrame(createSimpleWorldFrame(frameNumber, timestamp), new HashSet<>(), EAiTeam.YELLOW, false);
+		return new WorldFrame(createSimpleWorldFrame(frameNumber, timestamp), EAiTeam.YELLOW, false);
 	}
 	
 	

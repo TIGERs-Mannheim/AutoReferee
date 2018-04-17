@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.commands.botskills.data;
 
@@ -34,6 +34,7 @@ public class BotSkillOutput
 	private final EDriveMode modeW;
 	
 	private final MoveConstraints driveLimits;
+	private final boolean strictVelocityLimit;
 	
 	/** --- DRIBBLER output -- */
 	private final double dribblerRPM;
@@ -60,6 +61,7 @@ public class BotSkillOutput
 		kickMode = builder.kickMode;
 		kickSpeed = builder.kickSpeed;
 		driveLimits = builder.driveLimits;
+		strictVelocityLimit = builder.strictVelocityLimit;
 		commands = builder.commands;
 	}
 	
@@ -75,6 +77,7 @@ public class BotSkillOutput
 		private EDriveMode modeXY;
 		private EDriveMode modeW;
 		private MoveConstraints driveLimits;
+		private boolean strictVelocityLimit;
 		private double dribblerRPM;
 		private EKickerDevice kickDevice;
 		private EKickerMode kickMode;
@@ -255,6 +258,17 @@ public class BotSkillOutput
 		
 		
 		/**
+		 * @param strictVelocityLimit
+		 * @return this builder
+		 */
+		public Builder strictVelocityLimit(final boolean strictVelocityLimit)
+		{
+			this.strictVelocityLimit = strictVelocityLimit;
+			return this;
+		}
+		
+		
+		/**
 		 * @return new instance
 		 */
 		public BotSkillOutput build()
@@ -343,5 +357,11 @@ public class BotSkillOutput
 	public IVector2 getPrimaryDirection()
 	{
 		return primaryDirection;
+	}
+	
+	
+	public boolean isStrictVelocityLimit()
+	{
+		return strictVelocityLimit;
 	}
 }

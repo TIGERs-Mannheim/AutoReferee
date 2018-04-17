@@ -6,6 +6,8 @@ package edu.tigers.sumatra.math.line.v2;
 
 import java.util.Optional;
 
+import com.sleepycat.persist.model.Persistent;
+
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
@@ -15,15 +17,24 @@ import edu.tigers.sumatra.math.vector.Vector2f;
  * 
  * @author Lukas Magel
  */
+@Persistent
 final class LineSegment extends ALine implements ILineSegment
 {
 	private final Vector2f start;
 	private final Vector2f end;
 	
 	/** this field is calculated on demand */
-	private IVector2 directionVector;
+	private transient IVector2 directionVector;
 	/** this field is calculated on demand */
-	private IVector2 displacement;
+	private transient IVector2 displacement;
+	
+	
+	/** Used by berkely */
+	private LineSegment()
+	{
+		start = Vector2f.ZERO_VECTOR;
+		end = Vector2f.ZERO_VECTOR;
+	}
 	
 	
 	private LineSegment(final IVector2 start, final IVector2 end)
@@ -85,7 +96,7 @@ final class LineSegment extends ALine implements ILineSegment
 		{
 			return true;
 		}
-		if (other == null || !(other instanceof ILineSegment))
+		if ((other == null) || !(other instanceof ILineSegment))
 		{
 			return false;
 		}
@@ -100,7 +111,7 @@ final class LineSegment extends ALine implements ILineSegment
 	public final int hashCode()
 	{
 		int result = getStart().hashCode();
-		result = 31 * result + getEnd().hashCode();
+		result = (31 * result) + getEnd().hashCode();
 		return result;
 	}
 	
@@ -193,7 +204,7 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public Optional<IVector2> intersectSegment(final ILineSegment other)
 	{
-		if (this.isValid() && other.isValid())
+		if (isValid() && other.isValid())
 		{
 			return LineMath.intersectionPointOfSegments(this, other);
 		}

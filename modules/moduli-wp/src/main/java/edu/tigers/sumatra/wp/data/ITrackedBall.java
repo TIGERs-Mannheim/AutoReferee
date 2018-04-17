@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -48,9 +48,20 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 	
 	
 	/**
+	 * Check if the ball was visible within the last half second
+	 * 
 	 * @return true, if the ball is detected by any camera
 	 */
 	boolean isOnCam();
+	
+	
+	/**
+	 * Check if the ball was visible within the given horizon
+	 * 
+	 * @param horizon within this horizon
+	 * @return true, if the ball is detected by any camera
+	 */
+	boolean isOnCam(double horizon);
 	
 	
 	/**

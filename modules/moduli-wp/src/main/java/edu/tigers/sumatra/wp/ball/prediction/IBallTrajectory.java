@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.prediction;
@@ -8,6 +8,7 @@ import java.util.List;
 
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.planarcurve.IPlanarCurveProvider;
@@ -150,11 +151,17 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	
 	
 	/**
+	 * @return a line from current ball pos to ball end pos
+	 */
+	ILineSegment getTravelLineSegment();
+	
+	
+	/**
 	 * Same as getTravelLine() for a flat ball.
 	 * 
 	 * @return a line from the point where the ball is rolling on the ground to end pos
 	 */
-	ILine getTravelLineRolling();
+	ILineSegment getTravelLineRolling();
 	
 	
 	/**

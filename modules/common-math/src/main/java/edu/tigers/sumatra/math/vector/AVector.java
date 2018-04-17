@@ -5,9 +5,11 @@
 package edu.tigers.sumatra.math.vector;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -30,8 +32,14 @@ import edu.tigers.sumatra.math.SumatraMath;
 @Persistent
 public abstract class AVector implements IVector
 {
-	private static final DecimalFormat df = new DecimalFormat("0.000");
-	
+	private static final DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
+
+	static {
+		decimalFormatSymbols.setDecimalSeparator('.');
+		decimalFormatSymbols.setGroupingSeparator(',');
+	}
+
+	private static final DecimalFormat df = new DecimalFormat("0.000", decimalFormatSymbols);
 	
 	@Override
 	public final boolean equals(final Object o)

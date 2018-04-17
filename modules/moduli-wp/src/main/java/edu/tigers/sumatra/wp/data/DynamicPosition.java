@@ -34,7 +34,7 @@ import edu.tigers.sumatra.model.SumatraModel;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent(version = 1)
+@Persistent(version = 2)
 public class DynamicPosition extends AVector2
 {
 	@SuppressWarnings("unused")
@@ -44,7 +44,7 @@ public class DynamicPosition extends AVector2
 	private AObjectID trackedId;
 	private double lookahead = 0;
 	private boolean useKickerPos = true;
-	private double receiverRange = 0;
+	private double passRange = 0;
 	
 	
 	/**
@@ -86,6 +86,33 @@ public class DynamicPosition extends AVector2
 	{
 		setPos(pos);
 		trackedId = new UninitializedID();
+	}
+	
+	
+	/**
+	 * Copy constructor
+	 * 
+	 * @param dynamicPosition
+	 */
+	public DynamicPosition(final DynamicPosition dynamicPosition)
+	{
+		this.pos = dynamicPosition.pos;
+		this.trackedId = dynamicPosition.trackedId;
+		this.lookahead = dynamicPosition.lookahead;
+		this.useKickerPos = dynamicPosition.useKickerPos;
+		this.passRange = dynamicPosition.passRange;
+	}
+	
+	
+	/**
+	 * @param pos
+	 * @param passRange the range [rad] in which the pass can be played
+	 */
+	public DynamicPosition(final IVector2 pos, final double passRange)
+	{
+		setPos(pos);
+		trackedId = new UninitializedID();
+		this.passRange = passRange;
 	}
 	
 	
@@ -159,6 +186,7 @@ public class DynamicPosition extends AVector2
 		pos = dyn.pos;
 		trackedId = dyn.trackedId;
 		lookahead = dyn.lookahead;
+		passRange = dyn.passRange;
 	}
 	
 	
@@ -333,14 +361,14 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
-	public double getReceiverRange()
+	public double getPassRange()
 	{
-		return receiverRange;
+		return passRange;
 	}
 	
 	
-	public void setReceiverRange(final double receiverRange)
+	public void setPassRange(final double passRange)
 	{
-		this.receiverRange = receiverRange;
+		this.passRange = passRange;
 	}
 }

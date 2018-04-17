@@ -78,7 +78,7 @@ public class PenaltyArea implements IPenaltyArea
 	{
 		double newDepth = Math.max(0, this.depth + margin);
 		double newLength = Math.max(0, this.length + margin * 2);
-		return new PenaltyArea(goalCenter, newDepth, newLength);
+		return new PenaltyArea(getGoalCenter(), newDepth, newLength);
 	}
 	
 	
@@ -109,8 +109,8 @@ public class PenaltyArea implements IPenaltyArea
 	private List<ILineSegment> getEdges()
 	{
 		List<ILineSegment> edges = new ArrayList<>();
-		double lowerX = goalCenter.x();
-		double upperX = lowerX - Math.signum(goalCenter.x()) * getDepth();
+		double lowerX = getGoalCenter().x();
+		double upperX = lowerX - Math.signum(getGoalCenter().x()) * getDepth();
 		double negY = -getLength() / 2;
 		double posY = getLength() / 2;
 		IVector2 p1 = Vector2.fromXY(lowerX, negY);
@@ -135,23 +135,23 @@ public class PenaltyArea implements IPenaltyArea
 	@SuppressWarnings("squid:S1244") // equality check intended
 	public IVector2 projectPointOnToPenaltyAreaBorder(final IVector2 point)
 	{
-		if (point.x() * Math.signum(goalCenter.x()) >= Math.abs(goalCenter.x()))
+		if (point.x() * Math.signum(getGoalCenter().x()) >= Math.abs(getGoalCenter().x()))
 		{
 			if (point.y() == 0.0)
 			{
-				return goalCenter.addNew(Vector2.fromX(getDepth()));
+				return getGoalCenter().addNew(Vector2.fromX(getDepth()));
 			}
-			return goalCenter.addNew(Vector2.fromY(Math.signum(point.y()) * getLength() / 2));
+			return getGoalCenter().addNew(Vector2.fromY(Math.signum(point.y()) * getLength() / 2));
 		}
-		return point.nearestToOpt(lineIntersections(Lines.lineFromPoints(point, goalCenter)))
-				.orElseGet(() -> goalCenter.addNew(Vector2.fromX(getDepth())));
+		return point.nearestToOpt(lineIntersections(Lines.lineFromPoints(point, getGoalCenter())))
+				.orElseGet(() -> getGoalCenter().addNew(Vector2.fromX(getDepth())));
 	}
 	
 	
 	@Override
 	public boolean isPointInShape(final IVector2 point)
 	{
-		return rectangle.isPointInShape(point);
+		return getRectangle().isPointInShape(point);
 	}
 	
 	
@@ -172,14 +172,14 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public IVector2 nearestPointInside(final IVector2 point)
 	{
-		return rectangle.nearestPointInside(point);
+		return getRectangle().nearestPointInside(point);
 	}
 	
 	
 	@Override
 	public IVector2 nearestPointOutside(final IVector2 point)
 	{
-		if (rectangle.isPointInShape(point))
+		if (getRectangle().isPointInShape(point))
 		{
 			return point.nearestTo(
 					getEdges().stream()
@@ -193,15 +193,15 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public boolean isIntersectingWithLine(final ILine line)
 	{
-		return rectangle.isIntersectingWithLine(line);
+		return getRectangle().isIntersectingWithLine(line);
 	}
 	
 	
 	@Override
 	public boolean isBehindPenaltyArea(final IVector2 point)
 	{
-		return (Math.abs(point.x()) > Math.abs(goalCenter.x()))
-				&& ((int) Math.signum(point.x()) == (int) Math.signum(goalCenter.x()))
+		return (Math.abs(point.x()) > Math.abs(getGoalCenter().x()))
+				&& ((int) Math.signum(point.x()) == (int) Math.signum(getGoalCenter().x()))
 				&& Math.abs(point.y()) < getLength() / 2;
 	}
 	
@@ -209,6 +209,7 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public IVector2 getGoalCenter()
 	{
+		ensureInitialized();
 		return goalCenter;
 	}
 	
@@ -216,19 +217,20 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public Rectangle getRectangle()
 	{
+		ensureInitialized();
 		return rectangle;
 	}
 	
 	
 	private double getLength()
 	{
-		return rectangle.yExtent();
+		return getRectangle().yExtent();
 	}
 	
 	
 	private double getDepth()
 	{
-		return rectangle.xExtent();
+		return getRectangle().xExtent();
 	}
 	
 	

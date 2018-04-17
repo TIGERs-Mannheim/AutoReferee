@@ -12,6 +12,7 @@ import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.botshape.IBotShape;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -52,9 +53,28 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	
 	
 	/**
+	 * @param horizon the time horizon in seconds
+	 * @return true, if the ball had ball contact within given horizon
+	 */
+	boolean hadBallContact(double horizon);
+	
+	
+	/**
+	 * @return the last time when ball contact was reported
+	 */
+	long getLastBallContact();
+	
+	
+	/**
 	 * @return
 	 */
 	double getCenter2DribblerDist();
+	
+	
+	/**
+	 * @return the bot shape of this bot
+	 */
+	IBotShape getBotShape();
 	
 	
 	/**

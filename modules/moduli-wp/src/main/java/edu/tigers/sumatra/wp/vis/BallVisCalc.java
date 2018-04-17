@@ -16,6 +16,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
@@ -60,7 +61,7 @@ public class BallVisCalc implements IWpCalc
 			}
 		}
 		
-		ILine rollLine = ball.getTrajectory().getTravelLineRolling();
+		ILineSegment rollLine = ball.getTrajectory().getTravelLineRolling();
 		if (rollLine.directionVector().getLength2() > 1)
 		{
 			DrawableLine roll = new DrawableLine(rollLine, Color.orange);

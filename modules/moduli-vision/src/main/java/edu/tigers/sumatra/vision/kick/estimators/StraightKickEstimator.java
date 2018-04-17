@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
@@ -28,6 +28,7 @@ import org.apache.commons.math3.util.Pair;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.sumatra.cam.data.ACamObject;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -152,7 +153,7 @@ public class StraightKickEstimator implements IKickEstimator
 		if (records.size() > 20)
 		{
 			Map<Integer, List<CamBallInternal>> groupedBalls = records.stream()
-					.collect(Collectors.groupingBy((final CamBallInternal b) -> b.getCameraId()));
+					.collect(Collectors.groupingBy(ACamObject::getCameraId));
 			
 			for (List<CamBallInternal> group : groupedBalls.values())
 			{
@@ -198,10 +199,7 @@ public class StraightKickEstimator implements IKickEstimator
 				return true;
 			}
 			
-			if (!Geometry.getField().withMargin(100).isPointInShape(posNow))
-			{
-				return true;
-			}
+			return !Geometry.getField().withMargin(100).isPointInShape(posNow);
 		}
 		
 		return false;
@@ -472,7 +470,7 @@ public class StraightKickEstimator implements IKickEstimator
 			
 			DrawableAnnotation err = new DrawableAnnotation(fit.getKickPos(),
 					String.format("%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().getLength2()));
-			err.setOffset(Vector2.fromXY(80, 40));
+			err.withOffset(Vector2.fromXY(80, 40));
 			err.setColor(Color.RED);
 			shapes.add(err);
 		}

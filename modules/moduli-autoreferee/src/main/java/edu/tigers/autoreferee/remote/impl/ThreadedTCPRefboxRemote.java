@@ -1,14 +1,7 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Feb 9, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.remote.impl;
-
-import static edu.tigers.autoreferee.generic.CheckedRunnable.execAndCatchAll;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,15 +23,15 @@ import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
  */
 public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 {
-	private static final Logger					log	= Logger.getLogger(ThreadedTCPRefboxRemote.class);
+	private static final Logger log = Logger.getLogger(ThreadedTCPRefboxRemote.class);
 	
-	private final String								hostname;
-	private final int									port;
+	private final String hostname;
+	private final int port;
 	
-	private Thread										thread;
-	private RefboxRemoteSocket						socket;
+	private Thread thread;
+	private RefboxRemoteSocket socket;
 	
-	private LinkedBlockingDeque<QueueEntry>	commandQueue;
+	private LinkedBlockingDeque<QueueEntry> commandQueue;
 	
 	
 	/**
@@ -82,6 +75,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	{
 		try
 		{
+			socket.close();
 			thread.interrupt();
 			thread.join();
 		} catch (InterruptedException e)
@@ -92,12 +86,8 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	}
 	
 	
-	private synchronized void reconnect() throws IOException, InterruptedException
+	private synchronized void reconnect() throws IOException
 	{
-		if (Thread.interrupted())
-		{
-			throw new InterruptedException();
-		}
 		socket.close();
 		socket.connect(hostname, port);
 	}
@@ -122,34 +112,27 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	@Override
 	public void run()
 	{
-		try
+		while (!Thread.interrupted())
 		{
-			while (!Thread.interrupted())
+			try
 			{
+				readWriteLoop();
+			} catch (Exception e)
+			{
+				/*
+				 * Try to reconnect to the refbox.
+				 * Fail with an error if the connection cannot be reestablished.
+				 */
 				try
 				{
-					readWriteLoop();
-				} catch (IOException e)
+					log.info("Reconnecting to refbox after error", e);
+					reconnect();
+				} catch (IOException ex)
 				{
-					/*
-					 * Try to reconnect to the refbox.
-					 * Fail with an error if the connection cannot be reestablished.
-					 */
-					try
-					{
-						log.debug("Reconnecting to refbox after IO error", e);
-						reconnect();
-					} catch (IOException ex)
-					{
-						log.error("Unable to reconnect to the refbox", ex);
-						break;
-					}
+					log.error("Unable to reconnect to the refbox", ex);
+					break;
 				}
 			}
-		} catch (InterruptedException e)
-		{
-			log.debug("Interrupted", e);
-			Thread.currentThread().interrupt();
 		}
 		
 		socket.close();
@@ -166,17 +149,12 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	 * @throws InvalidProtocolBufferException
 	 * @throws IOException
 	 */
-	private void readWriteLoop() throws InterruptedException, IOException
+	private void readWriteLoop() throws IOException
 	{
 		RemoteControlProtobufBuilder pbBuilder = new RemoteControlProtobufBuilder();
 		
-		while (true)
+		while (!Thread.interrupted())
 		{
-			if (Thread.interrupted())
-			{
-				throw new InterruptedException();
-			}
-			
 			QueueEntry entry = null;
 			try
 			{
@@ -191,15 +169,25 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 				{
 					entry.getResult().setSuccessful();
 				}
-			} catch (Exception e)
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			} catch (IOException e)
 			{
 				/*
 				 * Put the entry back into the queue if an error occurs in case the connection can be reestablished.
 				 */
-				if (entry != null)
+				if (entry.retries < 5)
 				{
+					entry.retries++;
 					QueueEntry lambdaEntry = entry;
-					execAndCatchAll(() -> commandQueue.putFirst(lambdaEntry));
+					try
+					{
+						commandQueue.putFirst(lambdaEntry);
+					} catch (InterruptedException e1)
+					{
+						Thread.currentThread().interrupt();
+					}
 				}
 				throw e;
 			}
@@ -209,7 +197,8 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	private static class QueueEntry
 	{
 		private final RefboxRemoteCommand cmd;
-		private final CommandResultImpl	result;
+		private final CommandResultImpl result;
+		private int retries = 0;
 		
 		
 		public QueueEntry(final RefboxRemoteCommand cmd)

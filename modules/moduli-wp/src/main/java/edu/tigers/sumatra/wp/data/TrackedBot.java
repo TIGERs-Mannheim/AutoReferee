@@ -20,6 +20,7 @@ import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.botshape.BotShape;
+import edu.tigers.sumatra.math.botshape.IBotShape;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -39,7 +40,7 @@ public final class TrackedBot implements ITrackedBot
 	private final State botState;
 	private final transient State filteredState;
 	private final transient State bufferedTrajState;
-	private final boolean ballContact;
+	private final long lastBallContact;
 	private final RobotInfo robotInfo;
 	
 	
@@ -51,7 +52,7 @@ public final class TrackedBot implements ITrackedBot
 		botState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
 		filteredState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
 		bufferedTrajState = null;
-		ballContact = false;
+		lastBallContact = 0;
 		robotInfo = null;
 		tAssembly = 0;
 	}
@@ -64,7 +65,7 @@ public final class TrackedBot implements ITrackedBot
 		botState = builder.state;
 		filteredState = builder.filteredState;
 		bufferedTrajState = builder.bufferedTrajState;
-		ballContact = builder.ballContact;
+		lastBallContact = builder.lastBallContact;
 		robotInfo = builder.robotInfo;
 		tAssembly = System.nanoTime();
 	}
@@ -91,7 +92,7 @@ public final class TrackedBot implements ITrackedBot
 		builder.state = copy.getBotState();
 		builder.filteredState = copy.getFilteredState().orElse(null);
 		builder.robotInfo = copy.getRobotInfo();
-		builder.ballContact = copy.hasBallContact();
+		builder.lastBallContact = copy.getLastBallContact();
 		return builder;
 	}
 	
@@ -109,7 +110,7 @@ public final class TrackedBot implements ITrackedBot
 				.withBotId(botID)
 				.withTimestamp(timestamp)
 				.withState(State.zero())
-				.withBallContact(false)
+				.withLastBallContact(0)
 				.withBotInfo(RobotInfo.stub(botID, timestamp));
 	}
 	
@@ -142,6 +143,15 @@ public final class TrackedBot implements ITrackedBot
 	public long getTimestamp()
 	{
 		return timestamp;
+	}
+	
+	
+	@Override
+	public IBotShape getBotShape()
+	{
+		double botRadius = robotInfo.getBotParams().getDimensions().getDiameter() / 2;
+		return BotShape.fromFullSpecification(getPos(), botRadius, getCenter2DribblerDist(),
+				getOrientation());
 	}
 	
 	
@@ -252,7 +262,21 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public boolean hasBallContact()
 	{
-		return ballContact;
+		return hadBallContact(0.2);
+	}
+	
+	
+	@Override
+	public boolean hadBallContact(double horizon)
+	{
+		return (timestamp - lastBallContact) * 1e-9 < horizon;
+	}
+	
+	
+	@Override
+	public long getLastBallContact()
+	{
+		return lastBallContact;
 	}
 	
 	
@@ -345,7 +369,7 @@ public final class TrackedBot implements ITrackedBot
 		private State state;
 		private State filteredState;
 		private State bufferedTrajState;
-		private Boolean ballContact;
+		private Long lastBallContact;
 		private RobotInfo robotInfo;
 		
 		
@@ -501,15 +525,15 @@ public final class TrackedBot implements ITrackedBot
 		
 		
 		/**
-		 * Sets the {@code ballContact} and returns a reference to this Builder so that the methods can be chained
+		 * Sets the {@code lastBallContact} and returns a reference to this Builder so that the methods can be chained
 		 * together.
 		 *
-		 * @param ballContact the {@code ballContact} to set
+		 * @param lastBallContact the {@code lastBallContact} to set
 		 * @return a reference to this Builder
 		 */
-		public Builder withBallContact(final boolean ballContact)
+		public Builder withLastBallContact(final long lastBallContact)
 		{
-			this.ballContact = ballContact;
+			this.lastBallContact = lastBallContact;
 			return this;
 		}
 		
@@ -537,7 +561,7 @@ public final class TrackedBot implements ITrackedBot
 			Validate.notNull(botId);
 			Validate.notNull(timestamp);
 			Validate.notNull(state);
-			Validate.notNull(ballContact);
+			Validate.notNull(lastBallContact);
 			Validate.notNull(robotInfo);
 			
 			return new TrackedBot(this);
