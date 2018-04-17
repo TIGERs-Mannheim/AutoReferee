@@ -30,21 +30,14 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
  */
 public class BallLeftFieldCalc implements IRefereeCalc
 {
+	@Configurable(comment = "[mm] Area behind the goal that is still considered to be part of the goal for better goal detection", defValue = "50.0")
+	private static double goalMargin = 50;
 	
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
 	private static final int BUFFER_SIZE = 15;
 	private static final int CERTAINTY = 3;
-	@Configurable(comment = "[mm] Area behind the goal that is still considered to be part of the goal for better goal detection")
-	private static double goalMargin = 50;
 	
 	private final LinkedList<TimedPosition> buffer = new LinkedList<>();
 	
-	
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
 	
 	@Override
 	public void process(final AutoRefFrame frame)

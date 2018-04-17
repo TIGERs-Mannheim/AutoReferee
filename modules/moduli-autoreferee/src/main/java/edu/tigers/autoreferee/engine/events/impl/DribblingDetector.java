@@ -38,10 +38,10 @@ public class DribblingDetector extends APreparingGameEventDetector
 	private static final int PRIORITY = 1;
 	private static final Logger	log									= Logger.getLogger(DribblingDetector.class);
 	
-	@Configurable(comment = "[mm] Any dribbling distance above this value is considered a violation")
+	@Configurable(comment = "[mm] Any dribbling distance above this value is considered a violation", defValue = "1000.0")
 	private static double maxDribblingLength = 1000;
 	
-	@Configurable(comment = "[mm] Any distance to the ball closer than this value is considered dribbling")
+	@Configurable(comment = "[mm] Any distance to the ball closer than this value is considered dribbling", defValue = "40.0")
 	private static double dribblingBotBallDistance = 40;
 	
 	static

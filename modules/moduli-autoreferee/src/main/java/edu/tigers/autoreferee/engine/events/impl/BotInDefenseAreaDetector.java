@@ -42,16 +42,16 @@ import edu.tigers.sumatra.referee.data.EGameState;
  */
 public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 {
-	private static final int			priority					= 1;
+	private static final int PRIORITY = 1;
 	
-	@Configurable(comment = "[ms] The cooldown time before registering a ball touch with the same bot again in ms")
-	private static int					COOLDOWN_TIME_MS		= 3_000;
+	@Configurable(comment = "[ms] The cooldown time before registering a ball touch with the same bot again in ms", defValue = "3000")
+	private static int cooldownTimeMs = 3_000;
 	
-	@Configurable(comment = "[mm] Distance from the defense line that is considered a partial violation")
-	private static double				partialTouchMargin	= 20;
+	@Configurable(comment = "[mm] Distance from the defense line that is considered a partial violation", defValue = "20.0")
+	private static double partialTouchMargin = 20;
 	
-	private long							entryTime				= 0;
-	private Map<BotID, BotPosition>	lastViolators			= new HashMap<>();
+	private long entryTime = 0;
+	private Map<BotID, BotPosition> lastViolators = new HashMap<>();
 	
 	static
 	{
@@ -71,7 +71,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	@Override
 	public int getPriority()
 	{
-		return priority;
+		return PRIORITY;
 	}
 	
 	
@@ -114,7 +114,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			{
 				// Wait a certain amount of time before reporting the offense again for the same bot
 				long timeDiff = curKicker.getTimestamp() - lastViolationOfCurKicker.getTimestamp();
-				if (timeDiff < TimeUnit.MILLISECONDS.toNanos(COOLDOWN_TIME_MS))
+				if (timeDiff < TimeUnit.MILLISECONDS.toNanos(cooldownTimeMs))
 				{
 					return Optional.empty();
 				}

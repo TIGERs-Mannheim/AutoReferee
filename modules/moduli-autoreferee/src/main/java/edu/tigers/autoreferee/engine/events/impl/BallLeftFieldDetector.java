@@ -39,10 +39,10 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	
 	private static final int		PRIORITY							= 1;
 	
-	@Configurable(comment = "[mm] The goal line threshold")
+	@Configurable(comment = "[mm] The goal line threshold", defValue = "10.0")
 	private static double			goalLineThreshold				= 10;
 	
-	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line")
+	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line", defValue = "200.0")
 	private static double			icingKickoffLineThreshold	= 200;
 	
 	static

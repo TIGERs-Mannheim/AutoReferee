@@ -49,8 +49,8 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "[ms] Wait time before reporting a crash with a robot again", defValue = "1000")
 	private static double crashCooldownTimeMs = 1_000;
 	
-	@Configurable(comment = "Adjust the bot to bot distance that is considered a contact: dist * factor", defValue = "0.9")
-	private static double minDistanceFactor = 0.9;
+	@Configurable(comment = "Adjust the bot to bot distance that is considered a contact: dist * factor", defValue = "1.1")
+	private static double minDistanceFactor = 1.1;
 	
 	private Map<BotID, Long> lastViolators = new HashMap<>();
 	

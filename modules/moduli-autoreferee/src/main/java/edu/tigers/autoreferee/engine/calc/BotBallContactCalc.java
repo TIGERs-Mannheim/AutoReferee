@@ -33,7 +33,7 @@ import edu.tigers.sumatra.wp.util.BotLastTouchedBallCalculator;
 public class BotBallContactCalc implements IRefereeCalc
 {
 	private static final Color EXT_COLOR = Color.WHITE;
-	@Configurable(comment = "The algorithm to use for ball touch detection")
+	@Configurable(comment = "The algorithm to use for ball touch detection", defValue = "REGULAR")
 	private static CalcMode mode = CalcMode.REGULAR;
 	
 	static

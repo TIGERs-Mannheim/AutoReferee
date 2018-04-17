@@ -46,13 +46,13 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 {
 	private static final int PRIORITY = 1;
 	
-	@Configurable(comment = "If disabled only bots that are on a collision course with the ball will be considered violators")
+	@Configurable(comment = "If disabled only bots that are on a collision course with the ball will be considered violators", defValue = "true")
 	private static boolean strictMode = true;
 	
-	@Configurable(comment = "[ms] The amount of time a bot can be located inside the outer circle (500mm>x>250mm from the kick pos) without logging a violation")
+	@Configurable(comment = "[ms] The amount of time a bot can be located inside the outer circle (500mm>x>250mm from the kick pos) without logging a violation", defValue = "3000")
 	private static long maxOuterCircleLingerTime = 3_000;
 	
-	@Configurable(comment = "[ms] The amount of time before a violation is reported again for the same bot")
+	@Configurable(comment = "[ms] The amount of time before a violation is reported again for the same bot", defValue = "1500")
 	private static long violatorCooldownTime = 1_500;
 	
 	private IVector2 ballPos = null;
