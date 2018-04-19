@@ -122,6 +122,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 				break;
 			}
 		}
+		// xor: either state changed or currently inside, not both
 		return ballStateChanged ^ currentlyInside;
 	}
 	
