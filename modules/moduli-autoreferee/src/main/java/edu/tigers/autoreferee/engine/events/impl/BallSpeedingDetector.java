@@ -75,7 +75,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 			}
 		} else
 		{
-			if (lastSpeedEstimate > RuleConstraints.getMaxBallSpeed() && (lastSpeedEstimate < topSpeedThreshold))
+			if (lastSpeedEstimate > RuleConstraints.getMaxBallSpeed() + 0.01 && (lastSpeedEstimate < topSpeedThreshold))
 			{
 				SpeedViolation violation = createViolation(lastKickEvent.getKickingBot(), frame.getTimestamp());
 				reset();

@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2015, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jul 30, 2015
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.botmanager.commands;
 
@@ -44,5 +39,5 @@ public interface IMatchCommand
 	/**
 	 * @param enable
 	 */
-	public void setStrictVelocityLimit(final boolean enable);
+	void setStrictVelocityLimit(final boolean enable);
 }

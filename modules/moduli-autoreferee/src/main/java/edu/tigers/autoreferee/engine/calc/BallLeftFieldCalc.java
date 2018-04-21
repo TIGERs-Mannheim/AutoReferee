@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.calc;
 
@@ -33,7 +33,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	@Configurable(comment = "[mm] Area behind the goal that is still considered to be part of the goal for better goal detection", defValue = "50.0")
 	private static double goalMargin = 50;
 	
-	private static final int BUFFER_SIZE = 15;
+	private static final int BUFFER_SIZE = 50;
 	private static final int CERTAINTY = 3;
 	
 	private final LinkedList<TimedPosition> buffer = new LinkedList<>();
@@ -47,7 +47,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 		boolean wasInsideField = frame.getPreviousFrame().isBallInsideField();
 		
 		TimedPosition leftFieldPos = frame.getPreviousFrame().getBallLeftFieldPos();
-		boolean isBallInsideField = isBallInsideField(wasInsideField);
+		boolean isBallInsideField = isBallInsideField(wasInsideField, frame);
 		if (!isBallInsideField && wasInsideField)
 		{
 			leftFieldPos = getBallLeftFieldPosition();
@@ -105,8 +105,20 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	}
 	
 	
-	private boolean isBallInsideField(final boolean currentlyInside)
+	private boolean isBallInsideField(final boolean currentlyInside, final AutoRefFrame frame)
 	{
+		if (frame.getWorldFrame().getKickEvent().isPresent())
+		{
+			if ((frame.getTimestamp() - frame.getWorldFrame().getKickEvent().get().getTimestamp()) / 1e9 < 0.7)
+			{
+				return currentlyInside;
+			}
+			if (frame.getWorldFrame().getBall().isChipped())
+			{
+				return currentlyInside;
+			}
+		}
+		
 		if (buffer.size() < CERTAINTY)
 		{
 			return currentlyInside;
