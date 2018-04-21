@@ -34,13 +34,13 @@ import edu.tigers.sumatra.math.vector.Vector3f;
  */
 public class CamCalibration implements IJsonString
 {
-	private final int				cameraId;
-	private final double			focalLength;
-	private final double			distortion;
-	private final IVector2		principalPoint;
-	private final Quaternion	rotationQuaternion;
-	private final IVector3		translation;
-	private final IVector3		cameraPosition;
+	private final int cameraId;
+	private final double focalLength;
+	private final double distortion;
+	private final IVector2 principalPoint;
+	private final Quaternion rotationQuaternion;
+	private final IVector3 translation;
+	private final IVector3 cameraPosition;
 	
 	
 	/**
@@ -398,10 +398,10 @@ public class CamCalibration implements IJsonString
 	public IRectangle getApproximatedViewport(final IVector2 sensorPixelSize)
 	{
 		List<IVector2> points = new ArrayList<>();
-		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x() / 2, sensorPixelSize.y()), 150));
-		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x() / 2, 0), 150));
-		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x(), sensorPixelSize.y() / 2), 150));
-		points.add(imageToField(Vector2.fromXY(0, sensorPixelSize.y() / 2), 150));
+		points.add(imageToField(Vector2.fromXY(0, 0), 150));
+		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x(), 0), 150));
+		points.add(imageToField(Vector2.fromXY(0, sensorPixelSize.y()), 150));
+		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x(), sensorPixelSize.y()), 150));
 		
 		double minX = points.stream()
 				.mapToDouble(IVector2::x)

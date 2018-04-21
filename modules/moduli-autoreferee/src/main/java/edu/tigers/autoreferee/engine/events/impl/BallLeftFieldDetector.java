@@ -44,7 +44,10 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	
 	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line", defValue = "200.0")
 	private static double			icingKickoffLineThreshold	= 200;
-	
+
+	@Configurable(comment= "[mm] Ball from sideline distance", defValue = "200.0")
+	private static double sideLineDistance = 200;
+
 	static
 	{
 		AGameEventDetector.registerClass(BallLeftFieldDetector.class);
@@ -109,7 +112,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 			final BotPosition lastTouched, final long ts)
 	{
 		int ySide = ballPos.y() > 0 ? 1 : -1;
-		IVector2 kickPos = ballPos.addNew(Vector2.fromXY(0, -100.0 * ySide));
+		IVector2 kickPos = ballPos.addNew(Vector2.fromXY(0, -sideLineDistance * ySide));
 		return Optional.of(buildThrowInResult(lastTouched.getBotID(), kickPos, ts));
 	}
 	
