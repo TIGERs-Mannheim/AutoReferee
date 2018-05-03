@@ -4,8 +4,11 @@
 package edu.tigers.autoreferee.remote.impl;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -30,6 +33,8 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	
 	private Thread thread;
 	private RefboxRemoteSocket socket;
+	private boolean running = false;
+	private CountDownLatch terminationLatch = null;
 	
 	private LinkedBlockingDeque<QueueEntry> commandQueue;
 	
@@ -63,24 +68,23 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		{
 			throw new IOException("Unable to connect to the Refbox: " + e.getMessage(), e);
 		}
+		running = true;
 		thread.start();
 	}
 	
 	
-	/**
-	 * 
-	 */
 	@Override
 	public synchronized void stop()
 	{
+		terminationLatch = new CountDownLatch(1);
+		running = false;
+		thread.interrupt();
 		try
 		{
-			socket.close();
-			thread.interrupt();
-			thread.join();
+			Validate.isTrue(terminationLatch.await(1, TimeUnit.SECONDS));
 		} catch (InterruptedException e)
 		{
-			log.warn("Error while joining the sending thread", e);
+			log.warn("Interrupted while waiting for termination", e);
 			Thread.currentThread().interrupt();
 		}
 	}
@@ -97,14 +101,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	public ICommandResult sendCommand(final RefboxRemoteCommand command)
 	{
 		QueueEntry entry = new QueueEntry(command);
-		try
-		{
-			commandQueue.put(entry);
-		} catch (InterruptedException e)
-		{
-			log.error("", e);
-			Thread.currentThread().interrupt();
-		}
+		Validate.isTrue(commandQueue.offer(entry));
 		return entry.getResult();
 	}
 	
@@ -112,7 +109,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	@Override
 	public void run()
 	{
-		while (!Thread.interrupted())
+		while (running)
 		{
 			try
 			{
@@ -136,6 +133,11 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		}
 		
 		socket.close();
+		
+		if (terminationLatch != null)
+		{
+			terminationLatch.countDown();
+		}
 	}
 	
 	
@@ -153,7 +155,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	{
 		RemoteControlProtobufBuilder pbBuilder = new RemoteControlProtobufBuilder();
 		
-		while (!Thread.interrupted())
+		while (running)
 		{
 			QueueEntry entry = null;
 			try

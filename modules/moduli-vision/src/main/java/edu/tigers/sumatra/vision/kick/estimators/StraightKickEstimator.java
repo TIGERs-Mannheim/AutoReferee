@@ -52,23 +52,23 @@ import edu.tigers.sumatra.vision.data.StraightBallTrajectory;
  */
 public class StraightKickEstimator implements IKickEstimator
 {
-	private final List<CamBallInternal>	records							= new ArrayList<>();
-	private final double						initialAcc;
+	private final List<CamBallInternal> records = new ArrayList<>();
+	private final double initialAcc;
 	
-	private Optional<Line>					fitFirstLine					= Optional.empty();
-	private Optional<Line>					fitLastLine						= Optional.empty();
+	private Optional<Line> fitFirstLine = Optional.empty();
+	private Optional<Line> fitLastLine = Optional.empty();
 	
-	private KickFitResult					fitResult						= null;
-	private final BallParameters			ballParams;
+	private KickFitResult fitResult = null;
+	private final BallParameters ballParams;
 	
 	@Configurable(comment = "Number of initial samples where linear fitting is used")
-	private static int						numInitialKickVelSamples	= 10;
+	private static int numInitialKickVelSamples = 10;
 	
 	@Configurable(comment = "Max fitting error until this estimator is dropped [mm]")
-	private static double					maxFittingError				= 100;
+	private static double maxFittingError = 100;
 	
 	@Configurable(comment = "Max direction deviation until this estimator is dropped [deg]")
-	private static double					maxDirectionError				= 20;
+	private static double maxDirectionError = 20;
 	
 	static
 	{
@@ -124,7 +124,7 @@ public class StraightKickEstimator implements IKickEstimator
 	{
 		records.add(record);
 		
-		if (records.size() < numInitialKickVelSamples)
+		if (records.size() < numInitialKickVelSamples || fitResult == null)
 		{
 			solve3Lin();
 		} else
@@ -306,7 +306,9 @@ public class StraightKickEstimator implements IKickEstimator
 		
 		IVector2 dir = kickLine.get().directionVector().normalizeNew();
 		
-		RealVector start = new ArrayRealVector(new double[] { fitResult.getKickPos().x(), fitResult.getKickPos().y(),
+		RealVector start = new ArrayRealVector(new double[] {
+				fitResult.getKickPos().x(),
+				fitResult.getKickPos().y(),
 				fitResult.getKickVel().getLength2() });
 		
 		RealVector target = new ArrayRealVector(numRecords * 2);
@@ -367,10 +369,10 @@ public class StraightKickEstimator implements IKickEstimator
 	
 	private class TwoPhaseModel implements MultivariateJacobianFunction
 	{
-		private final double	dx;
-		private final double	dy;
-		private final double	cSw;
-		private final double	cT;
+		private final double dx;
+		private final double dy;
+		private final double cSw;
+		private final double cT;
 		
 		
 		public TwoPhaseModel(final IVector2 dir)

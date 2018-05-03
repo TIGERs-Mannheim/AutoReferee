@@ -18,39 +18,17 @@
     </properties>
 
     <repositories>
-
         <repository>
             <id>tigers_public</id>
             <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
-        </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
-        <repository>
-            <id>oracleReleases</id>
-            <name>Oracle Released Java Packages</name>
-            <url>http://download.oracle.com/maven</url>
-            <layout>default</layout>
         </repository>
     </repositories>
 
 
     <pluginRepositories>
         <pluginRepository>
-            <id>central</id>
-            <name>Maven Central</name>
-            <url>http://repo1.maven.org/maven2/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-sergei-ivanov-maven</id>
-            <name>bintray-plugins</name>
-            <url>http://dl.bintray.com/sergei-ivanov/maven</url>
+            <id>tigers_public</id>
+            <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
 

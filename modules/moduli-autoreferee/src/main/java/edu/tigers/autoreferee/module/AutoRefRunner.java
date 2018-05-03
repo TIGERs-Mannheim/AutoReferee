@@ -54,7 +54,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private final BlockingDeque<RefStateChange> requestStateChanges = new LinkedBlockingDeque<>();
 	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
 	private AutoRefState refState = AutoRefState.STOPPED;
-	private boolean isRunning = false;
+	private boolean running = false;
 	private IAutoRefEngine engine;
 	private GameLogFileAppender gameLogAppender;
 	private final ERemoteControlType remoteControlType;
@@ -182,7 +182,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		
 		engine = refEngine;
 		
-		isRunning = true;
+		running = true;
 		executorService.execute(this);
 		
 		setState(AutoRefState.STARTED);
@@ -204,8 +204,9 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	 */
 	public void stop()
 	{
-		if (isRunning)
+		if (running)
 		{
+			running = false;
 			requestStateChanges.add(RefStateChange.STOP);
 			try
 			{
@@ -225,7 +226,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	 */
 	public void pause()
 	{
-		if (isRunning)
+		if (running)
 		{
 			requestStateChanges.add(RefStateChange.PAUSE);
 		}
@@ -237,7 +238,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	 */
 	public void resume()
 	{
-		if (isRunning)
+		if (running)
 		{
 			requestStateChanges.add(RefStateChange.RESUME);
 		}
@@ -252,11 +253,15 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		try
 		{
 			doLoop();
+		} catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
 		} catch (Exception e)
 		{
 			log.error("Unhandled exception during AutoRef execution", e);
 		} finally
 		{
+			running = false;
 			setState(AutoRefState.STOPPED);
 			
 			deregisterFromPredictor();
@@ -271,14 +276,13 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	private void doLoop() throws InterruptedException
 	{
-		while (!Thread.currentThread().isInterrupted())
+		while (running)
 		{
 			WorldFrameWrapper frame = consumableFrames.poll(10, TimeUnit.MILLISECONDS);
 			if (frame != null)
 			{
 				consumeWorldFrame(frame);
 			}
-			
 			
 			RefStateChange change = requestStateChanges.poll();
 			if (change != null)

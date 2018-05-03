@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.ids;
@@ -116,9 +116,9 @@ public final class BotID extends AObjectID
 		
 		ETeamColor color = ETeamColor.YELLOW;
 		int colorDependentNumber = number;
-		if (number > BOT_ID_MAX)
+		if (number > BOT_ID_MIDDLE_BS)
 		{
-			colorDependentNumber -= BOT_ID_MAX + 1;
+			colorDependentNumber -= BOT_ID_MIDDLE_BS + 1;
 			color = ETeamColor.BLUE;
 		}
 		return createBotId(colorDependentNumber, color);
@@ -166,7 +166,7 @@ public final class BotID extends AObjectID
 	 */
 	public int getNumberWithColorOffsetBS()
 	{
-		return getNumber() + (teamColor == ETeamColor.YELLOW ? 0 : AObjectID.BOT_ID_MAX + 1);
+		return getNumber() + (teamColor == ETeamColor.YELLOW ? 0 : AObjectID.BOT_ID_MIDDLE_BS + 1);
 	}
 	
 	

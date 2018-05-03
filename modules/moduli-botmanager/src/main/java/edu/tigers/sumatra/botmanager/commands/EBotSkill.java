@@ -12,6 +12,7 @@ import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillFastGlobalPositi
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalPosition;
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalVelXyPosW;
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillGlobalVelocity;
+import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillLocalForce;
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillLocalVelocity;
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillMotorsOff;
 import edu.tigers.sumatra.botmanager.commands.botskills.BotSkillPenaltyShooter;
@@ -51,8 +52,8 @@ public enum EBotSkill implements IInstanceableEnum
 			new InstanceableParameter(Double.TYPE, "kickSpeed", "0"),
 			new InstanceableParameter(EKickerDevice.class, "kickDevice", "STRAIGHT"),
 			new InstanceableParameter(EKickerMode.class, "kickMode", "DISARM"))),
-	/** */
 	
+	/** */
 	GLOBAL_VELOCITY(3, new InstanceableClass(BotSkillGlobalVelocity.class,
 			new InstanceableParameter(IVector2.class, "xy", "0,0"),
 			new InstanceableParameter(Double.TYPE, "w", "0"),
@@ -125,8 +126,16 @@ public enum EBotSkill implements IInstanceableEnum
 			new InstanceableParameter(Double.TYPE, "accMaxW", "150"),
 			new InstanceableParameter(Double.TYPE, "jerkMax", "300"),
 			new InstanceableParameter(Double.TYPE, "jerkMaxW", "500"),
-			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "3000")));
+			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "3000"))),
 	
+	/** */
+	LOCAL_FORCE(10, new InstanceableClass(BotSkillLocalForce.class,
+			new InstanceableParameter(IVector2.class, "xy", "0,0"),
+			new InstanceableParameter(Double.TYPE, "w", "0"),
+			new InstanceableParameter(Double.TYPE, "dribbleSpeed", "0"),
+			new InstanceableParameter(Double.TYPE, "kickSpeed", "0"),
+			new InstanceableParameter(EKickerDevice.class, "kickDevice", "STRAIGHT"),
+			new InstanceableParameter(EKickerMode.class, "kickMode", "DISARM")));
 	
 	private final InstanceableClass clazz;
 	private final int id;

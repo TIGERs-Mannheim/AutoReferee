@@ -130,9 +130,9 @@ public class BaseStationACommand extends ACommand
 			return BotID.noBot();
 		}
 		
-		if (id > AObjectID.BOT_ID_MAX)
+		if (id > AObjectID.BOT_ID_MIDDLE_BS)
 		{
-			return BotID.createBotId(id - (AObjectID.BOT_ID_MAX + 1), ETeamColor.BLUE);
+			return BotID.createBotId(id - (AObjectID.BOT_ID_MIDDLE_BS + 1), ETeamColor.BLUE);
 		}
 		
 		return BotID.createBotId(id, ETeamColor.YELLOW);
@@ -154,7 +154,7 @@ public class BaseStationACommand extends ACommand
 		
 		if (id.getTeamColor() == ETeamColor.BLUE)
 		{
-			return id.getNumber() + AObjectID.BOT_ID_MAX + 1;
+			return id.getNumber() + AObjectID.BOT_ID_MIDDLE_BS + 1;
 		}
 		
 		return id.getNumber();

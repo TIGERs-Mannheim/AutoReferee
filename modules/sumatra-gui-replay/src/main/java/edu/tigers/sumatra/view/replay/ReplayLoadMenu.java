@@ -250,8 +250,11 @@ public class ReplayLoadMenu extends JMenu
 				observers.forEach(o -> o.onOpenReplay(dbOut));
 			} catch (Exception e)
 			{
-				log.error("An exception occurred on load. See log.", e);
-				JOptionPane.showMessageDialog(ReplayLoadMenu.this, "An exception occurred while loading database. See log.",
+				log.error(
+						"An exception occurred while loading database.\nTo watch a replay, you need to have started the simulation at least once.",
+						e);
+				JOptionPane.showMessageDialog(ReplayLoadMenu.this,
+						"An exception occurred while loading database.\nTo watch a replay, you need to have started the simulation at least once.",
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
 				if (db != null)

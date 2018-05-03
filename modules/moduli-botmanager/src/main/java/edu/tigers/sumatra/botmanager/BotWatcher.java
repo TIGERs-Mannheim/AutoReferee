@@ -14,6 +14,7 @@ import edu.tigers.sumatra.botmanager.commands.ACommand;
 import edu.tigers.sumatra.botmanager.commands.botskills.EDataAcquisitionMode;
 import edu.tigers.sumatra.botmanager.commands.tigerv2.TigerSystemMatchFeedback;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqBotModel;
+import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqBotModelV2;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqDelays;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqMotorModel;
 import edu.tigers.sumatra.botmanager.commands.tigerv3.TigerDataAcqSetMode;
@@ -75,6 +76,9 @@ public class BotWatcher implements IABotObserver
 				break;
 			case MOTOR_MODEL:
 				exporter = new CSVExporter("data/motorModel/" + sdf.format(new Date()), false);
+				break;
+			case BOT_MODEL_V2:
+				exporter = new CSVExporter("data/botModelV2/" + sdf.format(new Date()), false);
 				break;
 			case NONE:
 				exporter = new CSVExporter("data/botstatus/" + sdf.format(new Date()), false);
@@ -168,6 +172,9 @@ public class BotWatcher implements IABotObserver
 			case CMD_DATA_ACQ_VELOCITY:
 				handleAcqVelocity(cmd, nbrs);
 				break;
+			case CMD_DATA_ACQ_BOT_MODEL_V2:
+				handleAcqBotModelV2(cmd, nbrs);
+				break;
 			default:
 				break;
 		}
@@ -209,6 +216,23 @@ public class BotWatcher implements IABotObserver
 		nbrs.add(bm.getVisionTime());
 		nbrs.addAll(bm.getOutVelocityList());
 		nbrs.addAll(bm.getVisionPositionList());
+		exporter.addValues(nbrs);
+		dataReceived = true;
+	}
+	
+	
+	private void handleAcqBotModelV2(final ACommand cmd, final List<Number> nbrs)
+	{
+		TigerDataAcqBotModelV2 bm = (TigerDataAcqBotModelV2) cmd;
+		nbrs.add(bot.getBotId().getNumberWithColorOffsetBS());
+		nbrs.add(bm.getTimestamp());
+		nbrs.addAll(bm.getStateVelocityList());
+		nbrs.addAll(bm.getEncoderVelocityList());
+		nbrs.addAll(bm.getOutputForceList());
+		nbrs.add(bm.getEfficiencyXY());
+		nbrs.add(bm.getEfficiencyW());
+		nbrs.add(bm.getModeXY());
+		nbrs.add(bm.getModeW());
 		exporter.addValues(nbrs);
 		dataReceived = true;
 	}
