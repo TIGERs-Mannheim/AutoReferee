@@ -108,7 +108,8 @@ public class Geometry
 	private static double opponentCenter2DribblerDist = 85;
 	@Configurable
 	private static double goalWallThickness = 20;
-	
+	@Configurable
+	private static double lineWidth = 10;
 	
 	/**
 	 * TIGERs internal
@@ -626,5 +627,11 @@ public class Geometry
 	public static void setNegativeHalfTeam(final ETeamColor negativeHalfTeam)
 	{
 		Geometry.negativeHalfTeam = negativeHalfTeam;
+	}
+	
+	
+	public static double getLineWidth()
+	{
+		return lineWidth;
 	}
 }

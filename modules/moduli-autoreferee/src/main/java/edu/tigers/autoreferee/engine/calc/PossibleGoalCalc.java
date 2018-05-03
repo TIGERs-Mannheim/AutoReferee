@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.calc;
@@ -89,14 +89,14 @@ public class PossibleGoalCalc implements IRefereeCalc
 			{
 				buffer = new LinkedList<>();
 				detectedGoal = null;
-				frame.setBallLeftFieldPos(new TimedPosition(frame.getTimestamp(), ballPosOutsideGoal));
+				frame.setBallLeftFieldPos(new TimedPosition(frame.getTimestamp(), ballPosOutsideGoal.getXYVector()));
 			} else
 			{
-				buffer.add(new TimedPosition(prevFrame.getTimestamp(), ballPosOutsideGoal));
+				buffer.add(new TimedPosition(prevFrame.getTimestamp(), ballPosOutsideGoal.getXYVector()));
 			}
 		}
 		ballWasInGoal = true;
-		buffer.add(new TimedPosition(frame.getTimestamp(), ballPos));
+		buffer.add(new TimedPosition(frame.getTimestamp(), ballPos.getXYVector()));
 		if (buffer.size() > 3)
 		{
 			detectedGoal = new PossibleGoal(frame.getTimestamp(), getGoalColor(ballPos.getXYVector()));

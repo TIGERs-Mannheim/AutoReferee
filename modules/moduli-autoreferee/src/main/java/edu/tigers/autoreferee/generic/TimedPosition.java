@@ -1,25 +1,20 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.generic;
 
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3;
 
 
 /**
- * Vector subclass which carries a timestamp corresponding to the time the vector was captured
- * 
- * @author "Lukas Magel"
+ * Position which carries a timestamp corresponding to the time it was captured
  */
 public class TimedPosition
 {
-	private final long		timestamp;
-	private final IVector2	position;
-	private final IVector3 pos3D;
+	private final long timestamp;
+	private final IVector2 position;
 	
 	
 	/**
@@ -29,7 +24,6 @@ public class TimedPosition
 	{
 		timestamp = 0;
 		position = Vector2f.ZERO_VECTOR;
-		pos3D = Vector3.zero();
 	}
 	
 	
@@ -41,15 +35,16 @@ public class TimedPosition
 	{
 		this.position = position;
 		this.timestamp = timestamp;
-		pos3D = position.getXYZVector();
 	}
 	
 	
-	public TimedPosition(final long timestamp, final IVector3 position)
+	/**
+	 * @param currentTimestamp
+	 * @return the age in [s]
+	 */
+	public double getAge(final long currentTimestamp)
 	{
-		this.timestamp = timestamp;
-		this.pos3D = position;
-		this.position = position.getXYVector();
+		return (currentTimestamp - timestamp) / 1e9;
 	}
 	
 	
@@ -65,11 +60,5 @@ public class TimedPosition
 	public IVector2 getPos()
 	{
 		return position;
-	}
-	
-	
-	public IVector3 getPos3D()
-	{
-		return pos3D;
 	}
 }

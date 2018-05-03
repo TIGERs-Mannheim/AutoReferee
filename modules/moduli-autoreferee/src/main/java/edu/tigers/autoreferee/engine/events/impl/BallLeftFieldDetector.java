@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
@@ -35,19 +35,19 @@ import edu.tigers.sumatra.referee.data.EGameState;
  */
 public class BallLeftFieldDetector extends AGameEventDetector
 {
-	private static final Logger	log								= Logger.getLogger(BallLeftFieldDetector.class);
+	private static final Logger log = Logger.getLogger(BallLeftFieldDetector.class);
 	
-	private static final int		PRIORITY							= 1;
+	private static final int PRIORITY = 1;
 	
 	@Configurable(comment = "[mm] The goal line threshold", defValue = "10.0")
-	private static double			goalLineThreshold				= 10;
+	private static double goalLineThreshold = 10;
 	
 	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line", defValue = "200.0")
-	private static double			icingKickoffLineThreshold	= 200;
-
-	@Configurable(comment= "[mm] Ball from sideline distance", defValue = "200.0")
+	private static double icingKickoffLineThreshold = 200;
+	
+	@Configurable(comment = "[mm] Ball from sideline distance", defValue = "200.0")
 	private static double sideLineDistance = 200;
-
+	
 	static
 	{
 		AGameEventDetector.registerClass(BallLeftFieldDetector.class);
@@ -97,9 +97,16 @@ public class BallLeftFieldDetector extends AGameEventDetector
 					- Math.abs(leftFieldPos.getPos().x())) < goalLineThreshold;
 			boolean exitGoallineInY = ((Geometry.getFieldWidth() / 2)
 					- Math.abs(leftFieldPos.getPos().y())) > goalLineThreshold;
+			boolean enteredGoalInY = Geometry.getGoalOur().getWidth() / 2
+					- Math.abs(leftFieldPos.getPos().y()) > goalLineThreshold;
 			if (exitGoallineInX && exitGoallineInY)
 			{
 				// The ball exited the field over the goal line
+				if (enteredGoalInY)
+				{
+					// a potential goal
+					return Optional.empty();
+				}
 				return handleGoalLineOff(leftFieldPos.getPos(), lastTouched, ts);
 			}
 			return handleSideLineOff(leftFieldPos.getPos(), lastTouched, ts);
