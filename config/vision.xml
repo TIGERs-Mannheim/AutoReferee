@@ -65,6 +65,5 @@
     </tracker>
     <ViewportArchitect>
         <maxViewportOverlap>400</maxViewportOverlap>
-        <sensorPixelSize>752.0;480.0</sensorPixelSize>
     </ViewportArchitect>
 </edu.tigers.sumatra.vision>
