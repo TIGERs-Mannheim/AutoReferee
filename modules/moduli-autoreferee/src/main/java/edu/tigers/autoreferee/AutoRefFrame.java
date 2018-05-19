@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee;
 
@@ -131,9 +131,9 @@ public class AutoRefFrame implements IAutoRefFrame
 	
 	
 	@Override
-	public TimedPosition getBallLeftFieldPos()
+	public Optional<TimedPosition> getBallLeftFieldPos()
 	{
-		return ballLeftFieldPos;
+		return Optional.ofNullable(ballLeftFieldPos);
 	}
 	
 	

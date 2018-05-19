@@ -12,14 +12,21 @@ import edu.tigers.sumatra.ids.BotID;
 
 public class CrashViolation extends GameEvent
 {
-	private final DecimalFormat format = new DecimalFormat("0.000");
+	private static final DecimalFormat DF = new DecimalFormat("0.000");
+	
 	private BotID secondResponsibleBot;
 	private double collisionSpeed;
 	private double speedDifference;
+	private double speedPrimaryBot;
+	private double speedSecondaryBot;
 	
 	
-	public CrashViolation(final EGameEvent eventType, final long timestamp, final BotID responsibleBot,
-			final double collisionSpeed, final double speedDifference,
+	public CrashViolation(
+			final EGameEvent eventType,
+			final long timestamp,
+			final BotID responsibleBot,
+			final double collisionSpeed,
+			final double speedDifference,
 			final FollowUpAction followUp)
 	{
 		super(eventType, timestamp, responsibleBot, followUp);
@@ -28,14 +35,24 @@ public class CrashViolation extends GameEvent
 	}
 	
 	
-	public CrashViolation(final EGameEvent eventType, final long timestamp, final BotID responsibleBot,
-			final BotID responsibleBot2, final double collisionSpeed, final double speedDifference,
-			final FollowUpAction followUp)
+	public CrashViolation setSecondResponsibleBot(final BotID secondResponsibleBot)
 	{
-		super(eventType, timestamp, responsibleBot, followUp);
-		secondResponsibleBot = responsibleBot2;
-		this.collisionSpeed = collisionSpeed;
-		this.speedDifference = speedDifference;
+		this.secondResponsibleBot = secondResponsibleBot;
+		return this;
+	}
+	
+	
+	public CrashViolation setSpeedPrimaryBot(final double speedPrimaryBot)
+	{
+		this.speedPrimaryBot = speedPrimaryBot;
+		return this;
+	}
+	
+	
+	public CrashViolation setSpeedSecondaryBot(final double speedSecondaryBot)
+	{
+		this.speedSecondaryBot = speedSecondaryBot;
+		return this;
 	}
 	
 	
@@ -54,10 +71,16 @@ public class CrashViolation extends GameEvent
 	{
 		return super.generateLogString()
 				+ " | CollisionSpeed: "
-				+ format.format(collisionSpeed)
+				+ DF.format(collisionSpeed)
 				+ "m/s"
 				+ " | SpeedDifference: "
-				+ format.format(speedDifference)
+				+ DF.format(speedDifference)
+				+ "m/s"
+				+ " | SpeedPrimary: "
+				+ DF.format(speedPrimaryBot)
+				+ "m/s"
+				+ " | SpeedSecondary: "
+				+ DF.format(speedSecondaryBot)
 				+ "m/s";
 	}
 	
@@ -79,11 +102,19 @@ public class CrashViolation extends GameEvent
 			builder.append(secondResponsibleBot.getTeamColor());
 			
 			builder.append(" | CollisionSpeed: ");
-			builder.append(format.format(collisionSpeed));
+			builder.append(DF.format(collisionSpeed));
 			builder.append("m/s");
 			
 			builder.append(" | SpeedDifference: ");
-			builder.append(format.format(speedDifference));
+			builder.append(DF.format(speedDifference));
+			builder.append("m/s");
+			
+			builder.append(" | SpeedPrimary: ");
+			builder.append(DF.format(speedPrimaryBot));
+			builder.append("m/s");
+			
+			builder.append(" | SpeedSecondary: ");
+			builder.append(DF.format(speedSecondaryBot));
 			builder.append("m/s");
 		}
 		return builder.toString();

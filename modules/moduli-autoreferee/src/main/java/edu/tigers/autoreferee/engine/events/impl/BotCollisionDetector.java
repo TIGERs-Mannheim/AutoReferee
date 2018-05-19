@@ -20,7 +20,6 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.events.CrashViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
@@ -52,6 +51,9 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "Adjust the bot to bot distance that is considered a contact: dist * factor", defValue = "1.1")
 	private static double minDistanceFactor = 1.1;
 	
+	@Configurable(comment = "The lookahead [s] that is used to estimate the brake amount of each bot")
+	private static double botBrakeLookahead = 0.1;
+	
 	private Map<BotID, Long> lastViolators = new HashMap<>();
 	
 	static
@@ -60,9 +62,6 @@ public class BotCollisionDetector extends AGameEventDetector
 	}
 	
 	
-	/**
-	 * 
-	 */
 	public BotCollisionDetector()
 	{
 		super(EGameState.RUNNING);
@@ -88,6 +87,12 @@ public class BotCollisionDetector extends AGameEventDetector
 	}
 	
 	
+	private double predictBotVel(final ITrackedBot bot)
+	{
+		return bot.getVel().getLength2() - bot.getMoveConstraints().getAccMax() * botBrakeLookahead;
+	}
+	
+	
 	private Optional<IGameEvent> checkForCrashEvent(List<BotPair> consideredBotPairs, IAutoRefFrame frame)
 	{
 		long curTS = frame.getTimestamp();
@@ -101,36 +106,52 @@ public class BotCollisionDetector extends AGameEventDetector
 			lastViolators.put(pair.blueBot.getBotId(), curTS);
 			lastViolators.put(pair.yellowBot.getBotId(), curTS);
 			
-			IVector2 blueVel = pair.blueBot.getVel();
-			IVector2 yellowVel = pair.yellowBot.getVel();
-			double velDiff = blueVel.getLength() - yellowVel.getLength();
+			double blueVel = predictBotVel(pair.blueBot);
+			double yellowVel = predictBotVel(pair.yellowBot);
+			double velDiff = blueVel - yellowVel;
 			
+			final BotID primaryBot;
+			final BotID secondaryBot;
+			final double primarySpeed;
+			final double secondarySpeed;
+			if (velDiff > 0)
+			{
+				primaryBot = pair.blueBot.getBotId();
+				secondaryBot = pair.yellowBot.getBotId();
+				primarySpeed = blueVel;
+				secondarySpeed = yellowVel;
+			} else
+			{
+				primaryBot = pair.yellowBot.getBotId();
+				secondaryBot = pair.blueBot.getBotId();
+				primarySpeed = yellowVel;
+				secondarySpeed = blueVel;
+			}
+			
+			IVector2 kickPos = Lines.segmentFromPoints(pair.blueBot.getPos(), pair.yellowBot.getPos()).getCenter();
+			kickPos = AutoRefMath.getClosestFreekickPos(kickPos, primaryBot.getTeamColor().opposite());
+			
+			final FollowUpAction followUp;
+			final BotID secondaryViolator;
 			if (Math.abs(velDiff) < minSpeedDiff)
 			{
-				return Optional.of(createCrashViolationGameStateForBothTeams(frame, pair, crashVel, velDiff,
-						calcCenterOfTwoPoints(pair.blueBot.getPos(), pair.yellowBot.getPos())));
+				kickPos = AutoRefMath.getClosestFreekickPos(kickPos, secondaryBot.getTeamColor().opposite());
+				followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, kickPos);
+				secondaryViolator = secondaryBot;
+			} else
+			{
+				followUp = new FollowUpAction(EActionType.DIRECT_FREE, primaryBot.getTeamColor()
+						.opposite(), kickPos);
+				secondaryViolator = null;
 			}
-			return Optional.of(createSingleResponsibleCrash(frame, crashVel, velDiff, pair));
+			
+			return Optional.of(new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
+					primaryBot, crashVel, velDiff, followUp)
+							.setSecondResponsibleBot(secondaryViolator)
+							.setSpeedPrimaryBot(primarySpeed)
+							.setSpeedSecondaryBot(secondarySpeed));
 		}
 		return Optional.empty();
-	}
-	
-	
-	private GameEvent createSingleResponsibleCrash(IAutoRefFrame frame, double collisionSpeed, double velDiff,
-			BotPair pair)
-	{
-		BotID violatorID;
-		IVector2 kickPos;
-		if (velDiff > 0)
-		{
-			violatorID = pair.blueBot.getBotId();
-			kickPos = pair.blueBot.getPos();
-		} else
-		{
-			violatorID = pair.yellowBot.getBotId();
-			kickPos = pair.yellowBot.getPos();
-		}
-		return createCrashViolationGameState(frame, violatorID, collisionSpeed, velDiff, kickPos);
 	}
 	
 	
@@ -177,31 +198,6 @@ public class BotCollisionDetector extends AGameEventDetector
 	}
 	
 	
-	private GameEvent createCrashViolationGameState(final IAutoRefFrame frame, final BotID violatorID,
-			final double violatorSpeed, final double velDiff, IVector2 kickPos)
-	{
-		kickPos = AutoRefMath.getClosestFreekickPos(kickPos, violatorID.getTeamColor().opposite());
-		
-		FollowUpAction followUp = new FollowUpAction(EActionType.DIRECT_FREE, violatorID.getTeamColor()
-				.opposite(), kickPos);
-		return new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
-				violatorID, violatorSpeed, velDiff, followUp);
-	}
-	
-	
-	private GameEvent createCrashViolationGameStateForBothTeams(final IAutoRefFrame frame, final BotPair pair,
-			final double violatorSpeed, final double velDiff, IVector2 pointOfCollision)
-	{
-		
-		pointOfCollision = AutoRefMath.getClosestFreekickPos(pointOfCollision, pair.blueBot.getTeamColor().opposite());
-		pointOfCollision = AutoRefMath.getClosestFreekickPos(pointOfCollision, pair.yellowBot.getTeamColor().opposite());
-		
-		FollowUpAction followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, pointOfCollision);
-		return new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
-				pair.blueBot.getBotId(), pair.yellowBot.getBotId(), violatorSpeed, velDiff, followUp);
-	}
-	
-	
 	private boolean botStillOnCoolDown(final BotID bot, final long curTS)
 	{
 		if (lastViolators.containsKey(bot))
@@ -215,23 +211,15 @@ public class BotCollisionDetector extends AGameEventDetector
 	
 	private double calcCrashVelocity(final ITrackedBot bot1, final ITrackedBot bot2)
 	{
-		IVector2 bot1Vel = bot1.getVel();
-		IVector2 bot2Vel = bot2.getVel();
+		IVector2 bot1Vel = bot1.getVel().scaleToNew(predictBotVel(bot1));
+		IVector2 bot2Vel = bot2.getVel().scaleToNew(predictBotVel(bot2));
 		IVector2 velDiff = bot1Vel.subtractNew(bot2Vel);
-		IVector2 center = calcCenterOfTwoPoints(bot1.getPos(), bot2.getPos());
+		IVector2 center = Lines.segmentFromPoints(bot1.getPos(), bot2.getPos()).getCenter();
 		IVector2 crashVelReferencePoint = center.addNew(velDiff);
 		ILine collisionReferenceLine = Lines.lineFromPoints(bot1.getPos(), bot2.getPos());
 		IVector2 projectedCrashVelReferencePoint = collisionReferenceLine.closestPointOnLine(crashVelReferencePoint);
 		
 		return projectedCrashVelReferencePoint.distanceTo(center);
-	}
-	
-	
-	private IVector2 calcCenterOfTwoPoints(IVector2 pos1, IVector2 pos2)
-	{
-		return pos1.subtractNew(pos2)
-				.multiply(0.5)
-				.add(pos2);
 	}
 	
 	

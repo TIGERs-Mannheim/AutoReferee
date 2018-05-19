@@ -12,7 +12,6 @@ import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public interface ITrackedBall extends ITrackedObject, IExportable
 {

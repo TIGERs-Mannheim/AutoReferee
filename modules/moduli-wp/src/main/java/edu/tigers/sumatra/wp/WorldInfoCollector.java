@@ -31,6 +31,7 @@ import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
+import edu.tigers.sumatra.data.TimestampBasedBuffer;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
@@ -80,10 +81,6 @@ public class WorldInfoCollector extends AWorldPredictor
 {
 	private static final Logger log = Logger.getLogger(WorldInfoCollector.class.getName());
 	
-	
-	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
-	
-	
 	@Configurable(comment = "Use robot feedback for position and velocity.", defValue = "true")
 	private static boolean preferRobotFeedback = true;
 	@Configurable(comment = "Prefer the state of the current trajectory that the bot executes", defValue = "true")
@@ -93,7 +90,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Configurable(comment = "Add a faked ball. Set pos,vel,acc in code.", defValue = "false")
 	private static boolean fakeBall = false;
 	
-	
+	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
 	private GameStateCalculator gameStateCalculator;
 	private WorldFrameVisualization worldFrameVisualization;
 	private BallContactCalculator ballContactCalculator;
@@ -105,7 +102,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
 	private IKickEvent lastKickEvent;
-	
+	private TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.1);
 	
 	static
 	{
@@ -230,7 +227,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		if (filteredVisionFrame.getKickEvent().isPresent())
 		{
 			lastKickEvent = filteredVisionFrame.getKickEvent().get();
-		} else if (filteredVisionFrame.getBall().getVel().getLength2() < 0.1)
+		} else if (ballBuffer.getData().stream().allMatch(b -> b.getVel().getLength2() < 0.1))
 		{
 			lastKickEvent = null;
 		}
@@ -270,6 +267,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		IBotIDMap<ITrackedBot> bots = collectTrackedBots(filteredVisionFrame.getBots(), robotInfo.values());
 		
 		ITrackedBall ball = getTrackedBall(filteredVisionFrame);
+		ballBuffer.add(ball);
 		
 		IKickEvent kickEvent = getKickEvent(filteredVisionFrame);
 		BallKickFitState kickFitState = getKickFitState(filteredVisionFrame);

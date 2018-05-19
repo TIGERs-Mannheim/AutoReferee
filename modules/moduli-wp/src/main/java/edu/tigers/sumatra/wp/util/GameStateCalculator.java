@@ -4,6 +4,9 @@
 
 package edu.tigers.sumatra.wp.util;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -18,14 +21,22 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  * 
  * @author AndreR <andre@ryll.cc>
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * @author Sebastian Stein <sebastian-stein@gmx.de>
  */
 public class GameStateCalculator
 {
-	private static final double	BALL_MOVED_DISTANCE_TOL	= 50;
-	private IVector2					ballPosOnPrepare			= null;
-	private long						lastRefMsgCounter			= -1;
-	private GameState					lastGameState				= GameState.Builder.empty().build();
-	private Command					lastRefCmd					= Command.STOP;
+	@Configurable(comment = "Ball movement tolerance", defValue = "50")
+	private static double ballMovedDistanceTol = 50;
+	
+	static
+	{
+		ConfigRegistration.registerClass("metis", GameStateCalculator.class);
+	}
+	
+	private IVector2 ballPosOnPrepare = null;
+	private long lastRefMsgCounter = -1;
+	private GameState lastGameState = GameState.Builder.empty().build();
+	private Command lastRefCmd = Command.STOP;
 	
 	
 	/**
@@ -73,8 +84,9 @@ public class GameStateCalculator
 			
 			lastRefCmd = refereeMsg.getCommand();
 		}
-
-		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT) {
+		
+		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT)
+		{
 			processBallMovement(ballPos, builder);
 		}
 		
@@ -217,7 +229,7 @@ public class GameStateCalculator
 			return;
 		}
 		
-		if (ballPos.distanceTo(ballPosOnPrepare) > BALL_MOVED_DISTANCE_TOL)
+		if (ballPos.distanceTo(ballPosOnPrepare) > ballMovedDistanceTol)
 		{
 			builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);
 			ballPosOnPrepare = null;

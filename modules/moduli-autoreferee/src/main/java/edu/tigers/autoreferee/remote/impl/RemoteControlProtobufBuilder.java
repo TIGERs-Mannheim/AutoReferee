@@ -17,6 +17,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
  */
 public class RemoteControlProtobufBuilder
 {
+	private static final String AUTO_REF_IMPL_ID = "TIGERs AutoRef";
 	private int nextMsgId = 0;
 	
 	
@@ -28,6 +29,7 @@ public class RemoteControlProtobufBuilder
 	{
 		SSL_RefereeRemoteControlRequest.Builder reqBuilder = SSL_RefereeRemoteControlRequest.newBuilder();
 		reqBuilder.setMessageId(nextMsgId++);
+		reqBuilder.setImplementationId(AUTO_REF_IMPL_ID);
 		if (cmd.getGameEvent() != null)
 		{
 			reqBuilder.setGameEvent(cmd.getGameEvent());
@@ -40,6 +42,10 @@ public class RemoteControlProtobufBuilder
 			case COMMAND:
 				handleRegularCommand(cmd, reqBuilder);
 				break;
+			case GAME_EVENT_ONLY:
+				break;
+			default:
+				throw new IllegalStateException("unexpected type: " + cmd.getType());
 		}
 		return reqBuilder.build();
 	}

@@ -52,37 +52,46 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	
 	private void updateDetection(final AutoRefFrame frame)
 	{
-		TimedPosition oldPos = ballPosBuffer.peekLast();
-		TimedPosition newPos = firstValidBallPos(frame);
+		TimedPosition prePos = ballPosBuffer.peekLast();
+		TimedPosition postPos = firstValidBallPos(frame);
 		
-		TimedPosition ballLeftFieldPos = frame.getPreviousFrame().getBallLeftFieldPos();
-		boolean ballInsideField = frame.getPreviousFrame().isBallInsideField();
-		
-		if (oldPos != null && newPos != null
-				&& (newPos.getTimestamp() - oldPos.getTimestamp()) / 1e9 >= minComparisonTimeSpan)
+		TimedPosition ballLeftFieldPos = frame.getPreviousFrame().getBallLeftFieldPos().orElse(null);
+		if (ballLeftFieldPos != null && (frame.getTimestamp() - ballLeftFieldPos.getTimestamp()) / 1e9 > 2)
 		{
-			ballInsideField = Geometry.getField().withMargin(Geometry.getLineWidth() + Geometry.getBallRadius())
-					.isPointInShape(newPos.getPos());
-			boolean stateChanged = ballInsideField != frame.getPreviousFrame().isBallInsideField();
-			if (!ballInsideField && stateChanged)
+			ballLeftFieldPos = null;
+		}
+		
+		if (prePos != null && postPos != null
+				&& (postPos.getTimestamp() - prePos.getTimestamp()) / 1e9 >= minComparisonTimeSpan)
+		{
+			boolean postBallPosInsideField = Geometry.getField()
+					.withMargin(Geometry.getLineWidth() + Geometry.getBallRadius())
+					.isPointInShape(postPos.getPos());
+			boolean preBallPosInsideField = Geometry.getField()
+					.withMargin(Geometry.getLineWidth() + Geometry.getBallRadius())
+					.isPointInShape(prePos.getPos());
+			boolean stateChanged = postBallPosInsideField != preBallPosInsideField;
+			if (!postBallPosInsideField && stateChanged)
 			{
-				ILine line = Line.fromPoints(newPos.getPos(), oldPos.getPos());
-				IVector2 pos = newPos.getPos().nearestTo(Geometry.getField().lineIntersections(line));
-				ballLeftFieldPos = new TimedPosition(newPos.getTimestamp(), pos);
+				ILine line = Line.fromPoints(postPos.getPos(), prePos.getPos());
+				IVector2 pos = postPos.getPos().nearestToOpt(Geometry.getField().lineIntersections(line))
+						.orElse(postPos.getPos());
+				ballLeftFieldPos = new TimedPosition(postPos.getTimestamp(), pos);
 			}
 		}
 		
 		frame.setBallLeftFieldPos(ballLeftFieldPos);
-		frame.setBallInsideField(ballInsideField);
+		frame.setBallInsideField(Geometry.getField().withMargin(Geometry.getLineWidth() + Geometry.getBallRadius())
+				.isPointInShape(frame.getWorldFrame().getBall().getPos()));
 	}
 	
 	
 	private void drawBallLeftFieldPos(final AutoRefFrame frame)
 	{
-		if (frame.getBallLeftFieldPos() != null)
+		if (frame.getBallLeftFieldPos().isPresent())
 		{
 			frame.getShapes().get(EAutoRefShapesLayer.BALL_LEFT_FIELD)
-					.add(new DrawableCircle(Circle.createCircle(frame.getBallLeftFieldPos().getPos(), 100)));
+					.add(new DrawableCircle(Circle.createCircle(frame.getBallLeftFieldPos().get().getPos(), 100)));
 		}
 	}
 	
@@ -113,7 +122,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 				}
 			} else
 			{
-				log.warn("Chipped ball has no kick event!");
+				log.warn("Chipped ball has no kick event: " + frame.getWorldFrame().getBall());
 			}
 		}
 	}

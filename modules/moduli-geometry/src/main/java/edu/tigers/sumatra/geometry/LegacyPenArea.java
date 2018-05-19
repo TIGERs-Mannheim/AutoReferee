@@ -4,14 +4,7 @@
 
 package edu.tigers.sumatra.geometry;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.NotImplementedException;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.drawable.DrawableArc;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -22,6 +15,7 @@ import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.LineMath;
+import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
@@ -29,6 +23,11 @@ import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import org.apache.commons.lang.NotImplementedException;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -303,6 +302,13 @@ public class LegacyPenArea implements IPenaltyArea
 	
 	
 	@Override
+	public List<IVector2> lineIntersections(final IHalfLine line)
+	{
+		throw new NotImplementedException();
+	}
+	
+	
+	@Override
 	public IVector2 nearestPointInside(final IVector2 point)
 	{
 		if (isPointInShape(point))
@@ -407,7 +413,7 @@ public class LegacyPenArea implements IPenaltyArea
 	
 	private boolean isBehindGoalLine(final IVector2 point)
 	{
-		if(xSignum > 0)
+		if (xSignum > 0)
 		{
 			return point.x() >= arcNeg.center().x();
 		}

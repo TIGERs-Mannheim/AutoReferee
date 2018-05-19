@@ -6,8 +6,6 @@ package edu.tigers.autoreferee.engine.events.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
-
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
@@ -35,8 +33,6 @@ import edu.tigers.sumatra.referee.data.EGameState;
  */
 public class BallLeftFieldDetector extends AGameEventDetector
 {
-	private static final Logger log = Logger.getLogger(BallLeftFieldDetector.class);
-	
 	private static final int PRIORITY = 1;
 	
 	@Configurable(comment = "[mm] The goal line threshold", defValue = "10.0")
@@ -53,7 +49,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 		AGameEventDetector.registerClass(BallLeftFieldDetector.class);
 	}
 	
-	private boolean eventReported = false;
+	private TimedPosition lastBallLeftFieldPos = null;
 	
 	
 	/**
@@ -75,30 +71,19 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
 	{
-		if (frame.isBallInsideField())
+		if (frame.getBallLeftFieldPos().isPresent()
+				&& !frame.getBallLeftFieldPos().get().similarTo(lastBallLeftFieldPos))
 		{
-			// The ball is inside the field or inside the goal
-			eventReported = false;
-		} else if (!eventReported)
-		{
-			eventReported = true;
-			TimedPosition leftFieldPos = frame.getBallLeftFieldPos();
-			
-			if (leftFieldPos.getPos().isZeroVector())
-			{
-				// Maybe the game was started while the ball was still outside the field
-				log.warn("Ball left the field but no valid exit position present");
-				return Optional.empty();
-			}
+			lastBallLeftFieldPos = frame.getBallLeftFieldPos().get();
 			
 			BotPosition lastTouched = frame.getBotLastTouchedBall();
 			long ts = frame.getTimestamp();
 			boolean exitGoallineInX = ((Geometry.getFieldLength() / 2)
-					- Math.abs(leftFieldPos.getPos().x())) < goalLineThreshold;
+					- Math.abs(lastBallLeftFieldPos.getPos().x())) < goalLineThreshold;
 			boolean exitGoallineInY = ((Geometry.getFieldWidth() / 2)
-					- Math.abs(leftFieldPos.getPos().y())) > goalLineThreshold;
+					- Math.abs(lastBallLeftFieldPos.getPos().y())) > goalLineThreshold;
 			boolean enteredGoalInY = Geometry.getGoalOur().getWidth() / 2
-					- Math.abs(leftFieldPos.getPos().y()) > goalLineThreshold;
+					- Math.abs(lastBallLeftFieldPos.getPos().y()) > goalLineThreshold;
 			if (exitGoallineInX && exitGoallineInY)
 			{
 				// The ball exited the field over the goal line
@@ -107,9 +92,9 @@ public class BallLeftFieldDetector extends AGameEventDetector
 					// a potential goal
 					return Optional.empty();
 				}
-				return handleGoalLineOff(leftFieldPos.getPos(), lastTouched, ts);
+				return handleGoalLineOff(lastBallLeftFieldPos.getPos(), lastTouched, ts);
 			}
-			return handleSideLineOff(leftFieldPos.getPos(), lastTouched, ts);
+			return handleSideLineOff(lastBallLeftFieldPos.getPos(), lastTouched, ts);
 		}
 		return Optional.empty();
 	}
@@ -197,6 +182,6 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Override
 	public void reset()
 	{
-		eventReported = false;
+		lastBallLeftFieldPos = null;
 	}
 }

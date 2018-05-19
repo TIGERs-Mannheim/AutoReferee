@@ -409,7 +409,6 @@ public class BotSkillPenaltyShooter extends ABotSkill
 		private void validate()
 		{
 			Validate.isTrue(timeToShoot > 0);
-			Validate.isTrue(targetAngle > 0);
 			Validate.isTrue(approachSpeed > 0);
 			Validate.isTrue(abs(rotationSpeed) > 0);
 			Validate.notNull(speedInTurn);

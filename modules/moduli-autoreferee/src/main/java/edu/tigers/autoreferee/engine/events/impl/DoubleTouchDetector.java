@@ -31,6 +31,14 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  * This class detects a violation of the Double Touch Rule which can occur if the bot who performs a
  * kickoff/direct/indirect touches the ball a second time before any other bot touched it
  * -> according to rules from 2017: the bot is allowed to touch the ball more than ones before the ball moved 50mm
+ *
+ * From the rules (2018):
+ * For all restarts where the Laws stipulate that the ball is in play when it is kicked and moves,
+ * the robot must clearly tap or kick the ball to make it move. It is understood that the ball
+ * may remain in contact with the robot or be bumped by the robot multiple times over a short
+ * distance while the kick is being taken, but under no circumstances should the robot remain
+ * in contact or touch the ball after it has traveled 50 mm, unless the ball has previously touched
+ * another robot. Robots may use dribbling and kicking devices in taking the free kick.
  * 
  * @author "Simon Sander"
  */

@@ -67,13 +67,17 @@ public class RefereeVisCalc implements IWpCalc
 		double ballHeight = wfw.getSimpleWorldFrame().getBall().getPos3().z();
 		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "; height: " + dfBallVel.format(ballHeight);
 		
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 35), ballVelStr, ballSpeed <= RuleConstraints.getMaxBallSpeed() ? Color.white
-				: Color.red));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 35), ballVelStr,
+				ballSpeed <= RuleConstraints.getMaxBallSpeed() ? Color.white
+						: Color.red));
 		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 11), msg.getStage().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 23), msg.getCommand().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 35), wfw.getGameState().getStateNameWithColor(),
 				Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 47), wfw.getRefereeMsg().getGameEvent().toString(),
+				Color.white));
+		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 11), timeStr, Color.white));
 		
 		txtShapes
@@ -189,7 +193,7 @@ public class RefereeVisCalc implements IWpCalc
 		shapes.add(dtargetPoint);
 	}
 	
-
+	
 	private String getYellowCardString(final int cards, final List<Integer> times)
 	{
 		StringBuilder sb = new StringBuilder();

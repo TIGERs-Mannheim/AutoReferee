@@ -4,14 +4,15 @@
 
 package edu.tigers.sumatra.geometry;
 
-import java.util.List;
-
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+
+import java.util.List;
 
 
 /**
@@ -48,6 +49,17 @@ public interface IPenaltyArea extends I2DShape
 	 * @return all intersections. This can be zero to two intersections.
 	 */
 	List<IVector2> lineIntersections(ILineSegment line);
+	
+	
+	/**
+	 * <p>
+	 * Find the line intersections on the outer curve. The goal line is not considered.
+	 * </p>
+	 *
+	 * @param line some half line
+	 * @return all intersections. This can be zero to two intersections.
+	 */
+	List<IVector2> lineIntersections(IHalfLine line);
 	
 	
 	/**

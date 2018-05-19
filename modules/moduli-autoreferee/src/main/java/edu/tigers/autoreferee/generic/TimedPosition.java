@@ -4,6 +4,9 @@
 package edu.tigers.autoreferee.generic;
 
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
@@ -60,5 +63,49 @@ public class TimedPosition
 	public IVector2 getPos()
 	{
 		return position;
+	}
+	
+	
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (this == o)
+			return true;
+		
+		if (o == null || getClass() != o.getClass())
+			return false;
+		
+		final TimedPosition that = (TimedPosition) o;
+		
+		return new EqualsBuilder()
+				.append(timestamp, that.timestamp)
+				.append(position, that.position)
+				.isEquals();
+	}
+	
+	
+	@Override
+	public int hashCode()
+	{
+		return new HashCodeBuilder(17, 37)
+				.append(timestamp)
+				.append(position)
+				.toHashCode();
+	}
+	
+	
+	/**
+	 * @param other
+	 * @return true, if other is similar to this
+	 */
+	public boolean similarTo(final TimedPosition other)
+	{
+		if (other == null)
+		{
+			return false;
+		}
+		boolean similarInTime = Math.abs(timestamp - other.timestamp) < 2e9;
+		boolean similarInSpace = position.distanceToSqr(other.position) < 200 * 200;
+		return similarInTime && similarInSpace;
 	}
 }

@@ -42,7 +42,7 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 public class BotLastTouchedBallCalculator
 {
 	private static final Logger log = Logger.getLogger(BotLastTouchedBallCalculator.class);
-	private static final double MIN_DIST = Geometry.getBotRadius() + Geometry.getBallRadius() + 10;
+	private static final double MIN_DIST = Geometry.getBotRadius() + Geometry.getBallRadius();
 	private static final double EXTENDED_DIST = MIN_DIST + 25;
 	private static final double ANGLE_EPSILON = 0.1;
 	

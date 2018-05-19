@@ -371,17 +371,19 @@ public class QualityInspector
 			// draw invisible fast robots
 			for (RobotInvisibleIssue issue : invisibleIssues)
 			{
-				DrawableCircle circle = new DrawableCircle(issue.getCenterPos(), 160, Color.YELLOW);
+				DrawableCircle circle = new DrawableCircle(issue.getCenterPos(), 160,
+						issue.botId.getTeamColor().getColor());
 				circle.setStrokeWidth(20);
 				shapes.add(circle);
 				
-				DrawableLine line = new DrawableLine(Line.fromPoints(issue.firstPos, issue.lastPos), Color.YELLOW);
+				DrawableLine line = new DrawableLine(Line.fromPoints(issue.firstPos, issue.lastPos),
+						issue.botId.getTeamColor().getColor());
 				line.setStrokeWidth(20);
 				shapes.add(line);
 				
 				DrawableAnnotation botId = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, 240)),
 						issue.botId.toString(), true);
-				botId.setColor(Color.YELLOW);
+				botId.setColor(issue.botId.getTeamColor().getColor());
 				botId.withFontHeight(100);
 				botId.withBold(true);
 				shapes.add(botId);

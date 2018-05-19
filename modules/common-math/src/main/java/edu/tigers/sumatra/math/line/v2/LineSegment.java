@@ -142,6 +142,13 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	
 	@Override
+	public IVector2 getCenter()
+	{
+		return start.addNew(getDisplacement().multiplyNew(0.5));
+	}
+	
+	
+	@Override
 	public double getLength()
 	{
 		return getDisplacement().getLength();

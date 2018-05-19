@@ -3,6 +3,7 @@
  */
 package edu.tigers.sumatra.wp.data;
 
+import edu.tigers.sumatra.data.ITimestampBased;
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -10,12 +11,9 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public interface ITrackedObject extends IMirrorable<ITrackedObject>
+public interface ITrackedObject extends IMirrorable<ITrackedObject>, ITimestampBased
 {
-	
-	
 	/**
 	 * @return the pos
 	 */
@@ -46,7 +44,6 @@ public interface ITrackedObject extends IMirrorable<ITrackedObject>
 	/**
 	 * @return timestamp in [ns]
 	 */
+	@Override
 	long getTimestamp();
-	
-	
 }

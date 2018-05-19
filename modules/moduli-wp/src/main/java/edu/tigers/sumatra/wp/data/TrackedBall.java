@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -324,5 +325,15 @@ public class TrackedBall implements ITrackedBall
 	public long gettAssembly()
 	{
 		return tAssembly;
+	}
+	
+	
+	@Override
+	public String toString()
+	{
+		return new ToStringBuilder(this)
+				.append("pos", getPos3())
+				.append("vel", getVel3())
+				.toString();
 	}
 }

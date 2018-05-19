@@ -42,6 +42,8 @@ public class RefereeMsg
 	private final ETeamColor negativeHalfTeam;
 	private final IVector2 ballPlacementPos;
 	
+	private final GameEvent gameEvent;
+	
 	
 	/**
 	 * Create default referee msg
@@ -59,6 +61,7 @@ public class RefereeMsg
 		teamInfoBlue = new TeamInfo();
 		ballPlacementPos = Vector2f.ZERO_VECTOR;
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
+		gameEvent = new GameEvent();
 	}
 	
 	
@@ -91,6 +94,7 @@ public class RefereeMsg
 		}
 		
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
+		gameEvent = new GameEvent(sslRefereeMsg.getGameEvent());
 	}
 	
 	
@@ -112,6 +116,7 @@ public class RefereeMsg
 		teamInfoBlue = refereeMsg.teamInfoBlue;
 		negativeHalfTeam = refereeMsg.negativeHalfTeam;
 		ballPlacementPos = refereeMsg.getBallPlacementPosNeutral();
+		gameEvent = refereeMsg.gameEvent;
 	}
 	
 	
@@ -291,6 +296,12 @@ public class RefereeMsg
 		String yellowName = teamInfoYellow.getName();
 		String blueName = teamInfoBlue.getName();
 		return buildMap(blueName, yellowName);
+	}
+	
+	
+	public GameEvent getGameEvent()
+	{
+		return gameEvent;
 	}
 	
 	

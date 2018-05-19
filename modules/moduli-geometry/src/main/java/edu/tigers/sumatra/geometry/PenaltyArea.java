@@ -4,22 +4,22 @@
 
 package edu.tigers.sumatra.geometry;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -104,7 +104,18 @@ public class PenaltyArea implements IPenaltyArea
 				.distinct()
 				.collect(Collectors.toList());
 	}
-	
+
+	@Override
+	public List<IVector2> lineIntersections(final IHalfLine line)
+	{
+		return getEdges().stream()
+				.map(edge -> edge.intersectHalfLine(line))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.distinct()
+				.collect(Collectors.toList());
+	}
+
 	
 	private List<ILineSegment> getEdges()
 	{
