@@ -4,6 +4,7 @@
 package edu.tigers.autoreferee.module;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -33,6 +34,7 @@ import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
@@ -147,7 +149,10 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 					remote = new LocalRefboxRemote();
 				} else
 				{
-					ThreadedTCPRefboxRemote tcpRefboxRemote = new ThreadedTCPRefboxRemote(AutoRefConfig.getRefboxHostname(),
+					AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
+					String hostname = referee.getActiveSource().getRefBoxAddress().map(InetAddress::getHostAddress)
+							.orElse(AutoRefConfig.getRefboxHostname());
+					ThreadedTCPRefboxRemote tcpRefboxRemote = new ThreadedTCPRefboxRemote(hostname,
 							AutoRefConfig.getRefboxPort());
 					tcpRefboxRemote.start();
 					remote = tcpRefboxRemote;

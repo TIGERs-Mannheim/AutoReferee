@@ -22,7 +22,7 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 /**
  * Complete referee command
  */
-@Persistent
+@Persistent(version = 1)
 public class RefereeMsg
 {
 	/** in nanoseconds */

@@ -15,6 +15,7 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.AutoRefGlobalState;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
@@ -104,6 +105,14 @@ public class StopState extends AbstractAutoRefState
 	{
 		readyTime = null;
 		simulationPlacementAttempted = false;
+		
+		if (ctx.getAutoRefGlobalState().getBallPlacementStage() == AutoRefGlobalState.EBallPlacementStage.IN_PROGRESS)
+		{
+			ctx.getAutoRefGlobalState().setBallPlacementStage(AutoRefGlobalState.EBallPlacementStage.CANCELED);
+		} else
+		{
+			ctx.getAutoRefGlobalState().setBallPlacementStage(AutoRefGlobalState.EBallPlacementStage.UNKNOWN);
+		}
 	}
 	
 	
@@ -145,7 +154,7 @@ public class StopState extends AbstractAutoRefState
 		/*
 		 * Wait a minimum amount of time before doing anything
 		 */
-		if (!timeElapsedSinceEntry(stopWaitTimeMs))
+		if (stillInTime(stopWaitTimeMs))
 		{
 			return;
 		}
@@ -175,7 +184,9 @@ public class StopState extends AbstractAutoRefState
 		
 		
 		final ETeamColor placementTeam = getPlacementTeam(action, ctx);
-		if (placementTeam != ETeamColor.NEUTRAL && !placementWasAttemptedBy(frame, placementTeam) && ball.isOnCam())
+		if (placementTeam != ETeamColor.NEUTRAL
+				&& ctx.getAutoRefGlobalState().getBallPlacementStage() != AutoRefGlobalState.EBallPlacementStage.CANCELED
+				&& !placementWasAttemptedBy(frame, placementTeam) && ball.isOnCam())
 		{
 			if (ballStationary && !ballPlaced)
 			{
@@ -301,7 +312,6 @@ public class StopState extends AbstractAutoRefState
 	{
 		List<ETeamColor> teams = new ArrayList<>();
 		
-		// Only search for attempts which were performed directly before this stop state
 		List<GameState> stateHist = frame.getStateHistory();
 		for (int i = 1; i < stateHist.size(); i++)
 		{
@@ -309,7 +319,7 @@ public class StopState extends AbstractAutoRefState
 			if (state.getState() == EGameState.BALL_PLACEMENT)
 			{
 				teams.add(state.getForTeam());
-			} else
+			} else if (state.getState() != EGameState.STOP)
 			{
 				break;
 			}

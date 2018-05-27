@@ -190,6 +190,12 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
+	public final void update(final AObjectID trackedId)
+	{
+		this.trackedId = trackedId;
+	}
+	
+	
 	/**
 	 * @return the trackedId
 	 */

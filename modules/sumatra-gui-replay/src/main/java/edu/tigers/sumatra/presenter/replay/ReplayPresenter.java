@@ -56,6 +56,7 @@ public class ReplayPresenter extends AMainPresenter
 	
 	private boolean skipStoppedGame = false;
 	private boolean searchKickoff = false;
+	private boolean skipBallPlacement = false;
 	
 	
 	/**
@@ -247,7 +248,13 @@ public class ReplayPresenter extends AMainPresenter
 	{
 		this.skipStoppedGame = enable;
 	}
-	
+
+	@Override
+	public void onSetSkipBallPlacement(final boolean enable)
+    {
+        this.skipBallPlacement = enable;
+    }
+
 	
 	@Override
 	public void onSnapshot()
@@ -400,8 +407,11 @@ public class ReplayPresenter extends AMainPresenter
 			long t = getCurrentTime();
 			for (; t < recEndTime; t += 250_000_000)
 			{
-				if ((!skipStoppedGame || !skipFrameStoppedGame(db.get(WorldFrameWrapper.class, t))) &&
-						!searchKickoff || !skipFrameKickoff(db.get(WorldFrameWrapper.class, t)))
+				boolean skipStop = !skipStoppedGame || !skipFrameStoppedGame(db.get(WorldFrameWrapper.class, t));
+				boolean kickoff = !searchKickoff || !skipFrameKickoff(db.get(WorldFrameWrapper.class, t));
+				boolean skipPlacement = !skipBallPlacement || !skipFrameBallPlacement(db.get(WorldFrameWrapper.class, t));
+
+				if (skipStop && kickoff && skipPlacement)
 				{
 					jumpAbsoluteTime(t);
 					break;
@@ -415,6 +425,11 @@ public class ReplayPresenter extends AMainPresenter
 		{
 			RefereeMsg refMsg = wfw.getRefereeMsg();
 			return refMsg != null && wfw.getGameState().isStoppedGame();
+		}
+
+		private boolean skipFrameBallPlacement(final WorldFrameWrapper wfw)
+		{
+			return wfw.getGameState().isBallPlacement();
 		}
 		
 		

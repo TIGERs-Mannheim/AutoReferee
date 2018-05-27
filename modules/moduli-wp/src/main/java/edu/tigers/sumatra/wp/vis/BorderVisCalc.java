@@ -15,6 +15,7 @@ import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -46,6 +47,11 @@ public class BorderVisCalc implements IWpCalc
 		
 		Color theirColor = wfw.getRefereeMsg().getNegativeHalfTeam() != ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalTheir(), shapes, theirColor);
+		
+		shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkTheir(), Geometry.getBallRadius() + 10),
+				Color.white).withFill(true));
+		shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkOur(), Geometry.getBallRadius() + 10),
+				Color.white).withFill(true));
 	}
 	
 	

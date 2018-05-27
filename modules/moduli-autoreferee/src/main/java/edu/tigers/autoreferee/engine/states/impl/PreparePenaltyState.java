@@ -77,7 +77,7 @@ public class PreparePenaltyState extends AbstractAutoRefState
 		
 		shapes.add(new DrawableRectangle(keeperArea, AREA_COLOR));
 		
-		if (!timeElapsedSinceEntry(minWaitTimeMs))
+		if (stillInTime(minWaitTimeMs))
 		{
 			return;
 		}

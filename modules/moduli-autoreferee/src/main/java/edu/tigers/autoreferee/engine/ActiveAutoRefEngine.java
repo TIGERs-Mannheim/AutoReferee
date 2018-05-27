@@ -23,7 +23,6 @@ import edu.tigers.autoreferee.engine.states.impl.PrepareKickoffState;
 import edu.tigers.autoreferee.engine.states.impl.PreparePenaltyState;
 import edu.tigers.autoreferee.engine.states.impl.RunningState;
 import edu.tigers.autoreferee.engine.states.impl.StopState;
-import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
@@ -271,10 +270,10 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		
 		
 		@Override
-		public ICommandResult sendCommand(final RefboxRemoteCommand cmd)
+		public void sendCommand(final RefboxRemoteCommand cmd)
 		{
 			gameLog.addEntry(cmd);
-			return remote.sendCommand(cmd);
+			remote.sendCommand(cmd);
 		}
 		
 		

@@ -20,7 +20,6 @@ import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
-import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -40,13 +39,9 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public abstract class AbstractAutoRefState implements IAutoRefState
 {
 	private boolean firstRun = true;
-	/** in ns */
 	private long entryTime = 0;
-	/** in ns */
 	private long currentTime = 0;
-	
-	private ICommandResult lastCommand = null;
-	
+	private boolean commandSend = false;
 	private boolean canProceed;
 	
 	
@@ -75,7 +70,7 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	{
 		firstRun = true;
 		canProceed = false;
-		lastCommand = null;
+		commandSend = false;
 		doReset();
 	}
 	
@@ -112,36 +107,35 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	
 	protected void sendCommand(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd)
 	{
-		lastCommand = ctx.sendCommand(cmd);
+		ctx.sendCommand(cmd);
+		commandSend = true;
 	}
 	
 	
-	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd)
+	protected void sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd)
 	{
-		if ((lastCommand == null) || lastCommand.hasFailed())
+		if (!commandSend)
 		{
-			lastCommand = ctx.sendCommand(cmd);
-			return true;
+			ctx.sendCommand(cmd);
+			commandSend = true;
 		}
-		return false;
 	}
 	
 	
-	protected boolean sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd,
+	protected void sendCommandIfReady(final IAutoRefStateContext ctx, final RefboxRemoteCommand cmd,
 			final boolean doProceed)
 	{
 		if (doProceed)
 		{
 			sendCommand(ctx, cmd);
-			return true;
 		}
-		return sendCommandIfReady(ctx, cmd);
+		sendCommandIfReady(ctx, cmd);
 	}
 	
 	
-	protected boolean timeElapsedSinceEntry(final long timeMs)
+	protected boolean stillInTime(final long timeMs)
 	{
-		return (currentTime - entryTime) >= TimeUnit.MILLISECONDS.toNanos(timeMs);
+		return (currentTime - entryTime) < TimeUnit.MILLISECONDS.toNanos(timeMs);
 	}
 	
 	

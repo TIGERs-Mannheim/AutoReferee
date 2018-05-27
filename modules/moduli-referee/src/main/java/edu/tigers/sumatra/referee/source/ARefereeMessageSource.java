@@ -1,9 +1,11 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source;
 
+import java.net.InetAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
@@ -82,5 +84,11 @@ public abstract class ARefereeMessageSource
 	public void updateKeeperId(BotID keeperId)
 	{
 		// not implemented by default
+	}
+	
+	
+	public Optional<InetAddress> getRefBoxAddress()
+	{
+		return Optional.empty();
 	}
 }

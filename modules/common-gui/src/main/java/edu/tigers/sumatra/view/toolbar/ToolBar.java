@@ -65,6 +65,7 @@ public class ToolBar
 		btnStartStop.addActionListener(new StartStopModules());
 		btnStartStop.setBorder(BorderFactory.createEmptyBorder());
 		btnStartStop.setBackground(new Color(0, 0, 0, 1));
+		btnStartStop.setToolTipText("Start/Stop");
 		
 		btnEmergency = new JButton();
 		btnEmergency.setForeground(Color.red);
@@ -92,10 +93,12 @@ public class ToolBar
 		btnSwitchSides.setBackground(new Color(0, 0, 0, 1));
 		
 		JPanel heapPanel = new JPanel(new BorderLayout());
+		heapLabel.setToolTipText("Memory Usage (current/total/maximum)");
 		heapPanel.add(heapLabel, BorderLayout.NORTH);
 		heapPanel.add(heapBar, BorderLayout.SOUTH);
 		heapBar.setStringPainted(true);
 		heapBar.setMinimum(0);
+		heapBar.setToolTipText("Memory Usage");
 		
 		// --- configure toolbar ---
 		jToolBar = new JToolBar();
@@ -107,6 +110,7 @@ public class ToolBar
 		
 		JPanel matchModePanel = new JPanel(new BorderLayout());
 		telegramMode.addActionListener(new ChangeMatchModeListener());
+		telegramMode.setToolTipText("Enable/Disable broadcasting via Telegram");
 		matchModePanel.add(telegramMode);
 		
 		// --- add buttons ---

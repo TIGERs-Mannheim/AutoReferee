@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
-import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply.Outcome;
@@ -70,6 +69,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		}
 		running = true;
 		thread.start();
+		log.info("Connected to refbox at " + hostname + ":" + port);
 	}
 	
 	
@@ -98,11 +98,10 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	
 	
 	@Override
-	public ICommandResult sendCommand(final RefboxRemoteCommand command)
+	public void sendCommand(final RefboxRemoteCommand command)
 	{
 		QueueEntry entry = new QueueEntry(command);
-		Validate.isTrue(commandQueue.offer(entry));
-		return entry.getResult();
+		commandQueue.add(entry);
 	}
 	
 	
@@ -166,10 +165,7 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 				
 				if (reply.getOutcome() != Outcome.OK)
 				{
-					entry.getResult().setFailed();
-				} else
-				{
-					entry.getResult().setSuccessful();
+					log.warn("Remote control rejected command " + entry.getCmd() + " with outcome " + reply.getOutcome());
 				}
 			} catch (InterruptedException e)
 			{
@@ -199,20 +195,12 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 	private static class QueueEntry
 	{
 		private final RefboxRemoteCommand cmd;
-		private final CommandResultImpl result;
 		private int retries = 0;
 		
 		
 		public QueueEntry(final RefboxRemoteCommand cmd)
 		{
-			this(cmd, new CommandResultImpl());
-		}
-		
-		
-		public QueueEntry(final RefboxRemoteCommand cmd, final CommandResultImpl result)
-		{
 			this.cmd = cmd;
-			this.result = result;
 		}
 		
 		
@@ -222,15 +210,6 @@ public class ThreadedTCPRefboxRemote implements IRefboxRemote, Runnable
 		public RefboxRemoteCommand getCmd()
 		{
 			return cmd;
-		}
-		
-		
-		/**
-		 * @return the result
-		 */
-		public CommandResultImpl getResult()
-		{
-			return result;
 		}
 	}
 }

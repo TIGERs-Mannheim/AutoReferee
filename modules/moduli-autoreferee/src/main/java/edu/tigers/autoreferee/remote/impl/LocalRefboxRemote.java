@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.remote.impl;
@@ -7,7 +7,6 @@ package edu.tigers.autoreferee.remote.impl;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
-import edu.tigers.autoreferee.remote.ICommandResult;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
@@ -25,7 +24,7 @@ public class LocalRefboxRemote implements IRefboxRemote
 	
 	
 	@Override
-	public ICommandResult sendCommand(final RefboxRemoteCommand command)
+	public void sendCommand(final RefboxRemoteCommand command)
 	{
 		RemoteControlProtobufBuilder pbBuilder = new RemoteControlProtobufBuilder();
 		SSL_RefereeRemoteControlRequest request = pbBuilder.buildRequest(command);
@@ -37,14 +36,7 @@ public class LocalRefboxRemote implements IRefboxRemote
 		} catch (ModuleNotFoundException e)
 		{
 			log.error("Could not find RefBox module.", e);
-			CommandResultImpl result = new CommandResultImpl();
-			result.setFailed();
-			return result;
 		}
-		
-		CommandResultImpl result = new CommandResultImpl();
-		result.setSuccessful();
-		return result;
 	}
 	
 	

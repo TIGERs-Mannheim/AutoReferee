@@ -50,7 +50,7 @@ public class PrepareKickoffState extends AbstractAutoRefState
 	@Override
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
-		if (!timeElapsedSinceEntry(minWaitTimeMs))
+		if (stillInTime(minWaitTimeMs))
 		{
 			return;
 		}

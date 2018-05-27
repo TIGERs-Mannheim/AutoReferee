@@ -93,6 +93,7 @@ public class MoveConstraints implements IExportable
 		accMaxW = mergeDouble(accMaxW, o.accMaxW);
 		jerkMax = mergeDouble(jerkMax, o.jerkMax);
 		jerkMaxW = mergeDouble(jerkMaxW, o.jerkMaxW);
+		velMaxFast = mergeDouble(velMaxFast, o.velMaxFast);
 		accMaxFast = mergeDouble(accMaxFast, o.accMaxFast);
 		fastMove = o.fastMove;
 		primaryDirection = o.primaryDirection;
@@ -159,6 +160,10 @@ public class MoveConstraints implements IExportable
 	 */
 	public double getVelMax()
 	{
+		if (fastMove)
+		{
+			return velMaxFast;
+		}
 		return velMax;
 	}
 	
@@ -197,6 +202,10 @@ public class MoveConstraints implements IExportable
 	 */
 	public double getAccMax()
 	{
+		if (fastMove)
+		{
+			return accMaxFast;
+		}
 		return accMax;
 	}
 	
@@ -282,44 +291,6 @@ public class MoveConstraints implements IExportable
 	public boolean isFastMove()
 	{
 		return fastMove;
-	}
-	
-	
-	/**
-	 * @return the velMaxFast
-	 */
-	public double getVelMaxFast()
-	{
-		return velMaxFast;
-	}
-	
-	
-	/**
-	 * @param velMaxFast the velMaxFast to set
-	 */
-	public void setVelMaxFast(final double velMaxFast)
-	{
-		assert velMaxFast >= 0;
-		this.velMaxFast = velMaxFast;
-	}
-	
-	
-	/**
-	 * @return the accMaxFast
-	 */
-	public double getAccMaxFast()
-	{
-		return accMaxFast;
-	}
-	
-	
-	/**
-	 * @param accMaxFast the accMaxFast to set
-	 */
-	public void setAccMaxFast(final double accMaxFast)
-	{
-		assert accMaxFast >= 0;
-		this.accMaxFast = accMaxFast;
 	}
 	
 	

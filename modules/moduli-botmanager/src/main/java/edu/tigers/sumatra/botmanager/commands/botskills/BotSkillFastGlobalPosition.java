@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.botmanager.commands.botskills;
@@ -65,11 +65,11 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 		pos[2] = (int) (orientation * 1000.0);
 		
 		
-		setVelMax(mc.getVelMaxFast());
+		setVelMax(mc.getVelMax());
 		setVelMaxW(mc.getVelMaxW());
 		setAccMax(mc.getAccMax());
 		setAccMaxW(mc.getAccMaxW());
-		setAccMaxFast(mc.getAccMaxFast());
+		setAccMaxFast(mc.getAccMax());
 		
 	}
 	
@@ -85,6 +85,7 @@ public class BotSkillFastGlobalPosition extends AMoveBotSkill
 	 * @param accMaxW
 	 * @param accMaxFast
 	 */
+	@SuppressWarnings("unused") // used by UI
 	public BotSkillFastGlobalPosition(final IVector2 xy, final double orientation,
 			final double velMax, final double velMaxW, final double accMax, final double accMaxW, final double accMaxFast)
 	{

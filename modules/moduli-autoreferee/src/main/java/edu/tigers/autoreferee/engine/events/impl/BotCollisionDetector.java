@@ -51,7 +51,7 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "Adjust the bot to bot distance that is considered a contact: dist * factor", defValue = "1.1")
 	private static double minDistanceFactor = 1.1;
 	
-	@Configurable(comment = "The lookahead [s] that is used to estimate the brake amount of each bot")
+	@Configurable(comment = "The lookahead [s] that is used to estimate the brake amount of each bot", defValue = "0.1")
 	private static double botBrakeLookahead = 0.1;
 	
 	private Map<BotID, Long> lastViolators = new HashMap<>();

@@ -51,6 +51,12 @@ public interface IReplayControlPanelObserver
 	 * @param enable
 	 */
 	void onSetSkipStop(final boolean enable);
+
+	/**
+	 * Enable ball placement skipping
+	 * @param enable
+	 */
+	void onSetSkipBallPlacement(final boolean enable);
 	
 	
 	/**

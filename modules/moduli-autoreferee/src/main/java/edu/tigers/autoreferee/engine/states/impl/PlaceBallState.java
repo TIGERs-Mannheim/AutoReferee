@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.AutoRefGlobalState;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
@@ -38,6 +39,14 @@ public class PlaceBallState extends AbstractAutoRefState
 	
 	
 	@Override
+	protected void prepare(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
+	{
+		super.prepare(frame, ctx);
+		ctx.getAutoRefGlobalState().setBallPlacementStage(AutoRefGlobalState.EBallPlacementStage.IN_PROGRESS);
+	}
+	
+	
+	@Override
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 		if (placementNotPossible(ctx))
@@ -52,6 +61,8 @@ public class PlaceBallState extends AbstractAutoRefState
 			// The ball has been placed at the kick position. Return to the stopped state to perform the action
 			sendCommandIfReady(ctx, new RefboxRemoteCommand(Command.STOP, null), !stopSend);
 			stopSend = true;
+			
+			ctx.getAutoRefGlobalState().setBallPlacementStage(AutoRefGlobalState.EBallPlacementStage.SUCCEEDED);
 			
 			// reset failure log
 			ctx.getAutoRefGlobalState().getFailedBallPlacements().put(frame.getGameState().getForTeam(), 0);
@@ -69,6 +80,7 @@ public class PlaceBallState extends AbstractAutoRefState
 		
 		RefboxRemoteCommand cmd = determineNextAction(frame, ctx);
 		sendCommandIfReady(ctx, cmd, !stopSend);
+		ctx.getAutoRefGlobalState().setBallPlacementStage(AutoRefGlobalState.EBallPlacementStage.FAILED);
 		
 		if (!stopSend)
 		{

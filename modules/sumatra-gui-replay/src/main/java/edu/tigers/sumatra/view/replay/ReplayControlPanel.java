@@ -175,6 +175,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		
 		addMenuAction(new KickoffAction());
 		addMenuCheckbox(new SkipStopAction());
+		addMenuCheckbox(new SkipBallPlacementAction());
 		
 		JPanel topPanel = new JPanel();
 		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
@@ -510,6 +511,25 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			for (IReplayControlPanelObserver o : observers)
 			{
 				o.onSetSkipStop(chk.isSelected());
+			}
+		}
+	}
+
+	private class SkipBallPlacementAction extends AbstractAction
+	{
+		public SkipBallPlacementAction()
+		{
+			super("Skip Ball Placement");
+		}
+
+
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			JCheckBoxMenuItem chk = (JCheckBoxMenuItem) e.getSource();
+			for (IReplayControlPanelObserver o : observers)
+			{
+				o.onSetSkipBallPlacement(chk.isSelected());
 			}
 		}
 	}
