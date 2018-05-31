@@ -5,7 +5,6 @@
 package edu.tigers.sumatra.wp;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.github.g3force.configurable.IConfigObserver;
@@ -13,8 +12,7 @@ import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.AModule;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.drawable.ShapeMap;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.EAiType;
+import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 
 
 /**
@@ -105,17 +103,5 @@ public abstract class AWorldPredictor extends AModule implements ICamFrameObserv
 	}
 	
 	
-	/**
-	 * Update the bot to AI assignment
-	 *
-	 * @param botID
-	 * @param aiTeam
-	 */
-	public abstract void updateBot2AiAssignment(BotID botID, EAiType aiTeam);
-	
-	
-	/**
-	 * @return the current assignment
-	 */
-	public abstract Map<BotID, EAiType> getBotToAiMap();
+	public abstract void setRobotInfoProvider(IRobotInfoProvider robotInfoProvider);
 }

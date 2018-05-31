@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.visualizer;
 
@@ -10,7 +10,6 @@ import java.util.Map;
 import edu.tigers.sumatra.bot.EFeature;
 import edu.tigers.sumatra.bot.EFeatureState;
 import edu.tigers.sumatra.bot.ERobotMode;
-import edu.tigers.sumatra.ids.EAiType;
 
 
 /**
@@ -28,7 +27,6 @@ public class BotStatus
 	private Map<EFeature, EFeatureState> botFeatures;
 	private List<String> brokenFeatures = new ArrayList<>();
 	private ERobotMode robotMode;
-	private EAiType aiAssignment = null;
 	
 	
 	@Override
@@ -204,15 +202,6 @@ public class BotStatus
 	
 	
 	/**
-	 * @return the amount of broken bot features;
-	 */
-	public final int getCountBrokenFeatures()
-	{
-		return brokenFeatures.size();
-	}
-	
-	
-	/**
 	 * @return the robotMode
 	 */
 	public ERobotMode getRobotMode()
@@ -227,17 +216,5 @@ public class BotStatus
 	public void setRobotMode(final ERobotMode robotMode)
 	{
 		this.robotMode = robotMode;
-	}
-	
-	
-	public EAiType getAiAssignment()
-	{
-		return aiAssignment;
-	}
-	
-	
-	public void setAiAssignment(final EAiType aiAssignment)
-	{
-		this.aiAssignment = aiAssignment;
 	}
 }

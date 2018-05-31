@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.visualizer;
 
@@ -8,15 +8,10 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.DefaultButtonModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
 
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.EAiType;
 
 
 /**
@@ -46,24 +41,6 @@ public class BotPopUpMenu extends JPopupMenu
 		
 		hideFromRcm.setSelected(status.isHideRcm());
 		hideFromRcm.addActionListener(new HideFromRcmActionListener());
-		
-		ButtonGroup aiButtonGroup = new ButtonGroup();
-		for (EAiType aiAssignment : EAiType.values())
-		{
-			JRadioButtonMenuItem radioButton = new JRadioButtonMenuItem(aiAssignment.name());
-			radioButton.addActionListener(new AiAssignmentChangeListener());
-			radioButton.setActionCommand(aiAssignment.name());
-			add(radioButton);
-			aiButtonGroup.add(radioButton);
-			
-			if (aiAssignment == status.getAiAssignment())
-			{
-				radioButton.setSelected(true);
-			}
-		}
-		
-		final ButtonModel aiButtonModel = new DefaultButtonModel();
-		aiButtonModel.setGroup(aiButtonGroup);
 	}
 	
 	
@@ -98,15 +75,6 @@ public class BotPopUpMenu extends JPopupMenu
 		default void onHideBotFromRcmClicked(final BotID botId, final boolean hide)
 		{
 		}
-		
-		
-		/**
-		 * @param botID
-		 * @param aiAssignment
-		 */
-		default void onBotAiAssignmentChanged(final BotID botID, final EAiType aiAssignment)
-		{
-		}
 	}
 	
 	private class HideFromRcmActionListener implements ActionListener
@@ -118,20 +86,6 @@ public class BotPopUpMenu extends JPopupMenu
 			for (final IBotPopUpMenuObserver observer : observers)
 			{
 				observer.onHideBotFromRcmClicked(botId, checked);
-			}
-		}
-	}
-	
-	private class AiAssignmentChangeListener implements ActionListener
-	{
-		@Override
-		public void actionPerformed(final ActionEvent e)
-		{
-			JRadioButtonMenuItem button = (JRadioButtonMenuItem) e.getSource();
-			EAiType aiAssignment = EAiType.valueOf(button.getActionCommand());
-			for (final IBotPopUpMenuObserver observer : observers)
-			{
-				observer.onBotAiAssignmentChanged(botId, aiAssignment);
 			}
 		}
 	}

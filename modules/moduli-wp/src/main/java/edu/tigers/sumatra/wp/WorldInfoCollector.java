@@ -21,12 +21,6 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
-import edu.tigers.sumatra.botmanager.ABotManager;
-import edu.tigers.sumatra.botmanager.BotProvider;
-import edu.tigers.sumatra.botmanager.NoBotProvider;
-import edu.tigers.sumatra.botparams.BotParamsManager;
-import edu.tigers.sumatra.botparams.BotParamsProvider;
-import edu.tigers.sumatra.botparams.NoBotParamsProvider;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamBall;
@@ -36,7 +30,6 @@ import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
-import edu.tigers.sumatra.ids.EAiType;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.SumatraMath;
@@ -67,8 +60,9 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
 import edu.tigers.sumatra.wp.util.BotStateFromTrajectoryCalculator;
 import edu.tigers.sumatra.wp.util.CurrentBallDetector;
+import edu.tigers.sumatra.wp.util.DefaultRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
-import edu.tigers.sumatra.wp.util.RobotInfoProvider;
+import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 
 
 /**
@@ -97,7 +91,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private CurrentBallDetector currentBallDetector;
 	private BotStateFromTrajectoryCalculator botStateFromTrajectoryCalculator;
 	private AVisionFilter visionFilter;
-	private RobotInfoProvider robotInfoProvider;
+	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
@@ -418,29 +412,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 	
 	
-	private BotProvider getBotProvider()
-	{
-		if (SumatraModel.getInstance().isModuleLoaded(ABotManager.class))
-		{
-			return SumatraModel.getInstance().getModule(ABotManager.class);
-		}
-		return new NoBotProvider();
-	}
-	
-	
-	private BotParamsProvider getBotParamsProvider()
-	{
-		if (SumatraModel.getInstance().isModuleLoaded(BotParamsManager.class))
-		{
-			return SumatraModel.getInstance().getModule(BotParamsManager.class);
-		}
-		return new NoBotParamsProvider();
-	}
-	
-	
 	private void initState()
 	{
-		robotInfoProvider = new RobotInfoProvider(getBotProvider(), getBotParamsProvider());
 		gameStateCalculator = new GameStateCalculator();
 		worldFrameVisualization = new WorldFrameVisualization();
 		ballContactCalculator = new BallContactCalculator();
@@ -519,15 +492,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	
 	
 	@Override
-	public void updateBot2AiAssignment(final BotID botID, final EAiType aiTeam)
+	public void setRobotInfoProvider(final IRobotInfoProvider robotInfoProvider)
 	{
-		robotInfoProvider.updateBot2AiAssignment(botID, aiTeam);
-	}
-	
-	
-	@Override
-	public Map<BotID, EAiType> getBotToAiMap()
-	{
-		return robotInfoProvider.getBotToAiMap();
+		this.robotInfoProvider = robotInfoProvider;
 	}
 }

@@ -59,17 +59,7 @@
 
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-botmanager</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
             <artifactId>moduli-geometry</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-bot-params</artifactId>
         </dependency>
 
         <dependency>

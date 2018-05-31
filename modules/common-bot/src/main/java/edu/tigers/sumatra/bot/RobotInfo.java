@@ -15,7 +15,6 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.bot.params.BotParams;
 import edu.tigers.sumatra.bot.params.IBotParams;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.EAiType;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
@@ -31,7 +30,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final long timestamp;
 	private final EBotType type;
 	private final ERobotMode robotMode;
-	private final transient EAiType aiType;
 	private final transient ITrajectory<IVector3> trajectory;
 	private final Map<EFeature, EFeatureState> botFeatures;
 	private final float kickSpeed;
@@ -59,7 +57,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		timestamp = builder.timestamp;
 		type = builder.type;
 		robotMode = builder.robotMode;
-		aiType = builder.aiType;
 		trajectory = builder.trajectory;
 		botFeatures = builder.botFeatures;
 		kickSpeed = builder.kickSpeed;
@@ -111,7 +108,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withTimestamp(timestamp)
 				.withType(EBotType.UNKNOWN)
 				.withRobotMode(ERobotMode.IDLE)
-				.withAiType(EAiType.NONE)
 				.withTrajectory(null)
 				.withBotFeatures(new HashMap<>())
 				.withKickSpeed(0)
@@ -131,14 +127,13 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	 * @param copy for inital values
 	 * @return new builder
 	 */
-	public static Builder copyBuilder(final RobotInfo copy)
+	private static Builder copyBuilder(final RobotInfo copy)
 	{
 		Builder builder = new Builder();
 		builder.botId = copy.botId;
 		builder.timestamp = copy.timestamp;
 		builder.type = copy.type;
 		builder.robotMode = copy.robotMode;
-		builder.aiType = copy.aiType;
 		builder.trajectory = copy.trajectory;
 		builder.botFeatures = copy.botFeatures;
 		builder.kickSpeed = copy.kickSpeed;
@@ -201,12 +196,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	public ERobotMode getRobotMode()
 	{
 		return robotMode;
-	}
-	
-	
-	public EAiType getAiType()
-	{
-		return aiType;
 	}
 	
 	
@@ -296,7 +285,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private Long timestamp;
 		private EBotType type;
 		private ERobotMode robotMode;
-		private EAiType aiType;
 		private ITrajectory<IVector3> trajectory;
 		private Map<EFeature, EFeatureState> botFeatures;
 		private Float kickSpeed;
@@ -378,20 +366,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		public Builder withRobotMode(final ERobotMode val)
 		{
 			robotMode = val;
-			return this;
-		}
-		
-		
-		/**
-		 * Sets the {@code aiType} and returns a reference to this Builder so that the methods can be chained
-		 * together.
-		 *
-		 * @param val the {@code aiType} to set
-		 * @return a reference to this Builder
-		 */
-		public Builder withAiType(final EAiType val)
-		{
-			aiType = val;
 			return this;
 		}
 		
@@ -558,7 +532,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			Validate.notNull(botId);
 			Validate.notNull(type);
 			Validate.notNull(robotMode);
-			Validate.notNull(aiType);
 			Validate.notNull(botParams);
 			Validate.notNull(botFeatures);
 			Validate.notNull(kickSpeed);

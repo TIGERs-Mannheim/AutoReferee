@@ -21,13 +21,10 @@
 		<module>modules/moduli-autoreferee</module>
 		<module>modules/moduli-cam</module>
 		<module>modules/moduli-referee</module>
-		<module>modules/moduli-timer</module>
 		<module>modules/moduli-wp</module>
 		<module>modules/moduli-geometry</module>
 		<module>modules/moduli-vision</module>
 		<module>modules/moduli-record</module>
-		<module>modules/moduli-bot-params</module>
-		<module>modules/moduli-botmanager</module>
 
 		<module>modules/sumatra-gui-log</module>
 		<module>modules/sumatra-gui-visualizer</module>

@@ -12,7 +12,6 @@ import edu.tigers.sumatra.drawable.DrawableBotShape;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.ids.EAiType;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -95,25 +94,16 @@ public class BotVisCalc implements IWpCalc
 		return null;
 	}
 	
+	
 	private DrawableBotShape createBotShape(final ITrackedBot bot)
 	{
 		DrawableBotShape shape = new DrawableBotShape(bot.getPos(), bot.getOrientation(), Geometry.getBotRadius(),
 				bot.getCenter2DribblerDist());
-		shape.setBorderColor(borderColor(bot));
+		shape.setBorderColor(Color.black);
 		shape.setFillColor(fillColor(bot));
 		shape.setFontColor(bot.getTeamColor() == ETeamColor.YELLOW ? Color.black : Color.white);
 		shape.setId(String.valueOf(bot.getBotId().getNumber()));
 		return shape;
-	}
-	
-	
-	private Color borderColor(final ITrackedBot bot)
-	{
-		if (bot.getRobotInfo().getAiType() == EAiType.PRIMARY)
-		{
-			return Color.black;
-		}
-		return null;
 	}
 	
 	

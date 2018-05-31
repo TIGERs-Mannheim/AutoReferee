@@ -11,7 +11,6 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.EAiTeam;
-import edu.tigers.sumatra.ids.EAiType;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -101,7 +100,7 @@ public class WorldFrameFactory
 				- (Geometry.getFieldWidth() / 2.0);
 		final IVector2 pos = Vector2.fromXY(x, y);
 		
-		RobotInfo robotInfo = RobotInfo.stubBuilder(id, timestamp).withAiType(EAiType.PRIMARY).build();
+		RobotInfo robotInfo = RobotInfo.stubBuilder(id, timestamp).build();
 		
 		return TrackedBot.stubBuilder(id, timestamp)
 				.withPos(pos)
