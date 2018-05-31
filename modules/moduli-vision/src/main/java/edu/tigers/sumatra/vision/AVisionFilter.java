@@ -18,6 +18,7 @@ import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
@@ -87,6 +88,18 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	
 	
 	/**
+	 * Send an updated viewport to external modules.
+	 * 
+	 * @param cameraId
+	 * @param viewport
+	 */
+	protected final void publishUpdatedViewport(final int cameraId, final IRectangle viewport)
+	{
+		observers.forEach(o -> o.onViewportUpdated(cameraId, viewport));
+	}
+	
+	
+	/**
 	 * Reset the ball to a new position. Can be used to
 	 * select another ball, if multiple balls are detected (real filter)
 	 * 
@@ -102,6 +115,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 * Place the ball to a new position. This should only be implemented by the simulator
 	 * 
 	 * @param pos
+	 * @param vel
 	 */
 	public void placeBall(final IVector3 pos, final IVector3 vel)
 	{

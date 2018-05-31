@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
@@ -15,6 +15,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
@@ -53,7 +54,7 @@ public class GoalDetector extends APreparingGameEventDetector
 	 */
 	public GoalDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.GOAL, EGameState.RUNNING);
 	}
 	
 	
@@ -85,7 +86,7 @@ public class GoalDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		if ((indirectKickPos != null) && indirectStillHot)
 		{

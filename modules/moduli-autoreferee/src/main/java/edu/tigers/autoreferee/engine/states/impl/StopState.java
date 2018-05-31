@@ -144,10 +144,6 @@ public class StopState extends AbstractAutoRefState
 		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
 		
 		IVector2 kickPos = determineKickPos(action);
-		double penAreaMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard() + RuleConstraints.getStopRadius();
-		kickPos = NGeometry.getPenaltyArea(ETeamColor.YELLOW).withMargin(penAreaMargin).nearestPointOutside(kickPos);
-		kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(penAreaMargin).nearestPointOutside(kickPos);
-		kickPos = NGeometry.getField().withMargin(-AutoRefMath.THROW_IN_DISTANCE).nearestPointInside(kickPos);
 		
 		visualizeKickPos(shapes, kickPos);
 		
@@ -184,9 +180,7 @@ public class StopState extends AbstractAutoRefState
 		
 		
 		final ETeamColor placementTeam = getPlacementTeam(action, ctx);
-		if (placementTeam != ETeamColor.NEUTRAL
-				&& ctx.getAutoRefGlobalState().getBallPlacementStage() != AutoRefGlobalState.EBallPlacementStage.CANCELED
-				&& !placementWasAttemptedBy(frame, placementTeam) && ball.isOnCam())
+		if (placeBallByTeams(frame, ctx, placementTeam))
 		{
 			if (ballStationary && !ballPlaced)
 			{
@@ -218,6 +212,23 @@ public class StopState extends AbstractAutoRefState
 			}
 			
 		}
+	}
+	
+	
+	private boolean placeBallByTeams(final IAutoRefFrame frame, final IAutoRefStateContext ctx,
+			final ETeamColor placementTeam)
+	{
+		return placementTeam != ETeamColor.NEUTRAL
+				&& autoBallPlacementAllowed(frame, ctx)
+				&& !placementWasAttemptedBy(frame, placementTeam);
+	}
+	
+	
+	private boolean autoBallPlacementAllowed(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
+	{
+		return ctx.getFollowUpAction().getActionType() != FollowUpAction.EActionType.PENALTY
+				&& ctx.getAutoRefGlobalState().getBallPlacementStage() != AutoRefGlobalState.EBallPlacementStage.CANCELED
+				&& frame.getWorldFrame().getBall().isOnCam();
 	}
 	
 	
@@ -274,9 +285,7 @@ public class StopState extends AbstractAutoRefState
 		List<ETeamColor> capableTeams = AutoRefConfig.getBallPlacementTeams();
 		if (!capableTeams.contains(teamInFavor))
 		{
-			if (capableTeams.contains(teamInFavor.opposite())
-					// rules: ball for penalty kicks are not placed by opponent team
-					&& followUpAction.getActionType() != FollowUpAction.EActionType.PENALTY)
+			if (capableTeams.contains(teamInFavor.opposite()))
 			{
 				teamInFavor = teamInFavor.opposite();
 			} else
@@ -295,8 +304,7 @@ public class StopState extends AbstractAutoRefState
 			case DIRECT_FREE:
 			case INDIRECT_FREE:
 			case FORCE_START:
-				return action.getNewBallPosition()
-						.orElseThrow(() -> new IllegalArgumentException("Ball position not present"));
+				return validKickPos(action);
 			case KICK_OFF:
 				return NGeometry.getCenter();
 			case PENALTY:
@@ -305,6 +313,19 @@ public class StopState extends AbstractAutoRefState
 				throw new IllegalArgumentException("Update the StopState to handle the new ActionType: "
 						+ action.getActionType());
 		}
+	}
+	
+	
+	private IVector2 validKickPos(final FollowUpAction action)
+	{
+		IVector2 kickPos = action.getNewBallPosition()
+				.orElseThrow(() -> new IllegalArgumentException("Ball position not present"));
+		double penAreaMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard()
+				+ RuleConstraints.getStopRadius();
+		kickPos = NGeometry.getPenaltyArea(ETeamColor.YELLOW).withMargin(penAreaMargin)
+				.nearestPointOutside(kickPos);
+		kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(penAreaMargin).nearestPointOutside(kickPos);
+		return NGeometry.getField().withMargin(-AutoRefMath.THROW_IN_DISTANCE).nearestPointInside(kickPos);
 	}
 	
 	

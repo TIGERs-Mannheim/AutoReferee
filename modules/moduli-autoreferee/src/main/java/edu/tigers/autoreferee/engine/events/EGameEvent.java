@@ -36,7 +36,10 @@ public enum EGameEvent
 	INDIRECT_GOAL(EEventCategory.VIOLATION, "Indirect Goal", GameEventType.INDIRECT_GOAL),
 	BALL_PLACEMENT_FAILED(EEventCategory.VIOLATION, "Ball placement not successful",
 			GameEventType.BALL_PLACEMENT_FAILED),
-	CHIP_ON_GOAL(EEventCategory.VIOLATION, "Ball was chipped on goal", GameEventType.CHIP_ON_GOAL);
+	CHIP_ON_GOAL(EEventCategory.VIOLATION, "Ball was chipped on goal", GameEventType.CHIP_ON_GOAL),
+	MULTIPLE_YELLOW_CARDS(EEventCategory.VIOLATION, "Team got multiple yellow cards", GameEventType.CUSTOM),
+	
+	;
 	
 	
 	private final EEventCategory category;

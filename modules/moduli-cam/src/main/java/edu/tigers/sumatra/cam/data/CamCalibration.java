@@ -3,9 +3,7 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.complex.Quaternion;
@@ -18,8 +16,6 @@ import org.json.simple.JSONObject;
 import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_GeometryCameraCalibration;
 import edu.tigers.sumatra.export.IJsonString;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.rectangle.IRectangle;
-import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -81,6 +77,31 @@ public class CamCalibration implements IJsonString
 		translation = Vector3.fromXYZ(cc.getTx(), cc.getTy(), cc.getTz());
 		cameraPosition = Vector3.fromXYZ(cc.getDerivedCameraWorldTx(), cc.getDerivedCameraWorldTy(),
 				cc.getDerivedCameraWorldTz());
+	}
+	
+	
+	/**
+	 * Is this calibration similar to another one?
+	 * 
+	 * @param other
+	 * @return true if similar enough
+	 */
+	public boolean similarTo(final CamCalibration other)
+	{
+		boolean samePoints = principalPoint.isCloseTo(other.principalPoint) &&
+				translation.isCloseTo(other.translation) &&
+				cameraPosition.isCloseTo(other.cameraPosition);
+		
+		boolean sameQuaternion = SumatraMath.isEqual(rotationQuaternion.getQ0(), other.rotationQuaternion.getQ0()) &&
+				SumatraMath.isEqual(rotationQuaternion.getQ1(), other.rotationQuaternion.getQ1()) &&
+				SumatraMath.isEqual(rotationQuaternion.getQ2(), other.rotationQuaternion.getQ2()) &&
+				SumatraMath.isEqual(rotationQuaternion.getQ3(), other.rotationQuaternion.getQ3());
+		
+		boolean sameParameters = SumatraMath.isEqual(focalLength, other.focalLength) &&
+				SumatraMath.isEqual(distortion, other.distortion) &&
+				(cameraId == other.cameraId);
+		
+		return samePoints && sameQuaternion && sameParameters;
 	}
 	
 	
@@ -386,36 +407,5 @@ public class CamCalibration implements IJsonString
 						{ 0, 0, 1 } });
 		
 		return k.multiply(h);
-	}
-	
-	
-	/**
-	 * Return an axes-aligned rectangle that reflects the inner viewport of a sensor with a given pixel size;
-	 * 
-	 * @param sensorPixelSize
-	 * @return
-	 */
-	public IRectangle getApproximatedViewport(final IVector2 sensorPixelSize)
-	{
-		List<IVector2> points = new ArrayList<>();
-		points.add(imageToField(Vector2.fromXY(0, 0), 150));
-		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x(), 0), 150));
-		points.add(imageToField(Vector2.fromXY(0, sensorPixelSize.y()), 150));
-		points.add(imageToField(Vector2.fromXY(sensorPixelSize.x(), sensorPixelSize.y()), 150));
-		
-		double minX = points.stream()
-				.mapToDouble(IVector2::x)
-				.min().orElse(0);
-		double maxX = points.stream()
-				.mapToDouble(IVector2::x)
-				.max().orElse(0);
-		double minY = points.stream()
-				.mapToDouble(IVector2::y)
-				.min().orElse(0);
-		double maxY = points.stream()
-				.mapToDouble(IVector2::y)
-				.max().orElse(0);
-		
-		return Rectangle.fromPoints(Vector2.fromXY(minX, minY), Vector2.fromXY(maxX, maxY));
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
@@ -22,6 +22,7 @@ import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -70,7 +71,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 	 */
 	public DefenderToKickPointDistanceDetector()
 	{
-		super(EnumSet.of(
+		super(EGameEventDetectorType.DEFENDER_TO_KICK_POINT_DISTANCE, EnumSet.of(
 				EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE, EGameState.KICKOFF));
 	}
 	
@@ -90,7 +91,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		long timestamp = frame.getTimestamp();
 		Set<BotID> curViolators = getViolators(frame);

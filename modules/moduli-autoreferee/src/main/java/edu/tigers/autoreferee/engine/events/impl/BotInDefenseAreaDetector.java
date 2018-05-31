@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +21,7 @@ import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.events.CardPenalty;
 import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
@@ -64,7 +64,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	 */
 	public BotInDefenseAreaDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.BOT_IN_DEFENSE_AREA, EGameState.RUNNING);
 	}
 	
 	
@@ -83,7 +83,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		BotPosition curKicker = frame.getBotLastTouchedBall();
 		
@@ -98,9 +98,14 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 		{
 			return Optional.empty();
 		}
+		if ((frame.getTimestamp() - entryTime) / 1e9 < 0.5)
+		{
+			// wait some time before starting the detection
+			// this is mainly for penalty kicks where the game state switches to running in the moment of ball movement
+			return Optional.empty();
+		}
 		
-		BotID curKickerId = curKicker.getBotID();
-		BotPosition lastViolationOfCurKicker = lastViolators.get(curKickerId);
+		BotPosition lastViolationOfCurKicker = lastViolators.get(curKicker.getBotID());
 		
 		if (lastViolationOfCurKicker != null)
 		{
@@ -124,12 +129,20 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 		Set<BotID> keepers = new HashSet<>();
 		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.BLUE));
 		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.YELLOW));
-		if (keepers.contains(curKickerId))
+		if (keepers.contains(curKicker.getBotID()))
 		{
 			return Optional.empty();
 		}
 		
+		return checkPenaltyAreas(frame);
+	}
+	
+	
+	private Optional<IGameEvent> checkPenaltyAreas(final IAutoRefFrame frame)
+	{
+		BotPosition curKicker = frame.getBotLastTouchedBall();
 		ETeamColor curKickerColor = curKicker.getBotID().getTeamColor();
+		BotID curKickerId = curKicker.getBotID();
 		
 		IPenaltyArea opponentPenArea = NGeometry.getPenaltyArea(curKickerColor.opposite());
 		IPenaltyArea ownPenArea = NGeometry.getPenaltyArea(curKickerColor);
@@ -185,7 +198,6 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			return Optional.of(violation);
 		}
 		return Optional.empty();
-		
 	}
 	
 	

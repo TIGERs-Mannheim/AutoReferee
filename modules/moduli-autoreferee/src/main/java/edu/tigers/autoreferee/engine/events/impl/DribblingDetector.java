@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.log4j.Logger;
@@ -16,6 +15,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
@@ -59,7 +59,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	 */
 	public DribblingDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.DRIBBLING, EGameState.RUNNING);
 	}
 	
 	
@@ -78,7 +78,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		BotPosition curContact = frame.getLastBotCloseToBall();
 		if (!isSane(firstContact))

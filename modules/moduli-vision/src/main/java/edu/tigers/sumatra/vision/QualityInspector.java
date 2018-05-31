@@ -6,6 +6,7 @@ package edu.tigers.sumatra.vision;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class QualityInspector
 	private List<RobotDeviationIssue> deviationIssues = new ArrayList<>();
 	private List<RobotInvisibleIssue> invisibleIssues = new ArrayList<>();
 	private List<FilteredVisionBot> filteredBots = new ArrayList<>();
+	private Map<Integer, CamCalibration> calibrations = new HashMap<>();
 	
 	@Configurable(defValue = "true", comment = "Draw camera issues in quality layer.")
 	private static boolean drawCameraIssues = true;
@@ -277,29 +279,32 @@ public class QualityInspector
 	 */
 	public void inspectCameraGeometry(final CamGeometry geometry)
 	{
-		checkCameraHeights(geometry);
+		for (CamCalibration calib : geometry.getCalibrations().values())
+		{
+			calibrations.put(calib.getCameraId(), calib);
+		}
+		
+		checkCameraHeights(calibrations.values());
 	}
 	
 	
-	private void checkCameraHeights(final CamGeometry geometry)
+	private void checkCameraHeights(final Collection<CamCalibration> cams)
 	{
 		problematicCams.clear();
 		
-		if (geometry.getCalibrations().size() < 2)
+		if (cams.size() < 2)
 		{
 			return;
 		}
 		
-		List<Double> camHeights = geometry.getCalibrations().values().stream()
+		List<Double> camHeights = cams.stream()
 				.map(c -> c.getCameraPosition().z())
 				.sorted(Double::compare)
 				.collect(Collectors.toList());
 		
 		double median = StatisticsMath.median(camHeights);
 		
-		List<CamCalibration> calibrations = new ArrayList<>(geometry.getCalibrations().values());
-		
-		problematicCams = calibrations.stream()
+		problematicCams = cams.stream()
 				.filter(c -> Math.abs(median - c.getCameraPosition().z()) > maxHeightDifference)
 				.collect(Collectors.toList());
 	}
@@ -324,7 +329,7 @@ public class QualityInspector
 				shapes.add(circle);
 				
 				DrawableAnnotation warn = new DrawableAnnotation(
-						calib.getCameraPosition().getXYVector().addNew(Vector2.fromXY(0, 280)), "CAM_HEIGHT", true);
+						calib.getCameraPosition().getXYVector().addNew(Vector2.fromXY(0, 280)), "CAM_HEIGHT", false);
 				warn.withFontHeight(100).withBold(true).setColor(Color.RED);
 				shapes.add(warn);
 			}

@@ -3,7 +3,7 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
@@ -13,6 +13,7 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
 import edu.tigers.sumatra.geometry.RuleConstraints;
@@ -50,7 +51,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	 */
 	public BallSpeedingDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.BALL_SPEEDING, EGameState.RUNNING);
 	}
 	
 	
@@ -62,7 +63,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
 		if (frame.getWorldFrame().getKickFitState().isPresent() && frame.getWorldFrame().getKickEvent().isPresent()
 				&& isNewOrSameKicker(frame.getWorldFrame().getKickEvent().get(), frame.getTimestamp())
@@ -111,7 +112,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 				kickPos);
 
 		return new SpeedViolation(EGameEvent.BALL_SPEED, timestamp,
-				violator, action, lastSpeedEstimate);
+				violator, action, lastSpeedEstimate, Collections.emptyList());
 	}
 
 

@@ -22,7 +22,7 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine.IAutoRefEngineObserver;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
-import edu.tigers.autoreferee.engine.events.IGameEventDetector.EGameEventDetectorType;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.autoreferee.module.AutoRefState;
 import edu.tigers.moduli.exceptions.StartModuleException;

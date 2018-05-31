@@ -18,6 +18,7 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 
+import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.bot.IBot;
 import edu.tigers.sumatra.botmanager.basestation.IBaseStation;
 import edu.tigers.sumatra.botmanager.basestation.IBaseStationObserver;
@@ -25,11 +26,16 @@ import edu.tigers.sumatra.botmanager.bots.ABot;
 import edu.tigers.sumatra.botmanager.commands.ACommand;
 import edu.tigers.sumatra.botmanager.commands.BotSkillFactory;
 import edu.tigers.sumatra.botmanager.commands.CommandFactory;
+import edu.tigers.sumatra.botmanager.commands.basestation.BaseStationCameraViewport;
 import edu.tigers.sumatra.botmanager.commands.tigerv2.TigerSystemConsoleCommand;
 import edu.tigers.sumatra.botmanager.commands.tigerv2.TigerSystemConsoleCommand.ConsoleCommandTarget;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.vision.AVisionFilter;
+import edu.tigers.sumatra.vision.IVisionFilterObserver;
+import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 
 
 /**
@@ -37,7 +43,7 @@ import edu.tigers.sumatra.model.SumatraModel;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-public class BotManager extends ABotManager implements IConfigObserver
+public class BotManager extends ABotManager implements IConfigObserver, IVisionFilterObserver
 {
 	private static final Logger log = Logger.getLogger(BotManager.class.getName());
 	private static final String PROP_AUTO_CHARGE = BotManager.class.getName() + ".autoCharge";
@@ -96,6 +102,15 @@ public class BotManager extends ABotManager implements IConfigObserver
 			baseStation.connect();
 		}
 		
+		try
+		{
+			AVisionFilter visionFilter = SumatraModel.getInstance().getModule(AVisionFilter.class);
+			visionFilter.addObserver(this);
+		} catch (ModuleNotFoundException e)
+		{
+			log.debug("No VisionFilter found. Viewports won't be forwared.", e);
+		}
+		
 		ConfigRegistration.registerConfigurableCallback("botmgr", this);
 	}
 	
@@ -103,6 +118,15 @@ public class BotManager extends ABotManager implements IConfigObserver
 	@Override
 	public void stopModule()
 	{
+		try
+		{
+			AVisionFilter visionFilter = SumatraModel.getInstance().getModule(AVisionFilter.class);
+			visionFilter.removeObserver(this);
+		} catch (ModuleNotFoundException e)
+		{
+			log.debug("No VisionFilter found. Viewports won't be forwared.", e);
+		}
+		
 		for (IBaseStation baseStation : baseStations)
 		{
 			baseStation.disconnect();
@@ -143,7 +167,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 	}
 	
 	
-	private void setAutoCharge(boolean autoCharge)
+	private void setAutoCharge(final boolean autoCharge)
 	{
 		this.autoCharge = autoCharge;
 		SumatraModel.getInstance().setUserProperty(PROP_AUTO_CHARGE,
@@ -251,7 +275,7 @@ public class BotManager extends ABotManager implements IConfigObserver
 		}
 		
 		
-		private void updateColorOfAllRobotsToMajority(ABot bot)
+		private void updateColorOfAllRobotsToMajority(final ABot bot)
 		{
 			if (SumatraModel.getInstance().isProductive())
 			{
@@ -279,6 +303,21 @@ public class BotManager extends ABotManager implements IConfigObserver
 				}
 			}
 		}
+	}
+	
+	
+	@Override
+	public void onNewFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
+	{
+		// not used
+	}
+	
+	
+	@Override
+	public void onViewportUpdated(final int cameraId, final IRectangle viewport)
+	{
+		BaseStationCameraViewport cmd = new BaseStationCameraViewport(cameraId, viewport);
+		baseStations.forEach(b -> b.enqueueCommand(cmd));
 	}
 }
 

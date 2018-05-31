@@ -88,9 +88,7 @@ public class DrawableCircle extends ADrawableWithStroke
 	}
 	
 	
-	/**
-	 * @param fill
-	 */
+	@Override
 	public void setFill(final boolean fill)
 	{
 		this.fill = fill;

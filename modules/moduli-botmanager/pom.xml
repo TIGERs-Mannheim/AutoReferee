@@ -44,6 +44,11 @@
 
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>moduli-vision</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
             <artifactId>moduli-bot-params</artifactId>
         </dependency>
 

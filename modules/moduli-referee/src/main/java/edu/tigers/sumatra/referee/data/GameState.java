@@ -115,7 +115,7 @@ public class GameState
 		StringBuilder sb = new StringBuilder(state.toString());
 		if (forTeam.isNonNeutral())
 		{
-			sb.append("_" + forTeam);
+			sb.append("_").append(forTeam);
 		}
 		
 		return sb.toString();
@@ -165,12 +165,20 @@ public class GameState
 	 */
 	public boolean isIdleGame()
 	{
+		return isPausedGame() || state == EGameState.POST_GAME;
+	}
+	
+	
+	/**
+	 * @return true on any state within a game, where nothing happens (BREAK, HALT, TIMEOUT)
+	 */
+	public boolean isPausedGame()
+	{
 		switch (state)
 		{
 			case BREAK:
 			case HALT:
 			case TIMEOUT:
-			case POST_GAME:
 				return true;
 			default:
 				return false;

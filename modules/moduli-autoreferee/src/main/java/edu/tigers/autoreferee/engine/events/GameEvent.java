@@ -3,6 +3,8 @@
  */
 package edu.tigers.autoreferee.engine.events;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -23,75 +25,49 @@ public class GameEvent implements IGameEvent
 	private final BotID responsibleBot;
 	
 	private final FollowUpAction followUpAction;
-	private final CardPenalty cardPenalty;
+	private final List<CardPenalty> cardPenalties;
 	
 	private String cachedLogString = null;
 	
 	
-	/**
-	 * @param eventType
-	 * @param timestamp in ns
-	 * @param responsibleBot
-	 * @param followUp
-	 */
 	public GameEvent(final EGameEvent eventType, final long timestamp,
 			final BotID responsibleBot, final FollowUpAction followUp)
 	{
-		this(eventType, timestamp, responsibleBot, followUp, null);
+		this(eventType, timestamp, responsibleBot, followUp, Collections.emptyList());
 	}
 	
 	
-	/**
-	 * @param eventType
-	 * @param timestamp in ns
-	 * @param responsibleBot
-	 * @param followUp
-	 * @param cardPenalty
-	 */
 	public GameEvent(final EGameEvent eventType, final long timestamp,
-			final BotID responsibleBot, final FollowUpAction followUp, final CardPenalty cardPenalty)
+			final BotID responsibleBot, final FollowUpAction followUp, final List<CardPenalty> cardPenalties)
 	{
 		this.eventType = eventType;
 		this.timestamp = timestamp;
+		this.responsibleTeam = responsibleBot.getTeamColor();
 		this.responsibleBot = responsibleBot;
 		
-		followUpAction = followUp;
-		this.cardPenalty = cardPenalty;
+		this.followUpAction = followUp;
+		this.cardPenalties = cardPenalties;
 		
-		responsibleTeam = responsibleBot.getTeamColor();
 	}
 	
 	
-	/**
-	 * @param eventType
-	 * @param timestamp
-	 * @param responsibleTeam
-	 * @param followUp
-	 */
 	public GameEvent(final EGameEvent eventType, final long timestamp, final ETeamColor responsibleTeam,
 			final FollowUpAction followUp)
 	{
-		this(eventType, timestamp, responsibleTeam, followUp, null);
+		this(eventType, timestamp, responsibleTeam, followUp, Collections.emptyList());
 	}
 	
 	
-	/**
-	 * @param eventType
-	 * @param timestamp
-	 * @param responsibleTeam
-	 * @param followUp
-	 * @param cardPenalty
-	 */
 	public GameEvent(final EGameEvent eventType, final long timestamp, final ETeamColor responsibleTeam,
-			final FollowUpAction followUp, final CardPenalty cardPenalty)
+			final FollowUpAction followUp, final List<CardPenalty> cardPenalties)
 	{
 		this.eventType = eventType;
 		this.timestamp = timestamp;
 		this.responsibleTeam = responsibleTeam;
-		responsibleBot = null;
+		this.responsibleBot = null;
 		
-		followUpAction = followUp;
-		this.cardPenalty = cardPenalty;
+		this.followUpAction = followUp;
+		this.cardPenalties = cardPenalties;
 	}
 	
 	
@@ -216,8 +192,8 @@ public class GameEvent implements IGameEvent
 	
 	
 	@Override
-	public Optional<CardPenalty> getCardPenalty()
+	public List<CardPenalty> getCardPenalties()
 	{
-		return Optional.ofNullable(cardPenalty);
+		return Collections.unmodifiableList(cardPenalties);
 	}
 }

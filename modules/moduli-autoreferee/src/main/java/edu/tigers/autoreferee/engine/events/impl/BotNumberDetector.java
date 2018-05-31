@@ -4,14 +4,13 @@
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.BotNumberViolation;
-import edu.tigers.autoreferee.engine.events.GameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
@@ -40,17 +39,16 @@ public class BotNumberDetector extends AGameEventDetector
 		AGameEventDetector.registerClass(BotInDefenseAreaDetector.class);
 	}
 	
-	private int blueLastDiff = 0;
-	private int yellowLastDiff = 0;
+	private final ETeamColor teamColor;
+	private int lastDiff = 0;
 	
 	
-	/**
-	 * 
-	 */
-	public BotNumberDetector()
+	public BotNumberDetector(final ETeamColor teamColor)
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.BOT_NUMBER, EGameState.RUNNING);
+		this.teamColor = teamColor;
 	}
+	
 	
 	@Override
 	public int getPriority()
@@ -60,34 +58,24 @@ public class BotNumberDetector extends AGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		RefereeMsg refMsg = frame.getRefereeMsg();
 		long ts = frame.getTimestamp();
 		
-		int blueAllowedCount = getAllowedTeamBotCount(refMsg, ETeamColor.BLUE, ts);
-		int blueActualCount = getTeamOnFieldBotCount(bots, ETeamColor.BLUE);
+		int allowedCount = getAllowedTeamBotCount(refMsg, teamColor, ts);
+		int actualCount = getTeamOnFieldBotCount(bots, teamColor);
 		
-		int yellowAllowedCount = getAllowedTeamBotCount(refMsg, ETeamColor.YELLOW, ts);
-		int yellowActualCount = getTeamOnFieldBotCount(bots, ETeamColor.YELLOW);
+		int diff = actualCount - allowedCount;
 		
-		int blueDiff = blueActualCount - blueAllowedCount;
-		int yellowDiff = yellowActualCount - yellowAllowedCount;
-		
-		GameEvent violation = null;
-		if ((blueDiff > blueLastDiff) && (blueDiff > 0))
+		if ((diff > lastDiff) && (diff > 0))
 		{
-			blueLastDiff = blueDiff;
-			violation = new BotNumberViolation(frame.getTimestamp(), ETeamColor.BLUE, null, blueAllowedCount,
-					blueActualCount);
-		} else if ((yellowDiff > yellowLastDiff) && (yellowDiff > 0))
-		{
-			yellowLastDiff = yellowDiff;
-			violation = new BotNumberViolation(frame.getTimestamp(), ETeamColor.YELLOW, null, yellowAllowedCount,
-					yellowActualCount);
+			lastDiff = diff;
+			return Optional.of(new BotNumberViolation(frame.getTimestamp(), teamColor, null, allowedCount,
+					actualCount));
 		}
-		return violation != null ? Optional.of(violation) : Optional.empty();
+		return Optional.empty();
 	}
 	
 	
@@ -122,8 +110,6 @@ public class BotNumberDetector extends AGameEventDetector
 	@Override
 	public void reset()
 	{
-		blueLastDiff = 0;
-		yellowLastDiff = 0;
+		lastDiff = 0;
 	}
-	
 }

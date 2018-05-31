@@ -3,7 +3,6 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
@@ -14,6 +13,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
@@ -57,7 +57,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	 */
 	public BallLeftFieldDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.BALL_LEFT_FIELD_ICING, EGameState.RUNNING);
 	}
 	
 	
@@ -69,7 +69,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
 		if (frame.getBallLeftFieldPos().isPresent()
 				&& !frame.getBallLeftFieldPos().get().similarTo(lastBallLeftFieldPos))

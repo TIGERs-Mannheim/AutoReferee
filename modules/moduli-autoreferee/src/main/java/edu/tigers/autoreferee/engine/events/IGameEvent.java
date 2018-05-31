@@ -3,6 +3,7 @@
  */
 package edu.tigers.autoreferee.engine.events;
 
+import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -49,7 +50,7 @@ public interface IGameEvent
 	/**
 	 * @return the cardPenalty
 	 */
-	Optional<CardPenalty> getCardPenalty();
+	List<CardPenalty> getCardPenalties();
 	
 	
 	/**

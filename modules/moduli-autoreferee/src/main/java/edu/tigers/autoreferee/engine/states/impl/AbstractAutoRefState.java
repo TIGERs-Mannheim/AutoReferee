@@ -145,20 +145,11 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	@Override
 	public boolean handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
 	{
-		switch (gameEvent.getType())
-		{
-			case ROBOT_STOP_SPEED:
-			case NUMBER_OF_PLAYERS:
-				return false;
-			default:
-				break;
-		}
-		
 		final SSL_Referee_Game_Event refereeGameEvent = gameEvent.toProtobuf();
 		ctx.sendCommand(new RefboxRemoteCommand(Command.STOP, refereeGameEvent));
 		
-		gameEvent.getCardPenalty()
-				.ifPresent(c -> ctx.sendCommand(new RefboxRemoteCommand(c.getType(), c.getCardTeam(), refereeGameEvent)));
+		gameEvent.getCardPenalties()
+				.forEach(c -> ctx.sendCommand(new RefboxRemoteCommand(c.getType(), c.getCardTeam(), refereeGameEvent)));
 		
 		FollowUpAction followUp = gameEvent.getFollowUpAction();
 		if (followUp != null)

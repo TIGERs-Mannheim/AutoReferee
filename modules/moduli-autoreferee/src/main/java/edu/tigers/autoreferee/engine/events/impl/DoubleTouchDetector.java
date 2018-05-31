@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.events.impl;
@@ -17,6 +17,7 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.ids.BotID;
@@ -67,7 +68,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	 */
 	public DoubleTouchDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.DOUBLE_TOUCH, EGameState.RUNNING);
 	}
 	
 	
@@ -93,7 +94,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		if (justKickedFirstTime)
 		{

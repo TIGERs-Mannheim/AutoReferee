@@ -19,6 +19,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.events.DistanceViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
@@ -58,7 +59,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	 */
 	public AttackerToDefenseAreaDistanceDetector()
 	{
-		super(EGameState.RUNNING);
+		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_DISTANCE, EGameState.RUNNING);
 	}
 	
 	
@@ -79,7 +80,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
 		if (active)
 		{

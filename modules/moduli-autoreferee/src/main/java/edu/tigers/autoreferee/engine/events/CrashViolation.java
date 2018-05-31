@@ -5,6 +5,7 @@
 package edu.tigers.autoreferee.engine.events;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.ids.BotID;
@@ -27,9 +28,10 @@ public class CrashViolation extends GameEvent
 			final BotID responsibleBot,
 			final double collisionSpeed,
 			final double speedDifference,
-			final FollowUpAction followUp)
+			final FollowUpAction followUp,
+			final List<CardPenalty> cardPenalties)
 	{
-		super(eventType, timestamp, responsibleBot, followUp);
+		super(eventType, timestamp, responsibleBot, followUp, cardPenalties);
 		this.collisionSpeed = collisionSpeed;
 		this.speedDifference = speedDifference;
 	}

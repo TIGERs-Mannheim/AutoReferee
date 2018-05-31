@@ -13,6 +13,7 @@ import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.animated.AnimatedCrosshair;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
@@ -37,7 +38,7 @@ public class BallVisCalc implements IWpCalc
 		
 		double heightFactor = Math.abs(FLYING_BALL_SCALING * ball.getHeight()) + 1;
 		
-		ICircle ballCircle = Circle.createCircle(ball.getPos(), 20 * Geometry.getBallRadius());
+		ICircle ballCircle = Circle.createCircle(ball.getPos(), RuleConstraints.getStopRadius());
 		IDrawableShape crossHair = AnimatedCrosshair.aCrosshairWithContinuousRotation(ballCircle, 1.5f, Color.RED);
 		shapeMap.get(EWpShapesLayer.BALL).add(crossHair);
 		

@@ -178,9 +178,10 @@ public class FilteredVisionBall
 		
 		
 		/**
+		 * @param base
 		 * @return new builder based on given base
 		 */
-		public static Builder create(FilteredVisionBall base)
+		public static Builder create(final FilteredVisionBall base)
 		{
 			return new Builder()
 					.withPos(base.pos)

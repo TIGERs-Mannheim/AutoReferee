@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine;
 
@@ -99,16 +99,15 @@ public class FollowUpAction
 		switch (actionType)
 		{
 			case DIRECT_FREE:
-				return chooseCommandByTeam(Command.DIRECT_FREE_BLUE,
-						Command.DIRECT_FREE_YELLOW);
+				return chooseCommandByTeam(Command.DIRECT_FREE_BLUE, Command.DIRECT_FREE_YELLOW);
 			case INDIRECT_FREE:
-				return chooseCommandByTeam(Command.INDIRECT_FREE_BLUE,
-						Command.INDIRECT_FREE_YELLOW);
+				return chooseCommandByTeam(Command.INDIRECT_FREE_BLUE, Command.INDIRECT_FREE_YELLOW);
 			case KICK_OFF:
-				return chooseCommandByTeam(Command.PREPARE_KICKOFF_BLUE,
-						Command.PREPARE_KICKOFF_YELLOW);
+				return chooseCommandByTeam(Command.PREPARE_KICKOFF_BLUE, Command.PREPARE_KICKOFF_YELLOW);
 			case FORCE_START:
 				return Command.FORCE_START;
+			case PENALTY:
+				return chooseCommandByTeam(Command.PREPARE_PENALTY_BLUE, Command.PREPARE_PENALTY_YELLOW);
 			default:
 				throw new IllegalArgumentException(
 						"Please add the following action type to the switch case: " + actionType);
@@ -147,7 +146,7 @@ public class FollowUpAction
 			FollowUpAction otherAction = (FollowUpAction) other;
 			return (otherAction.actionType == actionType)
 					&& (otherAction.teamInFavor == teamInFavor)
-					&& otherAction.newBallPos.equals(newBallPos);
+					&& otherAction.getNewBallPosition().equals(getNewBallPosition());
 		}
 		return false;
 	}

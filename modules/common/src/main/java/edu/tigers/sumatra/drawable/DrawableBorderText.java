@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.drawable;
 
@@ -19,10 +19,10 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 @Persistent
 public class DrawableBorderText implements IDrawableShape
 {
-	private final IVector2	pos;
-	private final String		text;
-	private final Color		color;
-	private int					fontSize	= 5;
+	private final IVector2 pos;
+	private final String text;
+	private final Color color;
+	private int fontSize = 10;
 	
 	
 	@SuppressWarnings("unused")

@@ -4,12 +4,18 @@
 
 package edu.tigers.autoreferee.engine.events.impl;
 
+import static edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest.CardInfo.CardType.CARD_YELLOW;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -18,8 +24,10 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
+import edu.tigers.autoreferee.engine.events.CardPenalty;
 import edu.tigers.autoreferee.engine.events.CrashViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
+import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
@@ -37,6 +45,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BotCollisionDetector extends AGameEventDetector
 {
+	private static final Logger log = Logger.getLogger(BotCollisionDetector.class.getName());
 	private static final int PRIORITY = 1;
 	
 	@Configurable(comment = "[m/s] The velocity threshold above with a bot contact is considered a crash", defValue = "1.5")
@@ -54,7 +63,12 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "The lookahead [s] that is used to estimate the brake amount of each bot", defValue = "0.1")
 	private static double botBrakeLookahead = 0.1;
 	
-	private Map<BotID, Long> lastViolators = new HashMap<>();
+	@Configurable(comment = "Number of collision allowed, until a yellow card is issued", defValue = "3")
+	private static int numCollisionPerYellowCard = 3;
+
+	private final Map<BotID, Long> lastViolators = new HashMap<>();
+
+	private final Map<ETeamColor, Integer> collisionCounter = new EnumMap<>(ETeamColor.class);
 	
 	static
 	{
@@ -64,7 +78,9 @@ public class BotCollisionDetector extends AGameEventDetector
 	
 	public BotCollisionDetector()
 	{
-		super(EGameState.RUNNING);
+        super(EGameEventDetectorType.BOT_COLLISION, EGameState.RUNNING);
+		collisionCounter.put(ETeamColor.YELLOW, 0);
+		collisionCounter.put(ETeamColor.BLUE, 0);
 	}
 	
 	
@@ -76,7 +92,7 @@ public class BotCollisionDetector extends AGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> update(final IAutoRefFrame frame, final List<IGameEvent> violations)
+	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		List<ITrackedBot> yellowBots = AutoRefUtil.filterByColor(bots, ETeamColor.YELLOW);
@@ -138,15 +154,26 @@ public class BotCollisionDetector extends AGameEventDetector
 				kickPos = AutoRefMath.getClosestFreekickPos(kickPos, secondaryBot.getTeamColor().opposite());
 				followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, kickPos);
 				secondaryViolator = secondaryBot;
+				collisionCounter.computeIfPresent(ETeamColor.YELLOW, (k, v) -> v + 1);
+				collisionCounter.computeIfPresent(ETeamColor.BLUE, (k, v) -> v + 1);
 			} else
 			{
 				followUp = new FollowUpAction(EActionType.DIRECT_FREE, primaryBot.getTeamColor()
 						.opposite(), kickPos);
 				secondaryViolator = null;
+				collisionCounter.computeIfPresent(primaryBot.getTeamColor(), (k, v) -> v + 1);
 			}
-			
+
+			log.info("New bot collision counter: " + collisionCounter);
+
+			final List<CardPenalty> cardPenalties = collisionCounter.entrySet().stream()
+					.filter(e -> e.getValue() >= numCollisionPerYellowCard)
+					.map(e -> new CardPenalty(CARD_YELLOW, e.getKey()))
+					.collect(Collectors.toList());
+			collisionCounter.entrySet().forEach(e -> e.setValue(e.getValue() % numCollisionPerYellowCard));
+
 			return Optional.of(new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
-					primaryBot, crashVel, velDiff, followUp)
+					primaryBot, crashVel, velDiff, followUp, cardPenalties)
 							.setSecondResponsibleBot(secondaryViolator)
 							.setSpeedPrimaryBot(primarySpeed)
 							.setSpeedSecondaryBot(secondarySpeed));
@@ -226,7 +253,7 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Override
 	public void reset()
 	{
-		lastViolators = new HashMap<>();
+		lastViolators.clear();
 	}
 	
 	private class BotPair

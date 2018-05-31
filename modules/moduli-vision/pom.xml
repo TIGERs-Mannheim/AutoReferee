@@ -33,11 +33,6 @@
 
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-botmanager</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
             <artifactId>common-math</artifactId>
         </dependency>
 
