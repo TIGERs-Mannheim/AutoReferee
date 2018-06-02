@@ -27,7 +27,7 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 @Persistent
 public class KickEvent implements IKickEvent
 {
-	private final BotID kickingBot;
+	private final FilteredVisionBot kickingBot;
 	private final IVector2 position;
 	private final long timestamp;
 	private final transient List<MergedBall> recordsSinceKick = new ArrayList<>();
@@ -37,7 +37,7 @@ public class KickEvent implements IKickEvent
 	@SuppressWarnings("unused")
 	private KickEvent()
 	{
-		this(Vector2f.ZERO_VECTOR, BotID.noBot(), 0, Collections.emptyList(), false);
+		this(Vector2f.ZERO_VECTOR, null, 0, Collections.emptyList(), false);
 	}
 	
 	
@@ -48,7 +48,7 @@ public class KickEvent implements IKickEvent
 	 * @param recordsSinceKick
 	 * @param earlyDetection
 	 */
-	public KickEvent(final IVector2 position, final BotID kickingBot, final long timestamp,
+	public KickEvent(final IVector2 position, final FilteredVisionBot kickingBot, final long timestamp,
 			final List<MergedBall> recordsSinceKick, final boolean earlyDetection)
 	{
 		this.position = position;
@@ -74,6 +74,17 @@ public class KickEvent implements IKickEvent
 	 */
 	@Override
 	public BotID getKickingBot()
+	{
+		return kickingBot.getBotID();
+	}
+	
+	
+	/**
+	 * Get kicking bot as filtered vision bot.
+	 * 
+	 * @return
+	 */
+	public FilteredVisionBot getKickingFilteredVisionBot()
 	{
 		return kickingBot;
 	}

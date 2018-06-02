@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.line;
@@ -409,6 +409,7 @@ public final class LineMath
 	 * @param supportVector2 second support vector
 	 * @param directionVector2 second direction vector
 	 * @return the lambda for the first line
+	 * @throws IllegalStateException if both lines are parallel
 	 */
 	private static double getLineIntersectionLambda(
 			final IVector2 supportVector1,

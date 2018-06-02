@@ -6,6 +6,7 @@ package edu.tigers.autoreferee.engine;
 import java.util.Set;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 
@@ -66,7 +67,10 @@ public interface IAutoRefEngine
 	/**
 	 * @param types
 	 */
-	void setActiveGameEvents(Set<EGameEventDetectorType> types);
+	void setActiveGameEventDetectors(Set<EGameEventDetectorType> types);
+	
+	
+	void setActiveGameEvents(Set<EGameEvent> activeGameEvents);
 	
 	
 	/**

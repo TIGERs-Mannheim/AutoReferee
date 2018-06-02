@@ -6,6 +6,7 @@ package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
 
+import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -30,6 +32,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 
@@ -85,8 +88,29 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	@Override
 	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
-		BotPosition curKicker = frame.getBotLastTouchedBall();
+		if (frame.getBotsTouchingBall().size() > 1
+				&& frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().getTeamColor() == ETeamColor.YELLOW)
+				&& frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().getTeamColor() == ETeamColor.BLUE))
+		{
+			// two teams fighting for the ball, most likely being pushed by each other
+			return Optional.empty();
+		}
 		
+		for (BotPosition curKicker : frame.getBotsTouchingBall())
+		{
+			final Optional<IGameEvent> gameEvent = checkBotPosition(frame, curKicker);
+			if (gameEvent.isPresent())
+			{
+				return gameEvent;
+			}
+		}
+		
+		return Optional.empty();
+	}
+	
+	
+	private Optional<IGameEvent> checkBotPosition(final IAutoRefFrame frame, final BotPosition curKicker)
+	{
 		if (curKicker.getTimestamp() < entryTime)
 		{
 			/*
@@ -134,13 +158,12 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			return Optional.empty();
 		}
 		
-		return checkPenaltyAreas(frame);
+		return checkPenaltyAreas(frame, curKicker);
 	}
 	
 	
-	private Optional<IGameEvent> checkPenaltyAreas(final IAutoRefFrame frame)
+	private Optional<IGameEvent> checkPenaltyAreas(final IAutoRefFrame frame, final BotPosition curKicker)
 	{
-		BotPosition curKicker = frame.getBotLastTouchedBall();
 		ETeamColor curKickerColor = curKicker.getBotID().getTeamColor();
 		BotID curKickerId = curKicker.getBotID();
 		
@@ -163,6 +186,9 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 					curKickerId, followUp, distance);
 			
 			return Optional.of(violation);
+		} else if (defenderIsPushed(frame, curKickerId, curKicker.getPos()))
+		{
+			return Optional.empty();
 		} else if (ownPenArea.isPointInShape(curKicker.getPos(), -Geometry.getBotRadius()))
 		{
 			/*
@@ -201,6 +227,27 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	}
 	
 	
+	private boolean defenderIsPushed(final IAutoRefFrame frame, final BotID defender, final IVector2 botPos)
+	{
+		ETeamColor attackerColor = defender.getTeamColor().opposite();
+		
+		IPenaltyArea defenderPenaltyArea = NGeometry.getPenaltyArea(defender.getTeamColor());
+		return frame.getWorldFrame().getBots().values().stream()
+				// bots from attacking team
+				.filter(AutoRefUtil.ColorFilter.get(attackerColor))
+				// that touch the defender
+				.filter(b -> botPos.distanceTo(b.getPos()) <= Geometry.getBotRadius() * 2)
+				// push in direction of penalty area
+				.map(b -> Lines.halfLineFromPoints(b.getPos(), botPos))
+				// find intersection that show that attacker pushs towards penArea
+				.map(defenderPenaltyArea::lineIntersections)
+				.flatMap(List::stream)
+				.findAny()
+				// if any intersection is present, some attacker pushes the defender
+				.isPresent();
+	}
+	
+	
 	private double getPartialTouchMargin()
 	{
 		return Geometry.getBotRadius() - partialTouchMargin;
@@ -212,5 +259,4 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	{
 		lastViolators.clear();
 	}
-	
 }

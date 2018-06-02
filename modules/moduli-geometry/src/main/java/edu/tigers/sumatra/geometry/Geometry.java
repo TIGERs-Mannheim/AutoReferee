@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.math3.complex.Quaternion;
 import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
@@ -38,7 +36,6 @@ import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
 
 
@@ -192,23 +189,7 @@ public class Geometry
 		touchLines = new ArrayList<>();
 		touchLines.addAll(calcTouchLines());
 		
-		
-		Map<Integer, CamCalibration> calibs = new HashMap<>();
-		
-		// lab
-		calibs.put(0, new CamCalibration(0, 583.5178, Vector2.fromXY(393.20038, 307.02777), 0.28,
-				new Quaternion(0.009562, 0.016409, -0.999801, 0.006034),
-				Vector3.fromXYZ(1296.7423, -1035.8273, 2530.0)));
-		calibs.put(1, new CamCalibration(1, 594.1432, Vector2.fromXY(424.6054, 290.1744), 0.28,
-				new Quaternion(-0.023585, -0.009056, 0.999668, -0.005048),
-				Vector3.fromXYZ(1308.2275, 944.46234, 2530.0)));
-		calibs.put(2, new CamCalibration(2, 545.9973, Vector2.fromXY(391.43784, 286.54358), 0.24,
-				new Quaternion(0.011438, -0.998606, 4.59E-4, -0.051523),
-				Vector3.fromXYZ(1621.8491, -1042.7896, 2530.0)));
-		calibs.put(3, new CamCalibration(3, 543.0115, Vector2.fromXY(390.5568, 308.23514), 0.25,
-				new Quaternion(-0.018807, 0.998494, 0.019138, 0.047846),
-				Vector3.fromXYZ(1641.2815, 1019.6022, 2520.0)));
-		lastCamGeometry = new CamGeometry(calibs,
+		lastCamGeometry = new CamGeometry(new HashMap<Integer, CamCalibration>(),
 				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()));
 	}
 	
@@ -245,6 +226,8 @@ public class Geometry
 	 */
 	public static void setCamDetection(final CamGeometry geometry)
 	{
+		CamGeometry saveCamGeometry = getLastCamGeometry();
+		
 		boundaryWidth = geometry.getField().getBoundaryWidth();
 		fieldLength = geometry.getField().getFieldLength();
 		fieldWidth = geometry.getField().getFieldWidth();
@@ -254,6 +237,8 @@ public class Geometry
 		extractGeometryFromFieldMarkings(geometry);
 		
 		update();
+		
+		instance.lastCamGeometry = saveCamGeometry;
 		
 		instance.lastCamGeometry.update(geometry);
 	}

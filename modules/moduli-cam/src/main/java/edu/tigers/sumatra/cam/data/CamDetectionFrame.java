@@ -6,6 +6,7 @@ package edu.tigers.sumatra.cam.data;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -121,6 +122,35 @@ public class CamDetectionFrame
 		this.balls = balls;
 		this.robotsBlue = robotsBlue;
 		this.robotsYellow = robotsYellow;
+	}
+	
+	
+	/**
+	 * New CamDetectionFrame with adjusted tCapture.
+	 * 
+	 * @param f
+	 * @param tCapture
+	 */
+	public CamDetectionFrame(final CamDetectionFrame f, final long tCapture)
+	{
+		balls = f.getBalls().stream()
+				.map(b -> new CamBall(b, tCapture))
+				.collect(Collectors.toList());
+		
+		robotsYellow = f.getRobotsYellow().stream()
+				.map(r -> new CamRobot(r, tCapture))
+				.collect(Collectors.toList());
+		
+		robotsBlue = f.getRobotsBlue().stream()
+				.map(r -> new CamRobot(r, tCapture))
+				.collect(Collectors.toList());
+		
+		this.tCapture = tCapture;
+		tSent = f.tSent;
+		tAssembly = f.tAssembly;
+		cameraId = f.cameraId;
+		camFrameNumber = f.camFrameNumber;
+		frameNumber = f.frameNumber;
 	}
 	
 	

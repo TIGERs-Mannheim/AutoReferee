@@ -21,6 +21,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.vision.data.IKickEvent;
+import edu.tigers.sumatra.wp.data.BallKickFitState;
 
 
 /**
@@ -34,12 +35,11 @@ public class BallSpeedingDetector extends AGameEventDetector
 	@Configurable(comment = "[m/s] The ball is not considered to be too fast if above this threshold to prevent false positives", defValue = "12.0")
 	private static double topSpeedThreshold = 12.0d;
 	
-	@Configurable(comment = "Max waiting time [s]", defValue = "1.0")
-	private static double maxWaitingTime = 1;
-
-	private double lastSpeedEstimate = 0;
-	private IKickEvent lastKickEvent;
-
+	@Configurable(comment = "Max waiting time [s]", defValue = "0.8")
+	private static double maxWaitingTime = 0.8;
+	
+	private IKickEvent lastReportedKickEvent;
+	
 	static
 	{
 		AGameEventDetector.registerClass(BallSpeedingDetector.class);
@@ -65,62 +65,94 @@ public class BallSpeedingDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
-		if (frame.getWorldFrame().getKickFitState().isPresent() && frame.getWorldFrame().getKickEvent().isPresent()
-				&& isNewOrSameKicker(frame.getWorldFrame().getKickEvent().get(), frame.getTimestamp())
-				&& isBallInGame(frame))
+		if (!frame.getPreviousFrame().getWorldFrame().getKickFitState().isPresent()
+				|| !frame.getWorldFrame().getKickEvent().isPresent())
 		{
-			lastSpeedEstimate = frame.getWorldFrame().getKickFitState().get().getKickVel().getLength() / 1000.;
-			if (lastKickEvent == null)
-			{
-				lastKickEvent = frame.getWorldFrame().getKickEvent().get();
-			}
-		} else
+			return Optional.empty();
+		}
+		IKickEvent currentKickEvent = frame.getWorldFrame().getKickEvent().get();
+		
+		// take the last kickFitState, because if the ball hits another robot, we still want to have the original ball
+		// velocity
+		BallKickFitState lastKickFitState = frame.getPreviousFrame().getWorldFrame().getKickFitState().get();
+		double kickSpeed = lastKickFitState.getKickVel().getLength() / 1000.;
+		if (isKickTooFast(kickSpeed)
+				&& kickEventHasNotBeenReportedYet(currentKickEvent)
+				&& kickEstimateIsReady(frame, currentKickEvent))
 		{
-			if (lastSpeedEstimate > RuleConstraints.getMaxBallSpeed() + 0.01 && (lastSpeedEstimate < topSpeedThreshold))
+			lastReportedKickEvent = currentKickEvent;
+			SpeedViolation violation;
+			if (lastKickFitState.getKickPos().distanceTo(currentKickEvent.getPosition()) < 1000)
 			{
-				SpeedViolation violation = createViolation(lastKickEvent.getKickingBot(), frame.getTimestamp());
-				reset();
-				return Optional.of(violation);
+				violation = createViolation(currentKickEvent.getKickingBot(), kickSpeed,
+						frame.getTimestamp());
+			} else if (frame.getBotsLastTouchedBall().size() == 1)
+			{
+				violation = createViolation(frame.getBotsLastTouchedBall().get(0).getBotID(), kickSpeed,
+						frame.getTimestamp());
+			} else
+			{
+				// could not determine the violator
+				return Optional.empty();
 			}
-			reset();
+			return Optional.of(violation);
 		}
 		
 		return Optional.empty();
 	}
 	
 	
-	private boolean isBallInGame(IAutoRefFrame frame)
+	private boolean kickEventHasNotBeenReportedYet(final IKickEvent currentKickEvent)
 	{
-		return frame.isBallInsideField() && !frame.getPossibleGoal().isPresent();
+		return lastReportedKickEvent == null || lastReportedKickEvent.getTimestamp() != currentKickEvent.getTimestamp();
 	}
-
-
-	private boolean isNewOrSameKicker(IKickEvent event, long timestamp)
+	
+	
+	private boolean kickEstimateIsReady(final IAutoRefFrame frame, final IKickEvent currentKickEvent)
 	{
-		return lastKickEvent == null
-				|| (lastKickEvent.getKickingBot() == event.getKickingBot()
-						&& (timestamp - lastKickEvent.getTimestamp()) / 1_000_000_000. < maxWaitingTime);
+		boolean kickEstimateIsReady = (frame.getTimestamp() - currentKickEvent.getTimestamp()) / 1e9 > maxWaitingTime;
+		
+		// either time is up, or ball has left the field, or ball touched another bot
+		return kickEstimateIsReady || ballIsNotInsideField(frame) || ballTouchedAnotherRobot(frame, currentKickEvent);
 	}
-
-
-	private SpeedViolation createViolation(BotID violator, long timestamp)
+	
+	
+	private boolean isKickTooFast(double kickSpeed)
 	{
-		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastKickEvent.getPosition(),
+		return kickSpeed > RuleConstraints.getMaxBallSpeed() + 0.01
+				&& kickSpeed < topSpeedThreshold;
+	}
+	
+	
+	private boolean ballIsNotInsideField(IAutoRefFrame frame)
+	{
+		return !frame.isBallInsideField() && !frame.getPossibleGoal().isPresent();
+	}
+	
+	
+	private boolean ballTouchedAnotherRobot(IAutoRefFrame frame, final IKickEvent currentKickEvent)
+	{
+		return frame.getBotsLastTouchedBall().stream()
+				.noneMatch(b -> b.getBotID().equals(currentKickEvent.getKickingBot()));
+	}
+	
+	
+	private SpeedViolation createViolation(BotID violator, double lastSpeedEstimate, long timestamp)
+	{
+		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastReportedKickEvent.getPosition(),
 				violator.getTeamColor().opposite());
-
+		
 		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, violator.getTeamColor().opposite(),
 				kickPos);
-
+		
 		return new SpeedViolation(EGameEvent.BALL_SPEED, timestamp,
 				violator, action, lastSpeedEstimate, Collections.emptyList());
 	}
-
-
+	
+	
 	@Override
 	public void reset()
 	{
-		lastSpeedEstimate = 0;
-		lastKickEvent = null;
+		lastReportedKickEvent = null;
 	}
-	
 }

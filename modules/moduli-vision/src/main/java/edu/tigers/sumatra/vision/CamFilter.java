@@ -28,7 +28,7 @@ import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableEllipse;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.IDrawableShape;
-import edu.tigers.sumatra.filter.iir.ExponentialMovingAverageFilter;
+import edu.tigers.sumatra.filter.FirstOrderMultiSampleEstimator;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -61,12 +61,17 @@ public class CamFilter
 	
 	private final int camId;
 	
-	private final ExponentialMovingAverageFilter frameDtFilter;
+	private static final int FRAME_FILTER_NUM_SAMPLES = 100;
+	private static final int FRAME_FILTER_DIVIDER = 6;
+	
+	private final FirstOrderMultiSampleEstimator frameIntervalFilter = new FirstOrderMultiSampleEstimator(
+			FRAME_FILTER_NUM_SAMPLES);
+	private long lastCamFrameId;
+	
 	private Optional<CamCalibration> calibration = Optional.empty();
 	private Optional<IRectangle> fieldRectWithBoundary = Optional.empty();
 	private Optional<IRectangle> fieldRect = Optional.empty();
 	private Optional<IRectangle> viewport = Optional.empty();
-	private long lastDetectionFrameTimestamp = 0;
 	
 	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
 	private long lastBallVisibleTimestamp = 0;
@@ -78,12 +83,6 @@ public class CamFilter
 	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
 	
 	private CircularFifoQueue<CamBall> ballHistory = new CircularFifoQueue<>(100);
-	
-	@Configurable(defValue = "0.98", comment = "Alpha value for frame dt filter (0.0-1.0)")
-	private static double emaFilterAlpha = 0.98;
-	
-	@Configurable(defValue = "0.016", comment = "Default dt for new cams")
-	private static double emaFilterDefaultDt = 0.016;
 	
 	@Configurable(defValue = "0.2", comment = "Time in [s] after an invisible ball is removed")
 	private static double invisibleLifetimeBall = 0.2;
@@ -125,7 +124,6 @@ public class CamFilter
 	 */
 	public CamFilter(final int camId)
 	{
-		frameDtFilter = new ExponentialMovingAverageFilter(emaFilterAlpha, emaFilterDefaultDt);
 		this.camId = camId;
 	}
 	
@@ -136,12 +134,16 @@ public class CamFilter
 	 * 
 	 * @param frame
 	 * @param lastFilteredFrame
+	 * @return adjusted tCapture
 	 */
-	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
+	public long update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
 	{
-		processDtFilter(frame);
-		processRobots(frame, lastFilteredFrame.getBots());
-		processBalls(frame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots());
+		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
+		
+		processRobots(adjustedFrame, lastFilteredFrame.getBots());
+		processBalls(adjustedFrame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots());
+		
+		return adjustedFrame.gettCapture();
 	}
 	
 	
@@ -195,6 +197,28 @@ public class CamFilter
 	{
 		lastKnownBallPosition = ballFilterOutput.getLastKnownPosition().getXYVector();
 		lastBallVisibleTimestamp = ballFilterOutput.getFilteredBall().getLastVisibleTimestamp();
+	}
+	
+	
+	private CamDetectionFrame adjustTCapture(final CamDetectionFrame frame)
+	{
+		if (frame.getCamFrameNumber() != (lastCamFrameId + 1))
+		{
+			frameIntervalFilter.reset();
+		}
+		
+		lastCamFrameId = frame.getCamFrameNumber();
+		
+		if ((frame.getCamFrameNumber() % FRAME_FILTER_DIVIDER) == 0)
+		{
+			frameIntervalFilter.addSample(frame.getCamFrameNumber(), frame.gettCapture());
+		}
+		
+		IVector2 estimate = frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(frame.gettCapture(), 0.0));
+		
+		double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
+		
+		return new CamDetectionFrame(frame, (long) tCapture);
 	}
 	
 	
@@ -259,18 +283,6 @@ public class CamFilter
 	}
 	
 	
-	private void processDtFilter(final CamDetectionFrame frame)
-	{
-		if (lastDetectionFrameTimestamp != 0)
-		{
-			double dtInSeconds = (frame.gettCapture() - lastDetectionFrameTimestamp) * 1e-9;
-			frameDtFilter.update(dtInSeconds);
-		}
-		
-		lastDetectionFrameTimestamp = frame.gettCapture();
-	}
-	
-	
 	/**
 	 * Get camera position from calibration data.
 	 * 
@@ -290,7 +302,7 @@ public class CamFilter
 	 */
 	public double getAverageFrameDt()
 	{
-		return frameDtFilter.getState();
+		return frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(0, 0)).y() * 1e-9;
 	}
 	
 	
@@ -381,7 +393,7 @@ public class CamFilter
 		// do a prediction on all trackers
 		for (BallTracker b : balls)
 		{
-			b.predict(frame.gettCapture(), getAverageFrameDt(), colShapes, ball.getPos().z() > maxHeightForCollision);
+			b.predict(frame.gettCapture(), colShapes, ball.getPos().z() > maxHeightForCollision);
 		}
 		
 		List<CamBall> camBalls = new ArrayList<>();

@@ -25,6 +25,7 @@ public class FilteredVisionBall
 	private final boolean chipped;
 	private final double vSwitch;
 	private final long lastVisibleTimestamp;
+	private final double spin;
 	
 	
 	private FilteredVisionBall(final Builder builder)
@@ -41,6 +42,7 @@ public class FilteredVisionBall
 			vSwitch = builder.vSwitch;
 		}
 		lastVisibleTimestamp = builder.lastVisibleTimestamp;
+		spin = builder.spin;
 	}
 	
 	
@@ -92,6 +94,12 @@ public class FilteredVisionBall
 	public double getVSwitch()
 	{
 		return vSwitch;
+	}
+	
+	
+	public double getSpin()
+	{
+		return spin;
 	}
 	
 	
@@ -161,6 +169,7 @@ public class FilteredVisionBall
 		private Boolean chipped;
 		private double vSwitch = -1;
 		private long lastVisibleTimestamp = 0;
+		private double spin = 0;
 		
 		
 		private Builder()
@@ -189,6 +198,7 @@ public class FilteredVisionBall
 					.withAcc(base.acc)
 					.withIsChipped(base.chipped)
 					.withvSwitch(base.vSwitch)
+					.withSpin(base.spin)
 					.withLastVisibleTimestamp(base.lastVisibleTimestamp);
 		}
 		
@@ -260,6 +270,17 @@ public class FilteredVisionBall
 		
 		
 		/**
+		 * @param spin forward/topspin of the ball, backspin is negative
+		 * @return this builder
+		 */
+		public Builder withSpin(final double spin)
+		{
+			this.spin = spin;
+			return this;
+		}
+		
+		
+		/**
 		 * @return new instance
 		 */
 		public FilteredVisionBall build()
@@ -269,6 +290,7 @@ public class FilteredVisionBall
 			Validate.notNull(acc);
 			Validate.notNull(chipped);
 			Validate.isTrue(Double.isFinite(vSwitch));
+			Validate.isTrue(Double.isFinite(spin));
 			return new FilteredVisionBall(this);
 		}
 	}

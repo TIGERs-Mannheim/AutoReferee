@@ -91,6 +91,12 @@ public interface IVector extends IJsonString, INumberListable
 	
 	
 	/**
+	 * @return The L1 norm of the vector, i.e. the sum ob absolute values.
+	 */
+	double getL1Norm();
+	
+	
+	/**
 	 * @return Whether this is a Null-vector
 	 */
 	boolean isZeroVector();

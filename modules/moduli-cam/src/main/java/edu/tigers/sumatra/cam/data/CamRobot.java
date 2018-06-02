@@ -79,6 +79,22 @@ public class CamRobot extends ACamObject
 	}
 	
 	
+	/**
+	 * New CamRobot with adjusted tCapture timestamp.
+	 * 
+	 * @param orig
+	 * @param tCapture
+	 */
+	public CamRobot(final CamRobot orig, final long tCapture)
+	{
+		super(orig.getConfidence(), orig.getPixel(), tCapture, orig.getCameraId(), orig.getFrameId());
+		pos = orig.pos.copy();
+		orientation = orig.orientation;
+		height = orig.height;
+		botId = orig.botId;
+	}
+	
+	
 	@Override
 	public String toString()
 	{

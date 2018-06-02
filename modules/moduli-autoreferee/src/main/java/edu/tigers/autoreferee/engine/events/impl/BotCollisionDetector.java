@@ -63,12 +63,16 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "The lookahead [s] that is used to estimate the brake amount of each bot", defValue = "0.1")
 	private static double botBrakeLookahead = 0.1;
 	
-	@Configurable(comment = "Number of collision allowed, until a yellow card is issued", defValue = "3")
-	private static int numCollisionPerYellowCard = 3;
-
+	@Configurable(comment = "Number of collision until first yellow card", defValue = "3")
+	private static int numCollisionForFirstYellowCard = 3;
+	
+	@Configurable(comment = "Number of collision for all following yellow cards", defValue = "2")
+	private static int numCollisionPerYellowCard = 2;
+	
 	private final Map<BotID, Long> lastViolators = new HashMap<>();
-
+	
 	private final Map<ETeamColor, Integer> collisionCounter = new EnumMap<>(ETeamColor.class);
+	private final Map<ETeamColor, Integer> collisionCounterPunished = new EnumMap<>(ETeamColor.class);
 	
 	static
 	{
@@ -78,7 +82,7 @@ public class BotCollisionDetector extends AGameEventDetector
 	
 	public BotCollisionDetector()
 	{
-        super(EGameEventDetectorType.BOT_COLLISION, EGameState.RUNNING);
+		super(EGameEventDetectorType.BOT_COLLISION, EGameState.RUNNING);
 		collisionCounter.put(ETeamColor.YELLOW, 0);
 		collisionCounter.put(ETeamColor.BLUE, 0);
 	}
@@ -163,15 +167,17 @@ public class BotCollisionDetector extends AGameEventDetector
 				secondaryViolator = null;
 				collisionCounter.computeIfPresent(primaryBot.getTeamColor(), (k, v) -> v + 1);
 			}
-
+			
 			log.info("New bot collision counter: " + collisionCounter);
-
-			final List<CardPenalty> cardPenalties = collisionCounter.entrySet().stream()
-					.filter(e -> e.getValue() >= numCollisionPerYellowCard)
+			
+			final List<CardPenalty> cardPenalties = newCollisionCounter().entrySet().stream()
+					.filter(e -> e.getValue() >= numCollisionsAllowed(e.getKey()))
 					.map(e -> new CardPenalty(CARD_YELLOW, e.getKey()))
 					.collect(Collectors.toList());
-			collisionCounter.entrySet().forEach(e -> e.setValue(e.getValue() % numCollisionPerYellowCard));
-
+			
+			cardPenalties
+					.forEach(c -> collisionCounterPunished.put(c.getCardTeam(), collisionCounter.get(c.getCardTeam())));
+			
 			return Optional.of(new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
 					primaryBot, crashVel, velDiff, followUp, cardPenalties)
 							.setSecondResponsibleBot(secondaryViolator)
@@ -179,6 +185,28 @@ public class BotCollisionDetector extends AGameEventDetector
 							.setSpeedSecondaryBot(secondarySpeed));
 		}
 		return Optional.empty();
+	}
+	
+	
+	private Map<ETeamColor, Integer> newCollisionCounter()
+	{
+		Map<ETeamColor, Integer> newCollisionsCounter = new EnumMap<>(ETeamColor.class);
+		for (Map.Entry<ETeamColor, Integer> entry : collisionCounter.entrySet())
+		{
+			newCollisionsCounter.put(entry.getKey(),
+					entry.getValue() - collisionCounterPunished.getOrDefault(entry.getKey(), 0));
+		}
+		return newCollisionsCounter;
+	}
+	
+	
+	private int numCollisionsAllowed(final ETeamColor teamColor)
+	{
+		if (collisionCounter.get(teamColor) > numCollisionForFirstYellowCard)
+		{
+			return numCollisionPerYellowCard;
+		}
+		return numCollisionForFirstYellowCard;
 	}
 	
 	

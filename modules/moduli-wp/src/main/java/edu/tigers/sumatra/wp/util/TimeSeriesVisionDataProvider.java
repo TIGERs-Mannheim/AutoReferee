@@ -91,10 +91,10 @@ public class TimeSeriesVisionDataProvider implements ITimeSeriesDataProvider, IW
 	}
 	
 	
-	private void processCamFrame(ExtendedCamDetectionFrame frame)
+	private void processCamFrame(final ExtendedCamDetectionFrame frame)
 	{
 		dataBuffers.get("frameInfo").add(new ExportableFrameInfo(frame.getFrameNumber(), frame.getCameraId(),
-				frame.gettCapture(), frame.gettSent(), System.nanoTime()));
+				frame.gettCapture(), frame.gettSent(), System.nanoTime(), frame.getCamFrameNumber()));
 		dataBuffers.get("rawBall").add(frame.getBall());
 		dataBuffers.get("rawBalls").addAll(frame.getBalls());
 		dataBuffers.get("rawBots").addAll(frame.getRobots());

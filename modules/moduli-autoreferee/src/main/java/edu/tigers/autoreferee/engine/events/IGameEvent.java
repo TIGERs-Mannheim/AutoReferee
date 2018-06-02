@@ -26,12 +26,6 @@ public interface IGameEvent
 	/**
 	 * @return
 	 */
-	EEventCategory getCategory();
-	
-	
-	/**
-	 * @return
-	 */
 	long getTimestamp();
 	
 	

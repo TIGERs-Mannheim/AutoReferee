@@ -128,6 +128,7 @@ public class TrackedBall implements ITrackedBall
 		BallTrajectoryState state = aBallState()
 				.withPos(ball.getPos()).withVel(ball.getVel()).withAcc(ball.getAcc())
 				.withVSwitchToRoll(ball.getVSwitch()).withChipped(ball.isChipped())
+				.withSpin(ball.getSpin())
 				.build();
 		return new TrackedBall(timestamp, state, ball.getLastVisibleTimestamp());
 	}
@@ -234,7 +235,7 @@ public class TrackedBall implements ITrackedBall
 	@Override
 	public boolean isOnCam(final double horizon)
 	{
-		return lastVisibleTimestamp == 0 || ((getTimestamp() - lastVisibleTimestamp) * 1e-9) < horizon;
+		return (lastVisibleTimestamp == 0) || (((getTimestamp() - lastVisibleTimestamp) * 1e-9) < horizon);
 	}
 	
 	

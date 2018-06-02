@@ -25,6 +25,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
@@ -139,9 +140,29 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 			Optional<ITrackedBot> optOffender = bots.stream()
 					.filter(ColorFilter.get(attackerColor))
 					.filter(bot -> defenderPenArea.isPointInShape(bot.getPos(), requiredMargin))
+					.filter(this::notBeingPushed)
 					.findFirst();
 			
 			return optOffender.map(this::buildViolation);
+		}
+		
+		
+		private boolean notBeingPushed(ITrackedBot bot)
+		{
+			ETeamColor defenderColor = attackerColor.opposite();
+			return !bots.stream()
+					// bots from defending team
+					.filter(ColorFilter.get(defenderColor))
+					// that touch the attacker
+					.filter(b -> bot.getPos().distanceTo(b.getPos()) <= Geometry.getBotRadius() * 2)
+					// push in direction of penalty area
+					.map(b -> Lines.halfLineFromPoints(b.getPos(), bot.getPos()))
+					// find intersection that show that defenders pushs towards penArea
+					.map(defenderPenArea::lineIntersections)
+					.flatMap(List::stream)
+					.findAny()
+					// if any intersection is present, some defender pushes the attacker
+					.isPresent();
 		}
 		
 		

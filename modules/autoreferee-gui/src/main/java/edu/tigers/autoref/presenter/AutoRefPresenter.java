@@ -22,6 +22,7 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine.IAutoRefEngineObserver;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
+import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.autoreferee.module.AutoRefState;
@@ -48,7 +49,8 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 	public AutoRefPresenter()
 	{
 		mainPanel.getStartStopPanel().addObserver(new StartStopPanelObserver());
-		mainPanel.getEventPanel().addObserver(new GameEventsPanelObserver());
+		mainPanel.getGameEventDetectorPanel().addObserver(new GameEventDetectorsPanelObserver());
+		mainPanel.getGameEventPanel().addObserver(new GameEventsPanelObserver());
 		
 		IActiveEnginePanel enginePanel = mainPanel.getEnginePanel();
 		enginePanel.setPanelEnabled(false);
@@ -174,12 +176,26 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 		}
 	}
 	
-	private class GameEventsPanelObserver implements IEnumPanelObserver<EGameEventDetectorType>
+	private class GameEventDetectorsPanelObserver implements IEnumPanelObserver<EGameEventDetectorType>
 	{
 		@Override
 		public void onValueTicked(final EGameEventDetectorType type, final boolean value)
 		{
-			Set<EGameEventDetectorType> types = mainPanel.getEventPanel().getValues();
+			Set<EGameEventDetectorType> types = mainPanel.getGameEventDetectorPanel().getValues();
+			Optional<AutoRefModule> autoref = AutoRefUtil.getAutoRefModule();
+			if (autoref.isPresent() && (autoref.get().getState() == AutoRefState.RUNNING))
+			{
+				autoref.get().getEngine().setActiveGameEventDetectors(types);
+			}
+		}
+	}
+	
+	private class GameEventsPanelObserver implements IEnumPanelObserver<EGameEvent>
+	{
+		@Override
+		public void onValueTicked(final EGameEvent type, final boolean value)
+		{
+			Set<EGameEvent> types = mainPanel.getGameEventPanel().getValues();
 			Optional<AutoRefModule> autoref = AutoRefUtil.getAutoRefModule();
 			if (autoref.isPresent() && (autoref.get().getState() == AutoRefState.RUNNING))
 			{
@@ -212,7 +228,8 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 				{
 					AutoRefModule autoref = optAutoref.get();
 					autoref.start(mode);
-					autoref.getEngine().setActiveGameEvents(mainPanel.getEventPanel().getValues());
+					autoref.getEngine().setActiveGameEventDetectors(mainPanel.getGameEventDetectorPanel().getValues());
+					autoref.getEngine().setActiveGameEvents(mainPanel.getGameEventPanel().getValues());
 				} else
 				{
 					log.error("AutoRef module not found");

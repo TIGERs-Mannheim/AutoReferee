@@ -41,7 +41,6 @@ public class RobotTracker
 	private final List<Long> updateTimestamps = new ArrayList<>();
 	
 	private long lastUpdateTimestamp;
-	private long lastPredictTimestamp;
 	
 	private double visionQuality;
 	private double lastCamOrientation;
@@ -68,8 +67,6 @@ public class RobotTracker
 	private static double maxLinearVel = 6000.0;
 	@Configurable(defValue = "30.0", comment = "Maximum assumed angular robot speed in [rad/s] to filter outliers")
 	private static double maxAngularVel = 30.0;
-	@Configurable(defValue = "1000.0", comment = "Increase measurement error depending on frame time deviation from average.")
-	private static double measErrorDtDeviationPenalty = 1000.0;
 	@Configurable(defValue = "20", comment = "Reciprocal health is used as uncertainty, increased on update, decreased on prediction")
 	private static int maxHealth = 20;
 	
@@ -93,7 +90,6 @@ public class RobotTracker
 		
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.gettCapture();
-		lastPredictTimestamp = robot.gettCapture();
 		botId = robot.getBotId();
 		camId = robot.getCameraId();
 	}
@@ -118,7 +114,6 @@ public class RobotTracker
 		
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.gettCapture();
-		lastPredictTimestamp = robot.gettCapture();
 		botId = robot.getBotId();
 		camId = robot.getCameraId();
 	}
@@ -132,15 +127,8 @@ public class RobotTracker
 	 */
 	public void predict(final long timestamp, final double avgFrameDt)
 	{
-		double dtInSec = (timestamp - lastPredictTimestamp) * 1e-9;
-		
-		filterXY.setMeasurementError(measErrorXY + (Math.abs(avgFrameDt - dtInSec) * measErrorDtDeviationPenalty));
-		filterW.setMeasurementError(measErrorW + (Math.abs(avgFrameDt - dtInSec) * measErrorDtDeviationPenalty));
-		
 		filterXY.predict(timestamp);
 		filterW.predict(timestamp);
-		
-		lastPredictTimestamp = timestamp;
 		
 		if (health > 1)
 		{

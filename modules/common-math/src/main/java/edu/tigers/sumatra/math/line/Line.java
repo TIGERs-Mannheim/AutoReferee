@@ -33,10 +33,10 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 public class Line extends ALine
 {
 	/** ("Stuetzvektor") */
-	private final IVector2	supportVector;
+	private final IVector2 supportVector;
 	
 	/** ("Richtungsvektor" */
-	private final IVector2	directionVector;
+	private final IVector2 directionVector;
 	
 	
 	@SuppressWarnings("unused")
@@ -91,7 +91,7 @@ public class Line extends ALine
 	 * @param points
 	 * @return Optional Line.
 	 */
-	@SuppressWarnings("squid:S1166")
+	@SuppressWarnings("squid:S1166") // Exception from solver not logged
 	public static Optional<Line> fromPointsList(final List<IVector2> points)
 	{
 		int numPoints = points.size();

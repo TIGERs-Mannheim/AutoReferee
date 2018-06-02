@@ -17,68 +17,34 @@ import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
 /**
- * @author "Lukas Magel"
+ * The autoRef frame contains information that are required for further processing
  */
 public interface IAutoRefFrame
 {
-	
-	/**
-	 * @return
-	 */
 	IAutoRefFrame getPreviousFrame();
 	
 	
-	/**
-	 * @return
-	 */
 	SimpleWorldFrame getWorldFrame();
 	
 	
-	/**
-	 * @return
-	 */
 	GameState getGameState();
 	
 	
-	/**
-	 * @return
-	 */
-	BotPosition getLastBotCloseToBall();
+	List<BotPosition> getBotsLastTouchedBall();
 	
 	
-	/**
-	 * @return
-	 */
-	BotPosition getBotLastTouchedBall();
+	List<BotPosition> getBotsTouchingBall();
 	
 	
-	/**
-	 * @return
-	 */
-	Optional<BotPosition> getBotTouchedBall();
-	
-	
-	/**
-	 * @return
-	 */
 	Optional<TimedPosition> getBallLeftFieldPos();
 	
 	
-	/**
-	 * @return
-	 */
 	boolean isBallInsideField();
 	
 	
-	/**
-	 * @return
-	 */
 	IVector2 getLastStopBallPosition();
 	
 	
-	/**
-	 * @return
-	 */
 	RefereeMsg getRefereeMsg();
 	
 	
@@ -102,14 +68,8 @@ public interface IAutoRefFrame
 	void cleanUp();
 	
 	
-	/**
-	 * @return
-	 */
 	ShapeMap getShapes();
 	
 	
-	/**
-	 * @return
-	 */
 	Optional<PossibleGoal> getPossibleGoal();
 }

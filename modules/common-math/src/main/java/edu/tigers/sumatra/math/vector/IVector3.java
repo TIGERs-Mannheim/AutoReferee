@@ -78,6 +78,24 @@ public interface IVector3 extends IVector
 	
 	
 	/**
+	 * Dot product.
+	 * 
+	 * @param vector
+	 * @return
+	 */
+	double dotNew(IVector3 vector);
+	
+	
+	/**
+	 * Cross product.
+	 * 
+	 * @param vector
+	 * @return
+	 */
+	IVector3 crossNew(final IVector3 vector);
+	
+	
+	/**
 	 * Project 'this' to ground (z==0) using a ray from origin.
 	 * 
 	 * @param origin

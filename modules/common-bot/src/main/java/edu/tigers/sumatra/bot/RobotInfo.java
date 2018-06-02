@@ -23,7 +23,7 @@ import edu.tigers.sumatra.trajectory.ITrajectory;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent(version = 2)
+@Persistent(version = 3)
 public class RobotInfo implements IMirrorable<RobotInfo>
 {
 	private final BotID botId;
@@ -34,6 +34,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final Map<EFeature, EFeatureState> botFeatures;
 	private final float kickSpeed;
 	private final boolean chip;
+	private final boolean armed;
 	private final float battery;
 	private final float kickerVoltage;
 	private final float dribbleRpm;
@@ -61,6 +62,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		botFeatures = builder.botFeatures;
 		kickSpeed = builder.kickSpeed;
 		chip = builder.chip;
+		armed = builder.armed;
 		battery = builder.battery;
 		kickerVoltage = builder.kickerVoltage;
 		dribbleRpm = builder.dribbleRpm;
@@ -112,6 +114,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withBotFeatures(new HashMap<>())
 				.withKickSpeed(0)
 				.withChip(false)
+				.withArmed(false)
 				.withBattery(0)
 				.withKickerVoltage(0)
 				.withDribbleRpm(0)
@@ -138,6 +141,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.botFeatures = copy.botFeatures;
 		builder.kickSpeed = copy.kickSpeed;
 		builder.chip = copy.chip;
+		builder.armed = copy.armed;
 		builder.battery = copy.battery;
 		builder.kickerVoltage = copy.kickerVoltage;
 		builder.dribbleRpm = copy.dribbleRpm;
@@ -235,6 +239,12 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 	
 	
+	public boolean isArmed()
+	{
+		return armed;
+	}
+	
+	
 	public float getBattery()
 	{
 		return battery;
@@ -289,6 +299,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private Map<EFeature, EFeatureState> botFeatures;
 		private Float kickSpeed;
 		private Boolean chip;
+		private Boolean armed;
 		private Float battery;
 		private Float kickerVoltage;
 		private Float dribbleRpm;
@@ -439,6 +450,19 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		
 		
 		/**
+		 * Sets the {@code arm} and returns a reference to this Builder so that the methods can be chained together.
+		 *
+		 * @param val the {@code arm} to set
+		 * @return a reference to this Builder
+		 */
+		public Builder withArmed(final boolean val)
+		{
+			armed = val;
+			return this;
+		}
+		
+		
+		/**
 		 * Sets the {@code battery} and returns a reference to this Builder so that the methods can be chained together.
 		 *
 		 * @param val the {@code battery} to set
@@ -536,6 +560,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			Validate.notNull(botFeatures);
 			Validate.notNull(kickSpeed);
 			Validate.notNull(chip);
+			Validate.notNull(armed);
 			Validate.notNull(battery);
 			Validate.notNull(kickerVoltage);
 			Validate.notNull(dribbleRpm);

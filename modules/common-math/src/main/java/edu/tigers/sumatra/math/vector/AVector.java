@@ -33,13 +33,15 @@ import edu.tigers.sumatra.math.SumatraMath;
 public abstract class AVector implements IVector
 {
 	private static final DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
-
-	static {
+	
+	static
+	{
 		decimalFormatSymbols.setDecimalSeparator('.');
 		decimalFormatSymbols.setGroupingSeparator(',');
 	}
-
+	
 	private static final DecimalFormat df = new DecimalFormat("0.000", decimalFormatSymbols);
+	
 	
 	@Override
 	public final boolean equals(final Object o)
@@ -184,6 +186,18 @@ public abstract class AVector implements IVector
 			sum += get(d) * get(d);
 		}
 		return SumatraMath.sqrt(sum);
+	}
+	
+	
+	@Override
+	public double getL1Norm()
+	{
+		double sum = 0;
+		for (int d = 0; d < getNumDimensions(); d++)
+		{
+			sum += Math.abs(get(d));
+		}
+		return sum;
 	}
 	
 	

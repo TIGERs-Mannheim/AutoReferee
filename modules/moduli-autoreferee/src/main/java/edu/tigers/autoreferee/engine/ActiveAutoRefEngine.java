@@ -155,8 +155,11 @@ public class ActiveAutoRefEngine extends AbstractAutoRefEngine
 		if (!gameEvents.isEmpty())
 		{
 			IGameEvent gameEvent = gameEvents.remove(0);
-			boolean accepted = state.handleGameEvent(gameEvent, ctx);
-			
+			boolean accepted = false;
+			if (activeGameEvents.contains(gameEvent.getType()))
+			{
+				accepted = state.handleGameEvent(gameEvent, ctx);
+			}
 			gameLog.addEntry(gameEvent, accepted);
 			logGameEvents(gameEvents);
 		}

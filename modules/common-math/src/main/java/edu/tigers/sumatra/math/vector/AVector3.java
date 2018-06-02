@@ -109,6 +109,24 @@ public abstract class AVector3 extends AVector implements IVector3
 	
 	
 	@Override
+	public double dotNew(final IVector3 vector)
+	{
+		return (x() * vector.x()) + (y() * vector.y()) + (z() * vector.z());
+	}
+	
+	
+	@Override
+	public IVector3 crossNew(final IVector3 vector)
+	{
+		double x = (y() * vector.z()) - (z() * vector.y());
+		double y = (z() * vector.x()) - (x() * vector.z());
+		double z = (x() * vector.y()) - (y() * vector.x());
+		
+		return Vector3.fromXYZ(x, y, z);
+	}
+	
+	
+	@Override
 	public Vector2 getXYVector()
 	{
 		return Vector2.fromXY(x(), y());

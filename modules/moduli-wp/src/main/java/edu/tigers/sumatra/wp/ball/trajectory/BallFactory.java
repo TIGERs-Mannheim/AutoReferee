@@ -36,10 +36,10 @@ public final class BallFactory
 {
 	@Configurable(comment = "Type of model that will be created for flat balls", spezis = { "",
 			"SUMATRA" }, defValueSpezis = { "TWO_PHASE_DYNAMIC_VEL", "TWO_PHASE_DYNAMIC_VEL", })
-	private static EFlatBallModel	ballModelTypeFlat	= EFlatBallModel.TWO_PHASE_DYNAMIC_VEL;
+	private static EFlatBallModel ballModelTypeFlat = EFlatBallModel.TWO_PHASE_DYNAMIC_VEL;
 	
 	@Configurable(comment = "Type of model that will be created for chipped balls", defValue = "FIXED_LOSS_PLUS_ROLLING")
-	private static EChipBallModel	ballModelTypeChip	= EChipBallModel.FIXED_LOSS_PLUS_ROLLING;
+	private static EChipBallModel ballModelTypeChip = EChipBallModel.FIXED_LOSS_PLUS_ROLLING;
 	
 	static
 	{
@@ -80,6 +80,7 @@ public final class BallFactory
 					trajectory = FixedLossPlusRollingBallTrajectory.fromState(
 							state.getPos().getXYZVector(),
 							state.getVel().getXYZVector(),
+							state.getSpin(),
 							new FixedLossPlusRollingParameters());
 					break;
 				default:
@@ -136,6 +137,7 @@ public final class BallFactory
 		return createTrajectoryFromKick(kickPos, Vector3.from2d(xyVector, partVelz), chip);
 	}
 	
+	
 	/**
 	 * Create a ball trajectory based on a kick
 	 * 
@@ -155,7 +157,7 @@ public final class BallFactory
 			{
 				case FIXED_LOSS_PLUS_ROLLING:
 					trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos, kickVel.getXYZVector(),
-							new FixedLossPlusRollingParameters());
+							0, new FixedLossPlusRollingParameters());
 					break;
 				default:
 					throw new UnsupportedOperationException();

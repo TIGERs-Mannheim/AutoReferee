@@ -6,6 +6,8 @@ package edu.tigers.sumatra.vision.data;
 
 import org.apache.commons.lang.Validate;
 
+import com.sleepycat.persist.model.Persistent;
+
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.ids.BotID;
@@ -21,6 +23,7 @@ import edu.tigers.sumatra.math.vector.Vector3;
  * 
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
+@Persistent
 public class FilteredVisionBot
 {
 	private final BotID botID;
@@ -29,6 +32,18 @@ public class FilteredVisionBot
 	private final double orientation;
 	private final double angularVel;
 	private final double quality;
+	
+	
+	// for Berkeley database
+	private FilteredVisionBot()
+	{
+		botID = BotID.noBot();
+		pos = Vector2f.ZERO_VECTOR;
+		vel = Vector2f.ZERO_VECTOR;
+		orientation = 0;
+		angularVel = 0;
+		quality = 0;
+	}
 	
 	
 	private FilteredVisionBot(final BotID botID, final IVector2 pos, final IVector2 vel,

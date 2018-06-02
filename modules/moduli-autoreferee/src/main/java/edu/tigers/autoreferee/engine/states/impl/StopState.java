@@ -4,6 +4,9 @@
 
 package edu.tigers.autoreferee.engine.states.impl;
 
+import static edu.tigers.autoreferee.engine.AutoRefMath.DEFENSE_AREA_GOAL_LINE_DISTANCE;
+import static edu.tigers.autoreferee.engine.AutoRefMath.THROW_IN_DISTANCE;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,8 @@ import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -238,6 +243,9 @@ public class StopState extends AbstractAutoRefState
 		
 		shapes.add(new DrawableCircle(kickPos, radius, PLACEMENT_CIRCLE_COLOR));
 		shapes.add(new DrawableCircle(kickPos, RuleConstraints.getStopRadius(), PLACEMENT_CIRCLE_COLOR));
+		shapes.add(new DrawableCircle(kickPos,
+				RuleConstraints.getStopRadius() + RuleConstraints.getBotToPenaltyAreaMarginStandard(),
+				PLACEMENT_CIRCLE_COLOR));
 		shapes.add(new DrawablePoint(kickPos, Color.BLACK));
 		
 		IVector2 textPos = kickPos;
@@ -320,12 +328,43 @@ public class StopState extends AbstractAutoRefState
 	{
 		IVector2 kickPos = action.getNewBallPosition()
 				.orElseThrow(() -> new IllegalArgumentException("Ball position not present"));
-		double penAreaMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard()
-				+ RuleConstraints.getStopRadius();
-		kickPos = NGeometry.getPenaltyArea(ETeamColor.YELLOW).withMargin(penAreaMargin)
-				.nearestPointOutside(kickPos);
-		kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(penAreaMargin).nearestPointOutside(kickPos);
-		return NGeometry.getField().withMargin(-AutoRefMath.THROW_IN_DISTANCE).nearestPointInside(kickPos);
+		if (action.getActionType() == FollowUpAction.EActionType.PENALTY)
+		{
+			return kickPos;
+		}
+		
+		final double margin = RuleConstraints.getBotToPenaltyAreaMarginStandard()
+				+ RuleConstraints.getStopRadius()
+				+ Geometry.getBallRadius();
+		
+		if (action.getActionType() == FollowUpAction.EActionType.INDIRECT_FREE
+				|| action.getActionType() == FollowUpAction.EActionType.DIRECT_FREE)
+		{
+			IPenaltyArea attackingTeamsPenArea = NGeometry.getPenaltyArea(action.getTeamInFavor());
+			if (attackingTeamsPenArea.withMargin(200).isPointInShapeOrBehind(kickPos))
+			{
+				// from rules: If the free kick is awarded to a team inside or within 200 mm of its own defence area, the
+				// free kick
+				// is taken from a point 600 mm from the goal line and 100 mm from the touch line closest to where
+				// the infringement occurred.
+				double xSign = Math.signum(attackingTeamsPenArea.getGoalCenter().x());
+				double ySign = kickPos.y() > 0 ? 1 : -1;
+				return Vector2.fromXY(xSign * (Geometry.getFieldLength() / 2 - DEFENSE_AREA_GOAL_LINE_DISTANCE),
+						ySign * (Geometry.getFieldWidth() / 2 - THROW_IN_DISTANCE));
+			}
+			
+			IPenaltyArea opposingTeamsPenArea = NGeometry.getPenaltyArea(action.getTeamInFavor().opposite());
+			// from rules: If the free kick is awarded to the attacking team within 700 mm of the opposing defence area,
+			// the
+			// ball is moved to the closest point 700 mm from the defence area.
+			kickPos = opposingTeamsPenArea.withMargin(margin).nearestPointOutside(kickPos);
+		} else if (action.getActionType() == FollowUpAction.EActionType.FORCE_START)
+		{
+			kickPos = NGeometry.getPenaltyArea(ETeamColor.YELLOW).withMargin(margin).nearestPointOutside(kickPos);
+			kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(margin).nearestPointOutside(kickPos);
+		}
+		
+		return NGeometry.getField().withMargin(-THROW_IN_DISTANCE).nearestPointInside(kickPos);
 	}
 	
 	

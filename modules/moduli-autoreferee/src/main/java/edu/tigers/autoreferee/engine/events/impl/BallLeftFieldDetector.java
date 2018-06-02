@@ -3,7 +3,11 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+
+import org.apache.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -34,6 +38,7 @@ import edu.tigers.sumatra.referee.data.EGameState;
 public class BallLeftFieldDetector extends AGameEventDetector
 {
 	private static final int PRIORITY = 1;
+	private static final Logger log = Logger.getLogger(BallLeftFieldDetector.class);
 	
 	@Configurable(comment = "[mm] The goal line threshold", defValue = "10.0")
 	private static double goalLineThreshold = 10;
@@ -50,6 +55,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	}
 	
 	private TimedPosition lastBallLeftFieldPos = null;
+	private Random rnd = new Random();
 	
 	
 	/**
@@ -71,12 +77,18 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
+		if (rnd == null)
+		{
+			// get a deterministic random generator in simulation
+			rnd = new Random(frame.getTimestamp());
+		}
+		
 		if (frame.getBallLeftFieldPos().isPresent()
 				&& !frame.getBallLeftFieldPos().get().similarTo(lastBallLeftFieldPos))
 		{
 			lastBallLeftFieldPos = frame.getBallLeftFieldPos().get();
 			
-			BotPosition lastTouched = frame.getBotLastTouchedBall();
+			BotPosition lastTouched = botThatLastTouchedBall(frame);
 			long ts = frame.getTimestamp();
 			boolean exitGoallineInX = ((Geometry.getFieldLength() / 2)
 					- Math.abs(lastBallLeftFieldPos.getPos().x())) < goalLineThreshold;
@@ -97,6 +109,24 @@ public class BallLeftFieldDetector extends AGameEventDetector
 			return handleSideLineOff(lastBallLeftFieldPos.getPos(), lastTouched, ts);
 		}
 		return Optional.empty();
+	}
+	
+	
+	private BotPosition botThatLastTouchedBall(IAutoRefFrame frame)
+	{
+		final List<BotPosition> botLastTouchedBall = frame.getBotsLastTouchedBall();
+		if (botLastTouchedBall.isEmpty())
+		{
+			log.info("No last touched bot detected, choosing random one");
+			ETeamColor teamColor = rnd.nextInt(2) == 0 ? ETeamColor.YELLOW : ETeamColor.BLUE;
+			BotID id = BotID.createBotId(-1, teamColor);
+			return new BotPosition(frame.getTimestamp(), frame.getWorldFrame().getBall().getPos(), id);
+		} else if (botLastTouchedBall.size() == 1)
+		{
+			return botLastTouchedBall.get(0);
+		}
+		int randomId = rnd.nextInt(botLastTouchedBall.size());
+		return botLastTouchedBall.get(randomId);
 	}
 	
 	
@@ -183,5 +213,6 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	public void reset()
 	{
 		lastBallLeftFieldPos = null;
+		rnd = null;
 	}
 }

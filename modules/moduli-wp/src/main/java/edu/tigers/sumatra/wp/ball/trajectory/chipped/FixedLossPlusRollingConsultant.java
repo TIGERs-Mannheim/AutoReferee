@@ -49,7 +49,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	
 	@Override
 	public double botVelocityToChipFartherThanMaximumDistance(final double distance, final int numTouchdowns,
-			double absMaxVel)
+			final double absMaxVel)
 	{
 		double partVelz = SumatraMath.cos(chipAngle) * absMaxVel * 1000;
 		double partVelxy = SumatraMath.sin(chipAngle) * absMaxVel * 1000;
@@ -67,7 +67,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 		}
 		
 		double initialVel = getInitVelForDistAtTouchdown(distance, numTouchdowns);
-		return Math.abs(SumatraMath.sin(chipAngle) * initialVel - partVelxy / 1000);
+		return Math.abs((SumatraMath.sin(chipAngle) * initialVel) - (partVelxy / 1000));
 	}
 	
 	
@@ -93,7 +93,16 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 		double f = 0.0;
 		for (int i = 0; i <= numTouchdown; i++)
 		{
-			f += Math.pow(params.getChipDampingXY(), i) * Math.pow(params.getChipDampingZ(), i);
+			final double dampXY;
+			if (i == 0)
+			{
+				dampXY = 1.0;
+			} else
+			{
+				dampXY = params.getChipDampingXYFirstHop() * Math.pow(params.getChipDampingXYOtherHops(), i - 1.0);
+			}
+			
+			f += dampXY * Math.pow(params.getChipDampingZ(), i);
 		}
 		
 		double denom = f * SumatraMath.cos(chipAngle) * SumatraMath.sin(chipAngle);

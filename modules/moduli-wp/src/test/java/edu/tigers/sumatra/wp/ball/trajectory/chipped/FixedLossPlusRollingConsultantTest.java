@@ -20,14 +20,14 @@ import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingBallTra
  */
 public class FixedLossPlusRollingConsultantTest
 {
-	private FixedLossPlusRollingParameters	params;
-	private FixedLossPlusRollingConsultant	consultant;
+	private FixedLossPlusRollingParameters params;
+	private FixedLossPlusRollingConsultant consultant;
 	
 	
 	@Before
 	public void setup()
 	{
-		params = new FixedLossPlusRollingParameters(0.75, 0.6, -400.0, 10, 150);
+		params = new FixedLossPlusRollingParameters(0.75, 0.95, 0.6, -400.0, 10, 150);
 		consultant = new FixedLossPlusRollingConsultant(params);
 	}
 	
@@ -43,7 +43,7 @@ public class FixedLossPlusRollingConsultantTest
 				IVector2 kickVector = consultant.absoluteKickVelToVector(kickVel);
 				
 				FixedLossPlusRollingBallTrajectory traj = new FixedLossPlusRollingBallTrajectory(Vector3f.ZERO_VECTOR,
-						Vector3.fromXYZ(kickVector.x(), 0, kickVector.y()), 0, params);
+						Vector3.fromXYZ(kickVector.x(), 0, kickVector.y()), 0, 0, params);
 				
 				if (traj.getTouchdownLocations().size() > numTouchdown)
 				{

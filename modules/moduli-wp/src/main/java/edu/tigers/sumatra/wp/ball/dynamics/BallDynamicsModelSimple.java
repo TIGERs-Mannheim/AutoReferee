@@ -22,9 +22,9 @@ import edu.tigers.sumatra.wp.data.MotionContext;
  */
 public class BallDynamicsModelSimple implements IBallDynamicsModel
 {
-	private static final double	G			= 9810;
-	private static final double	A_FALL	= -G;
-	private static final double	V_SWITCH	= 2000;
+	private static final double G = 9810;
+	private static final double A_FALL = -G;
+	private static final double V_SWITCH = 2000;
 	
 	
 	/**
@@ -62,8 +62,8 @@ public class BallDynamicsModelSimple implements IBallDynamicsModel
 		{
 			if (vz < 0)
 			{
-				vx *= Geometry.getBallParameters().getChipDampingXY();
-				vy *= Geometry.getBallParameters().getChipDampingXY();
+				vx *= Geometry.getBallParameters().getChipDampingXYFirstHop();
+				vy *= Geometry.getBallParameters().getChipDampingXYFirstHop();
 			}
 			vz *= -Geometry.getBallParameters().getChipDampingZ();
 			double maxHeight = (vz * vz) / (2 * G);

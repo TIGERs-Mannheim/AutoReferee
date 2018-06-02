@@ -16,10 +16,10 @@ import edu.tigers.sumatra.math.vector.Vector3f;
  */
 public class StraightBallTrajectory extends ABallTrajectory
 {
-	private final long				timeSwitch;
-	private final IVector3			posSwitch;
-	private final IVector3			velSwitch;
-	private final BallParameters	ballParams;
+	private final long timeSwitch;
+	private final IVector3 posSwitch;
+	private final IVector3 velSwitch;
+	private final BallParameters ballParams;
 	
 	
 	/**
@@ -112,6 +112,7 @@ public class StraightBallTrajectory extends ABallTrajectory
 					.withAcc(Vector3f.ZERO_VECTOR)
 					.withIsChipped(false)
 					.withvSwitch(vSwitch)
+					.withSpin(1.0)
 					.build();
 		}
 		
@@ -128,6 +129,7 @@ public class StraightBallTrajectory extends ABallTrajectory
 					.withAcc(accNow)
 					.withIsChipped(false)
 					.withvSwitch(vSwitch)
+					.withSpin(1.0)
 					.build();
 		}
 		
@@ -143,6 +145,7 @@ public class StraightBallTrajectory extends ABallTrajectory
 				.withAcc(acc)
 				.withIsChipped(false)
 				.withvSwitch(vSwitch)
+				.withSpin(1.0)
 				.build();
 	}
 	

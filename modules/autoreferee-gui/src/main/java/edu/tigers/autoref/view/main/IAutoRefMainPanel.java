@@ -3,6 +3,7 @@
  */
 package edu.tigers.autoref.view.main;
 
+import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.sumatra.components.IEnumPanel;
 
@@ -27,5 +28,8 @@ public interface IAutoRefMainPanel
 	/**
 	 * @return
 	 */
-	IEnumPanel<EGameEventDetectorType> getEventPanel();
+	IEnumPanel<EGameEventDetectorType> getGameEventDetectorPanel();
+	
+	
+	IEnumPanel<EGameEvent> getGameEventPanel();
 }

@@ -21,6 +21,7 @@ public class ExportableFrameInfo implements IExportable
 	private long tCapture;
 	private long tSent;
 	private long tRecorded;
+	private long camFrameId;
 	
 	
 	/**
@@ -37,9 +38,10 @@ public class ExportableFrameInfo implements IExportable
 	 * @param tCapture
 	 * @param tSent
 	 * @param tRecorded
+	 * @param camFrameId
 	 */
 	public ExportableFrameInfo(final long frameId, final int camId, final long tCapture, final long tSent,
-			final long tRecorded)
+			final long tRecorded, final long camFrameId)
 	{
 		super();
 		this.frameId = frameId;
@@ -47,6 +49,7 @@ public class ExportableFrameInfo implements IExportable
 		this.tCapture = tCapture;
 		this.tSent = tSent;
 		this.tRecorded = tRecorded;
+		this.camFrameId = camFrameId;
 	}
 	
 	
@@ -60,7 +63,8 @@ public class ExportableFrameInfo implements IExportable
 				list.get(1).intValue(),
 				list.get(2).longValue(),
 				list.get(3).longValue(),
-				list.get(4).longValue());
+				list.get(4).longValue(),
+				list.get(5).longValue());
 	}
 	
 	
@@ -73,6 +77,7 @@ public class ExportableFrameInfo implements IExportable
 		numbers.add(tCapture);
 		numbers.add(tSent);
 		numbers.add(tRecorded);
+		numbers.add(camFrameId);
 		return numbers;
 	}
 	
@@ -80,7 +85,7 @@ public class ExportableFrameInfo implements IExportable
 	@Override
 	public List<String> getHeaders()
 	{
-		return Arrays.asList("frameId", "camId", "tCapture", "tSent", "tRecorded");
+		return Arrays.asList("frameId", "camId", "tCapture", "tSent", "tRecorded", "camFrameId");
 	}
 	
 	
@@ -171,5 +176,23 @@ public class ExportableFrameInfo implements IExportable
 	public void settRecorded(final long tRecorded)
 	{
 		this.tRecorded = tRecorded;
+	}
+	
+	
+	/**
+	 * @return the camFrameId
+	 */
+	public long getCamFrameId()
+	{
+		return camFrameId;
+	}
+	
+	
+	/**
+	 * @param camFrameId the camFrameId to set
+	 */
+	public void setCamFrameId(final long camFrameId)
+	{
+		this.camFrameId = camFrameId;
 	}
 }

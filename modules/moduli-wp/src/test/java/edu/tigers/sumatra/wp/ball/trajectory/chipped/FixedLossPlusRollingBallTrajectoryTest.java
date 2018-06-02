@@ -26,19 +26,19 @@ import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingBallTra
  */
 public class FixedLossPlusRollingBallTrajectoryTest
 {
-	private static IVector3						kickPos	= Vector3.fromXYZ(0, 0, 0);
-	private static IVector3						kickVel	= Vector3.fromXYZ(3000, 0, 3000);
+	private static IVector3 kickPos = Vector3.fromXYZ(0, 0, 0);
+	private static IVector3 kickVel = Vector3.fromXYZ(3000, 0, 3000);
 	
-	private FixedLossPlusRollingParameters	params;
-	private IBallTrajectory						trajectory;
+	private FixedLossPlusRollingParameters params;
+	private IBallTrajectory trajectory;
 	
 	
 	@Before
 	public void setup()
 	{
-		params = new FixedLossPlusRollingParameters(0.75, 0.6, -400.0, 10, 150);
+		params = new FixedLossPlusRollingParameters(0.75, 0.95, 0.6, -400.0, 10, 150);
 		
-		trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos.getXYVector(), kickVel, params);
+		trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos.getXYVector(), kickVel, 0, params);
 	}
 	
 	
@@ -121,7 +121,8 @@ public class FixedLossPlusRollingBallTrajectoryTest
 		{
 			IVector3 posNow = traj.getPosByTime(tStep).getXYZVector();
 			IVector3 velNow = traj.getVelByTime(tStep).multiplyNew(1000.0).getXYZVector();
-			traj = FixedLossPlusRollingBallTrajectory.fromState(posNow, velNow, params);
+			double spin = traj.getSpinByTime(tStep);
+			traj = FixedLossPlusRollingBallTrajectory.fromState(posNow, velNow, spin, params);
 			
 			IVector finalPosNew = traj.getPosByVel(0);
 			

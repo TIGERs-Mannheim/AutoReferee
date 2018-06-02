@@ -47,6 +47,15 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	
 	
 	/**
+	 * Get ball spin for a given time.
+	 * 
+	 * @param time in [s]
+	 * @return ball spin, forward/topspin is positive, backspin is negative
+	 */
+	double getSpinByTime(double time);
+	
+	
+	/**
 	 * Get the position for a given target velocity.<br>
 	 * If <code>targetVelocity</code> is larger than the current velocity, the current position will be returned.
 	 *

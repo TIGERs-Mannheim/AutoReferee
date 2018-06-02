@@ -59,11 +59,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.g3force</groupId>
             <artifactId>configurable</artifactId>
         </dependency>

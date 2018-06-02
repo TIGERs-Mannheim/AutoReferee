@@ -106,6 +106,13 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	
 	
 	@Override
+	public double getSpinByTime(final double time)
+	{
+		return getMilliStateAtTime(tKickToNow + time).getSpin();
+	}
+	
+	
+	@Override
 	public IVector getPosByVel(final double targetVelocity)
 	{
 		if (getAbsVelByTime(0) < targetVelocity)

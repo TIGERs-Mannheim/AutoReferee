@@ -78,6 +78,7 @@ public class BallDynamicsModelDynamicVelFixedLoss
 				.withAcc(acc)
 				.withChipped(chipped)
 				.withVSwitchToRoll(vSwitch)
+				.withSpin(state.getSpin())
 				.build();
 		
 		ABallTrajectory traj = BallFactory.createTrajectory(bs);

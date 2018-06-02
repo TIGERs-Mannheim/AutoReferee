@@ -100,9 +100,6 @@ public class GameEvent implements IGameEvent
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	@Override
 	public EGameEvent getType()
 	{
@@ -111,25 +108,12 @@ public class GameEvent implements IGameEvent
 	
 	
 	@Override
-	public EEventCategory getCategory()
-	{
-		return eventType.getCategory();
-	}
-	
-	
-	/**
-	 * @return timestamp in ns
-	 */
-	@Override
 	public long getTimestamp()
 	{
 		return timestamp;
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	@Override
 	public ETeamColor getResponsibleTeam()
 	{

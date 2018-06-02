@@ -44,21 +44,21 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 public class KickDetector implements IKickDetector
 {
 	@SuppressWarnings("unused")
-	private static final Logger		log							= Logger
+	private static final Logger log = Logger
 			.getLogger(KickDetector.class.getName());
 	
-	private LinkedList<FrameRecord>	frameHistory				= new LinkedList<>();
+	private LinkedList<FrameRecord> frameHistory = new LinkedList<>();
 	
-	private static int					frameHistorySize			= 5;
+	private static int frameHistorySize = 5;
 	
-	private long							lastKickTimestamp;
+	private long lastKickTimestamp;
 	
-	private List<IKickValidator>		kickValidators				= new ArrayList<>();
-	private String							lastKVText					= "";
+	private List<IKickValidator> kickValidators = new ArrayList<>();
+	private String lastKVText = "";
 	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
 	
 	@Configurable(defValue = "0.1", comment = "Minimum time between two kicks [s]")
-	private static double				minDeltaTime				= 0.1;
+	private static double minDeltaTime = 0.1;
 	
 	static
 	{
@@ -172,14 +172,14 @@ public class KickDetector implements IKickDetector
 			FilteredVisionBot bot = kickedBot.get(0);
 			log.debug("Kick detected, Bot: " + bot.getBotID());
 			
-			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot.getBotID(), balls.get(0).getTimestamp(), balls, false);
+			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot, balls.get(0).getTimestamp(), balls, false);
 			lastKickTimestamp = balls.get(0).getTimestamp();
 			
 			Optional<Pair<Long, IVector2>> backtrack = DirectionValidator.backtrack(kickedBot, balls);
 			if (backtrack.isPresent())
 			{
 				log.debug("Backtrack possible");
-				kick = new KickEvent(backtrack.get().getSecond(), bot.getBotID(), backtrack.get().getFirst(), balls, false);
+				kick = new KickEvent(backtrack.get().getSecond(), bot, backtrack.get().getFirst(), balls, false);
 				lastKickTimestamp = backtrack.get().getFirst();
 			}
 			

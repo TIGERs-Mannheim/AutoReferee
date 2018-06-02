@@ -75,6 +75,21 @@ public class CamBall extends ACamObject
 	}
 	
 	
+	/**
+	 * New CamBall with adjusted tCapture.
+	 * 
+	 * @param newCamBall
+	 * @param tCapture
+	 */
+	public CamBall(final CamBall newCamBall, final long tCapture)
+	{
+		super(newCamBall.getConfidence(), newCamBall.getPixel(), tCapture, newCamBall.getCameraId(),
+				newCamBall.getFrameId());
+		area = newCamBall.getArea();
+		pos = Vector3.copy(newCamBall.getPos());
+	}
+	
+	
 	@Override
 	public String toString()
 	{

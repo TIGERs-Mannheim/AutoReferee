@@ -153,9 +153,6 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 	
 	private void processDetectionFrame(final CamDetectionFrame camDetectionFrame)
 	{
-		// use newest timestamp to prevent negative delta time in filtered frames
-		long timestamp = Math.max(lastFilteredFrame.getTimestamp(), camDetectionFrame.gettCapture());
-		
 		int camId = camDetectionFrame.getCameraId();
 		
 		// let viewport architect adjust
@@ -174,7 +171,10 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 		cams.get(camId).setBallInfo(lastBallFilterOutput);
 		
 		// update camera filter with new detection frame
-		cams.get(camId).update(camDetectionFrame, lastFilteredFrame);
+		long timestamp = cams.get(camId).update(camDetectionFrame, lastFilteredFrame);
+		
+		// use newest timestamp to prevent negative delta time in filtered frames
+		timestamp = Math.max(lastFilteredFrame.getTimestamp(), timestamp);
 		
 		// merge all camera filters (robots on multiple cams)
 		List<FilteredVisionBot> mergedRobots = mergeRobots(cams.values(), timestamp);
@@ -240,11 +240,10 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 	{
 		List<BallTracker> allTrackers = camFilters.stream()
 				.flatMap(f -> f.getBalls().stream())
-				.filter(BallTracker::isGrownUp)
 				.collect(Collectors.toList());
 		
 		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(lastFilteredFrame.getBall(), allTrackers,
-				mergedRobots, timestamp);
+				mergedRobots, getRobotInfoMap(), timestamp);
 		
 		lastKickEvent = preOutput.getKickEvent().orElse(null);
 		
