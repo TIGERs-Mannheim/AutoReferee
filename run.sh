@@ -7,6 +7,10 @@ if ! type mvn &> /dev/null; then
 	exit 1
 fi
 
+if [ ! -d "repository" ]; then
+    ./build.sh
+fi
+
 mode="`echo $1 | tr '[:lower:]' '[:upper:]'`"
 if [ "$mode" != "ACTIVE" ] && [ "$mode" != "PASSIVE" ]; then
     echo "Please specify a valid mode to start with: active | passive"
@@ -14,7 +18,7 @@ if [ "$mode" != "ACTIVE" ] && [ "$mode" != "PASSIVE" ]; then
 fi
 
 # the productive=true flag controls some behavior for real games like automatic recording
-# recording has a significant memory impact (both heap size and disk space).
+# recording has a significant memory impact (both heap size and disk space). You should increase Xmx below to 4G.
 autoRecording="-Dproductive=false"
 
 # if the font size is too small (e.g. on high resolution screens), you can add following arguments to the command below:
@@ -24,12 +28,12 @@ autoRecording="-Dproductive=false"
 mvn -pl modules/autoreferee-main exec:exec -Dmaven.repo.local=repository \
     --no-snapshot-updates \
     -Dexec.args="-Dautoref.mode=$mode $autoRecording \
-    -Xms128m -Xmx1G -server -Xnoclassgc -Xverify:none -Dsun.java2d.d3d=false -XX:+UseG1GC -Djava.net.preferIPv4Stack=true -XX:-OmitStackTraceInFastThrow \
+    -Xms128m -Xmx1G -server -Xnoclassgc -Xverify:none -Dsun.java2d.d3d=false -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true -XX:-OmitStackTraceInFastThrow -XX:+AggressiveOpts \
     -classpath %classpath \
     edu.tigers.autoref.AutoReferee"
 
 if [ "$?" != "0" ]; then
 	echo
 	echo
-	echo "Launching the program failed. Did you build the application using 'mvn install'???'"
+	echo "Launching the program failed. Did you build the application using './build.sh'?'"
 fi
