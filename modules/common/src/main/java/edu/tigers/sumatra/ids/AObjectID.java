@@ -76,6 +76,12 @@ public abstract class AObjectID implements Comparable<AObjectID>
 	}
 	
 	
+	public String getSaveableString()
+	{
+		return String.valueOf(getNumber());
+	}
+	
+	
 	/**
 	 * @return the number
 	 */

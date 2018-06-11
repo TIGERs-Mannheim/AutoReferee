@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.trajectory;
@@ -140,6 +140,9 @@ public final class BallFactory
 	
 	/**
 	 * Create a ball trajectory based on a kick
+	 * <br>
+	 * Consider using {@link #createTrajectoryFromChipKick(IVector2, IVector)} or
+	 * {@link #createTrajectoryFromStraightKick(IVector2, IVector)}
 	 * 
 	 * @param kickPos [mm]
 	 * @param kickVel [mm/s]
@@ -149,36 +152,60 @@ public final class BallFactory
 	public static ABallTrajectory createTrajectoryFromKick(final IVector2 kickPos, final IVector kickVel,
 			final boolean chip)
 	{
-		final ABallTrajectory trajectory;
-		
 		if (chip)
 		{
-			switch (ballModelTypeChip)
-			{
-				case FIXED_LOSS_PLUS_ROLLING:
-					trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos, kickVel.getXYZVector(),
-							0, new FixedLossPlusRollingParameters());
-					break;
-				default:
-					throw new UnsupportedOperationException();
-			}
-		} else
-		{
-			switch (ballModelTypeFlat)
-			{
-				case TWO_PHASE_FIXED_VEL:
-					trajectory = TwoPhaseFixedVelBallTrajectory.fromKick(kickPos, kickVel.getXYVector(),
-							new TwoPhaseFixedVelParameters());
-					break;
-				case TWO_PHASE_DYNAMIC_VEL:
-					trajectory = TwoPhaseDynamicVelBallTrajectory.fromKick(kickPos, kickVel.getXYVector(),
-							new TwoPhaseDynamicVelParameters());
-					break;
-				default:
-					throw new UnsupportedOperationException();
-			}
+			return createTrajectoryFromChipKick(kickPos, kickVel);
 		}
-		
+		return createTrajectoryFromStraightKick(kickPos, kickVel);
+	}
+	
+	
+	/**
+	 * Create a ball trajectory based on a chip kick
+	 *
+	 * @param kickPos [mm]
+	 * @param kickVel [mm/s]
+	 * @return
+	 */
+	public static ABallTrajectory createTrajectoryFromStraightKick(final IVector2 kickPos, final IVector kickVel)
+	{
+		final ABallTrajectory trajectory;
+		switch (ballModelTypeFlat)
+		{
+			case TWO_PHASE_FIXED_VEL:
+				trajectory = TwoPhaseFixedVelBallTrajectory.fromKick(kickPos, kickVel.getXYVector(),
+						new TwoPhaseFixedVelParameters());
+				break;
+			case TWO_PHASE_DYNAMIC_VEL:
+				trajectory = TwoPhaseDynamicVelBallTrajectory.fromKick(kickPos, kickVel.getXYVector(),
+						new TwoPhaseDynamicVelParameters());
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
+		return trajectory;
+	}
+	
+	
+	/**
+	 * Create a ball trajectory based on a straight kick
+	 *
+	 * @param kickPos [mm]
+	 * @param kickVel [mm/s]
+	 * @return
+	 */
+	public static ABallTrajectory createTrajectoryFromChipKick(final IVector2 kickPos, final IVector kickVel)
+	{
+		final ABallTrajectory trajectory;
+		switch (ballModelTypeChip)
+		{
+			case FIXED_LOSS_PLUS_ROLLING:
+				trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos, kickVel.getXYZVector(),
+						0, new FixedLossPlusRollingParameters());
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
 		return trajectory;
 	}
 	

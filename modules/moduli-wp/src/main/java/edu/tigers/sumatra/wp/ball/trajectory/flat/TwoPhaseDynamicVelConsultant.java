@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.trajectory.flat;
@@ -83,6 +83,16 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 	
 	
 	@Override
+	public double getVelForKickByTime(final double kickSpeed, final double travelTime)
+	{
+		return TwoPhaseDynamicVelBallTrajectory
+				.fromKick(Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickSpeed), parameters)
+				.getVelByTime(travelTime)
+				.getLength2();
+	}
+	
+	
+	@Override
 	public double getInitVelForTimeDist(final double distance, final double time)
 	{
 		double initialVel;
@@ -92,14 +102,18 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 		double t = time;
 		double s = distance;
 		double det = ((pow(as, 2) - ar * as) * pow(c, 2) + ar * as) * pow(t, 2)
-						+ ((2 * ar - 2 * as) * pow(c, 2) + (4 * as - 4 * ar) * c - 2 * as + 2 * ar) * s;
-		if (det >= 0) {
+				+ ((2 * ar - 2 * as) * pow(c, 2) + (4 * as - 4 * ar) * c - 2 * as + 2 * ar) * s;
+		if (det >= 0)
+		{
 			double v01 = (as * sqrt(det)
-					+ ((pow(as, 2) - ar * as) * c + ar * as) * t) / ((as - ar) * pow(c, 2) + (2 * ar - 2 * as) * c + as - ar);
+					+ ((pow(as, 2) - ar * as) * c + ar * as) * t)
+					/ ((as - ar) * pow(c, 2) + (2 * ar - 2 * as) * c + as - ar);
 			double v02 = -(as * sqrt(det)
-					+ ((ar * as - pow(as, 2)) * c - ar * as) * t) / ((as - ar) * pow(c, 2) + (2 * ar - 2 * as) * c + as - ar);
+					+ ((ar * as - pow(as, 2)) * c - ar * as) * t)
+					/ ((as - ar) * pow(c, 2) + (2 * ar - 2 * as) * c + as - ar);
 			initialVel = max(v01, v02);
-		} else {
+		} else
+		{
 			initialVel = s / t - .5 * ar * t;
 		}
 		return 1e-3 * initialVel;

@@ -4,7 +4,14 @@
 
 package edu.tigers.sumatra.geometry;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.NotImplementedException;
+
 import com.sleepycat.persist.model.Persistent;
+
 import edu.tigers.sumatra.drawable.DrawableArc;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -23,11 +30,6 @@ import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import org.apache.commons.lang.NotImplementedException;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -458,6 +460,13 @@ public class LegacyPenArea implements IPenaltyArea
 		shapes.add(new DrawableArc(arcPos, Color.white));
 		shapes.add(new DrawableRectangle(getInnerRectangle(), Color.white));
 		return shapes;
+	}
+	
+	
+	@Override
+	public double distanceTo(final IVector2 point)
+	{
+		return nearestPointInside(point).distanceTo(point);
 	}
 	
 	

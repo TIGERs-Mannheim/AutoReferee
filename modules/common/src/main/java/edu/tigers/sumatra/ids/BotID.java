@@ -143,6 +143,13 @@ public final class BotID extends AObjectID
 	}
 	
 	
+	@Override
+	public String getSaveableString()
+	{
+		return String.format("%d %s", getNumber(), getTeamColor().name().substring(0, 1));
+	}
+	
+	
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------
 	// --------------------------------------------------------------------------

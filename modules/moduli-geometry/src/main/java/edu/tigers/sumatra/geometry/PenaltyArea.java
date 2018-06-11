@@ -4,7 +4,14 @@
 
 package edu.tigers.sumatra.geometry;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.sleepycat.persist.model.Persistent;
+
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.line.ILine;
@@ -14,12 +21,6 @@ import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 /**
@@ -104,7 +105,8 @@ public class PenaltyArea implements IPenaltyArea
 				.distinct()
 				.collect(Collectors.toList());
 	}
-
+	
+	
 	@Override
 	public List<IVector2> lineIntersections(final IHalfLine line)
 	{
@@ -115,7 +117,7 @@ public class PenaltyArea implements IPenaltyArea
 				.distinct()
 				.collect(Collectors.toList());
 	}
-
+	
 	
 	private List<ILineSegment> getEdges()
 	{
@@ -251,5 +253,12 @@ public class PenaltyArea implements IPenaltyArea
 		List<IDrawableShape> shapes = new ArrayList<>(1);
 		shapes.add(new DrawableRectangle(getRectangle(), Color.white));
 		return shapes;
+	}
+	
+	
+	@Override
+	public double distanceTo(final IVector2 point)
+	{
+		return nearestPointInside(point).distanceTo(point);
 	}
 }

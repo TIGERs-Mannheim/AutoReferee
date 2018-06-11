@@ -30,7 +30,7 @@ public class GameStateCalculator
 	
 	static
 	{
-		ConfigRegistration.registerClass("metis", GameStateCalculator.class);
+		ConfigRegistration.registerClass("wp", GameStateCalculator.class);
 	}
 	
 	private IVector2 ballPosOnPrepare = null;

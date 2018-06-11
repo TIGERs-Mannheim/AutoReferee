@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.geometry;
 
+import java.util.List;
+
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.line.ILine;
@@ -11,8 +13,6 @@ import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
-
-import java.util.List;
 
 
 /**
@@ -119,4 +119,14 @@ public interface IPenaltyArea extends I2DShape
 	 * @return the drawable shapes to draw this penalty area
 	 */
 	List<IDrawableShape> getDrawableShapes();
+	
+	
+	/**
+	 * Distance from penalty area border to point.
+	 * If point is inside, the distance is always zero.
+	 * 
+	 * @param point some point
+	 * @return the distance to this point
+	 */
+	double distanceTo(final IVector2 point);
 }

@@ -38,7 +38,9 @@ import edu.tigers.sumatra.vision.data.EVisionFilterShapesLayer;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
+import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
 import edu.tigers.sumatra.vision.data.KickEvent;
+import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
 
@@ -46,7 +48,8 @@ import edu.tigers.sumatra.vision.tracker.RobotTracker;
 /**
  * @author AndreR
  */
-public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewportArchitect
+public class VisionFilterImpl extends AVisionFilter
+		implements Runnable, IViewportArchitect, IBallModelIdentificationObserver
 {
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(VisionFilterImpl.class.getName());
@@ -296,6 +299,7 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 		super.start();
 		
 		viewportArchitect.addObserver(this);
+		ballFilterPreprocessor.addObserver(this);
 		
 		boolean useThreads = getSubnodeConfiguration().getBoolean("useThreads", true);
 		
@@ -326,6 +330,7 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 		}
 		cams.clear();
 		viewportArchitect.removeObserver(this);
+		ballFilterPreprocessor.removeObserver(this);
 		ballFilterPreprocessor.clear();
 		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
 	}
@@ -336,6 +341,13 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 	{
 		ballFilter.resetBall(pos.getXYVector());
 		ballFilterPreprocessor.clear();
+	}
+	
+	
+	@Override
+	public void setModelIdentification(final boolean enable)
+	{
+		ballFilterPreprocessor.setDoModelIdentification(enable);
 	}
 	
 	
@@ -353,6 +365,13 @@ public class VisionFilterImpl extends AVisionFilter implements Runnable, IViewpo
 	public void onViewportUpdated(final int cameraId, final IRectangle viewport)
 	{
 		publishUpdatedViewport(cameraId, viewport);
+	}
+	
+	
+	@Override
+	public void onBallModelIdentificationResult(final IBallModelIdentResult ident)
+	{
+		publishBallModelIdentification(ident);
 	}
 	
 	

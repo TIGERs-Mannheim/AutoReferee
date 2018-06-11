@@ -41,7 +41,6 @@ import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverLin3Offset;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverLin5Offset;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverNonLin3Direct;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverNonLinIdentDirect;
-import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverNonLinIdentDirect.ChipModelIdentResult;
 
 
 /**
@@ -88,9 +87,6 @@ public class ChipKickEstimator implements IKickEstimator
 	
 	@Configurable(comment = "Estimate kick position if the ball is visible on two cameras", defValue = "false")
 	private static boolean useKickPositionEstimator = false;
-	
-	@Configurable(comment = "Enable chip model identification solver", defValue = "false")
-	private boolean doModelIdentification = false;
 	
 	static
 	{
@@ -307,16 +303,9 @@ public class ChipKickEstimator implements IKickEstimator
 			return false;
 		}
 		
-		return isDoneByFitResult(mergedRobots, timestamp);
-	}
-	
-	
-	private boolean isDoneByFitResult(final List<FilteredVisionBot> mergedRobots, final long timestamp)
-	{
-		boolean done = false;
 		if ((fitResult.getAvgDistance() > maxFittingError) || (avgDistLatest10 > maxFittingError))
 		{
-			done = true;
+			return true;
 		}
 		
 		FilteredVisionBall state = fitResult.getState(timestamp);
@@ -327,30 +316,39 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		if ((minDistToRobot < Geometry.getBotRadius()) && !state.isChipped())
 		{
-			done = true;
+			return true;
 		}
 		
-		if (!Geometry.getField().withMargin(100).isPointInShape(posNow))
-		{
-			done = true;
-		}
-		
-		if (done && doModelIdentification)
-		{
-			doModelIdentification();
-		}
-		
-		return done;
+		return !Geometry.getField().withMargin(100).isPointInShape(posNow);
 	}
 	
 	
-	private void doModelIdentification()
+	@Override
+	public Optional<IBallModelIdentResult> getModelIdentResult()
 	{
+		if (allRecords.size() < 20)
+		{
+			return Optional.empty();
+		}
+		
+		if (solverNonLin == null)
+		{
+			return Optional.empty();
+		}
+		
+		long timeAfterKick = allRecords.get(0).gettCapture() + 500_000_000;
+		
+		// keep all records directly after the kick and within the field (-10cm)
+		List<CamBall> usedRecords = allRecords.stream()
+				.filter(r -> (r.gettCapture() < timeAfterKick)
+						|| Geometry.getField().withMargin(-100).isPointInShape(r.getFlatPos()))
+				.collect(Collectors.toList());
+		
 		// solve to estimate all parameters
 		ChipKickSolverNonLinIdentDirect identSolver = new ChipKickSolverNonLinIdentDirect(
 				solverNonLin.getKickPosition(), solverNonLin.getKickTimestamp(), camCalib, fitResult.getKickVel());
 		
-		Optional<ChipModelIdentResult> result = identSolver.identModel(allRecords);
+		Optional<IBallModelIdentResult> result = identSolver.identModel(usedRecords);
 		if (result.isPresent())
 		{
 			log.info("Chip Model:" + System.lineSeparator() + result.get());
@@ -358,6 +356,8 @@ public class ChipKickEstimator implements IKickEstimator
 		{
 			log.info("Chip model identification failed.");
 		}
+		
+		return result;
 	}
 	
 	
@@ -413,23 +413,5 @@ public class ChipKickEstimator implements IKickEstimator
 	public EKickEstimatorType getType()
 	{
 		return EKickEstimatorType.CHIP;
-	}
-	
-	
-	/**
-	 * @return the doModelIdentification
-	 */
-	public boolean isDoModelIdentification()
-	{
-		return doModelIdentification;
-	}
-	
-	
-	/**
-	 * @param doModelIdentification the doModelIdentification to set
-	 */
-	public void setDoModelIdentification(final boolean doModelIdentification)
-	{
-		this.doModelIdentification = doModelIdentification;
 	}
 }
