@@ -3,21 +3,16 @@
  */
 package edu.tigers.sumatra.view.log;
 
-import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JMenu;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-
 import edu.tigers.sumatra.presenter.log.LogPresenter;
-import org.apache.log4j.Priority;
-
 import edu.tigers.sumatra.view.TextPane;
 import edu.tigers.sumatra.views.ISumatraView;
 import net.miginfocom.swing.MigLayout;
+import org.apache.log4j.Priority;
+
+import javax.swing.JMenu;
+import javax.swing.JPanel;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -29,12 +24,8 @@ public class LogPanel extends JPanel implements ISumatraView
 {
 	private static final long	serialVersionUID	= 1L;
 	
-	private static final int	INIT_DIVIDER_LOC	= 150;
-	
-	
 	private final TextPane		textPane;
 	private final FilterPanel	filterPanel;
-	private final TreePanel		treePanel;
 	
 	
 	/**
@@ -47,23 +38,13 @@ public class LogPanel extends JPanel implements ISumatraView
 		
 		textPane = new TextPane(maxCapacity);
 		filterPanel = new FilterPanel(initialLevel);
-		treePanel = new TreePanel();
-		
-		final JPanel filter = new JPanel(new MigLayout("fill", "", ""));
-		filter.add(treePanel, "push, grow, wrap");
-		filter.setMinimumSize(new Dimension(0, 0));
 		
 		final JPanel display = new JPanel(new MigLayout("fill", "", ""));
 		display.add(textPane, "push, grow, wrap");
 		display.add(filterPanel, "growx");
+
 		
-		final JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, filter, display);
-		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(0);
-		splitPane.setLastDividerLocation(INIT_DIVIDER_LOC);
-		splitPane.setBorder(BorderFactory.createEmptyBorder());
-		
-		add(splitPane, "grow");
+		add(display, "grow");
 	}
 	
 	
@@ -94,20 +75,10 @@ public class LogPanel extends JPanel implements ISumatraView
 	}
 	
 	
-	/**
-	 * @return
-	 */
-	public TreePanel getTreePanel()
-	{
-		return treePanel;
-	}
-	
-	
 	@Override
 	public List<JMenu> getCustomMenus()
 	{
-		final ArrayList<JMenu> customMenu = new ArrayList<JMenu>();
-		return customMenu;
+		return new ArrayList<>();
 	}
 	
 	

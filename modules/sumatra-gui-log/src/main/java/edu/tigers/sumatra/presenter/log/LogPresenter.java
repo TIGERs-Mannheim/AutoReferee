@@ -3,18 +3,12 @@
  */
 package edu.tigers.sumatra.presenter.log;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.view.log.IFilterPanelObserver;
+import edu.tigers.sumatra.view.log.ISlidePanelObserver;
+import edu.tigers.sumatra.view.log.LogPanel;
+import edu.tigers.sumatra.views.ISumatraView;
+import edu.tigers.sumatra.views.ISumatraViewPresenter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -22,23 +16,24 @@ import org.apache.log4j.Priority;
 import org.apache.log4j.WriterAppender;
 import org.apache.log4j.spi.LoggingEvent;
 
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.view.log.IFilterPanelObserver;
-import edu.tigers.sumatra.view.log.ISlidePanelObserver;
-import edu.tigers.sumatra.view.log.ITreePanelObserver;
-import edu.tigers.sumatra.view.log.LogPanel;
-import edu.tigers.sumatra.views.ISumatraView;
-import edu.tigers.sumatra.views.ISumatraViewPresenter;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
  * The log presenter handles catching LoggingEvents from log4j and displays them.
- * Furthermore it can filter the output by custom user strings or via class selection.
+ * Furthermore it can filter the output by custom user strings
  * One more word on the filtering capability:
  * - Enter a user filter -> text is filtered
  * - Reset user filter -> all messages reappear
- * - Select a class filter -> text is filtered
- * - Select another class filter -> original text is filtered
  * - Select a new log level -> nothing filtered, but only events with a level equal or
  * higher to the log level will appear, all others are lost. They will not even appear
  * if you drop the log level to a lower value.
@@ -47,7 +42,7 @@ import edu.tigers.sumatra.views.ISumatraViewPresenter;
  * @author AndreR
  */
 public class LogPresenter extends WriterAppender implements ISumatraViewPresenter, IFilterPanelObserver,
-		ISlidePanelObserver, ITreePanelObserver
+		ISlidePanelObserver
 {
 	// --------------------------------------------------------------------------
 	// --- variables and constants ----------------------------------------------
@@ -79,7 +74,6 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 	};
 	
 	private LogPanel logPanel;
-	private List<String> allowedClasses = new ArrayList<>();
 	private List<String> allowedStrings = new ArrayList<>();
 	private Level logLevel;
 	private int numFatals = 0;
@@ -104,7 +98,6 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 		
 		logPanel.getFilterPanel().addObserver(this);
 		logPanel.getSlidePanel().addObserver(this);
-		logPanel.getTreePanel().addObserver(this);
 		
 		// set internal output layout -> see log4j.properties
 		setLayout(new PatternLayout("%d{ABSOLUTE} %-5p [%t|%c{1}] %m%n"));
@@ -157,15 +150,6 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 		{
 			appendLoggingEvent(logEvent);
 		}
-	}
-	
-	
-	@Override
-	public void onNewClassList(final List<String> classes)
-	{
-		allowedClasses = classes;
-		
-		reappendAllEvents();
 	}
 	
 	
@@ -250,34 +234,6 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 	}
 	
 	
-	/**
-	 * Checks if the event is from a component which is on the white-list
-	 * 
-	 * @param event Event to check.
-	 * @return true if the event is in the white-list or the white-list is empty.
-	 */
-	private boolean checkClassFilter(final LoggingEvent event)
-	{
-		if (allowedClasses.isEmpty())
-		{
-			return true;
-		}
-		
-		// get classname of loggingEvent
-		final String from = new PatternLayout("%C{1}").format(event);
-		
-		for (final String allowed : allowedClasses)
-		{
-			if (from.startsWith(allowed))
-			{
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	
 	private boolean checkForLogLevel(final LoggingEvent event)
 	{
 		return event.getLevel().isGreaterOrEqual(logLevel);
@@ -315,7 +271,7 @@ public class LogPresenter extends WriterAppender implements ISumatraViewPresente
 	 */
 	public boolean checkFilters(final LoggingEvent event)
 	{
-		return !(!checkStringFilter(event) || !checkClassFilter(event) || !checkForLogLevel(event));
+		return !(!checkStringFilter(event) || !checkForLogLevel(event));
 	}
 	
 	
