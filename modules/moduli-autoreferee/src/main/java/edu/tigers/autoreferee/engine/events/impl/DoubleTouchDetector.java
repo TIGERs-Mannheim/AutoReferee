@@ -61,6 +61,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	}
 	
 	private BotID kickerID = null;
+	private boolean stillTouching = true;
 	
 	
 	public DoubleTouchDetector()
@@ -80,6 +81,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	protected void prepare(final IAutoRefFrame frame)
 	{
 		kickerID = null;
+		stillTouching = true;
 		
 		List<GameState> stateHistory = frame.getStateHistory();
 		if ((stateHistory.size() > 1) && VALID_PREVIOUS_STATES.contains(stateHistory.get(1).getState()))
@@ -102,7 +104,15 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 			return Optional.empty();
 		}
 		
-		if (frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().equals(kickerID)))
+		boolean touching = frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().equals(kickerID));
+		if (!touching)
+		{
+			// kicker is not touching ball anymore, next time it touches the ball again, it is a violation
+			stillTouching = false;
+			return Optional.empty();
+		}
+		
+		if (!stillTouching)
 		{
 			// kicker touched the ball again
 			GameEvent violation = createViolation(frame);
