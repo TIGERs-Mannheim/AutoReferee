@@ -47,8 +47,8 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	private static final int PRIORITY = 1;
 	private static final Logger log = Logger.getLogger(BotStopSpeedDetector.class);
 	
-	@Configurable(comment = "[ms] Wait time before reporting any events", defValue = "2500")
-	private static long initialWaitTimeMs = 2_500;
+	@Configurable(comment = "[s] Wait time before reporting any events", defValue = "1.5")
+	private static double initialWaitTime = 1.5;
 	@Configurable(comment = "[ms] The number of milliseconds that a bot needs violate the stop speed limit to be reported", defValue = "300")
 	private static long violationThresholdMs = 300;
 	
@@ -100,7 +100,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 		/*
 		 * We wait an initial time before reporting any events to give robots time to slow down after the STOP command
 		 */
-		if ((frame.getTimestamp() - entryTime) < TimeUnit.MILLISECONDS.toNanos(initialWaitTimeMs))
+		if ((frame.getTimestamp() - entryTime) / 1e9 < initialWaitTime)
 		{
 			return Optional.empty();
 		}
