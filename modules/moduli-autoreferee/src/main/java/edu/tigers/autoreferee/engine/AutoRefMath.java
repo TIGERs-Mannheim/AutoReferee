@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine;
@@ -18,7 +18,6 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
-import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
 /**
@@ -220,14 +219,12 @@ public class AutoRefMath
 	/**
 	 * Returns true if all bots are located further than {@link RuleConstraints#getStopRadius()} from the ball
 	 * 
-	 * @param frame
+	 * @param bots
+	 * @param ballPos
 	 * @return
 	 */
-	public static boolean botStopDistanceIsCorrect(final SimpleWorldFrame frame)
+	public static boolean botStopDistanceIsCorrect(final Collection<ITrackedBot> bots, IVector2 ballPos)
 	{
-		Collection<ITrackedBot> bots = frame.getBots().values();
-		IVector2 ballPos = frame.getBall().getPos();
-		
 		return bots.stream().allMatch(
 				bot -> VectorMath.distancePP(bot.getPos(), ballPos) > RuleConstraints.getStopRadius());
 	}

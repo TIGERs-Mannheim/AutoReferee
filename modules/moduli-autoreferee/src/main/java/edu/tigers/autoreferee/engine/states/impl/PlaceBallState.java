@@ -4,7 +4,9 @@
 package edu.tigers.autoreferee.engine.states.impl;
 
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +23,7 @@ import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
-import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
@@ -56,7 +58,7 @@ public class PlaceBallState extends AbstractAutoRefState
 		}
 		
 		IVector2 targetPos = ctx.getFollowUpAction().getNewBallPosition().orElseThrow(IllegalStateException::new);
-		if (criteriaAreMet(frame.getWorldFrame(), targetPos))
+		if (criteriaAreMet(frame, targetPos))
 		{
 			// The ball has been placed at the kick position. Return to the stopped state to perform the action
 			sendCommandIfReady(ctx, new RefboxRemoteCommand(Command.STOP, null), !stopSend);
@@ -138,10 +140,14 @@ public class PlaceBallState extends AbstractAutoRefState
 	}
 	
 	
-	private boolean criteriaAreMet(final SimpleWorldFrame frame, final IVector2 targetPos)
+	private boolean criteriaAreMet(final IAutoRefFrame frame, final IVector2 targetPos)
 	{
-		ITrackedBall ball = frame.getBall();
-		boolean botDistanceCorrect = AutoRefMath.botStopDistanceIsCorrect(frame);
+		ITrackedBall ball = frame.getWorldFrame().getBall();
+		final ETeamColor forTeam = frame.getGameState().getForTeam();
+		// only respect placing teams bots. If opponent bots are in the way, the placement should not fail
+		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values().stream()
+				.filter(b -> b.getBotId().getTeamColor() == forTeam).collect(Collectors.toList());
+		boolean botDistanceCorrect = AutoRefMath.botStopDistanceIsCorrect(bots, ball.getPos());
 		boolean ballPlaced = AutoRefMath.ballIsPlaced(ball, targetPos, AutoRefConfig.getRobotBallPlacementAccuracy());
 		boolean ballStationary = AutoRefMath.ballIsStationary(ball);
 		
