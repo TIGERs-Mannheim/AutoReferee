@@ -16,8 +16,9 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	QUALITY_SHAPES("Quality Inspector"),
 	CAM_INFO_SHAPES("Cam Info"),
 	VIEWPORT_SHAPES("Viewports"),
-	ROBOT_TRACKER_SHAPES("Robot Trackers", false, EShapeLayerPersistenceType.DEBUG_PERSIST),
-	BALL_TRACKER_SHAPES("Ball Trackers", false, EShapeLayerPersistenceType.DEBUG_PERSIST);
+	ROBOT_TRACKER_SHAPES("Robot Trackers", false, EShapeLayerPersistenceType.NEVER_PERSIST),
+	BALL_TRACKER_SHAPES_IMPORTANT("Ball Trackers"),
+	BALL_TRACKER_SHAPES("Ball Trackers Debug", false, EShapeLayerPersistenceType.NEVER_PERSIST);
 	
 	private final String id;
 	private final String name;

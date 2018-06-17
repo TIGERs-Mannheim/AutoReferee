@@ -205,6 +205,8 @@ public class VisionFilterImpl extends AVisionFilter
 		frame.getShapeMap().get(EVisionFilterShapesLayer.VIEWPORT_SHAPES).addAll(viewportArchitect.getInfoShapes());
 		frame.getShapeMap().get(EVisionFilterShapesLayer.QUALITY_SHAPES).addAll(qualityInspector.getInfoShapes());
 		frame.getShapeMap().get(EVisionFilterShapesLayer.CAM_INFO_SHAPES).addAll(getCamInfoShapes());
+		frame.getShapeMap().get(EVisionFilterShapesLayer.BALL_TRACKER_SHAPES_IMPORTANT)
+				.addAll(ballFilterPreprocessor.getShapes());
 		frame.getShapeMap().get(EVisionFilterShapesLayer.ROBOT_TRACKER_SHAPES)
 				.addAll(getRobotTrackerShapes(timestamp));
 		frame.getShapeMap().get(EVisionFilterShapesLayer.BALL_TRACKER_SHAPES)
@@ -427,7 +429,6 @@ public class VisionFilterImpl extends AVisionFilter
 			shapes.addAll(camFilter.getBallInfoShapes());
 		}
 		
-		shapes.addAll(ballFilterPreprocessor.getShapes());
 		shapes.addAll(ballFilter.getShapes());
 		
 		return shapes;

@@ -52,9 +52,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			.getLogger(FieldPanel.class.getName());
 	
 	/** color of field background */
-	private static final Color FIELD_COLOR = new Color(0, 180, 30);
+	private static final Color FIELD_COLOR = new Color(0, 160, 30);
 	/** color of field background */
-	private static final Color FIELD_COLOR_REFEREE = new Color(0, 150, 30);
+	private static final Color FIELD_COLOR_REFEREE = new Color(100, 100, 100);
 	private static final String SCALE_FACTOR_PROPERTY = FieldPanel.class.getCanonicalName() + ".scaleFactor";
 	private static final String FIELD_ORIGIN_X_PROPERTY = FieldPanel.class.getCanonicalName() + ".fieldOriginX";
 	private static final String FIELD_ORIGIN_Y_PROPERTY = FieldPanel.class.getCanonicalName() + ".fieldOriginY";
