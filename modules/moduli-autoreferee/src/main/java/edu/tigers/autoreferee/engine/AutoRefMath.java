@@ -27,17 +27,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class AutoRefMath
 {
-	/**  */
-	public static final double THROW_IN_DISTANCE = 100;
-	/**  */
-	public static final double GOAL_KICK_DISTANCE = 500;
-	/** Minimum distance between the goal line and the kick position during a freekick */
-	public static final double DEFENSE_AREA_GOAL_LINE_DISTANCE = 600;
-	
-	/** mm */
-	public static final double OFFENSE_FREE_KICK_DISTANCE = 700;
-	
-	
 	private AutoRefMath()
 	{
 		// private default constructor
@@ -55,7 +44,8 @@ public class AutoRefMath
 		IVector2 corner = NGeometry.getClosestCorner(pos);
 		int ySide = corner.y() > 0 ? -1 : 1;
 		int xSide = corner.x() > 0 ? -1 : 1;
-		return corner.addNew(Vector2.fromXY(xSide * THROW_IN_DISTANCE, ySide * THROW_IN_DISTANCE));
+		return corner.addNew(Vector2.fromXY(xSide * getThrowInDistanceWithOffset(),
+				ySide * getThrowInDistanceWithOffset()));
 	}
 	
 	
@@ -70,16 +60,16 @@ public class AutoRefMath
 		IVector2 corner = NGeometry.getClosestCorner(pos);
 		int xSide = corner.x() > 0 ? -1 : 1;
 		int ySide = corner.y() > 0 ? -1 : 1;
-		return corner.addNew(Vector2.fromXY(xSide * GOAL_KICK_DISTANCE, ySide * THROW_IN_DISTANCE));
+		return corner
+				.addNew(Vector2.fromXY(xSide * getGoalKickDistanceWithOffset(), ySide * getThrowInDistanceWithOffset()));
 	}
 	
 	
 	/**
 	 * This method checks if the specified position is located closer than
-	 * {@value AutoRefMath#OFFENSE_FREE_KICK_DISTANCE}
-	 * to the defense area.
+	 * {@link AutoRefMath#getOffenseFreeKickDistanceWithOffset()} to the defense area.
 	 * If the freekick is to be executed by the attacking team then the ball is positioned at the
-	 * closest point that is located {@value AutoRefMath#OFFENSE_FREE_KICK_DISTANCE} from the defense area.
+	 * closest point that is located {@link AutoRefMath#getOffenseFreeKickDistanceWithOffset()} from the defense area.
 	 * If the freekick is to be executed by the defending team then the ball is positioned at one of the two corner
 	 * points of the field which are located 600 mm from the goal line and 100 mm from the side line.
 	 * 
@@ -87,7 +77,7 @@ public class AutoRefMath
 	 * @param kickerColor
 	 * @return
 	 */
-	public static IVector2 getClosestFreekickPos(final IVector2 pos, final ETeamColor kickerColor)
+	public static IVector2 getClosestFreeKickPos(final IVector2 pos, final ETeamColor kickerColor)
 	{
 		IRectangle field = NGeometry.getField();
 		ETeamColor goalColor = NGeometry.getTeamOfClosestGoalLine(pos);
@@ -105,15 +95,15 @@ public class AutoRefMath
 		int xSide = newKickPos.x() > 0 ? 1 : -1;
 		int ySide = newKickPos.y() > 0 ? 1 : -1;
 		
-		if (Math.abs(newKickPos.x()) > ((field.xExtent() / 2) - THROW_IN_DISTANCE))
+		if (Math.abs(newKickPos.x()) > ((field.xExtent() / 2) - getThrowInDistanceWithOffset()))
 		{
-			double newXPos = ((field.xExtent() / 2) - THROW_IN_DISTANCE) * xSide;
+			double newXPos = ((field.xExtent() / 2) - getThrowInDistanceWithOffset()) * xSide;
 			newKickPos = Vector2.fromXY(newXPos, newKickPos.y());
 		}
 		
-		if (Math.abs(newKickPos.y()) > ((field.yExtent() / 2) - THROW_IN_DISTANCE))
+		if (Math.abs(newKickPos.y()) > ((field.yExtent() / 2) - getThrowInDistanceWithOffset()))
 		{
-			double newYPos = ((field.yExtent() / 2) - THROW_IN_DISTANCE) * ySide;
+			double newYPos = ((field.yExtent() / 2) - getThrowInDistanceWithOffset()) * ySide;
 			newKickPos = Vector2.fromXY(newKickPos.x(), newYPos);
 		}
 		
@@ -124,7 +114,7 @@ public class AutoRefMath
 	public static IVector2 getOffenseKickPos(final IVector2 pos)
 	{
 		IPenaltyArea penArea = NGeometry.getPenaltyArea(NGeometry.getTeamOfClosestGoalLine(pos))
-				.withMargin(OFFENSE_FREE_KICK_DISTANCE);
+				.withMargin(getOffenseFreeKickDistanceWithOffset());
 		return penArea.nearestPointOutside(pos);
 	}
 	
@@ -133,10 +123,10 @@ public class AutoRefMath
 	{
 		int xSide = pos.x() > 0 ? -1 : 1;
 		IPenaltyArea penArea = NGeometry.getPenaltyArea(NGeometry.getTeamOfClosestGoalLine(pos));
-		if (penArea.isPointInShape(pos, OFFENSE_FREE_KICK_DISTANCE))
+		if (penArea.isPointInShape(pos, getOffenseFreeKickDistanceWithOffset()))
 		{
 			return getClosestGoalKickPos(pos)
-					.addNew(Vector2.fromXY((DEFENSE_AREA_GOAL_LINE_DISTANCE - GOAL_KICK_DISTANCE) * xSide, 0));
+					.addNew(Vector2.fromXY((getDistanceToGoaLineWithOffset() - getGoalKickDistanceWithOffset()) * xSide, 0));
 		}
 		return pos;
 	}
@@ -277,5 +267,29 @@ public class AutoRefMath
 		int side = execTeam == Geometry.getNegativeHalfTeam() ? 1 : -1;
 		
 		return (pos.x() * side) >= (kickAreaX - margin);
+	}
+	
+	
+	public static double getThrowInDistanceWithOffset()
+	{
+		return RuleConstraints.getThrowInDistance() + AutoRefConfig.getPlacementOffset();
+	}
+	
+	
+	public static double getDistanceToGoaLineWithOffset()
+	{
+		return RuleConstraints.getDistanceToGoalLine() + +AutoRefConfig.getPlacementOffset();
+	}
+	
+	
+	public static double getOffenseFreeKickDistanceWithOffset()
+	{
+		return RuleConstraints.getOffenseFreeKickDistance() + +AutoRefConfig.getPlacementOffset();
+	}
+	
+	
+	public static double getGoalKickDistanceWithOffset()
+	{
+		return RuleConstraints.getGoalKickDistance() + AutoRefConfig.getPlacementOffset();
 	}
 }

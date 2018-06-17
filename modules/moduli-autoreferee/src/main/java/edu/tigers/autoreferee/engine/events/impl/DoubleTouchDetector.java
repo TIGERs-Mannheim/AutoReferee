@@ -129,7 +129,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		ETeamColor attackingTeam = kickerID.getTeamColor();
-		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ballPos, attackingTeam.opposite());
+		IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(ballPos, attackingTeam.opposite());
 		
 		FollowUpAction followUp = new FollowUpAction(
 				EActionType.INDIRECT_FREE,

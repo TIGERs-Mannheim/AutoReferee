@@ -98,7 +98,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	{
 		final BotID violatorId = finalBotPosition.getBotID();
 		final ETeamColor teamInFavor = violatorId.getTeamColor().opposite();
-		final IVector2 kickPos = AutoRefMath.getClosestFreekickPos(
+		final IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(
 				dribbleStartPosition(finalBotPosition),
 				teamInFavor);
 		

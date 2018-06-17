@@ -171,7 +171,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 			double distance = AutoRefMath
 					.distanceToNearestPointOutside(defenderPenArea, requiredMargin, offender.getPos());
 			
-			IVector2 kickPos = AutoRefMath.getClosestFreekickPos(ball.getPos(), offender.getTeamColor().opposite());
+			IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(ball.getPos(), offender.getTeamColor().opposite());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, attackerColor.opposite(), kickPos);
 			return new DistanceViolation(EGameEvent.ATTACKER_TO_DEFENCE_AREA, frame.getTimestamp(),
 					offender.getBotId(), followUp, distance);

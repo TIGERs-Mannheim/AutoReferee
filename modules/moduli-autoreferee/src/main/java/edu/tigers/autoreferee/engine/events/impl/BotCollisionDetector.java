@@ -149,13 +149,13 @@ public class BotCollisionDetector extends AGameEventDetector
 			}
 			
 			IVector2 kickPos = Lines.segmentFromPoints(pair.blueBot.getPos(), pair.yellowBot.getPos()).getCenter();
-			kickPos = AutoRefMath.getClosestFreekickPos(kickPos, primaryBot.getTeamColor().opposite());
+			kickPos = AutoRefMath.getClosestFreeKickPos(kickPos, primaryBot.getTeamColor().opposite());
 			
 			final FollowUpAction followUp;
 			final BotID secondaryViolator;
 			if (Math.abs(velDiff) < minSpeedDiff)
 			{
-				kickPos = AutoRefMath.getClosestFreekickPos(kickPos, secondaryBot.getTeamColor().opposite());
+				kickPos = AutoRefMath.getClosestFreeKickPos(kickPos, secondaryBot.getTeamColor().opposite());
 				followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, kickPos);
 				secondaryViolator = secondaryBot;
 				collisionCounter.computeIfPresent(ETeamColor.YELLOW, (k, v) -> v + 1);

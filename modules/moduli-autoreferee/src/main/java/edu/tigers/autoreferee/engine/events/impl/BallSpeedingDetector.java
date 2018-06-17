@@ -139,7 +139,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	private SpeedViolation createViolation(BotID violator, double lastSpeedEstimate, long timestamp)
 	{
-		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastReportedKickEvent.getPosition(),
+		IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(lastReportedKickEvent.getPosition(),
 				violator.getTeamColor().opposite());
 		
 		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, violator.getTeamColor().opposite(),

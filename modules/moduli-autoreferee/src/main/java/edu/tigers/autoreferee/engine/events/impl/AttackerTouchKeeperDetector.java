@@ -128,7 +128,7 @@ public class AttackerTouchKeeperDetector extends AGameEventDetector
 			ETeamColor violatorTeamColor = violatorID.get().getTeamColor();
 			
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, violatorTeamColor.opposite(),
-					AutoRefMath.getClosestFreekickPos(violatorPos, violatorTeamColor.opposite()));
+					AutoRefMath.getClosestFreeKickPos(violatorPos, violatorTeamColor.opposite()));
 			GameEvent violation = new GameEvent(EGameEvent.ATTACKER_TOUCH_KEEPER, frame.getTimestamp(),
 					violatorID.get(), followUp);
 			

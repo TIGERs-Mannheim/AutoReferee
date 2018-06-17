@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine;
@@ -10,11 +10,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import edu.tigers.sumatra.geometry.RuleConstraints;
 import org.junit.Test;
 
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
@@ -38,7 +38,7 @@ public class AutoRefMathTest
 	{
 		IRectangle field = NGeometry.getField();
 		List<IVector2> corners = field.getCorners();
-		List<IVector2> closerCorners = field.withMargin(-AutoRefMath.THROW_IN_DISTANCE).getCorners();
+		List<IVector2> closerCorners = field.withMargin(-AutoRefMath.getThrowInDistanceWithOffset()).getCorners();
 		
 		Rectangle smallRect = Rectangle.fromCenter(Vector2f.ZERO_VECTOR, 5, 5);
 		List<IVector2> smallCorners = smallRect.getCorners();
@@ -60,7 +60,7 @@ public class AutoRefMathTest
 		IRectangle field = NGeometry.getField();
 		List<IVector2> corners = field.getCorners();
 		List<IVector2> closerCorners = field
-				.withMarginXy(-AutoRefMath.GOAL_KICK_DISTANCE, -AutoRefMath.THROW_IN_DISTANCE)
+				.withMarginXy(-AutoRefMath.getGoalKickDistanceWithOffset(), -AutoRefMath.getThrowInDistanceWithOffset())
 				.getCorners();
 		Rectangle smallRect = Rectangle.fromCenter(Vector2f.ZERO_VECTOR, 5, 5);
 		List<IVector2> smallCorners = smallRect.getCorners();

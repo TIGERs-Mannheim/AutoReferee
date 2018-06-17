@@ -194,7 +194,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	
 	private IGameEvent buildIcingResult(final BotID lastTouched, final IVector2 lastTouchedPos, final long ts)
 	{
-		IVector2 kickPos = AutoRefMath.getClosestFreekickPos(lastTouchedPos, lastTouched.getTeamColor().opposite());
+		IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(lastTouchedPos, lastTouched.getTeamColor().opposite());
 		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, lastTouched.getTeamColor().opposite(),
 				kickPos);
 		return new GameEvent(EGameEvent.ICING, ts, lastTouched, action);

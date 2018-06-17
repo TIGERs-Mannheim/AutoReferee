@@ -180,7 +180,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			double distance = AutoRefMath.distanceToNearestPointOutside(opponentPenArea, Geometry.getBotRadius(),
 					curKicker.getPos());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, curKickerColor.opposite(),
-					AutoRefMath.getClosestFreekickPos(curKicker.getPos(), curKickerColor.opposite()));
+					AutoRefMath.getClosestFreeKickPos(curKicker.getPos(), curKickerColor.opposite()));
 			
 			GameEvent violation = new DistanceViolation(EGameEvent.ATTACKER_IN_DEFENSE_AREA, frame.getTimestamp(),
 					curKickerId, followUp, distance);
@@ -215,7 +215,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			
 			double distance = AutoRefMath.distanceToNearestPointOutside(ownPenArea, Geometry.getBotRadius(),
 					curKicker.getPos());
-			IVector2 freekickPos = AutoRefMath.getClosestFreekickPos(curKicker.getPos(), curKickerColor.opposite());
+			IVector2 freekickPos = AutoRefMath.getClosestFreeKickPos(curKicker.getPos(), curKickerColor.opposite());
 			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, curKickerColor.opposite(),
 					freekickPos);
 			CardPenalty cardPenalty = new CardPenalty(CardType.CARD_YELLOW, curKickerColor);

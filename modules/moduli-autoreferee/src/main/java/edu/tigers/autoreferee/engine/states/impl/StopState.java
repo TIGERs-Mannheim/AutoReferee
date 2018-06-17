@@ -4,9 +4,6 @@
 
 package edu.tigers.autoreferee.engine.states.impl;
 
-import static edu.tigers.autoreferee.engine.AutoRefMath.DEFENSE_AREA_GOAL_LINE_DISTANCE;
-import static edu.tigers.autoreferee.engine.AutoRefMath.THROW_IN_DISTANCE;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -349,8 +346,9 @@ public class StopState extends AbstractAutoRefState
 				// the infringement occurred.
 				double xSign = Math.signum(attackingTeamsPenArea.getGoalCenter().x());
 				double ySign = kickPos.y() > 0 ? 1 : -1;
-				return Vector2.fromXY(xSign * (Geometry.getFieldLength() / 2 - DEFENSE_AREA_GOAL_LINE_DISTANCE),
-						ySign * (Geometry.getFieldWidth() / 2 - THROW_IN_DISTANCE));
+				return Vector2.fromXY(
+						xSign * (Geometry.getFieldLength() / 2 - AutoRefMath.getOffenseFreeKickDistanceWithOffset()),
+						ySign * (Geometry.getFieldWidth() / 2 - AutoRefMath.getThrowInDistanceWithOffset()));
 			}
 			
 			IPenaltyArea opposingTeamsPenArea = NGeometry.getPenaltyArea(action.getTeamInFavor().opposite());
@@ -364,7 +362,7 @@ public class StopState extends AbstractAutoRefState
 			kickPos = NGeometry.getPenaltyArea(ETeamColor.BLUE).withMargin(margin).nearestPointOutside(kickPos);
 		}
 		
-		return NGeometry.getField().withMargin(-THROW_IN_DISTANCE).nearestPointInside(kickPos);
+		return NGeometry.getField().withMargin(-AutoRefMath.getThrowInDistanceWithOffset()).nearestPointInside(kickPos);
 	}
 	
 	

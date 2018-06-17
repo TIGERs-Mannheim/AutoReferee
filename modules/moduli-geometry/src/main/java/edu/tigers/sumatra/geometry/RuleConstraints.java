@@ -31,6 +31,16 @@ public class RuleConstraints
 	private static double ballPlacementTolerance = 100;
 	@Configurable(comment = "The max allowed robot height", defValue = "150.0")
 	private static double maxRobotHeight = 150;
+	@Configurable(defValue = "100.0", comment = "[mm] throw-in distance from field border")
+	private static double throwInDistance = 100;
+	@Configurable(defValue = "600.0", comment = "[mm] distance to goalLine if freeKick was awarded to defending team inside "
+			+ "20mm radius of its own defense area")
+	private static double distanceToGoalLine = 600;
+	@Configurable(defValue = "700.0", comment = "[mm] distance to defense area when freekick was awarded to attacking team "
+			+ "within 700mm distance of opposing defense area")
+	private static double offenseFreeKickDistance = 700;
+	@Configurable(defValue = "500.0", comment = "[mm] distance to goalLine after offensive team kicked ball over goaLine of defending team")
+	private static double goalKickDistance = 500;
 	
 	static
 	{
@@ -112,5 +122,29 @@ public class RuleConstraints
 	public static double getMaxRobotHeight()
 	{
 		return maxRobotHeight;
+	}
+	
+	
+	public static double getThrowInDistance()
+	{
+		return throwInDistance;
+	}
+	
+	
+	public static double getDistanceToGoalLine()
+	{
+		return distanceToGoalLine;
+	}
+	
+	
+	public static double getOffenseFreeKickDistance()
+	{
+		return offenseFreeKickDistance;
+	}
+	
+	
+	public static double getGoalKickDistance()
+	{
+		return goalKickDistance;
 	}
 }

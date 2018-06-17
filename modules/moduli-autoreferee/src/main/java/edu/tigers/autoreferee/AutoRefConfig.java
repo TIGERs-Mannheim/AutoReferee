@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee;
 
@@ -48,6 +48,9 @@ public class AutoRefConfig
 	
 	@Configurable(comment = "The port which will be used to connect to the refbox", defValue = "10007")
 	private static int refboxPort = 10007;
+	
+	@Configurable(defValue = "200.0", comment = "[mm] offset to placement positions for automatic ball placement")
+	private static double placementOffset = 200.0;
 	
 	static
 	{
@@ -162,5 +165,11 @@ public class AutoRefConfig
 	public static int getRefboxPort()
 	{
 		return refboxPort;
+	}
+	
+	
+	public static double getPlacementOffset()
+	{
+		return placementOffset;
 	}
 }
