@@ -8,10 +8,17 @@
  */
 package edu.tigers.autoref.view.ballspeed;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 
 import org.apache.commons.lang.NotImplementedException;
 
@@ -36,6 +43,9 @@ public class BallSpeedPanel extends BasePanel<IBallSpeedPanelListener> implement
 	private JCheckBox						stopChartCheckbox;
 	private JButton						pauseButton			= new JButton("Pause");
 	private JButton						resumeButton		= new JButton("Resume");
+	private JLabel lineInitialDescription = new JLabel("initial ball speed");
+	private JLabel lineSpeedDescription = new JLabel("ball speed");
+	private JLabel lineMaxDescription = new JLabel("maximum ball speed");
 	
 	
 	/**
@@ -84,7 +94,14 @@ public class BallSpeedPanel extends BasePanel<IBallSpeedPanelListener> implement
 		pauseButton.addActionListener(e -> informObserver(IBallSpeedPanelListener::pauseButtonPressed));
 		resumeButton.addActionListener(e -> informObserver(IBallSpeedPanelListener::resumeButtonPressed));
 		
+		lineMaxDescription.setForeground(Color.RED);
+		lineInitialDescription.setForeground(Color.GREEN);
+		lineSpeedDescription.setForeground(Color.BLUE);
+		
 		JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		southPanel.add(lineMaxDescription);
+		southPanel.add(lineInitialDescription);
+		southPanel.add(lineSpeedDescription);
 		southPanel.setBackground(Color.WHITE);
 		southPanel.add(pauseButton);
 		southPanel.add(resumeButton);
@@ -124,6 +141,16 @@ public class BallSpeedPanel extends BasePanel<IBallSpeedPanelListener> implement
 	public void addPoint(final long time, final double velocity)
 	{
 		chartPanel.addPoint(time, velocity);
+	}
+	
+	
+	/**
+	 * @param time
+	 * @param velocity
+	 */
+	public void addInitialVelPoint(final long time, final double velocity)
+	{
+		chartPanel.addInitialVelPoint(time, velocity);
 	}
 	
 	

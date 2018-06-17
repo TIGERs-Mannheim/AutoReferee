@@ -18,6 +18,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class BallSpeedModel
 {
 	private double		lastBallSpeed		= 0.0d;
+	private double lastEstimatedBallSpeed = 0.0d;
 	
 	private GameState	lastState			= GameState.HALT;
 	private boolean	gameStateChanged	= false;
@@ -44,7 +45,11 @@ public class BallSpeedModel
 		}
 		
 		lastBallSpeed = wFrameWrapper.getSimpleWorldFrame().getBall().getVel().getLength();
+		lastEstimatedBallSpeed = wFrameWrapper.getSimpleWorldFrame().getKickFitState().get().getKickVel().getLength()
+				/ 1000.;
+		
 		lastState = curState;
+		
 	}
 	
 	
@@ -81,5 +86,11 @@ public class BallSpeedModel
 	public boolean hasGameStateChanged()
 	{
 		return gameStateChanged;
+	}
+	
+	
+	public double getLastEstimatedBallSpeed()
+	{
+		return lastEstimatedBallSpeed;
 	}
 }
