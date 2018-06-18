@@ -81,11 +81,11 @@ public class StopState extends AbstractAutoRefState
 {
 	private static final Color PLACEMENT_CIRCLE_COLOR = Color.BLUE;
 	
-	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state", defValue = "2000")
-	private static long stopWaitTimeMs = 2_000;
+	@Configurable(comment = "[ms] Time to wait before performing an action after reaching the stop state", defValue = "1500")
+	private static long stopWaitTimeMs = 1500;
 	
-	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly", defValue = "3000")
-	private static long readyWaitTimeMs = 3_000;
+	@Configurable(comment = "[ms] The time to wait after all bots have come to a stop and the ball has been placed correctly", defValue = "1500")
+	private static long readyWaitTimeMs = 1500;
 	
 	@Configurable(comment = "Simulation only: Move the ball slowly towards target instead of just placing it", defValue = "true")
 	private static boolean moveBallSlowlyToTarget = true;

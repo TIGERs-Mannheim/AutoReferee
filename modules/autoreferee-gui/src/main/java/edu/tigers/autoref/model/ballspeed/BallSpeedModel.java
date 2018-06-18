@@ -1,14 +1,11 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Mar 31, 2016
- * Author(s): "Lukas Magel"
- * *********************************************************
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoref.model.ballspeed;
 
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -17,19 +14,11 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  */
 public class BallSpeedModel
 {
-	private double		lastBallSpeed		= 0.0d;
+	private double lastBallSpeed = 0.0d;
 	private double lastEstimatedBallSpeed = 0.0d;
 	
-	private GameState	lastState			= GameState.HALT;
-	private boolean	gameStateChanged	= false;
-	
-	
-	/**
-	 * 
-	 */
-	public BallSpeedModel()
-	{
-	}
+	private GameState lastState = GameState.HALT;
+	private boolean gameStateChanged = false;
 	
 	
 	/**
@@ -45,8 +34,10 @@ public class BallSpeedModel
 		}
 		
 		lastBallSpeed = wFrameWrapper.getSimpleWorldFrame().getBall().getVel().getLength();
-		lastEstimatedBallSpeed = wFrameWrapper.getSimpleWorldFrame().getKickFitState().get().getKickVel().getLength()
-				/ 1000.;
+		lastEstimatedBallSpeed = wFrameWrapper.getSimpleWorldFrame().getKickFitState()
+				.map(BallKickFitState::getKickVel)
+				.map(IVector3::getLength).orElse(0.0)
+				/ 1000.0;
 		
 		lastState = curState;
 		

@@ -51,13 +51,7 @@ public class PlaceBallState extends AbstractAutoRefState
 	@Override
 	public void doUpdate(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
-		if (placementNotPossible(ctx))
-		{
-			// No idea where the ball is supposed to be placed, this situation needs to be fixed by the human ref
-			return;
-		}
-		
-		IVector2 targetPos = ctx.getFollowUpAction().getNewBallPosition().orElseThrow(IllegalStateException::new);
+		IVector2 targetPos = frame.getRefereeMsg().getBallPlacementPosNeutral();
 		if (criteriaAreMet(frame, targetPos))
 		{
 			// The ball has been placed at the kick position. Return to the stopped state to perform the action
@@ -93,29 +87,24 @@ public class PlaceBallState extends AbstractAutoRefState
 	}
 	
 	
-	private boolean placementNotPossible(final IAutoRefStateContext ctx)
-	{
-		return (ctx.getFollowUpAction() == null) || !ctx.getFollowUpAction().getNewBallPosition().isPresent();
-	}
-	
-	
 	private RefboxRemoteCommand determineNextAction(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
 		final RefboxRemoteCommand cmd;
-		if (frame.getGameState().getForTeam() != ctx.getFollowUpAction().getTeamInFavor()
-				&& ctx.getFollowUpAction().getTeamInFavor() != ETeamColor.NEUTRAL)
+		if (ctx.getFollowUpAction() == null ||
+				(frame.getGameState().getForTeam() != ctx.getFollowUpAction().getTeamInFavor()
+						&& ctx.getFollowUpAction().getTeamInFavor() != ETeamColor.NEUTRAL))
 		{
 			// ball placement failed, but was not executed by team in favor
 			GameEvent gameEvent = new GameEvent(EGameEvent.BALL_PLACEMENT_FAILED,
 					frame.getTimestamp(),
-					ctx.getFollowUpAction().getTeamInFavor().opposite(),
+					frame.getRefereeMsg().getCommand() == Command.BALL_PLACEMENT_BLUE ? ETeamColor.BLUE : ETeamColor.YELLOW,
 					null);
 			cmd = new RefboxRemoteCommand(Command.STOP, gameEvent.toProtobuf());
 		} else
 		{
 			FollowUpAction followUpAction = new FollowUpAction(FollowUpAction.EActionType.INDIRECT_FREE,
 					frame.getGameState().getForTeam().opposite(),
-					ctx.getFollowUpAction().getNewBallPosition().orElseThrow(IllegalStateException::new));
+					frame.getRefereeMsg().getBallPlacementPosNeutral());
 			GameEvent gameEvent = new GameEvent(EGameEvent.BALL_PLACEMENT_FAILED,
 					frame.getTimestamp(),
 					frame.getGameState().getForTeam(),

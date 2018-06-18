@@ -7,6 +7,7 @@ package edu.tigers.sumatra.math.circle;
 import static java.lang.Math.abs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,6 +134,34 @@ public final class CircleMath
 		Rectangle rect = Rectangle.fromLineSegment(line);
 		candidates.removeIf(c -> !rect.isPointInShape(c));
 		return candidates;
+	}
+	
+	
+	public static List<IVector2> circleIntersections(final ICircle firstCircle, final ICircle secondCircle)
+	{
+		double distBetweenCircles = firstCircle.center().distanceTo(secondCircle.center());
+		double firstRadius = firstCircle.radius();
+		double secondRadius = secondCircle.radius();
+		double firstRadius2 = firstRadius * firstRadius;
+		double distBetweenCircles2 = distBetweenCircles * distBetweenCircles;
+		double secondRadius2 = secondRadius * secondRadius;
+		if (firstRadius + secondRadius < distBetweenCircles || distBetweenCircles < 0.0001)
+		{
+			return Collections.emptyList();
+		}
+		
+		
+		double a = (firstRadius2 - secondRadius2 + distBetweenCircles2) / (2 * distBetweenCircles);
+		double h = Math.sqrt(firstRadius2 - a * a);
+		
+		
+		IVector2 direction = secondCircle.center().subtractNew(firstCircle.center()).scaleTo(a);
+		IVector2 heightVector = direction.getNormalVector().scaleTo(h);
+		
+		List<IVector2> intersections = new ArrayList<>();
+		intersections.add(firstCircle.center().addNew(direction).add(heightVector));
+		intersections.add(firstCircle.center().addNew(direction).add(heightVector.multiplyNew(-1)));
+		return intersections;
 	}
 	
 	

@@ -25,6 +25,7 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 public class DrawableArc extends Arc implements IDrawableShape
 {
 	private Color color;
+	private boolean fill = false;
 	
 	
 	@SuppressWarnings("unused") // used by berkeley
@@ -61,6 +62,10 @@ public class DrawableArc extends Arc implements IDrawableShape
 				extendAngle, Arc2D.PIE);
 		g.setColor(color);
 		g.draw(arcShape);
+		if (fill)
+		{
+			g.fill(arcShape);
+		}
 	}
 	
 	
@@ -69,4 +74,12 @@ public class DrawableArc extends Arc implements IDrawableShape
 	{
 		this.color = color;
 	}
+	
+	
+	@Override
+	public void setFill(final boolean fill)
+	{
+		this.fill = fill;
+	}
+	
 }

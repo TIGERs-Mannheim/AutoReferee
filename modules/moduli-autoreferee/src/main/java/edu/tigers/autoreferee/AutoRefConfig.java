@@ -37,8 +37,8 @@ public class AutoRefConfig
 	@Configurable(comment = "[m/s] The velocity below which a bot is considered to be stationary", defValue = "0.3")
 	private static double botStationarySpeedThreshold = 0.3;
 	
-	@Configurable(comment = "[m/s] The velocity below which the ball is considered to be stationary", defValue = "0.1")
-	private static double ballStationarySpeedThreshold = 0.1;
+	@Configurable(comment = "[m/s] The velocity below which the ball is considered to be stationary", defValue = "0.2")
+	private static double ballStationarySpeedThreshold = 0.2;
 	
 	@Configurable(comment = "[ms] The time each team has to place the ball", defValue = "30000")
 	private static int ballPlacementWindow = 30_000;

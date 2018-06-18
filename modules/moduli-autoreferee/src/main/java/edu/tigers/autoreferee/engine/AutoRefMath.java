@@ -216,7 +216,7 @@ public class AutoRefMath
 	public static boolean botStopDistanceIsCorrect(final Collection<ITrackedBot> bots, IVector2 ballPos)
 	{
 		return bots.stream().allMatch(
-				bot -> VectorMath.distancePP(bot.getPos(), ballPos) > RuleConstraints.getStopRadius());
+				bot -> VectorMath.distancePP(bot.getPos(), ballPos) >= RuleConstraints.getStopRadius() - 10);
 	}
 	
 	
