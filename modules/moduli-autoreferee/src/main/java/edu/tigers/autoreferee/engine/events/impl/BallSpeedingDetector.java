@@ -4,6 +4,8 @@
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
@@ -18,6 +20,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.vision.data.IKickEvent;
@@ -39,6 +42,8 @@ public class BallSpeedingDetector extends AGameEventDetector
 	private static double maxWaitingTime = 0.8;
 	
 	private IKickEvent lastReportedKickEvent;
+	
+	private Map<ETeamColor, Integer> counter = new EnumMap<>(ETeamColor.class);
 	
 	static
 	{
@@ -81,6 +86,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 				&& kickEstimateIsReady(frame, currentKickEvent))
 		{
 			lastReportedKickEvent = currentKickEvent;
+			counter.computeIfPresent(currentKickEvent.getKickingBot().getTeamColor(), (k, v) -> v + 1);
 			SpeedViolation violation;
 			if (lastKickFitState.getKickPos().distanceTo(currentKickEvent.getPosition()) < 1000)
 			{
@@ -146,7 +152,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 				kickPos);
 		
 		return new SpeedViolation(EGameEvent.BALL_SPEED, timestamp,
-				violator, action, lastSpeedEstimate, Collections.emptyList());
+				violator, action, lastSpeedEstimate, Collections.emptyList(), counter.get(violator.getTeamColor()));
 	}
 	
 	

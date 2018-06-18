@@ -178,11 +178,15 @@ public class BotCollisionDetector extends AGameEventDetector
 			cardPenalties
 					.forEach(c -> collisionCounterPunished.put(c.getCardTeam(), collisionCounter.get(c.getCardTeam())));
 			
-			return Optional.of(new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
+			CrashViolation violation = new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
 					primaryBot, crashVel, velDiff, followUp, cardPenalties)
 							.setSecondResponsibleBot(secondaryViolator)
 							.setSpeedPrimaryBot(primarySpeed)
-							.setSpeedSecondaryBot(secondarySpeed));
+							.setSpeedSecondaryBot(secondarySpeed);
+			
+			violation.setCustomMessage(String.format("Crash No %d: collided @ %.2f (Δv=%.2f)",
+					collisionCounterPunished.get(primaryBot.getTeamColor()), crashVel, velDiff));
+			return Optional.of(violation);
 		}
 		return Optional.empty();
 	}

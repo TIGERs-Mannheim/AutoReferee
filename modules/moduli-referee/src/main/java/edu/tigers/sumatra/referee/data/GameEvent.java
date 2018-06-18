@@ -116,7 +116,7 @@ public class GameEvent
 		}
 		if (!message.isEmpty())
 		{
-			sb.append('(');
+			sb.append(" (");
 			sb.append(message);
 			sb.append(')');
 		}

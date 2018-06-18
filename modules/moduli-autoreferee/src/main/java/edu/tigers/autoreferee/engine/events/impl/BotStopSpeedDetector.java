@@ -156,7 +156,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 			counter.entrySet().forEach(e -> e.setValue(e.getValue() % numInfringementsPerYellowCard));
 
 			SpeedViolation violation = new SpeedViolation(EGameEvent.ROBOT_STOP_SPEED, frame.getTimestamp(), violator,
-					null, bot.getVel().getLength(), cardPenalties);
+					null, bot.getVel().getLength(), cardPenalties, counter.get(violator.getTeamColor()));
 			return Optional.of(violation);
 		}
 		

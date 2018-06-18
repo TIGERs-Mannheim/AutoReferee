@@ -28,6 +28,7 @@ public class GameEvent implements IGameEvent
 	private final List<CardPenalty> cardPenalties;
 	
 	private String cachedLogString = null;
+	private String customMessage = null;
 	
 	
 	public GameEvent(final EGameEvent eventType, final long timestamp,
@@ -83,6 +84,10 @@ public class GameEvent implements IGameEvent
 			originator.setBotId(responsibleBot.getNumber());
 		}
 		event.setOriginator(originator);
+		if (customMessage != null)
+		{
+			event.setMessage(customMessage);
+		}
 		return event.build();
 	}
 	
@@ -154,6 +159,11 @@ public class GameEvent implements IGameEvent
 			builder.append(" | Team: ");
 			builder.append(responsibleTeam);
 		}
+		if (customMessage != null)
+		{
+			builder.append(" | ");
+			builder.append(customMessage);
+		}
 		return builder.toString();
 	}
 	
@@ -179,5 +189,11 @@ public class GameEvent implements IGameEvent
 	public List<CardPenalty> getCardPenalties()
 	{
 		return Collections.unmodifiableList(cardPenalties);
+	}
+	
+	
+	public void setCustomMessage(final String customMessage)
+	{
+		this.customMessage = customMessage;
 	}
 }

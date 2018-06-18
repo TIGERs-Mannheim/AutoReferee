@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source.refbox;
 
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply.Outcome;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest.CardInfo;
@@ -36,9 +37,10 @@ public class RefBoxEngine
 	private static final int EXTRA_TIME_MIN = 5;
 	private static final int BREAK_TIME_MIN = 5;
 	private static final int SHOOTOUT_BREAK_TIME_MIN = 2;
-
+	
 	private Stage stage = Stage.NORMAL_FIRST_HALF_PRE;
 	private Command command = Command.HALT;
+	private SSL_Referee_Game_Event gameEvent = null;
 	private int stageTimeLeft = (int) TimeUnit.MINUTES.toMicros(HALF_TIME_MIN);
 	private int commandCounter = 0;
 	private Map<ETeamColor, TeamData> teams = new EnumMap<>(ETeamColor.class);
@@ -113,6 +115,11 @@ public class RefBoxEngine
 		msgBuilder.setCommandTimestamp(lastCommandTimestamp);
 		msgBuilder.setBlue(getTeamInfo(ETeamColor.BLUE));
 		msgBuilder.setYellow(getTeamInfo(ETeamColor.YELLOW));
+		
+		if (gameEvent != null)
+		{
+			msgBuilder.setGameEvent(gameEvent);
+		}
 		
 		if ((command == Command.BALL_PLACEMENT_BLUE) || (command == Command.BALL_PLACEMENT_YELLOW))
 		{
@@ -260,6 +267,10 @@ public class RefBoxEngine
 		command = request.getCommand();
 		++commandCounter;
 		
+		if (request.hasGameEvent())
+		{
+			gameEvent = request.getGameEvent();
+		}
 		return Outcome.OK;
 	}
 	

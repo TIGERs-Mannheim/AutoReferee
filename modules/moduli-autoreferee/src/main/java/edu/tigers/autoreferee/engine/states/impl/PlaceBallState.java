@@ -89,6 +89,14 @@ public class PlaceBallState extends AbstractAutoRefState
 	
 	private RefboxRemoteCommand determineNextAction(final IAutoRefFrame frame, final IAutoRefStateContext ctx)
 	{
+		int numberOfFailures = ctx.getAutoRefGlobalState().getFailedBallPlacements()
+				.getOrDefault(frame.getGameState().getForTeam(), 0) + 1;
+		String customMessage = null;
+		if (numberOfFailures > 1)
+		{
+			customMessage = String.format("Placement failed %d times in a row", numberOfFailures);
+		}
+		
 		final RefboxRemoteCommand cmd;
 		if (ctx.getFollowUpAction() == null ||
 				(frame.getGameState().getForTeam() != ctx.getFollowUpAction().getTeamInFavor()
@@ -99,6 +107,7 @@ public class PlaceBallState extends AbstractAutoRefState
 					frame.getTimestamp(),
 					frame.getRefereeMsg().getCommand() == Command.BALL_PLACEMENT_BLUE ? ETeamColor.BLUE : ETeamColor.YELLOW,
 					null);
+			gameEvent.setCustomMessage(customMessage);
 			cmd = new RefboxRemoteCommand(Command.STOP, gameEvent.toProtobuf());
 		} else
 		{
@@ -109,6 +118,7 @@ public class PlaceBallState extends AbstractAutoRefState
 					frame.getTimestamp(),
 					frame.getGameState().getForTeam(),
 					followUpAction);
+			gameEvent.setCustomMessage(customMessage);
 			ctx.setFollowUpAction(followUpAction);
 			cmd = new RefboxRemoteCommand(Command.STOP, gameEvent.toProtobuf());
 		}

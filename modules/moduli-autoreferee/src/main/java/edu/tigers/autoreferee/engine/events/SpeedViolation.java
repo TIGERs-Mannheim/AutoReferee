@@ -20,10 +20,20 @@ public class SpeedViolation extends GameEvent
 	
 	
 	public SpeedViolation(final EGameEvent eventType, final long timestamp, final BotID botAtFault,
-			final FollowUpAction followUp, final double speed, final List<CardPenalty> cardPenalties)
+			final FollowUpAction followUp, final double speed, final List<CardPenalty> cardPenalties, Integer count)
 	{
 		super(eventType, timestamp, botAtFault, followUp, cardPenalties);
 		this.speed = speed;
+		if (eventType == EGameEvent.BALL_SPEED)
+		{
+			this.setCustomMessage(
+					String.format("Ball was too fast @ %.2f m/s (%dth violation of this kind)", speed, count));
+		} else if (eventType == EGameEvent.ROBOT_STOP_SPEED)
+		{
+			this.setCustomMessage(
+					String.format("Bot was too fast @ %.2f m/s (%dth violation of this kind)", speed, count));
+		}
+		
 	}
 	
 	
