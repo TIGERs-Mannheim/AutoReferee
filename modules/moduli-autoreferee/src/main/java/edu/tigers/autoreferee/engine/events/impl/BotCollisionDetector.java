@@ -184,8 +184,15 @@ public class BotCollisionDetector extends AGameEventDetector
 							.setSpeedPrimaryBot(primarySpeed)
 							.setSpeedSecondaryBot(secondarySpeed);
 			
-			violation.setCustomMessage(String.format("%s collided into %s @ %.2f m/s (Δv= %.2f m/s)  ",
-					primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff));
+			if (secondaryViolator == null)
+			{
+				violation.setCustomMessage(String.format("%s collided into %s @ %.2f m/s (Δv= %.2f m/s)  ",
+						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff));
+			} else
+			{
+				violation.setCustomMessage(String.format("Both %s and %s collided @ %.2f m/s (Δv= %.2f m/s)  ",
+						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff));
+			}
 			return Optional.of(violation);
 		}
 		return Optional.empty();
