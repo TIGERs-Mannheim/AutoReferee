@@ -19,7 +19,9 @@ public enum EVisualizerOptions implements IShapeLayer
 	/**  */
 	TURN_NEXT("Visualizer", "horizontal field"),
 	/**  */
-	RESET_FIELD("Visualizer", "reset field"),;
+	RESET_FIELD("Visualizer", "reset field"),
+	/**  */
+	DARK("Visualizer", "dark mode"),;
 	
 	
 	private final String name;

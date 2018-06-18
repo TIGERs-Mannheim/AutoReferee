@@ -111,16 +111,26 @@ public class ReplayLoadMenu extends JMenu
 			{
 				JMenu subMenu = new JMenu(file.getName());
 				menu.add(subMenu);
+				
 				for (File d : dirs)
 				{
 					addFileToMenu(d, subMenu);
 				}
+				
 				return;
 			}
 		}
-		JMenuItem item = new JMenuItem(file.getName());
-		item.addActionListener(new ComboBoxListener(file.getAbsolutePath()));
-		menu.add(item);
+		JMenu subsubMenu = new JMenu(file.getName());
+		menu.add(subsubMenu);
+		
+		JMenuItem rename = new JMenuItem("rename");
+		JMenuItem run = new JMenuItem("run");
+		
+		subsubMenu.add(run);
+		subsubMenu.add(rename);
+		
+		run.addActionListener(new RunActionListener(file.getAbsolutePath()));
+		rename.addActionListener(new RenameActionListener(file.getAbsolutePath()));
 	}
 	
 	
@@ -186,27 +196,53 @@ public class ReplayLoadMenu extends JMenu
 		}
 	}
 	
-	private class ComboBoxListener implements ActionListener
+	private class RunActionListener implements ActionListener
 	{
-		private final String fileName;
+		
+		private final String filename;
 		
 		
-		/**
-		 * 
-		 */
-		private ComboBoxListener(final String fileName)
+		public RunActionListener(String filename)
 		{
-			this.fileName = fileName;
+			this.filename = filename;
 		}
 		
 		
 		@Override
-		public void actionPerformed(final ActionEvent arg0)
+		public void actionPerformed(final ActionEvent e)
 		{
-			Thread loadThread = new Thread(new LoadDatabase(fileName), "LoadDatabase");
+			Thread loadThread = new Thread(new LoadDatabase(filename), "LoadDatabase");
 			loadThread.start();
 		}
 	}
+	
+	private class RenameActionListener implements ActionListener
+	{
+		
+		private final String filename;
+		
+		
+		public RenameActionListener(String filename)
+		{
+			this.filename = filename;
+		}
+		
+		
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			File file = new File(filename);
+			String newName = (String) JOptionPane.showInputDialog(null,
+					"Change file name. Rename it to: ",
+					"Rename File", JOptionPane.PLAIN_MESSAGE, null, null,
+					file.getName());
+			if (newName != null && !(file.renameTo(new File(file.getParent() + File.separator + newName))))
+			{
+				log.error("Renaming file failed.");
+			}
+		}
+	}
+	
 	
 	private class SetDefaultPathListener implements ActionListener
 	{
