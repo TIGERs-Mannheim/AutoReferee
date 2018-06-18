@@ -15,6 +15,7 @@ import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.model.SumatraModel;
 
 
 /**
@@ -41,8 +42,12 @@ public class RunningState extends AbstractAutoRefState
 				ETeamColor teamInFavor = gameEvent.getResponsibleTeam();
 				Command goalCmd = teamInFavor == ETeamColor.BLUE ? Command.GOAL_BLUE : Command.GOAL_YELLOW;
 				
-				ctx.sendCommand(new RefboxRemoteCommand(goalCmd, null));
 				ctx.sendCommand(new RefboxRemoteCommand(Command.STOP, gameEvent.toProtobuf()));
+				if ("SUMATRA".equalsIgnoreCase(SumatraModel.getInstance().getEnvironment()))
+				{
+					// only send goals in simulation
+					ctx.sendCommand(new RefboxRemoteCommand(goalCmd, null));
+				}
 				ctx.setFollowUpAction(gameEvent.getFollowUpAction());
 				return true;
 			case INDIRECT_GOAL:

@@ -5,9 +5,7 @@
 package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,8 +21,6 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.referee.data.GameState;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 
 
@@ -52,8 +48,8 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 {
 	private static final int PRIORITY = 1;
 	
-	private static final Set<EGameState> VALID_PREVIOUS_STATES = Collections.unmodifiableSet(EnumSet.of(
-			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE));
+	private static final Set<EGameState> VALID_STATES = Collections.unmodifiableSet(EnumSet.of(
+			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE, EGameState.RUNNING));
 	
 	static
 	{
@@ -62,11 +58,12 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	
 	private BotID kickerID = null;
 	private boolean stillTouching = true;
+	private boolean violationRaised = false;
 	
 	
 	public DoubleTouchDetector()
 	{
-		super(EGameEventDetectorType.DOUBLE_TOUCH, EGameState.RUNNING);
+		super(EGameEventDetectorType.DOUBLE_TOUCH, VALID_STATES);
 	}
 	
 	
@@ -82,21 +79,30 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	{
 		kickerID = null;
 		stillTouching = true;
-		
-		List<GameState> stateHistory = frame.getStateHistory();
-		if ((stateHistory.size() > 1) && VALID_PREVIOUS_STATES.contains(stateHistory.get(1).getState()))
-		{
-			kickerID = frame.getWorldFrame().getBots().values().stream()
-					.min(Comparator.comparingDouble(b -> b.getPos().distanceTo(frame.getWorldFrame().getBall().getPos())))
-					.map(ITrackedBot::getBotId)
-					.orElse(null);
-		}
+		violationRaised = false;
 	}
 	
 	
 	@Override
 	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
 	{
+		if (violationRaised)
+		{
+			return Optional.empty();
+		}
+		if (kickerID == null
+				&& !frame.getGameState().isRunning()
+				&& !frame.getBotsTouchingBall().isEmpty())
+		{
+			// find the kicker bot
+			kickerID = frame.getBotsTouchingBall().get(0).getBotID();
+		}
+		
+		if (kickerID == null)
+		{
+			return Optional.empty();
+		}
+		
 		if (frame.getBotsLastTouchedBall().stream().noneMatch(b -> b.getBotID().equals(kickerID)))
 		{
 			// The ball has been touched by another robot
@@ -117,6 +123,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 			// kicker touched the ball again
 			GameEvent violation = createViolation(frame);
 			kickerID = null;
+			violationRaised = true;
 			return Optional.of(violation);
 		}
 		

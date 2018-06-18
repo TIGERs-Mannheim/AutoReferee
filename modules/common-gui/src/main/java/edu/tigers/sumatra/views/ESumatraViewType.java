@@ -78,7 +78,9 @@ public enum ESumatraViewType
 	/** */
 	OFFENSIVE_ACTION_TREES(50, "Offensive ActionTrees"),
 	/** */
-	BALL_KICK_IDENT(51, "Ball & Kick Model");
+	BALL_KICK_IDENT(51, "Ball & Kick Model"),
+	/** */
+	SUPPORT_BEHAVIORS(52, "Support Behaviors");
 	
 	private final int id;
 	private final String title;

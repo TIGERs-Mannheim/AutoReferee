@@ -5,7 +5,8 @@ package edu.tigers.autoreferee.engine.events.impl;
 
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+
+import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -22,14 +23,15 @@ import edu.tigers.sumatra.referee.data.EGameState;
 
 /**
  * The kick timeout will stop the game and initiate a {@link Command#FORCE_START} command if the ball is not kicked
- * after {@link KickTimeoutDetector#FREEKICK_TIMEOUT_MS} seconds.
  * 
  * @author Lukas Magel
  */
 public class KickTimeoutDetector extends APreparingGameEventDetector
 {
 	private static final int PRIORITY = 1;
-	private static final long FREEKICK_TIMEOUT_MS = 10_000;
+	
+	@Configurable(defValue = "10.0")
+	private static double freeKickTimeout = 10.0;
 	
 	private long entryTime;
 	private boolean kickTimedOut;
@@ -67,7 +69,7 @@ public class KickTimeoutDetector extends APreparingGameEventDetector
 		ETeamColor attackingColor = frame.getGameState().getForTeam();
 		
 		long curTime = frame.getTimestamp();
-		if (((curTime - entryTime) > TimeUnit.MILLISECONDS.toNanos(FREEKICK_TIMEOUT_MS)) && !kickTimedOut)
+		if (((curTime - entryTime) / 1e9 > freeKickTimeout) && !kickTimedOut)
 		{
 			kickTimedOut = true;
 			FollowUpAction followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, ballPos);

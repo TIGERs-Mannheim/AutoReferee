@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefGlobalState;
@@ -36,6 +38,9 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public class PlaceBallState extends AbstractAutoRefState
 {
 	private static final Logger log = Logger.getLogger(PlaceBallState.class.getName());
+	
+	@Configurable(defValue = "5")
+	private static int numberOfFailedPlacementsAllowed = 5;
 	
 	private boolean stopSend = false;
 	
@@ -67,7 +72,8 @@ public class PlaceBallState extends AbstractAutoRefState
 		
 		// Wait until the team has had enough time to place the ball
 		// For teams with 5 failed attempts, the placement will fail immediately
-		if (ctx.getAutoRefGlobalState().getFailedBallPlacements().getOrDefault(frame.getGameState().getForTeam(), 0) < 5
+		if (ctx.getAutoRefGlobalState().getFailedBallPlacements().getOrDefault(frame.getGameState().getForTeam(),
+				0) < numberOfFailedPlacementsAllowed
 				&& (frame.getTimestamp() - getEntryTime()) < TimeUnit.MILLISECONDS
 						.toNanos(AutoRefConfig.getBallPlacementWindow()))
 		{

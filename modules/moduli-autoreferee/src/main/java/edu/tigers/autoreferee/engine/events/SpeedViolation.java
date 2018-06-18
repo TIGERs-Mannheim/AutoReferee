@@ -24,14 +24,28 @@ public class SpeedViolation extends GameEvent
 	{
 		super(eventType, timestamp, botAtFault, followUp, cardPenalties);
 		this.speed = speed;
+		
+		String countString = "";
+		if (count != null)
+		{
+			if (count == 1)
+				countString = "(1st violation of this kind)";
+			else if (count == 2)
+				countString = "(2nd violation of this kind)";
+			else if (count == 3)
+				countString = "(3rd violation of this kind)";
+			else
+				countString = String.format("(%sth violation of this kind)", count);
+		}
+		
 		if (eventType == EGameEvent.BALL_SPEED)
 		{
 			this.setCustomMessage(
-					String.format("Ball was too fast @ %.2f m/s (%dth violation of this kind)", speed, count));
+					String.format("Ball was too fast @ %.2f m/s %s", speed, countString));
 		} else if (eventType == EGameEvent.ROBOT_STOP_SPEED)
 		{
 			this.setCustomMessage(
-					String.format("Bot was too fast @ %.2f m/s (%dth violation of this kind)", speed, count));
+					String.format("Bot was too fast @ %.2f m/s %s", speed, countString));
 		}
 		
 	}
