@@ -42,7 +42,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 {
 	private static final int PRIORITY = 1;
 	
-	private static final double INACCURACY_TOLERANCE = 5;
+	private static final double INACCURACY_TOLERANCE = 15;
 	private static final Set<EGameState> ALLOWED_PREVIOUS_STATES;
 	
 	private boolean active = false;

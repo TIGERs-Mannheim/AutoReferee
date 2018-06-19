@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.model.SumatraModel;
@@ -112,11 +114,28 @@ public class ReplayLoadMenu extends JMenu
 				JMenu subMenu = new JMenu(file.getName());
 				menu.add(subMenu);
 				
-				for (File d : dirs)
+				subMenu.addMenuListener(new MenuListener()
 				{
-					addFileToMenu(d, subMenu);
-				}
-				
+					@Override
+					public void menuSelected(final MenuEvent menuEvent)
+					{
+						dirs.forEach(d -> addFileToMenu(d, subMenu));
+					}
+					
+					
+					@Override
+					public void menuDeselected(final MenuEvent menuEvent)
+					{
+						// no action
+					}
+					
+					
+					@Override
+					public void menuCanceled(final MenuEvent menuEvent)
+					{
+						// no action
+					}
+				});
 				return;
 			}
 		}
@@ -125,12 +144,15 @@ public class ReplayLoadMenu extends JMenu
 		
 		JMenuItem rename = new JMenuItem("rename");
 		JMenuItem run = new JMenuItem("run");
+		JMenuItem delete = new JMenuItem("delete");
 		
 		subsubMenu.add(run);
 		subsubMenu.add(rename);
+		subsubMenu.add(delete);
 		
 		run.addActionListener(new RunActionListener(file.getAbsolutePath()));
 		rename.addActionListener(new RenameActionListener(file.getAbsolutePath()));
+		delete.addActionListener(new DeleteActionListener(file.getAbsolutePath()));
 	}
 	
 	
@@ -239,6 +261,37 @@ public class ReplayLoadMenu extends JMenu
 			if (newName != null && !(file.renameTo(new File(file.getParent() + File.separator + newName))))
 			{
 				log.error("Renaming file failed.");
+			}
+		}
+	}
+	
+	private class DeleteActionListener implements ActionListener
+	{
+		
+		final String filename;
+		
+		
+		public DeleteActionListener(final String absolutePath)
+		{
+			this.filename = absolutePath;
+		}
+		
+		
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			
+			if (JOptionPane.showConfirmDialog(null, "Do you want to delete '" + filename + "'?", "Confirm deletion",
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+			{
+				log.info("Deleting '" + filename + "'...");
+				try
+				{
+					FileUtils.deleteDirectory(new File(filename));
+				} catch (IOException exception)
+				{
+					log.error("Replay deletion not successful!", exception);
+				}
 			}
 		}
 	}

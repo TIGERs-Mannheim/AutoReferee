@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -91,6 +92,16 @@ abstract class ARectangle implements IRectangle
 	{
 		return SumatraMath.isBetween(point.x(), minX(), maxX())
 				&& SumatraMath.isBetween(point.y(), minY(), maxY());
+	}
+	
+	
+	@Override
+	public boolean isCircleInShape(final ICircle circle)
+	{
+		return SumatraMath.isBetween(circle.center().x() + circle.radius(), minX(), maxX())
+				&& SumatraMath.isBetween(circle.center().x() - circle.radius(), minX(), maxX())
+				&& SumatraMath.isBetween(circle.center().y() + circle.radius(), minY(), maxY())
+				&& SumatraMath.isBetween(circle.center().y() - circle.radius(), minY(), maxY());
 	}
 	
 	

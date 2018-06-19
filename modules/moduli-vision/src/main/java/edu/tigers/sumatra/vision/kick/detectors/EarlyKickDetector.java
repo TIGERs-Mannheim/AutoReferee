@@ -41,8 +41,8 @@ public class EarlyKickDetector implements IKickDetector
 	@Configurable(comment = "Ball velocity threshold [mm/s]", defValue = "1000.0")
 	private static double velocityThreshold = 1000.0;
 	
-	@Configurable(comment = "A bot must be within this radius [mm]", defValue = "500.0")
-	private static double nearBotLimit = 500.0;
+	@Configurable(comment = "A bot must be within this radius [mm]", defValue = "150.0")
+	private static double nearBotLimit = 150.0;
 	
 	@Configurable(comment = "Fast ball direction change threshold [deg]", defValue = "20.0")
 	private static double directionThreshold = 20.0;
@@ -65,16 +65,6 @@ public class EarlyKickDetector implements IKickDetector
 		Optional<CamBall> camBall = ball.getLatestCamBall();
 		if (!camBall.isPresent())
 		{
-			return null;
-		}
-		
-		long numNearRobots = mergedRobots.stream()
-				.filter(b -> b.getPos().distanceTo(ball.getCamPos()) < nearBotLimit)
-				.count();
-		
-		if (numNearRobots == 0)
-		{
-			// no kicking robot nearby :(
 			return null;
 		}
 		
@@ -103,7 +93,7 @@ public class EarlyKickDetector implements IKickDetector
 			return null;
 		}
 		
-		if (!detectKick(camBallList))
+		if (!detectKick(camBallList, mergedRobots))
 		{
 			return null;
 		}
@@ -131,11 +121,21 @@ public class EarlyKickDetector implements IKickDetector
 	}
 	
 	
-	private boolean detectKick(final List<MergedBall> balls)
+	private boolean detectKick(final List<MergedBall> balls, final List<FilteredVisionBot> mergedRobots)
 	{
 		CamBall ball0 = balls.get(0).getLatestCamBall().get();
 		CamBall ball1 = balls.get(1).getLatestCamBall().get();
 		CamBall ball2 = balls.get(2).getLatestCamBall().get();
+		
+		long numNearRobots = mergedRobots.stream()
+				.filter(b -> b.getPos().distanceTo(ball0.getPos().getXYVector()) < nearBotLimit)
+				.count();
+		
+		if (numNearRobots == 0)
+		{
+			// no kicking robot nearby :(
+			return false;
+		}
 		
 		double t0 = (ball0.gettCapture() * 1e-9);
 		double t1 = (ball1.gettCapture() * 1e-9);

@@ -9,6 +9,7 @@ import java.util.Random;
 
 import edu.tigers.sumatra.export.IJsonString;
 import edu.tigers.sumatra.math.I2DShape;
+import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.vector.IVector2;
 
@@ -71,6 +72,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return
 	 */
 	IVector2 getRandomPointInShape(Random rnd);
+
+	boolean isCircleInShape(ICircle circle);
 	
 	
 	/**
