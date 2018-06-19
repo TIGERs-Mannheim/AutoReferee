@@ -63,4 +63,7 @@ public interface IGameEvent
 	 * @return the protobuf data format of this game event
 	 */
 	SSL_Referee_Game_Event toProtobuf();
+	
+	
+	boolean isStopGame();
 }

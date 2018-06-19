@@ -29,6 +29,7 @@ public class GameEvent implements IGameEvent
 	
 	private String cachedLogString = null;
 	private String customMessage = null;
+	private boolean stopGame = true;
 	
 	
 	public GameEvent(final EGameEvent eventType, final long timestamp,
@@ -195,5 +196,18 @@ public class GameEvent implements IGameEvent
 	public void setCustomMessage(final String customMessage)
 	{
 		this.customMessage = customMessage;
+	}
+	
+	
+	@Override
+	public boolean isStopGame()
+	{
+		return stopGame;
+	}
+	
+	
+	public void setStopGame(final boolean stopGame)
+	{
+		this.stopGame = stopGame;
 	}
 }

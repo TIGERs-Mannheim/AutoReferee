@@ -17,7 +17,6 @@ import edu.tigers.autoreferee.engine.AutoRefMath;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.states.IAutoRefState;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
@@ -147,14 +146,12 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 	public boolean handleGameEvent(final IGameEvent gameEvent, final IAutoRefStateContext ctx)
 	{
 		final SSL_Referee_Game_Event refereeGameEvent = gameEvent.toProtobuf();
-		if (gameEvent.getType() == EGameEvent.ROBOT_STOP_SPEED)
-		{
-			// robot stop speed is not stopped. It is only detected during stop phases and ball placement should not be
-			// canceled
-			ctx.sendCommand(new RefboxRemoteCommand(refereeGameEvent));
-		} else
+		if (gameEvent.isStopGame())
 		{
 			ctx.sendCommand(new RefboxRemoteCommand(Command.STOP, refereeGameEvent));
+		} else
+		{
+			ctx.sendCommand(new RefboxRemoteCommand(refereeGameEvent));
 		}
 		
 		gameEvent.getCardPenalties()

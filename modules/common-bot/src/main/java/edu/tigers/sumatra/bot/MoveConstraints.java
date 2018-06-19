@@ -179,6 +179,16 @@ public class MoveConstraints implements IExportable
 	
 	
 	/**
+	 * @param velMaxFast the velMaxFast to set
+	 */
+	public void setVelMaxFast(final double velMaxFast)
+	{
+		assert velMax >= 0 : "vel: " + velMaxFast;
+		this.velMaxFast = velMaxFast;
+	}
+	
+	
+	/**
 	 * @return the velMaxW
 	 */
 	public double getVelMaxW()

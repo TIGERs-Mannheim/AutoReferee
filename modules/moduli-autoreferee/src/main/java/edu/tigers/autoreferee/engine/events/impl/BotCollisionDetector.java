@@ -9,6 +9,7 @@ import static edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReq
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import edu.tigers.autoreferee.engine.events.CardPenalty;
 import edu.tigers.autoreferee.engine.events.CrashViolation;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
+import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
@@ -69,6 +71,9 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Configurable(comment = "Number of collision for all following yellow cards", defValue = "2")
 	private static int numCollisionPerYellowCard = 2;
 	
+	@Configurable(defValue = "false")
+	private static boolean stopGameOnCollisions = false;
+	
 	private final Map<BotID, Long> lastViolators = new HashMap<>();
 	
 	private final Map<ETeamColor, Integer> collisionCounter = new EnumMap<>(ETeamColor.class);
@@ -82,7 +87,16 @@ public class BotCollisionDetector extends AGameEventDetector
 	
 	public BotCollisionDetector()
 	{
-		super(EGameEventDetectorType.BOT_COLLISION, EGameState.RUNNING);
+		super(EGameEventDetectorType.BOT_COLLISION, EnumSet.of(
+				EGameState.RUNNING,
+				EGameState.STOP,
+				EGameState.INDIRECT_FREE,
+				EGameState.DIRECT_FREE,
+				EGameState.INDIRECT_FREE,
+				EGameState.BALL_PLACEMENT,
+				EGameState.PREPARE_PENALTY,
+				EGameState.PREPARE_KICKOFF,
+				EGameState.PENALTY));
 		collisionCounter.put(ETeamColor.YELLOW, 0);
 		collisionCounter.put(ETeamColor.BLUE, 0);
 	}
@@ -98,6 +112,45 @@ public class BotCollisionDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> update(final IAutoRefFrame frame)
 	{
+		if (frame.getGameState().isStoppedGame() && !stopGameOnCollisions)
+		{
+			final List<CardPenalty> cardPenalties = newCollisionCounter().entrySet().stream()
+					.filter(e -> e.getValue() >= numCollisionsAllowed(e.getKey()))
+					.map(e -> new CardPenalty(CARD_YELLOW, e.getKey()))
+					.collect(Collectors.toList());
+			
+			boolean blueTeam = cardPenalties.stream().anyMatch(c -> c.getCardTeam() == ETeamColor.BLUE);
+			boolean yellowTeam = cardPenalties.stream().anyMatch(c -> c.getCardTeam() == ETeamColor.YELLOW);
+			
+			ETeamColor originatingTeam;
+			String message;
+			if (blueTeam && yellowTeam)
+			{
+				originatingTeam = ETeamColor.NEUTRAL;
+				message = "Both team got a yellow card for robot collision";
+			} else if (blueTeam)
+			{
+				originatingTeam = ETeamColor.BLUE;
+				message = String.format("Yellow card for %d. robot collision", collisionCounter.get(originatingTeam));
+			} else if (yellowTeam)
+			{
+				originatingTeam = ETeamColor.YELLOW;
+				message = String.format("Yellow card for %d. robot collision", collisionCounter.get(originatingTeam));
+			} else
+			{
+				return Optional.empty();
+			}
+			
+			cardPenalties
+					.forEach(c -> collisionCounterPunished.put(c.getCardTeam(), collisionCounter.get(c.getCardTeam())));
+			
+			GameEvent gameEvent = new GameEvent(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
+					originatingTeam, null, cardPenalties);
+			gameEvent.setStopGame(false);
+			gameEvent.setCustomMessage(message);
+			
+			return Optional.of(gameEvent);
+		}
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		List<ITrackedBot> yellowBots = AutoRefUtil.filterByColor(bots, ETeamColor.YELLOW);
 		List<ITrackedBot> blueBots = AutoRefUtil.filterByColor(bots, ETeamColor.BLUE);
@@ -151,7 +204,7 @@ public class BotCollisionDetector extends AGameEventDetector
 			IVector2 kickPos = Lines.segmentFromPoints(pair.blueBot.getPos(), pair.yellowBot.getPos()).getCenter();
 			kickPos = AutoRefMath.getClosestFreeKickPos(kickPos, primaryBot.getTeamColor().opposite());
 			
-			final FollowUpAction followUp;
+			FollowUpAction followUp;
 			final BotID secondaryViolator;
 			if (Math.abs(velDiff) < minSpeedDiff)
 			{
@@ -175,23 +228,34 @@ public class BotCollisionDetector extends AGameEventDetector
 					.map(e -> new CardPenalty(CARD_YELLOW, e.getKey()))
 					.collect(Collectors.toList());
 			
-			cardPenalties
-					.forEach(c -> collisionCounterPunished.put(c.getCardTeam(), collisionCounter.get(c.getCardTeam())));
+			if (stopGameOnCollisions)
+			{
+				cardPenalties
+						.forEach(c -> collisionCounterPunished.put(c.getCardTeam(), collisionCounter.get(c.getCardTeam())));
+			} else
+			{
+				followUp = null;
+				cardPenalties.clear();
+			}
 			
 			CrashViolation violation = new CrashViolation(EGameEvent.BOT_COLLISION, frame.getTimestamp(),
-					primaryBot, crashVel, velDiff, followUp, cardPenalties)
+					primaryBot, crashVel, Math.abs(velDiff), followUp, cardPenalties)
 							.setSecondResponsibleBot(secondaryViolator)
 							.setSpeedPrimaryBot(primarySpeed)
 							.setSpeedSecondaryBot(secondarySpeed);
 			
+			violation.setStopGame(stopGameOnCollisions);
+			
 			if (secondaryViolator == null)
 			{
-				violation.setCustomMessage(String.format("%s collided into %s @ %.2f m/s (Δv= %.2f m/s)  ",
-						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff));
+				violation.setCustomMessage(String.format("%s collided into %s @ %.2f m/s (Δv %.2f m/s) (%d. time)",
+						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff,
+						collisionCounter.getOrDefault(primaryBot.getTeamColor(), 0)));
 			} else
 			{
-				violation.setCustomMessage(String.format("Both %s and %s collided @ %.2f m/s (Δv= %.2f m/s)  ",
-						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff));
+				violation.setCustomMessage(String.format("Both %s and %s collided @ %.2f m/s (Δv= %.2f m/s) (%d. time)",
+						primaryBot.getSaveableString(), secondaryBot.getSaveableString(), crashVel, velDiff,
+						collisionCounter.getOrDefault(primaryBot.getTeamColor(), 0)));
 			}
 			return Optional.of(violation);
 		}
