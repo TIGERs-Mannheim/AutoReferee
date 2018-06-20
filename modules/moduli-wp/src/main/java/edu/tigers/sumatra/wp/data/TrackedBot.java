@@ -110,7 +110,7 @@ public final class TrackedBot implements ITrackedBot
 				.withBotId(botID)
 				.withTimestamp(timestamp)
 				.withState(State.zero())
-				.withLastBallContact(0)
+				.withLastBallContact(-10000000)
 				.withBotInfo(RobotInfo.stub(botID, timestamp));
 	}
 	

@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 
@@ -146,6 +147,12 @@ public class GameLog implements IGameLog
 	public GameLogEntry addEntry(final RefereeMsg refereeMsg)
 	{
 		return buildAndAddEntry(builder -> builder.setRefereeMsg(refereeMsg));
+	}
+	
+	
+	public GameLogEntry addEntry(final GameEvent refGameEvent)
+	{
+		return buildAndAddEntry(builder -> builder.setGameEvent(refGameEvent));
 	}
 	
 	

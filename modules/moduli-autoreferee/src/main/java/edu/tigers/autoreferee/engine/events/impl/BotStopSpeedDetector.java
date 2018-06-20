@@ -30,6 +30,7 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.events.SpeedViolation;
+import edu.tigers.autoreferee.generic.TeamData;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
@@ -54,7 +55,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	
 	@Configurable(comment = "Number of infringements allowed, until a yellow card is issued", defValue = "3")
 	private static int numInfringementsPerYellowCard = 3;
-
+	
 	static
 	{
 		AGameEventDetector.registerClass(BotStopSpeedDetector.class);
@@ -63,7 +64,6 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	private long entryTime = 0;
 	private Map<BotID, Long> currentViolators = new HashMap<>();
 	private Set<BotID> lastViolators = new HashSet<>();
-	private Map<ETeamColor, Integer> counter = new EnumMap<>(ETeamColor.class);
 	private Map<ETeamColor, Boolean> infringementRecordedThisStopPhase = new EnumMap<>(ETeamColor.class);
 	
 	
@@ -73,8 +73,6 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	public BotStopSpeedDetector()
 	{
 		super(EGameEventDetectorType.BOT_STOP_SPEED, EGameState.STOP);
-		counter.put(ETeamColor.YELLOW, 0);
-		counter.put(ETeamColor.BLUE, 0);
 	}
 	
 	
@@ -144,21 +142,27 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 			
 			if (!infringementRecordedThisStopPhase.getOrDefault(violator.getTeamColor(), true))
 			{
-				counter.computeIfPresent(violator.getTeamColor(), (k, v) -> v + 1);
+				frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == violator.getTeamColor())
+						.forEach(TeamData::botStopSpeeding);
 				infringementRecordedThisStopPhase.put(violator.getTeamColor(), true);
-				log.info("New bot stop speed infringement counter: " + counter);
+				log.info("New bot stop speed infringement counter: "
+						+ frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == violator.getTeamColor())
+								.mapToInt(TeamData::getBotStopSpeeding).findFirst().orElse(0));
 			}
-
-			final List<CardPenalty> cardPenalties = counter.entrySet().stream()
-					.filter(e -> e.getValue() >= numInfringementsPerYellowCard)
-					.map(e -> new CardPenalty(CARD_YELLOW, e.getKey()))
+			
+			final List<CardPenalty> cardPenalties = frame.getTeamInfo().stream()
+					.filter(e -> e.getBotStopSpeeding() >= numInfringementsPerYellowCard)
+					.map(e -> new CardPenalty(CARD_YELLOW, e.getTeamColor()))
 					.collect(Collectors.toList());
-
+			
 			SpeedViolation violation = new SpeedViolation(EGameEvent.ROBOT_STOP_SPEED, frame.getTimestamp(), violator,
-					null, bot.getVel().getLength(), cardPenalties, counter.get(violator.getTeamColor()));
+					null, bot.getVel().getLength(), cardPenalties,
+					frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == violator.getTeamColor())
+							.mapToInt(TeamData::getBotStopSpeeding).findFirst().orElse(0));
 			violation.setStopGame(false);
 			
-			counter.entrySet().forEach(e -> e.setValue(e.getValue() % numInfringementsPerYellowCard)); // reset counter
+			frame.getTeamInfo().forEach(e -> e.setBotStopSpeeding(e.getBotStopSpeeding() % numInfringementsPerYellowCard)); // reset
+																																									// counter
 			
 			return Optional.of(violation);
 		}

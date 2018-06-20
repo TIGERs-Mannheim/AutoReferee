@@ -59,6 +59,9 @@ public class ChipKickEstimator implements IKickEstimator
 	private final Map<Integer, CamCalibration> camCalib;
 	private final List<CamBall> records = new ArrayList<>();
 	private final List<CamBall> allRecords = new ArrayList<>();
+	private final long kickEventTimestamp;
+	private boolean usesPriorKnowledge;
+	
 	private int pruneIndex = 0;
 	
 	private final ChipKickSolverLin3Offset solverLin3;
@@ -103,6 +106,7 @@ public class ChipKickEstimator implements IKickEstimator
 	public ChipKickEstimator(final Map<Integer, CamCalibration> camCalib, final KickEvent event)
 	{
 		this.camCalib = camCalib;
+		kickEventTimestamp = event.getTimestamp();
 		
 		solverLin3 = new ChipKickSolverLin3Offset(event.getPosition(), event.getTimestamp(), camCalib);
 		solverLin5 = new ChipKickSolverLin5Offset(event.getPosition(), event.getTimestamp(), camCalib);
@@ -114,6 +118,8 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		records.addAll(camBalls);
 		allRecords.addAll(camBalls);
+		
+		usesPriorKnowledge = false;
 	}
 	
 	
@@ -139,6 +145,8 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		currentTraj = new ChipBallTrajectory(event.getPosition(), kickVel, event.getTimestamp());
 		fitResult = new KickFitResult(new ArrayList<>(), 0, currentTraj);
+		
+		usesPriorKnowledge = true;
 	}
 	
 	
@@ -159,6 +167,11 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		if (records.size() < minRecords)
 		{
+			if (usesPriorKnowledge)
+			{
+				computeFiteResult();
+			}
+			
 			return;
 		}
 		
@@ -192,6 +205,12 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		currentTraj = new ChipBallTrajectory(kickPos, kickVel, kickTimestamp);
 		
+		computeFiteResult();
+	}
+	
+	
+	private void computeFiteResult()
+	{
 		List<IVector2> modelPoints = records.stream()
 				.map(r -> currentTraj.getStateAtTimestamp(r.gettCapture()).getPos()
 						.projectToGroundNew(getCameraPosition(r.getCameraId())))
@@ -199,7 +218,7 @@ public class ChipKickEstimator implements IKickEstimator
 		
 		double avgDist = IntStream.range(0, records.size())
 				.mapToDouble(i -> modelPoints.get(i).distanceTo(records.get(i).getFlatPos()))
-				.average().orElse(Double.MAX_VALUE);
+				.average().orElse(0.0);
 		
 		if (records.size() >= 10)
 		{
@@ -284,10 +303,12 @@ public class ChipKickEstimator implements IKickEstimator
 	{
 		if (records.isEmpty())
 		{
-			return false;
+			boolean kickWasSomeTimeAgo = ((timestamp - kickEventTimestamp) * 1e-9) > 0.2;
+			return usesPriorKnowledge && kickWasSomeTimeAgo;
 		}
 		
-		if (((records.get(records.size() - 1).gettCapture() - records.get(0).gettCapture()) * 1e-9) < 0.1)
+		long tCaptureLastRecord = records.get(records.size() - 1).gettCapture();
+		if (((tCaptureLastRecord - records.get(0).gettCapture()) * 1e-9) < 0.1)
 		{
 			// keep this estimator for at least 0.1s
 			return false;

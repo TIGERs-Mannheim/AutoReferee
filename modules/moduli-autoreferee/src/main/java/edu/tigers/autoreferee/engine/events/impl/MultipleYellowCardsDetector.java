@@ -4,8 +4,6 @@
 
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
@@ -17,6 +15,7 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.generic.TeamData;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.data.EGameState;
 
@@ -32,14 +31,11 @@ public class MultipleYellowCardsDetector extends AGameEventDetector
 	private static int numberOfYellowCards = 3;
 	
 	private boolean penaltyGivenInThisStopPhase = false;
-	private final Map<ETeamColor, Integer> cardOffsets = new EnumMap<>(ETeamColor.class);
 	
 	
 	public MultipleYellowCardsDetector()
 	{
 		super(EGameEventDetectorType.MULTIPLE_YELLOW_CARDS, EGameState.STOP);
-		cardOffsets.put(ETeamColor.YELLOW, 0);
-		cardOffsets.put(ETeamColor.BLUE, 0);
 	}
 	
 	
@@ -59,9 +55,11 @@ public class MultipleYellowCardsDetector extends AGameEventDetector
 		}
 		
 		int blueCards = frame.getRefereeMsg().getTeamInfoBlue().getYellowCards()
-				- cardOffsets.get(ETeamColor.BLUE);
+				- frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == ETeamColor.BLUE)
+						.mapToInt(TeamData::getYellowCards).findFirst().orElse(0);
 		int yellowCards = frame.getRefereeMsg().getTeamInfoYellow().getYellowCards()
-				- cardOffsets.get(ETeamColor.YELLOW);
+				- frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == ETeamColor.YELLOW)
+						.mapToInt(TeamData::getYellowCards).findFirst().orElse(0);
 		
 		ETeamColor team;
 		if (blueCards >= numberOfYellowCards && yellowCards >= numberOfYellowCards)
@@ -78,7 +76,8 @@ public class MultipleYellowCardsDetector extends AGameEventDetector
 			return Optional.empty();
 		}
 		
-		cardOffsets.computeIfPresent(team, (k, v) -> v + numberOfYellowCards);
+		frame.getTeamInfo().stream().filter(data -> data.getTeamColor() == team)
+				.forEach(data -> data.addYellowCards(numberOfYellowCards));
 		penaltyGivenInThisStopPhase = true;
 		
 		FollowUpAction followUp = new FollowUpAction(FollowUpAction.EActionType.PENALTY, team.opposite(),

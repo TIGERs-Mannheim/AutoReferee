@@ -116,10 +116,17 @@ public class ReplayLoadMenu extends JMenu
 				
 				subMenu.addMenuListener(new MenuListener()
 				{
+					private boolean itemsAdded = false;
+					
+					
 					@Override
 					public void menuSelected(final MenuEvent menuEvent)
 					{
-						dirs.forEach(d -> addFileToMenu(d, subMenu));
+						if (!itemsAdded)
+						{
+							dirs.forEach(d -> addFileToMenu(d, subMenu));
+							itemsAdded = true;
+						}
 					}
 					
 					

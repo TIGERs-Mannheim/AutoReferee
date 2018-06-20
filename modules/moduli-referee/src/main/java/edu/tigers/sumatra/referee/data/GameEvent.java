@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.referee.data;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import com.sleepycat.persist.model.Persistent;
@@ -121,5 +122,30 @@ public class GameEvent
 			sb.append(')');
 		}
 		return sb.toString();
+	}
+	
+	
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (o == null)
+			return false;
+		
+		if (this.getClass() != o.getClass())
+			return false;
+		
+		GameEvent other = (GameEvent) o;
+		
+		return other.getGameEventType().equals(getGameEventType())
+				&& other.getMessage().equals(getMessage())
+				&& other.getOriginatorBot().equals(getOriginatorBot())
+				&& other.getOriginatorTeam().equals(getOriginatorTeam());
+	}
+	
+	
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(gameEventType, originatorBot, originatorTeam, message);
 	}
 }

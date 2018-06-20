@@ -115,6 +115,8 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				return GameLogFormatter.formatRefMsg(entry.getRefereeMsg());
 			case GAME_EVENT:
 				return getGameEventMessage(entry);
+			case REFEREE_GAME_EVENT:
+				return entry.getRefGameEvent().toString();
 		}
 		
 		return "";
@@ -172,6 +174,10 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				builder.append(System.lineSeparator());
 				builder.append(entry.getGameEvent());
 				break;
+			case REFEREE_GAME_EVENT:
+				builder.append("The Referee send the following GameEvent message: ");
+				builder.append(System.lineSeparator());
+				builder.append(entry.getRefGameEvent().toString());
 		}
 		return builder.toString();
 	}
@@ -210,6 +216,8 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				return new Color(50, 50, 50);
 			case GAME_EVENT:
 				return new Color(230, 0, 0);
+			case REFEREE_GAME_EVENT:
+				return new Color(0, 150, 225);
 		}
 		return Color.BLACK;
 	}

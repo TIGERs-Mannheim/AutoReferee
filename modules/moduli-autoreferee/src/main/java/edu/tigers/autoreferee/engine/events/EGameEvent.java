@@ -74,4 +74,15 @@ public enum EGameEvent
 	{
 		return gameEventType;
 	}
+
+	public static EGameEvent getForGameEventType(GameEventType t)
+	{
+		for(EGameEvent event : EGameEvent.values())
+		{
+			if(event.getGameEventType() == t)
+				return event;
+		}
+
+		return null;
+	}
 }

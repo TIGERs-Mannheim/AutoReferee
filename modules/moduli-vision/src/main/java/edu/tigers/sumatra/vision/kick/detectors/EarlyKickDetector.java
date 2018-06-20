@@ -68,6 +68,12 @@ public class EarlyKickDetector implements IKickDetector
 			return null;
 		}
 		
+		boolean isVirtualBall = camBall.get().getConfidence() < 0.1;
+		if (isVirtualBall)
+		{
+			return null;
+		}
+		
 		int camId = camBall.get().getCameraId();
 		camBallMap.putIfAbsent(camId, new LinkedList<MergedBall>());
 		LinkedList<MergedBall> camBallList = camBallMap.get(camId);

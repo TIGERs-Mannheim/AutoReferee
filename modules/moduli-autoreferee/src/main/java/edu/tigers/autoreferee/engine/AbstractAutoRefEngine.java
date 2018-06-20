@@ -19,6 +19,7 @@ import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.log.GameTime;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 
@@ -86,6 +87,9 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 		if (curRefMsg.getCommandCounter() != lastRefMsg.getCommandCounter())
 		{
 			gameLog.addEntry(curRefMsg);
+			GameEvent lastRefEvent = frame.getPreviousFrame().getRefereeMsg().getGameEvent();
+			if (!lastRefEvent.equals(curRefMsg.getGameEvent()))
+				gameLog.addEntry(curRefMsg.getGameEvent());
 		}
 		
 		GameState curGameState = frame.getGameState();

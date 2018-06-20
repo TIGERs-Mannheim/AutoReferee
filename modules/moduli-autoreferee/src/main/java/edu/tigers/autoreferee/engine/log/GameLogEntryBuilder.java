@@ -14,6 +14,7 @@ import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
+import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 
@@ -38,6 +39,7 @@ public class GameLogEntryBuilder
 	private RefereeMsg				refereeMsg;
 	private FollowUpAction			followUpAction;
 	private RefboxRemoteCommand	command;
+	private GameEvent refGameEvent;
 	
 	
 	private void setType(final ELogEntryType type)
@@ -105,6 +107,13 @@ public class GameLogEntryBuilder
 	}
 	
 	
+	public void setGameEvent(final GameEvent refGameEvent)
+	{
+		this.refGameEvent = refGameEvent;
+		setType(ELogEntryType.REFEREE_GAME_EVENT);
+	}
+	
+	
 	/**
 	 * @param followUpAction
 	 */
@@ -136,6 +145,6 @@ public class GameLogEntryBuilder
 		}
 		
 		return new GameLogEntry(timestamp, gameTime, instant, type, gamestate, gameEvent, acceptedByEngine, refereeMsg,
-				followUpAction, command);
+				followUpAction, command, refGameEvent);
 	}
 }

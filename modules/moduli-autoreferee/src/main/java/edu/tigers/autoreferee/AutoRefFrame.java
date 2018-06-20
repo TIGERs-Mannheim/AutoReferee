@@ -4,11 +4,14 @@
 package edu.tigers.autoreferee;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.autoreferee.generic.BotPosition;
+import edu.tigers.autoreferee.generic.TeamData;
 import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -27,6 +30,7 @@ public class AutoRefFrame implements IAutoRefFrame
 	private final WorldFrameWrapper worldFrameWrapper;
 	private AutoRefFrame previousFrame;
 	
+	private Set<TeamData> teamInfo = new HashSet<>();
 	private List<BotPosition> botsLastTouchedBall = Collections.emptyList();
 	private List<BotPosition> botsTouchingBall = Collections.emptyList();
 	
@@ -161,6 +165,19 @@ public class AutoRefFrame implements IAutoRefFrame
 	public RefereeMsg getRefereeMsg()
 	{
 		return worldFrameWrapper.getRefereeMsg();
+	}
+	
+	
+	@Override
+	public Set<TeamData> getTeamInfo()
+	{
+		return teamInfo;
+	}
+	
+	
+	public void setTeamInfo(Set<TeamData> teamInfo)
+	{
+		this.teamInfo.addAll(teamInfo);
 	}
 	
 	

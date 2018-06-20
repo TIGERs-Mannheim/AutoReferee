@@ -22,7 +22,7 @@ public class AutoRefConfig
 	@Configurable(comment = "Enable ball placement calls for the blue teams", defValue = "true")
 	private static boolean ballPlacementBlueEnabled = true;
 	
-	@Configurable(comment = "Enable ball placement calls for the blue teams", defValue = "true")
+	@Configurable(comment = "Enable ball placement calls for the yellow teams", defValue = "true")
 	private static boolean ballPlacementYellowEnabled = true;
 	
 	@Configurable(comment = "[mm] The accuracy with which the ball needs to be placed by the human referee", defValue = "200.0")

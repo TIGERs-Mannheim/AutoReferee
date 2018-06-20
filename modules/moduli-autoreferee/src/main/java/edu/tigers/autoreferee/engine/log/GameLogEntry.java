@@ -10,6 +10,7 @@ import org.apache.commons.lang.NotImplementedException;
 import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 
@@ -32,6 +33,8 @@ public class GameLogEntry
 		REFEREE_MSG,
 		/**  */
 		FOLLOW_UP,
+		/** */
+		REFEREE_GAME_EVENT,
 		/**  */
 		COMMAND
 	}
@@ -48,6 +51,7 @@ public class GameLogEntry
 	private final RefereeMsg refereeMsg;
 	private final FollowUpAction followUpAction;
 	private final RefboxRemoteCommand command;
+	private final GameEvent refGameEvent;
 	
 	private final IGameEvent gameEvent;
 	private final boolean acceptedByEngine;
@@ -66,7 +70,7 @@ public class GameLogEntry
 	protected GameLogEntry(final long timestamp, final GameTime gameTime, final Instant instant,
 			final ELogEntryType type, final GameState gamestate, final IGameEvent gameEvent,
 			final boolean acceptedByEngine, final RefereeMsg refereeMsg, final FollowUpAction followUpAction,
-			final RefboxRemoteCommand command)
+			final RefboxRemoteCommand command, GameEvent refGameEvent)
 	{
 		this.type = type;
 		this.gameTime = gameTime;
@@ -80,6 +84,7 @@ public class GameLogEntry
 		this.refereeMsg = refereeMsg;
 		this.followUpAction = followUpAction;
 		this.command = command;
+		this.refGameEvent = refGameEvent;
 	}
 	
 	
@@ -171,6 +176,15 @@ public class GameLogEntry
 	
 	
 	/**
+	 * @return game event from auto ref
+	 */
+	public GameEvent getRefGameEvent()
+	{
+		return refGameEvent;
+	}
+	
+	
+	/**
 	 * @return the instant this instance was created in. The value is in UTC
 	 */
 	public Instant getInstant()
@@ -198,6 +212,8 @@ public class GameLogEntry
 				return refereeMsg;
 			case GAME_EVENT:
 				return gameEvent;
+			case REFEREE_GAME_EVENT:
+				return refGameEvent;
 			default:
 				throw new NotImplementedException("Please add the following enum value to this switch case: " + type);
 		}
