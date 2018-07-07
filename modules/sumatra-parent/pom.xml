@@ -19,16 +19,47 @@
 
     <repositories>
         <repository>
+            <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
             <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
         </repository>
-    </repositories>
 
+        <repository>
+            <!-- maven central contains most of the dependencies -->
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+
+        <repository>
+            <!-- jitpack is a maven repository that automatically builds github repos -->
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+
+        <repository>
+            <!-- repo for oracles Berkeley DB for Java (com.sleepycat.je) -->
+            <id>oracle</id>
+            <url>http://download.oracle.com/maven</url>
+        </repository>
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
+            <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
             <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <!-- maven central contains most of the dependencies. It is provided by maven -->
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </pluginRepository>
+
+        <pluginRepository>
+            <!-- maven-protoc-plugin -->
+            <id>bintray-sergei-ivanov</id>
+            <url>http://dl.bintray.com/sergei-ivanov/maven</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -397,8 +428,8 @@
             </dependency>
 
             <dependency>
-                <groupId>edu.tigers.moduli</groupId>
-                <artifactId>moduli</artifactId>
+                <groupId>com.github.TIGERs-Mannheim</groupId>
+                <artifactId>Moduli</artifactId>
                 <version>2.0</version>
             </dependency>
 
@@ -447,13 +478,6 @@
             </dependency>
 
             <dependency>
-                <groupId>com.carrotsearch</groupId>
-                <artifactId>junit-benchmarks</artifactId>
-                <version>0.7.2</version>
-                <scope>test</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>com.sleepycat</groupId>
                 <artifactId>je</artifactId>
                 <version>7.5.11</version>
@@ -496,9 +520,9 @@
             </dependency>
 
             <dependency>
-                <groupId>idw-gpl</groupId>
-                <artifactId>idw-gpl</artifactId>
-                <version>1.6.1</version>
+                <groupId>com.github.TIGERs-Mannheim</groupId>
+                <artifactId>infonode</artifactId>
+                <version>1.7.0</version>
             </dependency>
 
             <dependency>
@@ -583,12 +607,6 @@
                 <groupId>net.jafama</groupId>
                 <artifactId>jafama</artifactId>
                 <version>2.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>1.4.191</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

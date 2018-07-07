@@ -61,8 +61,8 @@
             <artifactId>common-math</artifactId>
         </dependency>
         <dependency>
-            <groupId>edu.tigers.moduli</groupId>
-            <artifactId>moduli</artifactId>
+            <groupId>com.github.TIGERs-Mannheim</groupId>
+            <artifactId>Moduli</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>

@@ -41,8 +41,8 @@
         </dependency>
 
         <dependency>
-            <groupId>idw-gpl</groupId>
-            <artifactId>idw-gpl</artifactId>
+            <groupId>com.github.TIGERs-Mannheim</groupId>
+            <artifactId>infonode</artifactId>
         </dependency>
 
         <dependency>
@@ -51,8 +51,8 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.tigers.moduli</groupId>
-            <artifactId>moduli</artifactId>
+            <groupId>com.github.TIGERs-Mannheim</groupId>
+            <artifactId>Moduli</artifactId>
         </dependency>
 
         <dependency>
