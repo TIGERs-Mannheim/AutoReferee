@@ -9,8 +9,6 @@ import java.util.List;
 import org.apache.commons.lang.NotImplementedException;
 
 import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -99,25 +97,6 @@ public interface I2DShape
 	
 	
 	/**
-	 * @param line the line segment
-	 * @return true, if the line intersects the shape and intersection point is on segment
-	 */
-	default boolean isIntersectingWithLineSegment(ILine line)
-	{
-		List<IVector2> intersecs = lineIntersections(line);
-		Rectangle rect = Rectangle.fromLineSegment(line);
-		for (IVector2 inters : intersecs)
-		{
-			if (rect.isPointInShape(inters))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	/**
 	 * Create a new shape of the same type with an additional margin.
 	 * Implementation depends on the actual shape.
 	 *
@@ -125,20 +104,6 @@ public interface I2DShape
 	 * @return a new shape with an additional margin
 	 */
 	default I2DShape withMargin(double margin)
-	{
-		throw new NotImplementedException();
-	}
-	
-	
-	/**
-	 * Intersect this 2dShape instance with the specified line {@code segment} and return the intersection point.
-	 *
-	 * @param segment
-	 *           The line segment for which to calculate an intersection with this instance
-	 * @return
-	 * 			The list of intersections. This can be empty, if there are no intersections.
-	 */
-	default List<IVector2> intersectSegment(ILineSegment segment)
 	{
 		throw new NotImplementedException();
 	}

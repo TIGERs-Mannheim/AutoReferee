@@ -2,9 +2,7 @@
  * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math;
-
-import edu.tigers.sumatra.math.vector.IVector2;
+package edu.tigers.sumatra.math.vector;
 
 /**
  * @author nicolai.ommer

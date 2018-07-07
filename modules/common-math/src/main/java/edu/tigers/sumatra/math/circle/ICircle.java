@@ -45,4 +45,14 @@ public interface ICircle extends ICircular
 	 * @return all intersection points
 	 */
 	List<IVector2> lineSegmentIntersections(ILine line);
+	
+	
+	/**
+	 * @param line the line segment
+	 * @return true, if the line intersects the shape and intersection point is on segment
+	 */
+	default boolean isIntersectingWithLineSegment(ILine line)
+	{
+		return !lineSegmentIntersections(line).isEmpty();
+	}
 }
