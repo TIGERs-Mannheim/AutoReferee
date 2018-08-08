@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.circle;
@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -134,6 +136,19 @@ public final class CircleMath
 		Rectangle rect = Rectangle.fromLineSegment(line);
 		candidates.removeIf(c -> !rect.isPointInShape(c));
 		return candidates;
+	}
+	
+	
+	/**
+	 * Get intersection points between circle and line segment
+	 *
+	 * @param circle the circle
+	 * @param line the line segment
+	 * @return all intersection points
+	 */
+	public static List<IVector2> lineSegmentIntersections(final ICircle circle, final ILineSegment line)
+	{
+		return lineSegmentIntersections(circle, Line.fromPoints(line.getStart(), line.getEnd()));
 	}
 	
 	

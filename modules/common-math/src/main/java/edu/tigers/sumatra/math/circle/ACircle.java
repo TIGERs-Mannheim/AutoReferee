@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.circle;
@@ -13,6 +13,7 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -49,6 +50,13 @@ public abstract class ACircle implements ICircle
 	
 	@Override
 	public List<IVector2> lineSegmentIntersections(final ILine line)
+	{
+		return CircleMath.lineSegmentIntersections(this, line);
+	}
+	
+	
+	@Override
+	public List<IVector2> lineSegmentIntersections(final ILineSegment line)
 	{
 		return CircleMath.lineSegmentIntersections(this, line);
 	}

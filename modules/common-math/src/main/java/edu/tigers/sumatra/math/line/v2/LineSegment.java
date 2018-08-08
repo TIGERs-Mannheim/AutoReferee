@@ -25,8 +25,6 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	/** this field is calculated on demand */
 	private transient IVector2 directionVector;
-	/** this field is calculated on demand */
-	private transient IVector2 displacement;
 	
 	
 	/** Used by berkely */
@@ -129,29 +127,18 @@ final class LineSegment extends ALine implements ILineSegment
 		return end;
 	}
 	
-	
-	@Override
-	public IVector2 getDisplacement()
-	{
-		if (displacement == null)
-		{
-			displacement = end.subtractNew(start);
-		}
-		return displacement;
-	}
-	
-	
+
 	@Override
 	public IVector2 getCenter()
 	{
-		return start.addNew(getDisplacement().multiplyNew(0.5));
+		return start.addNew(directionVector().multiplyNew(0.5));
 	}
 	
 	
 	@Override
 	public double getLength()
 	{
-		return getDisplacement().getLength();
+		return directionVector().getLength();
 	}
 	
 	
@@ -160,7 +147,7 @@ final class LineSegment extends ALine implements ILineSegment
 	{
 		if (directionVector == null)
 		{
-			directionVector = getDisplacement().normalizeNew();
+			directionVector = end.subtractNew(start);
 		}
 		return directionVector;
 	}

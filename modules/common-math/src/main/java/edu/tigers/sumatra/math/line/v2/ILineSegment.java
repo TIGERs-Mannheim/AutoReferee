@@ -37,17 +37,6 @@ public interface ILineSegment extends ILineBase
 	
 	
 	/**
-	 * Returns the displacement which is described by this segment. If {@code A} was the starting point and {@code B} the
-	 * end point of this line then the displacement would be defined as {@code (B - A)}.
-	 * 
-	 * @return
-	 * 			The displacement of this line segment. The vector has a length of zero if the line instance is not valid
-	 *         according to {@link #isValid()}.
-	 */
-	IVector2 getDisplacement();
-	
-	
-	/**
 	 * Returns the point located in the middle between start and end
 	 * 
 	 * @return the center position of this line
@@ -89,4 +78,11 @@ public interface ILineSegment extends ILineBase
 	 * 			The resulting vector if this segment is valid or one of the two support points if it is not valid.
 	 */
 	IVector2 stepAlongLine(double stepSize);
+	
+	
+	@Override
+	default IVector2 supportVector()
+	{
+		return getStart();
+	}
 }

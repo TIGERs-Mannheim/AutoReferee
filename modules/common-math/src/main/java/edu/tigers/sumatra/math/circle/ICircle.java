@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.circle;
@@ -8,6 +8,7 @@ import java.util.List;
 
 import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 
@@ -45,6 +46,15 @@ public interface ICircle extends ICircular
 	 * @return all intersection points
 	 */
 	List<IVector2> lineSegmentIntersections(ILine line);
+	
+	
+	/**
+	 * Get the intersection points of the shape and segment
+	 *
+	 * @param line some line segment
+	 * @return all intersection points
+	 */
+	List<IVector2> lineSegmentIntersections(ILineSegment line);
 	
 	
 	/**

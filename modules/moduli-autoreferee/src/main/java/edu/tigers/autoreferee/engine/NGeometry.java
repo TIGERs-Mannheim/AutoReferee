@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine;
@@ -12,8 +12,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.LineMath;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
@@ -133,11 +132,10 @@ public final class NGeometry
 	 */
 	public static ETeamColor getTeamOfClosestGoalLine(final IVector2 pos)
 	{
-		ILine blueGoalLine = NGeometry.getGoal(ETeamColor.BLUE).getLine();
-		ILine yellowGoalLine = NGeometry.getGoal(ETeamColor.YELLOW).getLine();
+		ILineSegment blueGoalLine = NGeometry.getGoal(ETeamColor.BLUE).getGoalLine();
+		ILineSegment yellowGoalLine = NGeometry.getGoal(ETeamColor.YELLOW).getGoalLine();
 		
-		if (LineMath.distancePL(pos, blueGoalLine) < LineMath
-				.distancePL(pos, yellowGoalLine))
+		if (blueGoalLine.distanceTo(pos) < yellowGoalLine.distanceTo(pos))
 		{
 			return ETeamColor.BLUE;
 		}

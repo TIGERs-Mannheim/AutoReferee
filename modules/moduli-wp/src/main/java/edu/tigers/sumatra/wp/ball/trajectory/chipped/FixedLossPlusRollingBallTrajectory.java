@@ -13,8 +13,6 @@ import org.apache.commons.lang.Validate;
 import edu.tigers.sumatra.geometry.BallParameters;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -385,11 +383,11 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 	
 	
 	@Override
-	public List<ILine> getTravelLinesInterceptable()
+	public List<ILineSegment> getTravelLinesInterceptable()
 	{
 		final double g = 9810;
 		final double h = params.getMaxInterceptableHeight();
-		List<ILine> lines = new ArrayList<>();
+		List<ILineSegment> lines = new ArrayList<>();
 		Vector3 posNow = Vector3.copy(kickPos.getXYZVector());
 		Vector3 velNow = Vector3.copy(kickVel.getXYZVector());
 		double tNow = 0;
@@ -411,7 +409,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 			
 			if ((tNow + t1) > tKickToNow)
 			{
-				lines.add(Line.fromPoints(p2, p1));
+				lines.add(Lines.segmentFromPoints(p2, p1));
 			}
 			
 			t2 = (SumatraMath.sqrt((vz * vz) - (2 * g * h)) + vz) / g;
@@ -432,7 +430,7 @@ public class FixedLossPlusRollingBallTrajectory extends ABallTrajectory
 		}
 		
 		IVector2 p1 = getPosByVel(0).getXYVector();
-		lines.add(Line.fromPoints(p2, p1));
+		lines.add(Lines.segmentFromPoints(p2, p1));
 		
 		return lines;
 	}
