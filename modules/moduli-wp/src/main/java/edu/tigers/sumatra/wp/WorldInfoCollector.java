@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -151,6 +152,10 @@ public class WorldInfoCollector extends AWorldPredictor
 			BotState filterState, BotState internalState)
 	{
 		BotState currentBotState = select(filterState, internalState);
+		if (currentBotState == null)
+		{
+			return null;
+		}
 		Optional<BotState> trajState = botStateFromTrajectoryCalculator.getState(robotInfo);
 		boolean similar = trajState.map(s -> isSimilar(s, currentBotState)).orElse(false);
 		if (trajState.isPresent() && (!similar || botCollidingWithOtherBot(filteredBotStates, trajState.get())))
@@ -198,6 +203,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		Map<BotID, ITrackedBot> trackedBots = robotInfo.stream()
 				.map(r -> createTrackedBot(r, filteredBotStates, filteredBotStates.get(r.getBotId()),
 						internalBotStates.get(r.getBotId())))
+				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return new BotIDMap<>(trackedBots);
 	}

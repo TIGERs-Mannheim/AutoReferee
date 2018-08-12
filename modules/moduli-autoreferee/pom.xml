@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.TIGERs-Mannheim</groupId>
-            <artifactId>Moduli</artifactId>
+            <artifactId>moduli</artifactId>
         </dependency>
 
         <dependency>

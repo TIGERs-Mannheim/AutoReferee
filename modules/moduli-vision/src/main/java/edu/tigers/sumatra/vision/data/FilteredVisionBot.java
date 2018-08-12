@@ -20,8 +20,6 @@ import edu.tigers.sumatra.math.vector.Vector3;
 
 /**
  * Data structure for a filtered robot.
- * 
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent
 public class FilteredVisionBot
@@ -34,7 +32,7 @@ public class FilteredVisionBot
 	private final double quality;
 	
 	
-	// for Berkeley database
+	@SuppressWarnings("unused") // for Berkeley database
 	private FilteredVisionBot()
 	{
 		botID = BotID.noBot();

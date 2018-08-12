@@ -89,12 +89,7 @@
 
         <dependency>
             <groupId>com.github.TIGERs-Mannheim</groupId>
-            <artifactId>Moduli</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>gov.nist.math</groupId>
-            <artifactId>jama</artifactId>
+            <artifactId>moduli</artifactId>
         </dependency>
 
         <dependency>

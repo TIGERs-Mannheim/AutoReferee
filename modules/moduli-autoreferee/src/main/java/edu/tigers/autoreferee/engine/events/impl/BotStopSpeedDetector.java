@@ -174,7 +174,7 @@ public class BotStopSpeedDetector extends APreparingGameEventDetector
 	private Set<BotID> getViolators(final Collection<ITrackedBot> bots)
 	{
 		return bots.stream()
-				.filter(bot -> bot.getFilteredState().orElse(bot.getBotState()).getVel2().getLength() > AutoRefConfig
+				.filter(bot -> bot.getFilteredState().orElse(bot.getBotState()).getVel2().getLength() * 1e-3 > AutoRefConfig
 						.getMaxBotStopSpeed())
 				.map(ToBotIDMapper.get())
 				.collect(Collectors.toSet());

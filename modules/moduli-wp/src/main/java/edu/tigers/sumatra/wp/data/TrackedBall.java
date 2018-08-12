@@ -126,8 +126,11 @@ public class TrackedBall implements ITrackedBall
 	public static TrackedBall fromFilteredVisionBall(final long timestamp, final FilteredVisionBall ball)
 	{
 		BallTrajectoryState state = aBallState()
-				.withPos(ball.getPos()).withVel(ball.getVel()).withAcc(ball.getAcc())
-				.withVSwitchToRoll(ball.getVSwitch()).withChipped(ball.isChipped())
+				.withPos(ball.getPos())
+				.withVel(ball.getVel())
+				.withAcc(ball.getAcc())
+				.withVSwitchToRoll(ball.getVSwitch())
+				.withChipped(ball.isChipped())
 				.withSpin(ball.getSpin())
 				.build();
 		return new TrackedBall(timestamp, state, ball.getLastVisibleTimestamp());

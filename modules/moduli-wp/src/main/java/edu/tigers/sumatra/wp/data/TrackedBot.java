@@ -220,7 +220,7 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public IVector2 getVel()
 	{
-		return botState.getVel2();
+		return botState.getVel2().multiplyNew(1e-3);
 	}
 	
 	

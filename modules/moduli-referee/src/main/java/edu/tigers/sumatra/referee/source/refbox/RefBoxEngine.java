@@ -44,7 +44,7 @@ public class RefBoxEngine
 	private int stageTimeLeft = (int) TimeUnit.MINUTES.toMicros(HALF_TIME_MIN);
 	private int commandCounter = 0;
 	private Map<ETeamColor, TeamData> teams = new EnumMap<>(ETeamColor.class);
-	private ITimeProvider timeProdivder = new SystemTimeProvider();
+	private ITimeProvider timeProvider = new SystemTimeProvider();
 	private Vector2 placementPos = Vector2.fromXY(0, 0);
 	private ETeamColor timeoutTeam = ETeamColor.NEUTRAL;
 	
@@ -62,7 +62,7 @@ public class RefBoxEngine
 		teams.put(ETeamColor.BLUE, new TeamData(ETeamColor.BLUE.name()));
 		
 		lastCommandCounter = 0;
-		lastTime = timeProdivder.getTimeInMicroseconds();
+		lastTime = timeProvider.getTimeInMicroseconds();
 		lastCommandTimestamp = lastTime;
 	}
 	
@@ -75,7 +75,7 @@ public class RefBoxEngine
 	public SSL_Referee spin()
 	{
 		// determine how much time passed by
-		long timeNow = timeProdivder.getTimeInMicroseconds();
+		long timeNow = timeProvider.getTimeInMicroseconds();
 		int timePassed = (int) (timeNow - lastTime);
 		lastTime = timeNow;
 		
@@ -206,8 +206,14 @@ public class RefBoxEngine
 	 */
 	public void setTimeProvider(final ITimeProvider provider)
 	{
-		timeProdivder = provider;
-		lastTime = timeProdivder.getTimeInMicroseconds();
+		if (provider == null)
+		{
+			timeProvider = new SystemTimeProvider();
+		} else
+		{
+			timeProvider = provider;
+		}
+		lastTime = timeProvider.getTimeInMicroseconds();
 	}
 	
 	

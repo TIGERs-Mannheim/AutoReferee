@@ -164,7 +164,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			vel = Vector3f.ZERO_VECTOR;
 			pos = posIn;
 		}
-		referee.placeBall(Vector3.from2d(pos, 0), vel);
+		referee.placeBall(Vector3.from2d(pos, 0), vel.multiplyNew(1e3));
 	}
 	
 	

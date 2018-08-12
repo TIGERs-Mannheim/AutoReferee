@@ -145,6 +145,18 @@
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-botmanager-sim</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-botmanager-tigers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>moduli-bot-params</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -395,6 +407,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>sumatra-gui-skills</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- ########## external libs ################ -->
 
             <dependency>
@@ -429,8 +447,8 @@
 
             <dependency>
                 <groupId>com.github.TIGERs-Mannheim</groupId>
-                <artifactId>Moduli</artifactId>
-                <version>2.0</version>
+                <artifactId>moduli</artifactId>
+                <version>2.2</version>
             </dependency>
 
             <dependency>

@@ -18,15 +18,14 @@ import edu.tigers.sumatra.math.vector.VectorN;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class MatrixMotorModel extends AMotorModel
 {
 	private static final double	BOT_RADIUS		= 0.076;
 	private static final double	WHEEL_RADIUS	= 0.025;
 	
-	private final RealMatrix D;
-	private final RealMatrix Dinv;
+	private final RealMatrix d;
+	private final RealMatrix dInv;
 	
 	
 	/**
@@ -39,13 +38,12 @@ public class MatrixMotorModel extends AMotorModel
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 * @param D
+	 * @param d
 	 */
-	public MatrixMotorModel(final RealMatrix D)
+	public MatrixMotorModel(final RealMatrix d)
 	{
-		this.D = D;
-		Dinv = new SingularValueDecomposition(D).getSolver().getInverse();
+		this.d = d;
+		dInv = new SingularValueDecomposition(d).getSolver().getInverse();
 	}
 	
 	
@@ -67,38 +65,37 @@ public class MatrixMotorModel extends AMotorModel
 						(2 * Math.PI) - backAngleRad });
 		
 		// construct matrix for conversion from XYW to M1..M4
-		D = new Array2DRowRealMatrix(4, 3);
-		D.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
-		D.setColumnVector(1, theta.map(new Cos()));
-		D.setColumnVector(2, new ArrayRealVector(4, BOT_RADIUS));
-		Dinv = new SingularValueDecomposition(D).getSolver().getInverse();
+		d = new Array2DRowRealMatrix(4, 3);
+		d.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
+		d.setColumnVector(1, theta.map(new Cos()));
+		d.setColumnVector(2, new ArrayRealVector(4, BOT_RADIUS));
+		dInv = new SingularValueDecomposition(d).getSolver().getInverse();
 	}
 	
 	
 	/**
-	 * @author Nicolai Ommer <nicolai.ommer@gmail.com>
-	 * @param Dw
+	 * @param dw
 	 * @return
 	 */
-	public static MatrixMotorModel fromMatrixWithWheelVel(final RealMatrix Dw)
+	public static MatrixMotorModel fromMatrixWithWheelVel(final RealMatrix dw)
 	{
-		RealMatrix D = Dw.copy();
+		RealMatrix d = dw.copy();
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				D.multiplyEntry(i, j, WHEEL_RADIUS);
+				d.multiplyEntry(i, j, WHEEL_RADIUS);
 			}
 		}
-		return new MatrixMotorModel(D);
+		return new MatrixMotorModel(d);
 	}
 	
 	
 	@Override
 	protected VectorN getWheelSpeedInternal(final IVector3 targetVel)
 	{
-		RealMatrix XYW = new Array2DRowRealMatrix(targetVel.toArray());
-		RealMatrix speedOverGround = D.multiply(XYW);
+		RealMatrix xyw = new Array2DRowRealMatrix(targetVel.toArray());
+		RealMatrix speedOverGround = d.multiply(xyw);
 		RealVector wheelSpeed = speedOverGround.getColumnVector(0).mapMultiply(1.0 / WHEEL_RADIUS);
 		return VectorN.fromReal(wheelSpeed);
 	}
@@ -108,7 +105,7 @@ public class MatrixMotorModel extends AMotorModel
 	protected Vector3 getXywSpeedInternal(final IVectorN wheelSpeed)
 	{
 		RealMatrix wheel = new Array2DRowRealMatrix(wheelSpeed.toArray());
-		RealVector result = Dinv.multiply(wheel).getColumnVector(0).mapMultiply(WHEEL_RADIUS);
+		RealVector result = dInv.multiply(wheel).getColumnVector(0).mapMultiply(WHEEL_RADIUS);
 		return Vector3.fromXYZ(result.getEntry(0),
 				result.getEntry(1),
 				result.getEntry(2));

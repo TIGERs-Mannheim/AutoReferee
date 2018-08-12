@@ -6,14 +6,16 @@ import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Observer for updates from vision filter
  */
 public interface IVisionFilterObserver extends IBallModelIdentificationObserver
 {
 	/**
 	 * @param filteredVisionFrame a filtered and complete vision frame
 	 */
-	void onNewFilteredVisionFrame(FilteredVisionFrame filteredVisionFrame);
+	default void onNewFilteredVisionFrame(FilteredVisionFrame filteredVisionFrame)
+	{
+	}
 	
 	
 	/**

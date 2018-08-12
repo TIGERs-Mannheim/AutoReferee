@@ -56,7 +56,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.TIGERs-Mannheim</groupId>
-            <artifactId>Moduli</artifactId>
+            <artifactId>moduli</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
