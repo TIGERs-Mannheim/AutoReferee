@@ -27,8 +27,6 @@ import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 
 /**
  * Module for processing raw vision data.
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 {
@@ -56,7 +54,9 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 *
 	 * @param camDetectionFrame detections from a single camera frame
 	 */
-	protected abstract void updateCamDetectionFrame(CamDetectionFrame camDetectionFrame);
+	protected void updateCamDetectionFrame(CamDetectionFrame camDetectionFrame)
+	{
+	}
 	
 	
 	/**
