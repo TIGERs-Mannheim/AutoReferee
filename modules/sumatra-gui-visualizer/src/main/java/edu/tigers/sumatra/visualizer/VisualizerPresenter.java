@@ -149,7 +149,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			}
 		} else if (ctrl)
 		{
-			vel = Vector3.from2d(posIn.subtractNew(ballPos).scaleTo(RuleConstraints.getMaxBallSpeed()), 0);
+			vel = Vector3.from2d(posIn.subtractNew(ballPos).scaleTo(RuleConstraints.getMaxBallSpeed() - 0.001), 0);
 		} else if (shift)
 		{
 			if (alt)
