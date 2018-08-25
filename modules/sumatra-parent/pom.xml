@@ -574,9 +574,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.google.code.matlabcontrol</groupId>
+                <groupId>com.github.TIGERs-Mannheim.matlabcontrol</groupId>
                 <artifactId>matlabcontrol</artifactId>
-                <version>4.1.0</version>
+                <version>master-5a20558f47-1</version>
             </dependency>
 
             <dependency>
@@ -616,9 +616,9 @@
             </dependency>
 
             <dependency>
-                <groupId>com.vladium.utils</groupId>
-                <artifactId>objectprofiler</artifactId>
-                <version>1.0</version>
+                <groupId>com.github.TIGERs-Mannheim</groupId>
+                <artifactId>java-object-size-estimator</artifactId>
+                <version>master-2963d19809-1</version>
             </dependency>
 
             <dependency>

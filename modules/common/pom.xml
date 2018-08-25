@@ -58,7 +58,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.matlabcontrol</groupId>
+            <groupId>com.github.TIGERs-Mannheim.matlabcontrol</groupId>
             <artifactId>matlabcontrol</artifactId>
         </dependency>
 
