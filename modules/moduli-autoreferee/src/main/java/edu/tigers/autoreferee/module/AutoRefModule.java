@@ -14,7 +14,6 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 
 
@@ -109,9 +108,8 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	/**
 	 * @param mode
-	 * @throws StartModuleException
 	 */
-	public void start(final AutoRefMode mode) throws StartModuleException
+	public void start(final AutoRefMode mode)
 	{
 		runner.start(mode);
 	}

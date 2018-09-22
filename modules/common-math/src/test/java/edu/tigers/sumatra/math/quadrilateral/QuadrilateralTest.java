@@ -4,16 +4,18 @@
 
 package edu.tigers.sumatra.math.quadrilateral;
 
-import com.google.common.collect.Collections2;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import com.google.common.collect.Collections2;
+
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 
 /**
@@ -61,15 +63,15 @@ public class QuadrilateralTest
 		for (List<IVector2> corners : Collections2.permutations(acorners)) {
 			IQuadrilateral quadrilateral = Quadrilateral.fromCorners(corners.get(0), corners.get(1), corners.get(2),
 					corners.get(3));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, 0)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(1, 0.9)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(1, 0.5)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0.9)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0.5)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, -0.9)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, 0.9)));
-			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, -0.2)));
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, 0))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(1, 0.9))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(1, 0.5))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0.9))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0.5))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(-1, -0))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, -0.9))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, 0.9))).isTrue();
+			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, -0.2))).isTrue();
 		}
 	}
 	

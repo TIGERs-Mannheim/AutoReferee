@@ -16,6 +16,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import edu.tigers.moduli.Moduli;
+import edu.tigers.moduli.exceptions.DependencyException;
+import edu.tigers.moduli.exceptions.LoadModulesException;
 
 
 /**
@@ -56,7 +58,7 @@ public final class SumatraModel extends Moduli
 	/** */
 	public static final String MODULI_CONFIG_PATH = "./config/moduli/";
 	/**  */
-	public static final String MODULI_CONFIG_FILE_DEFAULT = "moduli_sim.xml";
+	public static final String MODULI_CONFIG_FILE_DEFAULT = "sim.xml";
 	
 	// Application Properties
 	private static final String CONFIG_SETTINGS_PATH = "./config/";
@@ -121,10 +123,29 @@ public final class SumatraModel extends Moduli
 	}
 	
 	
-	@Override
-	public void loadModulesSafe(final String filename)
+	/**
+	 * Load modules of the given config file. The config path is appended by this method and must not be prepended.
+	 * 
+	 * @param configFileName the config file name
+	 * @throws DependencyException
+	 * @throws LoadModulesException
+	 */
+	@SuppressWarnings("squid:S1160") // throwing two exceptions, because this is only a proxy method
+	public void loadModulesOfConfig(final String configFileName) throws DependencyException, LoadModulesException
 	{
-		super.loadModulesSafe(MODULI_CONFIG_PATH + filename);
+		super.loadModules(MODULI_CONFIG_PATH + configFileName);
+	}
+	
+	
+	/**
+	 * Load modules of the given config file. The config path is appended by this method and must not be prepended.
+	 * Catch exceptions and continue normally
+	 * 
+	 * @param configFileName the config file name
+	 */
+	public void loadModulesOfConfigSafe(final String configFileName)
+	{
+		super.loadModulesSafe(MODULI_CONFIG_PATH + configFileName);
 	}
 	
 	
@@ -326,7 +347,7 @@ public final class SumatraModel extends Moduli
 	public static void changeLogLevel(final Level lvl)
 	{
 		Appender appender = Logger.getRootLogger().getAppender("console");
-		if ((appender != null) && (appender instanceof ConsoleAppender))
+		if (appender instanceof ConsoleAppender)
 		{
 			((ConsoleAppender) appender).setThreshold(lvl);
 		}

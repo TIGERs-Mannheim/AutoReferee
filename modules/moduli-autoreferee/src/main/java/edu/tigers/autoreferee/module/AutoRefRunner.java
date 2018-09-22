@@ -32,7 +32,6 @@ import edu.tigers.autoreferee.remote.IRefboxRemote;
 import edu.tigers.autoreferee.remote.impl.LocalRefboxRemote;
 import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.wp.AWorldPredictor;
@@ -115,9 +114,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	/**
 	 * @param mode
-	 * @throws StartModuleException
 	 */
-	public void start(final AutoRefMode mode) throws StartModuleException
+	public void start(final AutoRefMode mode)
 	{
 		wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		IRefboxRemote remote = null;
@@ -182,7 +180,6 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			}
 			setState(AutoRefState.STOPPED);
 			log.error("Error while starting up the autoref engine (" + mode + ")", e);
-			throw new StartModuleException(e.getMessage(), e);
 		}
 		
 		engine = refEngine;

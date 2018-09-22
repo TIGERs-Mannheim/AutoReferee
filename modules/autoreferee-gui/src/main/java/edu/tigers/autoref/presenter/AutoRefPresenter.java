@@ -26,7 +26,6 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.autoreferee.module.AutoRefState;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.components.IEnumPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.views.ISumatraView;
@@ -221,22 +220,16 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 		@Override
 		public void run()
 		{
-			try
+			Optional<AutoRefModule> optAutoref = AutoRefUtil.getAutoRefModule();
+			if (optAutoref.isPresent())
 			{
-				Optional<AutoRefModule> optAutoref = AutoRefUtil.getAutoRefModule();
-				if (optAutoref.isPresent())
-				{
-					AutoRefModule autoref = optAutoref.get();
-					autoref.start(mode);
-					autoref.getEngine().setActiveGameEventDetectors(mainPanel.getGameEventDetectorPanel().getValues());
-					autoref.getEngine().setActiveGameEvents(mainPanel.getGameEventPanel().getValues());
-				} else
-				{
-					log.error("AutoRef module not found");
-				}
-			} catch (StartModuleException e)
+				AutoRefModule autoRef = optAutoref.get();
+				autoRef.start(mode);
+				autoRef.getEngine().setActiveGameEventDetectors(mainPanel.getGameEventDetectorPanel().getValues());
+				autoRef.getEngine().setActiveGameEvents(mainPanel.getGameEventPanel().getValues());
+			} else
 			{
-				log.error("Error during Autoref startup: " + e.getMessage(), e);
+				log.error("AutoRef module not found");
 			}
 		}
 		
