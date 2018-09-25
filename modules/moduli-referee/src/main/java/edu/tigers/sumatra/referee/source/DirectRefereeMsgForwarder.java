@@ -45,6 +45,9 @@ public class DirectRefereeMsgForwarder extends ARefereeMessageSource
 	 */
 	public void send(final SSL_Referee msg)
 	{
-		notifyNewRefereeMessage(msg);
+		if (msg != null)
+		{
+			notifyNewRefereeMessage(msg);
+		}
 	}
 }

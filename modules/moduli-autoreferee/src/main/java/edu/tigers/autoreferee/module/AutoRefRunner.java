@@ -46,7 +46,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 {
 	private static final Logger log = Logger.getLogger(AutoRefRunner.class);
 	
-	private static final Path LOG_DIRECTORY = Paths.get("gamelogs/");
+	private static final Path LOG_DIRECTORY = Paths.get("target/gamelogs/");
 	
 	
 	private final List<IAutoRefStateObserver> observer;
@@ -196,6 +196,11 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	{
 		Path logName = Paths.get(String.format("%1$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS-%2$tL.log", mode.toString(),
 				new Date()));
+		boolean logDirCreated = LOG_DIRECTORY.toFile().mkdirs();
+		if (logDirCreated)
+		{
+			log.debug("Log dir created: " + LOG_DIRECTORY);
+		}
 		Path fileName = LOG_DIRECTORY.resolve(logName);
 		return new GameLogFileAppender(fileName);
 	}

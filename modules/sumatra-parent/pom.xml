@@ -21,7 +21,7 @@
         <repository>
             <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
-            <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
+            <url>https://tigers-mannheim.de/nexus/content/groups/public/</url>
         </repository>
 
         <repository>
@@ -47,7 +47,7 @@
         <pluginRepository>
             <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
-            <url>http://tigers-mannheim.de/nexus/content/groups/public/</url>
+            <url>https://tigers-mannheim.de/nexus/content/groups/public/</url>
         </pluginRepository>
 
         <pluginRepository>
@@ -718,6 +718,12 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.6.0</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
