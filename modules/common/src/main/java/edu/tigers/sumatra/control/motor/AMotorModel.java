@@ -20,7 +20,7 @@ public abstract class AMotorModel implements IMotorModel
 {
 	private static final Logger log = Logger.getLogger(AMotorModel.class.getName());
 	
-	private Random rnd = new Random();
+	private Random rnd = new Random(42);
 	private IVectorN motorNoise = VectorN.zero(4);
 	private IVector3 xywNoise = Vector3f.ZERO_VECTOR;
 	

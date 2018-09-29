@@ -7,9 +7,7 @@ package edu.tigers.sumatra.referee.source.refbox;
 import static edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlReply.Outcome;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.log4j.Logger;
 
@@ -29,15 +27,11 @@ import edu.tigers.sumatra.referee.source.refbox.time.ITimeProvider;
  * 
  * @author AndreR <andre@ryll.cc>
  */
-public class RefBox extends ARefereeMessageSource implements Runnable
+public class RefBox extends ARefereeMessageSource
 {
-	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(RefBox.class.getName());
 	
-	
 	private RefBoxEngine engine = new RefBoxEngine();
-	private List<SSL_RefereeRemoteControlRequest> outstandingRequests = new CopyOnWriteArrayList<>();
-	private Thread thread;
 	
 	private Map<ETeamColor, Integer> keeperIds = new EnumMap<>(ETeamColor.class);
 	
@@ -59,70 +53,40 @@ public class RefBox extends ARefereeMessageSource implements Runnable
 	@Override
 	public void start()
 	{
-		if (thread == null)
-		{
-			thread = new Thread(this, "RefBox");
-			thread.start();
-		} else
-		{
-			log.warn("Refbox already started!");
-		}
+		// nothing to do
 	}
 	
 	
 	@Override
 	public void stop()
 	{
-		if (thread != null)
-		{
-			thread.interrupt();
-			thread = null;
-		}
+		// nothing to do
 	}
 	
 	
-	@Override
-	public void run()
+	public void update()
 	{
-		while (!Thread.interrupted())
-		{
-			// ...zzzZZZzzzz...
-			try
-			{
-				Thread.sleep(20);
-			} catch (InterruptedException e1)
-			{
-				Thread.currentThread().interrupt();
-				return;
-			}
-			
-			// process all control requests
-			while (!outstandingRequests.isEmpty())
-			{
-				Outcome outcome = engine.handleControlRequest(outstandingRequests.remove(0));
-				if (outcome != Outcome.OK)
-				{
-					log.warn("Invalid outcome: " + outcome);
-				}
-			}
-			
-			// update keeper ids
-			engine.setKeeperId(ETeamColor.YELLOW, keeperIds.get(ETeamColor.YELLOW));
-			engine.setKeeperId(ETeamColor.BLUE, keeperIds.get(ETeamColor.BLUE));
-			
-			// spin the engine
-			SSL_Referee msg = engine.spin();
-			
-			// send referee message
-			notifyNewRefereeMessage(msg);
-		}
+		// update keeper ids
+		engine.setKeeperId(ETeamColor.YELLOW, keeperIds.get(ETeamColor.YELLOW));
+		engine.setKeeperId(ETeamColor.BLUE, keeperIds.get(ETeamColor.BLUE));
+		
+		// spin the engine
+		SSL_Referee msg = engine.spin();
+		
+		// send referee message
+		notifyNewRefereeMessage(msg);
 	}
 	
 	
 	@Override
 	public void handleControlRequest(final SSL_RefereeRemoteControlRequest request)
 	{
-		outstandingRequests.add(request);
+		Outcome outcome = engine.handleControlRequest(request);
+		if (outcome != Outcome.OK)
+		{
+			log.warn("Invalid outcome: " + outcome);
+		}
+		update();
 	}
 	
 	

@@ -55,7 +55,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	}
 	
 	private TimedPosition lastBallLeftFieldPos = null;
-	private Random rnd = new Random();
+	private Random rnd = null;
 	
 	
 	/**

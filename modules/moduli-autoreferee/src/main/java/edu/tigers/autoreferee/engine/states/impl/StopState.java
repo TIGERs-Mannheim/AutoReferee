@@ -99,7 +99,7 @@ public class StopState extends AbstractAutoRefState
 	private boolean simulationPlacementAttempted = false;
 	private Referee.SSL_Referee.Stage lastStage = null;
 	
-	private final Random rnd = new Random(System.currentTimeMillis());
+	private Random rnd = null;
 	
 	
 	@Override
@@ -107,6 +107,7 @@ public class StopState extends AbstractAutoRefState
 	{
 		readyTime = null;
 		simulationPlacementAttempted = false;
+		rnd = new Random(frame.getTimestamp());
 		
 		if (ctx.getAutoRefGlobalState().getBallPlacementStage() == AutoRefGlobalState.EBallPlacementStage.IN_PROGRESS)
 		{

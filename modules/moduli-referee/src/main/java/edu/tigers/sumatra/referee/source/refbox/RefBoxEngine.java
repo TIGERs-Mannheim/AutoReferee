@@ -376,8 +376,9 @@ public class RefBoxEngine
 					stageTimeLeft = 0;
 					break;
 				default:
-					break;
+					return Outcome.OK;
 			}
+			lastTime = timeProvider.getTimeInMicroseconds();
 		}
 		
 		return Outcome.OK;

@@ -393,8 +393,21 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		consumableFrames.pollLast();
-		consumableFrames.offerFirst(wFrameWrapper);
+		if ("SUMATRA".equals(SumatraModel.getInstance().getEnvironment()))
+		{
+			// process all frames, waiting and blocking if necessary
+			try
+			{
+				consumableFrames.putFirst(wFrameWrapper);
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
+		} else
+		{
+			consumableFrames.pollLast();
+			consumableFrames.addFirst(wFrameWrapper);
+		}
 	}
 	
 	

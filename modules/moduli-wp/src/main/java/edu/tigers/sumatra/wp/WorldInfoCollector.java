@@ -43,6 +43,8 @@ import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
+import edu.tigers.sumatra.referee.source.refbox.RefBox;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.vision.IVisionFilterObserver;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
@@ -282,6 +284,13 @@ public class WorldInfoCollector extends AWorldPredictor
 		observers.forEach(c -> c.onNewWorldFrame(wfw));
 		
 		visualize(wfw);
+		
+		RefBox refBox = (RefBox) SumatraModel.getInstance().getModule(AReferee.class)
+				.getSource(ERefereeMessageSource.INTERNAL_REFBOX);
+		if (refBox != null)
+		{
+			refBox.update();
+		}
 	}
 	
 	
