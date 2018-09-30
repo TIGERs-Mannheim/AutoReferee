@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.engine.FollowUpAction;
@@ -23,6 +25,7 @@ import edu.tigers.autoreferee.engine.log.GameLog.IGameLogObserver;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogFormatter;
 import edu.tigers.autoreferee.engine.log.GameTime;
+import edu.tigers.sumatra.Referee;
 
 
 /**
@@ -169,15 +172,18 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 	{
 		StringBuilder builder = new StringBuilder();
 		
+		builder.append(formatStage(entry.getGameTime().getStage()));
+		builder.append(" | ");
 		builder.append(formatGameTime(entry.getGameTime()));
 		builder.append(" | ");
-		builder.append(formatInstant(entry.getInstant()));
+		builder.append(formatTimestamp(entry.getTimestamp()));
+		builder.append(" | ");
+		builder.append(formatType(entry.getType()));
 		builder.append(" | ");
 		
 		switch (entry.getType())
 		{
 			case COMMAND:
-				builder.append("Sending command: ");
 				builder.append(GameLogFormatter.formatCommand(entry.getCommand()));
 				break;
 			case FOLLOW_UP:
@@ -187,13 +193,13 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 				gameEvent(entry, builder);
 				break;
 			case GAME_STATE:
-				builder.append("Game state changed to: ");
 				builder.append(entry.getGamestate().toString());
 				break;
 			case REFEREE_MSG:
-				builder.append("Received new Referee Msg: ");
 				builder.append(GameLogFormatter.formatRefMsg(entry.getRefereeMsg()));
 				break;
+			case REFEREE_GAME_EVENT:
+				// ignore
 			default:
 				builder.append("Unknown event type: ");
 				builder.append(entry.getType());
@@ -204,10 +210,29 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 	}
 	
 	
+	private String formatStage(final Referee.SSL_Referee.Stage stage)
+	{
+		int maxStageLength = Arrays.stream(Referee.SSL_Referee.Stage.values())
+				.map(Enum::name)
+				.mapToInt(String::length)
+				.max().orElse(0);
+		return StringUtils.rightPad(stage.name(), maxStageLength);
+	}
+	
+	
+	private String formatType(final GameLogEntry.ELogEntryType type)
+	{
+		int maxStageLength = Arrays.stream(GameLogEntry.ELogEntryType.values())
+				.map(Enum::name)
+				.mapToInt(String::length)
+				.max().orElse(0);
+		return StringUtils.rightPad(type.name(), maxStageLength);
+	}
+	
+	
 	private void gameEvent(final GameLogEntry entry, final StringBuilder builder)
 	{
 		IGameEvent event = entry.getGameEvent();
-		builder.append("New event: ");
 		builder.append(event.toString());
 		FollowUpAction action = event.getFollowUpAction();
 		if (action != null)
@@ -223,29 +248,21 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 		FollowUpAction followUp = entry.getFollowUpAction();
 		if (followUp != null)
 		{
-			builder.append("FollowUpAction set to: ");
 			builder.append(GameLogFormatter.formatFollowUp(followUp));
 		} else
 		{
-			builder.append("FollowUpAction reset");
+			builder.append("reset");
 		}
 	}
 	
 	
-	private String formatInstant(final Instant instant)
+	private String formatTimestamp(final long timestamp)
 	{
-		StringBuilder builder = new StringBuilder();
-		LocalDateTime date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-		
-		builder.append(minFormat.format(date.getHour()));
-		builder.append(":");
-		builder.append(minFormat.format(date.getMinute()));
-		builder.append(":");
-		builder.append(sFormat.format(date.getSecond()));
-		builder.append(":");
-		builder.append(msFormat.format((long) date.getNano() / 1_000_000));
-		
-		return builder.toString();
+		long timestampMs = (long) (timestamp / 1e6);
+		Date date = new Date(timestampMs);
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
+		sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return sdf.format(date);
 	}
 	
 	
@@ -254,8 +271,6 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 		long micros = gameTime.getMicrosLeft();
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append(gameTime.getStage());
-		builder.append(" ");
 		
 		if (micros < 0)
 		{
