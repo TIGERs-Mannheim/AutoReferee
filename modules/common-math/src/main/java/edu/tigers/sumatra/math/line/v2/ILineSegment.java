@@ -85,4 +85,14 @@ public interface ILineSegment extends ILineBase
 	{
 		return getStart();
 	}
+	
+	
+	/**
+	 * Create a new line segment with a positive or negative margin.
+	 * If the margin is negative and the line segment length is less than |margin*2|, the behavior is undefined.
+	 * 
+	 * @param margin the margin to apply to both ends
+	 * @return a new line segment
+	 */
+	ILineSegment withMargin(double margin);
 }

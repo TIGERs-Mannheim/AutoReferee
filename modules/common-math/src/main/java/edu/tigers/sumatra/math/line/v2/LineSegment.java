@@ -28,6 +28,7 @@ final class LineSegment extends ALine implements ILineSegment
 	
 	
 	/** Used by berkely */
+	@SuppressWarnings("unused")
 	private LineSegment()
 	{
 		start = Vector2f.ZERO_VECTOR;
@@ -94,7 +95,7 @@ final class LineSegment extends ALine implements ILineSegment
 		{
 			return true;
 		}
-		if ((other == null) || !(other instanceof ILineSegment))
+		if (!(other instanceof ILineSegment))
 		{
 			return false;
 		}
@@ -127,7 +128,7 @@ final class LineSegment extends ALine implements ILineSegment
 		return end;
 	}
 	
-
+	
 	@Override
 	public IVector2 getCenter()
 	{
@@ -214,5 +215,14 @@ final class LineSegment extends ALine implements ILineSegment
 			return getStart();
 		}
 		return LineMath.stepAlongLine(getStart(), getEnd(), stepSize);
+	}
+	
+	
+	@Override
+	public ILineSegment withMargin(final double margin)
+	{
+		IVector2 newStart = LineMath.stepAlongLine(getStart(), getEnd(), -margin);
+		IVector2 newEnd = LineMath.stepAlongLine(getEnd(), getStart(), -margin);
+		return Lines.segmentFromPoints(newStart, newEnd);
 	}
 }

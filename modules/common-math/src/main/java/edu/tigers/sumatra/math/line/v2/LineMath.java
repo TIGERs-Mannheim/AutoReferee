@@ -64,10 +64,9 @@ public final class LineMath
 		
 		if (Double.isNaN(result.x()) || Double.isNaN(result.y()))
 		{
-			log.fatal("stepAlongLine: result contains NaNs. Very dangerous!!");
-			final String seperator = " / ";
-			log.fatal(start.toString() + seperator + end.toString() + seperator + distance + seperator + coefficient
-					+ seperator + xDistance + seperator + yDistance + seperator + result.toString());
+			log.warn(String.format("stepAlongLine(%s,%s,%s) = %s -> NaNs!", start, end, stepSize, result),
+					new Exception());
+			return Vector2f.zero();
 		}
 		
 		return result;

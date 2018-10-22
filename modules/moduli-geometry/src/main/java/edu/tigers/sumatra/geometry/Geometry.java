@@ -111,8 +111,9 @@ public class Geometry
 	/**
 	 * TIGERs internal
 	 */
-	@Configurable
-	private static double penaltyAreaMargin = 100;
+	@Configurable(defValue = "10.0")
+	private static double penaltyAreaMargin = 10.0;
+	
 	@Configurable(spezis = { "GRSIM", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
 	
