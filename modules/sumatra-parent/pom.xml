@@ -576,7 +576,7 @@
             <dependency>
                 <groupId>com.github.TIGERs-Mannheim.matlabcontrol</groupId>
                 <artifactId>matlabcontrol</artifactId>
-                <version>master-5a20558f47-1</version>
+                <version>4.1.2</version>
             </dependency>
 
             <dependency>
@@ -598,9 +598,15 @@
             </dependency>
 
             <dependency>
+                <groupId>com.github.TIGERs-Mannheim.jinput</groupId>
+                <artifactId>jinput</artifactId>
+                <version>2.0.9.4</version>
+            </dependency>
+            <dependency>
                 <groupId>net.java.jinput</groupId>
-                <artifactId>jinput-platform</artifactId>
-                <version>2.0.4-1</version>
+                <artifactId>jinput</artifactId>
+                <version>2.0.9</version>
+                <classifier>natives-all</classifier>
             </dependency>
 
             <dependency>
@@ -618,7 +624,7 @@
             <dependency>
                 <groupId>com.github.TIGERs-Mannheim</groupId>
                 <artifactId>java-object-size-estimator</artifactId>
-                <version>master-2963d19809-1</version>
+                <version>v1.0</version>
             </dependency>
 
             <dependency>
@@ -674,6 +680,20 @@
                             <failOnWarning>true</failOnWarning>
                             <outputXML>true</outputXML>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.googlecode.mavennatives</groupId>
+                <artifactId>maven-nativedependencies-plugin</artifactId>
+                <version>0.0.7</version>
+                <executions>
+                    <execution>
+                        <id>unpacknatives</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
