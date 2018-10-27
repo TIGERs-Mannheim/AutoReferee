@@ -205,11 +205,14 @@ public abstract class AbstractAutoRefState implements IAutoRefState
 		IRectangle field = NGeometry.getField();
 		Collection<ITrackedBot> bots = frame.getWorldFrame().getBots().values();
 		List<ITrackedBot> violators = bots.stream()
-				.filter(bot -> field.isPointInShape(bot.getPos()))
+				.filter(bot -> field.withMargin(-Geometry.getBotRadius()).isPointInShape(bot.getPos()))
 				.filter(bot -> {
 					IRectangle side = NGeometry.getFieldSide(bot.getBotId().getTeamColor());
-					return !side.isPointInShape(bot.getPos());
-				}).collect(Collectors.toList());
+					return !side.withMargin(-Geometry.getBotRadius()).isPointInShape(bot.getPos());
+				})
+				.filter(bot -> (Geometry.getCenter().distanceTo(bot.getPos()) > Geometry.getCenterCircle().radius()
+						+ Geometry.getBotRadius()))
+				.collect(Collectors.toList());
 		
 		violators.forEach(bot -> shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED)));
 		

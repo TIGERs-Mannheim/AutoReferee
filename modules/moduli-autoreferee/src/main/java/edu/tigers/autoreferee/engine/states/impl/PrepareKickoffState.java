@@ -4,9 +4,11 @@
 
 package edu.tigers.autoreferee.engine.states.impl;
 
+import java.awt.Color;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -16,6 +18,7 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.autoreferee.engine.states.IAutoRefStateContext;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -63,12 +66,15 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		
 		boolean ballIsPlaced = checkBallPlaced(ball, Geometry.getCenter(), shapes);
 		
-		boolean botPosCorrect = checkBotsOnCorrectSide(frame, shapes)
+		boolean botOnCorrectSide = checkBotsOnCorrectSide(frame, shapes)
 				&& checkBotDistance(frame, shooterTeam.opposite(), shapes);
 		
 		boolean readyWaitTimeOver = false;
 		
-		if (ballIsPlaced && botPosCorrect)
+		boolean kickoffBotPosCorrect = checkKickoffBotPos(frame, shapes, ETeamColor.YELLOW)
+				&& checkKickoffBotPos(frame, shapes, ETeamColor.BLUE);
+		
+		if (ballIsPlaced && botOnCorrectSide && kickoffBotPosCorrect)
 		{
 			if (readyWaitTime == null)
 			{
@@ -86,6 +92,28 @@ public class PrepareKickoffState extends AbstractAutoRefState
 		{
 			sendCommandIfReady(ctx, new RefboxRemoteCommand(Command.NORMAL_START, null), ctx.doProceed());
 		}
+	}
+	
+	
+	private boolean checkKickoffBotPos(final IAutoRefFrame frame, final List<IDrawableShape> shapes,
+			ETeamColor teamColor)
+	{
+		List<ITrackedBot> bots = frame.getWorldFrame().getBots().values().stream()
+				.filter(bot -> bot.getTeamColor() == teamColor)
+				.filter(bot -> Geometry.getCenterCircle().isPointInShape(bot.getPos()))
+				.collect(Collectors.toList());
+		
+		boolean isOnlyOneBot = bots.size() <= 1;
+		
+		if (!isOnlyOneBot)
+		{
+			for (ITrackedBot bot : bots)
+			{
+				shapes.add(new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED));
+			}
+		}
+		
+		return isOnlyOneBot;
 	}
 	
 	
