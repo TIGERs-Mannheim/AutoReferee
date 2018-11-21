@@ -76,6 +76,8 @@ public interface IBot
 	 * @return the color
 	 */
 	ETeamColor getColor();
+
+	double getDribblerTemp();
 	
 	
 	/**
