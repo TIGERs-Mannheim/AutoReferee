@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,6 +62,8 @@ public class ReplayPresenter extends AMainPresenter
 	
 	/**
 	 * Default
+	 * 
+	 * @param mainFrame e.g. ReplayWindow.java
 	 */
 	public ReplayPresenter(AMainFrame mainFrame)
 	{
@@ -122,6 +125,7 @@ public class ReplayPresenter extends AMainPresenter
 	public void start(final BerkeleyDb db, long startTime)
 	{
 		this.db = db;
+		getMainFrame().setTitle(new File(db.getDbPath()).getName());
 		refreshThread = new RefreshThread(startTime);
 		visualizerPresenter.start();
 		executor.execute(refreshThread);
