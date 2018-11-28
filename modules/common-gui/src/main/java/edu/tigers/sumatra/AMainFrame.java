@@ -19,9 +19,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.ButtonGroup;
@@ -70,7 +73,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	private final JMenuBar jMenuBar = new JMenuBar();
 	private final JMenu viewsMenu = new JMenu("Views");
 	private final JMenu layoutMenu = new JMenu("Layout");
-	private final transient List<ASumatraView> views = new ArrayList<>();
+	private final transient Set<ASumatraView> views = new TreeSet<>(Comparator.comparing(v -> v.getType().getTitle()));
 	
 	private final transient Map<ASumatraView, List<JMenu>> customMenuMap = new HashMap<>();
 	
@@ -171,6 +174,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	
 	/**
 	 * Add a sumatra view
+	 * This method will keep the alphabetical order of views (based on title)
 	 */
 	protected void addView(final ASumatraView view)
 	{
@@ -192,7 +196,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	 */
 	public final List<ASumatraView> getViews()
 	{
-		return views;
+		return new ArrayList<>(views);
 	}
 	
 	
