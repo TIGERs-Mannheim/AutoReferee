@@ -169,6 +169,12 @@
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-offensive-tree</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>moduli-geometry</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -50,4 +50,5 @@
             <log2file>true</log2file>
         </properties>
     </module>
+    <module id="edu.tigers.sumatra.trees.OffensiveTreeProvider"/>
 </centralSoftware>
