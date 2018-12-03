@@ -3,14 +3,20 @@
  */
 package edu.tigers.sumatra.referee.data;
 
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.SslGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -44,6 +50,12 @@ public class RefereeMsg
 	
 	private final GameEvent gameEvent;
 	
+	private final Command nextCommand;
+	/** must be transient until a wrapper class has been implemented that is @Persistent */
+	private final transient List<SslGameEvent.GameEvent> gameEvents;
+	/** must be transient until a wrapper class has been implemented that is @Persistent */
+	private final transient List<Referee.ProposedGameEvent> proposedGameEvents;
+	
 	
 	/**
 	 * Create default referee msg
@@ -62,6 +74,9 @@ public class RefereeMsg
 		ballPlacementPos = Vector2f.ZERO_VECTOR;
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		gameEvent = new GameEvent();
+		nextCommand = null;
+		gameEvents = Collections.emptyList();
+		proposedGameEvents = Collections.emptyList();
 	}
 	
 	
@@ -95,6 +110,10 @@ public class RefereeMsg
 		
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		gameEvent = new GameEvent(sslRefereeMsg.getGameEvent());
+		
+		nextCommand = sslRefereeMsg.getNextCommand();
+		gameEvents = sslRefereeMsg.getGameEventsList();
+		proposedGameEvents = sslRefereeMsg.getProposedGameEventsList();
 	}
 	
 	
@@ -117,6 +136,9 @@ public class RefereeMsg
 		negativeHalfTeam = refereeMsg.negativeHalfTeam;
 		ballPlacementPos = refereeMsg.getBallPlacementPosNeutral();
 		gameEvent = refereeMsg.gameEvent;
+		nextCommand = refereeMsg.nextCommand;
+		gameEvents = refereeMsg.gameEvents;
+		proposedGameEvents = refereeMsg.proposedGameEvents;
 	}
 	
 	
@@ -314,21 +336,49 @@ public class RefereeMsg
 	}
 	
 	
+	public IVector2 getBallPlacementPos()
+	{
+		return ballPlacementPos;
+	}
+	
+	
+	public Command getNextCommand()
+	{
+		return nextCommand;
+	}
+	
+	
+	public List<SslGameEvent.GameEvent> getGameEvents()
+	{
+		return gameEvents;
+	}
+	
+	
+	public List<Referee.ProposedGameEvent> getProposedGameEvents()
+	{
+		return proposedGameEvents;
+	}
+	
+	
 	@Override
 	public String toString()
 	{
-		return "RefereeMsg{" +
-				"frameTimestamp=" + frameTimestamp +
-				", command=" + command +
-				", cmdTimestamp=" + cmdTimestamp +
-				", cmdCounter=" + cmdCounter +
-				", packetTimestamp=" + packetTimestamp +
-				", stage=" + stage +
-				", stageTimeLeft=" + stageTimeLeft +
-				", teamInfoYellow=" + teamInfoYellow +
-				", teamInfoBlue=" + teamInfoBlue +
-				", negativeHalfTeam=" + negativeHalfTeam +
-				", ballPlacementPos=" + ballPlacementPos +
-				'}';
+		return new ToStringBuilder(this)
+				.append("frameTimestamp", frameTimestamp)
+				.append("command", command)
+				.append("cmdTimestamp", cmdTimestamp)
+				.append("cmdCounter", cmdCounter)
+				.append("packetTimestamp", packetTimestamp)
+				.append("stage", stage)
+				.append("stageTimeLeft", stageTimeLeft)
+				.append("teamInfoYellow", teamInfoYellow)
+				.append("teamInfoBlue", teamInfoBlue)
+				.append("negativeHalfTeam", negativeHalfTeam)
+				.append("ballPlacementPos", ballPlacementPos)
+				.append("gameEvent", gameEvent)
+				.append("nextCommand", nextCommand)
+				.append("gameEvents", gameEvents)
+				.append("proposedGameEvents", proposedGameEvents)
+				.toString();
 	}
 }

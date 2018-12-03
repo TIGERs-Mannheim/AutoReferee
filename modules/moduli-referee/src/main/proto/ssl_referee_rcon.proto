@@ -1,10 +1,10 @@
 syntax = "proto2";
-package edu.tigers.sumatra;
 
+package edu.tigers.sumatra;
 option java_outer_classname = "RefboxRemoteControl";
 
-import "messages_robocup_ssl_referee.proto";
-import "messages_robocup_ssl_game_event.proto";
+import "ssl_referee.proto";
+import "ssl_game_event.proto";
 
 // The TCP half-connection from controller to referee box carries a sequence of
 // these messages, sent on demand, each preceded by its length in bytes as a

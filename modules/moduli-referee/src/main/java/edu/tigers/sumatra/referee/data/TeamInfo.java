@@ -6,6 +6,8 @@ package edu.tigers.sumatra.referee.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
@@ -13,8 +15,6 @@ import edu.tigers.sumatra.Referee.SSL_Referee;
 
 /**
  * Persistent wrapper for TeamInfo
- * 
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent
 public class TeamInfo
@@ -34,6 +34,11 @@ public class TeamInfo
 	private final int timeoutTime;
 	private final int goalie;
 	
+	private final int foulCounter;
+	private final int ballPlacementFailures;
+	private final boolean canPlaceBall;
+	private final int maxAllowedBots;
+	
 	
 	@SuppressWarnings("unused")
 	TeamInfo()
@@ -46,6 +51,10 @@ public class TeamInfo
 		timeouts = 0;
 		timeoutTime = 0;
 		goalie = 0;
+		foulCounter = 0;
+		ballPlacementFailures = 0;
+		canPlaceBall = true;
+		maxAllowedBots = 0;
 	}
 	
 	
@@ -62,6 +71,10 @@ public class TeamInfo
 		timeouts = teamInfo.getTimeouts();
 		timeoutTime = teamInfo.getTimeoutTime();
 		goalie = teamInfo.getGoalie();
+		foulCounter = teamInfo.hasFoulCounter() ? teamInfo.getFoulCounter() : 0;
+		ballPlacementFailures = teamInfo.hasBallPlacementFailures() ? teamInfo.getBallPlacementFailures() : 0;
+		canPlaceBall = !teamInfo.hasCanPlaceBall() || teamInfo.getCanPlaceBall();
+		maxAllowedBots = teamInfo.hasMaxAllowedBots() ? teamInfo.getMaxAllowedBots() : 0;
 	}
 	
 	
@@ -141,18 +154,46 @@ public class TeamInfo
 	}
 	
 	
+	public int getFoulCounter()
+	{
+		return foulCounter;
+	}
+	
+	
+	public int getBallPlacementFailures()
+	{
+		return ballPlacementFailures;
+	}
+	
+	
+	public boolean isCanPlaceBall()
+	{
+		return canPlaceBall;
+	}
+	
+	
+	public int getMaxAllowedBots()
+	{
+		return maxAllowedBots;
+	}
+	
+	
 	@Override
 	public String toString()
 	{
-		return "TeamInfo{" +
-				"name='" + name + '\'' +
-				", score=" + score +
-				", redCards=" + redCards +
-				", yellowCards=" + yellowCards +
-				", yellowCardsTimes=" + yellowCardsTimes +
-				", timeouts=" + timeouts +
-				", timeoutTime=" + timeoutTime +
-				", goalie=" + goalie +
-				'}';
+		return new ToStringBuilder(this)
+				.append("name", name)
+				.append("score", score)
+				.append("redCards", redCards)
+				.append("yellowCards", yellowCards)
+				.append("yellowCardsTimes", yellowCardsTimes)
+				.append("timeouts", timeouts)
+				.append("timeoutTime", timeoutTime)
+				.append("goalie", goalie)
+				.append("foulCounter", foulCounter)
+				.append("ballPlacementFailures", ballPlacementFailures)
+				.append("canPlaceBall", canPlaceBall)
+				.append("maxAllowedBots", maxAllowedBots)
+				.toString();
 	}
 }
