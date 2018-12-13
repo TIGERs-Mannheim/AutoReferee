@@ -14,6 +14,7 @@ import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.components.IEnumPanel;
+import edu.tigers.sumatra.util.MigLayoutResizeListener;
 import edu.tigers.sumatra.views.ISumatraView;
 import net.miginfocom.swing.MigLayout;
 
@@ -52,11 +53,13 @@ public class AutoRefMainPanel extends JPanel implements IAutoRefMainPanel, ISuma
 		final JScrollPane scrollPane = new JScrollPane(panel);
 		add(scrollPane, BorderLayout.CENTER);
 		
-		panel.setLayout(new MigLayout("", "[250][250]", "[][]"));
+		panel.setLayout(new MigLayout("wrap 2", "[250][250]", "[][]"));
+		this.addComponentListener(new MigLayoutResizeListener(this, panel)); // Set number of panels per row based on width
+
 		panel.add(startStopPanel, "grow, top");
-		panel.add(activeEnginePanel, "grow, top, wrap");
+		panel.add(activeEnginePanel, "grow, top");
 		panel.add(gameEventPanel, "grow x, top");
-		panel.add(gameEventDetectorPanel, "grow x, top, wrap");
+		panel.add(gameEventDetectorPanel, "grow x, top");
 	}
 	
 	
