@@ -8,10 +8,10 @@ import java.util.Arrays;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
+import edu.tigers.sumatra.components.BetterScrollPane;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.components.IEnumPanel;
 import edu.tigers.sumatra.util.MigLayoutResizeListener;
@@ -50,7 +50,7 @@ public class AutoRefMainPanel extends JPanel implements IAutoRefMainPanel, ISuma
 	{
 		setLayout(new BorderLayout());
 		JPanel panel = new JPanel();
-		final JScrollPane scrollPane = new JScrollPane(panel);
+		final BetterScrollPane scrollPane = new BetterScrollPane(panel);
 		add(scrollPane, BorderLayout.CENTER);
 		
 		panel.setLayout(new MigLayout("wrap 2", "[250][250]", "[][]"));
