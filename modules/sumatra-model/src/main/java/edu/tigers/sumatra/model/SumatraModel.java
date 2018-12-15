@@ -35,15 +35,10 @@ import edu.tigers.moduli.exceptions.LoadModulesException;
  */
 public final class SumatraModel extends Moduli
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	
 	private static final Logger log = Logger.getLogger(SumatraModel.class.getName());
 	
 	// --- version ---
-	private static final String VERSION = "6.0";
+	private static final String VERSION = "2019";
 	
 	// --- singleton ---
 	private static final SumatraModel INSTANCE = new SumatraModel();
