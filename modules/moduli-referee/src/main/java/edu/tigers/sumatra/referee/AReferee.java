@@ -10,6 +10,8 @@ import edu.tigers.moduli.AModule;
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.referee.events.Event;
+import edu.tigers.sumatra.referee.events.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 
@@ -57,6 +59,12 @@ public abstract class AReferee extends AModule
 	
 	
 	/**
+	 * Send an event to the game controller. Use {@link GcEventFactory} to create new events
+	 */
+	public abstract void sendGameControllerEvent(Event event);
+	
+	
+	/**
 	 * Internal use only.
 	 * 
 	 * @param refMsg
@@ -97,17 +105,15 @@ public abstract class AReferee extends AModule
 	
 	
 	/**
-	 * Set a specific message source.
-	 * 
-	 * @param type
-	 */
-	public abstract void setActiveSource(final ERefereeMessageSource type);
-	
-	
-	/**
 	 * Update a keeper id
 	 *
 	 * @param keeperId
 	 */
 	public abstract void updateKeeperId(BotID keeperId);
+	
+	
+	/**
+	 * @return true, if the referee can be controlled locally
+	 */
+	public abstract boolean isControllable();
 }

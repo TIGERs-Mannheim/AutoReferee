@@ -121,7 +121,7 @@ public class RefereeVisCalc implements IWpCalc
 	
 	private void paintShapes(final List<IDrawableShape> shapes, final WorldFrameWrapper wfw)
 	{
-		if (wfw.getGameState().isBallPlacement())
+		if (wfw.getGameState().getBallPlacementPositionNeutral() != null)
 		{
 			paintAutomatedPlacementShapes(shapes, wfw);
 		}

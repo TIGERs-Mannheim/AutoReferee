@@ -5,7 +5,6 @@ package edu.tigers.autoreferee.engine.log;
 
 import java.text.DecimalFormat;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 
@@ -20,27 +19,6 @@ public class GameLogFormatter
 	
 	private GameLogFormatter()
 	{
-	}
-	
-	
-	/**
-	 * @param action
-	 * @return
-	 */
-	public static String formatFollowUp(final FollowUpAction action)
-	{
-		StringBuilder builder = new StringBuilder();
-		builder.append(action.getActionType());
-		builder.append(" | ");
-		builder.append(action.getTeamInFavor());
-		action.getNewBallPosition().ifPresent(ballPos -> {
-			builder.append(" | (");
-			builder.append(posFormat.format(ballPos.x()));
-			builder.append(" ");
-			builder.append(posFormat.format(ballPos.y()));
-			builder.append(")");
-		});
-		return builder.toString();
 	}
 	
 	
@@ -83,6 +61,6 @@ public class GameLogFormatter
 	 */
 	public static String formatRefMsg(final RefereeMsg msg)
 	{
-		return String.valueOf(msg.getCommandCounter()) + " " + msg.getCommand();
+		return msg.getCommandCounter() + " " + msg.getCommand();
 	}
 }

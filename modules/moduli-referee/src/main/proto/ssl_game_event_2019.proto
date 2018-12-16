@@ -20,16 +20,15 @@ message GameEvent {
 
         Prepared prepared = 1;
         NoProgressInGame no_progress_in_game = 2;
-        PlacementFailedByTeamInFavor placement_failed_by_team_in_favor = 3;
-        PlacementFailedByOpponent placement_failed_by_opponent = 4;
+        PlacementFailed placement_failed = 3;
         PlacementSucceeded placement_succeeded = 5;
         BotSubstitution bot_substitution = 37;
         TooManyRobots too_many_robots = 38;
 
         // Ball out of field events
 
-        BallLeftFieldEvent ball_left_field_touch_line = 6;
-        BallLeftFieldEvent ball_left_field_goal_line = 7;
+        BallLeftField ball_left_field_touch_line = 6;
+        BallLeftField ball_left_field_goal_line = 7;
         Goal possible_goal = 39;
         Goal goal = 8;
         IndirectGoal indirect_goal = 9;
@@ -75,7 +74,7 @@ message GameEvent {
     }
 
     // the ball left the field normally
-    message BallLeftFieldEvent {
+    message BallLeftField {
         // the team that last touched the ball
         required Team by_team = 1;
         // the bot that last touched the ball
@@ -126,7 +125,7 @@ message GameEvent {
         optional Location location = 3;
         // the location where the ball was kicked
         optional Location kick_location = 4;
-        // the maximum height of the ball, before it entered the goal and since the last kick
+        // the maximum height [m] of the ball, before it entered the goal and since the last kick
         optional float max_ball_height = 5;
     }
     // a bot moved too fast while the game was stopped
@@ -163,9 +162,9 @@ message GameEvent {
         optional float crash_speed = 4;
         // the difference [m/s] of the velocity of the two bots
         optional float speed_diff = 5;
-        // the angle [rad] in the range [0, pi/2] of the bot velocity vectors
-        // an angle of 0rad means, the bots mearly touched each other
-        // an angle of pi/2rad means, the bots crashed into each other frontal
+        // the angle [rad] in the range [0, π] of the bot velocity vectors
+        // an angle of 0 rad (  0°) means, the bots barely touched each other
+        // an angle of π rad (180°) means, the bots crashed frontal into each other
         optional float crash_angle = 6;
     }
     // two robots crashed into each other and one team was found guilty to due significant speed difference
@@ -182,9 +181,9 @@ message GameEvent {
         optional float crash_speed = 5;
         // the difference [m/s] of the velocity of the two bots
         optional float speed_diff = 6;
-        // the angle [rad] in the range [0, pi/2] of the bot velocity vectors
-        // an angle of 0rad means, the bots mearly touched each other
-        // an angle of pi/2rad means, the bots crashed into each other frontal
+        // the angle [rad] in the range [0, π] of the bot velocity vectors
+        // an angle of 0 rad (  0°) means, the bots barely touched each other
+        // an angle of π rad (180°) means, the bots crashed frontal into each other
         optional float crash_angle = 7;
     }
     // a bot pushed another bot over a significant distance
@@ -250,9 +249,9 @@ message GameEvent {
         optional uint32 by_bot = 2;
         // the location of the ball at the time of the highest speed
         optional Location location = 3;
-        // the absolute initial ball speed (kick speed)
+        // the absolute initial ball speed (kick speed) [m/s]
         optional float initial_ball_speed = 4;
-        // the maximum height that the ball has reached during the kick
+        // the maximum height [m] that the ball has reached during the kick
         optional float max_ball_height = 5;
     }
     // a bot dribbled to ball too far
@@ -292,7 +291,7 @@ message GameEvent {
         optional uint32 by_bot = 2;
         // the location of the bot
         optional Location location = 3;
-        // the distance of the bot to the penalty area
+        // the distance [m] of the bot to the penalty area
         optional float distance = 4;
     }
     // a bot held the ball for too long
@@ -334,8 +333,10 @@ message GameEvent {
     message KickTimeout {
         // the team that that should have kicked
         required Team by_team = 1;
+        // the location of the ball
+        optional Location location = 2;
         // the time [s] that was waited
-        optional float time = 2;
+        optional float time = 3;
     }
     // game was stuck
     message NoProgressInGame {
@@ -344,18 +345,11 @@ message GameEvent {
         // the time [s] that was waited
         optional float time = 2;
     }
-    // placement failed by the team that should bring the ball into play next
-    message PlacementFailedByTeamInFavor {
+    // ball placement failed
+    message PlacementFailed {
         // the team that failed
         required Team by_team = 1;
-        // the remaining distance from ball to placement position
-        optional float remaining_distance = 2;
-    }
-    // placement failed by the team other team
-    message PlacementFailedByOpponent {
-        // the team that failed
-        required Team by_team = 1;
-        // the remaining distance from ball to placement position
+        // the remaining distance [m] from ball to placement position
         optional float remaining_distance = 2;
     }
     // a team was found guilty for minor unsporting behavior
@@ -379,22 +373,22 @@ message GameEvent {
         // the location of the ball
         optional Location location = 2;
         // the duration [s] that the keeper hold the ball
-        optional double duration = 3;
+        optional float duration = 3;
     }
     // a team successfully placed the ball
     message PlacementSucceeded {
         // the team that did the placement
         required Team by_team = 1;
-        // the time taken for placing the ball
+        // the time [s] taken for placing the ball
         optional float time_taken = 2;
-        // the distance between placement location and actual ball position
+        // the distance [m] between placement location and actual ball position
         optional float precision = 3;
-        // the distance between the initial ball location and the placement position
+        // the distance [m] between the initial ball location and the placement position
         optional float distance = 4;
     }
     // both teams are prepared - all conditions are met to continue (with kickoff or penalty kick)
     message Prepared {
-        // the time taken for preparing
+        // the time [s] taken for preparing
         optional float time_taken = 1;
     }
     // bots are being substituted by at least one team

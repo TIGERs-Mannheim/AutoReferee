@@ -9,7 +9,6 @@
 package edu.tigers.autoref.view.main;
 
 import edu.tigers.autoref.view.main.IActiveEnginePanel.IActiveEnginePanelObserver;
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.sumatra.components.IBasePanel;
 
 
@@ -27,23 +26,5 @@ public interface IActiveEnginePanel extends IBasePanel<IActiveEnginePanelObserve
 		 * Called whenever the reset button is pressed
 		 */
 		void onResetButtonPressed();
-		
-		
-		/**
-		 * Called whenever the proceed button is pressed
-		 */
-		void onProceedButtonPressed();
 	}
-	
-	
-	/**
-	 * @param enabled
-	 */
-	void setProceedButtonEnabled(boolean enabled);
-	
-	
-	/**
-	 * @param action
-	 */
-	void setNextAction(FollowUpAction action);
 }

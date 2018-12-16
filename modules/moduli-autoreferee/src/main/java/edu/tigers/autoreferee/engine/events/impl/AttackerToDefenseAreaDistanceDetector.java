@@ -14,45 +14,30 @@ import java.util.Set;
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.events.DistanceViolation;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.data.AttackerTooCloseToDefenseArea;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.Lines;
-import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
-import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
- * Monitors the distance between attackers and the defense area of the defending team when a freekick is performed.
- * 
- * @author Lukas Magel
+ * Monitors the distance between attackers and the defense area of the defending team when a free kick is performed.
  */
-public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDetector
+public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
 	private static final double INACCURACY_TOLERANCE = 15;
-	private static final Set<EGameState> ALLOWED_PREVIOUS_STATES;
+	private static final Set<EGameState> ALLOWED_PREVIOUS_STATES = Collections.unmodifiableSet(EnumSet.of(
+			EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF));
 	
 	private boolean active = false;
-	
-	static
-	{
-		Set<EGameState> states = EnumSet.of(
-				EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF);
-		ALLOWED_PREVIOUS_STATES = Collections.unmodifiableSet(states);
-	}
 	
 	
 	/**
@@ -60,19 +45,12 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	 */
 	public AttackerToDefenseAreaDistanceDetector()
 	{
-		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_DISTANCE, EGameState.RUNNING);
+		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_AREA_DISTANCE, EGameState.RUNNING);
 	}
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		List<GameState> stateHistory = frame.getStateHistory();
 		
@@ -81,7 +59,7 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	public Optional<IGameEvent> doUpdate()
 	{
 		if (active)
 		{
@@ -97,12 +75,6 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 	}
 	
 	
-	@Override
-	public void doReset()
-	{
-		// Nothing to reset
-	}
-	
 	/**
 	 * The actual evaluation of this detector is encapsulated in this class and executed only once when the gamestate
 	 * changes to running. Since this class is created when the rule is to be evaluated all required values can be stored
@@ -117,20 +89,16 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 				+ Geometry.getBotRadius()
 				- INACCURACY_TOLERANCE;
 		
-		private final IAutoRefFrame frame;
 		private final ETeamColor attackerColor;
 		private final IPenaltyArea defenderPenArea;
 		
-		private final ITrackedBall ball;
 		private final Collection<ITrackedBot> bots;
 		
 		
 		public Evaluator(final IAutoRefFrame frame, final ETeamColor attackerColor)
 		{
-			this.frame = frame;
 			this.attackerColor = attackerColor;
 			defenderPenArea = NGeometry.getPenaltyArea(attackerColor.opposite());
-			ball = frame.getWorldFrame().getBall();
 			bots = frame.getWorldFrame().getBots().values();
 		}
 		
@@ -166,15 +134,12 @@ public class AttackerToDefenseAreaDistanceDetector extends APreparingGameEventDe
 		}
 		
 		
-		private DistanceViolation buildViolation(final ITrackedBot offender)
+		private IGameEvent buildViolation(final ITrackedBot offender)
 		{
 			double distance = AutoRefMath
 					.distanceToNearestPointOutside(defenderPenArea, requiredMargin, offender.getPos());
 			
-			IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(ball.getPos(), offender.getTeamColor().opposite());
-			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, attackerColor.opposite(), kickPos);
-			return new DistanceViolation(EGameEvent.ATTACKER_TO_DEFENCE_AREA, frame.getTimestamp(),
-					offender.getBotId(), followUp, distance);
+			return new AttackerTooCloseToDefenseArea(offender.getBotId(), offender.getPos(), distance);
 		}
 	}
 	

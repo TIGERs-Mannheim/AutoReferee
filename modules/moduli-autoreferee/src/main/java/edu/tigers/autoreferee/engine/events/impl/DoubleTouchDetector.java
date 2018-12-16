@@ -9,14 +9,10 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.data.AttackerDoubleTouchedBall;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -44,10 +40,8 @@ import edu.tigers.sumatra.wp.util.GameStateCalculator;
  * The {@link GameStateCalculator} uses the same 50mm distance to switch to running.
  * </p>
  */
-public class DoubleTouchDetector extends APreparingGameEventDetector
+public class DoubleTouchDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
 	private static final Set<EGameState> VALID_STATES = Collections.unmodifiableSet(EnumSet.of(
 			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE, EGameState.RUNNING));
 	
@@ -68,14 +62,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		kickerID = null;
 		stillTouching = true;
@@ -84,7 +71,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	public Optional<IGameEvent> doUpdate()
 	{
 		if (violationRaised)
 		{
@@ -121,7 +108,7 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 		if (!stillTouching)
 		{
 			// kicker touched the ball again
-			GameEvent violation = createViolation(frame);
+			AttackerDoubleTouchedBall violation = createViolation();
 			kickerID = null;
 			violationRaised = true;
 			return Optional.of(violation);
@@ -132,21 +119,12 @@ public class DoubleTouchDetector extends APreparingGameEventDetector
 	}
 	
 	
-	private GameEvent createViolation(final IAutoRefFrame frame)
+	private AttackerDoubleTouchedBall createViolation()
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		ETeamColor attackingTeam = kickerID.getTeamColor();
 		IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(ballPos, attackingTeam.opposite());
 		
-		FollowUpAction followUp = new FollowUpAction(
-				EActionType.INDIRECT_FREE,
-				attackingTeam.opposite(),
-				kickPos);
-		
-		return new GameEvent(
-				EGameEvent.DOUBLE_TOUCH,
-				frame.getTimestamp(),
-				kickerID,
-				followUp);
+		return new AttackerDoubleTouchedBall(kickerID, kickPos);
 	}
 }

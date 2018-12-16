@@ -12,8 +12,8 @@ import java.util.function.Consumer;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
+import edu.tigers.autoreferee.engine.events.GameEventResponse;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
@@ -155,17 +155,6 @@ public class GameLog implements IGameLog
 		return buildAndAddEntry(builder -> builder.setGameEvent(refGameEvent));
 	}
 	
-	
-	/**
-	 * @param action
-	 * @return
-	 */
-	public GameLogEntry addEntry(final FollowUpAction action)
-	{
-		return buildAndAddEntry(builder -> builder.setFollowUpAction(action));
-	}
-	
-	
 	/**
 	 * @param command
 	 * @return
@@ -173,6 +162,12 @@ public class GameLog implements IGameLog
 	public GameLogEntry addEntry(final RefboxRemoteCommand command)
 	{
 		return buildAndAddEntry(builder -> builder.setCommand(command));
+	}
+	
+	
+	public GameLogEntry addEntry(final GameEventResponse response)
+	{
+		return buildAndAddEntry(builder -> builder.setGameEventResponse((response)));
 	}
 	
 	

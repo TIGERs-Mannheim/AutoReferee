@@ -29,8 +29,7 @@ import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.log.appender.GameLogFileAppender;
 import edu.tigers.autoreferee.remote.IRefboxRemote;
-import edu.tigers.autoreferee.remote.impl.LocalRefboxRemote;
-import edu.tigers.autoreferee.remote.impl.ThreadedTCPRefboxRemote;
+import edu.tigers.autoreferee.remote.impl.AutoRefProtocol;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
@@ -58,21 +57,21 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private boolean running = false;
 	private IAutoRefEngine engine;
 	private GameLogFileAppender gameLogAppender;
-	private final ERemoteControlType remoteControlType;
 	private final boolean log2File;
+	private final int gameControllerPort;
 	private AWorldPredictor wp;
 	
 	
 	/**
 	 * @param observer
-	 * @param remoteControlType
+	 * @param gameControllerPort
 	 * @param log2File
 	 */
-	public AutoRefRunner(final List<IAutoRefStateObserver> observer,
-			final ERemoteControlType remoteControlType, final boolean log2File)
+	public AutoRefRunner(final List<IAutoRefStateObserver> observer, final int gameControllerPort,
+			final boolean log2File)
 	{
 		this.observer = observer;
-		this.remoteControlType = remoteControlType;
+		this.gameControllerPort = gameControllerPort;
 		this.log2File = log2File;
 	}
 	
@@ -142,20 +141,16 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			 */
 			if (mode == AutoRefMode.ACTIVE)
 			{
-				if (remoteControlType == ERemoteControlType.LOCAL_MOCK)
-				{
-					remote = new LocalRefboxRemote();
-				} else
-				{
-					AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
-					String hostname = referee.getActiveSource().getRefBoxAddress().map(InetAddress::getHostAddress)
-							.orElse(AutoRefConfig.getRefboxHostname());
-					ThreadedTCPRefboxRemote tcpRefboxRemote = new ThreadedTCPRefboxRemote(hostname,
-							AutoRefConfig.getRefboxPort());
-					tcpRefboxRemote.start();
-					remote = tcpRefboxRemote;
-				}
+				AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
+				String hostname = referee.getActiveSource().getRefBoxAddress().map(InetAddress::getHostAddress)
+						.orElse(AutoRefConfig.getRefboxHostname());
+				AutoRefProtocol autoRefProtocol = new AutoRefProtocol(hostname,
+						gameControllerPort);
 				
+				autoRefProtocol.addGameEventResponseObserver(response -> getEngine().onGameControllerResponse(response));
+				
+				autoRefProtocol.start();
+				remote = autoRefProtocol;
 				refEngine = new ActiveAutoRefEngine(remote);
 			} else
 			{
@@ -168,7 +163,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			
 			registerWithWorldPredictor();
 			
-		} catch (ModuleNotFoundException | IOException e)
+		} catch (ModuleNotFoundException e)
 		{
 			if (remote != null)
 			{

@@ -10,8 +10,8 @@ package edu.tigers.autoreferee.engine.log;
 
 import java.time.Instant;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
+import edu.tigers.autoreferee.engine.events.GameEventResponse;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
 import edu.tigers.sumatra.referee.data.GameEvent;
@@ -24,21 +24,21 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  */
 public class GameLogEntryBuilder
 {
-	private ELogEntryType			type;
+	private ELogEntryType type;
 	/** frame timestamp in nanoseconds */
-	private Long						timestamp;
+	private Long timestamp;
 	/** Game time left in the stage when the event was created */
-	private GameTime					gameTime;
+	private GameTime gameTime;
 	/** The time instant this entry was created in */
-	private Instant					instant;
+	private Instant instant;
 	
-	private IGameEvent				gameEvent;
-	private boolean					acceptedByEngine;
+	private IGameEvent gameEvent;
+	private GameEventResponse gameEventResponse;
+	private boolean acceptedByEngine;
 	
-	private GameState					gamestate;
-	private RefereeMsg				refereeMsg;
-	private FollowUpAction			followUpAction;
-	private RefboxRemoteCommand	command;
+	private GameState gamestate;
+	private RefereeMsg refereeMsg;
+	private RefboxRemoteCommand command;
 	private GameEvent refGameEvent;
 	
 	
@@ -97,6 +97,13 @@ public class GameLogEntryBuilder
 	}
 	
 	
+	public void setGameEventResponse(final GameEventResponse response)
+	{
+		this.gameEventResponse = response;
+		setType(ELogEntryType.GAME_EVENT_REPLY);
+	}
+	
+	
 	/**
 	 * @param refereeMsg
 	 */
@@ -111,16 +118,6 @@ public class GameLogEntryBuilder
 	{
 		this.refGameEvent = refGameEvent;
 		setType(ELogEntryType.REFEREE_GAME_EVENT);
-	}
-	
-	
-	/**
-	 * @param followUpAction
-	 */
-	public void setFollowUpAction(final FollowUpAction followUpAction)
-	{
-		this.followUpAction = followUpAction;
-		setType(ELogEntryType.FOLLOW_UP);
 	}
 	
 	
@@ -145,6 +142,6 @@ public class GameLogEntryBuilder
 		}
 		
 		return new GameLogEntry(timestamp, gameTime, instant, type, gamestate, gameEvent, acceptedByEngine, refereeMsg,
-				followUpAction, command, refGameEvent);
+				command, refGameEvent, gameEventResponse);
 	}
 }

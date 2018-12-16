@@ -7,36 +7,26 @@ package edu.tigers.autoreferee.engine.events.impl;
 import java.util.EnumSet;
 import java.util.Optional;
 
-import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.autoreferee.engine.events.data.NoProgressInGame;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 
 
 /**
- * Check if there is no progress in a running game and trigger a stop -> force start
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Check if there is no progress in a running game.
  */
-public class NoProgressDetector extends APreparingGameEventDetector
+public class NoProgressDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
 	private static final double DISTANCE_TOLERANCE = 100;
 	private static final double TIMEOUT = 10.0;
 	
 	private long lastTime;
+	private boolean raised;
 	private IVector2 lastBallPos = null;
 	
 	
-	/**
-	 * Default
-	 */
 	public NoProgressDetector()
 	{
 		super(EGameEventDetectorType.NO_PROGRESS, EnumSet.of(EGameState.RUNNING));
@@ -44,22 +34,16 @@ public class NoProgressDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		lastTime = 0;
+		raised = false;
 		lastBallPos = frame.getWorldFrame().getBall().getPos();
 	}
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	protected Optional<IGameEvent> doUpdate()
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		
@@ -67,6 +51,7 @@ public class NoProgressDetector extends APreparingGameEventDetector
 		{
 			lastTime = 0;
 			lastBallPos = ballPos;
+			raised = false;
 			return Optional.empty();
 		}
 		if (lastTime == 0)
@@ -74,18 +59,14 @@ public class NoProgressDetector extends APreparingGameEventDetector
 			lastTime = frame.getTimestamp();
 		}
 		
-		if ((frame.getTimestamp() - lastTime) / 1e9 > TIMEOUT)
+		if (!raised && (frame.getTimestamp() - lastTime) / 1e9 > TIMEOUT)
 		{
-			IVector2 placementPos = AutoRefMath.getOffenseKickPos(ballPos);
-			FollowUpAction followUp = new FollowUpAction(FollowUpAction.EActionType.FORCE_START, ETeamColor.NEUTRAL,
-					placementPos);
-			GameEvent violation = new GameEvent(EGameEvent.NO_PROGRESS_IN_GAME, frame.getTimestamp(), ETeamColor.NEUTRAL,
-					followUp);
+			IGameEvent violation = new NoProgressInGame(ballPos, (frame.getTimestamp() - lastTime) / 1e9);
 			lastTime = 0;
+			raised = true;
 			return Optional.of(violation);
 		}
 		
 		return Optional.empty();
 	}
-	
 }

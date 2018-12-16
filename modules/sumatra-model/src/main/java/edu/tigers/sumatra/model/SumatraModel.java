@@ -360,4 +360,10 @@ public final class SumatraModel extends Moduli
 		}
 		return "";
 	}
+	
+	
+	public boolean isSimulation()
+	{
+		return "SUMATRA".equalsIgnoreCase(getEnvironment());
+	}
 }

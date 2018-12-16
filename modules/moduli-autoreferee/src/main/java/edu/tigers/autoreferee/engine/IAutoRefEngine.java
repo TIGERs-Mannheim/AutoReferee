@@ -8,6 +8,7 @@ import java.util.Set;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
+import edu.tigers.autoreferee.engine.events.GameEventResponse;
 import edu.tigers.autoreferee.engine.log.IGameLog;
 
 
@@ -63,6 +64,8 @@ public interface IAutoRefEngine
 	 */
 	IGameLog getGameLog();
 	
+	
+	void onGameControllerResponse(GameEventResponse response);
 	
 	/**
 	 * @param types

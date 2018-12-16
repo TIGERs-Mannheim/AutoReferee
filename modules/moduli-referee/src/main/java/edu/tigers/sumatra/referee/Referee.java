@@ -3,18 +3,16 @@
  */
 package edu.tigers.sumatra.referee;
 
+import static edu.tigers.sumatra.referee.source.ERefereeMessageSource.INTERNAL_REFBOX;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
-import com.github.g3force.configurable.IConfigClient;
-import com.github.g3force.configurable.IConfigObserver;
 
 import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.events.Event;
+import edu.tigers.sumatra.referee.events.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
@@ -25,24 +23,14 @@ import edu.tigers.sumatra.referee.source.refbox.RefBox;
 
 /**
  * Implementation of {@link AReferee} which can use various referee message sources.
- *
- * @author AndreR <andre@ryll.cc>
  */
-public class Referee extends AReferee implements IConfigObserver, IRefereeSourceObserver
+public class Referee extends AReferee implements IRefereeSourceObserver
 {
-	private static final String CONFIG_CATEGORY = "user";
-	
-	@Configurable(spezis = { "SUMATRA", "", }, defValueSpezis = { "INTERNAL_REFBOX", "NETWORK" })
-	private static ERefereeMessageSource activeSource = ERefereeMessageSource.NETWORK;
-	
 	private final List<ARefereeMessageSource> msgSources = new ArrayList<>();
 	
 	private ARefereeMessageSource source;
-	
-	static
-	{
-		ConfigRegistration.registerClass(CONFIG_CATEGORY, Referee.class);
-	}
+	private SslGameControllerProcess sslGameControllerProcess;
+	private boolean controllable = false;
 	
 	
 	/**
@@ -57,47 +45,19 @@ public class Referee extends AReferee implements IConfigObserver, IRefereeSource
 	
 	
 	@Override
-	public void initModule()
-	{
-		ConfigRegistration.applySpezi(CONFIG_CATEGORY, SumatraModel.getInstance().getEnvironment());
-		ConfigRegistration.registerConfigurableCallback(CONFIG_CATEGORY, this);
-	}
-	
-	
-	@Override
-	public void afterApply(final IConfigClient configClient)
-	{
-		ConfigRegistration.applySpezi(CONFIG_CATEGORY, SumatraModel.getInstance().getEnvironment());
-		changeSource(activeSource);
-	}
-	
-	
-	private void changeSource(final ERefereeMessageSource newSource)
-	{
-		if (source != null)
-		{
-			source.stop();
-			source.removeObserver(this);
-		}
-		
-		source = msgSources.stream()
-				.filter(s -> s.getType() == newSource)
-				.findAny()
-				.orElse(source);
-		
-		if (source != null)
-		{
-			source.addObserver(this);
-			source.start();
-			
-			notifyRefereeMsgSourceChanged(source);
-		}
-	}
-	
-	
-	@Override
 	public void startModule()
 	{
+		ERefereeMessageSource activeSource = ERefereeMessageSource
+				.valueOf(getSubnodeConfiguration().getString("source", ERefereeMessageSource.NETWORK.name()));
+		int port = getSubnodeConfiguration().getInt("port", 10003);
+		boolean useGameController = getSubnodeConfiguration().getBoolean("gameController", false);
+		
+		msgSources.stream()
+				.filter(s -> s.getType() == ERefereeMessageSource.NETWORK)
+				.findFirst()
+				.map(s -> (NetworkRefereeReceiver) s)
+				.ifPresent(s -> s.setPort(port));
+		
 		source = msgSources.stream()
 				.filter(s -> s.getType() == activeSource)
 				.findAny()
@@ -106,7 +66,17 @@ public class Referee extends AReferee implements IConfigObserver, IRefereeSource
 		source.addObserver(this);
 		source.start();
 		
+		controllable = useGameController || source.getType() == INTERNAL_REFBOX;
+		
 		notifyRefereeMsgSourceChanged(source);
+		
+		if (useGameController)
+		{
+			sslGameControllerProcess = new SslGameControllerProcess();
+			new Thread(sslGameControllerProcess).start();
+			
+			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
+		}
 	}
 	
 	
@@ -115,6 +85,10 @@ public class Referee extends AReferee implements IConfigObserver, IRefereeSource
 	{
 		source.stop();
 		source.removeObserver(this);
+		if (sslGameControllerProcess != null)
+		{
+			sslGameControllerProcess.stop();
+		}
 	}
 	
 	
@@ -143,6 +117,16 @@ public class Referee extends AReferee implements IConfigObserver, IRefereeSource
 	
 	
 	@Override
+	public void sendGameControllerEvent(final Event event)
+	{
+		if (sslGameControllerProcess != null)
+		{
+			sslGameControllerProcess.getClient().ifPresent(c -> c.sendEvent(event));
+		}
+	}
+	
+	
+	@Override
 	public ARefereeMessageSource getActiveSource()
 	{
 		return source;
@@ -160,15 +144,15 @@ public class Referee extends AReferee implements IConfigObserver, IRefereeSource
 	
 	
 	@Override
-	public void setActiveSource(final ERefereeMessageSource type)
+	public void updateKeeperId(BotID keeperId)
 	{
-		changeSource(type);
+		source.updateKeeperId(keeperId);
 	}
 	
 	
 	@Override
-	public void updateKeeperId(BotID keeperId)
+	public boolean isControllable()
 	{
-		source.updateKeeperId(keeperId);
+		return controllable;
 	}
 }

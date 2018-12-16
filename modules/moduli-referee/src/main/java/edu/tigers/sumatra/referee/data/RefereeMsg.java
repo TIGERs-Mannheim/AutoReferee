@@ -22,7 +22,6 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -71,7 +70,7 @@ public class RefereeMsg
 		stageTimeLeft = 0;
 		teamInfoYellow = new TeamInfo();
 		teamInfoBlue = new TeamInfo();
-		ballPlacementPos = Vector2f.ZERO_VECTOR;
+		ballPlacementPos = null;
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		gameEvent = new GameEvent();
 		nextCommand = null;
@@ -105,7 +104,7 @@ public class RefereeMsg
 			ballPlacementPos = Vector2.fromXY(msgBallPos.getX(), msgBallPos.getY());
 		} else
 		{
-			ballPlacementPos = Vector2f.ZERO_VECTOR;
+			ballPlacementPos = null;
 		}
 		
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();

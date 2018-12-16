@@ -10,7 +10,7 @@ import edu.tigers.sumatra.referee.data.EGameState;
 
 
 /**
- * @author "Lukas Magel"
+ * Detects {@link IGameEvent}s
  */
 public interface IGameEventDetector
 {
@@ -19,12 +19,6 @@ public interface IGameEventDetector
 	 * @return
 	 */
 	boolean isActiveIn(EGameState state);
-	
-	
-	/**
-	 * @return
-	 */
-	int getPriority();
 	
 	
 	/**

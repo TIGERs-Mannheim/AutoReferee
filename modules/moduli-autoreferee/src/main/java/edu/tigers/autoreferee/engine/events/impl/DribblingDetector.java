@@ -10,15 +10,10 @@ import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
-import edu.tigers.autoreferee.engine.events.DistanceViolation;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.data.BotDribbledBallTooFar;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -27,16 +22,12 @@ import edu.tigers.sumatra.referee.data.EGameState;
 
 
 /**
- * This class tries to detect ball dribbling
- * 
- * @author Lukas Magel
+ * Detect if bots dribble the ball over a large distance.
  */
-public class DribblingDetector extends APreparingGameEventDetector
+public class DribblingDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
 	@Configurable(comment = "[mm] Any dribbling distance above this value is considered a violation", defValue = "1000.0")
-	private static double maxDribblingLength = 1000;
+	private static double maxDribblingLength = 1000.0;
 	
 	static
 	{
@@ -46,9 +37,6 @@ public class DribblingDetector extends APreparingGameEventDetector
 	private final Map<BotID, BotPosition> currentContacts = new HashMap<>();
 	
 	
-	/**
-	 * Default constructor
-	 */
 	public DribblingDetector()
 	{
 		super(EGameEventDetectorType.DRIBBLING, EGameState.RUNNING);
@@ -56,14 +44,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	public Optional<IGameEvent> doUpdate()
 	{
 		List<BotPosition> botsTouchingBall = frame.getBotsTouchingBall();
 		
@@ -75,7 +56,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 		Optional<IGameEvent> gameEvent = botsTouchingBall.stream()
 				.filter(b -> dribbleDistance(b) > maxDribblingLength)
 				.findFirst()
-				.map(b -> createViolation(frame, b));
+				.map(this::createViolation);
 		
 		gameEvent.ifPresent(g -> doReset());
 		return gameEvent;
@@ -88,13 +69,13 @@ public class DribblingDetector extends APreparingGameEventDetector
 	}
 	
 	
-	private double dribbleDistance(final BotPosition b)
+	private float dribbleDistance(final BotPosition b)
 	{
-		return b.getPos().distanceTo(dribbleStartPosition(b));
+		return (float) b.getPos().distanceTo(dribbleStartPosition(b));
 	}
 	
 	
-	private GameEvent createViolation(final IAutoRefFrame frame, final BotPosition finalBotPosition)
+	private BotDribbledBallTooFar createViolation(final BotPosition finalBotPosition)
 	{
 		final BotID violatorId = finalBotPosition.getBotID();
 		final ETeamColor teamInFavor = violatorId.getTeamColor().opposite();
@@ -102,24 +83,7 @@ public class DribblingDetector extends APreparingGameEventDetector
 				dribbleStartPosition(finalBotPosition),
 				teamInFavor);
 		
-		FollowUpAction followUp = new FollowUpAction(
-				EActionType.INDIRECT_FREE,
-				teamInFavor,
-				kickPos);
-		
-		return new DistanceViolation(
-				EGameEvent.BALL_DRIBBLING,
-				frame.getTimestamp(),
-				violatorId,
-				followUp,
-				dribbleDistance(finalBotPosition));
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
-	{
-		// nothing to prepare
+		return new BotDribbledBallTooFar(violatorId, kickPos, finalBotPosition.getPos());
 	}
 	
 	

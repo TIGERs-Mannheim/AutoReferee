@@ -17,9 +17,6 @@ import edu.tigers.autoref.view.main.IStartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.IAutoRefStateObserver;
-import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
-import edu.tigers.autoreferee.engine.ActiveAutoRefEngine.IAutoRefEngineObserver;
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
@@ -161,8 +158,6 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 				if (engine.getMode() == AutoRefMode.ACTIVE)
 				{
 					EventQueue.invokeLater(() -> mainPanel.getEnginePanel().setPanelEnabled(true));
-					ActiveAutoRefEngine activeEngine = (ActiveAutoRefEngine) engine;
-					activeEngine.addObserver(new AutoRefEngineObserver());
 				}
 			}
 		}
@@ -220,6 +215,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 		@Override
 		public void run()
 		{
+			Thread.currentThread().setName("AutoRefStarter");
 			Optional<AutoRefModule> optAutoref = AutoRefUtil.getAutoRefModule();
 			if (optAutoref.isPresent())
 			{
@@ -265,50 +261,13 @@ public class AutoRefPresenter implements ISumatraViewPresenter
 		}
 	}
 	
-	private class AutoRefEngineObserver implements IAutoRefEngineObserver
-	{
-		
-		@Override
-		public void onStateChanged(final boolean proceedPossible)
-		{
-			EventQueue.invokeLater(() -> mainPanel.getEnginePanel().setProceedButtonEnabled(proceedPossible));
-		}
-		
-		
-		@Override
-		public void onFollowUpChanged(final FollowUpAction action)
-		{
-			EventQueue.invokeLater(() -> mainPanel.getEnginePanel().setNextAction(action));
-		}
-	}
-	
 	private class ActiveEnginePanelObserver implements IActiveEnginePanelObserver
 	{
-		
 		@Override
 		public void onResetButtonPressed()
 		{
 			AutoRefUtil.ifAutoRefModulePresent(module -> module.getEngine().reset());
 		}
-		
-		
-		@Override
-		public void onProceedButtonPressed()
-		{
-			Optional<AutoRefModule> optModule = AutoRefUtil.getAutoRefModule();
-			if (optModule.isPresent())
-			{
-				AutoRefModule module = optModule.get();
-				
-				IAutoRefEngine engine = module.getEngine();
-				if ((engine != null) && (engine.getMode() == AutoRefMode.ACTIVE))
-				{
-					ActiveAutoRefEngine activeEngine = (ActiveAutoRefEngine) engine;
-					activeEngine.proceed();
-				}
-			}
-		}
-		
 	}
 	
 }

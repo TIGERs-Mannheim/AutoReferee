@@ -10,24 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefUtil;
-import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.events.CardPenalty;
-import edu.tigers.autoreferee.engine.events.DistanceViolation;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.data.AttackerInDefenseArea;
+import edu.tigers.autoreferee.engine.events.data.DefenderInDefenseArea;
 import edu.tigers.autoreferee.generic.BotPosition;
-import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest.CardInfo.CardType;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.ids.BotID;
@@ -40,21 +33,17 @@ import edu.tigers.sumatra.referee.data.EGameState;
 /**
  * This rule detects attackers/defenders that touch the ball while inside the defense area of the defending/their own
  * team.
- * 
- * @author Lukas Magel
  */
-public class BotInDefenseAreaDetector extends APreparingGameEventDetector
+public class BotInDefenseAreaDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
-	@Configurable(comment = "[ms] The cooldown time before registering a ball touch with the same bot again in ms", defValue = "3000")
-	private static int cooldownTimeMs = 3_000;
+	@Configurable(comment = "[s] The cool down time before registering a ball touch with the same bot again in ms", defValue = "3.0")
+	private static double coolDownTime = 3.0;
 	
 	@Configurable(comment = "[mm] Distance from the defense line that is considered a partial violation", defValue = "20.0")
 	private static double partialTouchMargin = 20;
 	
+	private final Map<BotID, BotPosition> lastViolators = new HashMap<>();
 	private long entryTime = 0;
-	private Map<BotID, BotPosition> lastViolators = new HashMap<>();
 	
 	static
 	{
@@ -62,9 +51,6 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	}
 	
 	
-	/**
-	 * 
-	 */
 	public BotInDefenseAreaDetector()
 	{
 		super(EGameEventDetectorType.BOT_IN_DEFENSE_AREA, EGameState.RUNNING);
@@ -72,21 +58,14 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		entryTime = frame.getTimestamp();
 	}
 	
 	
 	@Override
-	public Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	public Optional<IGameEvent> doUpdate()
 	{
 		if (frame.getBotsTouchingBall().size() > 1
 				&& frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().getTeamColor() == ETeamColor.YELLOW)
@@ -98,7 +77,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 		
 		for (BotPosition curKicker : frame.getBotsTouchingBall())
 		{
-			final Optional<IGameEvent> gameEvent = checkBotPosition(frame, curKicker);
+			final Optional<IGameEvent> gameEvent = checkBotPosition(curKicker);
 			if (gameEvent.isPresent())
 			{
 				return gameEvent;
@@ -109,7 +88,7 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 	}
 	
 	
-	private Optional<IGameEvent> checkBotPosition(final IAutoRefFrame frame, final BotPosition curKicker)
+	private Optional<IGameEvent> checkBotPosition(final BotPosition curKicker)
 	{
 		if (curKicker.getTimestamp() < entryTime)
 		{
@@ -142,8 +121,8 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			if (curKicker.getBotID().equals(lastViolationOfCurKicker.getBotID()))
 			{
 				// Wait a certain amount of time before reporting the offense again for the same bot
-				long timeDiff = curKicker.getTimestamp() - lastViolationOfCurKicker.getTimestamp();
-				if (timeDiff < TimeUnit.MILLISECONDS.toNanos(cooldownTimeMs))
+				double timeDiff = (curKicker.getTimestamp() - lastViolationOfCurKicker.getTimestamp()) / 1e9;
+				if (timeDiff < coolDownTime)
 				{
 					return Optional.empty();
 				}
@@ -158,11 +137,11 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			return Optional.empty();
 		}
 		
-		return checkPenaltyAreas(frame, curKicker);
+		return checkPenaltyAreas(curKicker);
 	}
 	
 	
-	private Optional<IGameEvent> checkPenaltyAreas(final IAutoRefFrame frame, final BotPosition curKicker)
+	private Optional<IGameEvent> checkPenaltyAreas(final BotPosition curKicker)
 	{
 		ETeamColor curKickerColor = curKicker.getBotID().getTeamColor();
 		BotID curKickerId = curKicker.getBotID();
@@ -179,14 +158,9 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			
 			double distance = AutoRefMath.distanceToNearestPointOutside(opponentPenArea, Geometry.getBotRadius(),
 					curKicker.getPos());
-			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, curKickerColor.opposite(),
-					AutoRefMath.getClosestFreeKickPos(curKicker.getPos(), curKickerColor.opposite()));
 			
-			GameEvent violation = new DistanceViolation(EGameEvent.ATTACKER_IN_DEFENSE_AREA, frame.getTimestamp(),
-					curKickerId, followUp, distance);
-			
-			return Optional.of(violation);
-		} else if (defenderIsPushed(frame, curKickerId, curKicker.getPos()))
+			return Optional.of(new AttackerInDefenseArea(curKickerId, curKicker.getPos(), distance));
+		} else if (defenderIsPushed(curKickerId, curKicker.getPos()))
 		{
 			return Optional.empty();
 		} else if (ownPenArea.isPointInShape(curKicker.getPos(), -Geometry.getBotRadius()))
@@ -199,12 +173,8 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			
 			double distance = AutoRefMath
 					.distanceToNearestPointOutside(ownPenArea, Geometry.getBotRadius(), curKicker.getPos());
-			FollowUpAction followUp = new FollowUpAction(EActionType.PENALTY, curKickerColor.opposite(),
-					NGeometry.getPenaltyMark(curKickerColor));
-			GameEvent violation = new DistanceViolation(EGameEvent.MULTIPLE_DEFENDER, frame.getTimestamp(),
-					curKickerId, followUp, distance);
 			
-			return Optional.of(violation);
+			return Optional.of(new DefenderInDefenseArea(false, curKickerId, curKicker.getPos(), distance));
 		} else if (ownPenArea.isPointInShape(curKicker.getPos(), getPartialTouchMargin()))
 		{
 			/*
@@ -215,19 +185,13 @@ public class BotInDefenseAreaDetector extends APreparingGameEventDetector
 			
 			double distance = AutoRefMath.distanceToNearestPointOutside(ownPenArea, Geometry.getBotRadius(),
 					curKicker.getPos());
-			IVector2 freekickPos = AutoRefMath.getClosestFreeKickPos(curKicker.getPos(), curKickerColor.opposite());
-			FollowUpAction followUp = new FollowUpAction(EActionType.INDIRECT_FREE, curKickerColor.opposite(),
-					freekickPos);
-			CardPenalty cardPenalty = new CardPenalty(CardType.CARD_YELLOW, curKickerColor);
-			GameEvent violation = new DistanceViolation(EGameEvent.MULTIPLE_DEFENDER_PARTIALLY, frame.getTimestamp(),
-					curKickerId, followUp, cardPenalty, distance);
-			return Optional.of(violation);
+			return Optional.of(new DefenderInDefenseArea(true, curKickerId, curKicker.getPos(), distance));
 		}
 		return Optional.empty();
 	}
 	
 	
-	private boolean defenderIsPushed(final IAutoRefFrame frame, final BotID defender, final IVector2 botPos)
+	private boolean defenderIsPushed(final BotID defender, final IVector2 botPos)
 	{
 		ETeamColor attackerColor = defender.getTeamColor().opposite();
 		

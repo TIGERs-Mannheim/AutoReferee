@@ -7,8 +7,8 @@ import java.time.Instant;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
+import edu.tigers.autoreferee.engine.events.GameEventResponse;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.data.GameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
@@ -20,24 +20,8 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  */
 public class GameLogEntry
 {
-	/**
-	 * @author "Lukas Magel"
-	 */
-	public enum ELogEntryType
-	{
-		/**  */
-		GAME_STATE,
-		/**  */
-		GAME_EVENT,
-		/**  */
-		REFEREE_MSG,
-		/**  */
-		FOLLOW_UP,
-		/** */
-		REFEREE_GAME_EVENT,
-		/**  */
-		COMMAND
-	}
+	
+	private final GameEventResponse gameEventResponse;
 	
 	private final ELogEntryType type;
 	/** frame timestamp in nanoseconds */
@@ -49,13 +33,11 @@ public class GameLogEntry
 	
 	private final GameState gamestate;
 	private final RefereeMsg refereeMsg;
-	private final FollowUpAction followUpAction;
 	private final RefboxRemoteCommand command;
 	private final GameEvent refGameEvent;
 	
 	private final IGameEvent gameEvent;
 	private final boolean acceptedByEngine;
-	
 	
 	/**
 	 * @param timestamp
@@ -64,13 +46,12 @@ public class GameLogEntry
 	 * @param gamestate
 	 * @param gameEvent
 	 * @param refereeMsg
-	 * @param followUpAction
 	 * @param command
 	 */
 	protected GameLogEntry(final long timestamp, final GameTime gameTime, final Instant instant,
 			final ELogEntryType type, final GameState gamestate, final IGameEvent gameEvent,
-			final boolean acceptedByEngine, final RefereeMsg refereeMsg, final FollowUpAction followUpAction,
-			final RefboxRemoteCommand command, GameEvent refGameEvent)
+			final boolean acceptedByEngine, final RefereeMsg refereeMsg,
+			final RefboxRemoteCommand command, GameEvent refGameEvent, GameEventResponse gameEventResponse)
 	{
 		this.type = type;
 		this.gameTime = gameTime;
@@ -78,13 +59,19 @@ public class GameLogEntry
 		this.instant = instant;
 		
 		this.gameEvent = gameEvent;
+		this.gameEventResponse = gameEventResponse;
 		this.acceptedByEngine = acceptedByEngine;
 		
 		this.gamestate = gamestate;
 		this.refereeMsg = refereeMsg;
-		this.followUpAction = followUpAction;
 		this.command = command;
 		this.refGameEvent = refGameEvent;
+	}
+	
+	
+	public GameEventResponse getGameEventResponse()
+	{
+		return gameEventResponse;
 	}
 	
 	
@@ -136,6 +123,33 @@ public class GameLogEntry
 	
 	
 	/**
+	 * Returns the object stored in this entry instance
+	 *
+	 * @return
+	 */
+	public Object getObject()
+	{
+		switch (type)
+		{
+			case COMMAND:
+				return command;
+			case GAME_STATE:
+				return gamestate;
+			case REFEREE_MSG:
+				return refereeMsg;
+			case GAME_EVENT:
+				return gameEvent;
+			case REFEREE_GAME_EVENT:
+				return refGameEvent;
+			case GAME_EVENT_REPLY:
+				return gameEventResponse;
+			default:
+				throw new NotImplementedException("Please add the following enum value to this switch case: " + type);
+		}
+	}
+	
+	
+	/**
 	 * Returns true if the corresponding game event accessible over {@link #getGameEvent()} was accepted by the autoref
 	 * engine and initiated a referee command and/or change of game state. This flag is only set when the autoref runs in
 	 * active mode.
@@ -154,15 +168,6 @@ public class GameLogEntry
 	public RefereeMsg getRefereeMsg()
 	{
 		return refereeMsg;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public FollowUpAction getFollowUpAction()
-	{
-		return followUpAction;
 	}
 	
 	
@@ -194,29 +199,27 @@ public class GameLogEntry
 	
 	
 	/**
-	 * Returns the object stored in this entry instance
-	 * 
-	 * @return
+	 * @author "Lukas Magel"
 	 */
-	public Object getObject()
+	public enum ELogEntryType
 	{
-		switch (type)
-		{
-			case COMMAND:
-				return command;
-			case FOLLOW_UP:
-				return followUpAction;
-			case GAME_STATE:
-				return gamestate;
-			case REFEREE_MSG:
-				return refereeMsg;
-			case GAME_EVENT:
-				return gameEvent;
-			case REFEREE_GAME_EVENT:
-				return refGameEvent;
-			default:
-				throw new NotImplementedException("Please add the following enum value to this switch case: " + type);
-		}
+		/** Describes a change in the game state e.g. RUNNING or STOP */
+		GAME_STATE,
+		
+		/** Describes a game event e.g. BallLeftField */
+		GAME_EVENT,
+		
+		/** Describes a ssl-game-controller-response to a reported GameEvent e.g. OK or REJECT */
+		GAME_EVENT_REPLY,
+		
+		/**  */
+		REFEREE_MSG,
+		
+		/** */
+		REFEREE_GAME_EVENT,
+		
+		/**  */
+		COMMAND
 	}
 	
 	

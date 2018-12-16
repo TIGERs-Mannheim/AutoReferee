@@ -8,28 +8,18 @@ import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.autoreferee.engine.events.data.KickTimeout;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 
 
 /**
- * The kick timeout will stop the game and initiate a {@link Command#FORCE_START} command if the ball is not kicked
- * 
- * @author Lukas Magel
+ * The kick timeout will stop the game if the ball is not kicked
  */
-public class KickTimeoutDetector extends APreparingGameEventDetector
+public class KickTimeoutDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
 	@Configurable(defValue = "10.0")
 	private static double freeKickTimeout = 10.0;
 	
@@ -37,9 +27,6 @@ public class KickTimeoutDetector extends APreparingGameEventDetector
 	private boolean kickTimedOut;
 	
 	
-	/**
-	 * Default
-	 */
 	public KickTimeoutDetector()
 	{
 		super(EGameEventDetectorType.KICK_TIMEOUT, EnumSet.of(
@@ -48,14 +35,7 @@ public class KickTimeoutDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		entryTime = frame.getTimestamp();
 		kickTimedOut = false;
@@ -63,21 +43,18 @@ public class KickTimeoutDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	protected Optional<IGameEvent> doUpdate()
 	{
-		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		ETeamColor attackingColor = frame.getGameState().getForTeam();
 		
 		long curTime = frame.getTimestamp();
 		if (((curTime - entryTime) / 1e9 > freeKickTimeout) && !kickTimedOut)
 		{
 			kickTimedOut = true;
-			FollowUpAction followUp = new FollowUpAction(EActionType.FORCE_START, ETeamColor.NEUTRAL, ballPos);
-			GameEvent violation = new GameEvent(EGameEvent.KICK_TIMEOUT, frame.getTimestamp(), attackingColor,
-					followUp);
+			IGameEvent violation = new KickTimeout(attackingColor,
+					getBall().getPos(), (curTime - entryTime) / 1e9);
 			return Optional.of(violation);
 		}
 		return Optional.empty();
 	}
-	
 }

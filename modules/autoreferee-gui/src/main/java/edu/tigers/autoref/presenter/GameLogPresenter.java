@@ -3,7 +3,8 @@
  */
 package edu.tigers.autoref.presenter;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.EventQueue;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,10 +51,11 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 		{
 			types.add(ELogEntryType.COMMAND);
 			types.add(ELogEntryType.GAME_EVENT);
-			types.add(ELogEntryType.FOLLOW_UP);
 		} else
 		{
 			Arrays.stream(activeLogTypes.split(","))
+					.filter(logType -> Arrays.stream(ELogEntryType.values()).map(ELogEntryType::name)
+							.anyMatch(name -> name.equals(logType)))
 					.map(ELogEntryType::valueOf)
 					.forEach(types::add);
 		}

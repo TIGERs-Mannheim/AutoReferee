@@ -14,6 +14,7 @@ import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine;
 import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
 import edu.tigers.moduli.AModule;
+import edu.tigers.sumatra.referee.SslGameControllerProcess;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 
 
@@ -26,16 +27,16 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	private List<IAutoRefStateObserver> refObserver = new CopyOnWriteArrayList<>();
 	private AutoRefRunner runner;
-	private ERemoteControlType remoteControlType;
 	private boolean log2File;
+	private int gameControllerPort;
 	
 	
 	@Override
 	public void initModule()
 	{
-		remoteControlType = ERemoteControlType.valueOf(
-				getSubnodeConfiguration().getString("remoteControlType", ERemoteControlType.REMOTE_SSL_REFBOX.name()));
 		log2File = getSubnodeConfiguration().getBoolean("log2file", true);
+		gameControllerPort = getSubnodeConfiguration().getInt("gameControllerPort",
+				SslGameControllerProcess.GAME_CONTROLLER_PORT);
 	}
 	
 	
@@ -59,7 +60,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 			refObserver.clear();
 		}
 		
-		runner = new AutoRefRunner(refObserver, remoteControlType, log2File);
+		runner = new AutoRefRunner(refObserver, gameControllerPort, log2File);
 	}
 	
 	
@@ -121,7 +122,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	public void stop()
 	{
 		runner.stop();
-		runner = new AutoRefRunner(refObserver, remoteControlType, log2File);
+		runner = new AutoRefRunner(refObserver, gameControllerPort, log2File);
 	}
 	
 	

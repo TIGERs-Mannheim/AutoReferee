@@ -14,6 +14,7 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.GameEventEngine;
+import edu.tigers.autoreferee.engine.events.GameEventResponse;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLog;
 import edu.tigers.autoreferee.engine.log.GameTime;
@@ -120,6 +121,12 @@ public abstract class AbstractAutoRefEngine implements IAutoRefEngine
 	{
 	}
 	
+	
+	@Override
+	public void onGameControllerResponse(GameEventResponse response)
+	{
+		this.gameLog.addEntry(response);
+	}
 	
 	protected void logGameEvents(final List<IGameEvent> gameEvents)
 	{

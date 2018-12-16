@@ -419,6 +419,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-game-controller-protocol</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- ########## external libs ################ -->
 
             <dependency>
@@ -644,6 +650,12 @@
                 <artifactId>commons-cli</artifactId>
                 <version>1.4</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.java-websocket</groupId>
+                <artifactId>Java-WebSocket</artifactId>
+                <version>1.3.9</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -714,6 +726,12 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.googlecode.maven-download-plugin</groupId>
+                    <artifactId>download-maven-plugin</artifactId>
+                    <version>1.4.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

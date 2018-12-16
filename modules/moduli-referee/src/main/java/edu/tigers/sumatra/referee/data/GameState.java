@@ -5,13 +5,14 @@
 package edu.tigers.sumatra.referee.data;
 
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -44,7 +45,7 @@ public class GameState
 		forTeam = ETeamColor.NEUTRAL;
 		ourTeam = ETeamColor.NEUTRAL;
 		penaltyShootout = false;
-		ballPlacementPosition = Vector2f.ZERO_VECTOR;
+		ballPlacementPosition = null;
 	}
 	
 	
@@ -96,7 +97,7 @@ public class GameState
 	 */
 	public IVector2 getBallPlacementPositionForUs()
 	{
-		if (ourTeam != Geometry.getNegativeHalfTeam())
+		if (ballPlacementPosition != null && ourTeam != Geometry.getNegativeHalfTeam())
 		{
 			return ballPlacementPosition.multiplyNew(-1.0d);
 		}
@@ -535,7 +536,7 @@ public class GameState
 		private ETeamColor forTeam;
 		private ETeamColor ourTeam;
 		private boolean penaltyShootout;
-		private IVector2 ballPlacementPosition = Vector2f.ZERO_VECTOR;
+		private IVector2 ballPlacementPosition = null;
 		
 		
 		private Builder()
@@ -649,58 +650,35 @@ public class GameState
 	
 	
 	@Override
-	public int hashCode()
+	public boolean equals(final Object o)
 	{
-		final int prime = 31;
-		int result = 1;
-		result = (prime * result) + ((ballPlacementPosition == null) ? 0 : ballPlacementPosition.hashCode());
-		result = (prime * result) + ((forTeam == null) ? 0 : forTeam.hashCode());
-		result = (prime * result) + ((ourTeam == null) ? 0 : ourTeam.hashCode());
-		result = (prime * result) + (penaltyShootout ? 1231 : 1237);
-		result = (prime * result) + ((state == null) ? 0 : state.hashCode());
-		return result;
+		if (this == o)
+			return true;
+		
+		if (o == null || getClass() != o.getClass())
+			return false;
+		
+		final GameState gameState = (GameState) o;
+		
+		return new EqualsBuilder()
+				.append(penaltyShootout, gameState.penaltyShootout)
+				.append(state, gameState.state)
+				.append(forTeam, gameState.forTeam)
+				.append(ourTeam, gameState.ourTeam)
+				.append(ballPlacementPosition, gameState.ballPlacementPosition)
+				.isEquals();
 	}
 	
 	
 	@Override
-	public boolean equals(final Object obj)
+	public int hashCode()
 	{
-		if (this == obj)
-		{
-			return true;
-		}
-		
-		if (obj == null)
-		{
-			return false;
-		}
-		
-		if (getClass() != obj.getClass())
-		{
-			return false;
-		}
-		
-		GameState other = (GameState) obj;
-		if (!ballPlacementPosition.isCloseTo(other.ballPlacementPosition))
-		{
-			return false;
-		}
-		
-		if (forTeam != other.forTeam)
-		{
-			return false;
-		}
-		
-		if (ourTeam != other.ourTeam)
-		{
-			return false;
-		}
-		
-		if (penaltyShootout != other.penaltyShootout)
-		{
-			return false;
-		}
-		
-		return state == other.state;
+		return new HashCodeBuilder(17, 37)
+				.append(state)
+				.append(forTeam)
+				.append(ourTeam)
+				.append(penaltyShootout)
+				.append(ballPlacementPosition)
+				.toHashCode();
 	}
 }

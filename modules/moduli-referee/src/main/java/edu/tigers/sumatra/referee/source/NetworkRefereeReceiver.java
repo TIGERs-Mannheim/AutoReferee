@@ -33,13 +33,13 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 	
 	private static final int BUFFER_SIZE = 10000;
 	
-	@Configurable(defValue = "10003")
-	private static int port;
 	@Configurable(defValue = "224.5.23.1")
 	private static String address;
+	
 	@Configurable(defValue = "")
 	private static String network;
 	
+	private int port;
 	private Thread referee;
 	private IReceiver receiver;
 	
@@ -180,5 +180,11 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 	public Optional<InetAddress> getRefBoxAddress()
 	{
 		return Optional.ofNullable(refBoxAddress);
+	}
+	
+	
+	public void setPort(final int port)
+	{
+		this.port = port;
 	}
 }

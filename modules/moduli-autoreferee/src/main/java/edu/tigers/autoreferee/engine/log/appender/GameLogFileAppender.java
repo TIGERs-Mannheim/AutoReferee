@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLog.IGameLogObserver;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
@@ -186,9 +185,6 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 			case COMMAND:
 				builder.append(GameLogFormatter.formatCommand(entry.getCommand()));
 				break;
-			case FOLLOW_UP:
-				followUp(entry, builder);
-				break;
 			case GAME_EVENT:
 				gameEvent(entry, builder);
 				break;
@@ -234,25 +230,6 @@ public class GameLogFileAppender implements IGameLogObserver, Runnable
 	{
 		IGameEvent event = entry.getGameEvent();
 		builder.append(event.toString());
-		FollowUpAction action = event.getFollowUpAction();
-		if (action != null)
-		{
-			builder.append(" | Next action: ");
-			builder.append(GameLogFormatter.formatFollowUp(action));
-		}
-	}
-	
-	
-	private void followUp(final GameLogEntry entry, final StringBuilder builder)
-	{
-		FollowUpAction followUp = entry.getFollowUpAction();
-		if (followUp != null)
-		{
-			builder.append(GameLogFormatter.formatFollowUp(followUp));
-		} else
-		{
-			builder.append("reset");
-		}
 	}
 	
 	

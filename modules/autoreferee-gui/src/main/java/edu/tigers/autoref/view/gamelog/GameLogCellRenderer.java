@@ -17,7 +17,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
-import edu.tigers.autoreferee.engine.FollowUpAction;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
 import edu.tigers.autoreferee.engine.log.GameLogFormatter;
@@ -107,8 +106,6 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		{
 			case COMMAND:
 				return GameLogFormatter.formatCommand(entry.getCommand());
-			case FOLLOW_UP:
-				return getFollowUpMessage(entry);
 			case GAME_STATE:
 				return entry.getGamestate().toString();
 			case REFEREE_MSG:
@@ -117,34 +114,19 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				return getGameEventMessage(entry);
 			case REFEREE_GAME_EVENT:
 				return entry.getRefGameEvent().toString();
+			case GAME_EVENT_REPLY:
+				return entry.getGameEventResponse().toString();
 		}
 		
 		return "";
 	}
-	
-	
-	private String getFollowUpMessage(GameLogEntry entry)
-	{
-		FollowUpAction action = entry.getFollowUpAction();
-		if (action == null)
-		{
-			return "Follow-Up action was reset";
-		}
-		return GameLogFormatter.formatFollowUp(action);
-	}
+
 	
 	
 	private String getGameEventMessage(GameLogEntry entry)
 	{
 		IGameEvent event = entry.getGameEvent();
-		StringBuilder builder = new StringBuilder();
-		builder.append(event.toString());
-		if (event.getFollowUpAction() != null)
-		{
-			builder.append(" | Next action: ");
-			builder.append(GameLogFormatter.formatFollowUp(event.getFollowUpAction()));
-		}
-		return builder.toString();
+		return event.toString();
 	}
 	
 	
@@ -157,9 +139,6 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				builder.append("Sent the command \"");
 				builder.append(GameLogFormatter.formatCommand(entry.getCommand()));
 				builder.append("\" to the refbox");
-				break;
-			case FOLLOW_UP:
-				builder.append(getToolTipTextForFollowUp(entry));
 				break;
 			case GAME_STATE:
 				builder.append("The game state of the AutoReferee has changed to ");
@@ -178,26 +157,13 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				builder.append("The Referee send the following GameEvent message: ");
 				builder.append(System.lineSeparator());
 				builder.append(entry.getRefGameEvent().toString());
+				break;
+			case GAME_EVENT_REPLY:
+				builder.append("The SSL-GameController send the following reply to the previous game event: ");
+				builder.append(System.lineSeparator());
+				builder.append(entry.getGameEventResponse().toString());
+				break;
 		}
-		return builder.toString();
-	}
-	
-	
-	private String getToolTipTextForFollowUp(final GameLogEntry entry)
-	{
-		StringBuilder builder = new StringBuilder();
-		FollowUpAction action = entry.getFollowUpAction();
-		if (action != null)
-		{
-			builder.append("Set the next action which is executed when the game reaches the Stopped state to: ");
-			builder.append(GameLogFormatter.formatFollowUp(action));
-			
-		} else
-		{
-			builder.append(
-					"Reset the follow up action. No actions will be taken when the game reaches the Stopped state");
-		}
-		
 		return builder.toString();
 	}
 	
@@ -208,8 +174,6 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 		{
 			case COMMAND:
 				return new Color(150, 40, 0);
-			case FOLLOW_UP:
-				return new Color(0, 0, 150);
 			case GAME_STATE:
 				return new Color(0, 180, 0);
 			case REFEREE_MSG:
@@ -218,6 +182,8 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 				return new Color(230, 0, 0);
 			case REFEREE_GAME_EVENT:
 				return new Color(0, 150, 225);
+			case GAME_EVENT_REPLY:
+				return new Color(255, 0, 255);
 		}
 		return Color.BLACK;
 	}

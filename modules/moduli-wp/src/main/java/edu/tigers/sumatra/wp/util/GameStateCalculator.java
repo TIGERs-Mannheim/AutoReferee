@@ -78,7 +78,7 @@ public class GameStateCalculator
 			lastRefMsgCounter = refereeMsg.getCommandCounter();
 			
 			processCommand(refereeMsg.getCommand(), lastRefCmd, builder);
-			processBallPlacement(refereeMsg.getCommand(), refereeMsg.getBallPlacementPosNeutral(), builder);
+			builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
 			processStage(refereeMsg.getStage(), builder);
 			storeBallPosition(refereeMsg.getCommand(), ballPos);
 			
@@ -141,8 +141,6 @@ public class GameStateCalculator
 				builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);
 				break;
 			case STOP:
-			case GOAL_BLUE:
-			case GOAL_YELLOW:
 				builder.withState(EGameState.STOP).forTeam(ETeamColor.NEUTRAL);
 				break;
 			case HALT:
@@ -233,20 +231,6 @@ public class GameStateCalculator
 		{
 			builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);
 			ballPosOnPrepare = null;
-		}
-	}
-	
-	
-	private void processBallPlacement(final Command command, final IVector2 placePos, final GameState.Builder builder)
-	{
-		switch (command)
-		{
-			case BALL_PLACEMENT_BLUE:
-			case BALL_PLACEMENT_YELLOW:
-				builder.withBallPlacementPosition(placePos);
-				break;
-			default:
-				break;
 		}
 	}
 }

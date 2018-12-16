@@ -8,18 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.g3force.configurable.Configurable;
-
-import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.autoreferee.engine.events.data.Goal;
+import edu.tigers.autoreferee.engine.events.data.IndirectGoal;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -32,13 +26,8 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 /**
  * Detect goals and invalid indirect goals
  */
-public class GoalDetector extends APreparingGameEventDetector
+public class GoalDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
-	@Configurable(comment = "Continue the game with a kick off after goals", defValue = "false")
-	private static boolean continueGameAfterGoal = false;
-	
 	static
 	{
 		AGameEventDetector.registerClass(GoalDetector.class);
@@ -54,9 +43,6 @@ public class GoalDetector extends APreparingGameEventDetector
 	private boolean goalDetected = false;
 	
 	
-	/**
-	 * Create new instance
-	 */
 	public GoalDetector()
 	{
 		super(EGameEventDetectorType.GOAL, EGameState.RUNNING);
@@ -64,14 +50,7 @@ public class GoalDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		goalDetected = false;
 		indirectStillHot = false;
@@ -79,7 +58,7 @@ public class GoalDetector extends APreparingGameEventDetector
 		
 		/*
 		 * Save the position of the kicker in case this RUNNING state was initiated by an INDIRECT freekick.
-		 * This will allow the rule to determine if an indirect goal occured
+		 * This will allow the rule to determine if an indirect goal occurred
 		 */
 		List<GameState> stateHistory = frame.getStateHistory();
 		if (stateHistory.size() > 1)
@@ -98,7 +77,7 @@ public class GoalDetector extends APreparingGameEventDetector
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	protected Optional<IGameEvent> doUpdate()
 	{
 		if (indirectStillHot && frame.getBotsLastTouchedBall().stream().noneMatch(b -> b.getBotID().equals(attackerId)))
 		{
@@ -120,16 +99,26 @@ public class GoalDetector extends APreparingGameEventDetector
 					indirectStillHot = false;
 					
 					// The ball was kicked from an indirect freekick -> the goal is not valid
-					GameEvent violation = createIndirectGoalViolation(frame, goalShot, ballPos);
+					IGameEvent violation = createIndirectGoalViolation(goalShot, ballPos);
 					return Optional.of(violation);
 				}
 				
 				ETeamColor goalColor = goalShot.getGoalColor();
 				
-				FollowUpAction followUp = continueGame()
-						? new FollowUpAction(EActionType.KICK_OFF, goalColor, Geometry.getCenter())
-						: null;
-				return Optional.of(new GameEvent(EGameEvent.GOAL, frame.getTimestamp(), goalColor.opposite(), followUp));
+				// pass correct data to goal
+				
+				if (attackerId == null)
+				{
+					return Optional
+							.of(new Goal(!SumatraModel.getInstance().isSimulation(),
+									BotID.createBotId(0, goalShot.getGoalColor().opposite()), ballPos,
+									ballPos));
+				}
+				
+				// Return Goal in Sim and PossibleGoal in real use
+				return Optional
+						.of(new Goal(!SumatraModel.getInstance().isSimulation(), attackerId, ballPos,
+								getKickPos(goalColor, attackerId.getTeamColor(), ballPos)));
 			}
 		} else
 		{
@@ -139,21 +128,12 @@ public class GoalDetector extends APreparingGameEventDetector
 	}
 	
 	
-	private GameEvent createIndirectGoalViolation(final IAutoRefFrame frame, final PossibleGoal goalShot,
-			final IVector2 ballPos)
+	private IndirectGoal createIndirectGoalViolation(final PossibleGoal goalShot, final IVector2 ballPos)
 	{
 		ETeamColor kickerColor = attackerId.getTeamColor();
 		IVector2 kickPos = getKickPos(goalShot.getGoalColor(), kickerColor, ballPos);
 		
-		FollowUpAction followUp = new FollowUpAction(EActionType.DIRECT_FREE, kickerColor.opposite(), kickPos);
-		return new GameEvent(EGameEvent.INDIRECT_GOAL, frame.getTimestamp(), attackerId,
-				followUp);
-	}
-	
-	
-	private boolean continueGame()
-	{
-		return "SUMATRA".equals(SumatraModel.getInstance().getEnvironment()) || continueGameAfterGoal;
+		return new IndirectGoal(attackerId, ballPos, kickPos);
 	}
 	
 	

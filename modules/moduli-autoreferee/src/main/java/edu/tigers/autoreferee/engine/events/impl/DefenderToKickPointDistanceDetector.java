@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.Configurable;
@@ -19,12 +18,9 @@ import com.google.common.collect.Sets;
 
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.AutoRefUtil.ToBotIDMapper;
-import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.DistanceViolation;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.GameEvent;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.events.data.DefenderTooCloseToKickPoint;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
@@ -38,27 +34,22 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
- * This rule monitors the bot to ball distance of the defending team during a freekick situation and restarts the play
- * if necessary.
- * 
- * @author Lukas Magel
+ * This rule monitors the bot to ball distance of the defending team during a free kick situation.
  */
-public class DefenderToKickPointDistanceDetector extends APreparingGameEventDetector
+public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 1;
-	
 	@Configurable(comment = "If disabled only bots that are on a collision course with the ball will be considered violators", defValue = "true")
 	private static boolean strictMode = true;
 	
-	@Configurable(comment = "[ms] The amount of time a bot can be located inside the outer circle (500mm>x>250mm from the kick pos) without logging a violation", defValue = "3000")
-	private static long maxOuterCircleLingerTime = 3_000;
+	@Configurable(comment = "[s] The amount of time a bot can be located inside the outer circle (500mm>x>250mm from the kick pos) without logging a violation", defValue = "3.0")
+	private static double maxOuterCircleLingerTime = 3.0;
 	
-	@Configurable(comment = "[ms] The amount of time before a violation is reported again for the same bot", defValue = "1500")
-	private static long violatorCooldownTime = 1_500;
+	@Configurable(comment = "[s] The amount of time before a violation is reported again for the same bot", defValue = "1.5")
+	private static double violatorCoolDownTime = 1.5;
 	
+	private final Map<BotID, Long> lastViolators = new HashMap<>();
+	private final Map<BotID, Long> outerCircleBots = new HashMap<>();
 	private IVector2 ballPos = null;
-	private Map<BotID, Long> lastViolators = new HashMap<>();
-	private Map<BotID, Long> outerCircleBots = new HashMap<>();
 	
 	static
 	{
@@ -66,9 +57,6 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 	}
 	
 	
-	/**
-	 * Create new instance
-	 */
 	public DefenderToKickPointDistanceDetector()
 	{
 		super(EGameEventDetectorType.DEFENDER_TO_KICK_POINT_DISTANCE, EnumSet.of(
@@ -77,24 +65,17 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	protected void prepare(final IAutoRefFrame frame)
+	protected void doPrepare()
 	{
 		ballPos = frame.getWorldFrame().getBall().getPos();
 	}
 	
 	
 	@Override
-	protected Optional<IGameEvent> doUpdate(final IAutoRefFrame frame)
+	protected Optional<IGameEvent> doUpdate()
 	{
 		long timestamp = frame.getTimestamp();
-		Set<BotID> curViolators = getViolators(frame);
+		Set<BotID> curViolators = getViolators();
 		
 		/*
 		 * Update the timestamp of all violators for which a violation has already been generated but which are still
@@ -105,8 +86,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 		/*
 		 * Remove all old violators which have reached the cooldown time
 		 */
-		lastViolators.entrySet()
-				.removeIf(entry -> TimeUnit.NANOSECONDS.toMillis(timestamp - entry.getValue()) > violatorCooldownTime);
+		lastViolators.entrySet().removeIf(entry -> (timestamp - entry.getValue()) / 1e9 > violatorCoolDownTime);
 		
 		Set<BotID> newViolators = Sets.difference(curViolators, lastViolators.keySet()).immutableCopy();
 		Optional<BotID> optViolator = newViolators.stream().findFirst();
@@ -120,16 +100,14 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 			double distance = ballPos.distanceTo(bot.getPos()) - RuleConstraints.getStopRadius()
 					- Geometry.getBotRadius();
 			
-			GameEvent violation = new DistanceViolation(EGameEvent.DEFENDER_TO_KICK_POINT_DISTANCE,
-					frame.getTimestamp(), violator, null, distance);
-			return Optional.of(violation);
+			return Optional.of(new DefenderTooCloseToKickPoint(violator, bot.getPos(), distance));
 		}
 		
 		return Optional.empty();
 	}
 	
 	
-	private Set<BotID> getViolators(final IAutoRefFrame frame)
+	private Set<BotID> getViolators()
 	{
 		ETeamColor attackingColor = frame.getGameState().getForTeam();
 		
@@ -163,7 +141,7 @@ public class DefenderToKickPointDistanceDetector extends APreparingGameEventDete
 			oldViolators.forEach(outerCircleBots::remove);
 			
 			outerCircleBots.forEach((id, entryTimestamp) -> {
-				if ((curTimestamp - entryTimestamp) > TimeUnit.MILLISECONDS.toNanos(maxOuterCircleLingerTime))
+				if ((curTimestamp - entryTimestamp) / 1e9 > maxOuterCircleLingerTime)
 				{
 					violators.add(id);
 				}

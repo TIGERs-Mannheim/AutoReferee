@@ -11,8 +11,6 @@ enum Team {
     YELLOW = 1;
     // blue team
     BLUE = 2;
-    // both teams
-    BOTH = 3;
 }
 
 // BotId is the combination of a team and a robot id

@@ -3,24 +3,14 @@
  */
 package edu.tigers.autoreferee.remote;
 
-import edu.tigers.autoreferee.engine.RefboxRemoteCommand;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
 
 
-/**
- * @author "Lukas Magel"
- */
 public interface IRefboxRemote
 {
 	
-	/**
-	 * @param command
-	 * @return
-	 */
-	void sendCommand(RefboxRemoteCommand command);
+	void sendEvent(IGameEvent event);
 	
 	
-	/**
-	 * 
-	 */
 	void stop();
 }

@@ -3,67 +3,34 @@
  */
 package edu.tigers.autoreferee.engine.events;
 
-import java.util.List;
-import java.util.Optional;
 
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.sumatra.MessagesRobocupSslGameEvent.SSL_Referee_Game_Event;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.gamecontroller.SslGameEvent2019;
 
 
 /**
- * @author "Lukas Magel"
+ * @author Marius Messerschmidt
+ *         This interface is implemented by all GameEvent types in {@link EGameEvent}
+ *         The implementations are located in edu.tigers.autoreferee.engine.events.data
+ *         All Events are read only after creation
  */
 public interface IGameEvent
 {
 	/**
-	 * @return
+	 * @return The type of the stored game Event
 	 */
 	EGameEvent getType();
 	
 	
 	/**
-	 * @return
+	 * Receive a message ready for transmitting
+	 *
+	 * @return The internal values of the gameEvent compiled to a Protobuf message
 	 */
-	long getTimestamp();
+	SslGameEvent2019.GameEvent toProtobuf();
 	
 	
 	/**
-	 * @return
+	 * @return a formatted string describing the event in human language (used in the game log)
 	 */
-	ETeamColor getResponsibleTeam();
-	
-	
-	/**
-	 * @return
-	 */
-	Optional<BotID> getResponsibleBot();
-	
-	
-	/**
-	 * @return the cardPenalty
-	 */
-	List<CardPenalty> getCardPenalties();
-	
-	
-	/**
-	 * @return
-	 */
-	String buildLogString();
-	
-	
-	/**
-	 * @return
-	 */
-	FollowUpAction getFollowUpAction();
-	
-	
-	/**
-	 * @return the protobuf data format of this game event
-	 */
-	SSL_Referee_Game_Event toProtobuf();
-	
-	
-	boolean isStopGame();
+	String toString();
 }

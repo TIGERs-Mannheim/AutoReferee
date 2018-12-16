@@ -3,24 +3,16 @@
  */
 package edu.tigers.autoreferee.engine.events.impl;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.AutoRefMath;
-import edu.tigers.autoreferee.engine.FollowUpAction;
-import edu.tigers.autoreferee.engine.FollowUpAction.EActionType;
-import edu.tigers.autoreferee.engine.events.EGameEvent;
 import edu.tigers.autoreferee.engine.events.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.SpeedViolation;
+import edu.tigers.autoreferee.engine.events.data.BotKickedBallToFast;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.vision.data.IKickEvent;
@@ -29,31 +21,24 @@ import edu.tigers.sumatra.wp.data.BallKickFitState;
 
 /**
  * This rule detects ball speed violations when the game is running.
- * 
- * @author "Lukas Magel"
  */
 public class BallSpeedingDetector extends AGameEventDetector
 {
-	private static final int PRIORITY = 2;
 	@Configurable(comment = "[m/s] The ball is not considered to be too fast if above this threshold to prevent false positives", defValue = "12.0")
-	private static double topSpeedThreshold = 12.0d;
+	private static double topSpeedThreshold = 12.0;
 	
 	@Configurable(comment = "Max waiting time [s]", defValue = "0.8")
 	private static double maxWaitingTime = 0.8;
 	
-	private IKickEvent lastReportedKickEvent;
-	
-	private Map<ETeamColor, Integer> counter = new EnumMap<>(ETeamColor.class);
 	
 	static
 	{
 		AGameEventDetector.registerClass(BallSpeedingDetector.class);
 	}
 	
+	private IKickEvent lastReportedKickEvent;
 	
-	/**
-	 * Create new instance
-	 */
+	
 	public BallSpeedingDetector()
 	{
 		super(EGameEventDetectorType.BALL_SPEEDING, EGameState.RUNNING);
@@ -61,14 +46,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	
 	@Override
-	public int getPriority()
-	{
-		return PRIORITY;
-	}
-	
-	
-	@Override
-	public Optional<IGameEvent> update(final IAutoRefFrame frame)
+	public Optional<IGameEvent> doUpdate()
 	{
 		if (!frame.getPreviousFrame().getWorldFrame().getKickFitState().isPresent()
 				|| !frame.getWorldFrame().getKickEvent().isPresent())
@@ -83,19 +61,16 @@ public class BallSpeedingDetector extends AGameEventDetector
 		double kickSpeed = lastKickFitState.getKickVel().getLength() / 1000.;
 		if (isKickTooFast(kickSpeed)
 				&& kickEventHasNotBeenReportedYet(currentKickEvent)
-				&& kickEstimateIsReady(frame, currentKickEvent))
+				&& kickEstimateIsReady(currentKickEvent))
 		{
 			lastReportedKickEvent = currentKickEvent;
-			counter.computeIfPresent(currentKickEvent.getKickingBot().getTeamColor(), (k, v) -> v + 1);
-			SpeedViolation violation;
+			IGameEvent violation;
 			if (lastKickFitState.getKickPos().distanceTo(currentKickEvent.getPosition()) < 1000)
 			{
-				violation = createViolation(currentKickEvent.getKickingBot(), kickSpeed,
-						frame.getTimestamp());
+				violation = createViolation(currentKickEvent.getKickingBot(), kickSpeed);
 			} else if (frame.getBotsLastTouchedBall().size() == 1)
 			{
-				violation = createViolation(frame.getBotsLastTouchedBall().get(0).getBotID(), kickSpeed,
-						frame.getTimestamp());
+				violation = createViolation(frame.getBotsLastTouchedBall().get(0).getBotID(), kickSpeed);
 			} else
 			{
 				// could not determine the violator
@@ -114,12 +89,12 @@ public class BallSpeedingDetector extends AGameEventDetector
 	}
 	
 	
-	private boolean kickEstimateIsReady(final IAutoRefFrame frame, final IKickEvent currentKickEvent)
+	private boolean kickEstimateIsReady(final IKickEvent currentKickEvent)
 	{
 		boolean kickEstimateIsReady = (frame.getTimestamp() - currentKickEvent.getTimestamp()) / 1e9 > maxWaitingTime;
 		
 		// either time is up, or ball has left the field, or ball touched another bot
-		return kickEstimateIsReady || ballIsNotInsideField(frame) || ballTouchedAnotherRobot(frame, currentKickEvent);
+		return kickEstimateIsReady || ballIsNotInsideField() || ballTouchedAnotherRobot(currentKickEvent);
 	}
 	
 	
@@ -130,34 +105,32 @@ public class BallSpeedingDetector extends AGameEventDetector
 	}
 	
 	
-	private boolean ballIsNotInsideField(IAutoRefFrame frame)
+	private boolean ballIsNotInsideField()
 	{
 		return !frame.isBallInsideField() && !frame.getPossibleGoal().isPresent();
 	}
 	
 	
-	private boolean ballTouchedAnotherRobot(IAutoRefFrame frame, final IKickEvent currentKickEvent)
+	private boolean ballTouchedAnotherRobot(final IKickEvent currentKickEvent)
 	{
 		return frame.getBotsLastTouchedBall().stream()
 				.noneMatch(b -> b.getBotID().equals(currentKickEvent.getKickingBot()));
 	}
 	
 	
-	private SpeedViolation createViolation(BotID violator, double lastSpeedEstimate, long timestamp)
+	private IGameEvent createViolation(BotID violator, double lastSpeedEstimate)
 	{
 		IVector2 kickPos = AutoRefMath.getClosestFreeKickPos(lastReportedKickEvent.getPosition(),
 				violator.getTeamColor().opposite());
 		
-		FollowUpAction action = new FollowUpAction(EActionType.INDIRECT_FREE, violator.getTeamColor().opposite(),
-				kickPos);
+		// add maxBallHeight Detection
+		return new BotKickedBallToFast(violator, kickPos, lastSpeedEstimate, 0);
 		
-		return new SpeedViolation(EGameEvent.BALL_SPEED, timestamp,
-				violator, action, lastSpeedEstimate, Collections.emptyList(), counter.get(violator.getTeamColor()));
 	}
 	
 	
 	@Override
-	public void reset()
+	public void doReset()
 	{
 		lastReportedKickEvent = null;
 	}
