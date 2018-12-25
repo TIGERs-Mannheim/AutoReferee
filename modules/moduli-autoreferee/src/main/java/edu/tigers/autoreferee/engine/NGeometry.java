@@ -22,8 +22,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 /**
  * Wrapper class around {@link Geometry} to provide access based on team colors.
- * 
- * @author "Lukas Magel"
  */
 public final class NGeometry
 {
@@ -32,10 +30,6 @@ public final class NGeometry
 	}
 	
 	
-	/**
-	 * @param color
-	 * @return
-	 */
 	public static Goal getGoal(final ETeamColor color)
 	{
 		if (color == Geometry.getNegativeHalfTeam())
@@ -46,28 +40,12 @@ public final class NGeometry
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	public static IRectangle getField()
 	{
 		return Geometry.getField();
 	}
 	
 	
-	/**
-	 * @return
-	 */
-	public static double getGoalSize()
-	{
-		return Geometry.getGoalOur().getWidth();
-	}
-	
-	
-	/**
-	 * @param color
-	 * @return
-	 */
 	public static IRectangle getFieldSide(final ETeamColor color)
 	{
 		if (color == Geometry.getNegativeHalfTeam())
@@ -78,19 +56,6 @@ public final class NGeometry
 	}
 	
 	
-	/**
-	 * @return
-	 */
-	public static IVector2 getCenter()
-	{
-		return Geometry.getCenter();
-	}
-	
-	
-	/**
-	 * @param color
-	 * @return
-	 */
 	public static IPenaltyArea getPenaltyArea(final ETeamColor color)
 	{
 		if (color == Geometry.getNegativeHalfTeam())
@@ -101,10 +66,6 @@ public final class NGeometry
 	}
 	
 	
-	/**
-	 * @param color
-	 * @return
-	 */
 	public static IVector2 getPenaltyMark(final ETeamColor color)
 	{
 		if (color == Geometry.getNegativeHalfTeam())
@@ -115,9 +76,6 @@ public final class NGeometry
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	public static List<IPenaltyArea> getPenaltyAreas()
 	{
 		return Arrays.asList(Geometry.getPenaltyAreaOur(), Geometry.getPenaltyAreaTheir());
@@ -204,18 +162,12 @@ public final class NGeometry
 	
 	/**
 	 * Sorts points by their distance to a fixed second point
-	 *
-	 * @author "Lukas Magel"
 	 */
 	public static class PointDistanceComparator implements Comparator<IVector2>
 	{
-		
 		private final IVector2 pos;
 		
 		
-		/**
-		 * @param pos
-		 */
 		public PointDistanceComparator(final IVector2 pos)
 		{
 			this.pos = pos;
@@ -240,18 +192,11 @@ public final class NGeometry
 		
 	}
 	
-	/**
-	 * @author "Lukas Magel"
-	 */
 	public static class BotDistanceComparator implements Comparator<ITrackedBot>
 	{
-		
 		private PointDistanceComparator comparator;
 		
 		
-		/**
-		 * @param pos
-		 */
 		public BotDistanceComparator(final IVector2 pos)
 		{
 			comparator = new PointDistanceComparator(pos);
@@ -263,6 +208,5 @@ public final class NGeometry
 		{
 			return comparator.compare(o1.getPos(), o2.getPos());
 		}
-		
 	}
 }

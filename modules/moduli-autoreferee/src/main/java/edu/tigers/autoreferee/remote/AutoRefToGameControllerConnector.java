@@ -1,0 +1,223 @@
+/*
+ * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ */
+package edu.tigers.autoreferee.remote;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.Validate;
+import org.apache.log4j.Logger;
+
+import com.google.protobuf.ByteString;
+
+import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.game.GameControllerProtocol;
+import edu.tigers.sumatra.game.MessageSigner;
+import edu.tigers.sumatra.gamecontroller.SslGameControllerAutoRef;
+import edu.tigers.sumatra.gamecontroller.SslGameControllerCommon;
+import edu.tigers.sumatra.thread.NamedThreadFactory;
+
+
+/**
+ * Connector to game controller
+ */
+public class AutoRefToGameControllerConnector implements Runnable
+{
+	private static final Logger log = Logger.getLogger(AutoRefToGameControllerConnector.class);
+	private static final String AUTO_REF_ID = "TIGERs AutoRef";
+	
+	private GameControllerProtocol protocol;
+	private ExecutorService executorService;
+	
+	private LinkedBlockingDeque<QueueEntry> commandQueue;
+	
+	private List<IGameEventResponseObserver> responseObserverList = new ArrayList<>();
+	
+	private String nextToken;
+	private MessageSigner signer;
+	
+	
+	public AutoRefToGameControllerConnector(final String hostname, final int port)
+	{
+		protocol = new GameControllerProtocol(hostname, port);
+		protocol.addConnectedHandler(this::register);
+		
+		commandQueue = new LinkedBlockingDeque<>();
+		// disable signer for know - buggy with integration tests and might be replaced
+		signer = new MessageSigner(null, null);
+		// getClass().getResource("/keys/TIGERs-Mannheim-autoRef.key.pem.pkcs8")
+		// getClass().getResource("/keys/TIGERs-Mannheim-autoRef.pub.pem")
+	}
+	
+	
+	private void register()
+	{
+		SslGameControllerAutoRef.ControllerToAutoRef reply;
+		reply = protocol.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		if (reply == null || !reply.hasControllerReply())
+		{
+			log.error("Receiving initial Message failed");
+			return;
+		}
+		
+		nextToken = reply.getControllerReply().getNextToken();
+		
+		SslGameControllerAutoRef.AutoRefRegistration.Builder registration = SslGameControllerAutoRef.AutoRefRegistration
+				.newBuilder()
+				.setIdentifier(AUTO_REF_ID);
+		registration.getSignatureBuilder().setToken(nextToken).setPkcs1V15(ByteString.EMPTY);
+		byte[] signature = signer.sign(registration.build().toByteArray());
+		registration.getSignatureBuilder().setPkcs1V15(ByteString.copyFrom(signature));
+		
+		protocol.sendMessage(registration.build());
+		
+		reply = protocol.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		if (reply == null)
+		{
+			log.error("Receiving AutoRefRegistration reply failed");
+		} else if (reply.getControllerReply().getStatusCode() != SslGameControllerCommon.ControllerReply.StatusCode.OK)
+		{
+			log.error("Server did not allow registration: " + reply.getControllerReply().getStatusCode() + " - "
+					+ reply.getControllerReply().getReason());
+		} else
+		{
+			log.info("Successfully registered AutoRef");
+			nextToken = reply.getControllerReply().getNextToken();
+		}
+	}
+	
+	
+	/**
+	 * Connect to the refbox via the specified hostname and port
+	 * 
+	 * @throws IOException
+	 */
+	public void start()
+	{
+		executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("AutoRefToGameControllerConnector"));
+		executorService.execute(this);
+	}
+	
+	
+	public void stop()
+	{
+		executorService.shutdownNow();
+		try
+		{
+			Validate.isTrue(executorService.awaitTermination(2, TimeUnit.SECONDS));
+		} catch (InterruptedException e)
+		{
+			log.warn("Interrupted while waiting for termination", e);
+			Thread.currentThread().interrupt();
+		}
+	}
+	
+	
+	public void sendEvent(final IGameEvent event)
+	{
+		QueueEntry entry = new QueueEntry(event);
+		commandQueue.add(entry);
+	}
+	
+	
+	@Override
+	public void run()
+	{
+		protocol.connectBlocking();
+		while (!executorService.isShutdown())
+		{
+			try
+			{
+				readWriteLoop();
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			} catch (Exception e)
+			{
+				log.error("Uncaught exception in autoRef -> game-controller connector", e);
+			}
+		}
+		protocol.disconnect();
+	}
+	
+	
+	private void readWriteLoop() throws InterruptedException
+	{
+		QueueEntry entry = commandQueue.take();
+		SslGameControllerAutoRef.AutoRefToController.Builder req = SslGameControllerAutoRef.AutoRefToController
+				.newBuilder();
+		req.setGameEvent(entry.getEvent().toProtobuf());
+		
+		if (nextToken != null)
+		{
+			req.getSignatureBuilder().setToken(nextToken).setPkcs1V15(ByteString.EMPTY);
+			byte[] signature = signer.sign(req.build().toByteArray());
+			req.getSignatureBuilder().setPkcs1V15(ByteString.copyFrom(signature));
+		}
+		
+		if (!protocol.sendMessage(req.build()))
+		{
+			
+			log.info(String.format("Put game event '%s' back into queue after lost connection",
+					entry.getEvent().getType()));
+			commandQueue.addFirst(entry);
+			return;
+		}
+		SslGameControllerAutoRef.ControllerToAutoRef reply = protocol
+				.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		if (reply == null || !reply.hasControllerReply())
+		{
+			log.error("Receiving GameController Reply failed");
+		} else if (reply.getControllerReply()
+				.getStatusCode() != SslGameControllerCommon.ControllerReply.StatusCode.OK)
+		{
+			log.warn(
+					"Remote control rejected command " + entry.getEvent() + " with outcome "
+							+ reply.getControllerReply().getStatusCode());
+		}
+		
+		if (reply != null)
+		{
+			responseObserverList.forEach(a -> a.notify(new GameEventResponse(reply.getControllerReply())));
+			nextToken = reply.getControllerReply().getNextToken();
+		}
+	}
+	
+	
+	public void addGameEventResponseObserver(IGameEventResponseObserver observer)
+	{
+		this.responseObserverList.add(observer);
+	}
+	
+	private static class QueueEntry
+	{
+		private final IGameEvent event;
+		
+		
+		public QueueEntry(final IGameEvent event)
+		{
+			this.event = event;
+		}
+		
+		
+		/**
+		 * @return the cmd
+		 */
+		public IGameEvent getEvent()
+		{
+			return event;
+		}
+	}
+	
+	@FunctionalInterface
+	public interface IGameEventResponseObserver
+	{
+		void notify(GameEventResponse response);
+	}
+}

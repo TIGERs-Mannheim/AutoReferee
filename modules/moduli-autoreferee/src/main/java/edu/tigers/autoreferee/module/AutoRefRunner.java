@@ -3,12 +3,6 @@
  */
 package edu.tigers.autoreferee.module;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,377 +12,139 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
-import edu.tigers.autoreferee.AutoRefConfig;
 import edu.tigers.autoreferee.AutoRefFrame;
 import edu.tigers.autoreferee.AutoRefFramePreprocessor;
-import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.IAutoRefStateObserver;
 import edu.tigers.autoreferee.engine.ActiveAutoRefEngine;
-import edu.tigers.autoreferee.engine.IAutoRefEngine;
-import edu.tigers.autoreferee.engine.IAutoRefEngine.AutoRefMode;
+import edu.tigers.autoreferee.engine.AutoRefEngine;
+import edu.tigers.autoreferee.engine.EAutoRefMode;
+import edu.tigers.autoreferee.engine.IAutoRefEngineObserver;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
-import edu.tigers.autoreferee.engine.log.appender.GameLogFileAppender;
-import edu.tigers.autoreferee.remote.IRefboxRemote;
-import edu.tigers.autoreferee.remote.impl.AutoRefProtocol;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.referee.AReferee;
+import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
 /**
- * @author "Lukas Magel"
+ * Start the autoRef in a new thread and run an engine respective to the {@link EAutoRefMode}.
  */
 public class AutoRefRunner implements Runnable, IWorldFrameObserver
 {
 	private static final Logger log = Logger.getLogger(AutoRefRunner.class);
 	
-	private static final Path LOG_DIRECTORY = Paths.get("target/gamelogs/");
-	
-	
-	private final List<IAutoRefStateObserver> observer;
-	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private final BlockingDeque<WorldFrameWrapper> consumableFrames = new LinkedBlockingDeque<>(1);
-	private final BlockingDeque<RefStateChange> requestStateChanges = new LinkedBlockingDeque<>();
 	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
-	private AutoRefState refState = AutoRefState.STOPPED;
-	private boolean running = false;
-	private IAutoRefEngine engine;
-	private GameLogFileAppender gameLogAppender;
-	private final boolean log2File;
-	private final int gameControllerPort;
-	private AWorldPredictor wp;
+	
+	private ExecutorService executorService;
+	private AutoRefEngine engine = new AutoRefEngine();
+	private final IAutoRefEngineObserver callback;
 	
 	
-	/**
-	 * @param observer
-	 * @param gameControllerPort
-	 * @param log2File
-	 */
-	public AutoRefRunner(final List<IAutoRefStateObserver> observer, final int gameControllerPort,
-			final boolean log2File)
+	public AutoRefRunner(IAutoRefEngineObserver callback)
 	{
-		this.observer = observer;
-		this.gameControllerPort = gameControllerPort;
-		this.log2File = log2File;
+		this.callback = callback;
 	}
 	
 	
 	/**
-	 * @return
+	 * Start the auto referee runner with an inactive engine
 	 */
-	public IAutoRefEngine getEngine()
+	public void start()
 	{
-		return engine;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public AutoRefState getState()
-	{
-		return refState;
-	}
-	
-	
-	private void setState(final AutoRefState state)
-	{
-		if (refState != state && state != AutoRefState.RUNNING)
-		{
-			wp.notifyClearShapeMap("AUTO_REF");
-		}
-		refState = state;
-		try
-		{
-			observer.forEach(obs -> obs.onAutoRefStateChanged(state));
-		} catch (Exception e)
-		{
-			log.error("Error in auto ref observer call", e);
-		}
-	}
-	
-	
-	/**
-	 * @param mode
-	 */
-	public void start(final AutoRefMode mode)
-	{
-		wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
-		IRefboxRemote remote = null;
-		IAutoRefEngine refEngine = null;
-		
-		if (log2File)
-		{
-			gameLogAppender = createGameLogAppender(mode);
-			try
-			{
-				gameLogAppender.start();
-			} catch (IOException e)
-			{
-				log.error("Could not start gameLogAppender.", e);
-			}
-		}
-		
-		try
-		{
-			setState(AutoRefState.STARTING);
-			
-			/*
-			 * Create the AutoRef engine
-			 */
-			if (mode == AutoRefMode.ACTIVE)
-			{
-				AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
-				String hostname = referee.getActiveSource().getRefBoxAddress().map(InetAddress::getHostAddress)
-						.orElse(AutoRefConfig.getRefboxHostname());
-				AutoRefProtocol autoRefProtocol = new AutoRefProtocol(hostname,
-						gameControllerPort);
-				
-				autoRefProtocol.addGameEventResponseObserver(response -> getEngine().onGameControllerResponse(response));
-				
-				autoRefProtocol.start();
-				remote = autoRefProtocol;
-				refEngine = new ActiveAutoRefEngine(remote);
-			} else
-			{
-				refEngine = new PassiveAutoRefEngine();
-			}
-			if (gameLogAppender != null)
-			{
-				refEngine.getGameLog().addObserver(gameLogAppender);
-			}
-			
-			registerWithWorldPredictor();
-			
-		} catch (ModuleNotFoundException e)
-		{
-			if (remote != null)
-			{
-				remote.stop();
-			}
-			if (refEngine != null)
-			{
-				refEngine.stop();
-			}
-			setState(AutoRefState.STOPPED);
-			log.error("Error while starting up the autoref engine (" + mode + ")", e);
-		}
-		
-		engine = refEngine;
-		
-		running = true;
+		// make sure, the engine is initially in a clean off state
+		changeMode(EAutoRefMode.OFF);
+		// register to WP frames
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
+		// start runner thread
+		executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("AutoRef"));
 		executorService.execute(this);
-		
-		setState(AutoRefState.STARTED);
-		setState(AutoRefState.RUNNING);
-	}
-	
-	
-	private GameLogFileAppender createGameLogAppender(final AutoRefMode mode)
-	{
-		Path logName = Paths.get(String.format("%1$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS-%2$tL.log", mode.toString(),
-				new Date()));
-		boolean logDirCreated = LOG_DIRECTORY.toFile().mkdirs();
-		if (logDirCreated)
-		{
-			log.debug("Log dir created: " + LOG_DIRECTORY);
-		}
-		Path fileName = LOG_DIRECTORY.resolve(logName);
-		return new GameLogFileAppender(fileName);
 	}
 	
 	
 	/**
-	 * Stop the auto referee which is currently being run
+	 * Stop the auto referee runner
 	 */
 	public void stop()
 	{
-		if (running)
+		// switch off engine first
+		changeMode(EAutoRefMode.OFF);
+		try
 		{
-			running = false;
-			requestStateChanges.add(RefStateChange.STOP);
-			try
-			{
-				executorService.shutdown();
-				Validate.isTrue(executorService.awaitTermination(2, TimeUnit.SECONDS));
-			} catch (InterruptedException e)
-			{
-				log.error("Interrupted while awaiting termination", e);
-				Thread.currentThread().interrupt();
-			}
+			executorService.shutdown();
+			Validate.isTrue(executorService.awaitTermination(2, TimeUnit.SECONDS));
+		} catch (InterruptedException e)
+		{
+			log.error("Interrupted while awaiting termination", e);
+			Thread.currentThread().interrupt();
 		}
+		// deregister from WP frames
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
+		// clear auto ref shape map
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyClearShapeMap("AUTO_REF");
 	}
 	
 	
-	/**
-	 * Pause the auto referee. Has no effect
-	 */
-	public void pause()
+	public void changeMode(final EAutoRefMode mode)
 	{
-		if (running)
+		engine.stop();
+		engine.removeObserver(callback);
+		switch (mode)
 		{
-			requestStateChanges.add(RefStateChange.PAUSE);
+			case OFF:
+				engine = new AutoRefEngine();
+				break;
+			case ACTIVE:
+				engine = new ActiveAutoRefEngine();
+				break;
+			case PASSIVE:
+				engine = new PassiveAutoRefEngine();
+				break;
 		}
-	}
-	
-	
-	/**
-	 * Resumes the auto referee after it has been paused
-	 */
-	public void resume()
-	{
-		if (running)
-		{
-			requestStateChanges.add(RefStateChange.RESUME);
-		}
+		engine.addObserver(callback);
+		engine.start();
 	}
 	
 	
 	@Override
 	public void run()
 	{
-		Thread.currentThread().setName("AutoReferee");
-		
-		try
+		while (!executorService.isShutdown())
 		{
-			doLoop();
-		} catch (InterruptedException e)
-		{
-			Thread.currentThread().interrupt();
-		} catch (Exception e)
-		{
-			log.error("Unhandled exception during AutoRef execution", e);
-		} finally
-		{
-			running = false;
-			setState(AutoRefState.STOPPED);
-			
-			deregisterFromPredictor();
-			engine.stop();
-			if (gameLogAppender != null)
+			try
 			{
-				gameLogAppender.stop();
+				WorldFrameWrapper frame = consumableFrames.poll(10, TimeUnit.MILLISECONDS);
+				if (frame != null)
+				{
+					consumeWorldFrame(frame);
+				}
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			} catch (Exception e)
+			{
+				log.error("Unhandled exception during AutoRef execution", e);
 			}
 		}
-	}
-	
-	
-	private void doLoop() throws InterruptedException
-	{
-		while (running)
-		{
-			WorldFrameWrapper frame = consumableFrames.poll(10, TimeUnit.MILLISECONDS);
-			if (frame != null)
-			{
-				consumeWorldFrame(frame);
-			}
-			
-			RefStateChange change = requestStateChanges.poll();
-			if (change != null)
-			{
-				if (change == RefStateChange.PAUSE)
-				{
-					deregisterFromPredictor();
-					setState(AutoRefState.PAUSED);
-					engine.pause();
-					change = pauseUntilResume();
-				}
-				
-				if ((refState == AutoRefState.PAUSED) && (change == RefStateChange.RESUME))
-				{
-					registerWithWorldPredictor();
-					engine.resume();
-					setState(AutoRefState.RUNNING);
-				}
-				
-				if (change == RefStateChange.STOP)
-				{
-					break;
-				}
-			}
-		}
-	}
-	
-	
-	private RefStateChange pauseUntilResume() throws InterruptedException
-	{
-		RefStateChange change;
-		do
-		{
-			change = requestStateChanges.take();
-		} while (change == RefStateChange.PAUSE);
-		return change;
 	}
 	
 	
 	private void consumeWorldFrame(final WorldFrameWrapper frame)
 	{
-		if (!preprocessor.hasLastFrame())
-		{
-			preprocessor.setLastFrame(frame);
-			return;
-		}
-		
-		AutoRefFrame currentFrame;
-		try
-		{
-			currentFrame = preprocessor.process(frame);
-		} catch (Exception t)
-		{
-			log.error("Error while running autoref calculators", t);
-			return;
-		}
-		
-		try
+		AutoRefFrame currentFrame = preprocessor.process(frame);
+		if (currentFrame.getPreviousFrame() != null)
 		{
 			engine.process(currentFrame);
-		} catch (Exception t)
-		{
-			log.error("Error while running autoref engine", t);
 		}
-		
-		pushFrameToObserver(currentFrame);
-	}
-	
-	
-	private void pushFrameToObserver(final IAutoRefFrame frame)
-	{
-		for (IAutoRefStateObserver o : observer)
-		{
-			try
-			{
-				o.onNewAutoRefFrame(frame);
-			} catch (Exception t)
-			{
-				log.error("Error in autoref state observer (" + o + ")", t);
-			}
-		}
-		wp.notifyNewShapeMap(frame.getTimestamp(), frame.getShapes(), "AUTO_REF");
-	}
-	
-	
-	private void registerWithWorldPredictor()
-	{
-		wp.addObserver(this);
-	}
-	
-	
-	private void deregisterFromPredictor()
-	{
-		if (wp != null)
-		{
-			wp.removeObserver(this);
-		}
+		SumatraModel.getInstance().getModule(AWorldPredictor.class)
+				.notifyNewShapeMap(frame.getTimestamp(), currentFrame.getShapes(), "AUTO_REF");
 	}
 	
 	
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		if ("SUMATRA".equals(SumatraModel.getInstance().getEnvironment()))
+		if (SumatraModel.getInstance().isSimulation())
 		{
 			// process all frames, waiting and blocking if necessary
 			try
@@ -406,17 +162,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	}
 	
 	
-	@Override
-	public void onClearWorldFrame()
+	public AutoRefEngine getEngine()
 	{
-		consumableFrames.clear();
-	}
-	
-	
-	private enum RefStateChange
-	{
-		PAUSE,
-		RESUME,
-		STOP
+		return engine;
 	}
 }

@@ -3,7 +3,6 @@
  */
 package edu.tigers.autoref.view.gamelog;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import java.time.Instant;
@@ -17,26 +16,21 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.GameLogEntry;
-import edu.tigers.autoreferee.engine.log.GameLogFormatter;
 import edu.tigers.autoreferee.engine.log.GameTime;
 
 
 /**
  * {@link TableCellRenderer} implementation that is responsible for rendering the columns in a {@link JTable} which is
  * used in conjunction with the {@link GameLogTableModel}.
- * 
- * @author "Lukas Magel"
  */
 public class GameLogCellRenderer extends DefaultTableCellRenderer
 {
-	/**  */
-	private static final long				serialVersionUID	= -6221824311185461448L;
+	private static final long serialVersionUID = -6221824311185461448L;
 	
-	private static final DecimalFormat	msFormat				= new DecimalFormat("000");
-	private static final DecimalFormat	sFormat				= new DecimalFormat("00");
-	private static final DecimalFormat	minFormat			= new DecimalFormat("00");
+	private static final DecimalFormat msFormat = new DecimalFormat("000");
+	private static final DecimalFormat sFormat = new DecimalFormat("00");
+	private static final DecimalFormat minFormat = new DecimalFormat("00");
 	
 	
 	@Override
@@ -65,8 +59,8 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 	{
 		TableColumn col = table.getColumnModel().getColumn(colIndex);
 		
-		int preferedWidth = getPreferredSize().width + table.getIntercellSpacing().width + 10;
-		int newWidth = Math.max(col.getPreferredWidth(), preferedWidth);
+		int preferredWidth = getPreferredSize().width + table.getIntercellSpacing().width + 10;
+		int newWidth = Math.max(col.getPreferredWidth(), preferredWidth);
 		
 		col.setPreferredWidth(newWidth);
 		col.setMaxWidth(newWidth);
@@ -76,8 +70,8 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 	private void styleComponent(final GameLogEntry entry, final int colIndex)
 	{
 		setText(getCellText(entry, colIndex));
-		setToolTipText(getToolTipText(entry));
-		setForeground(getForegroundColor(entry));
+		setToolTipText(entry.getToolTipText());
+		setForeground(entry.getForegroundColor());
 	}
 	
 	
@@ -92,100 +86,10 @@ public class GameLogCellRenderer extends DefaultTableCellRenderer
 			case 2:
 				return entry.getType().toString();
 			case 3:
-				return workGameLogEntry(entry);
+				return entry.workGameLogEntry();
 			default:
 				throw new IllegalArgumentException("Column index out of range: " + colIndex);
 		}
-		
-	}
-	
-	
-	private String workGameLogEntry(GameLogEntry entry)
-	{
-		switch (entry.getType())
-		{
-			case COMMAND:
-				return GameLogFormatter.formatCommand(entry.getCommand());
-			case GAME_STATE:
-				return entry.getGamestate().toString();
-			case REFEREE_MSG:
-				return GameLogFormatter.formatRefMsg(entry.getRefereeMsg());
-			case GAME_EVENT:
-				return getGameEventMessage(entry);
-			case REFEREE_GAME_EVENT:
-				return entry.getRefGameEvent().toString();
-			case GAME_EVENT_REPLY:
-				return entry.getGameEventResponse().toString();
-		}
-		
-		return "";
-	}
-
-	
-	
-	private String getGameEventMessage(GameLogEntry entry)
-	{
-		IGameEvent event = entry.getGameEvent();
-		return event.toString();
-	}
-	
-	
-	private String getToolTipText(final GameLogEntry entry)
-	{
-		StringBuilder builder = new StringBuilder();
-		switch (entry.getType())
-		{
-			case COMMAND:
-				builder.append("Sent the command \"");
-				builder.append(GameLogFormatter.formatCommand(entry.getCommand()));
-				builder.append("\" to the refbox");
-				break;
-			case GAME_STATE:
-				builder.append("The game state of the AutoReferee has changed to ");
-				builder.append(entry.getGamestate());
-				break;
-			case REFEREE_MSG:
-				builder.append("Received a new referee msg from the refbox with command ");
-				builder.append(entry.getRefereeMsg().getCommand());
-				break;
-			case GAME_EVENT:
-				builder.append("The AutoReferee has registered the following game event");
-				builder.append(System.lineSeparator());
-				builder.append(entry.getGameEvent());
-				break;
-			case REFEREE_GAME_EVENT:
-				builder.append("The Referee send the following GameEvent message: ");
-				builder.append(System.lineSeparator());
-				builder.append(entry.getRefGameEvent().toString());
-				break;
-			case GAME_EVENT_REPLY:
-				builder.append("The SSL-GameController send the following reply to the previous game event: ");
-				builder.append(System.lineSeparator());
-				builder.append(entry.getGameEventResponse().toString());
-				break;
-		}
-		return builder.toString();
-	}
-	
-	
-	private Color getForegroundColor(final GameLogEntry entry)
-	{
-		switch (entry.getType())
-		{
-			case COMMAND:
-				return new Color(150, 40, 0);
-			case GAME_STATE:
-				return new Color(0, 180, 0);
-			case REFEREE_MSG:
-				return new Color(50, 50, 50);
-			case GAME_EVENT:
-				return new Color(230, 0, 0);
-			case REFEREE_GAME_EVENT:
-				return new Color(0, 150, 225);
-			case GAME_EVENT_REPLY:
-				return new Color(255, 0, 255);
-		}
-		return Color.BLACK;
 	}
 	
 	

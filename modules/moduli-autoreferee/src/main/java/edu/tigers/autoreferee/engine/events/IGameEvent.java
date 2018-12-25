@@ -8,10 +8,9 @@ import edu.tigers.sumatra.gamecontroller.SslGameEvent2019;
 
 
 /**
- * @author Marius Messerschmidt
- *         This interface is implemented by all GameEvent types in {@link EGameEvent}
- *         The implementations are located in edu.tigers.autoreferee.engine.events.data
- *         All Events are read only after creation
+ * This interface is implemented by all GameEvent types in {@link EGameEvent}
+ * The implementations are located in edu.tigers.autoreferee.engine.events.data
+ * All Events are read only after creation
  */
 public interface IGameEvent
 {

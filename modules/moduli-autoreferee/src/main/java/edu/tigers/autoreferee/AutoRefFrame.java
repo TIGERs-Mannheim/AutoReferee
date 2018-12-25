@@ -33,7 +33,7 @@ public class AutoRefFrame implements IAutoRefFrame
 	private boolean isBallInsideField = true;
 	private TimedPosition ballLeftFieldPos = new TimedPosition();
 	private IVector2 lastStopBallPos;
-	private List<GameState> stateHistory;
+	private List<GameState> stateHistory = Collections.emptyList();
 	private PossibleGoal possibleGoal;
 	
 	

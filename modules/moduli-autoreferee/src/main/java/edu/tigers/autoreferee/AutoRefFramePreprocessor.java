@@ -17,18 +17,14 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
 /**
- * @author "Lukas Magel"
+ * The preprocessor runs some calculators to gather some generic information.
  */
 public class AutoRefFramePreprocessor
 {
-	private List<IRefereeCalc>	calculators	= new ArrayList<>();
+	private List<IRefereeCalc> calculators = new ArrayList<>();
+	private AutoRefFrame lastFrame;
 	
-	private AutoRefFrame			lastFrame;
 	
-	
-	/**
-	 * 
-	 */
 	public AutoRefFramePreprocessor()
 	{
 		calculators.add(new BallLeftFieldCalc());
@@ -40,32 +36,17 @@ public class AutoRefFramePreprocessor
 	}
 	
 	
-	/**
-	 * @param wframe
-	 * @return
-	 */
-	public AutoRefFrame process(final WorldFrameWrapper wframe)
+	public AutoRefFrame process(final WorldFrameWrapper wFrame)
 	{
-		AutoRefFrame frame = new AutoRefFrame(lastFrame, wframe);
+		AutoRefFrame frame = new AutoRefFrame(lastFrame, wFrame);
 		
-		/*
-		 * We can only run the calculators if we have a last frame.
-		 */
 		if (lastFrame != null)
 		{
+			// We can only run the calculators if we have a last frame.
 			runCalculators(frame);
 		}
 		setLastFrame(frame);
 		return frame;
-	}
-	
-	
-	/**
-	 * @param frame
-	 */
-	public void setLastFrame(final WorldFrameWrapper frame)
-	{
-		setLastFrame(new AutoRefFrame(null, frame));
 	}
 	
 	
@@ -79,15 +60,6 @@ public class AutoRefFramePreprocessor
 	}
 	
 	
-	/**
-	 * 
-	 */
-	public void clear()
-	{
-		lastFrame = null;
-	}
-	
-	
 	private void runCalculators(final AutoRefFrame frame)
 	{
 		for (IRefereeCalc calc : calculators)
@@ -97,9 +69,6 @@ public class AutoRefFramePreprocessor
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	public boolean hasLastFrame()
 	{
 		return lastFrame != null;

@@ -20,8 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-import org.apache.commons.lang.NotImplementedException;
-
 import edu.tigers.autoref.view.generic.FixedTimeRangeChartPanel;
 import edu.tigers.sumatra.components.BasePanel;
 import edu.tigers.sumatra.views.ISumatraView;
@@ -152,12 +150,4 @@ public class BallSpeedPanel extends BasePanel<IBallSpeedPanelListener> implement
 	{
 		chartPanel.addInitialVelPoint(time, velocity);
 	}
-	
-	
-	@Override
-	public void setPanelEnabled(final boolean enabled)
-	{
-		throw new NotImplementedException();
-	}
-	
 }

@@ -15,8 +15,6 @@ import com.github.g3force.configurable.Configurable;
  */
 public class RuleConstraints
 {
-	@Configurable(comment = "Bots per team in standard game", defValue = "8")
-	private static int botsPerTeam = 8;
 	@Configurable(comment = "Max allowed ball speed", defValue = "6.5")
 	private static double maxBallSpeed = 6.5;
 	@Configurable(comment = "Stop radius around ball", defValue = "500.0")
@@ -27,20 +25,10 @@ public class RuleConstraints
 	private static double stopSpeed = 1.5;
 	@Configurable(comment = "Distance between bots and penalty area in standard situations", defValue = "200.0")
 	private static double botToPenaltyAreaDistanceStandard = 200;
-	@Configurable(comment = "Ball placement accuracy tolerance of referee", defValue = "100.0")
-	private static double ballPlacementTolerance = 100;
+	@Configurable(comment = "Ball placement accuracy tolerance of referee", defValue = "150.0")
+	private static double ballPlacementTolerance = 150;
 	@Configurable(comment = "The max allowed robot height", defValue = "150.0")
 	private static double maxRobotHeight = 150;
-	@Configurable(defValue = "100.0", comment = "[mm] throw-in distance from field border")
-	private static double throwInDistance = 100;
-	@Configurable(defValue = "600.0", comment = "[mm] distance to goalLine if freeKick was awarded to defending team inside "
-			+ "20mm radius of its own defense area")
-	private static double distanceToGoalLine = 600;
-	@Configurable(defValue = "700.0", comment = "[mm] distance to defense area when freekick was awarded to attacking team "
-			+ "within 700mm distance of opposing defense area")
-	private static double offenseFreeKickDistance = 700;
-	@Configurable(defValue = "500.0", comment = "[mm] distance to goalLine after offensive team kicked ball over goaLine of defending team")
-	private static double goalKickDistance = 500;
 	
 	static
 	{
@@ -50,15 +38,6 @@ public class RuleConstraints
 	
 	private RuleConstraints()
 	{
-	}
-	
-	
-	/**
-	 * @return the allowed number of bots per team
-	 */
-	public static int getBotsPerTeam()
-	{
-		return botsPerTeam;
 	}
 	
 	
@@ -122,29 +101,5 @@ public class RuleConstraints
 	public static double getMaxRobotHeight()
 	{
 		return maxRobotHeight;
-	}
-	
-	
-	public static double getThrowInDistance()
-	{
-		return throwInDistance;
-	}
-	
-	
-	public static double getDistanceToGoalLine()
-	{
-		return distanceToGoalLine;
-	}
-	
-	
-	public static double getOffenseFreeKickDistance()
-	{
-		return offenseFreeKickDistance;
-	}
-	
-	
-	public static double getGoalKickDistance()
-	{
-		return goalKickDistance;
 	}
 }

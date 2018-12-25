@@ -4,7 +4,7 @@
 package edu.tigers.autoref.presenter;
 
 import java.awt.Component;
-import java.awt.EventQueue;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,44 +13,45 @@ import org.apache.commons.lang.StringUtils;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
 import edu.tigers.autoref.view.gamelog.GameLogPanel;
-import edu.tigers.autoreferee.AutoRefUtil;
-import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.IAutoRefStateObserver;
-import edu.tigers.autoreferee.engine.log.GameLogEntry.ELogEntryType;
-import edu.tigers.autoreferee.engine.log.IGameLog;
-import edu.tigers.autoreferee.module.AutoRefState;
+import edu.tigers.autoreferee.IAutoRefObserver;
+import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.autoreferee.engine.log.AutoRefGameEventGameLogEntry;
+import edu.tigers.autoreferee.engine.log.ELogEntryType;
+import edu.tigers.autoreferee.engine.log.GameStateGameLogEntry;
+import edu.tigers.autoreferee.engine.log.GameTime;
+import edu.tigers.autoreferee.engine.log.RefereeCommandGameLogEntry;
+import edu.tigers.autoreferee.engine.log.RefereeGameEventGameLogEntry;
+import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.components.IEnumPanel;
-import edu.tigers.sumatra.components.IEnumPanel.IEnumPanelObserver;
+import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
+import edu.tigers.sumatra.wp.AWorldPredictor;
+import edu.tigers.sumatra.wp.IWorldFrameObserver;
+import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
-/**
- * @author "Lukas Magel"
- */
-public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefStateObserver,
-		IEnumPanelObserver<ELogEntryType>
+public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver,
+		EnumCheckBoxPanel.IEnumPanelObserver<ELogEntryType>, IWorldFrameObserver
 {
-	public static final String ACTIVE_LOG_TYPES_KEY = GameLogPresenter.class + ".activeLogTypes";
+	private static final String ACTIVE_LOG_TYPES_KEY = GameLogPresenter.class + ".activeLogTypes";
 	
-	private GameLogPanel gameLogPanel = new GameLogPanel();
+	private GameLogTableModel gameLogTableModel = new GameLogTableModel();
+	private GameLogPanel gameLogPanel = new GameLogPanel(gameLogTableModel);
+	private WorldFrameWrapper lastWorldFrameWrapper;
 	
 	
-	/**
-	 * Default
-	 */
 	public GameLogPresenter()
 	{
-		IEnumPanel<ELogEntryType> logPanel = gameLogPanel.getLogTypePanel();
+		EnumCheckBoxPanel<ELogEntryType> logPanel = gameLogPanel.getLogTypePanel();
 		
 		Set<ELogEntryType> types = new HashSet<>();
 		String activeLogTypes = SumatraModel.getInstance().getUserProperty(ACTIVE_LOG_TYPES_KEY);
 		if (activeLogTypes == null)
 		{
-			types.add(ELogEntryType.COMMAND);
-			types.add(ELogEntryType.GAME_EVENT);
+			types.add(ELogEntryType.DETECTED_GAME_EVENT);
 		} else
 		{
 			Arrays.stream(activeLogTypes.split(","))
@@ -81,43 +82,83 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefStateObs
 	
 	
 	@Override
+	public void onNewWorldFrame(final WorldFrameWrapper wfw)
+	{
+		if (lastWorldFrameWrapper != null)
+		{
+			checkForNewGameEventFromReferee(wfw);
+			checkForNewRefereeCommand(wfw);
+			checkForNewGameState(wfw);
+		}
+		lastWorldFrameWrapper = wfw;
+	}
+	
+	
+	private void checkForNewRefereeCommand(final WorldFrameWrapper wfw)
+	{
+		if (wfw.getRefereeMsg().getCommand() != lastWorldFrameWrapper.getRefereeMsg().getCommand())
+		{
+			gameLogTableModel.add(new RefereeCommandGameLogEntry(
+					wfw.getTimestamp(),
+					GameTime.of(wfw.getRefereeMsg()),
+					wfw.getRefereeMsg().getCommand()));
+		}
+	}
+	
+	
+	private void checkForNewGameState(final WorldFrameWrapper wfw)
+	{
+		if (!lastWorldFrameWrapper.getGameState().equals(wfw.getGameState()))
+		{
+			gameLogTableModel.add(new GameStateGameLogEntry(
+					wfw.getTimestamp(),
+					GameTime.of(wfw.getRefereeMsg()),
+					wfw.getGameState()));
+		}
+	}
+	
+	
+	private void checkForNewGameEventFromReferee(final WorldFrameWrapper wfw)
+	{
+		final ArrayList<SslGameEvent.GameEvent> newGameEvents = new ArrayList<>(
+				wfw.getRefereeMsg().getGameEvents());
+		newGameEvents.removeAll(lastWorldFrameWrapper.getRefereeMsg().getGameEvents());
+		for (SslGameEvent.GameEvent gameEvent : newGameEvents)
+		{
+			gameLogTableModel.add(new RefereeGameEventGameLogEntry(
+					wfw.getTimestamp(),
+					GameTime.of(wfw.getRefereeMsg()),
+					gameEvent));
+		}
+	}
+	
+	
+	@Override
+	public void onNewGameEventDetected(final IGameEvent gameEvent)
+	{
+		if (lastWorldFrameWrapper == null)
+		{
+			return;
+		}
+		gameLogTableModel.add(new AutoRefGameEventGameLogEntry(
+				lastWorldFrameWrapper.getTimestamp(),
+				GameTime.of(lastWorldFrameWrapper.getRefereeMsg()),
+				gameEvent));
+	}
+	
+	
+	@Override
 	public void onModuliStateChanged(final ModulesState state)
 	{
 		if (state == ModulesState.ACTIVE)
 		{
-			AutoRefUtil.ifAutoRefModulePresent(module -> module.addObserver(this));
-		}
-	}
-	
-	
-	@Override
-	public void onAutoRefStateChanged(final AutoRefState state)
-	{
-		if (state == AutoRefState.STARTED)
+			SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
+			SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(m -> m.addObserver(this));
+		} else if (state == ModulesState.RESOLVED)
 		{
-			AutoRefUtil.ifAutoRefModulePresent(module -> {
-				IGameLog log = module.getEngine().getGameLog();
-				EventQueue.invokeLater(() -> setGameLog(log));
-				
-			});
+			SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
+			SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(m -> m.removeObserver(this));
 		}
-	}
-	
-	
-	/**
-	 * @param log
-	 */
-	public void setGameLog(final IGameLog log)
-	{
-		GameLogTableModel model = new GameLogTableModel(log);
-		gameLogPanel.setTableModel(model);
-	}
-	
-	
-	@Override
-	public void onNewAutoRefFrame(final IAutoRefFrame frame)
-	{
-		// empty
 	}
 	
 	

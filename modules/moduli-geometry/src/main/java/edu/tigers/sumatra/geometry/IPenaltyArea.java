@@ -129,4 +129,14 @@ public interface IPenaltyArea extends I2DShape
 	 * @return the distance to this point
 	 */
 	double distanceTo(final IVector2 point);
+	
+	
+	/**
+	 * Calculates the distance between the supplied {@code pos} and the edge of the penalty area.
+	 * If the point does not lie inside the penalty area, a distance of 0 is returned.
+	 *
+	 * @param pos
+	 * @return
+	 */
+	double distanceToNearestPointOutside(final IVector2 pos);
 }

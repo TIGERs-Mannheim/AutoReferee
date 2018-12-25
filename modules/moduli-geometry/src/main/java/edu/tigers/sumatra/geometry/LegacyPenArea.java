@@ -470,6 +470,13 @@ public class LegacyPenArea implements IPenaltyArea
 	}
 	
 	
+	@Override
+	public double distanceToNearestPointOutside(final IVector2 pos)
+	{
+		return nearestPointOutside(pos).distanceTo(pos);
+	}
+	
+	
 	public double getRadius()
 	{
 		return radius;

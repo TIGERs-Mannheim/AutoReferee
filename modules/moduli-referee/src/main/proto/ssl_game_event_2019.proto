@@ -13,6 +13,8 @@ import "ssl_game_controller_common.proto";
 // An autoRef should ideally set all fields, except if there are good reasons to not do so.
 message GameEvent {
 
+    required GameEventType type = 40;
+
     // the event that occurred
     oneof event {
 
@@ -401,4 +403,47 @@ message GameEvent {
         // the team that has too many robots
         required Team by_team = 1;
     }
+}
+
+enum GameEventType {
+    UNKNOWN_GAME_EVENT_TYPE = 0;
+
+    PREPARED = 1;
+    NO_PROGRESS_IN_GAME = 2;
+    PLACEMENT_FAILED = 3;
+    PLACEMENT_SUCCEEDED = 5;
+    BOT_SUBSTITUTION = 37;
+    TOO_MANY_ROBOTS = 38;
+    BALL_LEFT_FIELD_TOUCH_LINE = 6;
+    BALL_LEFT_FIELD_GOAL_LINE = 7;
+    POSSIBLE_GOAL = 39;
+    GOAL = 8;
+    INDIRECT_GOAL = 9;
+    CHIPPED_GOAL = 10;
+    AIMLESS_KICK = 11;
+    KICK_TIMEOUT = 12;
+    KEEPER_HELD_BALL = 13;
+    ATTACKER_DOUBLE_TOUCHED_BALL = 14;
+    ATTACKER_IN_DEFENSE_AREA = 15;
+    ATTACKER_TOUCHED_KEEPER = 16;
+    BOT_DRIBBLED_BALL_TOO_FAR = 17;
+    BOT_KICKED_BALL_TOO_FAST = 18;
+    ATTACKER_TOO_CLOSE_TO_DEFENSE_AREA = 19;
+    BOT_INTERFERED_PLACEMENT = 20;
+    BOT_CRASH_DRAWN = 21;
+    BOT_CRASH_UNIQUE = 22;
+    BOT_CRASH_UNIQUE_SKIPPED = 23;
+    BOT_PUSHED_BOT = 24;
+    BOT_PUSHED_BOT_SKIPPED = 25;
+    BOT_HELD_BALL_DELIBERATELY = 26;
+    BOT_TIPPED_OVER = 27;
+    BOT_TOO_FAST_IN_STOP = 28;
+    DEFENDER_TOO_CLOSE_TO_KICK_POINT = 29;
+    DEFENDER_IN_DEFENSE_AREA_PARTIALLY = 30;
+    DEFENDER_IN_DEFENSE_AREA = 31;
+    MULTIPLE_CARDS = 32;
+    MULTIPLE_PLACEMENT_FAILURES = 33;
+    MULTIPLE_FOULS = 34;
+    UNSPORTING_BEHAVIOR_MINOR = 35;
+    UNSPORTING_BEHAVIOR_MAJOR = 36;
 }

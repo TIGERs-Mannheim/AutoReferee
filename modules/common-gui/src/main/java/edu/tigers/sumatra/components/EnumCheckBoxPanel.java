@@ -22,20 +22,16 @@ import javax.swing.JCheckBox;
 
 import org.apache.log4j.Logger;
 
-import edu.tigers.sumatra.components.IEnumPanel.IEnumPanelObserver;
-
 
 /**
  * Generic Panel class that accepts an enum type as argument and displays checkboxes for each constant in the enum.
  * The checkboxes can be laid out horizontally or vertically. Observers are notified when the selection of a checkbox
  * is changed.
  * 
- * @author "Lukas Magel"
  * @param <T> The enum class to use
  */
-public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelObserver<T>> implements IEnumPanel<T>
+public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBoxPanel.IEnumPanelObserver<T>>
 {
-	/**  */
 	private static final long serialVersionUID = 5263861341015714105L;
 	private static final Logger log = Logger.getLogger(EnumCheckBoxPanel.class);
 	
@@ -63,7 +59,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	 * @param formatter Custom formatter which is used to derive the labels of the checkboxes from the enum constants -
 	 *           if null the name of the constants will be used
 	 */
-	public EnumCheckBoxPanel(final Class<T> enumClass, final String title, final int orientation,
+	private EnumCheckBoxPanel(final Class<T> enumClass, final String title, final int orientation,
 			final Function<T, String> formatter)
 	{
 		this.enumClass = enumClass;
@@ -105,13 +101,13 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	
 	
 	@Override
-	public void setPanelEnabled(final boolean enabled)
+	public void setEnabled(final boolean enabled)
 	{
+		super.setEnabled(enabled);
 		boxes.values().forEach(box -> box.setEnabled(enabled));
 	}
 	
 	
-	@Override
 	public Set<T> getValues()
 	{
 		Set<T> values = new HashSet<>();
@@ -127,7 +123,6 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 	}
 	
 	
-	@Override
 	public void setSelectedBoxes(final Set<T> enabledBoxes)
 	{
 		boxes.keySet().forEach(t -> boxes.get(t).setSelected(enabledBoxes.contains(t)));
@@ -155,5 +150,15 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<IEnumPanelOb
 		{
 			informObserver(obs -> obs.onValueTicked(type, value));
 		}
+	}
+	
+	/**
+	 * The observer interface of the {@link EnumCheckBoxPanel} class
+	 *
+	 * @param <E>
+	 */
+	public interface IEnumPanelObserver<E>
+	{
+		void onValueTicked(E type, boolean value);
 	}
 }

@@ -261,4 +261,11 @@ public class PenaltyArea implements IPenaltyArea
 	{
 		return nearestPointInside(point).distanceTo(point);
 	}
+	
+	
+	@Override
+	public double distanceToNearestPointOutside(final IVector2 pos)
+	{
+		return nearestPointOutside(pos).distanceTo(pos);
+	}
 }

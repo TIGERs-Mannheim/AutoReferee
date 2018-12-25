@@ -3,118 +3,71 @@
  */
 package edu.tigers.autoreferee.engine;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.net.InetAddress;
+
+import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.remote.IRefboxRemote;
-import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.autoreferee.module.AutoRefModule;
+import edu.tigers.autoreferee.remote.AutoRefToGameControllerConnector;
+import edu.tigers.autoreferee.remote.GameEventResponse;
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.AReferee;
+import edu.tigers.sumatra.referee.SslGameControllerProcess;
 
 
-/**
- * @author "Lukas Magel"
- */
-public class ActiveAutoRefEngine extends AbstractAutoRefEngine
+public class ActiveAutoRefEngine extends AutoRefEngine
 {
-	private final IRefboxRemote remote;
-	private List<IAutoRefEngineObserver> engineObserver = new CopyOnWriteArrayList<>();
+	private final Logger log = Logger.getLogger(ActiveAutoRefEngine.class.getName());
+	private static final String DEFAULT_REFEREE_HOST = "localhost";
+	
+	private AutoRefToGameControllerConnector remote;
 	
 	
-	/**
-	 * @param remote
-	 */
-	public ActiveAutoRefEngine(final IRefboxRemote remote)
+	@Override
+	public void start()
 	{
-		this.remote = remote;
+		AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
+		String hostname = referee.getActiveSource().getRefBoxAddress()
+				.map(InetAddress::getHostAddress)
+				.orElse(DEFAULT_REFEREE_HOST);
+		int port = SumatraModel.getInstance().getModule(AutoRefModule.class)
+				.getSubnodeConfiguration().getInt("gameControllerPort",
+						SslGameControllerProcess.GAME_CONTROLLER_PORT);
+		remote = new AutoRefToGameControllerConnector(hostname, port);
+		remote.addGameEventResponseObserver(this::onGameControllerResponse);
+		remote.start();
 	}
 	
 	
 	@Override
-	public synchronized void stop()
+	public void stop()
 	{
 		remote.stop();
 	}
 	
-
 	
 	@Override
-	public AutoRefMode getMode()
+	public void process(final IAutoRefFrame frame)
 	{
-		return AutoRefMode.ACTIVE;
+		processEngine(frame).forEach(this::processGameEvent);
 	}
 	
-
 	
 	@Override
-	public synchronized void process(final IAutoRefFrame frame)
+	protected void processGameEvent(final IGameEvent gameEvent)
 	{
-		if (engineState == EEngineState.PAUSED)
+		super.processGameEvent(gameEvent);
+		remote.sendEvent(gameEvent);
+	}
+	
+	
+	private void onGameControllerResponse(GameEventResponse response)
+	{
+		if (response.getResponse() != GameEventResponse.Response.OK)
 		{
-			return;
+			log.warn("Game-controller response was not OK: " + response);
 		}
-		
-		super.process(frame);
-		
-		List<IGameEvent> gameEvents = getGameEvents(frame);
-		
-		if (!gameEvents.isEmpty())
-		{
-			IGameEvent gameEvent = gameEvents.remove(0);
-			boolean accepted = false;
-			if (activeGameEvents.contains(gameEvent.getType()))
-			{
-				remote.sendEvent(gameEvent);
-			}
-			gameLog.addEntry(gameEvent, accepted);
-			logGameEvents(gameEvents);
-		}
-		
-	}
-	
-	
-	@Override
-	protected void onGameStateChange(final GameState oldGameState, final GameState newGameState)
-	{
-		super.onGameStateChange(oldGameState, newGameState);
-		notifyStateChange(false);
-	}
-
-	
-	/**
-	 * @param observer
-	 */
-	public void addObserver(final IAutoRefEngineObserver observer)
-	{
-		engineObserver.add(observer);
-	}
-	
-	
-	/**
-	 * @param observer
-	 */
-	public void removeObserver(final IAutoRefEngineObserver observer)
-	{
-		engineObserver.remove(observer);
-	}
-	
-	
-	private void notifyStateChange(final boolean canProceed)
-	{
-		engineObserver.forEach(obs -> obs.onStateChanged(canProceed));
-	}
-	
-	
-	/**
-	 * @author Lukas Magel
-	 */
-	public interface IAutoRefEngineObserver
-	{
-		
-		/**
-		 * @param proceedPossible
-		 */
-		void onStateChanged(final boolean proceedPossible);
-		
 	}
 }

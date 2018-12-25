@@ -46,7 +46,6 @@
 
     <module id="edu.tigers.autoreferee.module.AutoRefModule">
         <properties>
-            <log2file>true</log2file>
             <gameControllerPort>10007</gameControllerPort>
         </properties>
     </module>

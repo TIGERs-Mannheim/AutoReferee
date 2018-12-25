@@ -17,10 +17,10 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
  */
 public class GameTime
 {
-	private static final GameTime	empty	= new GameTime(Stage.NORMAL_FIRST_HALF_PRE, 0);
+	private static final GameTime empty = new GameTime(Stage.NORMAL_FIRST_HALF_PRE, 0);
 	
-	private final Stage				stage;
-	private final long				micros;
+	private final Stage stage;
+	private final long micros;
 	
 	
 	private GameTime(final Stage stage, final long micros)
@@ -36,18 +36,6 @@ public class GameTime
 	public static GameTime empty()
 	{
 		return empty;
-	}
-	
-	
-	/**
-	 * @param stage
-	 * @param micros
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	public static GameTime of(final Stage stage, final long micros)
-	{
-		return new GameTime(stage, micros);
 	}
 	
 	

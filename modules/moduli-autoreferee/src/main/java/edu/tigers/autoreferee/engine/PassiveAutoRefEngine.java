@@ -12,32 +12,13 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 
 
 /**
- * @author "Lukas Magel"
+ * The passive autoRef engine does not communicate with the game-controller.
  */
-public class PassiveAutoRefEngine extends AbstractAutoRefEngine
+public class PassiveAutoRefEngine extends AutoRefEngine
 {
-	
 	@Override
-	public void stop()
+	public void process(final IAutoRefFrame frame)
 	{
-	}
-	
-	
-	@Override
-	public AutoRefMode getMode()
-	{
-		return AutoRefMode.PASSIVE;
-	}
-	
-	
-	@Override
-	public synchronized void process(final IAutoRefFrame frame)
-	{
-		if (engineState == EEngineState.PAUSED)
-		{
-			return;
-		}
-		super.process(frame);
-		logGameEvents(getGameEvents(frame));
+		processEngine(frame).forEach(this::processGameEvent);
 	}
 }
