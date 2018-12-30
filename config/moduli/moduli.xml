@@ -49,5 +49,4 @@
             <gameControllerPort>10007</gameControllerPort>
         </properties>
     </module>
-    <module id="edu.tigers.sumatra.trees.OffensiveTreeProvider"/>
 </centralSoftware>

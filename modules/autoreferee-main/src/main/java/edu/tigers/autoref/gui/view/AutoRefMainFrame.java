@@ -40,7 +40,7 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 	 */
 	public AutoRefMainFrame()
 	{
-		setTitle("Autoreferee");
+		setTitle("TIGERs AutoReferee 2019");
 		
 		replayMenu.addObserver(this);
 		replayMenu.setMnemonic(KeyEvent.VK_R);
