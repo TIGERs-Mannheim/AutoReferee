@@ -61,6 +61,14 @@ public class GameControllerProtocol
 		if (isConnected())
 		{
 			disconnect();
+			try
+			{
+				Thread.sleep(1000);
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+				return;
+			}
 			log.info("Reconnecting to " + hostname + ":" + port);
 		} else
 		{
@@ -147,7 +155,7 @@ public class GameControllerProtocol
 			msg.writeDelimitedTo(socket.getOutputStream());
 		} catch (IOException e)
 		{
-			log.warn("Sending message to SSL-Game-Controller Failed", e);
+			log.warn("Sending message to ssl-game-controller failed", e);
 			connectBlocking();
 			return false;
 		}

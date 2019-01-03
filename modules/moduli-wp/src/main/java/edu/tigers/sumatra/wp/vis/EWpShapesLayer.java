@@ -34,6 +34,7 @@ public enum EWpShapesLayer implements IShapeLayer
 	BOT_BUFFERED_TRAJ("Bot Buffered Traj", "Field", false, EShapeLayerPersistenceType.DEBUG_PERSIST),
 	/**  */
 	BALL("Ball", "Field", true),
+	BALL_HIGHLIGHTER("Ball highlighter", "Field", true),
 	/** */
 	BALL_PREDICTION("Ball prediction", "Field", false),
 	/**  */

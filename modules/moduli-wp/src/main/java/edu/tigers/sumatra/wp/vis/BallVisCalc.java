@@ -39,7 +39,7 @@ public class BallVisCalc implements IWpCalc
 		
 		ICircle ballCircle = Circle.createCircle(ball.getPos(), RuleConstraints.getStopRadius());
 		IDrawableShape crossHair = AnimatedCrosshair.aCrosshairWithContinuousRotation(ballCircle, 1.5f, Color.RED);
-		shapeMap.get(EWpShapesLayer.BALL).add(crossHair);
+		shapeMap.get(EWpShapesLayer.BALL_HIGHLIGHTER).add(crossHair);
 		
 		DrawableCircle point = new DrawableCircle(ball.getPos(), heightFactor * Geometry.getBallRadius(), Color.ORANGE);
 		point.setFill(true);
