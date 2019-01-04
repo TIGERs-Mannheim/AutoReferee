@@ -3,7 +3,7 @@ syntax = "proto2";
 package edu.tigers.sumatra;
 option java_outer_classname = "Referee";
 
-import "ssl_game_event.proto";
+//import "ssl_game_event.proto";
 import "ssl_game_event_2019.proto";
 
 // Each UDP packet contains one of these messages.
@@ -173,7 +173,7 @@ message SSL_Referee {
 
     // The game event that caused the referee command.
     // deprecated in favor of game_events.
-    optional SSL_Referee_Game_Event game_event = 11 [deprecated = true];
+    //    optional SSL_Referee_Game_Event game_event = 11 [deprecated = true];
 
     // The command that will be issued after the current stoppage and ball placement to continue the game.
     optional Command next_command = 12;
@@ -184,6 +184,15 @@ message SSL_Referee {
 
     // All non-finished proposed game events that may be processed next.
     repeated ProposedGameEvent proposed_game_events = 14;
+
+    // The time in microseconds that is remaining until the current action times out
+    // The time will not be reset. It can get negative.
+    // An autoRef would raise an appropriate event, if the time gets negative.
+    // Possible actions where this time is relevant:
+    //  * free kicks
+    //  * kickoff, penalty kick, force start
+    //  * ball placement
+    optional int32 current_action_time_remaining = 15;
 }
 
 message ProposedGameEvent {

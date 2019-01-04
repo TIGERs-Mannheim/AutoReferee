@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.network.IReceiver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
@@ -24,8 +23,6 @@ import edu.tigers.sumatra.network.NetworkUtility;
 
 /**
  * New implementation of the referee receiver with the new protobuf message format (2013)
- * 
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class NetworkRefereeReceiver extends ARefereeMessageSource implements Runnable, IReceiver
 {
@@ -166,13 +163,6 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 	public boolean isReady()
 	{
 		return true;
-	}
-	
-	
-	@Override
-	public void handleControlRequest(final SSL_RefereeRemoteControlRequest request)
-	{
-		// cannot handle that
 	}
 	
 	

@@ -47,13 +47,14 @@ public class RefereeMsg
 	private final ETeamColor negativeHalfTeam;
 	private final IVector2 ballPlacementPos;
 	
-	private final GameEvent gameEvent;
-	
 	private final Command nextCommand;
 	/** must be transient until a wrapper class has been implemented that is @Persistent */
 	private final transient List<SslGameEvent.GameEvent> gameEvents;
 	/** must be transient until a wrapper class has been implemented that is @Persistent */
 	private final transient List<Referee.ProposedGameEvent> proposedGameEvents;
+	
+	/** in seconds */
+	private double currentActionTimeRemaining;
 	
 	
 	/**
@@ -72,10 +73,10 @@ public class RefereeMsg
 		teamInfoBlue = new TeamInfo();
 		ballPlacementPos = null;
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
-		gameEvent = new GameEvent();
 		nextCommand = null;
 		gameEvents = Collections.emptyList();
 		proposedGameEvents = Collections.emptyList();
+		currentActionTimeRemaining = 0;
 	}
 	
 	
@@ -108,11 +109,11 @@ public class RefereeMsg
 		}
 		
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
-		gameEvent = new GameEvent(sslRefereeMsg.getGameEvent());
 		
 		nextCommand = sslRefereeMsg.getNextCommand();
 		gameEvents = sslRefereeMsg.getGameEventsList();
 		proposedGameEvents = sslRefereeMsg.getProposedGameEventsList();
+		currentActionTimeRemaining = sslRefereeMsg.getCurrentActionTimeRemaining() / 1e6;
 	}
 	
 	
@@ -134,10 +135,10 @@ public class RefereeMsg
 		teamInfoBlue = refereeMsg.teamInfoBlue;
 		negativeHalfTeam = refereeMsg.negativeHalfTeam;
 		ballPlacementPos = refereeMsg.getBallPlacementPosNeutral();
-		gameEvent = refereeMsg.gameEvent;
 		nextCommand = refereeMsg.nextCommand;
 		gameEvents = refereeMsg.gameEvents;
 		proposedGameEvents = refereeMsg.proposedGameEvents;
+		currentActionTimeRemaining = refereeMsg.currentActionTimeRemaining;
 	}
 	
 	
@@ -320,12 +321,6 @@ public class RefereeMsg
 	}
 	
 	
-	public GameEvent getGameEvent()
-	{
-		return gameEvent;
-	}
-	
-	
 	private <T> Map<ETeamColor, T> buildMap(final T blue, final T yellow)
 	{
 		Map<ETeamColor, T> map = new EnumMap<>(ETeamColor.class);
@@ -359,6 +354,15 @@ public class RefereeMsg
 	}
 	
 	
+	/**
+	 * @return [s]
+	 */
+	public double getCurrentActionTimeRemaining()
+	{
+		return currentActionTimeRemaining;
+	}
+	
+	
 	@Override
 	public String toString()
 	{
@@ -374,7 +378,6 @@ public class RefereeMsg
 				.append("teamInfoBlue", teamInfoBlue)
 				.append("negativeHalfTeam", negativeHalfTeam)
 				.append("ballPlacementPos", ballPlacementPos)
-				.append("gameEvent", gameEvent)
 				.append("nextCommand", nextCommand)
 				.append("gameEvents", gameEvents)
 				.append("proposedGameEvents", proposedGameEvents)

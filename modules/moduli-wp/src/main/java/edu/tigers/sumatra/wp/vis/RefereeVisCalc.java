@@ -75,8 +75,6 @@ public class RefereeVisCalc implements IWpCalc
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 23), msg.getCommand().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 35), wfw.getGameState().getStateNameWithColor(),
 				Color.white));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 47), wfw.getRefereeMsg().getGameEvent().toString(),
-				Color.white));
 		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 11), timeStr, Color.white));
 		

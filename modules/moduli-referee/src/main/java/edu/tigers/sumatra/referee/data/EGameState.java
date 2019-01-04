@@ -5,7 +5,7 @@
 package edu.tigers.sumatra.referee.data;
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * All available, team independent game states
  */
 public enum EGameState
 {

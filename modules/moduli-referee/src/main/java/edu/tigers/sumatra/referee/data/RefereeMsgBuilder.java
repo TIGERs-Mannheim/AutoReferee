@@ -15,14 +15,11 @@ import edu.tigers.sumatra.math.vector.IVector2;
 /**
  * Construct new referee messages. All values are initialized already to make it easier to construct new messages
  * with only the relevant values.
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class RefereeMsgBuilder
 {
-	
-	private Map<ETeamColor, Referee.SSL_Referee.TeamInfo.Builder>	teamBuilder		= new EnumMap<>(ETeamColor.class);
-	private Referee.SSL_Referee.Builder										messagebuilder	= Referee.SSL_Referee.newBuilder();
+	private Map<ETeamColor, Referee.SSL_Referee.TeamInfo.Builder> teamBuilder = new EnumMap<>(ETeamColor.class);
+	private Referee.SSL_Referee.Builder messageBuilder = Referee.SSL_Referee.newBuilder();
 	
 	
 	private RefereeMsgBuilder()
@@ -49,12 +46,12 @@ public class RefereeMsgBuilder
 	
 	private void initMessage()
 	{
-		messagebuilder.setPacketTimestamp(System.currentTimeMillis());
-		messagebuilder.setCommand(Referee.SSL_Referee.Command.HALT);
-		messagebuilder.setCommandCounter(-1);
-		messagebuilder.setCommandTimestamp(0);
-		messagebuilder.setStageTimeLeft(300);
-		messagebuilder.setStage(Referee.SSL_Referee.Stage.NORMAL_FIRST_HALF);
+		messageBuilder.setPacketTimestamp(System.currentTimeMillis());
+		messageBuilder.setCommand(Referee.SSL_Referee.Command.HALT);
+		messageBuilder.setCommandCounter(-1);
+		messageBuilder.setCommandTimestamp(0);
+		messageBuilder.setStageTimeLeft(300);
+		messageBuilder.setStage(Referee.SSL_Referee.Stage.NORMAL_FIRST_HALF);
 	}
 	
 	
@@ -72,9 +69,9 @@ public class RefereeMsgBuilder
 	 */
 	public Referee.SSL_Referee build()
 	{
-		messagebuilder.setBlue(teamBuilder.get(ETeamColor.BLUE));
-		messagebuilder.setYellow(teamBuilder.get(ETeamColor.YELLOW));
-		return messagebuilder.build();
+		messageBuilder.setBlue(teamBuilder.get(ETeamColor.BLUE));
+		messageBuilder.setYellow(teamBuilder.get(ETeamColor.YELLOW));
+		return messageBuilder.build();
 	}
 	
 	
@@ -89,10 +86,10 @@ public class RefereeMsgBuilder
 			Referee.SSL_Referee.Point.Builder point = Referee.SSL_Referee.Point.newBuilder();
 			point.setX((float) pos.x());
 			point.setY((float) pos.y());
-			messagebuilder.setDesignatedPosition(point);
+			messageBuilder.setDesignatedPosition(point);
 		} else
 		{
-			messagebuilder.clearDesignatedPosition();
+			messageBuilder.clearDesignatedPosition();
 		}
 		return this;
 	}
@@ -104,7 +101,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withCommand(Referee.SSL_Referee.Command command)
 	{
-		messagebuilder.setCommand(command);
+		messageBuilder.setCommand(command);
 		return this;
 	}
 	
@@ -127,7 +124,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withTimeLeft(final int timeLeft)
 	{
-		messagebuilder.setStageTimeLeft(timeLeft);
+		messageBuilder.setStageTimeLeft(timeLeft);
 		return this;
 	}
 	
@@ -138,7 +135,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withCommandCounter(final int commandCounter)
 	{
-		messagebuilder.setCommandCounter(commandCounter);
+		messageBuilder.setCommandCounter(commandCounter);
 		return this;
 	}
 	
@@ -149,7 +146,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withPacketTimestamp(final long timestamp)
 	{
-		messagebuilder.setPacketTimestamp(timestamp);
+		messageBuilder.setPacketTimestamp(timestamp);
 		return this;
 	}
 	
@@ -160,7 +157,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withCommandTimestamp(final long timestamp)
 	{
-		messagebuilder.setCommandTimestamp(timestamp);
+		messageBuilder.setCommandTimestamp(timestamp);
 		return this;
 	}
 	
@@ -171,7 +168,7 @@ public class RefereeMsgBuilder
 	 */
 	public RefereeMsgBuilder withStage(Referee.SSL_Referee.Stage stage)
 	{
-		messagebuilder.setStage(stage);
+		messageBuilder.setStage(stage);
 		return this;
 	}
 	

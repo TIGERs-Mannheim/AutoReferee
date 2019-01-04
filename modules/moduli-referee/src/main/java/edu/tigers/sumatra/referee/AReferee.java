@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.Referee.SSL_Referee;
-import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.referee.events.Event;
 import edu.tigers.sumatra.referee.events.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
@@ -48,14 +46,6 @@ public abstract class AReferee extends AModule
 	{
 		observers.remove(observer);
 	}
-	
-	
-	/**
-	 * Handle an external control request.
-	 * 
-	 * @param request
-	 */
-	public abstract void handleControlRequest(final SSL_RefereeRemoteControlRequest request);
 	
 	
 	/**
@@ -102,14 +92,6 @@ public abstract class AReferee extends AModule
 	 * @return
 	 */
 	public abstract ARefereeMessageSource getSource(ERefereeMessageSource type);
-	
-	
-	/**
-	 * Update a keeper id
-	 *
-	 * @param keeperId
-	 */
-	public abstract void updateKeeperId(BotID keeperId);
 	
 	
 	/**

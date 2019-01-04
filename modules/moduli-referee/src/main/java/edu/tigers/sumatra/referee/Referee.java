@@ -3,14 +3,10 @@
  */
 package edu.tigers.sumatra.referee;
 
-import static edu.tigers.sumatra.referee.source.ERefereeMessageSource.INTERNAL_REFBOX;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.tigers.sumatra.RefboxRemoteControl.SSL_RefereeRemoteControlRequest;
 import edu.tigers.sumatra.Referee.SSL_Referee;
-import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.referee.events.Event;
 import edu.tigers.sumatra.referee.events.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
@@ -18,7 +14,6 @@ import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.IRefereeSourceObserver;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
-import edu.tigers.sumatra.referee.source.refbox.RefBox;
 
 
 /**
@@ -33,13 +28,9 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	private boolean controllable = false;
 	
 	
-	/**
-	 * Create new instance
-	 */
 	public Referee()
 	{
 		msgSources.add(new NetworkRefereeReceiver());
-		msgSources.add(new RefBox());
 		msgSources.add(new DirectRefereeMsgForwarder());
 	}
 	
@@ -66,7 +57,7 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		source.addObserver(this);
 		source.start();
 		
-		controllable = useGameController || source.getType() == INTERNAL_REFBOX;
+		controllable = useGameController;
 		
 		notifyRefereeMsgSourceChanged(source);
 		
@@ -93,26 +84,9 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	
 	
 	@Override
-	public void deinitModule()
-	{
-		// nothing to do
-	}
-	
-	
-	@Override
 	public void onNewRefereeMessage(final SSL_Referee msg)
 	{
 		notifyNewRefereeMsg(msg);
-	}
-	
-	
-	@Override
-	public void handleControlRequest(final SSL_RefereeRemoteControlRequest request)
-	{
-		if (source != null)
-		{
-			source.handleControlRequest(request);
-		}
 	}
 	
 	
@@ -140,13 +114,6 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 				.filter(s -> s.getType() == type)
 				.findAny()
 				.orElse(null);
-	}
-	
-	
-	@Override
-	public void updateKeeperId(BotID keeperId)
-	{
-		source.updateKeeperId(keeperId);
 	}
 	
 	
