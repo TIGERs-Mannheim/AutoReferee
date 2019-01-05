@@ -192,16 +192,9 @@ public class GameState
 	 */
 	public boolean isVelocityLimited()
 	{
-		switch (state)
-		{
-			case STOP:
-			case BALL_PLACEMENT:
-				// note: explicitly not in HALT: Robots may not move here anyway, but during skill testing, its
-				// annoying to change the gameState after each Sumatra restart.
-				return true;
-			default:
-				return false;
-		}
+		// note: explicitly not in HALT: Robots may not move here anyway, but during skill testing, its
+		// annoying to change the gameState after each Sumatra restart.
+		return state == EGameState.STOP;
 	}
 	
 	

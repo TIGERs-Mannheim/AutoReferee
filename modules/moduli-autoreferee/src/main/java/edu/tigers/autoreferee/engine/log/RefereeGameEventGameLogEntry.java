@@ -1,5 +1,7 @@
 package edu.tigers.autoreferee.engine.log;
 
+import com.google.protobuf.TextFormat;
+
 import edu.tigers.sumatra.SslGameEvent;
 
 
@@ -21,7 +23,7 @@ public class RefereeGameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String workGameLogEntry()
 	{
-		return gameEvent.toString();
+		return TextFormat.shortDebugString(gameEvent);
 	}
 	
 	

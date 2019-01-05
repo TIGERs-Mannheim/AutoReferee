@@ -14,6 +14,11 @@ message GameEvent {
 
     required GameEventType type = 40;
 
+    // the origin of this game event
+    // empty, if it originates from game controller
+    // autoRef name(s), if it originates from one or more autoRefs
+    repeated string origin = 41;
+
     // the event that occurred
     oneof event {
 

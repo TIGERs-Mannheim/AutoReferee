@@ -181,7 +181,7 @@ public class MulticastUDPReceiver implements IReceiver
 			joinNetworkGroup(socket, groupStr);
 		} catch (IOException err)
 		{
-			log.error("Could not create multicast socket on iface " + iface.getDisplayName() + " and port " + port, err);
+			log.info("Could not create multicast socket on iface " + iface.getDisplayName() + " and port " + port, err);
 		}
 	}
 	
