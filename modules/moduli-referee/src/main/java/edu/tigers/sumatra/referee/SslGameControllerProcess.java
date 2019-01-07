@@ -89,6 +89,7 @@ public class SslGameControllerProcess implements Runnable
 			builder.directory(new File(modulesFolder + "/..").getAbsoluteFile());
 			builder.redirectErrorStream(true);
 			process = builder.start();
+			log.debug("game-controller process started");
 			
 			Scanner s = new Scanner(process.getInputStream());
 			while (s.hasNextLine())
@@ -107,6 +108,7 @@ public class SslGameControllerProcess implements Runnable
 				log.warn("Could not execute ssl-game-controller", e);
 			}
 		}
+		log.debug("game-controller process thread finished");
 	}
 	
 	
