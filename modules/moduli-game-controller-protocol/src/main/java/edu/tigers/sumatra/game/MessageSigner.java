@@ -4,12 +4,6 @@
 
 package edu.tigers.sumatra.game;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -35,8 +29,6 @@ import org.apache.log4j.Logger;
 public class MessageSigner
 {
 	private static final Logger log = Logger.getLogger(MessageSigner.class.getName());
-	private static final String PRIVATE_KEY_PATH = "/keys/TIGERs-Mannheim.key.pem.pkcs8";
-	private static final String PUBLIC_KEY_PATH = "/keys/TIGERs-Mannheim.pub.pem";
 	private static final String SIGNING_ALGORITHM = "SHA256WITHRSA";
 	
 	private PrivateKey privateKey;
@@ -44,95 +36,52 @@ public class MessageSigner
 	
 	
 	/**
-	 * Constructor, pass a path to a Private and Public Key
-	 * 
-	 * @param pathToPrivateKey Path to a private key in PKCS8 Format
-	 * @param pathToPublicKey Path to a public key for verification
+	 * Default constructor without keys
 	 */
-	public MessageSigner(URL pathToPrivateKey, URL pathToPublicKey)
+	public MessageSigner()
 	{
-		log.debug("Loading private key from: " + pathToPrivateKey);
-		log.debug("Loading public key from:" + pathToPublicKey);
-		loadKeys(pathToPrivateKey, pathToPublicKey);
+		// no key will be loaded by default
 	}
 	
 	
 	/**
-	 * Default constructor, uses the default keys in the resource directory
+	 * Constructor, pass a path to a Private and Public Key
+	 * 
+	 * @param privateKey Path to a private key in PKCS8 Format
+	 * @param publicKey Path to a public key for verification
 	 */
-	public MessageSigner()
+	public MessageSigner(String privateKey, String publicKey)
 	{
-		log.debug("Loading default keys");
-		URL privateKeyPath = getClass().getResource(PRIVATE_KEY_PATH);
-		URL publicKeyPath = getClass().getResource(PUBLIC_KEY_PATH);
-		loadKeys(privateKeyPath, publicKeyPath);
-	}
-	
-	
-	private void loadKeys(URL privateKey, URL publicKey)
-	{
-		if (privateKey != null)
-		{
-			try
-			{
-				this.privateKey = getPrivateKey(Paths.get(privateKey.toURI()).toString());
-			} catch (URISyntaxException | FileSystemNotFoundException e)
-			{
-				log.warn("Can not load private key", e);
-				this.privateKey = null;
-			}
-		} else
-		{
-			log.info("Could not find private key");
-			this.privateKey = null;
-		}
-		
-		if (publicKey != null)
-		{
-			try
-			{
-				this.publicKey = getPublicKey(Paths.get(publicKey.toURI()).toString());
-			} catch (URISyntaxException e)
-			{
-				log.warn("Invalid public key path", e);
-				this.publicKey = null;
-			}
-		} else
-		{
-			log.info("Could not find public key");
-			this.publicKey = null;
-		}
+		this.privateKey = getPrivateKey(privateKey);
+		this.publicKey = getPublicKey(publicKey);
 	}
 	
 	
 	/**
 	 * read RSA PKCS8 Private key
 	 *
-	 * @param path Path to the private key file
+	 * @param rawKey the raw read key
 	 * @return PrivateKey instance
 	 */
-	private PrivateKey getPrivateKey(String path)
+	private PrivateKey getPrivateKey(String rawKey)
 	{
 		try
 		{
-			byte[] bytes = Files.readAllBytes(Paths.get(path));
-			
 			// Clean and Decode RSA Key
-			String inp = new String(bytes);
-			inp = inp.replace("-----BEGIN PRIVATE KEY-----", "");
-			inp = inp.replace("-----END PRIVATE KEY-----", "");
+			rawKey = rawKey.replace("-----BEGIN PRIVATE KEY-----", "");
+			rawKey = rawKey.replace("-----END PRIVATE KEY-----", "");
 			// Remove Whitespace
-			inp = inp.replaceAll("\\s+", "");
-			byte[] dec = Base64.getDecoder().decode(inp);
+			rawKey = rawKey.replaceAll("\\s+", "");
+			byte[] dec = Base64.getDecoder().decode(rawKey);
 			
 			// Get Key
 			KeyFactory factory = KeyFactory.getInstance("RSA");
 			PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(dec);
 			return factory.generatePrivate(spec);
 			
-		} catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NullPointerException e)
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException | NullPointerException e)
 		{
-			log.warn("Generating private key failed", e);
+			log.warn("Generating private key failed for " + rawKey, e);
 		}
 		
 		return null;
@@ -142,31 +91,28 @@ public class MessageSigner
 	/**
 	 * load RSA Public Key from File
 	 *
-	 * @param path Path to RSA Public Key file
+	 * @param rawKey the raw read key
 	 * @return PublicKey Instance
 	 */
-	private PublicKey getPublicKey(String path)
+	private PublicKey getPublicKey(String rawKey)
 	{
 		try
 		{
-			byte[] bytes = Files.readAllBytes(Paths.get(path));
-			
 			// Clean and Decode RSA Key
-			String inp = new String(bytes);
-			inp = inp.replace("-----BEGIN PUBLIC KEY-----", "");
-			inp = inp.replace("-----END PUBLIC KEY-----", "");
+			rawKey = rawKey.replace("-----BEGIN PUBLIC KEY-----", "");
+			rawKey = rawKey.replace("-----END PUBLIC KEY-----", "");
 			// Remove Whitespace
-			inp = inp.replaceAll("\\s+", "");
-			byte[] dec = Base64.getDecoder().decode(inp);
+			rawKey = rawKey.replaceAll("\\s+", "");
+			byte[] dec = Base64.getDecoder().decode(rawKey);
 			
 			// Get Key
 			KeyFactory factory = KeyFactory.getInstance("RSA");
 			X509EncodedKeySpec spec = new X509EncodedKeySpec(dec);
 			return factory.generatePublic(spec);
 			
-		} catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException | NullPointerException e)
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException | NullPointerException e)
 		{
-			log.warn("Generating public key failed", e);
+			log.warn("Generating public key failed for " + rawKey, e);
 		}
 		
 		return null;

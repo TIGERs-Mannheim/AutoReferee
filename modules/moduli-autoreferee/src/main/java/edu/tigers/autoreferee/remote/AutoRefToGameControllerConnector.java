@@ -4,6 +4,7 @@
 package edu.tigers.autoreferee.remote;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
@@ -49,15 +51,24 @@ public class AutoRefToGameControllerConnector implements Runnable
 		protocol.addConnectedHandler(this::register);
 		
 		commandQueue = new LinkedBlockingDeque<>();
-		// disable signer for know - buggy with integration tests and might be replaced
-		signer = new MessageSigner(null, null);
-		// getClass().getResource("/keys/TIGERs-Mannheim-autoRef.key.pem.pkcs8")
-		// getClass().getResource("/keys/TIGERs-Mannheim-autoRef.pub.pem")
+		try
+		{
+			signer = new MessageSigner(
+					IOUtils.resourceToString("/edu/tigers/autoreferee/remote/TIGERs-Mannheim-autoRef.key.pem.pkcs8",
+							Charset.forName("UTF-8")),
+					IOUtils.resourceToString("/edu/tigers/autoreferee/remote/TIGERs-Mannheim-autoRef.pub.pem",
+							Charset.forName("UTF-8")));
+		} catch (IOException e)
+		{
+			log.error("Could not read certificates from classpath", e);
+			signer = new MessageSigner();
+		}
 	}
 	
 	
 	private void register()
 	{
+		log.debug("Starting registering");
 		SslGameControllerAutoRef.ControllerToAutoRef reply;
 		reply = protocol.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
 		if (reply == null || !reply.hasControllerReply())
@@ -100,6 +111,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 	 */
 	public void start()
 	{
+		log.debug("Starting connector");
 		executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("AutoRefToGameControllerConnector"));
 		executorService.execute(this);
 	}
@@ -107,6 +119,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 	
 	public void stop()
 	{
+		log.debug("Stopping connector");
 		executorService.shutdownNow();
 		try
 		{
@@ -129,7 +142,9 @@ public class AutoRefToGameControllerConnector implements Runnable
 	@Override
 	public void run()
 	{
+		log.debug("Started connector");
 		protocol.connectBlocking();
+		log.debug("Connected");
 		while (!executorService.isShutdown())
 		{
 			try
@@ -144,6 +159,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 			}
 		}
 		protocol.disconnect();
+		log.debug("Stopped connector");
 	}
 	
 	

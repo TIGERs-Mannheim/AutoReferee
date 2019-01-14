@@ -56,6 +56,11 @@
         </dependency>
 
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>moduli-geometry</artifactId>
         </dependency>

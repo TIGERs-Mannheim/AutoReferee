@@ -5,6 +5,10 @@
 package edu.tigers.sumatra.game;
 
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -23,12 +27,14 @@ public class TestTeamClient
 	private static String nextToken;
 	
 	
-	public static void main(String[] args)
+	public static void main(String[] args) throws IOException
 	{
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO);
 		
-		signer = new MessageSigner();
+		signer = new MessageSigner(
+				IOUtils.resourceToString("/edu/tigers/sumatra/game/test.key.pem.pkcs8", Charset.forName("UTF-8")),
+				IOUtils.resourceToString("/edu/tigers/sumatra/game/test.pub.pem", Charset.forName("UTF-8")));
 		GameControllerProtocol gc = new GameControllerProtocol("localhost", 10008);
 		gc.addConnectedHandler(() -> {
 			if (!register(gc))
