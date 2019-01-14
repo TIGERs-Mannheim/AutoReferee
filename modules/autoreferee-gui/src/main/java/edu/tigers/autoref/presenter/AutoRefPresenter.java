@@ -57,6 +57,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 				EventQueue.invokeLater(() -> mainPanel.setEnabled(true));
 				mainPanel.getStartStopPanel().addObserver(this);
 				mainPanel.getGameEventDetectorPanel().addObserver(this);
+				optModule.ifPresent(autoRef -> mainPanel.getStartStopPanel().setAutoRefMode(autoRef.getMode()));
 				break;
 			case NOT_LOADED:
 			case RESOLVED:

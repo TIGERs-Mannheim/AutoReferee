@@ -99,4 +99,10 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	{
 		return runner.getEngine();
 	}
+	
+	
+	public EAutoRefMode getMode()
+	{
+		return runner.getMode();
+	}
 }

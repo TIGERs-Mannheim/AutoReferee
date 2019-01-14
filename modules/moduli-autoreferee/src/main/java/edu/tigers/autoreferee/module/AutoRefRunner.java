@@ -39,6 +39,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private ExecutorService executorService;
 	private AutoRefEngine engine = new AutoRefEngine();
 	private final IAutoRefEngineObserver callback;
+	private EAutoRefMode mode = EAutoRefMode.OFF;
 	
 	
 	public AutoRefRunner(IAutoRefEngineObserver callback)
@@ -101,6 +102,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 				engine = new PassiveAutoRefEngine();
 				break;
 		}
+		this.mode = mode;
 		engine.addObserver(callback);
 		engine.start();
 	}
@@ -165,5 +167,11 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	public AutoRefEngine getEngine()
 	{
 		return engine;
+	}
+	
+	
+	public EAutoRefMode getMode()
+	{
+		return mode;
 	}
 }
