@@ -17,13 +17,13 @@ import org.apache.log4j.Logger;
 import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
 
-import edu.tigers.autoreferee.engine.events.BotTooFastInStop;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.BotTooFastInStop;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 

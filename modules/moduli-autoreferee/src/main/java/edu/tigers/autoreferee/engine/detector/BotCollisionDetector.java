@@ -16,9 +16,6 @@ import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.BotCrashDrawn;
-import edu.tigers.autoreferee.engine.events.BotCrashUnique;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -28,6 +25,9 @@ import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.BotCrashDrawn;
+import edu.tigers.sumatra.referee.gameevent.BotCrashUnique;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 

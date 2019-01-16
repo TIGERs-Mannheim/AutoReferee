@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.TooManyRobots;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.TooManyRobots;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 

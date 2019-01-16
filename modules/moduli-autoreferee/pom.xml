@@ -112,11 +112,6 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-game-controller-protocol</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.g3force</groupId>
             <artifactId>instanceables</artifactId>
         </dependency>

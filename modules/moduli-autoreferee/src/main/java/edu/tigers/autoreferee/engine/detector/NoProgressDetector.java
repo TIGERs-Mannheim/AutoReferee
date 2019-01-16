@@ -7,10 +7,10 @@ package edu.tigers.autoreferee.engine.detector;
 import java.util.EnumSet;
 import java.util.Optional;
 
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.NoProgressInGame;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.NoProgressInGame;
 
 
 /**

@@ -8,10 +8,10 @@ import java.util.Optional;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.KickTimeout;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.KickTimeout;
 
 
 /**

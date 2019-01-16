@@ -9,9 +9,6 @@ import java.util.Optional;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.events.AimlessKick;
-import edu.tigers.autoreferee.engine.events.BallLeftFieldEvent;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -19,6 +16,10 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.AimlessKick;
+import edu.tigers.sumatra.referee.gameevent.BallLeftFieldGoalLine;
+import edu.tigers.sumatra.referee.gameevent.BallLeftFieldTouchLine;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 /**
@@ -99,7 +100,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	
 	private Optional<IGameEvent> handleSideLineOff(final IVector2 ballPos, final BotPosition lastTouched)
 	{
-		return Optional.of(new BallLeftFieldEvent(lastTouched.getBotID(), ballPos, false));
+		return Optional.of(new BallLeftFieldTouchLine(lastTouched.getBotID(), ballPos));
 	}
 	
 	
@@ -110,7 +111,7 @@ public class BallLeftFieldDetector extends AGameEventDetector
 			return Optional.of(new AimlessKick(lastTouched.getBotID(), ballPos, lastTouched.getPos()));
 		}
 		
-		return Optional.of(new BallLeftFieldEvent(lastTouched.getBotID(), ballPos, true));
+		return Optional.of(new BallLeftFieldGoalLine(lastTouched.getBotID(), ballPos));
 	}
 	
 	

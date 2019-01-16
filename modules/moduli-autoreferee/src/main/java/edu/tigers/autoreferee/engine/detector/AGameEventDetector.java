@@ -10,8 +10,8 @@ import java.util.Set;
 import com.github.g3force.configurable.ConfigRegistration;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 
 

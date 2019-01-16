@@ -3,10 +3,12 @@
  */
 package edu.tigers.sumatra.referee.data;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -16,18 +18,19 @@ import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
-import edu.tigers.sumatra.SslGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 /**
  * Complete referee command
  */
-@Persistent(version = 1)
+@Persistent(version = 2)
 public class RefereeMsg
 {
 	/** in nanoseconds */
@@ -48,10 +51,8 @@ public class RefereeMsg
 	private final IVector2 ballPlacementPos;
 	
 	private final Command nextCommand;
-	/** must be transient until a wrapper class has been implemented that is @Persistent */
-	private final transient List<SslGameEvent.GameEvent> gameEvents;
-	/** must be transient until a wrapper class has been implemented that is @Persistent */
-	private final transient List<Referee.ProposedGameEvent> proposedGameEvents;
+	private final List<IGameEvent> gameEvents;
+	private final List<ProposedGameEvent> proposedGameEvents;
 	
 	/** in seconds */
 	private double currentActionTimeRemaining;
@@ -74,8 +75,8 @@ public class RefereeMsg
 		ballPlacementPos = null;
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		nextCommand = null;
-		gameEvents = Collections.emptyList();
-		proposedGameEvents = Collections.emptyList();
+		gameEvents = new ArrayList<>();
+		proposedGameEvents = new ArrayList<>();
 		currentActionTimeRemaining = 0;
 	}
 	
@@ -111,8 +112,16 @@ public class RefereeMsg
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		
 		nextCommand = sslRefereeMsg.getNextCommand();
-		gameEvents = sslRefereeMsg.getGameEventsList();
-		proposedGameEvents = sslRefereeMsg.getProposedGameEventsList();
+		gameEvents = sslRefereeMsg.getGameEventsList().stream()
+				.map(GameEventFactory::fromProtobuf)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
+		proposedGameEvents = sslRefereeMsg.getProposedGameEventsList().stream()
+				.map(this::mapProposedGameEvent)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
 		currentActionTimeRemaining = sslRefereeMsg.getCurrentActionTimeRemaining() / 1e6;
 	}
 	
@@ -139,6 +148,13 @@ public class RefereeMsg
 		gameEvents = refereeMsg.gameEvents;
 		proposedGameEvents = refereeMsg.proposedGameEvents;
 		currentActionTimeRemaining = refereeMsg.currentActionTimeRemaining;
+	}
+	
+	
+	private Optional<ProposedGameEvent> mapProposedGameEvent(Referee.ProposedGameEvent event)
+	{
+		return GameEventFactory.fromProtobuf(event.getGameEvent())
+				.map(ge -> new ProposedGameEvent(ge, event.getValidUntil(), event.getProposerId()));
 	}
 	
 	
@@ -330,25 +346,19 @@ public class RefereeMsg
 	}
 	
 	
-	public IVector2 getBallPlacementPos()
-	{
-		return ballPlacementPos;
-	}
-	
-	
 	public Command getNextCommand()
 	{
 		return nextCommand;
 	}
 	
 	
-	public List<SslGameEvent.GameEvent> getGameEvents()
+	public List<IGameEvent> getGameEvents()
 	{
 		return gameEvents;
 	}
 	
 	
-	public List<Referee.ProposedGameEvent> getProposedGameEvents()
+	public List<ProposedGameEvent> getProposedGameEvents()
 	{
 		return proposedGameEvents;
 	}

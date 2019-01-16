@@ -5,7 +5,7 @@
 package edu.tigers.autoreferee.remote;
 
 
-import edu.tigers.sumatra.gamecontroller.SslGameControllerCommon;
+import edu.tigers.sumatra.SslGameControllerCommon;
 
 
 public class GameEventResponse

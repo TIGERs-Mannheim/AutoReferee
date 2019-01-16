@@ -18,11 +18,11 @@ import org.apache.log4j.Logger;
 
 import com.google.protobuf.ByteString;
 
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.sumatra.game.GameControllerProtocol;
-import edu.tigers.sumatra.game.MessageSigner;
-import edu.tigers.sumatra.gamecontroller.SslGameControllerAutoRef;
-import edu.tigers.sumatra.gamecontroller.SslGameControllerCommon;
+import edu.tigers.sumatra.SslGameControllerAutoRef;
+import edu.tigers.sumatra.SslGameControllerCommon;
+import edu.tigers.sumatra.referee.GameControllerProtocol;
+import edu.tigers.sumatra.referee.MessageSigner;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 
 
@@ -180,8 +180,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 		if (!protocol.sendMessage(req.build()))
 		{
 			
-			log.info(String.format("Put game event '%s' back into queue after lost connection",
-					entry.getEvent().getType()));
+			log.info(String.format("Put game event '%s' back into queue after lost connection", entry.getEvent()));
 			commandQueue.addFirst(entry);
 			return;
 		}

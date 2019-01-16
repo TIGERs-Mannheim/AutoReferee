@@ -9,10 +9,10 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import edu.tigers.autoreferee.engine.events.AttackerDoubleTouchedBall;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.AttackerDoubleTouchedBall;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 
 

@@ -14,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
 import edu.tigers.autoref.view.gamelog.GameLogPanel;
 import edu.tigers.autoreferee.IAutoRefObserver;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.engine.log.AutoRefGameEventGameLogEntry;
 import edu.tigers.autoreferee.engine.log.ELogEntryType;
 import edu.tigers.autoreferee.engine.log.GameStateGameLogEntry;
@@ -23,9 +22,9 @@ import edu.tigers.autoreferee.engine.log.RefereeCommandGameLogEntry;
 import edu.tigers.autoreferee.engine.log.RefereeGameEventGameLogEntry;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.SslGameEvent;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
@@ -120,10 +119,10 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver
 	
 	private void checkForNewGameEventFromReferee(final WorldFrameWrapper wfw)
 	{
-		final ArrayList<SslGameEvent.GameEvent> newGameEvents = new ArrayList<>(
+		final ArrayList<IGameEvent> newGameEvents = new ArrayList<>(
 				wfw.getRefereeMsg().getGameEvents());
 		newGameEvents.removeAll(lastWorldFrameWrapper.getRefereeMsg().getGameEvents());
-		for (SslGameEvent.GameEvent gameEvent : newGameEvents)
+		for (IGameEvent gameEvent : newGameEvents)
 		{
 			gameLogTableModel.add(new RefereeGameEventGameLogEntry(
 					wfw.getTimestamp(),

@@ -1,19 +1,17 @@
 package edu.tigers.autoreferee.engine.log;
 
-import com.google.protobuf.TextFormat;
-
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 public class RefereeGameEventGameLogEntry extends GameLogEntry
 {
-	private final SslGameEvent.GameEvent gameEvent;
+	private final IGameEvent gameEvent;
 	
 	
 	public RefereeGameEventGameLogEntry(
 			final long timestamp,
 			final GameTime gameTime,
-			final SslGameEvent.GameEvent gameEvent)
+			final IGameEvent gameEvent)
 	{
 		super(ELogEntryType.RECEIVED_GAME_EVENT, timestamp, gameTime);
 		this.gameEvent = gameEvent;
@@ -23,7 +21,7 @@ public class RefereeGameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String workGameLogEntry()
 	{
-		return TextFormat.shortDebugString(gameEvent);
+		return gameEvent.toString();
 	}
 	
 	

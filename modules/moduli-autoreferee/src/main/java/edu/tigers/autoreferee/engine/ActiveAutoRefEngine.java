@@ -8,13 +8,13 @@ import java.net.InetAddress;
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.autoreferee.remote.AutoRefToGameControllerConnector;
 import edu.tigers.autoreferee.remote.GameEventResponse;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.SslGameControllerProcess;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 public class ActiveAutoRefEngine extends AutoRefEngine

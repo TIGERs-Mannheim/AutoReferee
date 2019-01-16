@@ -419,12 +419,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>moduli-game-controller-protocol</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- ########## external libs ################ -->
 
             <dependency>

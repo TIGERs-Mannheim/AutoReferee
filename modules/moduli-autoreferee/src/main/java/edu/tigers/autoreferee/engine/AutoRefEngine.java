@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 public class AutoRefEngine

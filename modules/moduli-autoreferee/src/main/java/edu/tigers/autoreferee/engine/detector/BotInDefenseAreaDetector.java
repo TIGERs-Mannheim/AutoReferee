@@ -15,9 +15,6 @@ import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.engine.NGeometry;
-import edu.tigers.autoreferee.engine.events.AttackerInDefenseArea;
-import edu.tigers.autoreferee.engine.events.DefenderInDefenseArea;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
@@ -26,6 +23,10 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.AttackerInDefenseArea;
+import edu.tigers.sumatra.referee.gameevent.DefenderInDefenseArea;
+import edu.tigers.sumatra.referee.gameevent.DefenderInDefenseAreaPartially;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 /**
@@ -172,7 +173,7 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 			double distance = ownPenArea.withMargin(Geometry.getBotRadius())
 					.distanceToNearestPointOutside(curKicker.getPos());
 			
-			return Optional.of(new DefenderInDefenseArea(false, curKickerId, curKicker.getPos(), distance));
+			return Optional.of(new DefenderInDefenseArea(curKickerId, curKicker.getPos(), distance));
 		} else if (ownPenArea.isPointInShape(curKicker.getPos(), getPartialTouchMargin()))
 		{
 			/*
@@ -184,7 +185,7 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 			double distance = ownPenArea.withMargin(Geometry.getBotRadius())
 					.distanceToNearestPointOutside(curKicker.getPos());
 			
-			return Optional.of(new DefenderInDefenseArea(true, curKickerId, curKicker.getPos(), distance));
+			return Optional.of(new DefenderInDefenseAreaPartially(curKickerId, curKicker.getPos(), distance));
 		}
 		return Optional.empty();
 	}

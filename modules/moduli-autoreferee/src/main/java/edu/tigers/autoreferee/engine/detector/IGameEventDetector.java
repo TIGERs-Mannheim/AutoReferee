@@ -6,8 +6,8 @@ package edu.tigers.autoreferee.engine.detector;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 /**

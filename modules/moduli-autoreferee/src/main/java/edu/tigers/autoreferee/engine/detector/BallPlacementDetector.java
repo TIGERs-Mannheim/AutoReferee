@@ -8,9 +8,6 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.NGeometry.BotDistanceComparator;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.PlacementFailedEvent;
-import edu.tigers.autoreferee.engine.events.PlacementSucceeded;
 import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.filter.iir.ExponentialMovingAverageFilter2D;
@@ -19,6 +16,9 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.PlacementFailed;
+import edu.tigers.sumatra.referee.gameevent.PlacementSucceeded;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -115,7 +115,7 @@ public class BallPlacementDetector extends AGameEventDetector
 		if (elapsedTime > ballPlacementTime)
 		{
 			eventRaised = true;
-			return Optional.of(new PlacementFailedEvent(forTeam, remainingDistance));
+			return Optional.of(new PlacementFailed(forTeam, remainingDistance));
 		}
 		
 		return Optional.empty();

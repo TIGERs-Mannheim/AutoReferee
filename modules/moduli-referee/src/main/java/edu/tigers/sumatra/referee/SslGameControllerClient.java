@@ -9,7 +9,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.tigers.sumatra.referee.events.Event;
+import edu.tigers.sumatra.referee.control.Event;
 
 
 public class SslGameControllerClient extends WebSocketClient

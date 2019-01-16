@@ -12,11 +12,11 @@ import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
 import edu.tigers.autoreferee.IAutoRefObserver;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 

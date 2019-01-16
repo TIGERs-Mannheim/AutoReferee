@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
-import edu.tigers.autoreferee.engine.events.Goal;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
-import edu.tigers.autoreferee.engine.events.IndirectGoal;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.referee.gameevent.Goal;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.IndirectGoal;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
@@ -104,17 +104,18 @@ public class GoalDetector extends AGameEventDetector
 					return Optional.of(violation);
 				}
 				
-				if (attackerId == null)
-				{
-					return Optional
-							.of(new Goal(!SumatraModel.getInstance().isSimulation(),
-									BotID.createBotId(0, goalShot.getGoalColor().opposite()), ballPos,
-									Vector2.zero()));
-				}
+				BotID bot = attackerId == null
+						? BotID.createBotId(0, goalShot.getGoalColor().opposite())
+						: attackerId;
+				IVector2 location = Vector2.zero();
 				
 				// Return Goal in Sim and PossibleGoal in real use
-				return Optional
-						.of(new Goal(!SumatraModel.getInstance().isSimulation(), attackerId, ballPos, Vector2.zero()));
+				if (SumatraModel.getInstance().isSimulation())
+				{
+					return Optional.of(new Goal(bot, ballPos, location));
+				}
+				return Optional.of(new edu.tigers.sumatra.referee.gameevent.PossibleGoal(
+						bot, ballPos, location));
 			}
 		} else
 		{

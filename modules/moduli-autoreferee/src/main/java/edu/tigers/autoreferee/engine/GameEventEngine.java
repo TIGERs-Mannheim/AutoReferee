@@ -17,8 +17,8 @@ import com.github.g3force.instanceables.InstanceableClass;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.autoreferee.engine.detector.IGameEventDetector;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 /**

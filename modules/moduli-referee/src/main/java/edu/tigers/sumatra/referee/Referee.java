@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
-import edu.tigers.sumatra.referee.events.Event;
-import edu.tigers.sumatra.referee.events.GcEventFactory;
+import edu.tigers.sumatra.referee.control.Event;
+import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;

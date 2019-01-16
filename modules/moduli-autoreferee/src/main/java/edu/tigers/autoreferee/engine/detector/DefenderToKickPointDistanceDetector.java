@@ -17,8 +17,6 @@ import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
 
 import edu.tigers.autoreferee.AutoRefUtil;
-import edu.tigers.autoreferee.engine.events.DefenderTooCloseToKickPoint;
-import edu.tigers.autoreferee.engine.events.IGameEvent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
@@ -28,6 +26,8 @@ import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.DefenderTooCloseToKickPoint;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 

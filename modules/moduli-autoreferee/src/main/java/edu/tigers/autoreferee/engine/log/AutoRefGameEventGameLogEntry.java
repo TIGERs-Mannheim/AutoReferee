@@ -1,6 +1,6 @@
 package edu.tigers.autoreferee.engine.log;
 
-import edu.tigers.autoreferee.engine.events.IGameEvent;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 public class AutoRefGameEventGameLogEntry extends GameLogEntry
