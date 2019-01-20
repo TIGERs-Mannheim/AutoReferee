@@ -102,10 +102,12 @@ message GameEvent {
     }
     // a team shot a goal
     message Goal {
-        // the team that shot the goal
+        // the team that scored the goal
         required Team by_team = 1;
-        // the bot that scored the goal - at least the team must be set
-        optional uint32 by_bot = 2;
+        // the team that shot the goal (different from by_team for own goals)
+        optional Team kicking_team = 6;
+        // the bot that shot the goal
+        optional uint32 kicking_bot = 2;
         // the location where the ball entered the goal
         optional Location location = 3;
         // the location where the ball was kicked

@@ -104,7 +104,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	private boolean ballIsNotInsideField()
 	{
-		return !frame.isBallInsideField() && !frame.getPossibleGoal().isPresent();
+		return !frame.isBallInsideField();
 	}
 	
 	

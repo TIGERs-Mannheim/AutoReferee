@@ -19,7 +19,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class AimlessKick extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final Integer bot;
 	private final IVector2 location;
 	private final IVector2 kickLocation;
 	
@@ -52,8 +52,8 @@ public class AimlessKick extends AGameEvent
 	public AimlessKick(BotID bot, IVector2 location, IVector2 kickLocation)
 	{
 		super(EGameEvent.AIMLESS_KICK);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = bot == null ? null : bot.getTeamColor();
+		this.bot = bot == null ? null : bot.getNumber();
 		this.location = location;
 		this.kickLocation = kickLocation;
 	}
@@ -64,9 +64,23 @@ public class AimlessKick extends AGameEvent
 	{
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.AIMLESS_KICK);
-		builder.getAimlessKickBuilder().setByBot(bot).setByTeam(getTeam(team))
-				.setLocation(getLocationFromVector(location))
-				.setKickLocation(getLocationFromVector(kickLocation));
+		builder.getAimlessKickBuilder()
+				.setLocation(getLocationFromVector(location));
+		
+		if (bot != null)
+		{
+			builder.getAimlessKickBuilder().setByBot(bot);
+		}
+		
+		if (team != null)
+		{
+			builder.getAimlessKickBuilder().setByTeam(getTeam(team));
+		}
+		
+		if (kickLocation != null)
+		{
+			builder.getAimlessKickBuilder().setKickLocation(getLocationFromVector(kickLocation));
+		}
 		
 		return builder.build();
 	}

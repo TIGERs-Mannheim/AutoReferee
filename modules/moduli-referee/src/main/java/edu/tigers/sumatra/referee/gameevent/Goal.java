@@ -19,7 +19,8 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class Goal extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final ETeamColor kickingTeam;
+	private final Integer kickingBot;
 	private final IVector2 location;
 	private final IVector2 kickLocation;
 	
@@ -28,7 +29,8 @@ public class Goal extends AGameEvent
 	protected Goal()
 	{
 		team = null;
-		bot = 0;
+		kickingTeam = null;
+		kickingBot = null;
 		location = null;
 		kickLocation = null;
 	}
@@ -43,17 +45,19 @@ public class Goal extends AGameEvent
 	{
 		super(event);
 		this.team = toTeamColor(event.getGoal().getByTeam());
-		this.bot = event.getGoal().getByBot();
+		this.kickingTeam = toTeamColor(event.getGoal().getKickingTeam());
+		this.kickingBot = event.getGoal().getKickingBot();
 		this.location = toVector(event.getGoal().getLocation());
 		this.kickLocation = toVector(event.getGoal().getKickLocation());
 	}
 	
 	
-	public Goal(BotID bot, IVector2 location, IVector2 kickLocation)
+	public Goal(ETeamColor forTeam, BotID bot, IVector2 location, IVector2 kickLocation)
 	{
 		super(EGameEvent.GOAL);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = forTeam;
+		this.kickingTeam = bot == null ? null : bot.getTeamColor();
+		this.kickingBot = bot == null ? null : bot.getNumber();
 		this.location = location;
 		this.kickLocation = kickLocation;
 	}
@@ -65,11 +69,25 @@ public class Goal extends AGameEvent
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.GOAL);
 		builder.getGoalBuilder()
-				.setByBot(bot)
-				.setByTeam(getTeam(team))
-				.setLocation(getLocationFromVector(location))
-				.setKickLocation(getLocationFromVector(kickLocation));
+				.setByTeam(getTeam(team));
 		
+		if (kickingTeam != null)
+		{
+			builder.getGoalBuilder().setKickingTeam(getTeam(kickingTeam));
+		}
+		
+		if (kickingBot != null)
+		{
+			builder.getGoalBuilder().setKickingBot(kickingBot);
+		}
+		if (location != null)
+		{
+			builder.getGoalBuilder().setLocation(getLocationFromVector(location));
+		}
+		if (kickLocation != null)
+		{
+			builder.getGoalBuilder().setKickLocation(getLocationFromVector(kickLocation));
+		}
 		return builder.build();
 	}
 	
@@ -77,7 +95,7 @@ public class Goal extends AGameEvent
 	@Override
 	public String toString()
 	{
-		return String.format("Bot %d %s scored goal (%s -> %s)", bot, team,
+		return String.format("Bot %d %s scored goal for %s (%s -> %s)", kickingBot, kickingTeam, team,
 				formatVector(kickLocation), formatVector(location));
 	}
 	
@@ -95,8 +113,9 @@ public class Goal extends AGameEvent
 		
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
-				.append(bot, goal.bot)
 				.append(team, goal.team)
+				.append(kickingBot, goal.kickingBot)
+				.append(kickingTeam, goal.kickingTeam)
 				.append(location, goal.location)
 				.append(kickLocation, goal.kickLocation)
 				.isEquals();
@@ -109,7 +128,8 @@ public class Goal extends AGameEvent
 		return new HashCodeBuilder(17, 37)
 				.appendSuper(super.hashCode())
 				.append(team)
-				.append(bot)
+				.append(kickingTeam)
+				.append(kickingBot)
 				.append(location)
 				.append(kickLocation)
 				.toHashCode();

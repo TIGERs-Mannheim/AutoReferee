@@ -12,6 +12,7 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.SslGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -102,8 +103,8 @@ public class BotCrashDrawn extends AGameEvent
 	public String toString()
 	{
 		return String.format(
-				"Bots %d YELLOW and %d BLUE crashed into each other at %.2f m/s @ %s (Δv: %.2f m/s, angle. %.2f rad)",
-				botY, botB, crashSpeed, formatVector(location), speedDiff, crashAngle);
+				"Bots %d YELLOW and %d BLUE crashed into each other with %.2f m/s @ %s (Δv: %.2f m/s, angle: %.0f°)",
+				botY, botB, crashSpeed, formatVector(location), speedDiff, AngleMath.rad2deg(crashAngle));
 	}
 	
 	

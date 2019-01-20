@@ -12,7 +12,6 @@ import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -59,11 +58,6 @@ public class BallLeftFieldDetector extends AGameEventDetector
 			lastBallLeftFieldPos = frame.getBallLeftFieldPos().get();
 			
 			BotPosition lastTouched = botThatLastTouchedBall();
-			if (!lastTouched.getBotID().isBot())
-			{
-				// we do not know, which bot touched the ball last.
-				return Optional.empty();
-			}
 			
 			boolean exitGoalLineInX = ((Geometry.getFieldLength() / 2)
 					- Math.abs(lastBallLeftFieldPos.getPos().x())) < goalLineThreshold;
@@ -94,24 +88,24 @@ public class BallLeftFieldDetector extends AGameEventDetector
 		{
 			return botLastTouchedBall.get(0);
 		}
-		return new BotPosition(frame.getTimestamp(), frame.getWorldFrame().getBall().getPos(), BotID.noBot());
+		return null;
 	}
 	
 	
 	private Optional<IGameEvent> handleSideLineOff(final IVector2 ballPos, final BotPosition lastTouched)
 	{
-		return Optional.of(new BallLeftFieldTouchLine(lastTouched.getBotID(), ballPos));
+		return Optional.of(new BallLeftFieldTouchLine(lastTouched == null ? null : lastTouched.getBotID(), ballPos));
 	}
 	
 	
 	private Optional<IGameEvent> handleGoalLineOff(final IVector2 ballPos, final BotPosition lastTouched)
 	{
-		if (isIcing(lastTouched, ballPos))
+		if (lastTouched != null && isIcing(lastTouched, ballPos))
 		{
 			return Optional.of(new AimlessKick(lastTouched.getBotID(), ballPos, lastTouched.getPos()));
 		}
 		
-		return Optional.of(new BallLeftFieldGoalLine(lastTouched.getBotID(), ballPos));
+		return Optional.of(new BallLeftFieldGoalLine(lastTouched == null ? null : lastTouched.getBotID(), ballPos));
 	}
 	
 	

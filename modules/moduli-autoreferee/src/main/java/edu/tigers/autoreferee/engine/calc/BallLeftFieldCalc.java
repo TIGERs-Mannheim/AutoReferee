@@ -18,6 +18,7 @@ import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
@@ -76,7 +77,8 @@ public class BallLeftFieldCalc implements IRefereeCalc
 				ILine line = Line.fromPoints(postPos.getPos(), prePos.getPos());
 				IVector2 pos = postPos.getPos().nearestToOpt(Geometry.getField().lineIntersections(line))
 						.orElse(postPos.getPos());
-				ballLeftFieldPos = new TimedPosition(postPos.getTimestamp(), pos);
+				double height = (postPos.getPos3().z() + prePos.getPos3().z()) / 2.0;
+				ballLeftFieldPos = new TimedPosition(postPos.getTimestamp(), Vector3.from2d(pos, height));
 			}
 		}
 		
@@ -130,7 +132,7 @@ public class BallLeftFieldCalc implements IRefereeCalc
 	
 	private void addToBallPosBuffer(final SimpleWorldFrame frame)
 	{
-		TimedPosition pos = new TimedPosition(frame.getTimestamp(), frame.getBall().getPos());
+		TimedPosition pos = new TimedPosition(frame.getTimestamp(), frame.getBall().getPos3());
 		ballPosBuffer.offerFirst(pos);
 	}
 	

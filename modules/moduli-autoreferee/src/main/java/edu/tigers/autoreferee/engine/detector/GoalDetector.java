@@ -8,38 +8,46 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
+import org.apache.log4j.Logger;
+
+import edu.tigers.autoreferee.engine.NGeometry;
+import edu.tigers.autoreferee.generic.TimedPosition;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
+import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
+import edu.tigers.sumatra.referee.gameevent.BallLeftFieldGoalLine;
+import edu.tigers.sumatra.referee.gameevent.ChippedGoal;
 import edu.tigers.sumatra.referee.gameevent.Goal;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.IndirectGoal;
+import edu.tigers.sumatra.referee.gameevent.PossibleGoal;
+import edu.tigers.sumatra.vision.data.IKickEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
- * Detect goals and invalid indirect goals
+ * Detect goals, invalid indirect goals and invalid chipped goals.
  */
 public class GoalDetector extends AGameEventDetector
 {
+	private final Logger log = Logger.getLogger(GoalDetector.class.getName());
+	
 	static
 	{
 		AGameEventDetector.registerClass(GoalDetector.class);
 	}
 	
-	/**
-	 * we have to remember the last goal, because in passive mode, a goal may be detected by the autoRef, by game
-	 * may not be stopped by the human ref -> in this case, we still want to detect new goals.
-	 */
-	private PossibleGoal lastGoal = null;
-	private BotID attackerId = null;
-	private IVector2 attackerPos;
+	private TimedPosition lastBallLeftFieldPos;
 	private boolean indirectStillHot = false;
-	private boolean goalDetected = false;
+	private BotID indirectFreeKickBot;
+	private IKickEvent lastKickEvent;
+	private double maxBallHeight = 0.0;
 	
 	
 	public GoalDetector()
@@ -51,10 +59,8 @@ public class GoalDetector extends AGameEventDetector
 	@Override
 	protected void doPrepare()
 	{
-		goalDetected = false;
 		indirectStillHot = false;
-		attackerId = null;
-		attackerPos = null;
+		maxBallHeight = 0.0;
 		
 		/*
 		 * Save the position of the kicker in case this RUNNING state was initiated by an INDIRECT freekick.
@@ -66,11 +72,10 @@ public class GoalDetector extends AGameEventDetector
 			EGameState lastState = stateHistory.get(1).getState();
 			if (lastState == EGameState.INDIRECT_FREE)
 			{
-				attackerId = frame.getWorldFrame().getBots().values().stream()
+				indirectFreeKickBot = frame.getWorldFrame().getBots().values().stream()
 						.min(Comparator.comparingDouble(b -> b.getPos().distanceTo(frame.getWorldFrame().getBall().getPos())))
 						.map(ITrackedBot::getBotId)
 						.orElse(null);
-				attackerPos = frame.getWorldFrame().getBot(attackerId).getBotKickerPos();
 				indirectStillHot = true;
 			}
 		}
@@ -80,47 +85,110 @@ public class GoalDetector extends AGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
-		if (indirectStillHot && frame.getBotsLastTouchedBall().stream().noneMatch(b -> b.getBotID().equals(attackerId)))
+		updateIndirectDetection();
+		
+		updateChipDetection();
+		
+		if (!frame.getBallLeftFieldPos().isPresent() || frame.getBallLeftFieldPos().get().similarTo(lastBallLeftFieldPos))
+		{
+			return Optional.empty();
+		}
+		
+		final TimedPosition ballLeftFieldPos = frame.getBallLeftFieldPos().get();
+		lastBallLeftFieldPos = ballLeftFieldPos;
+		
+		ETeamColor forTeam = goalForTeam(ballLeftFieldPos);
+		if (forTeam == null)
+		{
+			return Optional.empty();
+		}
+		
+		warnIfNoKickEventPresent();
+		
+		final Optional<IKickEvent> kickEvent = frame.getWorldFrame().getKickEvent();
+		final IVector2 kickLocation = kickEvent.map(IKickEvent::getPosition).orElse(null);
+		final BotID kickingBot = kickEvent.map(IKickEvent::getKickingBot).filter(AObjectID::isBot).orElse(null);
+		
+		if (ballLeftFieldPos.getPos3().z() > Geometry.getGoalHeight())
+		{
+			// ball flew over the goal
+			return Optional.of(new BallLeftFieldGoalLine(kickingBot, ballLeftFieldPos.getPos()));
+		}
+		
+		if (maxBallHeight > RuleConstraints.getMaxRobotHeight() && kickEvent.isPresent())
+		{
+			// ball was chipped
+			return Optional.of(new ChippedGoal(kickingBot, ballLeftFieldPos.getPos(), kickLocation, maxBallHeight));
+		}
+		
+		if (indirectStillHot && kickEvent.isPresent())
+		{
+			indirectStillHot = false;
+			
+			// The ball was kicked from an indirect free kick -> the goal is not valid
+			IGameEvent violation = new IndirectGoal(kickingBot, ballLeftFieldPos.getPos(), kickLocation);
+			return Optional.of(violation);
+		}
+		return createEvent(ballLeftFieldPos, forTeam, kickLocation, kickingBot);
+	}
+	
+	
+	private void updateChipDetection()
+	{
+		final Optional<IKickEvent> kickEvent = frame.getWorldFrame().getKickEvent();
+		if (kickEvent.isPresent())
+		{
+			if (lastKickEvent != null && kickEvent.get().getTimestamp() != lastKickEvent.getTimestamp())
+			{
+				maxBallHeight = 0.0;
+				log.debug("New kick event: reset maxBallHeight: " + kickEvent.get() + " != " + lastKickEvent);
+			}
+			lastKickEvent = kickEvent.get();
+		}
+		maxBallHeight = Math.max(maxBallHeight, frame.getWorldFrame().getBall().getHeight());
+	}
+	
+	
+	private void warnIfNoKickEventPresent()
+	{
+		if (!frame.getWorldFrame().getKickEvent().isPresent())
+		{
+			log.warn("Goal detected, but no kick event found.");
+		}
+	}
+	
+	
+	private void updateIndirectDetection()
+	{
+		if (indirectStillHot
+				&& frame.getBotsLastTouchedBall().stream().noneMatch(b -> b.getBotID().equals(indirectFreeKickBot)))
 		{
 			indirectStillHot = false;
 		}
-		
-		Optional<PossibleGoal> optGoalShot = frame.getPossibleGoal();
-		if (optGoalShot.isPresent() && !optGoalShot.get().equals(lastGoal))
+	}
+	
+	
+	private ETeamColor goalForTeam(final TimedPosition ballLeftFieldPos)
+	{
+		if (NGeometry.getGoal(ETeamColor.YELLOW).getGoalLine().distanceTo(ballLeftFieldPos.getPos()) < 1)
 		{
-			PossibleGoal goalShot = optGoalShot.get();
-			lastGoal = goalShot;
-			IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
-			
-			if (!goalDetected)
-			{
-				goalDetected = true;
-				if (indirectStillHot)
-				{
-					indirectStillHot = false;
-					
-					// The ball was kicked from an indirect free kick -> the goal is not valid
-					IGameEvent violation = new IndirectGoal(attackerId, ballPos, attackerPos);
-					return Optional.of(violation);
-				}
-				
-				BotID bot = attackerId == null
-						? BotID.createBotId(0, goalShot.getGoalColor().opposite())
-						: attackerId;
-				IVector2 location = Vector2.zero();
-				
-				// Return Goal in Sim and PossibleGoal in real use
-				if (SumatraModel.getInstance().isSimulation())
-				{
-					return Optional.of(new Goal(bot, ballPos, location));
-				}
-				return Optional.of(new edu.tigers.sumatra.referee.gameevent.PossibleGoal(
-						bot, ballPos, location));
-			}
-		} else
+			return ETeamColor.BLUE;
+		} else if (NGeometry.getGoal(ETeamColor.BLUE).getGoalLine().distanceTo(ballLeftFieldPos.getPos()) < 1)
 		{
-			goalDetected = false;
+			return ETeamColor.YELLOW;
 		}
-		return Optional.empty();
+		return null;
+	}
+	
+	
+	private Optional<IGameEvent> createEvent(final TimedPosition ballLeftFieldPos, final ETeamColor forTeam,
+			final IVector2 kickLocation, final BotID kickingBot)
+	{
+		// Return Goal in Sim and PossibleGoal in real use
+		if (SumatraModel.getInstance().isSimulation())
+		{
+			return Optional.of(new Goal(forTeam, kickingBot, ballLeftFieldPos.getPos(), kickLocation));
+		}
+		return Optional.of(new PossibleGoal(forTeam, kickingBot, ballLeftFieldPos.getPos(), kickLocation));
 	}
 }

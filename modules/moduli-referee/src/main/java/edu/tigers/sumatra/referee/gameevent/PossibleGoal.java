@@ -19,7 +19,8 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class PossibleGoal extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final ETeamColor kickingTeam;
+	private final Integer kickingBot;
 	private final IVector2 location;
 	private final IVector2 kickLocation;
 	
@@ -28,7 +29,8 @@ public class PossibleGoal extends AGameEvent
 	protected PossibleGoal()
 	{
 		team = null;
-		bot = 0;
+		kickingTeam = null;
+		kickingBot = null;
 		location = null;
 		kickLocation = null;
 	}
@@ -43,17 +45,19 @@ public class PossibleGoal extends AGameEvent
 	{
 		super(event);
 		this.team = toTeamColor(event.getPossibleGoal().getByTeam());
-		this.bot = event.getPossibleGoal().getByBot();
+		this.kickingTeam = toTeamColor(event.getPossibleGoal().getKickingTeam());
+		this.kickingBot = event.getPossibleGoal().getKickingBot();
 		this.location = toVector(event.getPossibleGoal().getLocation());
 		this.kickLocation = toVector(event.getPossibleGoal().getKickLocation());
 	}
 	
 	
-	public PossibleGoal(BotID bot, IVector2 location, IVector2 kickLocation)
+	public PossibleGoal(ETeamColor forTeam, BotID bot, IVector2 location, IVector2 kickLocation)
 	{
 		super(EGameEvent.POSSIBLE_GOAL);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = forTeam;
+		this.kickingTeam = bot == null ? null : bot.getTeamColor();
+		this.kickingBot = bot == null ? null : bot.getNumber();
 		this.location = location;
 		this.kickLocation = kickLocation;
 	}
@@ -65,11 +69,25 @@ public class PossibleGoal extends AGameEvent
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.POSSIBLE_GOAL);
 		builder.getPossibleGoalBuilder()
-				.setByBot(bot)
-				.setByTeam(getTeam(team))
-				.setLocation(getLocationFromVector(location))
-				.setKickLocation(getLocationFromVector(kickLocation));
+				.setByTeam(getTeam(team));
 		
+		if (kickingTeam != null)
+		{
+			builder.getPossibleGoalBuilder().setKickingTeam(getTeam(kickingTeam));
+		}
+		
+		if (kickingBot != null)
+		{
+			builder.getPossibleGoalBuilder().setKickingBot(kickingBot);
+		}
+		if (location != null)
+		{
+			builder.getPossibleGoalBuilder().setLocation(getLocationFromVector(location));
+		}
+		if (kickLocation != null)
+		{
+			builder.getPossibleGoalBuilder().setKickLocation(getLocationFromVector(kickLocation));
+		}
 		return builder.build();
 	}
 	
@@ -77,7 +95,7 @@ public class PossibleGoal extends AGameEvent
 	@Override
 	public String toString()
 	{
-		return String.format("Bot %d %s scored possible goal (%s -> %s)", bot, team,
+		return String.format("Bot %d %s scored possible goal for %s (%s -> %s)", kickingBot, kickingTeam, team,
 				formatVector(kickLocation), formatVector(location));
 	}
 	
@@ -95,8 +113,9 @@ public class PossibleGoal extends AGameEvent
 		
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
-				.append(bot, goal.bot)
 				.append(team, goal.team)
+				.append(kickingBot, goal.kickingBot)
+				.append(kickingTeam, goal.kickingTeam)
 				.append(location, goal.location)
 				.append(kickLocation, goal.kickLocation)
 				.isEquals();
@@ -109,7 +128,8 @@ public class PossibleGoal extends AGameEvent
 		return new HashCodeBuilder(17, 37)
 				.appendSuper(super.hashCode())
 				.append(team)
-				.append(bot)
+				.append(kickingTeam)
+				.append(kickingBot)
 				.append(location)
 				.append(kickLocation)
 				.toHashCode();

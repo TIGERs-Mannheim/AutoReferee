@@ -11,8 +11,6 @@ import edu.tigers.autoreferee.engine.calc.BallLeftFieldCalc;
 import edu.tigers.autoreferee.engine.calc.BotBallContactCalc;
 import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
 import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
-import edu.tigers.autoreferee.engine.calc.LastStopBallPositionCalc;
-import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -30,8 +28,6 @@ public class AutoRefFramePreprocessor
 		calculators.add(new BallLeftFieldCalc());
 		calculators.add(new BotBallContactCalc());
 		calculators.add(new GameStateHistoryCalc());
-		calculators.add(new PossibleGoalCalc());
-		calculators.add(new LastStopBallPositionCalc());
 		calculators.add(new AllowedDistancesVisCalc());
 	}
 	

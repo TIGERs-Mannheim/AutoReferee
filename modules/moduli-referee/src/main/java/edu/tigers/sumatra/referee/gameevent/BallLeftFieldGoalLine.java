@@ -15,7 +15,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class BallLeftFieldGoalLine extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final Integer bot;
 	private final IVector2 location;
 	
 	
@@ -45,8 +45,8 @@ public class BallLeftFieldGoalLine extends AGameEvent
 	public BallLeftFieldGoalLine(BotID bot, IVector2 location)
 	{
 		super(EGameEvent.BALL_LEFT_FIELD_GOAL_LINE);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = bot == null ? null : bot.getTeamColor();
+		this.bot = bot == null ? null : bot.getNumber();
 		this.location = location;
 	}
 	
@@ -58,9 +58,17 @@ public class BallLeftFieldGoalLine extends AGameEvent
 		
 		builder.setType(SslGameEvent.GameEventType.BALL_LEFT_FIELD_GOAL_LINE);
 		builder.getBallLeftFieldGoalLineBuilder()
-				.setByBot(bot)
-				.setByTeam(getTeam(team))
 				.setLocation(getLocationFromVector(location));
+		
+		if (bot != null)
+		{
+			builder.getBallLeftFieldGoalLineBuilder().setByBot(bot);
+		}
+		
+		if (team != null)
+		{
+			builder.getBallLeftFieldGoalLineBuilder().setByTeam(getTeam(team));
+		}
 		
 		return builder.build();
 	}

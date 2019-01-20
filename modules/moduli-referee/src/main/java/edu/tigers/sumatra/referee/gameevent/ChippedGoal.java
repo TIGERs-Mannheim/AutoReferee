@@ -19,7 +19,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class ChippedGoal extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final Integer bot;
 	private final IVector2 location;
 	private final IVector2 kickLocation;
 	private final double maxBallHeight;
@@ -62,8 +62,8 @@ public class ChippedGoal extends AGameEvent
 			double maxBallHeight)
 	{
 		super(EGameEvent.CHIP_ON_GOAL);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = bot == null ? null : bot.getTeamColor();
+		this.bot = bot == null ? null : bot.getNumber();
 		this.location = location;
 		this.kickLocation = kickLocation;
 		this.maxBallHeight = maxBallHeight;
@@ -75,9 +75,24 @@ public class ChippedGoal extends AGameEvent
 	{
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.CHIPPED_GOAL);
-		builder.getChippedGoalBuilder().setByBot(bot).setByTeam(getTeam(team))
+		builder.getChippedGoalBuilder()
 				.setMaxBallHeight((float) maxBallHeight / 1000.f)
-				.setLocation(getLocationFromVector(location)).setKickLocation(getLocationFromVector(kickLocation));
+				.setLocation(getLocationFromVector(location));
+		
+		if (bot != null)
+		{
+			builder.getChippedGoalBuilder().setByBot(bot);
+		}
+		
+		if (team != null)
+		{
+			builder.getChippedGoalBuilder().setByTeam(getTeam(team));
+		}
+		
+		if (kickLocation != null)
+		{
+			builder.getChippedGoalBuilder().setKickLocation(getLocationFromVector(kickLocation));
+		}
 		
 		return builder.build();
 	}

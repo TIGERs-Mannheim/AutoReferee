@@ -6,11 +6,9 @@ package edu.tigers.autoreferee;
 import java.util.List;
 import java.util.Optional;
 
-import edu.tigers.autoreferee.engine.calc.PossibleGoalCalc.PossibleGoal;
 import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.drawable.ShapeMap;
-import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
@@ -42,9 +40,6 @@ public interface IAutoRefFrame
 	boolean isBallInsideField();
 	
 	
-	IVector2 getLastStopBallPosition();
-	
-	
 	RefereeMsg getRefereeMsg();
 	
 	
@@ -69,7 +64,4 @@ public interface IAutoRefFrame
 	
 	
 	ShapeMap getShapes();
-	
-	
-	Optional<PossibleGoal> getPossibleGoal();
 }

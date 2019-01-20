@@ -48,7 +48,7 @@ public class GameEventFactoryTest
 		gameEvents.add(new DefenderInDefenseArea(botId(), location(), number()));
 		gameEvents.add(new DefenderInDefenseAreaPartially(botId(), location(), number()));
 		gameEvents.add(new DefenderTooCloseToKickPoint(botId(), location(), number()));
-		gameEvents.add(new Goal(botId(), location(), location()));
+		gameEvents.add(new Goal(team(), botId(), location(), location()));
 		gameEvents.add(new IndirectGoal(botId(), location(), location()));
 		gameEvents.add(new KeeperHeldBall(team(), location(), number()));
 		gameEvents.add(new KickTimeout(team(), location(), number()));
@@ -58,7 +58,7 @@ public class GameEventFactoryTest
 		gameEvents.add(new NoProgressInGame(location(), number()));
 		gameEvents.add(new PlacementFailed(team(), number()));
 		gameEvents.add(new PlacementSucceeded(team(), number(), number(), number()));
-		gameEvents.add(new PossibleGoal(botId(), location(), location()));
+		gameEvents.add(new PossibleGoal(team(), botId(), location(), location()));
 		gameEvents.add(new Prepared(number()));
 		gameEvents.add(new TooManyRobots(team()));
 		gameEvents.add(new UnsportingBehaviorMajor(team(), "reason"));

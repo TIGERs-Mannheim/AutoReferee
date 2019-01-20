@@ -86,14 +86,12 @@ public abstract class AGameEvent implements IGameEvent
 	}
 	
 	
-	protected static BotID toBotID(int id, Team team)
-	{
-		return BotID.createBotId(id, toTeamColor(team));
-	}
-	
-	
 	protected static IVector2 toVector(SslGameControllerCommon.Location location)
 	{
+		if (location == null)
+		{
+			return null;
+		}
 		return Vector2.fromXY(location.getX() * 1000, location.getY() * 1000);
 	}
 	

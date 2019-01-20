@@ -8,7 +8,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 
 
 /**
@@ -17,7 +18,7 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 public class TimedPosition
 {
 	private final long timestamp;
-	private final IVector2 position;
+	private final IVector3 position;
 	
 	
 	/**
@@ -26,7 +27,7 @@ public class TimedPosition
 	public TimedPosition()
 	{
 		timestamp = 0;
-		position = Vector2f.ZERO_VECTOR;
+		position = Vector3f.ZERO_VECTOR;
 	}
 	
 	
@@ -34,7 +35,7 @@ public class TimedPosition
 	 * @param timestamp
 	 * @param position
 	 */
-	public TimedPosition(final long timestamp, final IVector2 position)
+	public TimedPosition(final long timestamp, final IVector3 position)
 	{
 		this.position = position;
 		this.timestamp = timestamp;
@@ -61,6 +62,12 @@ public class TimedPosition
 	
 	
 	public IVector2 getPos()
+	{
+		return position.getXYVector();
+	}
+	
+	
+	public IVector3 getPos3()
 	{
 		return position;
 	}
@@ -105,7 +112,7 @@ public class TimedPosition
 			return false;
 		}
 		boolean similarInTime = Math.abs(timestamp - other.timestamp) < 2e9;
-		boolean similarInSpace = position.distanceToSqr(other.position) < 200 * 200;
+		boolean similarInSpace = position.subtractNew(other.position).getLength() < 200 * 200;
 		return similarInTime && similarInSpace;
 	}
 }

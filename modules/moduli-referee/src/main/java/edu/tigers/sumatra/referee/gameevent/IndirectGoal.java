@@ -19,7 +19,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 public class IndirectGoal extends AGameEvent
 {
 	private final ETeamColor team;
-	private final int bot;
+	private final Integer bot;
 	private final IVector2 location;
 	private final IVector2 kickLocation;
 	
@@ -52,8 +52,8 @@ public class IndirectGoal extends AGameEvent
 	public IndirectGoal(BotID bot, IVector2 location, IVector2 kickLocation)
 	{
 		super(EGameEvent.INDIRECT_GOAL);
-		this.team = bot.getTeamColor();
-		this.bot = bot.getNumber();
+		this.team = bot == null ? null : bot.getTeamColor();
+		this.bot = bot == null ? null : bot.getNumber();
 		this.location = location;
 		this.kickLocation = kickLocation;
 	}
@@ -64,9 +64,23 @@ public class IndirectGoal extends AGameEvent
 	{
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.INDIRECT_GOAL);
-		builder.getIndirectGoalBuilder().setByBot(bot).setByTeam(getTeam(team))
-				.setLocation(getLocationFromVector(location))
-				.setKickLocation(getLocationFromVector(kickLocation));
+		builder.getIndirectGoalBuilder()
+				.setLocation(getLocationFromVector(location));
+		
+		if (bot != null)
+		{
+			builder.getIndirectGoalBuilder().setByBot(bot);
+		}
+		
+		if (team != null)
+		{
+			builder.getIndirectGoalBuilder().setByTeam(getTeam(team));
+		}
+		
+		if (kickLocation != null)
+		{
+			builder.getIndirectGoalBuilder().setKickLocation(getLocationFromVector(kickLocation));
+		}
 		
 		return builder.build();
 	}
