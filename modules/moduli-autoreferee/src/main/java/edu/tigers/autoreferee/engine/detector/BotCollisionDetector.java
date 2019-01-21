@@ -110,8 +110,8 @@ public class BotCollisionDetector extends AGameEventDetector
 			double blueVel = predictBotVel(pair.blueBot);
 			double yellowVel = predictBotVel(pair.yellowBot);
 			double velDiff = blueVel - yellowVel;
-			double angleBetweenVel = Math.abs(AngleMath.difference(pair.blueBot.getVel().getAngle(),
-					pair.yellowBot.getVel().getAngle()));
+			double angleBetweenVel = Math.abs(AngleMath.difference(pair.blueBot.getVel().getAngle(0),
+					pair.yellowBot.getVel().getAngle(0)));
 			
 			final BotID primaryBot;
 			final BotID secondaryBot;
