@@ -111,7 +111,7 @@ public class RefereeMsg
 		
 		negativeHalfTeam = Geometry.getNegativeHalfTeam();
 		
-		nextCommand = sslRefereeMsg.getNextCommand();
+		nextCommand = sslRefereeMsg.hasNextCommand() ? sslRefereeMsg.getNextCommand() : null;
 		gameEvents = sslRefereeMsg.getGameEventsList().stream()
 				.map(GameEventFactory::fromProtobuf)
 				.filter(Optional::isPresent)

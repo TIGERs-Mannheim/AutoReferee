@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import edu.tigers.sumatra.drawable.DrawableBorderText;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -21,8 +22,10 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.data.ProposedGameEvent;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.data.TeamInfo;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -92,6 +95,15 @@ public class RefereeVisCalc implements IWpCalc
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], 23), timeoutBlueStr, Color.blue));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], 23), yellowCardBlueStr, Color.blue));
 		
+		String nextCommand = msg.getNextCommand() == null ? "" : msg.getNextCommand().name();
+		String gameEvents = msg.getGameEvents().stream().map(IGameEvent::getType).map(Enum::name)
+				.collect(Collectors.joining(","));
+		String proposedGameEvents = msg.getProposedGameEvents().stream().map(ProposedGameEvent::getGameEvent)
+				.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 11), nextCommand, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 23), gameEvents, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 35), proposedGameEvents, Color.white));
+		
 		for (DrawableBorderText txt : txtShapes)
 		{
 			txt.setFontSize(10);
@@ -105,7 +117,7 @@ public class RefereeVisCalc implements IWpCalc
 	
 	private int[] getOffsets()
 	{
-		int[] offsets = new int[7];
+		int[] offsets = new int[8];
 		offsets[0] = 10;
 		offsets[1] = offsets[0] + 135;
 		offsets[2] = offsets[1] + 40;
@@ -113,6 +125,7 @@ public class RefereeVisCalc implements IWpCalc
 		offsets[4] = offsets[3] + 20;
 		offsets[5] = offsets[4] + 100;
 		offsets[6] = offsets[5] + 80;
+		offsets[7] = offsets[6] + 80;
 		return offsets;
 	}
 	

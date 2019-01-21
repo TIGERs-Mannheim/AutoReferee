@@ -115,17 +115,14 @@ public class BotCollisionDetector extends AGameEventDetector
 			
 			final BotID primaryBot;
 			final BotID secondaryBot;
-			final double primarySpeed;
 			if (velDiff > 0)
 			{
 				primaryBot = pair.blueBot.getBotId();
 				secondaryBot = pair.yellowBot.getBotId();
-				primarySpeed = blueVel;
 			} else
 			{
 				primaryBot = pair.yellowBot.getBotId();
 				secondaryBot = pair.blueBot.getBotId();
-				primarySpeed = yellowVel;
 			}
 			
 			IVector2 centerPos = Lines.segmentFromPoints(pair.blueBot.getPos(), pair.yellowBot.getPos()).getCenter();
@@ -142,12 +139,12 @@ public class BotCollisionDetector extends AGameEventDetector
 			if (secondaryViolator == null)
 			{
 				// primary bot is the only one that is responsible -> unique
-				return Optional.of(new BotCrashUnique(primaryBot, secondaryBot, centerPos, primarySpeed,
+				return Optional.of(new BotCrashUnique(primaryBot, secondaryBot, centerPos, crashVel,
 						velDiff, angleBetweenVel));
 			}
 			// Both bots are guilty -> draw
 			return Optional.of(new BotCrashDrawn(pair.yellowBot.getBotId(), pair.blueBot.getBotId(), centerPos,
-					primarySpeed, velDiff, angleBetweenVel));
+					crashVel, velDiff, angleBetweenVel));
 		}
 		return Optional.empty();
 	}

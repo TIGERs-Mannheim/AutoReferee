@@ -141,7 +141,6 @@ public class GoalDetector extends AGameEventDetector
 			if (lastKickEvent != null && kickEvent.get().getTimestamp() != lastKickEvent.getTimestamp())
 			{
 				maxBallHeight = 0.0;
-				log.debug("New kick event: reset maxBallHeight: " + kickEvent.get() + " != " + lastKickEvent);
 			}
 			lastKickEvent = kickEvent.get();
 		}
