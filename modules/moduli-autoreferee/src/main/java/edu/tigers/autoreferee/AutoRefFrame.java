@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.generic.BotPosition;
-import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
@@ -29,7 +29,7 @@ public class AutoRefFrame implements IAutoRefFrame
 	private List<BotPosition> botsTouchingBall = Collections.emptyList();
 	
 	private boolean isBallInsideField = true;
-	private TimedPosition ballLeftFieldPos = new TimedPosition();
+	private BallLeftFieldPosition ballLeftFieldPos = null;
 	private List<GameState> stateHistory = Collections.emptyList();
 	
 	
@@ -81,13 +81,13 @@ public class AutoRefFrame implements IAutoRefFrame
 	
 	
 	@Override
-	public Optional<TimedPosition> getBallLeftFieldPos()
+	public Optional<BallLeftFieldPosition> getBallLeftFieldPos()
 	{
 		return Optional.ofNullable(ballLeftFieldPos);
 	}
 	
 	
-	public void setBallLeftFieldPos(final TimedPosition getBallLeftFieldPos)
+	public void setBallLeftFieldPos(final BallLeftFieldPosition getBallLeftFieldPos)
 	{
 		ballLeftFieldPos = getBallLeftFieldPos;
 	}

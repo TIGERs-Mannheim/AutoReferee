@@ -45,8 +45,17 @@ public class BallLeftFieldGoalLine extends AGameEvent
 	public BallLeftFieldGoalLine(BotID bot, IVector2 location)
 	{
 		super(EGameEvent.BALL_LEFT_FIELD_GOAL_LINE);
-		this.team = bot == null ? null : bot.getTeamColor();
-		this.bot = bot == null ? null : bot.getNumber();
+		this.team = bot.getTeamColor();
+		this.bot = bot.getNumber();
+		this.location = location;
+	}
+	
+	
+	public BallLeftFieldGoalLine(ETeamColor team, IVector2 location)
+	{
+		super(EGameEvent.BALL_LEFT_FIELD_GOAL_LINE);
+		this.team = team;
+		this.bot = null;
 		this.location = location;
 	}
 	
@@ -58,16 +67,12 @@ public class BallLeftFieldGoalLine extends AGameEvent
 		
 		builder.setType(SslGameEvent.GameEventType.BALL_LEFT_FIELD_GOAL_LINE);
 		builder.getBallLeftFieldGoalLineBuilder()
+				.setByTeam(getTeam(team))
 				.setLocation(getLocationFromVector(location));
 		
 		if (bot != null)
 		{
 			builder.getBallLeftFieldGoalLineBuilder().setByBot(bot);
-		}
-		
-		if (team != null)
-		{
-			builder.getBallLeftFieldGoalLineBuilder().setByTeam(getTeam(team));
 		}
 		
 		return builder.build();

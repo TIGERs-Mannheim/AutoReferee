@@ -2,7 +2,7 @@
  * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.autoreferee.engine;
+package edu.tigers.sumatra.geometry;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -49,7 +48,7 @@ public class NGeometryTest
 	
 	/**
 	 * Test method for
-	 * {@link edu.tigers.autoreferee.engine.NGeometry#getTeamOfClosestGoalLine(IVector2)}.
+	 * {@link NGeometry#getTeamOfClosestGoalLine(IVector2)}.
 	 */
 	@Test
 	public void testGetTeamOfClosestGoalLine()
@@ -62,7 +61,7 @@ public class NGeometryTest
 	
 	
 	/**
-	 * Test method for {@link edu.tigers.autoreferee.engine.NGeometry#ballInsideGoal(IVector3)}
+	 * Test method for {@link NGeometry#ballInsideGoal(IVector3)}
 	 */
 	@Test
 	public void testBallInsideGoal()

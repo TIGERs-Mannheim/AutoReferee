@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.geometry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -379,6 +380,17 @@ public class Geometry
 	public static Goal getGoalTheir()
 	{
 		return instance.goalTheir;
+	}
+	
+	
+	/**
+	 * Return both goals
+	 * 
+	 * @return list of goals
+	 */
+	public static List<Goal> getGoals()
+	{
+		return Arrays.asList(instance.goalOur, instance.goalTheir);
 	}
 	
 	

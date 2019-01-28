@@ -12,14 +12,9 @@ import edu.tigers.autoreferee.AutoRefFrame;
 
 
 /**
- * @author "Lukas Magel"
+ * Auto referee calc
  */
-public interface IRefereeCalc
+public interface IAutoRefereeCalc
 {
-	
-	/**
-	 * @param frame
-	 */
 	void process(AutoRefFrame frame);
-	
 }

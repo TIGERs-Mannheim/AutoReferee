@@ -7,7 +7,6 @@ import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
-import edu.tigers.autoreferee.engine.NGeometry.BotDistanceComparator;
 import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.filter.iir.ExponentialMovingAverageFilter2D;
@@ -20,6 +19,7 @@ import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.PlacementFailed;
 import edu.tigers.sumatra.referee.gameevent.PlacementSucceeded;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.util.BotDistanceComparator;
 
 
 /**

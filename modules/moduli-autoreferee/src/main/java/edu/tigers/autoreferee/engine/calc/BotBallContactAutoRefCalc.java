@@ -20,7 +20,7 @@ import edu.tigers.sumatra.wp.util.BotLastTouchedBallCalculator;
 /**
  * This calculator decides which robot has last touched the ball
  */
-public class BotBallContactCalc implements IRefereeCalc
+public class BotBallContactAutoRefCalc implements IAutoRefereeCalc
 {
 	private List<BotPosition> lastBotTouchedBall = Collections.emptyList();
 	

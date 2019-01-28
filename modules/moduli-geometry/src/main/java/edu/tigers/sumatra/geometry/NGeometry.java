@@ -2,22 +2,17 @@
  * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.autoreferee.engine;
+package edu.tigers.sumatra.geometry;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
-import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.geometry.Goal;
-import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.VectorMath;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.math.vector.VectorDistanceComparator;
 
 
 /**
@@ -110,7 +105,7 @@ public final class NGeometry
 	 */
 	public static IVector2 getClosestCorner(final IVector2 pos)
 	{
-		return getField().getCorners().stream().sorted(new PointDistanceComparator(pos)).findFirst()
+		return getField().getCorners().stream().min(new VectorDistanceComparator(pos))
 				.orElseThrow(IllegalStateException::new);
 	}
 	
@@ -158,55 +153,5 @@ public final class NGeometry
 	public static boolean posInsidePenaltyArea(final IVector2 pos, final double margin)
 	{
 		return getPenaltyAreas().stream().anyMatch(penArea -> penArea.isPointInShape(pos, margin));
-	}
-	
-	/**
-	 * Sorts points by their distance to a fixed second point
-	 */
-	public static class PointDistanceComparator implements Comparator<IVector2>
-	{
-		private final IVector2 pos;
-		
-		
-		public PointDistanceComparator(final IVector2 pos)
-		{
-			this.pos = pos;
-		}
-		
-		
-		@Override
-		public int compare(final IVector2 p1, final IVector2 p2)
-		{
-			double distTo1 = VectorMath.distancePP(pos, p1);
-			double distTo2 = VectorMath.distancePP(pos, p2);
-			
-			if (distTo1 < distTo2)
-			{
-				return -1;
-			} else if (distTo1 > distTo2)
-			{
-				return 1;
-			}
-			return 0;
-		}
-		
-	}
-	
-	public static class BotDistanceComparator implements Comparator<ITrackedBot>
-	{
-		private PointDistanceComparator comparator;
-		
-		
-		public BotDistanceComparator(final IVector2 pos)
-		{
-			comparator = new PointDistanceComparator(pos);
-		}
-		
-		
-		@Override
-		public int compare(final ITrackedBot o1, final ITrackedBot o2)
-		{
-			return comparator.compare(o1.getPos(), o2.getPos());
-		}
 	}
 }

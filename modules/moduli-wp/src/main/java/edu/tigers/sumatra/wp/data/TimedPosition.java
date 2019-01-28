@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.autoreferee.generic;
+package edu.tigers.sumatra.wp.data;
 
 
 import org.apache.commons.lang.builder.EqualsBuilder;

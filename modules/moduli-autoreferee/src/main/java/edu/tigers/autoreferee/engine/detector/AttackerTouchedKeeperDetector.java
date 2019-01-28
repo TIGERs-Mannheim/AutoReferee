@@ -16,9 +16,9 @@ import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
 
 import edu.tigers.autoreferee.AutoRefUtil;
-import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
+import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;

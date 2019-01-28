@@ -6,11 +6,11 @@ package edu.tigers.autoreferee;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.tigers.autoreferee.engine.calc.AllowedDistancesVisCalc;
-import edu.tigers.autoreferee.engine.calc.BallLeftFieldCalc;
-import edu.tigers.autoreferee.engine.calc.BotBallContactCalc;
-import edu.tigers.autoreferee.engine.calc.GameStateHistoryCalc;
-import edu.tigers.autoreferee.engine.calc.IRefereeCalc;
+import edu.tigers.autoreferee.engine.calc.AllowedDistancesAutoRefVisCalc;
+import edu.tigers.autoreferee.engine.calc.BallLeftFieldAutoRefCalc;
+import edu.tigers.autoreferee.engine.calc.BotBallContactAutoRefCalc;
+import edu.tigers.autoreferee.engine.calc.GameStateHistoryAutoRefCalc;
+import edu.tigers.autoreferee.engine.calc.IAutoRefereeCalc;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -19,16 +19,16 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  */
 public class AutoRefFramePreprocessor
 {
-	private List<IRefereeCalc> calculators = new ArrayList<>();
+	private List<IAutoRefereeCalc> calculators = new ArrayList<>();
 	private AutoRefFrame lastFrame;
 	
 	
 	public AutoRefFramePreprocessor()
 	{
-		calculators.add(new BallLeftFieldCalc());
-		calculators.add(new BotBallContactCalc());
-		calculators.add(new GameStateHistoryCalc());
-		calculators.add(new AllowedDistancesVisCalc());
+		calculators.add(new BallLeftFieldAutoRefCalc());
+		calculators.add(new BotBallContactAutoRefCalc());
+		calculators.add(new GameStateHistoryAutoRefCalc());
+		calculators.add(new AllowedDistancesAutoRefVisCalc());
 	}
 	
 	
@@ -58,7 +58,7 @@ public class AutoRefFramePreprocessor
 	
 	private void runCalculators(final AutoRefFrame frame)
 	{
-		for (IRefereeCalc calc : calculators)
+		for (IAutoRefereeCalc calc : calculators)
 		{
 			calc.process(frame);
 		}

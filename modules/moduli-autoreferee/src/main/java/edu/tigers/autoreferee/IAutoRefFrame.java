@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.generic.BotPosition;
-import edu.tigers.autoreferee.generic.TimedPosition;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
@@ -34,7 +34,7 @@ public interface IAutoRefFrame
 	List<BotPosition> getBotsTouchingBall();
 	
 	
-	Optional<TimedPosition> getBallLeftFieldPos();
+	Optional<BallLeftFieldPosition> getBallLeftFieldPos();
 	
 	
 	boolean isBallInsideField();

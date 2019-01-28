@@ -9,15 +9,15 @@ import java.util.List;
 
 import edu.tigers.autoreferee.AutoRefFrame;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
-import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.math.circle.Circle;
 
 
-public class AllowedDistancesVisCalc implements IRefereeCalc
+public class AllowedDistancesAutoRefVisCalc implements IAutoRefereeCalc
 {
 	@Override
 	public void process(final AutoRefFrame frame)

@@ -5,13 +5,12 @@ package edu.tigers.autoreferee.engine.detector;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.autoreferee.generic.BotPosition;
-import edu.tigers.autoreferee.generic.TimedPosition;
-import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -19,6 +18,8 @@ import edu.tigers.sumatra.referee.gameevent.AimlessKick;
 import edu.tigers.sumatra.referee.gameevent.BallLeftFieldGoalLine;
 import edu.tigers.sumatra.referee.gameevent.BallLeftFieldTouchLine;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
+import edu.tigers.sumatra.wp.data.TimedPosition;
 
 
 /**
@@ -26,9 +27,6 @@ import edu.tigers.sumatra.referee.gameevent.IGameEvent;
  */
 public class BallLeftFieldDetector extends AGameEventDetector
 {
-	@Configurable(comment = "[mm] The goal line threshold", defValue = "10.0")
-	private static double goalLineThreshold = 10.0;
-	
 	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line", defValue = "200.0")
 	private static double icingKickoffLineThreshold = 200.0;
 	
@@ -52,32 +50,32 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
-		if (frame.getBallLeftFieldPos().isPresent()
-				&& !frame.getBallLeftFieldPos().get().similarTo(lastBallLeftFieldPos))
+		return frame.getBallLeftFieldPos()
+				.filter(b -> !b.getPosition().similarTo(lastBallLeftFieldPos))
+				.map(this::processBallLeftField);
+	}
+	
+	
+	@Override
+	protected void doReset()
+	{
+		lastBallLeftFieldPos = null;
+	}
+	
+	
+	private IGameEvent processBallLeftField(final BallLeftFieldPosition ballLeftFieldPosition)
+	{
+		lastBallLeftFieldPos = ballLeftFieldPosition.getPosition();
+		switch (ballLeftFieldPosition.getType())
 		{
-			lastBallLeftFieldPos = frame.getBallLeftFieldPos().get();
-			
-			BotPosition lastTouched = botThatLastTouchedBall();
-			
-			boolean exitGoalLineInX = ((Geometry.getFieldLength() / 2)
-					- Math.abs(lastBallLeftFieldPos.getPos().x())) < goalLineThreshold;
-			boolean exitGoalLineInY = ((Geometry.getFieldWidth() / 2)
-					- Math.abs(lastBallLeftFieldPos.getPos().y())) > goalLineThreshold;
-			boolean enteredGoalInY = Geometry.getGoalOur().getWidth() / 2
-					- Math.abs(lastBallLeftFieldPos.getPos().y()) > goalLineThreshold;
-			if (exitGoalLineInX && exitGoalLineInY)
-			{
-				// The ball exited the field over the goal line
-				if (enteredGoalInY)
-				{
-					// a potential goal
-					return Optional.empty();
-				}
-				return handleGoalLineOff(lastBallLeftFieldPos.getPos(), lastTouched);
-			}
-			return handleSideLineOff(lastBallLeftFieldPos.getPos(), lastTouched);
+			case TOUCH_LINE:
+				return handleSideLineOff(ballLeftFieldPosition.getPosition().getPos(), botThatLastTouchedBall());
+			case GOAL_LINE:
+			case GOAL_OVER:
+				return handleGoalLineOff(ballLeftFieldPosition.getPosition().getPos(), botThatLastTouchedBall());
+			default:
+				return null;
 		}
-		return Optional.empty();
 	}
 	
 	
@@ -92,20 +90,41 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	}
 	
 	
-	private Optional<IGameEvent> handleSideLineOff(final IVector2 ballPos, final BotPosition lastTouched)
+	private IGameEvent handleSideLineOff(final IVector2 ballPos, final BotPosition lastTouched)
 	{
-		return Optional.of(new BallLeftFieldTouchLine(lastTouched == null ? null : lastTouched.getBotID(), ballPos));
+		if (lastTouched == null)
+		{
+			// we do not know who last touched the ball
+			// let's just flip a coin
+			return new BallLeftFieldTouchLine(randomTeam(), ballPos);
+		}
+		return new BallLeftFieldTouchLine(lastTouched.getBotID(), ballPos);
 	}
 	
 	
-	private Optional<IGameEvent> handleGoalLineOff(final IVector2 ballPos, final BotPosition lastTouched)
+	private IGameEvent handleGoalLineOff(final IVector2 ballPos, final BotPosition lastTouched)
 	{
-		if (lastTouched != null && isIcing(lastTouched, ballPos))
+		if (lastTouched == null)
 		{
-			return Optional.of(new AimlessKick(lastTouched.getBotID(), ballPos, lastTouched.getPos()));
+			// we do not know who last touched the ball
+			// let's just flip a coin
+			return new BallLeftFieldGoalLine(randomTeam(), ballPos);
 		}
 		
-		return Optional.of(new BallLeftFieldGoalLine(lastTouched == null ? null : lastTouched.getBotID(), ballPos));
+		if (isIcing(lastTouched, ballPos))
+		{
+			return new AimlessKick(lastTouched.getBotID(), ballPos, lastTouched.getPos());
+		}
+		
+		return new BallLeftFieldGoalLine(lastTouched.getBotID(), ballPos);
+	}
+	
+	
+	private ETeamColor randomTeam()
+	{
+		return new Random(frame.getTimestamp()).nextInt(2) == 0
+				? ETeamColor.YELLOW
+				: ETeamColor.BLUE;
 	}
 	
 	
@@ -118,12 +137,5 @@ public class BallLeftFieldDetector extends AGameEventDetector
 				&& (Math.abs(lastTouched.getPos().x()) > icingKickoffLineThreshold);
 		boolean crossedOppositeGoalLine = kickerColor != colorOfGoalLine;
 		return kickerWasInHisHalf && crossedOppositeGoalLine;
-	}
-	
-	
-	@Override
-	public void doReset()
-	{
-		lastBallLeftFieldPos = null;
 	}
 }

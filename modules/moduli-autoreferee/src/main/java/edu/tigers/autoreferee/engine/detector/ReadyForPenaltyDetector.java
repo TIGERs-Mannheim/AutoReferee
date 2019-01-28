@@ -9,11 +9,11 @@ import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
-import edu.tigers.autoreferee.engine.NGeometry;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
+import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.rectangle.Rectangle;

@@ -10,6 +10,7 @@ package edu.tigers.autoreferee.engine.calc;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.LinkedList;
 
 import edu.tigers.autoreferee.AutoRefFrame;
@@ -17,24 +18,12 @@ import edu.tigers.sumatra.referee.data.GameState;
 
 
 /**
- * @author "Lukas Magel"
+ * Collect a history of recent game states.
  */
-public class GameStateHistoryCalc implements IRefereeCalc
+public class GameStateHistoryAutoRefCalc implements IAutoRefereeCalc
 {
-	private static final int		HISTORY_SIZE	= 5;
-	
-	// Using the implementation directly is normally considered bad practice, but a LinkedList implements both the List
-	// as well as the Queue interface, which makes it very convenient for internal use
-	private LinkedList<GameState>	stateHistory;
-	
-	
-	/**
-	 * 
-	 */
-	public GameStateHistoryCalc()
-	{
-		stateHistory = new LinkedList<>(Collections.singletonList(GameState.HALT));
-	}
+	private static final int HISTORY_SIZE = 5;
+	private final Deque<GameState> stateHistory = new LinkedList<>(Collections.singletonList(GameState.HALT));
 	
 	
 	@Override
@@ -57,5 +46,4 @@ public class GameStateHistoryCalc implements IRefereeCalc
 		}
 		stateHistory.offerFirst(state);
 	}
-	
 }

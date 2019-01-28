@@ -70,7 +70,7 @@ public class AttackerDoubleTouchedBall extends AGameEvent
 	@Override
 	public String toString()
 	{
-		return String.format("Attacked %d %s double touched ball @ %s", bot, team, formatVector(location));
+		return String.format("Attacker %d %s double touched ball @ %s", bot, team, formatVector(location));
 	}
 	
 	
