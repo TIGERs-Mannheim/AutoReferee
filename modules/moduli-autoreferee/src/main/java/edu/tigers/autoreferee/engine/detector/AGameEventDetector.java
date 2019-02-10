@@ -22,7 +22,9 @@ public abstract class AGameEventDetector implements IGameEventDetector
 {
 	private final Set<EGameState> activeStates;
 	private final EGameEventDetectorType type;
+	private boolean deactivateOnFirstGameEvent = false;
 	private boolean firstUpdate = true;
+	private boolean active = true;
 	protected IAutoRefFrame frame;
 	
 	
@@ -54,7 +56,16 @@ public abstract class AGameEventDetector implements IGameEventDetector
 			doPrepare();
 			firstUpdate = false;
 		}
-		return doUpdate();
+		if (active)
+		{
+			final Optional<IGameEvent> gameEvent = doUpdate();
+			if (deactivateOnFirstGameEvent && gameEvent.isPresent())
+			{
+				setInactive();
+			}
+			return gameEvent;
+		}
+		return Optional.empty();
 	}
 	
 	
@@ -62,6 +73,7 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	public final void reset()
 	{
 		firstUpdate = true;
+		active = true;
 		doReset();
 	}
 	
@@ -90,6 +102,18 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	public EGameEventDetectorType getType()
 	{
 		return type;
+	}
+	
+	
+	public void setDeactivateOnFirstGameEvent(final boolean deactivateOnFirstGameEvent)
+	{
+		this.deactivateOnFirstGameEvent = deactivateOnFirstGameEvent;
+	}
+	
+	
+	protected final void setInactive()
+	{
+		this.active = false;
 	}
 	
 	

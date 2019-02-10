@@ -23,6 +23,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.RefereeProtoUtil;
 import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
@@ -184,6 +185,16 @@ public class RefereeMsg
 	public final Command getCommand()
 	{
 		return command;
+	}
+	
+	
+	public ETeamColor getCommandForTeam()
+	{
+		if (command != null)
+		{
+			return RefereeProtoUtil.teamForCommand(command);
+		}
+		return ETeamColor.NEUTRAL;
 	}
 	
 	
@@ -349,6 +360,16 @@ public class RefereeMsg
 	public Command getNextCommand()
 	{
 		return nextCommand;
+	}
+	
+	
+	public ETeamColor getNextCommandForTeam()
+	{
+		if (nextCommand != null)
+		{
+			return RefereeProtoUtil.teamForCommand(nextCommand);
+		}
+		return ETeamColor.NEUTRAL;
 	}
 	
 	

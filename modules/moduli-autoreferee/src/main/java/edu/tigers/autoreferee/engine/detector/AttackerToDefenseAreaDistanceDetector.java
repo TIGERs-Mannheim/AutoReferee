@@ -5,11 +5,9 @@
 package edu.tigers.autoreferee.engine.detector;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
@@ -20,7 +18,6 @@ import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.gameevent.AttackerTooCloseToDefenseArea;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -32,10 +29,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 {
 	private static final double INACCURACY_TOLERANCE = 15;
-	private static final Set<EGameState> ALLOWED_PREVIOUS_STATES = Collections.unmodifiableSet(EnumSet.of(
-			EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF));
-	
-	private boolean active = false;
 	
 	
 	/**
@@ -43,33 +36,35 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	 */
 	public AttackerToDefenseAreaDistanceDetector()
 	{
-		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_AREA_DISTANCE, EGameState.RUNNING);
-	}
-	
-	
-	@Override
-	protected void doPrepare()
-	{
-		List<GameState> stateHistory = frame.getStateHistory();
-		
-		active = (stateHistory.size() > 1) && ALLOWED_PREVIOUS_STATES.contains(stateHistory.get(1).getState());
+		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_AREA_DISTANCE,
+				EnumSet.of(EGameState.STOP, EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF));
+		setDeactivateOnFirstGameEvent(true);
 	}
 	
 	
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
-		if (active)
+		ETeamColor attackingTeam = getAttackingTeam();
+		if (attackingTeam != ETeamColor.NEUTRAL)
 		{
-			active = false;
-			
-			GameState lastGameState = frame.getStateHistory().get(1);
-			ETeamColor attackerColor = lastGameState.getForTeam();
-			
-			return new Evaluator(frame, attackerColor).evaluate();
+			return new Evaluator(frame, attackingTeam).evaluate();
 		}
-		
 		return Optional.empty();
+	}
+	
+	
+	private ETeamColor getAttackingTeam()
+	{
+		ETeamColor attackingTeam;
+		if (frame.getGameState().isStoppedGame())
+		{
+			attackingTeam = frame.getRefereeMsg().getNextCommandForTeam();
+		} else
+		{
+			attackingTeam = frame.getRefereeMsg().getCommandForTeam();
+		}
+		return attackingTeam;
 	}
 	
 	
@@ -78,8 +73,6 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	 * changes to running. Since this class is created when the rule is to be evaluated all required values can be stored
 	 * as private final attributes. This makes the code cleaner because these values do not need to be passed around
 	 * between different functions.
-	 * 
-	 * @author "Lukas Magel"
 	 */
 	private static class Evaluator
 	{
@@ -139,5 +132,4 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 			return new AttackerTooCloseToDefenseArea(offender.getBotId(), offender.getPos(), distance);
 		}
 	}
-	
 }

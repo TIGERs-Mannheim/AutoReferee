@@ -24,7 +24,7 @@ public class AllowedDistancesAutoRefVisCalc implements IAutoRefereeCalc
 	{
 		List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ALLOWED_DISTANCES);
 		
-		if (frame.getGameState().isStandardSituation())
+		if (frame.getGameState().isStandardSituation() || frame.getGameState().isStoppedGame())
 		{
 			NGeometry.getPenaltyAreas().stream()
 					.map(p -> p.withMargin(RuleConstraints.getBotToPenaltyAreaMarginStandard()).getDrawableShapes())
