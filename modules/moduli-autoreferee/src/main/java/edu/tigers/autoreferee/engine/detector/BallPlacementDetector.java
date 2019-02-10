@@ -27,9 +27,6 @@ import edu.tigers.sumatra.wp.util.BotDistanceComparator;
  */
 public class BallPlacementDetector extends AGameEventDetector
 {
-	@Configurable(defValue = "30.0", comment = "Time [s] that a team can spend in placing a ball")
-	private static double ballPlacementTime = 30.0;
-	
 	@Configurable(defValue = "150.0", comment = "Minimum distance [mm] to placement pos to accept the placement")
 	private static double ballPlacementTolerance = 150.0;
 	
@@ -112,7 +109,7 @@ public class BallPlacementDetector extends AGameEventDetector
 			return Optional.of(new PlacementSucceeded(forTeam, elapsedTime, remainingDistance, movedDistance));
 		}
 		
-		if (elapsedTime > ballPlacementTime)
+		if (frame.getRefereeMsg().getCurrentActionTimeRemaining() < 0)
 		{
 			eventRaised = true;
 			return Optional.of(new PlacementFailed(forTeam, remainingDistance));
@@ -136,8 +133,8 @@ public class BallPlacementDetector extends AGameEventDetector
 		// no bots -> no bot can be too close :)
 		return true;
 	}
-	
-	
+
+
 	private boolean isNextCommandForPlacingTeam()
 	{
 		if (frame.getRefereeMsg().getCommand() == Referee.SSL_Referee.Command.BALL_PLACEMENT_BLUE)

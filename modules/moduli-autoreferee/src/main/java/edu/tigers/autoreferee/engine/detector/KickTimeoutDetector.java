@@ -6,8 +6,6 @@ package edu.tigers.autoreferee.engine.detector;
 import java.util.EnumSet;
 import java.util.Optional;
 
-import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
@@ -19,9 +17,6 @@ import edu.tigers.sumatra.referee.gameevent.KickTimeout;
  */
 public class KickTimeoutDetector extends AGameEventDetector
 {
-	@Configurable(defValue = "10.0")
-	private static double freeKickTimeout = 10.0;
-	
 	private long entryTime;
 	private boolean kickTimedOut;
 	
@@ -44,11 +39,11 @@ public class KickTimeoutDetector extends AGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
-		ETeamColor attackingColor = frame.getGameState().getForTeam();
-		
-		long curTime = frame.getTimestamp();
-		if (((curTime - entryTime) / 1e9 > freeKickTimeout) && !kickTimedOut)
+		if (frame.getRefereeMsg().getCurrentActionTimeRemaining() < 0 && !kickTimedOut)
 		{
+			ETeamColor attackingColor = frame.getGameState().getForTeam();
+			long curTime = frame.getTimestamp();
+
 			kickTimedOut = true;
 			IGameEvent violation = new KickTimeout(attackingColor,
 					getBall().getPos(), (curTime - entryTime) / 1e9);

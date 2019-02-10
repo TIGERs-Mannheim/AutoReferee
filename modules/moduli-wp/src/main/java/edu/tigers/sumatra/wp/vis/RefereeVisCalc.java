@@ -35,6 +35,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class RefereeVisCalc implements IWpCalc
 {
 	private final DecimalFormat df2 = new DecimalFormat("00");
+	private final DecimalFormat dfSeconds = new DecimalFormat("00.000");
 	private final DecimalFormat dfBallVel = new DecimalFormat("0.00");
 	
 	
@@ -78,6 +79,13 @@ public class RefereeVisCalc implements IWpCalc
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 23), msg.getCommand().toString(), Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 35), wfw.getGameState().getStateNameWithColor(),
 				Color.white));
+		if (msg.getCurrentActionTimeRemaining() >= 0)
+		{
+			txtShapes
+					.add(new DrawableBorderText(Vector2.fromXY(off[0], 47),
+							dfSeconds.format(msg.getCurrentActionTimeRemaining()),
+							Color.white));
+		}
 		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 11), timeStr, Color.white));
 		
