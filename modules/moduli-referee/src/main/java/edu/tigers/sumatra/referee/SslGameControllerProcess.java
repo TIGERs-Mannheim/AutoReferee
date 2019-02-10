@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Scanner;
@@ -22,11 +23,17 @@ public class SslGameControllerProcess implements Runnable
 {
 	private final Logger log = Logger.getLogger(SslGameControllerProcess.class.getName());
 	
-	public static final int GAME_CONTROLLER_PORT = 50543;
+	private final int gcUiPort;
 	
 	private Process process = null;
 	private SslGameControllerClient client = null;
 	private CountDownLatch clientLatch = new CountDownLatch(1);
+	
+	
+	public SslGameControllerProcess(final int gcUiPort)
+	{
+		this.gcUiPort = gcUiPort;
+	}
 	
 	
 	private String locateModulesFolder() throws FileNotFoundException
@@ -85,9 +92,9 @@ public class SslGameControllerProcess implements Runnable
 			}
 			
 			ProcessBuilder builder = new ProcessBuilder(binaryFile.getAbsolutePath(),
-					"-address", "localhost:" + GAME_CONTROLLER_PORT);
-			builder.directory(new File(modulesFolder + "/..").getAbsoluteFile());
+					"-address", "localhost:" + gcUiPort);
 			builder.redirectErrorStream(true);
+			builder.directory(Paths.get("").toAbsolutePath().toFile());
 			process = builder.start();
 			log.debug("game-controller process started");
 			

@@ -13,7 +13,6 @@ import edu.tigers.autoreferee.remote.AutoRefToGameControllerConnector;
 import edu.tigers.autoreferee.remote.GameEventResponse;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
-import edu.tigers.sumatra.referee.SslGameControllerProcess;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
@@ -21,6 +20,7 @@ public class ActiveAutoRefEngine extends AutoRefEngine
 {
 	private final Logger log = Logger.getLogger(ActiveAutoRefEngine.class.getName());
 	private static final String DEFAULT_REFEREE_HOST = "localhost";
+	private static final int DEFAULT_GC_AUTO_REF_PORT = 11007;
 	
 	private AutoRefToGameControllerConnector remote;
 	
@@ -33,8 +33,7 @@ public class ActiveAutoRefEngine extends AutoRefEngine
 				.map(InetAddress::getHostAddress)
 				.orElse(DEFAULT_REFEREE_HOST);
 		int port = SumatraModel.getInstance().getModule(AutoRefModule.class)
-				.getSubnodeConfiguration().getInt("gameControllerPort",
-						SslGameControllerProcess.GAME_CONTROLLER_PORT);
+				.getSubnodeConfiguration().getInt("gameControllerPort", DEFAULT_GC_AUTO_REF_PORT);
 		remote = new AutoRefToGameControllerConnector(hostname, port);
 		remote.addGameEventResponseObserver(this::onGameControllerResponse);
 		remote.start();

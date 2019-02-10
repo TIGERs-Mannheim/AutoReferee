@@ -63,12 +63,18 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		
 		if (useGameController)
 		{
-			sslGameControllerProcess = new SslGameControllerProcess();
+			sslGameControllerProcess = new SslGameControllerProcess(getGameControllerUiPort());
 			new Thread(sslGameControllerProcess).start();
 			
 			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
 			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.nextStage()));
 		}
+	}
+	
+	
+	public int getGameControllerUiPort()
+	{
+		return getSubnodeConfiguration().getInt("gc-ui-port", 50543);
 	}
 	
 	
