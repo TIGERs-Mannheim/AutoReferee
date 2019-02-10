@@ -4,10 +4,12 @@
 package edu.tigers.autoreferee.engine;
 
 import java.net.InetAddress;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.autoreferee.remote.AutoRefToGameControllerConnector;
 import edu.tigers.autoreferee.remote.GameEventResponse;
@@ -23,6 +25,12 @@ public class ActiveAutoRefEngine extends AutoRefEngine
 	private static final int DEFAULT_GC_AUTO_REF_PORT = 11007;
 	
 	private AutoRefToGameControllerConnector remote;
+	
+	
+	public ActiveAutoRefEngine(final Set<EGameEventDetectorType> activeDetectors)
+	{
+		super(activeDetectors);
+	}
 	
 	
 	@Override

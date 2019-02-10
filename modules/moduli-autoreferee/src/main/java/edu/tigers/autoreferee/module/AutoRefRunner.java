@@ -3,6 +3,8 @@
  */
 package edu.tigers.autoreferee.module;
 
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +21,7 @@ import edu.tigers.autoreferee.engine.AutoRefEngine;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.engine.IAutoRefEngineObserver;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.wp.AWorldPredictor;
@@ -35,9 +38,10 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	private final BlockingDeque<WorldFrameWrapper> consumableFrames = new LinkedBlockingDeque<>(1);
 	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
+	private final Set<EGameEventDetectorType> activeDetectors = EnumSet.allOf(EGameEventDetectorType.class);
 	
 	private ExecutorService executorService;
-	private AutoRefEngine engine = new AutoRefEngine();
+	private AutoRefEngine engine = new AutoRefEngine(activeDetectors);
 	private final IAutoRefEngineObserver callback;
 	private EAutoRefMode mode = EAutoRefMode.OFF;
 	
@@ -45,6 +49,18 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	public AutoRefRunner(IAutoRefEngineObserver callback)
 	{
 		this.callback = callback;
+	}
+	
+	
+	public void setDetectorActive(final EGameEventDetectorType type, boolean active)
+	{
+		if (active)
+		{
+			activeDetectors.add(type);
+		} else
+		{
+			activeDetectors.remove(type);
+		}
 	}
 	
 	
@@ -93,13 +109,13 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		switch (mode)
 		{
 			case OFF:
-				engine = new AutoRefEngine();
+				engine = new AutoRefEngine(activeDetectors);
 				break;
 			case ACTIVE:
-				engine = new ActiveAutoRefEngine();
+				engine = new ActiveAutoRefEngine(activeDetectors);
 				break;
 			case PASSIVE:
-				engine = new PassiveAutoRefEngine();
+				engine = new PassiveAutoRefEngine(activeDetectors);
 				break;
 		}
 		this.mode = mode;

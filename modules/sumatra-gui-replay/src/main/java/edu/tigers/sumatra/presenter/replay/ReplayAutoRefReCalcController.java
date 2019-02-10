@@ -6,6 +6,7 @@ package edu.tigers.sumatra.presenter.replay;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.swing.AbstractAction;
@@ -14,6 +15,7 @@ import javax.swing.JCheckBoxMenuItem;
 import edu.tigers.autoreferee.AutoRefFramePreprocessor;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
@@ -24,7 +26,8 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class ReplayAutoRefReCalcController implements IReplayController
 {
 	private final AutoRefFramePreprocessor refPreprocessor = new AutoRefFramePreprocessor();
-	private final PassiveAutoRefEngine autoRefEngine = new PassiveAutoRefEngine();
+	private final PassiveAutoRefEngine autoRefEngine = new PassiveAutoRefEngine(
+			EnumSet.allOf(EGameEventDetectorType.class));
 	
 	private final List<IWorldFrameObserver> wFrameObservers = new ArrayList<>();
 	private IAutoRefFrame lastAutoRefFrame = null;

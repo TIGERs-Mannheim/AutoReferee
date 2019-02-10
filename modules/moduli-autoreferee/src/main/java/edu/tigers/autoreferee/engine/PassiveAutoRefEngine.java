@@ -8,7 +8,10 @@
  */
 package edu.tigers.autoreferee.engine;
 
+import java.util.Set;
+
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 
 
 /**
@@ -16,6 +19,12 @@ import edu.tigers.autoreferee.IAutoRefFrame;
  */
 public class PassiveAutoRefEngine extends AutoRefEngine
 {
+	public PassiveAutoRefEngine(final Set<EGameEventDetectorType> activeDetectors)
+	{
+		super(activeDetectors);
+	}
+	
+	
 	@Override
 	public void process(final IAutoRefFrame frame)
 	{

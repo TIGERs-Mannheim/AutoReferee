@@ -91,7 +91,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	
 	public void setGameEventDetectorActive(EGameEventDetectorType type, boolean active)
 	{
-		runner.getEngine().getGameEventEngine().setDetectorActive(type, active);
+		runner.setDetectorActive(type, active);
 	}
 	
 	

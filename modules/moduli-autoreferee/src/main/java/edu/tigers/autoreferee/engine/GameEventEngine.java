@@ -4,7 +4,6 @@
 package edu.tigers.autoreferee.engine;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,8 +30,10 @@ public class GameEventEngine
 	private final Set<EGameEventDetectorType> activeDetectors;
 	
 	
-	public GameEventEngine()
+	public GameEventEngine(Set<EGameEventDetectorType> activeDetectors)
 	{
+		this.activeDetectors = activeDetectors;
+		
 		for (EGameEventDetectorType eCalc : EGameEventDetectorType.values())
 		{
 			if (eCalc.getInstanceableClass().getImpl() != null)
@@ -46,19 +47,6 @@ public class GameEventEngine
 					log.error("Could not instantiate calculator: " + eCalc, e);
 				}
 			}
-		}
-		activeDetectors = EnumSet.allOf(EGameEventDetectorType.class);
-	}
-	
-	
-	public void setDetectorActive(final EGameEventDetectorType type, boolean active)
-	{
-		if (active)
-		{
-			activeDetectors.add(type);
-		} else
-		{
-			activeDetectors.remove(type);
 		}
 	}
 	

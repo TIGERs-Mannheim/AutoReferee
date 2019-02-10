@@ -4,16 +4,24 @@
 package edu.tigers.autoreferee.engine;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
 public class AutoRefEngine
 {
-	private final GameEventEngine gameEventEngine = new GameEventEngine();
+	private final GameEventEngine gameEventEngine;
 	private final List<IAutoRefEngineObserver> observers = new CopyOnWriteArrayList<>();
+	
+	
+	public AutoRefEngine(Set<EGameEventDetectorType> activeDetectors)
+	{
+		gameEventEngine = new GameEventEngine(activeDetectors);
+	}
 	
 	
 	public void addObserver(IAutoRefEngineObserver observer)
@@ -55,11 +63,5 @@ public class AutoRefEngine
 	protected void processGameEvent(final IGameEvent gameEvent)
 	{
 		observers.forEach(o -> o.onNewGameEventDetected(gameEvent));
-	}
-	
-	
-	public GameEventEngine getGameEventEngine()
-	{
-		return gameEventEngine;
 	}
 }
