@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.model.SumatraModel;
@@ -336,28 +338,35 @@ public class ReplayLoadMenu extends JMenu
 		public void run()
 		{
 			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			BerkeleyDb db = null;
-			try
+			
+			Optional<RecordManager> recordManager = SumatraModel.getInstance().getModuleOpt(RecordManager.class);
+			if (recordManager.isPresent())
 			{
-				RecordManager recordManager = SumatraModel.getInstance().getModule(RecordManager.class);
-				db = recordManager.newBerkeleyDb(Paths.get(filename));
-				db.open();
-				BerkeleyDb dbOut = db;
-				observers.forEach(o -> o.onOpenReplay(dbOut));
-			} catch (Exception e)
-			{
-				log.error(
-						"An exception occurred while loading database.\nTo watch a replay, you need to have started the simulation at least once.",
-						e);
-				JOptionPane.showMessageDialog(ReplayLoadMenu.this,
-						"An exception occurred while loading database.\nTo watch a replay, you need to have started the simulation at least once.",
-						"Error",
-						JOptionPane.ERROR_MESSAGE);
-				if (db != null)
+				try
 				{
-					db.close();
+					@SuppressWarnings("squid:S2095") // DB will be closed automatically later
+					BerkeleyDb db = recordManager.get().newBerkeleyDb(Paths.get(filename));
+					db.open();
+					observers.forEach(o -> o.onOpenReplay(db));
+				} catch (Exception e)
+				{
+					log.error("An exception occurred while loading database. See stacktrace.", e);
+					JOptionPane.showMessageDialog(ReplayLoadMenu.this,
+							"An exception occurred while loading database:\n"
+									+ ExceptionUtils.getStackTrace(e),
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
 				}
+			} else
+			{
+				JOptionPane.showMessageDialog(ReplayLoadMenu.this,
+						"To watch a replay, you need to start the moduli system at least once " +
+								"with a config that includes a record manager module, " +
+								"because the record manager depends on the config (autoRef vs. AI).",
+						"Missing RecordManager module",
+						JOptionPane.ERROR_MESSAGE);
 			}
+			
 			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
