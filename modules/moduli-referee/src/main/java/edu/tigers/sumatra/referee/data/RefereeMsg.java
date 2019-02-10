@@ -412,6 +412,7 @@ public class RefereeMsg
 				.append("nextCommand", nextCommand)
 				.append("gameEvents", gameEvents)
 				.append("proposedGameEvents", proposedGameEvents)
+				.append("currentActionTimeRemaining", currentActionTimeRemaining)
 				.toString();
 	}
 }

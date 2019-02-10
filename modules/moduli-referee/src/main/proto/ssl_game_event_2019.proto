@@ -260,8 +260,8 @@ message GameEvent {
         optional Location location = 3;
         // the absolute initial ball speed (kick speed) [m/s]
         optional float initial_ball_speed = 4;
-        // the maximum height [m] that the ball has reached during the kick
-        optional float max_ball_height = 5;
+        // was the ball chipped?
+        optional bool chipped = 5;
     }
     // a bot dribbled to ball too far
     message BotDribbledBallTooFar {

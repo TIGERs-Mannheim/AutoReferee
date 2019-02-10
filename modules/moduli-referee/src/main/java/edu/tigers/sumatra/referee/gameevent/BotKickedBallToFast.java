@@ -22,7 +22,7 @@ public class BotKickedBallToFast extends AGameEvent
 	private final int bot;
 	private final IVector2 location;
 	private final double initialBallSpeed;
-	private final double maxBallHeight;
+	private final EKickType kickType;
 	
 	
 	@SuppressWarnings("unsued") // used by berkeley
@@ -32,7 +32,7 @@ public class BotKickedBallToFast extends AGameEvent
 		bot = 0;
 		location = null;
 		initialBallSpeed = 0;
-		maxBallHeight = 0;
+		kickType = EKickType.STRAIGHT;
 	}
 	
 	
@@ -48,7 +48,7 @@ public class BotKickedBallToFast extends AGameEvent
 		this.bot = event.getBotKickedBallTooFast().getByBot();
 		this.location = toVector(event.getBotKickedBallTooFast().getLocation());
 		this.initialBallSpeed = event.getBotKickedBallTooFast().getInitialBallSpeed();
-		this.maxBallHeight = toDistance(event.getBotKickedBallTooFast().getMaxBallHeight());
+		this.kickType = event.getBotKickedBallTooFast().getChipped() ? EKickType.CHIPPED : EKickType.STRAIGHT;
 	}
 	
 	
@@ -56,17 +56,16 @@ public class BotKickedBallToFast extends AGameEvent
 	 * @param bot
 	 * @param location
 	 * @param initialBallSpeed [m/s]
-	 * @param maxBallHeight [mm]
+	 * @param kickType
 	 */
-	public BotKickedBallToFast(BotID bot, IVector2 location, double initialBallSpeed,
-			double maxBallHeight)
+	public BotKickedBallToFast(BotID bot, IVector2 location, double initialBallSpeed, EKickType kickType)
 	{
 		super(EGameEvent.BOT_KICKED_BALL_TOO_FAST);
 		this.team = bot.getTeamColor();
 		this.bot = bot.getNumber();
 		this.location = location;
 		this.initialBallSpeed = initialBallSpeed;
-		this.maxBallHeight = maxBallHeight;
+		this.kickType = kickType;
 	}
 	
 	
@@ -75,9 +74,12 @@ public class BotKickedBallToFast extends AGameEvent
 	{
 		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
 		builder.setType(SslGameEvent.GameEventType.BOT_KICKED_BALL_TOO_FAST);
-		builder.getBotKickedBallTooFastBuilder().setByTeam(getTeam(team)).setByBot(bot)
+		builder.getBotKickedBallTooFastBuilder()
+				.setByTeam(getTeam(team))
+				.setByBot(bot)
 				.setInitialBallSpeed((float) initialBallSpeed)
-				.setMaxBallHeight((float) maxBallHeight / 1000.f).setLocation(getLocationFromVector(location));
+				.setChipped(kickType == EKickType.CHIPPED)
+				.setLocation(getLocationFromVector(location));
 		
 		return builder.build();
 	}
@@ -86,8 +88,9 @@ public class BotKickedBallToFast extends AGameEvent
 	@Override
 	public String toString()
 	{
-		return String.format("Bot %d %s kicked ball too fast: vmax=%.2f m/s hmax=%.2f @ %s", bot, team, initialBallSpeed,
-				maxBallHeight, formatVector(location));
+		return String.format("Bot %d %s %s ball too fast: vmax=%.2f m/s @ %s",
+				bot, team, kickType == EKickType.STRAIGHT ? "kicked" : "chipped", initialBallSpeed,
+				formatVector(location));
 	}
 	
 	
@@ -106,7 +109,7 @@ public class BotKickedBallToFast extends AGameEvent
 				.appendSuper(super.equals(o))
 				.append(bot, that.bot)
 				.append(initialBallSpeed, that.initialBallSpeed)
-				.append(maxBallHeight, that.maxBallHeight)
+				.append(kickType, that.kickType)
 				.append(team, that.team)
 				.append(location, that.location)
 				.isEquals();
@@ -122,7 +125,13 @@ public class BotKickedBallToFast extends AGameEvent
 				.append(bot)
 				.append(location)
 				.append(initialBallSpeed)
-				.append(maxBallHeight)
+				.append(kickType)
 				.toHashCode();
+	}
+	
+	public enum EKickType
+	{
+		STRAIGHT,
+		CHIPPED
 	}
 }

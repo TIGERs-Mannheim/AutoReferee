@@ -50,6 +50,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 		{
 			return Optional.empty();
 		}
+		
 		IKickEvent currentKickEvent = frame.getWorldFrame().getKickEvent().get();
 		
 		// take the last kickFitState, because if the ball hits another robot, we still want to have the original ball
@@ -117,7 +118,12 @@ public class BallSpeedingDetector extends AGameEventDetector
 	
 	private IGameEvent createViolation(BotID violator, double lastSpeedEstimate)
 	{
-		return new BotKickedBallToFast(violator, lastReportedKickEvent.getPosition(), lastSpeedEstimate, 0);
+		BotKickedBallToFast.EKickType kickType = frame.getPreviousFrame().getWorldFrame().getKickFitState()
+				.map(s -> s.getKickVel().z() > 0).orElse(false)
+						? BotKickedBallToFast.EKickType.CHIPPED
+						: BotKickedBallToFast.EKickType.STRAIGHT;
+		
+		return new BotKickedBallToFast(violator, lastReportedKickEvent.getPosition(), lastSpeedEstimate, kickType);
 	}
 	
 	
