@@ -4,7 +4,7 @@
 	<name>Autoreferee</name>
 	<artifactId>autoreferee</artifactId>
 	<groupId>edu.tigers.sumatra</groupId>
-	<version>2.0</version>
+	<version>2019</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -30,6 +30,7 @@
 		<module>modules/sumatra-gui-log</module>
 		<module>modules/sumatra-gui-visualizer</module>
 		<module>modules/sumatra-gui-replay</module>
+		<module>modules/sumatra-gui-referee</module>
 		<module>modules/sumatra-parent</module>
 		<module>modules/sumatra-model</module>
 		<module>modules/sumatra-snapshot</module>

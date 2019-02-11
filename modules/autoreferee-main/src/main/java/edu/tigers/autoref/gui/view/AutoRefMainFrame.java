@@ -19,6 +19,7 @@ import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.presenter.log.LogView;
+import edu.tigers.sumatra.presenter.referee.RefereeView;
 import edu.tigers.sumatra.view.replay.ReplayLoadMenu;
 import net.infonode.docking.RootWindow;
 import net.infonode.docking.properties.RootWindowProperties;
@@ -58,6 +59,7 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 		addView(autoRefView);
 		addView(gameLogView);
 		addView(new BallSpeedView());
+		addView(new RefereeView());
 		
 		updateViewMenu();
 		fillMenuBar();

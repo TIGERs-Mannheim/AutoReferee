@@ -37,6 +37,12 @@
 
     <module id="edu.tigers.sumatra.referee.AReferee">
         <implementation>edu.tigers.sumatra.referee.Referee</implementation>
+
+        <properties>
+            <source>NETWORK</source>
+            <port>10003</port>
+            <gameController>false</gameController>
+        </properties>
     </module>
 
 

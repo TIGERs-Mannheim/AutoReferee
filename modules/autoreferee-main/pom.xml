@@ -41,6 +41,11 @@
         </dependency>
 
         <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>sumatra-gui-referee</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.TIGERs-Mannheim</groupId>
             <artifactId>infonode</artifactId>
         </dependency>
