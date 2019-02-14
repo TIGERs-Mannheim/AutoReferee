@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import edu.tigers.sumatra.math.line.v2.IHalfLine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import org.json.simple.JSONObject;
 
 import com.sleepycat.persist.model.Persistent;
@@ -221,15 +224,61 @@ abstract class ARectangle implements IRectangle
 	
 	
 	@Override
-	public List<IVector2> lineIntersections(final ILine line)
+	public List<ILineSegment> getEdgesAsSegments()
 	{
-		return getEdges().stream()
-				.map(edge -> edge.intersectionWith(line))
+		List<ILineSegment> lines = new ArrayList<>(4);
+		List<IVector2> corners = getCorners();
+		
+		for (int i = 0; i < 4; i++)
+		{
+			int j = (i + 1) % 4;
+			lines.add(Lines.segmentFromPoints(corners.get(i), corners.get(j)));
+		}
+		
+		return lines;
+	}
+	
+	
+	@Override
+	public List<IVector2> lineIntersections(final edu.tigers.sumatra.math.line.v2.ILine line)
+	{
+		return getEdgesAsSegments().stream()
+				.map(edge -> edge.intersectLine(line))
 				.filter(Optional::isPresent)
 				.map(Optional::get)
-				.filter(this::isPointInShape)
 				.distinct()
 				.collect(Collectors.toList());
+	}
+	
+	
+	@Override
+	public List<IVector2> lineIntersections(final ILineSegment line)
+	{
+		return getEdgesAsSegments().stream()
+				.map(edge -> edge.intersectSegment(line))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.distinct()
+				.collect(Collectors.toList());
+	}
+	
+	
+	@Override
+	public List<IVector2> lineIntersections(final IHalfLine line)
+	{
+		return getEdgesAsSegments().stream()
+				.map(edge -> edge.intersectHalfLine(line))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.distinct()
+				.collect(Collectors.toList());
+	}
+	
+	
+	@Override
+	public List<IVector2> lineIntersections(final ILine line)
+	{
+		return lineIntersections(Lines.lineFromLegacyLine(line));
 	}
 	
 	

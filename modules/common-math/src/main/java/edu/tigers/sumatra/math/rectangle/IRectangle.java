@@ -11,6 +11,8 @@ import edu.tigers.sumatra.export.IJsonString;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.IHalfLine;
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -23,6 +25,43 @@ import edu.tigers.sumatra.math.vector.IVector2;
  */
 public interface IRectangle extends I2DShape, IJsonString
 {
+	/**
+	 * Find the line intersections with the edges
+	 *
+	 * @param line some unbounded line
+	 * @return all intersections. This can be zero to two intersections.
+	 */
+	List<IVector2> lineIntersections(edu.tigers.sumatra.math.line.v2.ILine line);
+
+	/**
+	 * Find the line intersections with the edges
+	 *
+	 * @param line some line segment
+	 * @return all intersections. This can be zero to two intersections.
+	 */
+	List<IVector2> lineIntersections(ILineSegment line);
+
+	/**
+	 * Find the line intersections with the edges
+	 *
+	 * @param line some half line
+	 * @return all intersections. This can be zero to two intersections.
+	 */
+	List<IVector2> lineIntersections(IHalfLine line);
+
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Find the line intersections on the outer curve. The goal line is not considered.
+	 * </p>
+	 *
+	 * @param line some legacy line (treated as a segment)
+	 * @return all intersections. This can be zero to two intersections.
+	 */
+	@Override
+	List<IVector2> lineIntersections(final ILine line);
+
 	/**
 	 * Absolute value of the length of the side
 	 * that is parallel to the Y-Axis.
@@ -100,6 +139,14 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return List of all edges
 	 */
 	List<ILine> getEdges();
+
+	/**
+	 * Get the rectangle edges in counter-clockwise order.
+	 * Starting with the left edge.
+	 *
+	 * @return List of all edges
+	 */
+	List<ILineSegment> getEdgesAsSegments();
 	
 	
 	/**

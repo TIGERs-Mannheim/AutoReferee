@@ -206,7 +206,7 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public boolean isIntersectingWithLine(final ILine line)
 	{
-		return getRectangle().isIntersectingWithLine(line);
+		return !lineIntersections(line).isEmpty();
 	}
 	
 	
