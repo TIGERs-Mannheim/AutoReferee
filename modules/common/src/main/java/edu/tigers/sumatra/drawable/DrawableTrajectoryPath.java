@@ -4,8 +4,10 @@
 
 package edu.tigers.sumatra.drawable;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,7 @@ public class DrawableTrajectoryPath implements IDrawableShape
 	
 	private Color color = Color.black;
 	private final List<IVector2> points = new ArrayList<>();
+	private transient Stroke stroke;
 	
 	
 	@SuppressWarnings("unused")
@@ -75,6 +78,11 @@ public class DrawableTrajectoryPath implements IDrawableShape
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
 		g.setColor(color);
+		if (stroke == null)
+		{
+			stroke = new BasicStroke(tool.scaleXLength(10));
+		}
+		g.setStroke(stroke);
 		
 		final GeneralPath drawPath = new GeneralPath();
 		IVector2 pLast = points.get(0);

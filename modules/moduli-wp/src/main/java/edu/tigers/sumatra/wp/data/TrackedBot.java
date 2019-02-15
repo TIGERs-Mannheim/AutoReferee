@@ -50,7 +50,7 @@ public final class TrackedBot implements ITrackedBot
 		timestamp = 0;
 		botId = BotID.noBot();
 		botState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
-		filteredState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
+		filteredState = null;
 		bufferedTrajState = null;
 		lastBallContact = 0;
 		robotInfo = null;
