@@ -39,6 +39,9 @@ public class BallPlacementDetector extends AGameEventDetector
 	@Configurable(defValue = "50.0", comment = "Min distance [mm] between ball and bot, before ball placement is considered successful, if next command is a force start")
 	private static double minDistanceToBallForForceStart = 50.0;
 	
+	@Configurable(defValue = "2.0", comment = "Minimum time [s] that the ball placement must take to allow robots to move to valid positions")
+	private static double minBallPlacementDuration = 2.0;
+	
 	static
 	{
 		registerClass(BallPlacementDetector.class);
@@ -102,7 +105,10 @@ public class BallPlacementDetector extends AGameEventDetector
 		frame.getShapes().get(EAutoRefShapesLayer.ENGINE)
 				.add(new DrawableCircle(Circle.createCircle(ballPosFilter.getState().getXYVector(), 50), color));
 		
-		if (remainingDistance <= ballPlacementTolerance && ballStill && botsHaveSufficientDistanceToBall())
+		if (remainingDistance <= ballPlacementTolerance
+				&& ballStill
+				&& botsHaveSufficientDistanceToBall()
+				&& elapsedTime > minBallPlacementDuration)
 		{
 			eventRaised = true;
 			double movedDistance = initialBallPos.distanceTo(ballPos);
@@ -133,8 +139,8 @@ public class BallPlacementDetector extends AGameEventDetector
 		// no bots -> no bot can be too close :)
 		return true;
 	}
-
-
+	
+	
 	private boolean isNextCommandForPlacingTeam()
 	{
 		if (frame.getRefereeMsg().getCommand() == Referee.SSL_Referee.Command.BALL_PLACEMENT_BLUE)
