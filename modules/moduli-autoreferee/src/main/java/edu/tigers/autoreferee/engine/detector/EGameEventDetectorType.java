@@ -31,8 +31,9 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	BALL_LEFT_FIELD(new InstanceableClass(BallLeftFieldDetector.class)),
 	BALL_SPEEDING(new InstanceableClass(BallSpeedingDetector.class)),
 	BOT_NUMBER(new InstanceableClass(BotNumberDetector.class)),
+	READY_TO_CONTINUE(new InstanceableClass(ReadyToContinueDetector.class)),
 	PUSHING(new InstanceableClass(PushingDetector.class)),
-	
+
 	;
 	
 	private final InstanceableClass clazz;
