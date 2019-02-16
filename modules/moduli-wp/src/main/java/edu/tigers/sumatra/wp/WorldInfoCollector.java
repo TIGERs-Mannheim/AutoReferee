@@ -68,8 +68,6 @@ import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 
 /**
  * This module collects some AI-independent world information, like filtered camera data and vision data
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class WorldInfoCollector extends AWorldPredictor
 		implements IRefereeObserver, IVisionFilterObserver, ICamFrameObserver
@@ -93,6 +91,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private BotStateFromTrajectoryCalculator botStateFromTrajectoryCalculator;
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
+	private AReferee referee;
 	
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
@@ -257,6 +256,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private void processFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
 		lastWFTimestamp = filteredVisionFrame.getTimestamp();
+		referee.setCurrentTime(lastWFTimestamp);
 		robotInfoProvider.setLastWFTimestamp(lastWFTimestamp);
 		
 		ballContactCalculator.setBallPos(filteredVisionFrame.getBall().getPos().getXYVector());
@@ -386,21 +386,20 @@ public class WorldInfoCollector extends AWorldPredictor
 	
 	private void registerToRefereeModule()
 	{
-		AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
+		referee = SumatraModel.getInstance().getModule(AReferee.class);
 		referee.addObserver(this);
 	}
 	
 	
 	private void unregisterFromRefereeModule()
 	{
-		AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
 		referee.removeObserver(this);
 	}
 	
 	
 	private void registerToCamModule()
 	{
-		if (!"SUMATRA".equals(SumatraModel.getInstance().getEnvironment()))
+		if (!SumatraModel.getInstance().isSimulation())
 		{
 			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
 			cam.addObserver(this);
@@ -410,7 +409,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	
 	private void unregisterFromCamModule()
 	{
-		if (!"SUMATRA".equals(SumatraModel.getInstance().getEnvironment()))
+		if (!SumatraModel.getInstance().isSimulation())
 		{
 			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
 			cam.removeObserver(this);

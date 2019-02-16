@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.control.Event;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
@@ -26,6 +27,8 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	private ARefereeMessageSource source;
 	private SslGameControllerProcess sslGameControllerProcess;
 	private boolean controllable = false;
+	private long currentTime = 0;
+	private Thread gcUpdateThread;
 	
 	
 	public Referee()
@@ -67,7 +70,34 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 			new Thread(sslGameControllerProcess).start();
 			
 			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
+			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.timestamp(0)));
+			sslGameControllerProcess.getClientBlocking()
+					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI")));
+			sslGameControllerProcess.getClientBlocking()
+					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI")));
 			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.nextStage()));
+			
+			gcUpdateThread = new Thread(this::updateGcTime);
+			gcUpdateThread.setName("GC_Time_Update");
+			gcUpdateThread.start();
+		}
+	}
+	
+	
+	private void updateGcTime()
+	{
+		while (!gcUpdateThread.isInterrupted())
+		{
+			sslGameControllerProcess.getClientBlocking()
+					.ifPresent(c -> c.sendEvent(GcEventFactory.timestamp(currentTime)));
+			try
+			{
+				Thread.sleep(100);
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+				return;
+			}
 		}
 	}
 	
@@ -86,6 +116,10 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		if (sslGameControllerProcess != null)
 		{
 			sslGameControllerProcess.stop();
+		}
+		if (gcUpdateThread != null)
+		{
+			gcUpdateThread.interrupt();
 		}
 	}
 	
@@ -128,5 +162,12 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	public boolean isControllable()
 	{
 		return controllable;
+	}
+	
+	
+	@Override
+	public void setCurrentTime(long timestamp)
+	{
+		currentTime = timestamp;
 	}
 }

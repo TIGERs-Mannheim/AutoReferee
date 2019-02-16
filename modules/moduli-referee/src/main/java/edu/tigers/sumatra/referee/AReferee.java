@@ -98,4 +98,12 @@ public abstract class AReferee extends AModule
 	 * @return true, if the referee can be controlled locally
 	 */
 	public abstract boolean isControllable();
+	
+	
+	/**
+	 * Set the current time for the referee (the game-controller) if possible
+	 * 
+	 * @param timestamp
+	 */
+	public abstract void setCurrentTime(long timestamp);
 }

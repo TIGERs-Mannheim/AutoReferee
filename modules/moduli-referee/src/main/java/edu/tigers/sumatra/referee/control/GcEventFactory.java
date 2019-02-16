@@ -73,6 +73,18 @@ public final class GcEventFactory
 	}
 	
 	
+	public static Event teamName(ETeamColor teamColor, String name)
+	{
+		return new Event(EventModifyValue.teamName(EventTeam.fromTeamColor(teamColor), name));
+	}
+	
+	
+	public static Event timestamp(long timestamp)
+	{
+		return new Event(EventModifyValue.timestamp(timestamp));
+	}
+	
+	
 	public static Event ballPlacement(ETeamColor teamColor, IVector2 location)
 	{
 		return new Event(new EventCommand(
