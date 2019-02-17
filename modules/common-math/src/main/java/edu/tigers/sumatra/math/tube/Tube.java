@@ -5,7 +5,7 @@
 package edu.tigers.sumatra.math.tube;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -13,8 +13,8 @@ import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.line.LineMath;
+import edu.tigers.sumatra.math.line.v2.ILineBase;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -22,15 +22,11 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
- * tube: consists of two similar half circles, on each end one
- * those circles are connected by two parallel lines with their distance equalling the radius of the circles
- * 
- * @author Ulrike Leipscher <ulrike.leipscher@dlr.de>.
+ * Implementation of a {@link ITube}
  */
 @Persistent(version = 1)
 public class Tube implements ITube
 {
-	
 	private final IVector2 startCenter;
 	private final IVector2 endCenter;
 	private final double radius;
@@ -56,14 +52,6 @@ public class Tube implements ITube
 	}
 	
 	
-	private Tube(final IVector2 center, final double length, final double radius, final IVector2 direction)
-	{
-		startCenter = center.addNew(direction.scaleToNew(length / 2));
-		endCenter = center.addNew(direction.scaleToNew(-length / 2));
-		this.radius = radius;
-	}
-	
-	
 	/**
 	 * @param startCenter center of first circle
 	 * @param endCenter center of second circle
@@ -78,20 +66,6 @@ public class Tube implements ITube
 	
 	
 	/**
-	 * @param center middle point between both ends
-	 * @param length from one circle center to the other [mm]
-	 * @param radius of circles in [mm]
-	 * @param direction direction vector of tube
-	 * @return
-	 */
-	public static Tube fromCenter(final IVector2 center, final double length, final double radius,
-			final IVector2 direction)
-	{
-		return new Tube(center, length, radius, direction);
-	}
-	
-	
-	/**
 	 * tube around LineSegment with given radius [mm]
 	 * adds radius to start and endpoint of lineSegment
 	 * 
@@ -102,34 +76,6 @@ public class Tube implements ITube
 	public static Tube fromLineSegment(final ILineSegment lineSegment, final double radius)
 	{
 		return new Tube(lineSegment.getStart(), lineSegment.getEnd(), radius);
-	}
-	
-	
-	/**
-	 * #
-	 * 
-	 * @param line any line
-	 * @param length from one circleCenter to the other in [mm]
-	 * @param radius of circle/ tube
-	 * @return
-	 */
-	public static Tube fromLineWithLength(final ILine line, final double length, final double radius)
-	{
-		return new Tube(line.getStart(), line.getStart().addNew(line.directionVector().scaleToNew(length)), radius);
-		
-	}
-	
-	
-	/**
-	 * #
-	 * 
-	 * @param line any line
-	 * @param radius of circle/ tube in [mm]
-	 * @return
-	 */
-	public static Tube fromLine(final ILine line, final double radius)
-	{
-		return new Tube(line.getStart(), line.getEnd(), radius);
 	}
 	
 	
@@ -177,26 +123,6 @@ public class Tube implements ITube
 	
 	
 	@Override
-	public boolean isIntersectingWithLine(final ILine line)
-	{
-		if (startCenter.equals(endCenter))
-		{
-			return Circle.createCircle(startCenter, radius).isIntersectingWithLine(line);
-		}
-		ICircle startCircle = Circle.createCircle(startCenter, radius);
-		ICircle endCircle = Circle.createCircle(endCenter, radius);
-		ILine tubeLine = Line.fromPoints(startCenter, endCenter);
-		Optional<IVector2> intersect = line.intersectionWith(tubeLine);
-		boolean isIntersecting = false;
-		if (intersect.isPresent())
-		{
-			isIntersecting = Lines.segmentFromPoints(startCenter, endCenter).isPointOnLine(intersect.get());
-		}
-		return startCircle.isIntersectingWithLine(line) || endCircle.isIntersectingWithLine(line) || isIntersecting;
-	}
-	
-	
-	@Override
 	public IVector2 nearestPointOutside(final IVector2 point)
 	{
 		if (startCenter.equals(endCenter))
@@ -235,25 +161,29 @@ public class Tube implements ITube
 	
 	
 	@Override
+	public List<IVector2> lineIntersections(final ILineBase line)
+	{
+		return lineIntersections(line.toLegacyLine()).stream()
+				.filter(line::isPointOnLine)
+				.collect(Collectors.toList());
+	}
+	
+	
+	@Override
 	public List<IVector2> lineIntersections(final ILine line)
 	{
 		if (startCenter.equals(endCenter))
 		{
 			return Circle.createCircle(startCenter, radius).lineIntersections(line);
 		}
-		List<IVector2> intersections;
 		ICircle startCircle = Circle.createCircle(startCenter, radius);
 		ICircle endCircle = Circle.createCircle(endCenter, radius);
 		ILineSegment tubeLineSeg = Lines.segmentFromPoints(startCenter, endCenter);
 		
-		intersections = startCircle.lineIntersections(line);
-		for (IVector2 v : intersections)
-		{
-			if (!tubeLineSeg.closestPointOnLine(v).equals(startCenter))
-			{
-				intersections.remove(v);
-			}
-		}
+		List<IVector2> intersections = startCircle.lineIntersections(line).stream()
+				.filter(v -> tubeLineSeg.closestPointOnLine(v).equals(startCenter))
+				.collect(Collectors.toList());
+		
 		List<IVector2> intersectsAtEnd = endCircle.lineIntersections(line);
 		for (IVector2 v : intersectsAtEnd)
 		{
@@ -265,25 +195,12 @@ public class Tube implements ITube
 		
 		IVector2 start1 = startCenter.addNew(tubeLineSeg.directionVector().getNormalVector().scaleTo(radius));
 		IVector2 end1 = endCenter.addNew(tubeLineSeg.directionVector().getNormalVector().scaleTo(radius));
+		Lines.segmentFromPoints(start1, end1).intersectLine(line.v2()).ifPresent(intersections::add);
 		IVector2 start2 = startCenter.addNew(tubeLineSeg.directionVector().getNormalVector().scaleTo(-radius));
 		IVector2 end2 = endCenter.addNew(tubeLineSeg.directionVector().getNormalVector().scaleTo(-radius));
-		ILine line1 = Line.fromPoints(start1, end1);
-		ILine line2 = Line.fromPoints(start2, end2);
-		getLineIntersections(line, line1, intersections);
-		getLineIntersections(line, line2, intersections);
-		return intersections;
-	}
-	
-	
-	private void getLineIntersections(ILine line, ILine lineOfTube, List<IVector2> intersections)
-	{
-		Optional<IVector2> intersect = lineOfTube.intersectionWith(line);
-		if (intersect.isPresent()
-				&& Lines.segmentFromPoints(lineOfTube.getStart(), lineOfTube.getEnd()).isPointOnLine(intersect.get())
-				&& !intersections.contains(intersect.get()))
-		{
-			intersections.add(intersect.get());
-		}
+		Lines.segmentFromPoints(start2, end2).intersectLine(line.v2()).ifPresent(intersections::add);
+		
+		return intersections.stream().distinct().collect(Collectors.toList());
 	}
 	
 	

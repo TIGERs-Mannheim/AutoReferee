@@ -22,7 +22,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
  * 
  * @author Lukas Magel
  */
-interface ILineBase extends IEuclideanDistance
+public interface ILineBase extends IEuclideanDistance
 {
 	/**
 	 * Returns true if this line instance is properly defined. Whether or not a line instance is valid depends on the

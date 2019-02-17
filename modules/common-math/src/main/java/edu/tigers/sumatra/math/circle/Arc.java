@@ -4,22 +4,16 @@
 
 package edu.tigers.sumatra.math.circle;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.sleepycat.persist.model.Persistent;
 
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Implementation of {@link IArc}
  */
 @Persistent
 public class Arc extends AArc
@@ -80,37 +74,6 @@ public class Arc extends AArc
 			final double rotation)
 	{
 		return new Arc(center, radius, startAngle, rotation);
-	}
-	
-	
-	@Override
-	public List<IVector2> intersectSegment(final ILineSegment segment)
-	{
-		ILineSegment startAngleLine = Lines.segmentFromPoints(center,
-				center.addNew(Vector2.fromAngle(startAngle).scaleTo(radius)));
-		ILineSegment endAngleLine = Lines.segmentFromPoints(center,
-				center.addNew(Vector2.fromAngle(startAngle + rotation).scaleTo(radius)));
-		ICircle circle = Circle.createCircle(center, radius);
-		
-		List<IVector2> intersections = new ArrayList<>();
-		startAngleLine.intersectSegment(segment).ifPresent(intersections::add);
-		endAngleLine.intersectSegment(segment).ifPresent(intersections::add);
-		circle.lineSegmentIntersections(segment.toLegacyLine()).stream()
-				.filter(inter -> inter.subtractNew(center).getAngle() > startAngle
-						&& inter.subtractNew(center).getAngle() < startAngle + rotation)
-				.forEach(intersections::add);
-		
-		return intersections;
-	}
-	
-	
-	/**
-	 * @param arc
-	 * @return
-	 */
-	public static IArc copyArc(final IArc arc)
-	{
-		return new Arc(arc);
 	}
 	
 	

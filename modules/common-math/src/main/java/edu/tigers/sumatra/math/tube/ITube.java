@@ -9,7 +9,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 
 
 /**
- * @author Ulrike Leipscher <ulrike.leipscher@dlr.de>.
+ * A tube is constructed out of two half circles and a rectangle, forming a tube.
  */
 public interface ITube extends I2DShape
 {

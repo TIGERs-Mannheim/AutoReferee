@@ -3,19 +3,20 @@
  */
 package edu.tigers.sumatra.planarcurve;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
-import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectory2D;
-import junit.framework.Assert;
 
 
 /**
@@ -51,7 +52,7 @@ public class PlanarCurveTest
 		
 		BangBangTrajectory2D traj = new BangBangTrajectory2D(initialPos, finalPos, initialVel, 2, 3);
 		double dist = traj.getPlanarCurve().getMinimumDistanceToPoint(testPoint);
-		Assert.assertEquals(1.0, dist, 1e-6);
+		assertThat(dist).isCloseTo(1.0, within(1e-6));
 	}
 	
 	
@@ -69,7 +70,7 @@ public class PlanarCurveTest
 			
 			double dist = traj.getPlanarCurve().getMinimumDistanceToPoint(testPoint);
 			double sampleDist = sampleDistMin(traj, testPoint, 1e-3);
-			Assert.assertEquals(sampleDist, dist, 1);
+			assertThat(dist).isCloseTo(sampleDist, within(2.0));
 		}
 	}
 	
@@ -90,7 +91,7 @@ public class PlanarCurveTest
 		
 		double dist = traj1.getPlanarCurve().getMinimumDistanceToCurve(traj2.getPlanarCurve());
 		double sampleDist = sampleDistMin(traj1, traj2, 1e-3);
-		Assert.assertEquals(sampleDist, dist, 1);
+		assertThat(dist).isCloseTo(sampleDist, within(2.0));
 	}
 	
 	
@@ -112,7 +113,7 @@ public class PlanarCurveTest
 			
 			double dist = traj1.getPlanarCurve().getMinimumDistanceToCurve(traj2.getPlanarCurve());
 			double sampleDist = sampleDistMin(traj1, traj2, 1e-3);
-			Assert.assertEquals(sampleDist, dist, 1);
+			assertThat(dist).isCloseTo(sampleDist, within(2.0));
 		}
 	}
 	
@@ -132,9 +133,7 @@ public class PlanarCurveTest
 		BangBangTrajectory2D traj1 = new BangBangTrajectory2D(initialPos1, finalPos1, initialVel1, 2, 3);
 		
 		List<IVector2> intersections = traj1.getPlanarCurve().getIntersectionsWithLineSegment(line);
-		Assert.assertTrue(intersections.size() == 1);
-		
-		Assert.assertTrue(SumatraMath.isZero(intersections.get(0).distanceTo(Vector2f.ZERO_VECTOR)));
+		assertThat(intersections).containsExactlyInAnyOrder(Vector2f.zero());
 	}
 	
 	
@@ -159,8 +158,8 @@ public class PlanarCurveTest
 			for (IVector2 inter : intersections)
 			{
 				double minDistTraj = traj1.getPlanarCurve().getMinimumDistanceToPoint(inter);
-				Assert.assertEquals(0.0, minDistTraj, 1e-3);
-				Assert.assertTrue(line.isPointOnLineSegment(inter, 1e-3));
+				assertThat(minDistTraj).isCloseTo(0.0, within(1e-3));
+				assertThat(line.isPointOnLineSegment(inter, 1e-3)).isTrue();
 			}
 		}
 	}

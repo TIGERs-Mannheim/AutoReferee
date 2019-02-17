@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.lang.NotImplementedException;
 
 import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.v2.ILineBase;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -41,18 +42,6 @@ public interface I2DShape
 	 * @return true if inside
 	 */
 	default boolean isPointInShape(IVector2 point, double margin)
-	{
-		throw new NotImplementedException();
-	}
-	
-	
-	/**
-	 * Check if the shape is intersecting with given line
-	 *
-	 * @param line the line to check
-	 * @return true, if there is an intersection
-	 */
-	default boolean isIntersectingWithLine(ILine line)
 	{
 		throw new NotImplementedException();
 	}
@@ -93,6 +82,42 @@ public interface I2DShape
 	default List<IVector2> lineIntersections(ILine line)
 	{
 		throw new NotImplementedException();
+	}
+	
+	
+	/**
+	 * Get the intersection points of the shape and the line
+	 * 
+	 * @param line some line, note: can be a bounded or unbounded line!
+	 * @return all intersection points
+	 */
+	default List<IVector2> lineIntersections(ILineBase line)
+	{
+		throw new NotImplementedException();
+	}
+	
+	
+	/**
+	 * Check if the shape is intersecting with given line
+	 *
+	 * @param line the line to check
+	 * @return true, if there is an intersection
+	 */
+	default boolean isIntersectingWithLine(ILine line)
+	{
+		return !lineIntersections(line).isEmpty();
+	}
+	
+	
+	/**
+	 * Check if the shape is intersecting with given line
+	 *
+	 * @param line the line to check
+	 * @return true, if there is an intersection
+	 */
+	default boolean isIntersectingWithLine(ILineBase line)
+	{
+		return !lineIntersections(line).isEmpty();
 	}
 	
 	
