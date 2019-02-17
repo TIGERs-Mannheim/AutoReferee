@@ -44,6 +44,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private AutoRefEngine engine = new AutoRefEngine(activeDetectors);
 	private final IAutoRefEngineObserver callback;
 	private EAutoRefMode mode = EAutoRefMode.OFF;
+	private final Object engineSync = new Object();
 	
 	
 	public AutoRefRunner(IAutoRefEngineObserver callback)
@@ -104,23 +105,26 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	
 	public void changeMode(final EAutoRefMode mode)
 	{
-		engine.stop();
-		engine.removeObserver(callback);
-		switch (mode)
+		synchronized (engineSync)
 		{
-			case OFF:
-				engine = new AutoRefEngine(activeDetectors);
-				break;
-			case ACTIVE:
-				engine = new ActiveAutoRefEngine(activeDetectors);
-				break;
-			case PASSIVE:
-				engine = new PassiveAutoRefEngine(activeDetectors);
-				break;
+			engine.stop();
+			engine.removeObserver(callback);
+			switch (mode)
+			{
+				case OFF:
+					engine = new AutoRefEngine(activeDetectors);
+					break;
+				case ACTIVE:
+					engine = new ActiveAutoRefEngine(activeDetectors);
+					break;
+				case PASSIVE:
+					engine = new PassiveAutoRefEngine(activeDetectors);
+					break;
+			}
+			this.mode = mode;
+			engine.addObserver(callback);
+			engine.start();
 		}
-		this.mode = mode;
-		engine.addObserver(callback);
-		engine.start();
 	}
 	
 	
@@ -152,7 +156,10 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		AutoRefFrame currentFrame = preprocessor.process(frame);
 		if (currentFrame.getPreviousFrame() != null)
 		{
-			engine.process(currentFrame);
+			synchronized (engineSync)
+			{
+				engine.process(currentFrame);
+			}
 		}
 		SumatraModel.getInstance().getModule(AWorldPredictor.class)
 				.notifyNewShapeMap(frame.getTimestamp(), currentFrame.getShapes(), "AUTO_REF");

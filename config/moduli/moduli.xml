@@ -54,5 +54,7 @@
         <properties>
             <gameControllerPort>10007</gameControllerPort>
         </properties>
+
+        <dependency>edu.tigers.sumatra.wp.AWorldPredictor</dependency>
     </module>
 </centralSoftware>

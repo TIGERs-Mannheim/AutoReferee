@@ -31,6 +31,8 @@ import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
+import javax.swing.SwingUtilities;
+
 
 public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver,
 		EnumCheckBoxPanel.IEnumPanelObserver<ELogEntryType>, IWorldFrameObserver
@@ -139,10 +141,10 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver
 		{
 			return;
 		}
-		gameLogTableModel.add(new AutoRefGameEventGameLogEntry(
+		SwingUtilities.invokeLater(() -> gameLogTableModel.add(new AutoRefGameEventGameLogEntry(
 				lastWorldFrameWrapper.getTimestamp(),
 				GameTime.of(lastWorldFrameWrapper.getRefereeMsg()),
-				gameEvent));
+				gameEvent)));
 	}
 	
 	
