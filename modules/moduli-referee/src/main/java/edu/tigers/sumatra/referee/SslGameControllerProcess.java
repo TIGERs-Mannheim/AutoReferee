@@ -145,7 +145,7 @@ public class SslGameControllerProcess implements Runnable
 			try
 			{
 				// wait a moment to allow the controller to actually listen for connections
-				Thread.sleep(50);
+				Thread.sleep(100);
 				// connection should be established within one second
 				boolean connected = client.connectBlocking(1, TimeUnit.SECONDS);
 				if (!connected)
