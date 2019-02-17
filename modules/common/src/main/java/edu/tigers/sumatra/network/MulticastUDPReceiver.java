@@ -38,7 +38,7 @@ public class MulticastUDPReceiver implements IReceiver
 	
 	private static final int SO_TIMEOUT = 500;
 	private static final String[] USELESS_PREFIXES = { "tap", "tun", "ham", "WAN" };
-	private static final String[] PREFERRED_PREFIXES = { "lo", "eth", "enp" };
+	private static final String[] PREFERRED_PREFIXES = { "eth", "enp" };
 	// Connection
 	private final List<MulticastSocket> sockets = new ArrayList<>();
 	private final Set<MulticastSocket> socketsTimedOut = new HashSet<>();

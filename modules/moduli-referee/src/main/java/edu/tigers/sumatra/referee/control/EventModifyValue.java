@@ -9,7 +9,6 @@ public class EventModifyValue
 	private Integer goals;
 	private Integer goalkeeper;
 	private String teamName;
-	private Long timestamp;
 	
 	
 	public static EventModifyValue goals(final EventTeam forTeam, final int goals)
@@ -35,14 +34,6 @@ public class EventModifyValue
 		EventModifyValue e = new EventModifyValue();
 		e.setForTeam(forTeam);
 		e.setTeamName(name);
-		return e;
-	}
-	
-	
-	public static EventModifyValue timestamp(final long timestamp)
-	{
-		EventModifyValue e = new EventModifyValue();
-		e.setTimestamp(timestamp);
 		return e;
 	}
 	
@@ -92,17 +83,5 @@ public class EventModifyValue
 	public void setTeamName(final String teamName)
 	{
 		this.teamName = teamName;
-	}
-	
-	
-	public Long getTimestamp()
-	{
-		return timestamp;
-	}
-	
-	
-	public void setTimestamp(final Long timestamp)
-	{
-		this.timestamp = timestamp;
 	}
 }

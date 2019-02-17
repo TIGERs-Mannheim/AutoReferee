@@ -379,7 +379,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		if (visionFilter != null)
 		{
 			visionFilter.removeObserver(this);
-			visionFilter = null;
 		}
 	}
 	

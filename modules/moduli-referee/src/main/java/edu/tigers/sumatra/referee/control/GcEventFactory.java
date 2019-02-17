@@ -79,12 +79,6 @@ public final class GcEventFactory
 	}
 	
 	
-	public static Event timestamp(long timestamp)
-	{
-		return new Event(EventModifyValue.timestamp(timestamp));
-	}
-	
-	
 	public static Event ballPlacement(ETeamColor teamColor, IVector2 location)
 	{
 		return new Event(new EventCommand(

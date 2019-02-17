@@ -3,14 +3,15 @@
  */
 package edu.tigers.sumatra.referee;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
+import java.util.Map;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.control.Event;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
+import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.IRefereeSourceObserver;
@@ -22,19 +23,19 @@ import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
  */
 public class Referee extends AReferee implements IRefereeSourceObserver
 {
-	private final List<ARefereeMessageSource> msgSources = new ArrayList<>();
+	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
+			ERefereeMessageSource.class);
 	
 	private ARefereeMessageSource source;
 	private SslGameControllerProcess sslGameControllerProcess;
 	private boolean controllable = false;
-	private long currentTime = 0;
-	private Thread gcUpdateThread;
 	
 	
 	public Referee()
 	{
-		msgSources.add(new NetworkRefereeReceiver());
-		msgSources.add(new DirectRefereeMsgForwarder());
+		msgSources.put(ERefereeMessageSource.NETWORK, new NetworkRefereeReceiver());
+		msgSources.put(ERefereeMessageSource.INTERNAL_FORWARDER, new DirectRefereeMsgForwarder());
+		msgSources.put(ERefereeMessageSource.CI, new CiRefereeSyncedReceiver());
 	}
 	
 	
@@ -46,16 +47,23 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		int port = getSubnodeConfiguration().getInt("port", 10003);
 		boolean useGameController = getSubnodeConfiguration().getBoolean("gameController", false);
 		
-		msgSources.stream()
-				.filter(s -> s.getType() == ERefereeMessageSource.NETWORK)
-				.findFirst()
-				.map(s -> (NetworkRefereeReceiver) s)
-				.ifPresent(s -> s.setPort(port));
+		if (useGameController)
+		{
+			sslGameControllerProcess = new SslGameControllerProcess(getGameControllerUiPort());
+			new Thread(sslGameControllerProcess).start();
+			
+			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
+			sslGameControllerProcess.getClientBlocking()
+					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI")));
+			sslGameControllerProcess.getClientBlocking()
+					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI")));
+			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.nextStage()));
+		}
 		
-		source = msgSources.stream()
-				.filter(s -> s.getType() == activeSource)
-				.findAny()
-				.orElse(msgSources.get(0));
+		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(port);
+		((CiRefereeSyncedReceiver) msgSources.get(ERefereeMessageSource.CI)).setPort(port);
+		
+		source = msgSources.get(activeSource);
 		
 		source.addObserver(this);
 		source.start();
@@ -63,42 +71,6 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		controllable = useGameController;
 		
 		notifyRefereeMsgSourceChanged(source);
-		
-		if (useGameController)
-		{
-			sslGameControllerProcess = new SslGameControllerProcess(getGameControllerUiPort());
-			new Thread(sslGameControllerProcess).start();
-			
-			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
-			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.timestamp(0)));
-			sslGameControllerProcess.getClientBlocking()
-					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI")));
-			sslGameControllerProcess.getClientBlocking()
-					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI")));
-			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.nextStage()));
-			
-			gcUpdateThread = new Thread(this::updateGcTime);
-			gcUpdateThread.setName("GC_Time_Update");
-			gcUpdateThread.start();
-		}
-	}
-	
-	
-	private void updateGcTime()
-	{
-		while (!gcUpdateThread.isInterrupted())
-		{
-			sslGameControllerProcess.getClientBlocking()
-					.ifPresent(c -> c.sendEvent(GcEventFactory.timestamp(currentTime)));
-			try
-			{
-				Thread.sleep(100);
-			} catch (InterruptedException e)
-			{
-				Thread.currentThread().interrupt();
-				return;
-			}
-		}
 	}
 	
 	
@@ -116,10 +88,6 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		if (sslGameControllerProcess != null)
 		{
 			sslGameControllerProcess.stop();
-		}
-		if (gcUpdateThread != null)
-		{
-			gcUpdateThread.interrupt();
 		}
 	}
 	
@@ -151,10 +119,7 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	@Override
 	public ARefereeMessageSource getSource(final ERefereeMessageSource type)
 	{
-		return msgSources.stream()
-				.filter(s -> s.getType() == type)
-				.findAny()
-				.orElse(null);
+		return msgSources.get(type);
 	}
 	
 	
@@ -168,6 +133,6 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	@Override
 	public void setCurrentTime(long timestamp)
 	{
-		currentTime = timestamp;
+		source.setCurrentTime(timestamp);
 	}
 }

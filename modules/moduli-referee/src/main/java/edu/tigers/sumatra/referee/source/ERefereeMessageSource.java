@@ -13,4 +13,7 @@ public enum ERefereeMessageSource
 	
 	/** Information via SSL gamelog file */
 	INTERNAL_FORWARDER,
+	
+	/** Direct TCP connection to game-controller */
+	CI,
 }

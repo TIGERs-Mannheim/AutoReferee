@@ -80,4 +80,9 @@ public abstract class ARefereeMessageSource
 	{
 		return Optional.empty();
 	}
+	
+	
+	public void setCurrentTime(long timestamp)
+	{
+	}
 }
