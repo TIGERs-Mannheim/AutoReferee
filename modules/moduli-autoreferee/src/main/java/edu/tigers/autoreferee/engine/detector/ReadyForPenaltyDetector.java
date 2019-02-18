@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
-
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -14,8 +12,10 @@ import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
 import edu.tigers.sumatra.geometry.NGeometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -31,7 +31,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class ReadyForPenaltyDetector extends AGameEventDetector
 {
-	private static final Logger log = Logger.getLogger(ReadyForPenaltyDetector.class);
 	private static final Color AREA_COLOR = new Color(0, 0, 255, 150);
 	private static final double BALL_PLACEMENT_TOLERANCE = 200;
 	
@@ -64,7 +63,19 @@ public class ReadyForPenaltyDetector extends AGameEventDetector
 	{
 		frame.getShapes().get(EAutoRefShapesLayer.ENGINE).add(new DrawableRectangle(keeperArea, AREA_COLOR));
 		
-		if (!eventRaised && ballPlaced() && allPositionsCorrect())
+		if (eventRaised)
+		{
+			return Optional.empty();
+		}
+		
+		if (!ballPlaced())
+		{
+			frame.getShapes().get(EAutoRefShapesLayer.ENGINE)
+					.add(new DrawableCircle(Circle.createCircle(NGeometry.getPenaltyMark(shooterTeam.opposite()), 50)));
+			return Optional.empty();
+		}
+		
+		if (allPositionsCorrect())
 		{
 			double timeTaken = (frame.getTimestamp() - tStart) / 1e9;
 			eventRaised = true;
@@ -93,7 +104,6 @@ public class ReadyForPenaltyDetector extends AGameEventDetector
 		ITrackedBot keeper = frame.getWorldFrame().getBots().getWithNull(keeperID);
 		if (keeper == null)
 		{
-			log.debug("Keeper not present on the field");
 			return false;
 		}
 		boolean keeperInsideGoal = keeperArea.isPointInShape(keeper.getPos());
@@ -111,6 +121,7 @@ public class ReadyForPenaltyDetector extends AGameEventDetector
 	{
 		List<ITrackedBot> possibleKicker = frame.getWorldFrame().getBots().values().stream()
 				.filter(AutoRefUtil.ColorFilter.get(shooterTeam))
+				.filter(this::robotPositionInValid)
 				.collect(Collectors.toList());
 		
 		if (possibleKicker.size() > 1)
@@ -127,15 +138,31 @@ public class ReadyForPenaltyDetector extends AGameEventDetector
 	private boolean defendingTeamCorrect()
 	{
 		BotID keeperID = frame.getRefereeMsg().getKeeperBotID(shooterTeam.opposite());
-		List<ITrackedBot> defender = frame.getWorldFrame().getBots().values().stream()
+		List<ITrackedBot> defenders = frame.getWorldFrame().getBots().values().stream()
 				.filter(AutoRefUtil.ColorFilter.get(shooterTeam.opposite()))
 				.filter(bot -> !bot.getBotId().equals(keeperID))
+				.filter(this::robotPositionInValid)
 				.collect(Collectors.toList());
 		
-		defender.forEach(bot -> frame.getShapes().get(EAutoRefShapesLayer.ENGINE).add(
+		defenders.forEach(bot -> frame.getShapes().get(EAutoRefShapesLayer.ENGINE).add(
 				new DrawableCircle(bot.getPos(), Geometry.getBotRadius() * 2, Color.RED)));
 		
-		return defender.isEmpty();
+		return defenders.isEmpty();
+	}
+	
+	
+	private boolean robotPositionInValid(ITrackedBot bot)
+	{
+		double sign = Math.signum(NGeometry.getGoal(shooterTeam.opposite()).getCenter().x());
+		double xBoundary = Geometry.getFieldLength() / 2
+				- Geometry.getPenaltyAreaDepth()
+				- RuleConstraints.getDistancePenaltyMarkToPenaltyLine()
+				- Geometry.getBotRadius();
+		if (sign < 0)
+		{
+			return bot.getPos().x() < -xBoundary;
+		}
+		return bot.getPos().x() > xBoundary;
 	}
 	
 	
