@@ -26,6 +26,7 @@ import edu.tigers.sumatra.referee.data.ProposedGameEvent;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.data.TeamInfo;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -68,8 +69,11 @@ public class RefereeVisCalc implements IWpCalc
 		int[] off = getOffsets();
 		
 		double ballSpeed = wfw.getSimpleWorldFrame().getBall().getVel3().getLength();
+		double initBallSpeed = wfw.getSimpleWorldFrame().getKickFitState()
+				.map(BallKickFitState::getAbsoluteKickSpeed).orElse(0.0) / 1000.0;
 		double ballHeight = wfw.getSimpleWorldFrame().getBall().getPos3().z();
-		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "; height: " + dfBallVel.format(ballHeight);
+		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "| "
+				+ dfBallVel.format(initBallSpeed) + "; height: " + dfBallVel.format(ballHeight);
 		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 35), ballVelStr,
 				ballSpeed <= RuleConstraints.getMaxBallSpeed() ? Color.white
