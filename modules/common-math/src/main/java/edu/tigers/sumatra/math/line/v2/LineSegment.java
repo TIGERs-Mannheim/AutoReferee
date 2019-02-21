@@ -225,4 +225,11 @@ final class LineSegment extends ALine implements ILineSegment
 		IVector2 newEnd = LineMath.stepAlongLine(getEnd(), getStart(), -margin);
 		return Lines.segmentFromPoints(newStart, newEnd);
 	}
+	
+	
+	@Override
+	public String toString()
+	{
+		return "LineSegment(" + start + " -> " + end + ")";
+	}
 }

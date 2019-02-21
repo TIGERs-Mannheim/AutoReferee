@@ -146,4 +146,11 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 	{
 		return isValid() && LineMath.isPointInFront(this, point);
 	}
+	
+	
+	@Override
+	public String toString()
+	{
+		return "Line(" + supportVector() + " + s * " + directionVector() + ")";
+	}
 }
