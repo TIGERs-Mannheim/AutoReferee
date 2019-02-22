@@ -143,7 +143,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			} catch (InterruptedException e)
 			{
 				Thread.currentThread().interrupt();
-			} catch (Exception e)
+			} catch (Throwable e)
 			{
 				log.error("Unhandled exception during AutoRef execution", e);
 			}

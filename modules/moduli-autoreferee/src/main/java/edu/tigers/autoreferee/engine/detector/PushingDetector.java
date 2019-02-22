@@ -1,19 +1,22 @@
 package edu.tigers.autoreferee.engine.detector;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
+import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableTube;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -42,7 +45,11 @@ public class PushingDetector extends AGameEventDetector
 	@Configurable(defValue = "0.7", comment = "Maximum absolute angle [rad] between pushed direction and attacker to opponent direction for counting violation")
 	private static double maxPushAngle = 0.7;
 	
-	private List<RobotPair> firstRobotPairs = new ArrayList<>();
+	@Configurable(defValue = "2.0", comment = "Cool down time [s] until the same robot pair will not be redetected")
+	private static double detectionCoolDownTime = 2.0;
+	
+	private Set<RobotPair> firstRobotPairs = new HashSet<>();
+	private Set<RobotPair> recentlyDetectedPushingPairs = new HashSet<>();
 	
 	
 	public PushingDetector()
@@ -54,39 +61,89 @@ public class PushingDetector extends AGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
-		final List<RobotPair> latestRobotPairs = frame.getWorldFrame().getBots().values().stream()
-				.map(this::touchingOpponents)
-				.flatMap(Collection::stream)
-				.collect(Collectors.toList());
+		removeOldRecentlyDetectedPushingPairs();
+		
+		final Set<RobotPair> latestRobotPairs = latestRobotPairs();
+		latestRobotPairs.addAll(touchingBallRobotPairs());
+		latestRobotPairs.removeAll(recentlyDetectedPushingPairs);
 		
 		firstRobotPairs = merge(firstRobotPairs, latestRobotPairs);
-		if (firstRobotPairs.size() != latestRobotPairs.size())
-		{
-			throw new IllegalStateException(
-					"Lists should have same size: " + firstRobotPairs + " vs. " + latestRobotPairs);
-		}
-		
 		firstRobotPairs.forEach(this::drawBotPair);
 		
-		final List<PushedDistance> pushedDistances = latestRobotPairs.stream()
-				.map(this::pushedDistance)
-				.collect(Collectors.toList());
+		final List<PushedDistance> pushedDistances = pushedDistances(latestRobotPairs);
 		pushedDistances.forEach(this::drawPushedDistance);
 		
-		final Optional<PushedDistance> ruleViolation = pushedDistances.stream()
+		return ruleViolation(pushedDistances).map(this::createEvent);
+	}
+	
+	
+	private IGameEvent createEvent(final PushedDistance pd)
+	{
+		firstRobotPairs.remove(pd.firstPair);
+		recentlyDetectedPushingPairs.add(pd.latestPair);
+		return new BotPushedBot(
+				pd.firstPair.bot.getBotId(),
+				pd.firstPair.opponentBot.getBotId(),
+				pd.start(),
+				pd.distance());
+	}
+	
+	
+	private Optional<PushedDistance> ruleViolation(final List<PushedDistance> pushedDistances)
+	{
+		return pushedDistances.stream()
 				.filter(this::violatesRules)
 				.findFirst();
-		if (ruleViolation.isPresent())
-		{
-			final PushedDistance pd = ruleViolation.get();
-			firstRobotPairs.remove(pd.firstPair);
-			return Optional.of(new BotPushedBot(
-					pd.firstPair.bot.getBotId(),
-					pd.firstPair.opponentBot.getBotId(),
-					pd.start(),
-					pd.distance()));
-		}
-		return Optional.empty();
+	}
+	
+	
+	private List<PushedDistance> pushedDistances(final Set<RobotPair> latestRobotPairs)
+	{
+		return latestRobotPairs.stream()
+				.map(this::pushedDistance)
+				.collect(Collectors.toList());
+	}
+	
+	
+	private Set<RobotPair> latestRobotPairs()
+	{
+		return frame.getWorldFrame().getBots().values().stream()
+				.map(this::touchingOpponents)
+				.flatMap(Collection::stream)
+				.collect(Collectors.toSet());
+	}
+	
+	
+	private Set<RobotPair> touchingBallRobotPairs()
+	{
+		final List<ITrackedBot> botsTouchingBall = frame.getBotsTouchingBall().stream()
+				.map(BotPosition::getBotID)
+				.map(id -> frame.getWorldFrame().getBot(id))
+				.collect(Collectors.toList());
+		return botsTouchingBall.stream()
+				.map(bot -> touching(bot, botsTouchingBall))
+				.flatMap(Collection::stream).collect(Collectors.toSet());
+	}
+	
+	
+	private void removeOldRecentlyDetectedPushingPairs()
+	{
+		recentlyDetectedPushingPairs.removeIf(this::detectionCooledDown);
+	}
+	
+	
+	private boolean detectionCooledDown(RobotPair robotPair)
+	{
+		return (frame.getTimestamp() - robotPair.getBot().getTimestamp()) / 1e9 > detectionCoolDownTime;
+	}
+	
+	
+	private List<RobotPair> touching(ITrackedBot bot, List<ITrackedBot> ballTouchingBots)
+	{
+		return ballTouchingBots.stream()
+				.filter(b -> b.getBotId() != bot.getBotId())
+				.map(b -> new RobotPair(b, bot))
+				.collect(Collectors.toList());
 	}
 	
 	
@@ -129,10 +186,10 @@ public class PushingDetector extends AGameEventDetector
 	}
 	
 	
-	private List<RobotPair> merge(List<RobotPair> oldPairs, List<RobotPair> newPairs)
+	private Set<RobotPair> merge(Set<RobotPair> oldPairs, Set<RobotPair> newPairs)
 	{
 		// take all old
-		final List<RobotPair> mergedPairs = new ArrayList<>(oldPairs);
+		final Set<RobotPair> mergedPairs = new HashSet<>(oldPairs);
 		// but remove the vanished ones
 		mergedPairs.removeIf(b -> !newPairs.contains(b));
 		// and add new bots
@@ -212,6 +269,16 @@ public class PushingDetector extends AGameEventDetector
 					.append(bot.getBotId())
 					.append(opponentBot.getBotId())
 					.toHashCode();
+		}
+		
+		
+		@Override
+		public String toString()
+		{
+			return new ToStringBuilder(this)
+					.append("bot", bot)
+					.append("opponentBot", opponentBot)
+					.toString();
 		}
 	}
 	

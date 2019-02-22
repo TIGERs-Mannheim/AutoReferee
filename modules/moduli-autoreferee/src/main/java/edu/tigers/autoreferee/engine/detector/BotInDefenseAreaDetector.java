@@ -6,7 +6,6 @@ package edu.tigers.autoreferee.engine.detector;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -20,7 +19,6 @@ import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.AttackerInDefenseArea;
@@ -195,20 +193,11 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 	{
 		ETeamColor attackerColor = defender.getTeamColor().opposite();
 		
-		IPenaltyArea defenderPenaltyArea = NGeometry.getPenaltyArea(defender.getTeamColor());
 		return frame.getWorldFrame().getBots().values().stream()
 				// bots from attacking team
 				.filter(AutoRefUtil.ColorFilter.get(attackerColor))
 				// that touch the defender
-				.filter(b -> botPos.distanceTo(b.getPos()) <= Geometry.getBotRadius() * 2)
-				// push in direction of penalty area
-				.map(b -> Lines.halfLineFromPoints(b.getPos(), botPos))
-				// find intersection that show that attacker pushs towards penArea
-				.map(defenderPenaltyArea::lineIntersections)
-				.flatMap(List::stream)
-				.findAny()
-				// if any intersection is present, some attacker pushes the defender
-				.isPresent();
+				.anyMatch(b -> botPos.distanceTo(b.getPos()) <= Geometry.getBotRadius() * 2 + 10);
 	}
 	
 	
