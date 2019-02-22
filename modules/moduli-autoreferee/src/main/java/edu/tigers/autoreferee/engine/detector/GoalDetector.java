@@ -37,10 +37,6 @@ public class GoalDetector extends AGameEventDetector
 {
 	private final Logger log = Logger.getLogger(GoalDetector.class.getName());
 	
-	static
-	{
-		AGameEventDetector.registerClass(GoalDetector.class);
-	}
 	
 	private TimedPosition lastBallLeftFieldPos = null;
 	private boolean indirectStillHot = false;

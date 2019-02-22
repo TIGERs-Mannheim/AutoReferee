@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
+import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.instanceables.InstanceableClass;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
@@ -36,6 +37,7 @@ public class GameEventEngine
 		
 		for (EGameEventDetectorType eCalc : EGameEventDetectorType.values())
 		{
+			ConfigRegistration.registerClass("autoreferee", eCalc.getInstanceableClass().getImpl());
 			if (eCalc.getInstanceableClass().getImpl() != null)
 			{
 				try

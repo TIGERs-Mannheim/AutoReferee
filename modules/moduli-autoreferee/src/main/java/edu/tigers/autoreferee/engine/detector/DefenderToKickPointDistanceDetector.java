@@ -49,11 +49,6 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 	private final Map<BotID, Long> outerCircleBots = new HashMap<>();
 	private IVector2 ballPos = null;
 	
-	static
-	{
-		AGameEventDetector.registerClass(DefenderToKickPointDistanceDetector.class);
-	}
-	
 	
 	public DefenderToKickPointDistanceDetector()
 	{

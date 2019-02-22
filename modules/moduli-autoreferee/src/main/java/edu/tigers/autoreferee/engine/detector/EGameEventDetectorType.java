@@ -33,7 +33,8 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	BOT_NUMBER(new InstanceableClass(BotNumberDetector.class)),
 	READY_TO_CONTINUE(new InstanceableClass(ReadyToContinueDetector.class)),
 	PUSHING(new InstanceableClass(PushingDetector.class)),
-
+	BALL_PLACEMENT_INTERFERENCE(new InstanceableClass(BallPlacementInterferenceDetector.class)),
+	
 	;
 	
 	private final InstanceableClass clazz;

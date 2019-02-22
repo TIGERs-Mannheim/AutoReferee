@@ -52,12 +52,6 @@ public class BotCollisionDetector extends AGameEventDetector
 	private static double botBrakeLookahead = 0.1;
 	
 	
-	static
-	{
-		AGameEventDetector.registerClass(BotCollisionDetector.class);
-	}
-	
-	
 	private final Map<BotID, Long> lastViolators = new HashMap<>();
 	
 	

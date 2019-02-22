@@ -41,10 +41,6 @@ public class DoubleTouchDetector extends AGameEventDetector
 	private static final Set<EGameState> VALID_STATES = Collections.unmodifiableSet(EnumSet.of(
 			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE, EGameState.RUNNING));
 	
-	static
-	{
-		AGameEventDetector.registerClass(DoubleTouchDetector.class);
-	}
 	
 	private BotID kickerID = null;
 	private boolean stillTouching = true;

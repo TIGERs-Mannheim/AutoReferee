@@ -26,11 +26,6 @@ public class DribblingDetector extends AGameEventDetector
 	@Configurable(comment = "[mm] Any dribbling distance above this value is considered a violation", defValue = "1000.0")
 	private static double maxDribblingLength = 1000.0;
 	
-	static
-	{
-		AGameEventDetector.registerClass(DribblingDetector.class);
-	}
-	
 	private final Map<BotID, BotPosition> currentContacts = new HashMap<>();
 	
 	

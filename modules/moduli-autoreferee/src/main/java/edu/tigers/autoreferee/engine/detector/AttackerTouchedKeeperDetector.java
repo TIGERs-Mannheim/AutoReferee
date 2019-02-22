@@ -43,10 +43,6 @@ public class AttackerTouchedKeeperDetector extends AGameEventDetector
 	@Configurable(comment = "[s] The amount of time before a violation is reported again for the same bot", defValue = "1.5")
 	private static double violatorCoolDownTime = 1.5;
 	
-	static
-	{
-		registerClass(AttackerTouchedKeeperDetector.class);
-	}
 	
 	private Map<BotID, Long> oldViolators = new HashMap<>();
 	

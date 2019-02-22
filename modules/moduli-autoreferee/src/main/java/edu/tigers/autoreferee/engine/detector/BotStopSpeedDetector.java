@@ -39,10 +39,6 @@ public class BotStopSpeedDetector extends AGameEventDetector
 	@Configurable(comment = "[s] The number of milliseconds that a bot needs violate the stop speed limit to be reported", defValue = "0.3")
 	private static double minViolationDuration = 0.3;
 	
-	static
-	{
-		AGameEventDetector.registerClass(BotStopSpeedDetector.class);
-	}
 	
 	private final Map<BotID, Long> currentViolators = new HashMap<>();
 	private final Set<BotID> lastViolators = new HashSet<>();

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
@@ -205,7 +204,7 @@ public class Tube implements ITube
 	
 	
 	@Override
-	public I2DShape withMargin(final double margin)
+	public ITube withMargin(final double margin)
 	{
 		return new Tube(startCenter, endCenter, radius + margin);
 	}

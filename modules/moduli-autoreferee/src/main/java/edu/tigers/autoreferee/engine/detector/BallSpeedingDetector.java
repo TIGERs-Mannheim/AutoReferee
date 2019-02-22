@@ -28,11 +28,6 @@ public class BallSpeedingDetector extends AGameEventDetector
 	private static double maxWaitingTime = 0.8;
 	
 	
-	static
-	{
-		AGameEventDetector.registerClass(BallSpeedingDetector.class);
-	}
-	
 	private IKickEvent lastReportedKickEvent;
 	
 	

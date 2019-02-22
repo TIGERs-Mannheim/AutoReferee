@@ -36,4 +36,8 @@ public interface ITube extends I2DShape
 	 * @return the center of the tube
 	 */
 	IVector2 center();
+	
+	
+	@Override
+	ITube withMargin(double margin);
 }

@@ -59,6 +59,13 @@ public class PushingDetector extends AGameEventDetector
 	
 	
 	@Override
+	public void doReset()
+	{
+		firstRobotPairs.clear();
+	}
+	
+	
+	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
 		removeOldRecentlyDetectedPushingPairs();

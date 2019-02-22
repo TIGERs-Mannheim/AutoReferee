@@ -42,11 +42,6 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 	private final Map<BotID, BotPosition> lastViolators = new HashMap<>();
 	private long entryTime = 0;
 	
-	static
-	{
-		AGameEventDetector.registerClass(BotInDefenseAreaDetector.class);
-	}
-	
 	
 	public BotInDefenseAreaDetector()
 	{

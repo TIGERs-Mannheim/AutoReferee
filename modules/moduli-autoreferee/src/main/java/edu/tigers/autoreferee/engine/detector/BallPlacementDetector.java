@@ -42,11 +42,6 @@ public class BallPlacementDetector extends AGameEventDetector
 	@Configurable(defValue = "2.0", comment = "Minimum time [s] that the ball placement must take to allow robots to move to valid positions")
 	private static double minBallPlacementDuration = 2.0;
 	
-	static
-	{
-		registerClass(BallPlacementDetector.class);
-	}
-	
 	
 	private long tStart = 0;
 	private IVector2 initialBallPos;

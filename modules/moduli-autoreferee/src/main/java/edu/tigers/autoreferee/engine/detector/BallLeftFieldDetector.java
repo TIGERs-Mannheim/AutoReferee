@@ -30,10 +30,6 @@ public class BallLeftFieldDetector extends AGameEventDetector
 	@Configurable(comment = "[mm] A goalline off is only considered icing if the bot was located more than this value behind the kickoff line", defValue = "200.0")
 	private static double icingKickoffLineThreshold = 200.0;
 	
-	static
-	{
-		registerClass(BallLeftFieldDetector.class);
-	}
 	
 	private TimedPosition lastBallLeftFieldPos = null;
 	
