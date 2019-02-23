@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.lang.StringUtils;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;
@@ -30,8 +32,6 @@ import edu.tigers.sumatra.views.ISumatraViewPresenter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
-
-import javax.swing.SwingUtilities;
 
 
 public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver,
@@ -85,6 +85,7 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wfw)
 	{
+		gameLogTableModel.removeTooRecentEntries(wfw.getTimestamp());
 		if (lastWorldFrameWrapper != null)
 		{
 			checkForNewGameEventFromReferee(wfw);
@@ -151,6 +152,7 @@ public class GameLogPresenter implements ISumatraViewPresenter, IAutoRefObserver
 	@Override
 	public void onModuliStateChanged(final ModulesState state)
 	{
+		gameLogTableModel.onClear();
 		if (state == ModulesState.ACTIVE)
 		{
 			SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);

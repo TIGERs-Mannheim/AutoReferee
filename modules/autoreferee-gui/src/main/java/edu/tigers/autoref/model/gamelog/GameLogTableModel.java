@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -32,16 +33,20 @@ public class GameLogTableModel extends AbstractTableModel
 	
 	public void add(GameLogEntry entry)
 	{
-		entries.add(entry);
-		int id = entries.size() - 1;
-		fireTableRowsInserted(id, id);
+		SwingUtilities.invokeLater(() -> {
+			entries.add(entry);
+			int id = entries.size() - 1;
+			fireTableRowsInserted(id, id);
+		});
 	}
 	
 	
 	public void onClear()
 	{
-		entries.clear();
-		fireTableDataChanged();
+		SwingUtilities.invokeLater(() -> {
+			entries.clear();
+			fireTableDataChanged();
+		});
 	}
 	
 	
@@ -82,5 +87,23 @@ public class GameLogTableModel extends AbstractTableModel
 		 * It is responsible for displaying the correct data in each column.
 		 */
 		return entries.get(rowIndex);
+	}
+	
+	
+	/**
+	 * Remove entries that have a larger timestamp that the given one.
+	 * This will clear events when going backwards in time in a replay window.
+	 * 
+	 * @param timestamp
+	 */
+	public void removeTooRecentEntries(final long timestamp)
+	{
+		SwingUtilities.invokeLater(() -> {
+			boolean removed = entries.removeIf(e -> e.getTimestamp() > timestamp);
+			if (removed)
+			{
+				fireTableDataChanged();
+			}
+		});
 	}
 }
