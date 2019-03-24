@@ -23,7 +23,6 @@ import edu.tigers.sumatra.ids.UninitializedID;
 import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
 
@@ -31,11 +30,9 @@ import edu.tigers.sumatra.model.SumatraModel;
 /**
  * This {@link DynamicPosition} represents either a normal position vector
  * or an updateable position connected with an object id
- * 
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent(version = 2)
-public class DynamicPosition extends AVector2
+public class DynamicPosition
 {
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(DynamicPosition.class.getName());
@@ -123,13 +120,6 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
-	@Override
-	public DynamicPosition copy()
-	{
-		return new DynamicPosition(this);
-	}
-	
-	
 	/**
 	 * Update position by consulting {@link SimpleWorldFrame}
 	 * 
@@ -205,6 +195,12 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
+	public IVector2 getPos()
+	{
+		return pos;
+	}
+	
+	
 	/**
 	 * @param pos the pos to set
 	 */
@@ -215,21 +211,6 @@ public class DynamicPosition extends AVector2
 	}
 	
 	
-	@Override
-	public double x()
-	{
-		return pos.x();
-	}
-	
-	
-	@Override
-	public double y()
-	{
-		return pos.y();
-	}
-	
-	
-	@Override
 	public String getSaveableString()
 	{
 		if (trackedId.isBot())
@@ -240,7 +221,7 @@ public class DynamicPosition extends AVector2
 		{
 			return "-1";
 		}
-		return super.getSaveableString();
+		return pos.getSaveableString();
 	}
 	
 	
@@ -334,30 +315,21 @@ public class DynamicPosition extends AVector2
 	
 	
 	@SuppressWarnings("unchecked")
-	@Override
 	public JSONObject toJSON()
 	{
-		JSONObject jsonMapping = super.toJSON();
+		JSONObject jsonMapping = pos.toJSON();
 		jsonMapping.put("trackedId", trackedId.getNumber());
 		jsonMapping.put("lookahead", lookahead);
 		return jsonMapping;
 	}
 	
 	
-	@Override
 	public List<Number> getNumberList()
 	{
-		List<Number> numbers = super.getNumberList();
+		List<Number> numbers = pos.getNumberList();
 		numbers.add(trackedId.getNumber());
 		numbers.add(lookahead);
 		return numbers;
-	}
-	
-	
-	@Override
-	public Vector2 getXYVector()
-	{
-		return Vector2.copy(pos);
 	}
 	
 	
