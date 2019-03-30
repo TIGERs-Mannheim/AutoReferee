@@ -8,8 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -38,7 +40,7 @@ public final class SumatraModel extends Moduli
 	private static final Logger log = Logger.getLogger(SumatraModel.class.getName());
 	
 	// --- version ---
-	private static final String VERSION = "2019";
+	private static final String VERSION = getVersionNameFromManifest();
 	
 	// --- singleton ---
 	private static final SumatraModel INSTANCE = new SumatraModel();
@@ -365,5 +367,34 @@ public final class SumatraModel extends Moduli
 	public boolean isSimulation()
 	{
 		return "SUMATRA".equalsIgnoreCase(getEnvironment());
+	}
+	
+	
+	private static String getVersionNameFromManifest()
+	{
+		InputStream manifestStream = SumatraModel.class.getClassLoader()
+				.getResourceAsStream("edu/tigers/sumatra/model/metadata.properties");
+		if (manifestStream != null)
+		{
+			try
+			{
+				final Properties properties = new Properties();
+				properties.load(manifestStream);
+				
+				final String version = properties.getProperty("version", "unknown version")
+						.replaceAll("-SNAPSHOT", "");
+				final String gitHash = properties.getProperty("git.hash", "");
+				if (StringUtils.isNotBlank(gitHash))
+				{
+					return version + "_" + gitHash;
+				}
+				return version;
+			} catch (IOException e)
+			{
+				log.error("Could not read manifest", e);
+			}
+			
+		}
+		return "";
 	}
 }

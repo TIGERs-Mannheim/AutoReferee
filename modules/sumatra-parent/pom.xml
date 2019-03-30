@@ -67,12 +67,6 @@
         <dependencies>
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>autoreferee</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>autoreferee-gui</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -253,12 +247,6 @@
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>sumatra-grsim</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>sumatra-gui-ai</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -355,18 +343,6 @@
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>sumatra-record-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
-                <artifactId>sumatra-multi-team-communication</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>moduli-vision-simulation</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -416,6 +392,12 @@
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>
                 <artifactId>sumatra-gui-skills</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-statistics-saver</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -650,6 +632,12 @@
                 <artifactId>Java-WebSocket</artifactId>
                 <version>1.3.9</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.influxdb</groupId>
+                <artifactId>influxdb-java</artifactId>
+                <version>2.15</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -726,6 +714,12 @@
                     <groupId>com.googlecode.maven-download-plugin</groupId>
                     <artifactId>download-maven-plugin</artifactId>
                     <version>1.4.1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>buildnumber-maven-plugin</artifactId>
+                    <version>1.4</version>
                 </plugin>
             </plugins>
         </pluginManagement>

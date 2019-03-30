@@ -420,6 +420,17 @@ public class GameState
 	
 	
 	/**
+	 * @return true if the game is in running state, in a standard situation or in kickoff (no prepare states)
+	 */
+	public boolean isGameRunning()
+	{
+		return isRunning()
+				|| isStandardSituation()
+				|| getState() == EGameState.KICKOFF;
+	}
+	
+	
+	/**
 	 * @return true if state is PENALTY or PREPARE_PENALTY
 	 */
 	public boolean isPenaltyOrPreparePenalty()
