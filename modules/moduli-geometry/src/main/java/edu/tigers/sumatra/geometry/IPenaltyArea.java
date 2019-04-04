@@ -88,6 +88,18 @@ public interface IPenaltyArea extends I2DShape
 	
 	
 	/**
+	 * @return Position of the front corner with negative y (looking towards enemy goal)
+	 */
+	IVector2 getNegCorner();
+	
+	
+	/**
+	 * @return Position of the front corner with positive y (looking towards enemy goal)
+	 */
+	IVector2 getPosCorner();
+	
+	
+	/**
 	 * Check if a point is behind the penalty area, considering the width of the penalty area
 	 *
 	 * @param point

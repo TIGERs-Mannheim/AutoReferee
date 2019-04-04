@@ -453,6 +453,20 @@ public class LegacyPenArea implements IPenaltyArea
 	
 	
 	@Override
+	public IVector2 getNegCorner()
+	{
+		return frontLine.getEnd();
+	}
+	
+	
+	@Override
+	public IVector2 getPosCorner()
+	{
+		return frontLine.getStart();
+	}
+	
+	
+	@Override
 	public List<IDrawableShape> getDrawableShapes()
 	{
 		List<IDrawableShape> shapes = new ArrayList<>(3);

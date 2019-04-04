@@ -32,7 +32,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return all intersections. This can be zero to two intersections.
 	 */
 	List<IVector2> lineIntersections(edu.tigers.sumatra.math.line.v2.ILine line);
-
+	
+	
 	/**
 	 * Find the line intersections with the edges
 	 *
@@ -40,7 +41,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return all intersections. This can be zero to two intersections.
 	 */
 	List<IVector2> lineIntersections(ILineSegment line);
-
+	
+	
 	/**
 	 * Find the line intersections with the edges
 	 *
@@ -48,8 +50,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return all intersections. This can be zero to two intersections.
 	 */
 	List<IVector2> lineIntersections(IHalfLine line);
-
-
+	
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -61,7 +63,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 */
 	@Override
 	List<IVector2> lineIntersections(final ILine line);
-
+	
+	
 	/**
 	 * Absolute value of the length of the side
 	 * that is parallel to the Y-Axis.
@@ -111,7 +114,8 @@ public interface IRectangle extends I2DShape, IJsonString
 	 * @return
 	 */
 	IVector2 getRandomPointInShape(Random rnd);
-
+	
+	
 	boolean isCircleInShape(ICircle circle);
 	
 	
@@ -124,24 +128,61 @@ public interface IRectangle extends I2DShape, IJsonString
 	
 	
 	/**
+	 * Get a specified corner of the rectangle
+	 *
+	 * @param pos which corner
+	 * @return IVector2 of the position of the selected corner
+	 */
+	IVector2 getCorner(ECorner pos);
+	
+	
+	/**
 	 * Get all four points of the rectangle.
-	 * Starting at topLeft, going counter clockwise.
+	 * Starting at bottomLeft, going clockwise.
 	 * 
 	 * @return List of corner points.
 	 */
 	List<IVector2> getCorners();
 	
+	/**
+	 * Top -> posY
+	 * Right -> posX
+	 */
+	enum ECorner
+	{
+		BOTTOM_LEFT(0),
+		TOP_LEFT(1),
+		TOP_RIGHT(2),
+		BOTTOM_RIGHT(3);
+		
+		private int index;
+		
+		
+		ECorner(int index)
+		{
+			this.index = index;
+		}
+		
+		
+		public int getIndex()
+		{
+			return this.index;
+		}
+		
+	}
+	
 	
 	/**
-	 * Get the rectangle edges in counter-clockwise order.
+	 * Get the rectangle edges in clockwise order.
 	 * Starting with the left edge.
 	 * 
 	 * @return List of all edges
 	 */
 	List<ILine> getEdges();
-
+	
+	
 	/**
-	 * Get the rectangle edges in counter-clockwise order.
+	 * Get the rectangle edges in clockwise order.
 	 * Starting with the left edge.
 	 *
 	 * @return List of all edges

@@ -26,6 +26,7 @@ public class DrawableArc extends Arc implements IDrawableShape
 {
 	private Color color;
 	private boolean fill = false;
+	private int arcType = Arc2D.PIE;
 	
 	
 	@SuppressWarnings("unused") // used by berkeley
@@ -59,7 +60,7 @@ public class DrawableArc extends Arc implements IDrawableShape
 				.rad2deg((getStartAngle() + tool.getFieldTurn().getAngle()) - (AngleMath.PI_HALF * (invert ? -1 : 1)));
 		double extendAngle = AngleMath.rad2deg(getRotation());
 		Shape arcShape = new Arc2D.Double(drawingX, drawingY, radius * 2, radius * 2, startAngle,
-				extendAngle, Arc2D.PIE);
+				extendAngle, arcType);
 		g.setColor(color);
 		g.draw(arcShape);
 		if (fill)
@@ -80,6 +81,18 @@ public class DrawableArc extends Arc implements IDrawableShape
 	public void setFill(final boolean fill)
 	{
 		this.fill = fill;
+	}
+	
+	
+	public void setArcType(final int arcType)
+	{
+		if (arcType >= Arc2D.OPEN && arcType <= Arc2D.PIE)
+		{
+			this.arcType = arcType;
+		} else
+		{
+			throw new IllegalArgumentException("invalid type for Arc: " + arcType);
+		}
 	}
 	
 }

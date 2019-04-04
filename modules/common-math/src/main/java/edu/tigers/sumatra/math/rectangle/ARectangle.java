@@ -84,6 +84,13 @@ abstract class ARectangle implements IRectangle
 	
 	
 	@Override
+	public IVector2 getCorner(final ECorner pos)
+	{
+		return getCorners().get(pos.getIndex());
+	}
+	
+	
+	@Override
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
 		return withMargin(margin).isPointInShape(point);
