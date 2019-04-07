@@ -338,7 +338,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	@Override
 	public void onClearShapeMap(final String source)
 	{
-		panel.getFieldPanel().setShapeMap(source, null);
+		runnables.add(() -> panel.getFieldPanel().setShapeMap(source, null));
 	}
 	
 	

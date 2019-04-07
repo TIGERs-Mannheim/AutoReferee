@@ -106,4 +106,10 @@ public abstract class AReferee extends AModule
 	 * @param timestamp
 	 */
 	public abstract void setCurrentTime(long timestamp);
+	
+	
+	/**
+	 * Reset and initialize the game controller.
+	 */
+	public abstract void initGameController();
 }

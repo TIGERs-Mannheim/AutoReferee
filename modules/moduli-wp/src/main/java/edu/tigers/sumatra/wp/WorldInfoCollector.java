@@ -308,20 +308,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Override
 	public final void initModule()
 	{
-		// nothing to do
-	}
-	
-	
-	@Override
-	public final void deinitModule()
-	{
-		// nothing to do
-	}
-	
-	
-	@Override
-	public final void startModule()
-	{
 		Geometry.refresh();
 		clearObservers();
 		
@@ -334,6 +320,13 @@ public class WorldInfoCollector extends AWorldPredictor
 		
 		BallFactory.updateConfigs();
 		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isProductive());
+	}
+	
+	
+	@Override
+	public final void deinitModule()
+	{
+		// nothing to do
 	}
 	
 	

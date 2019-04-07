@@ -51,13 +51,7 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		{
 			sslGameControllerProcess = new SslGameControllerProcess(getGameControllerUiPort());
 			new Thread(sslGameControllerProcess).start();
-			
-			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.triggerResetMatch()));
-			sslGameControllerProcess.getClientBlocking()
-					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI")));
-			sslGameControllerProcess.getClientBlocking()
-					.ifPresent(c -> c.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI")));
-			sslGameControllerProcess.getClientBlocking().ifPresent(c -> c.sendEvent(GcEventFactory.nextStage()));
+			initGameController();
 		}
 		
 		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(port);
@@ -71,6 +65,22 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		controllable = useGameController;
 		
 		notifyRefereeMsgSourceChanged(source);
+	}
+	
+	
+	@Override
+	public void initGameController()
+	{
+		sslGameControllerProcess.getClientBlocking().ifPresent(this::initGameController);
+	}
+	
+	
+	private void initGameController(SslGameControllerClient client)
+	{
+		client.sendEvent(GcEventFactory.triggerResetMatch());
+		client.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
+		client.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
+		client.sendEvent(GcEventFactory.nextStage());
 	}
 	
 	
