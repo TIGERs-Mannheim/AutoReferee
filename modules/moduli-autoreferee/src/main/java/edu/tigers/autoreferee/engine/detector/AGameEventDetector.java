@@ -7,8 +7,6 @@ import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
 
-import com.github.g3force.configurable.ConfigRegistration;
-
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
@@ -111,7 +109,7 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	}
 	
 	
-	protected final void setInactive()
+	private void setInactive()
 	{
 		this.active = false;
 	}
@@ -120,11 +118,5 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	protected final ITrackedBall getBall()
 	{
 		return frame.getWorldFrame().getBall();
-	}
-	
-	
-	protected static void registerClass(final Class<?> clazz)
-	{
-		ConfigRegistration.registerClass("autoreferee", clazz);
 	}
 }

@@ -1,7 +1,9 @@
 package edu.tigers.autoreferee.engine.detector;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -9,8 +11,11 @@ import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.sumatra.Referee;
 import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.filter.iir.ExponentialMovingAverageFilter2D;
 import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.NGeometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -19,7 +24,6 @@ import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.PlacementFailed;
 import edu.tigers.sumatra.referee.gameevent.PlacementSucceeded;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
-import edu.tigers.sumatra.wp.util.BotDistanceComparator;
 
 
 /**
@@ -95,14 +99,9 @@ public class BallPlacementDetector extends AGameEventDetector
 		ballPosFilter.setAlpha(ballMovingFilterAlpha);
 		ballPosFilter.update(ballPos);
 		
-		final boolean ballStill = ballPosFilter.getState().getXYVector().distanceTo(ballPos) < 5;
-		Color color = ballStill ? Color.green : Color.red;
-		frame.getShapes().get(EAutoRefShapesLayer.ENGINE)
-				.add(new DrawableCircle(Circle.createCircle(ballPosFilter.getState().getXYVector(), 50), color));
 		
 		if (remainingDistance <= ballPlacementTolerance
-				&& ballStill
-				&& botsHaveSufficientDistanceToBall()
+				&& canContinue()
 				&& elapsedTime > minBallPlacementDuration)
 		{
 			eventRaised = true;
@@ -120,19 +119,54 @@ public class BallPlacementDetector extends AGameEventDetector
 	}
 	
 	
-	private boolean botsHaveSufficientDistanceToBall()
+	private boolean canContinue()
 	{
-		final Optional<ITrackedBot> nearestBot = frame.getWorldFrame().getBots().values().stream()
-				.min(new BotDistanceComparator(frame.getWorldFrame().getBall().getPos()));
-		if (nearestBot.isPresent())
-		{
-			double minDistance = isNextCommandForPlacingTeam() ? minDistanceToBallForFreeKick
-					: minDistanceToBallForForceStart;
-			double curDistance = nearestBot.get().getPos().distanceTo(frame.getWorldFrame().getBall().getPos());
-			return curDistance > minDistance + Geometry.getBallRadius() + Geometry.getBotRadius();
-		}
-		// no bots -> no bot can be too close :)
-		return true;
+		final List<IDrawableShape> shapes = frame.getShapes().get(EAutoRefShapesLayer.ENGINE);
+		
+		final boolean ballStill = isBallStill();
+		Color color = ballStill ? Color.green : Color.red;
+		shapes.add(new DrawableCircle(Circle.createCircle(ballPosFilter.getState().getXYVector(), 50), color));
+		
+		final List<ITrackedBot> botsViolatingDistanceToBall = botsViolatingDistanceToBall();
+		botsViolatingDistanceToBall.forEach(bot -> shapes
+				.add(new DrawableCircle(Circle.createCircle(bot.getPos(), Geometry.getBotRadius() + 30), Color.red)));
+		
+		final List<ITrackedBot> botsInsideOpponentPenArea = botsInsideOpponentPenArea(frame.getGameState().getForTeam());
+		botsInsideOpponentPenArea.forEach(bot -> shapes
+				.add(new DrawableCircle(Circle.createCircle(bot.getPos(), Geometry.getBotRadius() + 30), Color.red)));
+		
+		return ballStill && botsViolatingDistanceToBall.isEmpty() && botsInsideOpponentPenArea.isEmpty();
+	}
+	
+	
+	private boolean isBallStill()
+	{
+		final IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
+		return ballPosFilter.getState().getXYVector().distanceTo(ballPos) < 5;
+	}
+	
+	
+	private List<ITrackedBot> botsViolatingDistanceToBall()
+	{
+		final double minDistance = Geometry.getBotRadius() +
+				(isNextCommandForPlacingTeam()
+						? minDistanceToBallForFreeKick
+						: minDistanceToBallForForceStart);
+		
+		return frame.getWorldFrame().getBots().values().stream()
+				.filter(bot -> bot.getPos().distanceTo(frame.getWorldFrame().getBall().getPos()) < minDistance)
+				.collect(Collectors.toList());
+	}
+	
+	
+	private List<ITrackedBot> botsInsideOpponentPenArea(ETeamColor teamColor)
+	{
+		final double penAreaMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard() + Geometry.getBotRadius();
+		return frame.getWorldFrame().getBots().values().stream()
+				.filter(bot -> bot.getBotId().getTeamColor() == teamColor)
+				.filter(bot -> NGeometry.getPenaltyArea(teamColor.opposite()).withMargin(penAreaMargin)
+						.isPointInShape(bot.getPos()))
+				.collect(Collectors.toList());
 	}
 	
 	
