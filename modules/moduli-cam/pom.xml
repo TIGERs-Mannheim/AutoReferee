@@ -22,11 +22,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-			<groupId>edu.tigers.sumatra</groupId>
-            <artifactId>sumatra-model</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>edu.tigers.sumatra</groupId>
 			<artifactId>common</artifactId>
@@ -70,11 +65,6 @@
         <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-configuration</groupId>
-            <artifactId>commons-configuration</artifactId>
         </dependency>
 
         <dependency>
