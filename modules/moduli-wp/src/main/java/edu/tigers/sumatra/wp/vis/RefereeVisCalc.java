@@ -35,10 +35,13 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  */
 public class RefereeVisCalc implements IWpCalc
 {
+	private static final int FIRST_LINE = 11;
+	private static final int SECOND_LINE = 23;
+	private static final int THIRD_LINE = 35;
+	private static final int FOURTH_LINE = 47;
 	private final DecimalFormat df2 = new DecimalFormat("00");
 	private final DecimalFormat dfSeconds = new DecimalFormat("00.000");
 	private final DecimalFormat dfBallVel = new DecimalFormat("0.00");
-	
 	
 	@Override
 	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
@@ -68,6 +71,11 @@ public class RefereeVisCalc implements IWpCalc
 		
 		int[] off = getOffsets();
 		
+		// Modify the offset after the yellow cards string to grow with the number of timers to prevent overlaps
+		modifyOffset(off, 7, 52 + 38 * Math.max(msg.getTeamInfoYellow().getYellowCardsTimes().size(),
+				msg.getTeamInfoBlue().getYellowCardsTimes().size()));
+		
+		
 		double ballSpeed = wfw.getSimpleWorldFrame().getBall().getVel3().getLength();
 		double initBallSpeed = wfw.getSimpleWorldFrame().getKickFitState()
 				.map(BallKickFitState::getAbsoluteKickSpeed).orElse(0.0) / 1000.0;
@@ -75,46 +83,58 @@ public class RefereeVisCalc implements IWpCalc
 		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "| "
 				+ dfBallVel.format(initBallSpeed) + "; height: " + dfBallVel.format(ballHeight);
 		
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 35), ballVelStr,
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], THIRD_LINE), ballVelStr,
 				ballSpeed <= RuleConstraints.getMaxBallSpeed() ? Color.white
 						: Color.red));
 		
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 11), msg.getStage().toString(), Color.white));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 23), msg.getCommand().toString(), Color.white));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], 35), wfw.getGameState().getStateNameWithColor(),
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], FIRST_LINE), msg.getStage().toString(),
 				Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[0], SECOND_LINE), msg.getCommand().toString(),
+				Color.white));
+		txtShapes
+				.add(new DrawableBorderText(Vector2.fromXY(off[0], THIRD_LINE), wfw.getGameState().getStateNameWithColor(),
+						Color.white));
 		if (msg.getCurrentActionTimeRemaining() >= 0)
 		{
 			txtShapes
-					.add(new DrawableBorderText(Vector2.fromXY(off[0], 47),
+					.add(new DrawableBorderText(Vector2.fromXY(off[0], FOURTH_LINE),
 							dfSeconds.format(msg.getCurrentActionTimeRemaining()),
 							Color.white));
 		}
 		
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], 11), timeStr, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[1], FIRST_LINE), timeStr, Color.white));
 		
+		
+		// Team YELLOW
 		txtShapes
-				.add(new DrawableBorderText(Vector2.fromXY(off[4], 11), msg.getTeamInfoYellow().getName(), Color.yellow));
-		txtShapes
-				.add(new DrawableBorderText(Vector2.fromXY(off[2], 11), String.valueOf(msg.getTeamInfoYellow().getScore()),
+				.add(new DrawableBorderText(Vector2.fromXY(off[2], FIRST_LINE),
+						String.valueOf(msg.getTeamInfoYellow().getScore()),
 						Color.yellow));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], 11), timeoutYellowStr, Color.yellow));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], 11), yellowCardYellowStr, Color.yellow));
+		txtShapes
+				.add(new DrawableBorderText(Vector2.fromXY(off[4], FIRST_LINE), msg.getTeamInfoYellow().getName(),
+						Color.yellow));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], FIRST_LINE), timeoutYellowStr, Color.yellow));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], FIRST_LINE), yellowCardYellowStr, Color.yellow));
 		
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[4], 23), msg.getTeamInfoBlue().getName(), Color.blue));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[2], 23), String.valueOf(msg.getTeamInfoBlue().getScore()),
+		
+		// Team BLUE
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[2], SECOND_LINE),
+				String.valueOf(msg.getTeamInfoBlue().getScore()),
 				Color.blue));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], 23), timeoutBlueStr, Color.blue));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], 23), yellowCardBlueStr, Color.blue));
+		txtShapes.add(
+				new DrawableBorderText(Vector2.fromXY(off[4], SECOND_LINE), msg.getTeamInfoBlue().getName(), Color.blue));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], SECOND_LINE), timeoutBlueStr, Color.blue));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], SECOND_LINE), yellowCardBlueStr, Color.blue));
+		
 		
 		String nextCommand = msg.getNextCommand() == null ? "" : msg.getNextCommand().name();
 		String gameEvents = msg.getGameEvents().stream().map(IGameEvent::getType).map(Enum::name)
 				.collect(Collectors.joining(","));
 		String proposedGameEvents = msg.getProposedGameEvents().stream().map(ProposedGameEvent::getGameEvent)
 				.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 11), nextCommand, Color.white));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 23), gameEvents, Color.white));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], 35), proposedGameEvents, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], FIRST_LINE), nextCommand, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], SECOND_LINE), gameEvents, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], THIRD_LINE), proposedGameEvents, Color.white));
 		
 		for (DrawableBorderText txt : txtShapes)
 		{
@@ -131,7 +151,7 @@ public class RefereeVisCalc implements IWpCalc
 	{
 		int[] offsets = new int[8];
 		offsets[0] = 10;
-		offsets[1] = offsets[0] + 135;
+		offsets[1] = offsets[0] + 150;
 		offsets[2] = offsets[1] + 40;
 		offsets[3] = offsets[2] + 13;
 		offsets[4] = offsets[3] + 20;
@@ -139,6 +159,21 @@ public class RefereeVisCalc implements IWpCalc
 		offsets[6] = offsets[5] + 80;
 		offsets[7] = offsets[6] + 80;
 		return offsets;
+	}
+	
+	
+	private void modifyOffset(int[] offsets, int pos, int offset)
+	{
+		int oldValue = offsets[pos];
+		if (pos != 0)
+		{
+			oldValue -= offsets[pos - 1];
+		}
+		int delta = offset - oldValue;
+		for (int i = pos; i < offsets.length; i++)
+		{
+			offsets[i] += delta;
+		}
 	}
 	
 	
