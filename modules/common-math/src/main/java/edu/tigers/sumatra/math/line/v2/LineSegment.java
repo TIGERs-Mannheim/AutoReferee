@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.math.line.v2;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.sleepycat.persist.model.Persistent;
@@ -231,5 +233,19 @@ final class LineSegment extends ALine implements ILineSegment
 	public String toString()
 	{
 		return "LineSegment(" + start + " -> " + end + ")";
+	}
+	
+	
+	@Override
+	public List<IVector2> getSteps(final double stepSize)
+	{
+		List<IVector2> steps = new ArrayList<>();
+		double len = getLength();
+		for (double step = 0; step < len; step += stepSize)
+		{
+			steps.add(stepAlongLine(step));
+		}
+		steps.add(stepAlongLine(len));
+		return steps;
 	}
 }
