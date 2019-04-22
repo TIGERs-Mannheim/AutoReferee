@@ -85,6 +85,7 @@ public class AutoRefModule extends AModule implements IWorldFrameObserver
 	public void changeMode(final EAutoRefMode mode)
 	{
 		runner.changeMode(mode);
+		log.info("Changed AutoRef mode to: " + mode);
 		observers.forEach(o -> o.onAutoRefModeChanged(mode));
 	}
 	
