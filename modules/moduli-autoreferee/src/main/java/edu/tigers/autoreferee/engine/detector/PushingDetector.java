@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.github.g3force.configurable.Configurable;
 
@@ -282,7 +283,7 @@ public class PushingDetector extends AGameEventDetector
 		@Override
 		public String toString()
 		{
-			return new ToStringBuilder(this)
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 					.append("bot", bot)
 					.append("opponentBot", opponentBot)
 					.toString();

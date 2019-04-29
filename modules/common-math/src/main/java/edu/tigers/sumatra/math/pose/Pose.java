@@ -7,6 +7,7 @@ package edu.tigers.sumatra.math.pose;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -132,7 +133,7 @@ public class Pose implements IMirrorable<Pose>
 	@Override
 	public String toString()
 	{
-		return new ToStringBuilder(this)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("pos", pos)
 				.append("orientation", orientation)
 				.toString();

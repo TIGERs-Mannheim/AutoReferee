@@ -7,6 +7,7 @@ package edu.tigers.sumatra.bot;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -133,7 +134,7 @@ public class State implements IMirrorable<State>
 	@Override
 	public String toString()
 	{
-		return new ToStringBuilder(this)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("pose", pose)
 				.append("vel3", vel3)
 				.toString();

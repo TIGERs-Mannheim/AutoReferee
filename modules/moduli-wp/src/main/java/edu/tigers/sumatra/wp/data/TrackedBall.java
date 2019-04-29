@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -335,7 +336,7 @@ public class TrackedBall implements ITrackedBall
 	@Override
 	public String toString()
 	{
-		return new ToStringBuilder(this)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("pos", getPos3())
 				.append("vel", getVel3())
 				.toString();

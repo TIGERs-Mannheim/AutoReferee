@@ -92,7 +92,7 @@ public class Geometry
 	private static String rightPenaltyStretchName = "RightPenaltyStretch";
 	@Configurable(defValue = "LeftFieldRightPenaltyArc")
 	private static String leftFieldRightPenaltyArcName = "LeftFieldRightPenaltyArc";
-	@Configurable(defValue = "false", spezis = { "SUMATRA" })
+	@Configurable(defValue = "false")
 	private static boolean legacyPenArea = false;
 	
 	/**
