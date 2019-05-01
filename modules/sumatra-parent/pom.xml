@@ -394,6 +394,12 @@
                 <artifactId>sumatra-gui-skills</artifactId>
                 <version>${project.version}</version>
             </dependency>
+	    
+	    <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+		<artifactId>moduli-team-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>edu.tigers.sumatra</groupId>

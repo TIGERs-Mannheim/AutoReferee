@@ -176,20 +176,30 @@ public class GameControllerProtocol
 	{
 		try
 		{
-			T ret = parser.parseDelimitedFrom(socket.getInputStream());
-			if (ret == null)
+			T message = parser.parseDelimitedFrom(socket.getInputStream());
+			if (message != null)
 			{
-				log.warn("Receiving Message failed: Socket was at EOF, most likely the connection was closed");
-				connectBlocking();
+				return message;
 			}
-			
-			
-			return ret;
+			log.info("Connection to game controller closed");
 		} catch (IOException e)
 		{
 			log.warn("Receiving message from SSL-Game-Controller failed", e);
-			connectBlocking();
-			return null;
+		}
+		connectBlocking();
+		return null;
+	}
+	
+	
+	public boolean newMessageAvailable()
+	{
+		try
+		{
+			return socket.getInputStream().available() != 0;
+		} catch (IOException e)
+		{
+			log.warn("Error checking for new Message", e);
+			return false;
 		}
 	}
 	

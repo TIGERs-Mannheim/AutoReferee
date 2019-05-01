@@ -99,14 +99,7 @@ public class SslGameControllerProcess implements Runnable
 			log.debug("game-controller process started");
 			
 			Scanner s = new Scanner(process.getInputStream());
-			while (s.hasNextLine())
-			{
-				String line = s.nextLine();
-				if (line != null)
-				{
-					processLogLine(line);
-				}
-			}
+			inputLoop(s);
 			s.close();
 		} catch (IOException e)
 		{
@@ -115,7 +108,24 @@ public class SslGameControllerProcess implements Runnable
 				log.warn("Could not execute ssl-game-controller", e);
 			}
 		}
+		if (process != null && !process.isAlive() && process.exitValue() != 0)
+		{
+			log.warn("game-controller has returned a non-zero exit code: " + process.exitValue());
+		}
 		log.debug("game-controller process thread finished");
+	}
+	
+	
+	private void inputLoop(final Scanner s)
+	{
+		while (s.hasNextLine())
+		{
+			String line = s.nextLine();
+			if (line != null)
+			{
+				processLogLine(line);
+			}
+		}
 	}
 	
 	
