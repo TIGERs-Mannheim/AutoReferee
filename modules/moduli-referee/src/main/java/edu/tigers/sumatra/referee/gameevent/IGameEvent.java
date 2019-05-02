@@ -31,5 +31,6 @@ public interface IGameEvent
 	/**
 	 * @return a formatted string describing the event in human language (used in the game log)
 	 */
+	@Override
 	String toString();
 }
