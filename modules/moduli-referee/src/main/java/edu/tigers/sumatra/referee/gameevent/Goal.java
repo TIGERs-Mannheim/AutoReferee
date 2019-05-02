@@ -134,4 +134,10 @@ public class Goal extends AGameEvent
 				.append(kickLocation)
 				.toHashCode();
 	}
+	
+	
+	public ETeamColor getTeam()
+	{
+		return team;
+	}
 }
