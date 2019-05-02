@@ -366,7 +366,11 @@ public final class SumatraModel extends Moduli
 	
 	public boolean isSimulation()
 	{
-		return "SUMATRA".equalsIgnoreCase(getEnvironment());
+		if (getGlobalConfiguration() != null)
+		{
+			return "true".equalsIgnoreCase(getGlobalConfiguration().getString("simulation", "false"));
+		}
+		return false;
 	}
 	
 	
