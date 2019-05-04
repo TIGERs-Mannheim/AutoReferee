@@ -96,8 +96,11 @@ public class BotCrashUnique extends AGameEvent
 		this.speedDiff = speedDiff;
 		this.crashAngle = crashAngle;
 	}
-	
-	
+
+	public IVector2 getLocation() {
+		return location;
+	}
+
 	@Override
 	public SslGameEvent.GameEvent toProtobuf()
 	{

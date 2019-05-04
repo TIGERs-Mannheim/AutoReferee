@@ -82,8 +82,11 @@ public class BotPushedBot extends AGameEvent
 		this.location = location;
 		this.pushedDistance = pushedDistance;
 	}
-	
-	
+
+	public IVector2 getLocation() {
+		return location;
+	}
+
 	@Override
 	public SslGameEvent.GameEvent toProtobuf()
 	{
