@@ -21,13 +21,13 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 
 /**
  * A pose consists of a position and an orientation.
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @Persistent
 public class Pose implements IMirrorable<Pose>
 {
+	/** [x,y] in [mm,mm] */
 	private final IVector2 pos;
+	/** [rad] **/
 	private final double orientation;
 	
 	
@@ -39,6 +39,10 @@ public class Pose implements IMirrorable<Pose>
 	}
 	
 	
+	/**
+	 * @param pos [mm,mm]
+	 * @param orientation [rad]
+	 */
 	private Pose(final IVector2 pos, final double orientation)
 	{
 		this.pos = pos;
@@ -47,8 +51,8 @@ public class Pose implements IMirrorable<Pose>
 	
 	
 	/**
-	 * @param pos position of object
-	 * @param orientation of object
+	 * @param pos position of object [mm,mm]
+	 * @param orientation of object [rad]
 	 * @return new pose
 	 */
 	public static Pose from(final IVector2 pos, final double orientation)
@@ -58,7 +62,7 @@ public class Pose implements IMirrorable<Pose>
 	
 	
 	/**
-	 * @param pose pose in 3d vector
+	 * @param pose pose in 3d vector [mm,mm,rad]
 	 * @return new pose
 	 */
 	public static Pose from(final IVector3 pose)
@@ -90,12 +94,18 @@ public class Pose implements IMirrorable<Pose>
 	}
 	
 	
+	/**
+	 * @return [mm,mm]
+	 */
 	public IVector2 getPos()
 	{
 		return pos;
 	}
 	
 	
+	/**
+	 * @return [rad]
+	 */
 	public double getOrientation()
 	{
 		return orientation;

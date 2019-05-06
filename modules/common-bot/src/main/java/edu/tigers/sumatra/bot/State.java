@@ -23,6 +23,7 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 public class State implements IMirrorable<State>
 {
 	private final Pose pose;
+	/** [x,y,z] velocity in [m/s,m/s,rad/s] */
 	private final IVector3 vel3;
 	
 	
@@ -33,6 +34,10 @@ public class State implements IMirrorable<State>
 	}
 	
 	
+	/**
+	 * @param pose the pose
+	 * @param vel3 [m/s,m/s,rad/s]
+	 */
 	protected State(final Pose pose, final IVector3 vel3)
 	{
 		this.pose = pose;
@@ -40,6 +45,11 @@ public class State implements IMirrorable<State>
 	}
 	
 	
+	/**
+	 * @param pose the pose
+	 * @param vel [m/s,m/s,rad/s]
+	 * @return
+	 */
 	public static State of(final Pose pose, final IVector3 vel)
 	{
 		return new State(pose, vel);
@@ -73,30 +83,45 @@ public class State implements IMirrorable<State>
 	}
 	
 	
+	/**
+	 * @return [mm,mm]
+	 */
 	public IVector2 getPos()
 	{
 		return pose.getPos();
 	}
 	
 	
+	/**
+	 * @return [rad]
+	 */
 	public double getOrientation()
 	{
 		return pose.getOrientation();
 	}
 	
 	
+	/**
+	 * @return [m/s,m/s,rad/s]
+	 */
 	public IVector3 getVel3()
 	{
 		return vel3;
 	}
 	
 	
+	/**
+	 * @return [m/s,m/s]
+	 */
 	public IVector2 getVel2()
 	{
 		return vel3.getXYVector();
 	}
 	
 	
+	/**
+	 * @return [rad/s]
+	 */
 	public double getAngularVel()
 	{
 		return vel3.z();

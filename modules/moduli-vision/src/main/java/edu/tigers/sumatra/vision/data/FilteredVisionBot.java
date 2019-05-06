@@ -25,7 +25,9 @@ import edu.tigers.sumatra.math.vector.Vector3;
 public class FilteredVisionBot
 {
 	private final BotID botID;
+	/** [mm,mm] */
 	private final IVector2 pos;
+	/** [m/s,m/s] */
 	private final IVector2 vel;
 	private final double orientation;
 	private final double angularVel;
@@ -143,7 +145,9 @@ public class FilteredVisionBot
 	public static final class Builder
 	{
 		private BotID botID;
+		/** [mm,mm] */
 		private IVector2 pos;
+		/** [m/s,m/s] */
 		private IVector2 vel;
 		private Double orientation;
 		private Double angularVel;
@@ -161,17 +165,6 @@ public class FilteredVisionBot
 		public static Builder create()
 		{
 			return new Builder();
-		}
-		
-		
-		/**
-		 * Empty bot.
-		 * 
-		 * @return
-		 */
-		public static FilteredVisionBot emptyBot()
-		{
-			return new FilteredVisionBot(BotID.noBot(), Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR, 0, 0, 0);
 		}
 		
 		
@@ -198,7 +191,7 @@ public class FilteredVisionBot
 		
 		
 		/**
-		 * @param vel of bot
+		 * @param vel of bot [m/s,m/s]
 		 * @return this builder
 		 */
 		public Builder withVel(final IVector2 vel)
