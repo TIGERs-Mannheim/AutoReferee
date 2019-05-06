@@ -2,8 +2,6 @@ package edu.tigers.sumatra.wp.util;
 
 import java.util.LinkedList;
 
-import org.apache.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
@@ -20,8 +18,6 @@ import edu.tigers.sumatra.wp.data.TimedPosition;
 
 public class BallLeftFieldCalculator
 {
-	private static final Logger log = Logger.getLogger(BallLeftFieldCalculator.class.getName());
-	
 	@Configurable(comment = "Time [s] to wait before using ball positions, invaliding all positions just before a chip kick", defValue = "0.3")
 	private static double maxTimeToDetectChipKick = 0.3;
 	
@@ -36,6 +32,7 @@ public class BallLeftFieldCalculator
 	private final LinkedList<TimedPosition> ballPosBuffer = new LinkedList<>();
 	private TimedPosition lastBallLeftFieldPosition = null;
 	private boolean ballInsideField = true;
+	private long chipStartTime;
 	
 	
 	public BallLeftFieldPosition process(final SimpleWorldFrame wFrame)
@@ -118,17 +115,18 @@ public class BallLeftFieldCalculator
 	{
 		if (wFrame.getBall().isChipped())
 		{
-			if (wFrame.getKickEvent().isPresent())
+			if (chipStartTime == 0)
 			{
-				double age = (wFrame.getTimestamp() - wFrame.getKickEvent().get().getTimestamp()) / 1e9;
-				if (age < maxTimeToDetectChipKick)
-				{
-					ballPosBuffer.clear();
-				}
-			} else
-			{
-				log.warn("Chipped ball has no kick event: " + wFrame.getBall());
+				chipStartTime = wFrame.getTimestamp();
 			}
+			double age = (wFrame.getTimestamp() - chipStartTime) / 1e9;
+			if (age < maxTimeToDetectChipKick)
+			{
+				ballPosBuffer.clear();
+			}
+		} else
+		{
+			chipStartTime = 0;
 		}
 	}
 	
