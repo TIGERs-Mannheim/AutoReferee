@@ -63,7 +63,7 @@ public final class SumatraModel extends Moduli
 	
 	private boolean productive = false;
 	private boolean testMode = false;
-	
+
 	
 	// --------------------------------------------------------------------------
 	// --- getInstance/constructor(s) -------------------------------------------
@@ -362,8 +362,8 @@ public final class SumatraModel extends Moduli
 		}
 		return "";
 	}
-	
-	
+
+
 	public boolean isSimulation()
 	{
 		if (getGlobalConfiguration() != null)

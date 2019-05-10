@@ -407,6 +407,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>edu.tigers.sumatra</groupId>
+                <artifactId>moduli-log-analysis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
             <!-- ########## external libs ################ -->
 
             <dependency>
