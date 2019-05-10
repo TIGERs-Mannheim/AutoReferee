@@ -1,9 +1,10 @@
 package edu.tigers.autoreferee.engine.detector;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.g3force.configurable.Configurable;
@@ -32,7 +33,7 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 	@Configurable(defValue = "2.0", comment = "The time [s] that a robot is allowed to stay within the forbidden area")
 	private static double violationTime = 2.0;
 	
-	private final Map<BotID, ITrackedBot> violators = new HashMap<>();
+	private final List<Violator> violators = new ArrayList<>();
 	
 	
 	public BallPlacementInterferenceDetector()
@@ -51,18 +52,26 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
-		Map<BotID, ITrackedBot> violatingBots = violatingBots();
-		violators.keySet().removeIf(b -> !violatingBots.keySet().contains(b));
-		violatingBots.forEach(violators::putIfAbsent);
+		Set<BotID> violatingBots = violatingBots();
+		violators.removeIf(b -> !violatingBots.contains(b.getBotId()));
+		violatingBots.stream().filter(this::isNewViolator)
+				.forEach(botID -> violators.add(new Violator(botID, frame.getTimestamp())));
 		
-		return violators.values().stream()
+		return violators.stream()
 				.filter(this::keepsViolating)
+				.filter(Violator::isUnpunished)
 				.findAny()
 				.map(this::createEvent);
 	}
 	
 	
-	private Map<BotID, ITrackedBot> violatingBots()
+	private boolean isNewViolator(BotID id)
+	{
+		return violators.stream().noneMatch(e -> e.getBotId() == id);
+	}
+	
+	
+	private Set<BotID> violatingBots()
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
 		IVector2 placePos = frame.getGameState().getBallPlacementPositionNeutral();
@@ -75,21 +84,66 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 		return frame.getWorldFrame().getBots().values().stream()
 				.filter(AutoRefUtil.ColorFilter.get(placingTeam.opposite()))
 				.filter(bot -> placementTube.isPointInShape(bot.getPos()))
-				.collect(Collectors.toMap(ITrackedBot::getBotId, b -> b));
+				.map(ITrackedBot::getBotId)
+				.collect(Collectors.toSet());
 	}
 	
 	
-	private IGameEvent createEvent(ITrackedBot bot)
+	private IGameEvent createEvent(Violator violator)
 	{
-		// remove it from the violators such that the time is reset
-		// if the bot keeps violating the distance, it get punished again after violationTime
-		violators.remove(bot.getBotId());
-		return new BotInterferedPlacement(bot.getBotId(), frame.getWorldFrame().getBot(bot.getBotId()).getPos());
+		violator.punish();
+		return new BotInterferedPlacement(violator.getBotId(),
+				frame.getWorldFrame().getBot(violator.getBotId()).getPos());
 	}
 	
 	
-	private boolean keepsViolating(ITrackedBot bot)
+	private boolean keepsViolating(Violator violator)
 	{
-		return (frame.getTimestamp() - bot.getTimestamp()) / 1e9 > violationTime;
+		return (frame.getTimestamp() - violator.getStartTimestamp()) / 1e9 > violationTime;
+	}
+	
+	private enum PunishedStatus
+	{
+		PUNISHED,
+		UNPUNISHED
+	}
+	
+	private class Violator
+	{
+		private final BotID botId;
+		private final long startTimestamp;
+		private PunishedStatus punished;
+		
+		
+		private Violator(final BotID botId, final long startTimestamp)
+		{
+			this.botId = botId;
+			this.startTimestamp = startTimestamp;
+			this.punished = PunishedStatus.UNPUNISHED;
+		}
+		
+		
+		public BotID getBotId()
+		{
+			return botId;
+		}
+		
+		
+		public long getStartTimestamp()
+		{
+			return startTimestamp;
+		}
+		
+		
+		public boolean isUnpunished()
+		{
+			return punished == PunishedStatus.UNPUNISHED;
+		}
+		
+		
+		public void punish()
+		{
+			this.punished = PunishedStatus.PUNISHED;
+		}
 	}
 }
