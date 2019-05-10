@@ -8,6 +8,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -24,20 +26,16 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BotNumberDetector extends AGameEventDetector
 {
-	private final Map<ETeamColor, Integer> lastDiff = new EnumMap<>(ETeamColor.class);
+	
+	@Configurable(comment = "[s] After this time period the detectors triggers the event", defValue = "0.5")
+	private static double minTimeDiff = 0.5;
+	
+	private final Map<ETeamColor, Violation> violationPerTeam = new EnumMap<>(ETeamColor.class);
 	
 	
 	public BotNumberDetector()
 	{
 		super(EGameEventDetectorType.BOT_NUMBER, EGameState.RUNNING);
-	}
-	
-	
-	@Override
-	protected void doPrepare()
-	{
-		lastDiff.put(ETeamColor.YELLOW, 0);
-		lastDiff.put(ETeamColor.BLUE, 0);
 	}
 	
 	
@@ -62,10 +60,18 @@ public class BotNumberDetector extends AGameEventDetector
 		
 		int diff = actualCount - allowedCount;
 		
-		if ((diff > lastDiff.get(teamColor)) && (diff > 0))
+		if (diff > 0)
 		{
-			lastDiff.put(teamColor, diff);
-			return Optional.of(new TooManyRobots(teamColor));
+			violationPerTeam.putIfAbsent(teamColor, new Violation(frame.getTimestamp()));
+			Violation violation = violationPerTeam.get(teamColor);
+			if (timeDiffTooBig(violation) && violation.isUnpunished())
+			{
+				violation.punish();
+				return Optional.of(new TooManyRobots(teamColor));
+			}
+		} else
+		{
+			violationPerTeam.remove(teamColor);
 		}
 		return Optional.empty();
 	}
@@ -81,5 +87,48 @@ public class BotNumberDetector extends AGameEventDetector
 				.filter(ColorFilter.get(color))
 				.filter(bot -> Geometry.getFieldWBorders().isPointInShape(bot.getPos()))
 				.count();
+	}
+	
+	
+	private boolean timeDiffTooBig(final Violation violation)
+	{
+		return ((frame.getTimestamp() - violation.getStartTimestamp()) / 1e9) >= minTimeDiff;
+	}
+	
+	private enum PunishedStatus
+	{
+		PUNISHED,
+		UNPUNISHED
+	}
+	
+	private class Violation
+	{
+		private final long startTimestamp;
+		private PunishedStatus punishedStatus;
+		
+		
+		private Violation(final long startTimestamp)
+		{
+			this.startTimestamp = startTimestamp;
+			this.punishedStatus = PunishedStatus.UNPUNISHED;
+		}
+		
+		
+		public long getStartTimestamp()
+		{
+			return startTimestamp;
+		}
+		
+		
+		public boolean isUnpunished()
+		{
+			return punishedStatus == PunishedStatus.UNPUNISHED;
+		}
+		
+		
+		public void punish()
+		{
+			this.punishedStatus = PunishedStatus.PUNISHED;
+		}
 	}
 }
