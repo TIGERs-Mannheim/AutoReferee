@@ -35,6 +35,7 @@ public class GameStateCalculator
 	
 	private IVector2 ballPosOnPrepare = null;
 	private long lastRefMsgCounter = -1;
+	private Stage lastRefMsgStage = null;
 	private GameState lastGameState = GameState.Builder.empty().build();
 	private Command lastRefCmd = Command.STOP;
 	
@@ -65,7 +66,7 @@ public class GameStateCalculator
 	
 	private boolean isNewRefereeMsg(final RefereeMsg refereeMsg)
 	{
-		return refereeMsg.getCommandCounter() != lastRefMsgCounter;
+		return refereeMsg.getCommandCounter() != lastRefMsgCounter || refereeMsg.getStage() != lastRefMsgStage;
 	}
 	
 	
@@ -76,6 +77,8 @@ public class GameStateCalculator
 		if (isNewRefereeMsg(refereeMsg))
 		{
 			lastRefMsgCounter = refereeMsg.getCommandCounter();
+			lastRefMsgStage = refereeMsg.getStage();
+			
 			
 			processCommand(refereeMsg.getCommand(), lastRefCmd, builder);
 			builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
