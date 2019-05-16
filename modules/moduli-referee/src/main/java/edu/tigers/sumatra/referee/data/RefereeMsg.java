@@ -189,7 +189,7 @@ public class RefereeMsg
 	}
 	
 	
-	public ETeamColor getCommandForTeam()
+	public ETeamColor getTeamFromCommand()
 	{
 		if (command != null)
 		{
@@ -364,7 +364,7 @@ public class RefereeMsg
 	}
 	
 	
-	public ETeamColor getNextCommandForTeam()
+	public ETeamColor getTeamFromNextCommand()
 	{
 		if (nextCommand != null)
 		{

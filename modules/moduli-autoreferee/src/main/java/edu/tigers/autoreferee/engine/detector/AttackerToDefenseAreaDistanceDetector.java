@@ -9,6 +9,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.g3force.configurable.Configurable;
+
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -28,6 +30,9 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 {
+	@Configurable(comment = "[s] The grace period for the bots to position them after a the activation of the detector", defValue = "2.0")
+	private static double gracePeriod = 2.0;
+	
 	private static final double INACCURACY_TOLERANCE = 15;
 	
 	
@@ -45,6 +50,10 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
+		if (!isActiveForAtLeast(gracePeriod))
+		{
+			return Optional.empty();
+		}
 		ETeamColor attackingTeam = getAttackingTeam();
 		if (attackingTeam != ETeamColor.NEUTRAL)
 		{
@@ -59,20 +68,19 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 		ETeamColor attackingTeam;
 		if (frame.getGameState().isStoppedGame())
 		{
-			attackingTeam = frame.getRefereeMsg().getNextCommandForTeam();
+			attackingTeam = frame.getRefereeMsg().getTeamFromNextCommand();
 		} else
 		{
-			attackingTeam = frame.getRefereeMsg().getCommandForTeam();
+			attackingTeam = frame.getRefereeMsg().getTeamFromCommand();
 		}
 		return attackingTeam;
 	}
 	
 	
 	/**
-	 * The actual evaluation of this detector is encapsulated in this class and executed only once when the gamestate
-	 * changes to running. Since this class is created when the rule is to be evaluated all required values can be stored
-	 * as private final attributes. This makes the code cleaner because these values do not need to be passed around
-	 * between different functions.
+	 * The actual evaluation of this detector is encapsulated in this class. Since this class is created when the rule is
+	 * to be evaluated all required values can be stored as private final attributes. This makes the code cleaner because
+	 * these values do not need to be passed around between different functions.
 	 */
 	private static class Evaluator
 	{
@@ -116,7 +124,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 					.filter(b -> bot.getPos().distanceTo(b.getPos()) <= Geometry.getBotRadius() * 2)
 					// push in direction of penalty area
 					.map(b -> Lines.halfLineFromPoints(b.getPos(), bot.getPos()))
-					// find intersection that show that defenders pushs towards penArea
+					// find intersection that show that defenders pushes towards penArea
 					.map(defenderPenArea::lineIntersections)
 					.flatMap(List::stream)
 					.findAny()

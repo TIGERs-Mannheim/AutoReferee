@@ -45,6 +45,9 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 	@Configurable(comment = "[s] The amount of time before a violation is reported again for the same bot", defValue = "1.5")
 	private static double violatorCoolDownTime = 1.5;
 	
+	@Configurable(comment = "[s] The grace period for the bots to position them after a the activation of the detector", defValue = "2.0")
+	private static double gracePeriod = 2.0;
+	
 	private final Map<BotID, Long> lastViolators = new HashMap<>();
 	private final Map<BotID, Long> outerCircleBots = new HashMap<>();
 	private IVector2 ballPos = null;
@@ -60,6 +63,7 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 	@Override
 	protected void doPrepare()
 	{
+		super.doPrepare();
 		ballPos = frame.getWorldFrame().getBall().getPos();
 	}
 	
@@ -67,6 +71,11 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
+		if (!isActiveForAtLeast(gracePeriod))
+		{
+			return Optional.empty();
+		}
+		
 		long timestamp = frame.getTimestamp();
 		Set<BotID> curViolators = getViolators();
 		
@@ -77,7 +86,7 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 		Sets.intersection(curViolators, lastViolators.keySet()).forEach(bot -> lastViolators.put(bot, timestamp));
 		
 		/*
-		 * Remove all old violators which have reached the cooldown time
+		 * Remove all old violators which have reached the cool down time
 		 */
 		lastViolators.entrySet().removeIf(entry -> (timestamp - entry.getValue()) / 1e9 > violatorCoolDownTime);
 		

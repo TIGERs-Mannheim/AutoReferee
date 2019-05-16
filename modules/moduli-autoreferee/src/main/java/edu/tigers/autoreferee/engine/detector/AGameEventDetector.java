@@ -23,6 +23,7 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	private boolean deactivateOnFirstGameEvent = false;
 	private boolean firstUpdate = true;
 	private boolean active = true;
+	private long timestampStart = 0;
 	protected IAutoRefFrame frame;
 	
 	
@@ -52,6 +53,7 @@ public abstract class AGameEventDetector implements IGameEventDetector
 		if (firstUpdate)
 		{
 			doPrepare();
+			timestampStart = frame.getTimestamp();
 			firstUpdate = false;
 		}
 		if (active)
@@ -118,5 +120,11 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	protected final ITrackedBall getBall()
 	{
 		return frame.getWorldFrame().getBall();
+	}
+	
+	
+	protected boolean isActiveForAtLeast(final double seconds)
+	{
+		return ((frame.getTimestamp() - timestampStart) / 1e9) >= seconds;
 	}
 }
