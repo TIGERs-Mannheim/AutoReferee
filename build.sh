@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 args="${@}"
-mvn install -Pfast -Dmaven.repo.local=repository ${args}
+./mvnw clean install -Pfast -Dmaven.repo.local=repository ${args}
