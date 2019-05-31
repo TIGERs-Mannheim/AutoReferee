@@ -48,12 +48,16 @@ public class BallSpeedingDetector extends AGameEventDetector
 		
 		IKickEvent currentKickEvent = frame.getWorldFrame().getKickEvent().get();
 		
+		if (kickEventHasBeenReported(currentKickEvent))
+		{
+			return Optional.empty();
+		}
+		
 		// take the last kickFitState, because if the ball hits another robot, we still want to have the original ball
 		// velocity
 		BallKickFitState lastKickFitState = frame.getPreviousFrame().getWorldFrame().getKickFitState().get();
 		double kickSpeed = lastKickFitState.getKickVel().getLength() / 1000.;
 		if (isKickTooFast(kickSpeed)
-				&& kickEventHasNotBeenReportedYet(currentKickEvent)
 				&& kickEstimateIsReady(currentKickEvent))
 		{
 			lastReportedKickEvent = currentKickEvent;
@@ -72,13 +76,19 @@ public class BallSpeedingDetector extends AGameEventDetector
 			return Optional.of(violation);
 		}
 		
+		if (ballTouchedAnotherRobot(currentKickEvent))
+		{
+			// reset detection for this kick event
+			lastReportedKickEvent = currentKickEvent;
+		}
+		
 		return Optional.empty();
 	}
 	
 	
-	private boolean kickEventHasNotBeenReportedYet(final IKickEvent currentKickEvent)
+	private boolean kickEventHasBeenReported(final IKickEvent currentKickEvent)
 	{
-		return lastReportedKickEvent == null || lastReportedKickEvent.getTimestamp() != currentKickEvent.getTimestamp();
+		return lastReportedKickEvent != null && lastReportedKickEvent.getTimestamp() == currentKickEvent.getTimestamp();
 	}
 	
 	
