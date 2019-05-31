@@ -111,7 +111,7 @@ public abstract class AGameEventDetector implements IGameEventDetector
 	}
 	
 	
-	private void setInactive()
+	protected void setInactive()
 	{
 		this.active = false;
 	}
