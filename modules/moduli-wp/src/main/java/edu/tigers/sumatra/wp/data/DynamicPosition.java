@@ -36,14 +36,14 @@ public class DynamicPosition
 {
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(DynamicPosition.class.getName());
-	
+
 	private IVector2 pos = Vector2f.ZERO_VECTOR;
 	private AObjectID trackedId;
 	private double lookahead = 0;
 	private boolean useKickerPos = true;
 	private double passRange = 0;
-	
-	
+
+
 	/**
 	 * @param objId
 	 */
@@ -52,8 +52,8 @@ public class DynamicPosition
 		Objects.requireNonNull(objId, "Object ID must not be null");
 		trackedId = objId;
 	}
-	
-	
+
+
 	/**
 	 * @param obj
 	 */
@@ -63,8 +63,8 @@ public class DynamicPosition
 		trackedId = obj.getId();
 		pos = obj.getPos();
 	}
-	
-	
+
+
 	/**
 	 * @param obj
 	 * @param lookahead
@@ -74,8 +74,8 @@ public class DynamicPosition
 		this(obj);
 		setLookahead(lookahead);
 	}
-	
-	
+
+
 	/**
 	 * @param pos
 	 */
@@ -84,11 +84,11 @@ public class DynamicPosition
 		setPos(pos);
 		trackedId = new UninitializedID();
 	}
-	
-	
+
+
 	/**
 	 * Copy constructor
-	 * 
+	 *
 	 * @param dynamicPosition
 	 */
 	public DynamicPosition(final DynamicPosition dynamicPosition)
@@ -99,8 +99,8 @@ public class DynamicPosition
 		this.useKickerPos = dynamicPosition.useKickerPos;
 		this.passRange = dynamicPosition.passRange;
 	}
-	
-	
+
+
 	/**
 	 * @param pos
 	 * @param passRange the range [rad] in which the pass can be played
@@ -111,18 +111,18 @@ public class DynamicPosition
 		trackedId = new UninitializedID();
 		this.passRange = passRange;
 	}
-	
-	
+
+
 	@SuppressWarnings("unused")
 	private DynamicPosition()
 	{
 		trackedId = null;
 	}
-	
-	
+
+
 	/**
 	 * Update position by consulting {@link SimpleWorldFrame}
-	 * 
+	 *
 	 * @param swf
 	 */
 	public final void update(final SimpleWorldFrame swf)
@@ -162,12 +162,12 @@ public class DynamicPosition
 				}
 			} else if (!SumatraModel.getInstance().isProductive())
 			{
-				log.warn("No tracked bot with id " + trackedId + " found.");
+				log.warn("No tracked bot with id " + trackedId + " found.", new Exception());
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param dyn
 	 */
@@ -178,14 +178,14 @@ public class DynamicPosition
 		lookahead = dyn.lookahead;
 		passRange = dyn.passRange;
 	}
-	
-	
+
+
 	public final void update(final AObjectID trackedId)
 	{
 		this.trackedId = trackedId;
 	}
-	
-	
+
+
 	/**
 	 * @return the trackedId
 	 */
@@ -193,14 +193,14 @@ public class DynamicPosition
 	{
 		return trackedId;
 	}
-	
-	
+
+
 	public IVector2 getPos()
 	{
 		return pos;
 	}
-	
-	
+
+
 	/**
 	 * @param pos the pos to set
 	 */
@@ -209,8 +209,8 @@ public class DynamicPosition
 		Objects.requireNonNull(pos, "Position must not be null");
 		this.pos = pos;
 	}
-	
-	
+
+
 	public String getSaveableString()
 	{
 		if (trackedId.isBot())
@@ -223,18 +223,18 @@ public class DynamicPosition
 		}
 		return pos.getSaveableString();
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
 		return "[" + pos + "," + trackedId + "]";
 	}
-	
-	
+
+
 	/**
 	 * String must look like "0 BLUE" or "0,0"
-	 * 
+	 *
 	 * @param value
 	 * @return
 	 */
@@ -251,7 +251,7 @@ public class DynamicPosition
 		{
 			// This is not a simple position, go on with id detection
 		}
-		
+
 		List<String> finalValues = parseValues(value);
 		if (finalValues.isEmpty() || (finalValues.size() > 2))
 		{
@@ -265,8 +265,8 @@ public class DynamicPosition
 		ETeamColor color = getTeamColor(finalValues.get(1));
 		return new DynamicPosition(BotID.createBotId(id, color));
 	}
-	
-	
+
+
 	private static ETeamColor getTeamColor(final String str)
 	{
 		if (str.startsWith("Y"))
@@ -278,8 +278,8 @@ public class DynamicPosition
 		}
 		throw new NumberFormatException("invalid team color: " + str);
 	}
-	
-	
+
+
 	private static List<String> parseValues(final String value)
 	{
 		String[] values = value.replaceAll("[,;]", " ").split("[ ]");
@@ -293,8 +293,8 @@ public class DynamicPosition
 		}
 		return finalValues;
 	}
-	
-	
+
+
 	/**
 	 * @return the lookahead
 	 */
@@ -302,8 +302,8 @@ public class DynamicPosition
 	{
 		return lookahead;
 	}
-	
-	
+
+
 	/**
 	 * @param lookahead the lookahead to set
 	 */
@@ -312,8 +312,8 @@ public class DynamicPosition
 		Validate.isTrue(lookahead >= 0, "The lookahead must be greater than or equal to zero");
 		this.lookahead = lookahead;
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	public JSONObject toJSON()
 	{
@@ -322,8 +322,8 @@ public class DynamicPosition
 		jsonMapping.put("lookahead", lookahead);
 		return jsonMapping;
 	}
-	
-	
+
+
 	public List<Number> getNumberList()
 	{
 		List<Number> numbers = pos.getNumberList();
@@ -331,20 +331,20 @@ public class DynamicPosition
 		numbers.add(lookahead);
 		return numbers;
 	}
-	
-	
+
+
 	public void setUseKickerPos(final boolean useKickerPos)
 	{
 		this.useKickerPos = useKickerPos;
 	}
-	
-	
+
+
 	public double getPassRange()
 	{
 		return passRange;
 	}
-	
-	
+
+
 	public void setPassRange(final double passRange)
 	{
 		this.passRange = passRange;
