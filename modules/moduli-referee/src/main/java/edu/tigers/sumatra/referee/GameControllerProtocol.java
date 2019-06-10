@@ -153,6 +153,7 @@ public class GameControllerProtocol
 		try
 		{
 			msg.writeDelimitedTo(socket.getOutputStream());
+			socket.getOutputStream().flush();
 		} catch (IOException e)
 		{
 			log.warn("Sending message to ssl-game-controller failed", e);
