@@ -26,8 +26,8 @@ public enum EGameEvent implements IInstanceableEnum
 	PLACEMENT_SUCCEEDED(GameEventType.PLACEMENT_SUCCEEDED, PlacementSucceeded.class, EGameEventType.MATCH_PROCEEDING),
 	BOT_SUBSTITUTION(GameEventType.BOT_SUBSTITUTION, BotSubstitution.class, EGameEventType.MATCH_PROCEEDING),
 	TOO_MANY_ROBOTS(GameEventType.TOO_MANY_ROBOTS, TooManyRobots.class, EGameEventType.MATCH_PROCEEDING),
-	
-	
+
+
 	// Ball out of field
 	BALL_LEFT_FIELD_GOAL_LINE(GameEventType.BALL_LEFT_FIELD_GOAL_LINE, BallLeftFieldGoalLine.class,
 			EGameEventType.BALL_LEFT_FIELD),
@@ -37,24 +37,24 @@ public enum EGameEvent implements IInstanceableEnum
 	POSSIBLE_GOAL(GameEventType.POSSIBLE_GOAL, PossibleGoal.class, EGameEventType.BALL_LEFT_FIELD),
 	INDIRECT_GOAL(GameEventType.INDIRECT_GOAL, IndirectGoal.class, EGameEventType.BALL_LEFT_FIELD),
 	CHIP_ON_GOAL(GameEventType.CHIPPED_GOAL, ChippedGoal.class, EGameEventType.BALL_LEFT_FIELD),
-	
-	
+
+
 	// Minor offense
 	AIMLESS_KICK(GameEventType.AIMLESS_KICK, AimlessKick.class, EGameEventType.MINOR_OFFENSE),
 	KICK_TIMEOUT(GameEventType.KICK_TIMEOUT, KickTimeout.class, EGameEventType.MINOR_OFFENSE),
 	KEEPER_HELD_BALL(GameEventType.KEEPER_HELD_BALL, KeeperHeldBall.class, EGameEventType.MINOR_OFFENSE),
 	ATTACKER_DOUBLE_TOUCHED_BALL(GameEventType.ATTACKER_DOUBLE_TOUCHED_BALL, AttackerDoubleTouchedBall.class,
 			EGameEventType.MINOR_OFFENSE),
-	ATTACKER_IN_DEFENSE_AREA(GameEventType.ATTACKER_IN_DEFENSE_AREA, AttackerInDefenseArea.class,
-			EGameEventType.MINOR_OFFENSE),
-	ATTACKER_TOUCH_KEEPER(GameEventType.ATTACKER_TOUCHED_KEEPER, AttackerTouchedKeeper.class,
+	ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA(
+			GameEventType.ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA,
+			AttackerTouchedBallInDefenseArea.class,
 			EGameEventType.MINOR_OFFENSE),
 	BOT_DRIBBLED_BALL_TOO_FAR(GameEventType.BOT_DRIBBLED_BALL_TOO_FAR, BotDribbledBallTooFar.class,
 			EGameEventType.MINOR_OFFENSE),
 	BOT_KICKED_BALL_TOO_FAST(GameEventType.BOT_KICKED_BALL_TOO_FAST, BotKickedBallToFast.class,
 			EGameEventType.MINOR_OFFENSE),
-	
-	
+
+
 	// Fouls
 	ATTACKER_TOO_CLOSE_TO_DEFENSE_AREA(GameEventType.ATTACKER_TOO_CLOSE_TO_DEFENSE_AREA,
 			AttackerTooCloseToDefenseArea.class, EGameEventType.FOUL),
@@ -73,65 +73,73 @@ public enum EGameEvent implements IInstanceableEnum
 	DEFENDER_IN_DEFENSE_AREA_PARTIALLY(GameEventType.DEFENDER_IN_DEFENSE_AREA_PARTIALLY,
 			DefenderInDefenseAreaPartially.class, EGameEventType.FOUL),
 	DEFENDER_IN_DEFENSE_AREA(GameEventType.DEFENDER_IN_DEFENSE_AREA, DefenderInDefenseArea.class, EGameEventType.FOUL),
-	
-	
+	ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA(
+			GameEventType.ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA,
+			AttackerTouchedOpponentInDefenseArea.class,
+			EGameEventType.FOUL),
+	ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA_SKIPPED(
+			GameEventType.ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA_SKIPPED,
+			AttackerTouchedOpponentInDefenseArea.class,
+			EGameEventType.FOUL),
+
+
 	// Repeated
 	MULTIPLE_CARDS(GameEventType.MULTIPLE_CARDS, MultipleCards.class, EGameEventType.REPEATED),
 	MULTIPLE_PLACEMENT_FAILURES(GameEventType.MULTIPLE_PLACEMENT_FAILURES, MultiplePlacementFailures.class,
 			EGameEventType.REPEATED),
 	MULTIPLE_FOULS(GameEventType.MULTIPLE_FOULS, MultipleFouls.class, EGameEventType.REPEATED),
-	
+
 	// Unsporting behaviors
 	UNSPORTING_BEHAVIOR_MINOR(GameEventType.UNSPORTING_BEHAVIOR_MINOR, UnsportingBehaviorMinor.class,
 			EGameEventType.UNSPORTING),
 	UNSPORTING_BEHAVIOR_MAJOR(GameEventType.UNSPORTING_BEHAVIOR_MAJOR, UnsportingBehaviorMajor.class,
 			EGameEventType.UNSPORTING)
-	
-	
+
+
 	;
-	
-	
+
+
 	private final InstanceableClass impl;
 	private final GameEventType protoType;
 	private final EGameEventType type;
-	
+
 	private static final Map<GameEventType, EGameEvent> EVENT_TYPE_MAP = new EnumMap<>(
 			SslGameEvent.GameEventType.class);
-	
-	
+
+
 	EGameEvent(final GameEventType protoType, final Class<? extends IGameEvent> wrapperImpl, final EGameEventType type)
 	{
 		this.impl = new InstanceableClass(wrapperImpl, new InstanceableParameter(SslGameEvent.GameEvent.class, "", null));
 		this.protoType = protoType;
 		this.type = type;
 	}
-	
-	
+
+
 	@Override
 	public InstanceableClass getInstanceableClass()
 	{
 		return impl;
 	}
-	
-	
+
+
 	public GameEventType getProtoType()
 	{
 		return protoType;
 	}
-	
-	
+
+
 	public EGameEventType getType()
 	{
 		return type;
 	}
-	
-	
+
+
 	public static EGameEvent fromProto(GameEventType type)
 	{
 		return EVENT_TYPE_MAP.computeIfAbsent(type, e -> searchProto(type));
 	}
-	
-	
+
+
 	private static EGameEvent searchProto(GameEventType type)
 	{
 		for (EGameEvent event : values())

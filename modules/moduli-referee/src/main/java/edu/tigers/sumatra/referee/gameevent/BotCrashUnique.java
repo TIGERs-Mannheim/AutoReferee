@@ -26,8 +26,8 @@ public class BotCrashUnique extends AGameEvent
 	private final double crashSpeed;
 	private final double speedDiff;
 	private final double crashAngle;
-	
-	
+
+
 	@SuppressWarnings("unsued") // used by berkeley
 	protected BotCrashUnique()
 	{
@@ -39,8 +39,8 @@ public class BotCrashUnique extends AGameEvent
 		speedDiff = 0;
 		crashAngle = 0;
 	}
-	
-	
+
+
 	/**
 	 * Default conversion constructor. Note: Called by reflection!
 	 *
@@ -57,8 +57,8 @@ public class BotCrashUnique extends AGameEvent
 		this.speedDiff = event.getBotCrashUnique().getSpeedDiff();
 		this.crashAngle = event.getBotCrashUnique().getCrashAngle();
 	}
-	
-	
+
+
 	/**
 	 * @param violator
 	 * @param victim
@@ -77,9 +77,9 @@ public class BotCrashUnique extends AGameEvent
 	{
 		this(EGameEvent.BOT_CRASH_UNIQUE, violator, victim, location, crashSpeed, speedDiff, crashAngle);
 	}
-	
-	
-	public BotCrashUnique(EGameEvent type,
+
+
+	BotCrashUnique(EGameEvent type,
 			BotID violator,
 			BotID victim,
 			IVector2 location,
@@ -97,9 +97,12 @@ public class BotCrashUnique extends AGameEvent
 		this.crashAngle = crashAngle;
 	}
 
-	public IVector2 getLocation() {
+
+	public IVector2 getLocation()
+	{
 		return location;
 	}
+
 
 	@Override
 	public SslGameEvent.GameEvent toProtobuf()
@@ -109,11 +112,11 @@ public class BotCrashUnique extends AGameEvent
 		builder.getBotCrashUniqueBuilder().setByTeam(getTeam(team)).setViolator(violator)
 				.setVictim(victim).setCrashSpeed((float) crashSpeed).setSpeedDiff((float) speedDiff)
 				.setCrashAngle((float) crashAngle).setLocation(getLocationFromVector(location));
-		
+
 		return builder.build();
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -121,19 +124,19 @@ public class BotCrashUnique extends AGameEvent
 				violator, team, victim, team.opposite(), crashSpeed, formatVector(location), speedDiff,
 				AngleMath.rad2deg(crashAngle));
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final BotCrashUnique that = (BotCrashUnique) o;
-		
+
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
 				.append(violator, that.violator)
@@ -145,8 +148,8 @@ public class BotCrashUnique extends AGameEvent
 				.append(location, that.location)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{

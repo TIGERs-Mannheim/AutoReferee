@@ -19,16 +19,20 @@ import edu.tigers.sumatra.math.vector.Vector2;
 @SuppressWarnings("OptionalGetWithoutIsPresent") // false positives with assertJ
 public class GameEventFactoryTest
 {
-	
+
 	@Test
 	public void testFromProtobuf()
 	{
 		List<IGameEvent> gameEvents = new ArrayList<>();
 		gameEvents.add(new AimlessKick(botId(), location(), location()));
 		gameEvents.add(new AttackerDoubleTouchedBall(botId(), location()));
-		gameEvents.add(new AttackerInDefenseArea(botId(), location(), number()));
+		gameEvents.add(new AttackerTouchedBallInDefenseArea(botId(), location(), number()));
 		gameEvents.add(new AttackerTooCloseToDefenseArea(botId(), location(), number()));
-		gameEvents.add(new AttackerTouchedKeeper(botId(), location()));
+		gameEvents.add(new AttackerTouchedOpponentInDefenseArea(botId(), botId(), location()));
+		gameEvents.add(
+				new AttackerTouchedOpponentInDefenseArea(EGameEvent.ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA_SKIPPED,
+						botId(),
+						botId(), location()));
 		gameEvents.add(new BallLeftFieldGoalLine(botId(), location()));
 		gameEvents.add(new BallLeftFieldTouchLine(botId(), location()));
 		gameEvents.add(new BotCrashDrawn(yellowBot(), blueBot(), location(), number(), number(), number()));
@@ -63,7 +67,7 @@ public class GameEventFactoryTest
 		gameEvents.add(new TooManyRobots(team()));
 		gameEvents.add(new UnsportingBehaviorMajor(team(), "reason"));
 		gameEvents.add(new UnsportingBehaviorMinor(team(), "reason"));
-		
+
 		for (IGameEvent gameEvent : gameEvents)
 		{
 			final SslGameEvent.GameEvent protoGameEvent = gameEvent.toProtobuf();
@@ -71,41 +75,41 @@ public class GameEventFactoryTest
 			assertThat(convertedGameEvent).isPresent();
 			assertThat(convertedGameEvent.get()).isEqualTo(gameEvent);
 		}
-		
+
 		assertThat(gameEvents.stream().map(IGameEvent::getType)).containsAll(Arrays.asList(EGameEvent.values()));
 	}
-	
-	
+
+
 	private ETeamColor team()
 	{
 		return ETeamColor.BLUE;
 	}
-	
-	
+
+
 	private BotID botId()
 	{
 		return BotID.createBotId(2, ETeamColor.YELLOW);
 	}
-	
-	
+
+
 	private BotID blueBot()
 	{
 		return BotID.createBotId(2, ETeamColor.BLUE);
 	}
-	
-	
+
+
 	private BotID yellowBot()
 	{
 		return BotID.createBotId(2, ETeamColor.YELLOW);
 	}
-	
-	
+
+
 	private IVector2 location()
 	{
 		return Vector2.fromXY(4200, 2000);
 	}
-	
-	
+
+
 	private double number()
 	{
 		return 2000.0;

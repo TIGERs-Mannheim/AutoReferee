@@ -47,8 +47,9 @@ message GameEvent {
         KickTimeout kick_timeout = 12;
         KeeperHeldBall keeper_held_ball = 13;
         AttackerDoubleTouchedBall attacker_double_touched_ball = 14;
-        AttackerInDefenseArea attacker_in_defense_area = 15;
-        AttackerTouchedKeeper attacker_touched_keeper = 16;
+        AttackerTouchedBallInDefenseArea attacker_touched_ball_in_defense_area = 15;
+        AttackerTouchedOpponentInDefenseArea attacker_touched_opponent_in_defense_area = 16;
+        AttackerTouchedOpponentInDefenseArea attacker_touched_opponent_in_defense_area_skipped = 42;
         BotDribbledBallTooFar bot_dribbled_ball_too_far = 17;
         BotKickedBallTooFast bot_kicked_ball_too_fast = 18;
 
@@ -240,7 +241,7 @@ message GameEvent {
         optional float distance = 4;
     }
     // an attacker touched the ball inside the opponent defense area
-    message AttackerInDefenseArea {
+    message AttackerTouchedBallInDefenseArea {
         // the team that found guilty
         required Team by_team = 1;
         // the bot that is inside the penalty area
@@ -274,13 +275,15 @@ message GameEvent {
         // the location where the maximum dribbling distance was reached
         optional Location end = 4;
     }
-    // an attacker touched the opponent keeper
-    message AttackerTouchedKeeper {
+    // an attacker touched the opponent robot inside defense area
+    message AttackerTouchedOpponentInDefenseArea {
         // the team that found guilty
         required Team by_team = 1;
-        // the bot that touched the opponent keeper
+        // the bot that touched the opponent robot
         optional uint32 by_bot = 2;
-        // the location of the contact point between bot and keeper
+        // the bot of the opposite team that was touched
+        optional uint32 victim = 4;
+        // the location of the contact point between both bots
         optional Location location = 3;
     }
     // an attacker touched the ball multiple times when it was not allowed to
@@ -431,8 +434,9 @@ enum GameEventType {
     KICK_TIMEOUT = 12;
     KEEPER_HELD_BALL = 13;
     ATTACKER_DOUBLE_TOUCHED_BALL = 14;
-    ATTACKER_IN_DEFENSE_AREA = 15;
-    ATTACKER_TOUCHED_KEEPER = 16;
+    ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA = 15;
+    ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA = 16;
+    ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA_SKIPPED = 40;
     BOT_DRIBBLED_BALL_TOO_FAR = 17;
     BOT_KICKED_BALL_TOO_FAST = 18;
     ATTACKER_TOO_CLOSE_TO_DEFENSE_AREA = 19;

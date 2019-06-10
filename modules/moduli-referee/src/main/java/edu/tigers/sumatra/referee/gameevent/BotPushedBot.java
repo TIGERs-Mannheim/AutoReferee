@@ -23,8 +23,8 @@ public class BotPushedBot extends AGameEvent
 	private final int victim;
 	private final IVector2 location;
 	private final double pushedDistance;
-	
-	
+
+
 	@SuppressWarnings("unsued") // used by berkeley
 	protected BotPushedBot()
 	{
@@ -34,8 +34,8 @@ public class BotPushedBot extends AGameEvent
 		location = null;
 		pushedDistance = 0;
 	}
-	
-	
+
+
 	/**
 	 * Default conversion constructor. Note: Called by reflection!
 	 *
@@ -50,8 +50,8 @@ public class BotPushedBot extends AGameEvent
 		this.location = toVector(event.getBotPushedBot().getLocation());
 		this.pushedDistance = toDistance(event.getBotPushedBot().getPushedDistance());
 	}
-	
-	
+
+
 	/**
 	 * @param violator
 	 * @param victim
@@ -66,9 +66,9 @@ public class BotPushedBot extends AGameEvent
 	{
 		this(EGameEvent.BOT_PUSHED_BOT, violator, victim, location, pushedDistance);
 	}
-	
-	
-	public BotPushedBot(
+
+
+	BotPushedBot(
 			EGameEvent type,
 			BotID violator,
 			BotID victim,
@@ -83,9 +83,12 @@ public class BotPushedBot extends AGameEvent
 		this.pushedDistance = pushedDistance;
 	}
 
-	public IVector2 getLocation() {
+
+	public IVector2 getLocation()
+	{
 		return location;
 	}
+
 
 	@Override
 	public SslGameEvent.GameEvent toProtobuf()
@@ -95,30 +98,30 @@ public class BotPushedBot extends AGameEvent
 		builder.getBotPushedBotBuilder().setByTeam(getTeam(team)).setViolator(violator)
 				.setVictim(victim).setPushedDistance((float) pushedDistance / 1000.f)
 				.setLocation(getLocationFromVector(location));
-		
+
 		return builder.build();
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
 		return String.format("Bot %d %s pushed bot %d %s for %.2f mm @ %s", violator, team, victim, team.opposite(),
 				pushedDistance, formatVector(location));
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final BotPushedBot that = (BotPushedBot) o;
-		
+
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
 				.append(violator, that.violator)
@@ -128,8 +131,8 @@ public class BotPushedBot extends AGameEvent
 				.append(location, that.location)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{

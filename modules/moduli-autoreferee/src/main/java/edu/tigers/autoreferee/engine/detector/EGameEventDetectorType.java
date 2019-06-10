@@ -19,7 +19,7 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	READY_FOR_PENALTY(new InstanceableClass(ReadyForPenaltyDetector.class)),
 	BALL_PLACEMENT(new InstanceableClass(BallPlacementDetector.class)),
 	ATTACKER_TO_DEFENSE_AREA_DISTANCE(new InstanceableClass(AttackerToDefenseAreaDistanceDetector.class)),
-	ATTACKER_TOUCHED_KEEPER(new InstanceableClass(AttackerTouchedKeeperDetector.class)),
+	ATTACKER_TOUCHED_OPPONENT_ROBOT(new InstanceableClass(AttackerTouchedOpponentRobotDetector.class)),
 	BOT_COLLISION(new InstanceableClass(BotCollisionDetector.class)),
 	BOT_IN_DEFENSE_AREA(new InstanceableClass(BotInDefenseAreaDetector.class)),
 	BOT_STOP_SPEED(new InstanceableClass(BotStopSpeedDetector.class)),
@@ -34,18 +34,18 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	READY_TO_CONTINUE(new InstanceableClass(ReadyToContinueDetector.class)),
 	PUSHING(new InstanceableClass(PushingDetector.class)),
 	BALL_PLACEMENT_INTERFERENCE(new InstanceableClass(BallPlacementInterferenceDetector.class)),
-	
+
 	;
-	
+
 	private final InstanceableClass clazz;
-	
-	
+
+
 	EGameEventDetectorType(final InstanceableClass clazz)
 	{
 		this.clazz = clazz;
 	}
-	
-	
+
+
 	@Override
 	public InstanceableClass getInstanceableClass()
 	{
