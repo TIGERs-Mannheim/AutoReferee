@@ -3,6 +3,7 @@
  */
 package edu.tigers.sumatra.referee.gameevent;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -93,10 +94,17 @@ public enum EGameEvent implements IInstanceableEnum
 	UNSPORTING_BEHAVIOR_MINOR(GameEventType.UNSPORTING_BEHAVIOR_MINOR, UnsportingBehaviorMinor.class,
 			EGameEventType.UNSPORTING),
 	UNSPORTING_BEHAVIOR_MAJOR(GameEventType.UNSPORTING_BEHAVIOR_MAJOR, UnsportingBehaviorMajor.class,
-			EGameEventType.UNSPORTING)
+			EGameEventType.UNSPORTING),
 
-
-	;
+	@Deprecated // only for compatibility with older Berkeley DBs
+	ATTACKER_IN_DEFENSE_AREA(GameEventType.ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA, AttackerTouchedBallInDefenseArea.class,
+			EGameEventType.MINOR_OFFENSE),
+	@Deprecated // only for compatibility with older Berkeley DBs
+	ATTACKER_TOUCH_KEEPER(
+			GameEventType.ATTACKER_TOUCHED_OPPONENT_IN_DEFENSE_AREA,
+			AttackerTouchedOpponentInDefenseArea.class,
+			EGameEventType.FOUL),
+			;
 
 
 	private final InstanceableClass impl;
@@ -137,6 +145,17 @@ public enum EGameEvent implements IInstanceableEnum
 	public static EGameEvent fromProto(GameEventType type)
 	{
 		return EVENT_TYPE_MAP.computeIfAbsent(type, e -> searchProto(type));
+	}
+
+
+	/**
+	 * Note: This has to be kept in sync with the actually marked values.
+	 *
+	 * @return all non deprecated values
+	 */
+	public static EGameEvent[] valuesNonDeprecated()
+	{
+		return Arrays.copyOf(values(), values().length - 2);
 	}
 
 

@@ -76,7 +76,8 @@ public class GameEventFactoryTest
 			assertThat(convertedGameEvent.get()).isEqualTo(gameEvent);
 		}
 
-		assertThat(gameEvents.stream().map(IGameEvent::getType)).containsAll(Arrays.asList(EGameEvent.values()));
+		assertThat(gameEvents.stream().map(IGameEvent::getType))
+				.containsAll(Arrays.asList(EGameEvent.valuesNonDeprecated()));
 	}
 
 
