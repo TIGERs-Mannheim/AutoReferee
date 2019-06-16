@@ -8,16 +8,22 @@
  */
 package edu.tigers.sumatra.components;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 import org.apache.log4j.Logger;
@@ -51,7 +57,6 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBox
 		this(enumClass, title, orientation, null);
 	}
 	
-	
 	/**
 	 * @param enumClass The class of the enum
 	 * @param title The title of the panel - if set to null no border will be drawn
@@ -66,6 +71,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBox
 		boxes = new EnumMap<>(enumClass);
 		this.formatter = formatter;
 		
+		
 		createBoxes(orientation);
 		
 		if (title != null)
@@ -75,15 +81,33 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBox
 	}
 	
 	
+	public void addToggleAllButton()
+	{
+		JButton toggleButton = new JButton("(de)select all");
+		toggleButton.addActionListener(e -> {
+			if (getValues().size() < (boxes.size() / 2))
+			{
+				setSelectedBoxes(boxes.keySet());
+			} else
+			{
+				setSelectedBoxes(Collections.emptySet());
+			}
+		});
+		add(toggleButton);
+	}
+	
+	
 	private void createBoxes(final int orientation)
 	{
 		setLayout(new BoxLayout(this, orientation));
 		
-		for (T type : enumClass.getEnumConstants())
+		List<T> sortedEntries = Arrays.stream(enumClass.getEnumConstants())
+				.sorted(Comparator.comparing(Enum::toString)).collect(Collectors.toList());
+		for (T type : sortedEntries)
 		{
 			JCheckBox checkBox = new JCheckBox(getBoxLabel(type));
 			checkBox.setSelected(true);
-			checkBox.addActionListener(new CheckBoxActionListener());
+			checkBox.addItemListener(new CheckBoxItemListener());
 			boxes.put(type, checkBox);
 			add(checkBox);
 		}
@@ -128,20 +152,19 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBox
 		boxes.keySet().forEach(t -> boxes.get(t).setSelected(enabledBoxes.contains(t)));
 	}
 	
-	private class CheckBoxActionListener implements ActionListener
+	private class CheckBoxItemListener implements ItemListener
 	{
-		
 		@Override
-		public void actionPerformed(final ActionEvent e)
+		public void itemStateChanged(final ItemEvent e)
 		{
 			try
 			{
-				T enumValue = Enum.valueOf(enumClass, e.getActionCommand());
+				T enumValue = Enum.valueOf(enumClass, ((JCheckBox) e.getSource()).getActionCommand());
 				boolean value = ((JCheckBox) e.getSource()).isSelected();
 				onSelectionChange(enumValue, value);
 			} catch (IllegalArgumentException ex)
 			{
-				log.warn("Unable to parse \"" + e.getActionCommand() + "\" to enum value", ex);
+				log.warn("Unable to parse \"" + ((JCheckBox) e.getSource()).getActionCommand() + "\" to enum value", ex);
 			}
 		}
 		

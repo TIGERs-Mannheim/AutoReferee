@@ -26,6 +26,7 @@ public class AutoRefMainPanel extends JPanel implements ISumatraView
 	{
 		gameEventDetectorPanel = new EnumCheckBoxPanel<>(EGameEventDetectorType.class, "Game Event Detectors",
 				BoxLayout.PAGE_AXIS);
+		gameEventDetectorPanel.addToggleAllButton();
 		
 		setLayout(new BorderLayout());
 		
