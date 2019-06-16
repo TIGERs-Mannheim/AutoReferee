@@ -3,7 +3,6 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -13,13 +12,13 @@ import java.net.URI;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 import org.apache.log4j.Logger;
 
@@ -28,7 +27,6 @@ import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.natives.OsDetector;
 import edu.tigers.sumatra.referee.Referee;
-import edu.tigers.sumatra.view.TextPane;
 import net.miginfocom.swing.MigLayout;
 
 
@@ -39,61 +37,62 @@ public class ShowRefereeMsgPanel extends JPanel
 {
 	private static final long serialVersionUID = -508393753936993622L;
 	private final Logger log = Logger.getLogger(ShowRefereeMsgPanel.class.getName());
-	
+	private static final int MAX_COMMANDS = 50;
+
 	private final JButton openControllerButton;
-	private final TextPane commandsList;
+	private final DefaultListModel<Command> listModel = new DefaultListModel<>();
 	private Command lastCmd = null;
 	private final JLabel time;
 	private final JLabel goals;
 	private final JLabel stage;
 	private final JLabel command;
-	
+
 	private final DecimalFormat df2 = new DecimalFormat("00");
-	private final Color color = new Color(0, 0, 0);
-	
-	
+
+
 	public ShowRefereeMsgPanel()
 	{
 		setLayout(new MigLayout("wrap 2", "[fill]10[fill]"));
-		
+
 		openControllerButton = new JButton("Open SSL Game Controller UI");
 		openControllerButton.addActionListener(a -> open());
 		add(openControllerButton, "span 2");
-		
+
 		add(new JLabel("Stage:"));
 		stage = new JLabel();
 		stage.setFont(stage.getFont().deriveFont(Font.BOLD));
 		add(stage);
-		
+
 		add(new JLabel("Last Command:"));
 		command = new JLabel();
 		command.setFont(stage.getFont().deriveFont(Font.BOLD));
 		add(command);
-		
+
 		// Goals
 		add(new JLabel("Goals:"));
 		goals = new JLabel();
 		goals.setFont(goals.getFont().deriveFont(Font.BOLD));
 		add(goals);
-		
+
 		// Time
 		add(new JLabel("Time:"));
 		time = new JLabel();
 		time.setFont(time.getFont().deriveFont(Font.BOLD));
 		add(time);
-		
+
 		// Commands
 		add(new JLabel("All Commands: "), "wrap");
-		commandsList = new TextPane(100);
-		commandsList.setMaximumSize(new Dimension(commandsList.getMaximumSize().width, this.getPreferredSize().height));
-		add(commandsList, "span 2");
+		final JList commandList = new JList<>(listModel);
+		commandList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		commandList.setLayoutOrientation(JList.VERTICAL);
+		commandList.setVisibleRowCount(-1);
+
+		JScrollPane listScroller = new JScrollPane(commandList);
+		listScroller.setPreferredSize(new Dimension(commandList.getMaximumSize().width, this.getPreferredSize().height));
+		add(listScroller, "span 2");
 	}
-	
-	
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
-	
+
+
 	private void open()
 	{
 		String gameControllerAddress = "http://localhost:"
@@ -119,8 +118,8 @@ public class ShowRefereeMsgPanel extends JPanel
 			log.warn("Could not execute command to open browser", e);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param msg
 	 */
@@ -137,27 +136,22 @@ public class ShowRefereeMsgPanel extends JPanel
 			stage.setText(msg.getStage().name());
 			command.setText(msg.getCommand().name());
 		});
-		
+
 		// Command History
 		EventQueue.invokeLater(() -> {
 			if (!msg.getCommand().equals(lastCmd))
 			{
-				// Command
-				final StyleContext sc = StyleContext.getDefaultStyleContext();
-				final AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, color);
-				String msgString = "";
-				if (commandsList.getLength() != 0)
-				{
-					msgString += "\n";
-				}
-				msgString = msgString + msg.getCommand().toString();
-				commandsList.append(msgString, aset);
 				lastCmd = msg.getCommand();
+				if (listModel.size() > MAX_COMMANDS)
+				{
+					listModel.removeElementAt(0);
+				}
+				listModel.add(0, msg.getCommand());
 			}
 		});
 	}
-	
-	
+
+
 	@Override
 	public void setEnabled(final boolean enable)
 	{
