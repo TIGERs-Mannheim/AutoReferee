@@ -42,54 +42,55 @@ public class AttackerTouchedOpponentRobotDetector extends AGameEventDetector
 
 	@Configurable(comment = "[s] The amount of time before a violation is reported again for the same bot", defValue = "1.5")
 	private static double violatorCoolDownTime = 1.5;
+	
+	@Configurable(comment = "[mm] Extra margin around the pen area. There is always a bot-radius wide margin.", defValue = "-20.0")
+	private static double penAreaMargin = -20.0;
 
 
-	private Map<BotID, Long> oldViolators = new HashMap<>();
+	private Map<Violation, Long> oldViolators = new HashMap<>();
 
-
+	
 	public AttackerTouchedOpponentRobotDetector()
 	{
 		super(EGameEventDetectorType.ATTACKER_TOUCHED_OPPONENT_ROBOT, EGameState.RUNNING);
 	}
-
-
+	
+	
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
 		long timestamp = frame.getTimestamp();
 
-		Set<BotID> keepers = new HashSet<>();
-		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.BLUE));
-		keepers.add(frame.getRefereeMsg().getKeeperBotID(ETeamColor.YELLOW));
+		Set<BotID> defendersInPenArea = bots.entrySet().stream()
+				.filter(e -> NGeometry.getPenaltyArea(e.getKey().getTeamColor())
+						.withMargin(Geometry.getBotRadius() + penAreaMargin)
+						.isPointInShape(e.getValue().getPos()))
+				.map(Map.Entry::getKey).collect(Collectors.toSet());
 
-		Set<BotID> violators = new HashSet<>();
+		Set<Violation> violators = new HashSet<>();
 
-		for (BotID keeperID : keepers)
+		for (BotID defenderID : defendersInPenArea)
 		{
-			if (!bots.containsKey(keeperID))
+			if (!bots.containsKey(defenderID))
 			{
 				/*
-				 * The keeper is omitted by the world predictor in this frame (maybe due to vision problems) or not located
+				 * The defender is omitted by the world predictor in this frame (maybe due to vision problems) or not
+				 * located
 				 * on the field. In this case it is skipped until it reappears on the field.
 				 */
 				continue;
 			}
-			ITrackedBot keeper = bots.getWithNull(keeperID);
-
-			// Only check for violators if the keeper is positioned inside his own penalty area
-			IPenaltyArea penArea = NGeometry.getPenaltyArea(keeperID.getTeamColor());
-			if (penArea.isPointInShape(keeper.getPos()))
-			{
-				violators.addAll(getViolators(bots, keeper));
-			}
+			ITrackedBot defender = bots.getWithNull(defenderID);
+			violators.addAll(getViolators(bots, defender));
 		}
 
 		/*
 		 * Update the timestamp of all violators for which a violation has already been generated but which are still
 		 * violating the rule
 		 */
-		Sets.intersection(violators, oldViolators.keySet()).forEach(bot -> oldViolators.put(bot, timestamp));
+		Sets.intersection(violators, oldViolators.keySet())
+				.forEach(bot -> oldViolators.put(bot, timestamp));
 
 		/*
 		 * Remove all old violators which have reached the cool down time
@@ -98,45 +99,89 @@ public class AttackerTouchedOpponentRobotDetector extends AGameEventDetector
 				.removeIf(entry -> (timestamp - entry.getValue()) / 1e9 > violatorCoolDownTime);
 
 		// get the first new violator
-		Optional<BotID> violatorID = Sets.difference(violators, oldViolators.keySet()).stream().findFirst();
+		Optional<Violation> violation = Sets.difference(violators, oldViolators.keySet()).stream().findFirst();
 
-		if (violatorID.isPresent() && bots.containsKey(violatorID.get()))
+		if (violation.isPresent() && bots.containsKey(violation.get().getViolator()))
 		{
-			ITrackedBot violator = bots.getWithNull(violatorID.get());
+			ITrackedBot violator = bots.getWithNull(violation.get().getViolator());
 
 			// add current validator to old validator
-			oldViolators.put(violatorID.get(), timestamp);
+			oldViolators.put(violation.get(), timestamp);
 
-			return Optional.of(new AttackerTouchedOpponentInDefenseArea(violatorID.get(),
-					BotID.createBotId(0, violator.getTeamColor().opposite()), violator.getPos()));
+			return Optional.of(new AttackerTouchedOpponentInDefenseArea(violation.get().getViolator(),
+					violation.get().getVictim(), violator.getPos()));
 
 		}
 		return Optional.empty();
 	}
-
-
-	private Set<BotID> getViolators(final IBotIDMap<ITrackedBot> bots, final ITrackedBot target)
+	
+	private Set<Violation> getViolators(final IBotIDMap<ITrackedBot> bots, final ITrackedBot defender)
 	{
-		ETeamColor targetColor = target.getBotId().getTeamColor();
+		ETeamColor defenderColor = defender.getBotId().getTeamColor();
 
-		IPenaltyArea penArea = NGeometry.getPenaltyArea(targetColor);
-		ICircle circle = Circle.createCircle(target.getPos(), touchDistance + (Geometry.getBotRadius() * 2));
+		IPenaltyArea penArea = NGeometry.getPenaltyArea(defenderColor);
+		ICircle circle = Circle.createCircle(defender.getPos(), touchDistance + (Geometry.getBotRadius() * 2));
 
-		List<ITrackedBot> attackingBots = AutoRefUtil.filterByColor(bots, targetColor.opposite());
+		List<ITrackedBot> attackingBots = AutoRefUtil.filterByColor(bots, defenderColor.opposite());
 
 		/*
 		 * We only consider a contact to be a violation if the contact occurs inside the defense area
 		 */
+		
 		return attackingBots.stream()
 				.filter(bot -> circle.isPointInShape(bot.getPos(), 0))
 				.filter(bot -> {
-					IVector2 contactPoint = calcTwoPointCenter(bot.getPos(), target.getPos());
-					return penArea.isPointInShape(contactPoint);
+					IVector2 contactPoint = calcTwoPointCenter(bot.getPos(), defender.getPos());
+					return penArea.isPointInShape(contactPoint, penAreaMargin);
 				})
-				.map(ITrackedBot::getBotId)
+				.map(bot -> new Violation(bot.getBotId(), defender.getBotId()))
 				.collect(Collectors.toSet());
 	}
 
+	private class Violation
+	{
+		private final BotID violator;
+		private final BotID victim;
+		
+		
+		public Violation(BotID violator, BotID victim)
+		{
+			this.violator = violator;
+			this.victim = victim;
+		}
+		
+		
+		public BotID getViolator()
+		{
+			return violator;
+		}
+		
+		
+		public BotID getVictim()
+		{
+			return victim;
+		}
+		
+		
+		@Override
+		public int hashCode()
+		{
+			return violator.hashCode() * victim.hashCode();
+		}
+		
+		
+		@Override
+		public boolean equals(final Object obj)
+		{
+			if (obj == null || obj.getClass() != Violation.class)
+			{
+				return false;
+			}
+			Violation other = (Violation) obj;
+			return other.getViolator() == violator && other.getVictim() == victim;
+		}
+	}
+	
 
 	private IVector2 calcTwoPointCenter(final IVector2 a, final IVector2 b)
 	{
