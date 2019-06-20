@@ -4,6 +4,10 @@
 
 package edu.tigers.autoreferee.engine.detector;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.github.g3force.instanceables.IInstanceableEnum;
 import com.github.g3force.instanceables.InstanceableClass;
 
@@ -32,17 +36,25 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	BALL_SPEEDING(new InstanceableClass(BallSpeedingDetector.class)),
 	BOT_NUMBER(new InstanceableClass(BotNumberDetector.class)),
 	READY_TO_CONTINUE(new InstanceableClass(ReadyToContinueDetector.class)),
-	PUSHING(new InstanceableClass(PushingDetector.class)),
+	PUSHING(new InstanceableClass(PushingDetector.class), false),
 	BALL_PLACEMENT_INTERFERENCE(new InstanceableClass(BallPlacementInterferenceDetector.class)),
 
 	;
 
 	private final InstanceableClass clazz;
+	private final boolean enabledByDefault;
 
 
 	EGameEventDetectorType(final InstanceableClass clazz)
 	{
+		this(clazz, true);
+	}
+
+
+	EGameEventDetectorType(final InstanceableClass clazz, final boolean enabledByDefault)
+	{
 		this.clazz = clazz;
+		this.enabledByDefault = enabledByDefault;
 	}
 
 
@@ -50,5 +62,19 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	public InstanceableClass getInstanceableClass()
 	{
 		return clazz;
+	}
+
+
+	public boolean isEnabledByDefault()
+	{
+		return enabledByDefault;
+	}
+
+
+	public static Set<EGameEventDetectorType> valuesEnabledByDefault()
+	{
+		return Arrays.stream(values())
+				.filter(EGameEventDetectorType::isEnabledByDefault)
+				.collect(Collectors.toSet());
 	}
 }

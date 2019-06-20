@@ -25,22 +25,22 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 		IEnumPanelObserver<EGameEventDetectorType>
 {
 	private AutoRefMainPanel mainPanel = new AutoRefMainPanel();
-	
-	
+
+
 	@Override
 	public Component getComponent()
 	{
 		return mainPanel;
 	}
-	
-	
+
+
 	@Override
 	public ISumatraView getSumatraView()
 	{
 		return mainPanel;
 	}
-	
-	
+
+
 	@Override
 	public void onModuliStateChanged(final ModulesState state)
 	{
@@ -49,7 +49,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 		{
 			return;
 		}
-		
+
 		switch (state)
 		{
 			case ACTIVE:
@@ -57,6 +57,7 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 				EventQueue.invokeLater(() -> mainPanel.setEnabled(true));
 				mainPanel.getStartStopPanel().addObserver(this);
 				mainPanel.getGameEventDetectorPanel().addObserver(this);
+				mainPanel.getGameEventDetectorPanel().setSelectedBoxes(EGameEventDetectorType.valuesEnabledByDefault());
 				optModule.ifPresent(autoRef -> mainPanel.getStartStopPanel().setAutoRefMode(autoRef.getMode()));
 				break;
 			case NOT_LOADED:
@@ -68,30 +69,30 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 				break;
 		}
 	}
-	
-	
+
+
 	@Override
 	public void onAutoRefModeChanged(EAutoRefMode mode)
 	{
 		EventQueue.invokeLater(() -> mainPanel.getStartStopPanel().setAutoRefMode(mode));
 	}
-	
-	
+
+
 	@Override
 	public void onValueTicked(final EGameEventDetectorType type, final boolean value)
 	{
 		AutoRefModule autoRef = SumatraModel.getInstance().getModule(AutoRefModule.class);
 		autoRef.setGameEventDetectorActive(type, value);
 	}
-	
-	
+
+
 	@Override
 	public void changeMode(final EAutoRefMode mode)
 	{
 		EventQueue.invokeLater(() -> SumatraModel.getInstance().getModule(AutoRefModule.class).changeMode(mode));
 	}
-	
-	
+
+
 	@Override
 	public void onNewGameEventDetected(final IGameEvent gameEvent)
 	{

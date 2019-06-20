@@ -3,7 +3,6 @@
  */
 package edu.tigers.autoreferee.module;
 
-import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
@@ -35,24 +34,24 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class AutoRefRunner implements Runnable, IWorldFrameObserver
 {
 	private static final Logger log = Logger.getLogger(AutoRefRunner.class);
-	
+
 	private final BlockingDeque<WorldFrameWrapper> consumableFrames = new LinkedBlockingDeque<>(1);
 	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
-	private final Set<EGameEventDetectorType> activeDetectors = EnumSet.allOf(EGameEventDetectorType.class);
-	
+	private final Set<EGameEventDetectorType> activeDetectors = EGameEventDetectorType.valuesEnabledByDefault();
+
 	private ExecutorService executorService;
 	private AutoRefEngine engine = new AutoRefEngine(activeDetectors);
 	private final IAutoRefEngineObserver callback;
 	private EAutoRefMode mode = EAutoRefMode.OFF;
 	private final Object engineSync = new Object();
-	
-	
+
+
 	public AutoRefRunner(IAutoRefEngineObserver callback)
 	{
 		this.callback = callback;
 	}
-	
-	
+
+
 	public void setDetectorActive(final EGameEventDetectorType type, boolean active)
 	{
 		if (active)
@@ -63,8 +62,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			activeDetectors.remove(type);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Start the auto referee runner with an inactive engine
 	 */
@@ -78,8 +77,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		executorService = Executors.newSingleThreadExecutor(new NamedThreadFactory("AutoRef"));
 		executorService.execute(this);
 	}
-	
-	
+
+
 	/**
 	 * Stop the auto referee runner
 	 */
@@ -101,8 +100,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		// clear auto ref shape map
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyClearShapeMap("AUTO_REF");
 	}
-	
-	
+
+
 	public void changeMode(final EAutoRefMode mode)
 	{
 		synchronized (engineSync)
@@ -126,8 +125,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			engine.start();
 		}
 	}
-	
-	
+
+
 	@Override
 	public void run()
 	{
@@ -149,8 +148,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			}
 		}
 	}
-	
-	
+
+
 	private void consumeWorldFrame(final WorldFrameWrapper frame)
 	{
 		AutoRefFrame currentFrame = preprocessor.process(frame);
@@ -164,8 +163,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		SumatraModel.getInstance().getModule(AWorldPredictor.class)
 				.notifyNewShapeMap(frame.getTimestamp(), currentFrame.getShapes(), "AUTO_REF");
 	}
-	
-	
+
+
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
@@ -185,14 +184,14 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			consumableFrames.addFirst(wFrameWrapper);
 		}
 	}
-	
-	
+
+
 	public AutoRefEngine getEngine()
 	{
 		return engine;
 	}
-	
-	
+
+
 	public EAutoRefMode getMode()
 	{
 		return mode;
