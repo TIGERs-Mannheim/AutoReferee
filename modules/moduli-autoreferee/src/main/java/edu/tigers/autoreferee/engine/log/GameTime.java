@@ -18,18 +18,18 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
 public class GameTime
 {
 	private static final GameTime empty = new GameTime(Stage.NORMAL_FIRST_HALF_PRE, 0);
-	
+
 	private final Stage stage;
 	private final long micros;
-	
-	
+
+
 	private GameTime(final Stage stage, final long micros)
 	{
 		this.stage = stage;
 		this.micros = micros;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -37,8 +37,8 @@ public class GameTime
 	{
 		return empty;
 	}
-	
-	
+
+
 	/**
 	 * @param refMsg
 	 * @return
@@ -47,8 +47,8 @@ public class GameTime
 	{
 		return new GameTime(refMsg.getStage(), refMsg.getStageTimeLeft());
 	}
-	
-	
+
+
 	/**
 	 * @param micros
 	 * @return
@@ -58,8 +58,8 @@ public class GameTime
 	{
 		return new GameTime(stage, this.micros - micros);
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -67,13 +67,20 @@ public class GameTime
 	{
 		return stage;
 	}
-	
-	
+
+
 	/**
 	 * @return ms left in the stage
 	 */
 	public long getMicrosLeft()
 	{
 		return micros;
+	}
+
+
+	@Override
+	public String toString()
+	{
+		return String.format("%s - %d", stage, ((int) (micros / 1e6)));
 	}
 }

@@ -120,7 +120,7 @@ public class BotCrashUnique extends AGameEvent
 	@Override
 	public String toString()
 	{
-		return String.format("Bot %d %s crashed into bot %d %s with %.2f m/s @ %s (Δv: %.2f m/s, angle: %.0f°",
+		return String.format("Bot %d %s crashed into bot %d %s with %.2f m/s @ %s (Δv: %.2f m/s, angle: %.0f°)",
 				violator, team, victim, team.opposite(), crashSpeed, formatVector(location), speedDiff,
 				AngleMath.rad2deg(crashAngle));
 	}
