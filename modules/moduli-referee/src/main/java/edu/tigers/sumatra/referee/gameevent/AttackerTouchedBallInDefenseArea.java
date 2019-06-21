@@ -15,7 +15,7 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
-@Persistent
+@Persistent(version = 1)
 public class AttackerTouchedBallInDefenseArea extends AGameEvent
 {
 	private final ETeamColor team;
