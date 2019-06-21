@@ -29,11 +29,13 @@ public class FilteredVisionBot
 	private final IVector2 pos;
 	/** [m/s,m/s] */
 	private final IVector2 vel;
+	/** [rad] */
 	private final double orientation;
+	/** [rad/s] */
 	private final double angularVel;
 	private final double quality;
-	
-	
+
+
 	@SuppressWarnings("unused") // for Berkeley database
 	private FilteredVisionBot()
 	{
@@ -44,8 +46,8 @@ public class FilteredVisionBot
 		angularVel = 0;
 		quality = 0;
 	}
-	
-	
+
+
 	private FilteredVisionBot(final BotID botID, final IVector2 pos, final IVector2 vel,
 			final double orientation, final double angularVel, final double quality)
 	{
@@ -56,47 +58,59 @@ public class FilteredVisionBot
 		this.angularVel = angularVel;
 		this.quality = quality;
 	}
-	
-	
+
+
 	public BotID getBotID()
 	{
 		return botID;
 	}
-	
-	
+
+
+	/**
+	 * @return [mm, mm]
+	 */
 	public IVector2 getPos()
 	{
 		return pos;
 	}
-	
-	
+
+
+	/**
+	 * @return [m/s, m/s]
+	 */
 	public IVector2 getVel()
 	{
 		return vel;
 	}
-	
-	
+
+
+	/**
+	 * @return [rad]
+	 */
 	public double getOrientation()
 	{
 		return orientation;
 	}
-	
-	
+
+
+	/**
+	 * @return [rad/s]
+	 */
 	public double getAngularVel()
 	{
 		return angularVel;
 	}
-	
-	
+
+
 	public double getQuality()
 	{
 		return quality;
 	}
-	
-	
+
+
 	/**
 	 * Extrapolate bot into future.
-	 * 
+	 *
 	 * @param timestampNow
 	 * @param timestampFuture
 	 * @return
@@ -107,9 +121,9 @@ public class FilteredVisionBot
 		{
 			return this;
 		}
-		
+
 		double dt = (timestampFuture - timestampNow) * 1e-9;
-		
+
 		return Builder.create()
 				.withId(botID)
 				.withQuality(quality)
@@ -119,14 +133,14 @@ public class FilteredVisionBot
 				.withAVel(angularVel)
 				.build();
 	}
-	
-	
+
+
 	public BotState toBotState()
 	{
 		return BotState.of(botID, State.of(Pose.from(pos, orientation), Vector3.from2d(vel, angularVel)));
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -138,7 +152,7 @@ public class FilteredVisionBot
 				", angularVel=" + angularVel +
 				'}';
 	}
-	
+
 	/**
 	 * Builder for sub class
 	 */
@@ -149,16 +163,18 @@ public class FilteredVisionBot
 		private IVector2 pos;
 		/** [m/s,m/s] */
 		private IVector2 vel;
+		/** [rad] */
 		private Double orientation;
+		/** [rad/s] */
 		private Double angularVel;
 		private double quality = 0;
-		
-		
+
+
 		private Builder()
 		{
 		}
-		
-		
+
+
 		/**
 		 * @return new builder
 		 */
@@ -166,8 +182,8 @@ public class FilteredVisionBot
 		{
 			return new Builder();
 		}
-		
-		
+
+
 		/**
 		 * @param botID id of the bot
 		 * @return this builder
@@ -177,8 +193,8 @@ public class FilteredVisionBot
 			this.botID = botID;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param pos of bot
 		 * @return this builder
@@ -188,8 +204,8 @@ public class FilteredVisionBot
 			this.pos = pos;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param vel of bot [m/s,m/s]
 		 * @return this builder
@@ -199,8 +215,8 @@ public class FilteredVisionBot
 			this.vel = vel;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param orientation of bot
 		 * @return this builder
@@ -210,8 +226,8 @@ public class FilteredVisionBot
 			this.orientation = orientation;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param aVel of bot
 		 * @return this builder
@@ -221,8 +237,8 @@ public class FilteredVisionBot
 			angularVel = aVel;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param quality of bot
 		 * @return this builder
@@ -232,8 +248,8 @@ public class FilteredVisionBot
 			this.quality = quality;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @return new instance
 		 */
