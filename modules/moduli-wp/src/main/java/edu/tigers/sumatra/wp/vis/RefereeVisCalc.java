@@ -133,7 +133,7 @@ public class RefereeVisCalc implements IWpCalc
 				.collect(Collectors.joining(","));
 		String proposedGameEvents = "Proposed: "
 				+ msg.getProposedGameEvents().stream().map(ProposedGameEvent::getGameEvent)
-				.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
+						.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], FIRST_LINE), nextCommand, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], SECOND_LINE), gameEvents, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], THIRD_LINE), proposedGameEvents, Color.white));
@@ -243,11 +243,12 @@ public class RefereeVisCalc implements IWpCalc
 		}
 
 		DrawableCircle distToBallCircle = new DrawableCircle(
-				Circle.createCircle(wfw.getSimpleWorldFrame().getBall().getPos(), 500), distToBallColor);
+				Circle.createCircle(wfw.getSimpleWorldFrame().getBall().getPos(), RuleConstraints.getStopRadius()),
+				distToBallColor);
 		shapes.add(distToBallCircle);
 
 		DrawableCircle dtargetCircle = new DrawableCircle(
-				Circle.createCircle(ballTargetPos, 100), targetCircleColor);
+				Circle.createCircle(ballTargetPos, RuleConstraints.getBallPlacementTolerance()), targetCircleColor);
 		DrawablePoint dtargetPoint = new DrawablePoint(ballTargetPos, Color.RED);
 		shapes.add(dtargetCircle);
 		shapes.add(dtargetPoint);
