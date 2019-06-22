@@ -1,5 +1,7 @@
 package edu.tigers.autoreferee.engine.log;
 
+import java.awt.Color;
+
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 
 
@@ -36,5 +38,25 @@ public class AutoRefGameEventGameLogEntry extends GameLogEntry
 	public String toString()
 	{
 		return String.format("%d | %s | %s | %s", getTimestamp(), getGameTime(), getType(), gameEvent);
+	}
+
+
+	@Override
+	public Color getForegroundColor()
+	{
+		switch (gameEvent.getType().getType())
+		{
+			case MINOR_OFFENSE:
+				return new Color(250, 150, 31);
+			case FOUL:
+				return new Color(250, 14, 10);
+			case UNSPORTING:
+				return new Color(250, 12, 112);
+			case MATCH_PROCEEDING:
+			case BALL_LEFT_FIELD:
+			case REPEATED:
+			default:
+				return super.getForegroundColor();
+		}
 	}
 }
