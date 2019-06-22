@@ -17,7 +17,7 @@ import edu.tigers.sumatra.Referee.SSL_Referee;
 /**
  * Persistent wrapper for TeamInfo
  */
-@Persistent
+@Persistent(version = 1)
 public class TeamInfo
 {
 	private final String name;
