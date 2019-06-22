@@ -34,13 +34,14 @@ public class TeamInfo
 	/** in microseconds */
 	private final int timeoutTime;
 	private final int goalie;
-	
+
 	private final int foulCounter;
 	private final int ballPlacementFailures;
 	private final boolean canPlaceBall;
 	private final int maxAllowedBots;
-	
-	
+	private final boolean botSubstitutionIntent;
+
+
 	@SuppressWarnings("unused")
 	TeamInfo()
 	{
@@ -56,9 +57,10 @@ public class TeamInfo
 		ballPlacementFailures = 0;
 		canPlaceBall = true;
 		maxAllowedBots = 8;
+		botSubstitutionIntent = false;
 	}
-	
-	
+
+
 	/**
 	 * @param teamInfo
 	 */
@@ -71,14 +73,15 @@ public class TeamInfo
 		yellowCardsTimes = new ArrayList<>(teamInfo.getYellowCardTimesList());
 		timeouts = teamInfo.getTimeouts();
 		timeoutTime = teamInfo.getTimeoutTime();
-		goalie = teamInfo.getGoalie();
+		goalie = teamInfo.getGoalkeeper();
 		foulCounter = teamInfo.hasFoulCounter() ? teamInfo.getFoulCounter() : 0;
 		ballPlacementFailures = teamInfo.hasBallPlacementFailures() ? teamInfo.getBallPlacementFailures() : 0;
 		canPlaceBall = !teamInfo.hasCanPlaceBall() || teamInfo.getCanPlaceBall();
 		maxAllowedBots = teamInfo.hasMaxAllowedBots() ? teamInfo.getMaxAllowedBots() : 8;
+		botSubstitutionIntent = teamInfo.hasBotSubstitutionIntent() && teamInfo.getBotSubstitutionIntent();
 	}
-	
-	
+
+
 	/**
 	 * @return the name
 	 */
@@ -86,8 +89,8 @@ public class TeamInfo
 	{
 		return name;
 	}
-	
-	
+
+
 	/**
 	 * @return the score
 	 */
@@ -95,8 +98,8 @@ public class TeamInfo
 	{
 		return score;
 	}
-	
-	
+
+
 	/**
 	 * @return the redCards
 	 */
@@ -104,8 +107,8 @@ public class TeamInfo
 	{
 		return redCards;
 	}
-	
-	
+
+
 	/**
 	 * @return the yellowCards
 	 */
@@ -113,21 +116,21 @@ public class TeamInfo
 	{
 		return yellowCards;
 	}
-	
-	
+
+
 	/**
 	 * The amount of time (in microseconds) left on each yellow card issued to the team.
 	 * If no yellow cards are issued, this array has no elements.
 	 * Otherwise, times are ordered from smallest to largest.
-	 * 
+	 *
 	 * @return the yellowCardsTimes in microseconds
 	 */
 	public final List<Integer> getYellowCardsTimes()
 	{
 		return yellowCardsTimes;
 	}
-	
-	
+
+
 	/**
 	 * @return the timeouts
 	 */
@@ -135,8 +138,8 @@ public class TeamInfo
 	{
 		return timeouts;
 	}
-	
-	
+
+
 	/**
 	 * @return the timeoutTime left for the team in microseconds
 	 */
@@ -144,8 +147,8 @@ public class TeamInfo
 	{
 		return timeoutTime;
 	}
-	
-	
+
+
 	/**
 	 * @return the goalie
 	 */
@@ -153,32 +156,38 @@ public class TeamInfo
 	{
 		return goalie;
 	}
-	
-	
+
+
 	public int getFoulCounter()
 	{
 		return foulCounter;
 	}
-	
-	
+
+
 	public int getBallPlacementFailures()
 	{
 		return ballPlacementFailures;
 	}
-	
-	
+
+
 	public boolean isCanPlaceBall()
 	{
 		return canPlaceBall;
 	}
-	
-	
+
+
 	public int getMaxAllowedBots()
 	{
 		return maxAllowedBots;
 	}
-	
-	
+
+
+	public boolean isBotSubstitutionIntent()
+	{
+		return botSubstitutionIntent;
+	}
+
+
 	@Override
 	public String toString()
 	{
@@ -195,6 +204,7 @@ public class TeamInfo
 				.append("ballPlacementFailures", ballPlacementFailures)
 				.append("canPlaceBall", canPlaceBall)
 				.append("maxAllowedBots", maxAllowedBots)
+				.append("maxAllowedBots", botSubstitutionIntent)
 				.toString();
 	}
 }

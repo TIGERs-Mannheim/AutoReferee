@@ -20,20 +20,20 @@ public class RefereeMsgBuilder
 {
 	private Map<ETeamColor, Referee.SSL_Referee.TeamInfo.Builder> teamBuilder = new EnumMap<>(ETeamColor.class);
 	private Referee.SSL_Referee.Builder messageBuilder = Referee.SSL_Referee.newBuilder();
-	
-	
+
+
 	private RefereeMsgBuilder()
 	{
 		initTeamInfo(ETeamColor.BLUE);
 		initTeamInfo(ETeamColor.YELLOW);
 		initMessage();
 	}
-	
-	
+
+
 	private void initTeamInfo(ETeamColor teamColor)
 	{
 		Referee.SSL_Referee.TeamInfo.Builder builder = Referee.SSL_Referee.TeamInfo.newBuilder();
-		builder.setGoalie(0);
+		builder.setGoalkeeper(0);
 		builder.setName(teamColor.name());
 		builder.setScore(0);
 		builder.setYellowCards(0);
@@ -42,8 +42,8 @@ public class RefereeMsgBuilder
 		builder.setTimeoutTime(360);
 		teamBuilder.put(teamColor, builder);
 	}
-	
-	
+
+
 	private void initMessage()
 	{
 		messageBuilder.setPacketTimestamp(System.currentTimeMillis());
@@ -53,8 +53,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setStageTimeLeft(300);
 		messageBuilder.setStage(Referee.SSL_Referee.Stage.NORMAL_FIRST_HALF);
 	}
-	
-	
+
+
 	/**
 	 * @return a new builder
 	 */
@@ -62,8 +62,8 @@ public class RefereeMsgBuilder
 	{
 		return new RefereeMsgBuilder();
 	}
-	
-	
+
+
 	/**
 	 * @return a new referee message
 	 */
@@ -73,8 +73,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setYellow(teamBuilder.get(ETeamColor.YELLOW));
 		return messageBuilder.build();
 	}
-	
-	
+
+
 	/**
 	 * @param pos in [mm] (not inverted!)
 	 * @return this builder for chaining
@@ -93,8 +93,8 @@ public class RefereeMsgBuilder
 		}
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param command
 	 * @return this builder for chaining
@@ -104,8 +104,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setCommand(command);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param teamColor
 	 * @param score
@@ -116,8 +116,8 @@ public class RefereeMsgBuilder
 		teamBuilder.get(teamColor).setScore(score);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param timeLeft
 	 * @return this builder for chaining
@@ -127,8 +127,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setStageTimeLeft(timeLeft);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param commandCounter
 	 * @return this builder for chaining
@@ -138,8 +138,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setCommandCounter(commandCounter);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 * @return this builder for chaining
@@ -149,8 +149,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setPacketTimestamp(timestamp);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 * @return this builder for chaining
@@ -160,8 +160,8 @@ public class RefereeMsgBuilder
 		messageBuilder.setCommandTimestamp(timestamp);
 		return this;
 	}
-	
-	
+
+
 	/**
 	 * @param stage
 	 * @return this builder for chaining
@@ -171,5 +171,5 @@ public class RefereeMsgBuilder
 		messageBuilder.setStage(stage);
 		return this;
 	}
-	
+
 }

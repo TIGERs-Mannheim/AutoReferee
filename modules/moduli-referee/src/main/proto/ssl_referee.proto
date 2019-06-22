@@ -3,7 +3,6 @@ syntax = "proto2";
 package edu.tigers.sumatra;
 option java_outer_classname = "Referee";
 
-//import "ssl_game_event.proto";
 import "ssl_game_event_2019.proto";
 
 // Each UDP packet contains one of these messages.
@@ -140,8 +139,8 @@ message SSL_Referee {
         required uint32 timeouts = 6;
         // The number of microseconds of timeout this team can use.
         required uint32 timeout_time = 7;
-        // The pattern number of this team's goalie.
-        required uint32 goalie = 8;
+        // The pattern number of this team's goalkeeper.
+        required uint32 goalkeeper = 8;
         // The total number of countable fouls that act towards yellow cards
         optional uint32 foul_counter = 9;
         // The number of consecutive ball placement failures of this team
@@ -150,6 +149,8 @@ message SSL_Referee {
         optional bool can_place_ball = 12;
         // The maximum number of bots allowed on the field based on division and cards
         optional uint32 max_allowed_bots = 13;
+        // The team has submitted an intent to substitute one or more robots at the next chance
+        optional bool bot_substitution_intent = 14;
     }
 
     // Information about the two teams.
@@ -173,7 +174,7 @@ message SSL_Referee {
 
     // The game event that caused the referee command.
     // deprecated in favor of game_events.
-    //    optional SSL_Referee_Game_Event game_event = 11 [deprecated = true];
+    //    optional Game_Event game_event = 11 [deprecated = true];
 
     // The command that will be issued after the current stoppage and ball placement to continue the game.
     optional Command next_command = 12;

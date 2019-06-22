@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <ssl.game.controller.version>v1.0.0-rc3</ssl.game.controller.version>
+        <ssl.game.controller.version>v1.0.0</ssl.game.controller.version>
     </properties>
 
     <dependencies>
