@@ -17,16 +17,19 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	CAM_INFO_SHAPES("Cam Info"),
 	VIEWPORT_SHAPES("Viewports"),
 	ROBOT_TRACKER_SHAPES("Robot Trackers", false, EShapeLayerPersistenceType.NEVER_PERSIST),
+	ROBOT_QUALITY_INSPECTOR("Robot Quality Inspector"),
 	BALL_TRACKER_SHAPES_IMPORTANT("Ball Trackers"),
-	BALL_TRACKER_SHAPES("Ball Trackers Debug", false, EShapeLayerPersistenceType.NEVER_PERSIST);
-	
+	BALL_TRACKER_SHAPES("Ball Trackers Debug", false, EShapeLayerPersistenceType.NEVER_PERSIST),
+
+	;
+
 	private final String id;
 	private final String name;
 	private final boolean visible;
 	private final int orderId;
 	private final EShapeLayerPersistenceType persistenceType;
-	
-	
+
+
 	/**
 	 *
 	 */
@@ -34,8 +37,8 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	{
 		this(name, false, EShapeLayerPersistenceType.ALWAYS_PERSIST);
 	}
-	
-	
+
+
 	/**
 	 *
 	 */
@@ -48,8 +51,8 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 		id = EVisionFilterShapesLayer.class.getCanonicalName() + name();
 		this.persistenceType = persistenceType;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -58,8 +61,8 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	{
 		return name;
 	}
-	
-	
+
+
 	/**
 	 * @return the category
 	 */
@@ -68,29 +71,29 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	{
 		return "Vision Filter";
 	}
-	
-	
+
+
 	@Override
 	public int getOrderId()
 	{
 		return orderId;
 	}
-	
-	
+
+
 	@Override
 	public String getId()
 	{
 		return id;
 	}
-	
-	
+
+
 	@Override
 	public EShapeLayerPersistenceType getPersistenceType()
 	{
 		return persistenceType;
 	}
-	
-	
+
+
 	@Override
 	public boolean isVisibleByDefault()
 	{
