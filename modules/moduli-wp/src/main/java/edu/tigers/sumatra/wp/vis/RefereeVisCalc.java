@@ -129,12 +129,14 @@ public class RefereeVisCalc implements IWpCalc
 
 
 		String nextCommand = msg.getNextCommand() == null ? "" : msg.getNextCommand().name();
+		String nextState = wfw.getGameState().getNextStateNameWithColor();
+		String nextStateAndCommand = "next: " + nextState + " (" + nextCommand + ")";
 		String gameEvents = "Events: " + msg.getGameEvents().stream().map(IGameEvent::getType).map(Enum::name)
 				.collect(Collectors.joining(","));
 		String proposedGameEvents = "Proposed: "
 				+ msg.getProposedGameEvents().stream().map(ProposedGameEvent::getGameEvent)
 						.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
-		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], FIRST_LINE), nextCommand, Color.white));
+		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], FIRST_LINE), nextStateAndCommand, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], SECOND_LINE), gameEvents, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], THIRD_LINE), proposedGameEvents, Color.white));
 

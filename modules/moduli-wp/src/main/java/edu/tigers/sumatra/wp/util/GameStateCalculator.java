@@ -18,28 +18,23 @@ import edu.tigers.sumatra.referee.data.RefereeMsg;
 
 /**
  * Check in which game state we are by consulting new referee messages and the ball position
- * 
- * @author AndreR <andre@ryll.cc>
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
- * @author Sebastian Stein <sebastian-stein@gmx.de>
  */
 public class GameStateCalculator
 {
 	@Configurable(comment = "Ball movement tolerance", defValue = "50")
 	private static double ballMovedDistanceTol = 50;
-	
+
 	static
 	{
 		ConfigRegistration.registerClass("wp", GameStateCalculator.class);
 	}
-	
+
 	private IVector2 ballPosOnPrepare = null;
 	private long lastRefMsgCounter = -1;
-	private Stage lastRefMsgStage = null;
 	private GameState lastGameState = GameState.Builder.empty().build();
 	private Command lastRefCmd = Command.STOP;
-	
-	
+
+
 	/**
 	 * reset state
 	 */
@@ -49,8 +44,8 @@ public class GameStateCalculator
 		lastRefMsgCounter = -1;
 		ballPosOnPrepare = null;
 	}
-	
-	
+
+
 	/**
 	 * @param refereeMsg latest referee message
 	 * @param ballPos current ball position
@@ -62,42 +57,34 @@ public class GameStateCalculator
 		lastGameState = nextGameState;
 		return nextGameState;
 	}
-	
-	
-	private boolean isNewRefereeMsg(final RefereeMsg refereeMsg)
-	{
-		return refereeMsg.getCommandCounter() != lastRefMsgCounter || refereeMsg.getStage() != lastRefMsgStage;
-	}
-	
-	
+
+
 	private GameState calcGameState(final RefereeMsg refereeMsg, final IVector2 ballPos)
 	{
 		GameState.Builder builder = GameState.Builder.create().withGameState(lastGameState);
-		
-		if (isNewRefereeMsg(refereeMsg))
+
+		if (refereeMsg.getCommandCounter() != lastRefMsgCounter)
 		{
 			lastRefMsgCounter = refereeMsg.getCommandCounter();
-			lastRefMsgStage = refereeMsg.getStage();
-			
-			
 			processCommand(refereeMsg.getCommand(), lastRefCmd, builder);
-			builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
-			processStage(refereeMsg.getStage(), builder);
 			storeBallPosition(refereeMsg.getCommand(), ballPos);
-			
 			lastRefCmd = refereeMsg.getCommand();
 		}
-		
+
+		processNextCommand(refereeMsg.getNextCommand(), refereeMsg.getCommand(), builder);
+		builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
+		processStage(refereeMsg.getStage(), builder);
+
 		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT)
 		{
 			processBallMovement(ballPos, builder);
 		}
-		
+
 		// we build this with NEUTRAL ourTeam because we don't know our team yet
 		return builder.withOurTeam(ETeamColor.NEUTRAL).build();
 	}
-	
-	
+
+
 	private void processStage(final Stage stage, final GameState.Builder builder)
 	{
 		builder.withPenalyShootout(false);
@@ -120,91 +107,122 @@ public class GameStateCalculator
 				break;
 		}
 	}
-	
-	
+
+
+	private void processCommand(final Command command, final Command lastCommand, final GameState.Builder builder)
+	{
+		if (command == Command.NORMAL_START)
+		{
+			builder.withState(normalStartToState(lastCommand));
+			builder.forTeam(commandToTeam(lastCommand));
+		} else if (command != null)
+		{
+			builder.withState(commandToState(command));
+			builder.forTeam(commandToTeam(command));
+		}
+	}
+
+
+	private void processNextCommand(final Command nextCommand, final Command currentCommand,
+			final GameState.Builder builder)
+	{
+		if (nextCommand == Command.NORMAL_START)
+		{
+			builder.withNextState(normalStartToState(currentCommand));
+			builder.nextForTeam(commandToTeam(currentCommand));
+		} else if (nextCommand != null)
+		{
+			builder.withNextState(commandToState(nextCommand));
+			builder.nextForTeam(commandToTeam(nextCommand));
+		}
+	}
+
+
 	// Splitting this in multiple methods is not reasonable
 	@SuppressWarnings("squid:MethodCyclomaticComplexity")
-	private void processCommand(final Command command, final Command lastCommand, final GameState.Builder builder)
+	private EGameState commandToState(final Command command)
 	{
 		switch (command)
 		{
-			case BALL_PLACEMENT_BLUE:
-				builder.withState(EGameState.BALL_PLACEMENT).forTeam(ETeamColor.BLUE);
-				break;
-			case BALL_PLACEMENT_YELLOW:
-				builder.withState(EGameState.BALL_PLACEMENT).forTeam(ETeamColor.YELLOW);
-				break;
-			case DIRECT_FREE_BLUE:
-				builder.withState(EGameState.DIRECT_FREE).forTeam(ETeamColor.BLUE);
-				break;
-			case DIRECT_FREE_YELLOW:
-				builder.withState(EGameState.DIRECT_FREE).forTeam(ETeamColor.YELLOW);
-				break;
-			case FORCE_START:
-				builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);
-				break;
-			case STOP:
-				builder.withState(EGameState.STOP).forTeam(ETeamColor.NEUTRAL);
-				break;
 			case HALT:
-				builder.withState(EGameState.HALT).forTeam(ETeamColor.NEUTRAL);
-				break;
-			case INDIRECT_FREE_BLUE:
-				builder.withState(EGameState.INDIRECT_FREE).forTeam(ETeamColor.BLUE);
-				break;
-			case INDIRECT_FREE_YELLOW:
-				builder.withState(EGameState.INDIRECT_FREE).forTeam(ETeamColor.YELLOW);
-				break;
+				return EGameState.HALT;
+			case STOP:
+				return EGameState.STOP;
 			case NORMAL_START:
-				processNormalStart(lastCommand, builder);
-				break;
-			case PREPARE_KICKOFF_BLUE:
-				builder.withState(EGameState.PREPARE_KICKOFF).forTeam(ETeamColor.BLUE);
-				break;
+			case FORCE_START:
+				return EGameState.RUNNING;
 			case PREPARE_KICKOFF_YELLOW:
-				builder.withState(EGameState.PREPARE_KICKOFF).forTeam(ETeamColor.YELLOW);
-				break;
-			case PREPARE_PENALTY_BLUE:
-				builder.withState(EGameState.PREPARE_PENALTY).forTeam(ETeamColor.BLUE);
-				break;
+			case PREPARE_KICKOFF_BLUE:
+				return EGameState.PREPARE_KICKOFF;
 			case PREPARE_PENALTY_YELLOW:
-				builder.withState(EGameState.PREPARE_PENALTY).forTeam(ETeamColor.YELLOW);
-				break;
-			case TIMEOUT_BLUE:
-				builder.withState(EGameState.TIMEOUT).forTeam(ETeamColor.BLUE);
-				break;
+			case PREPARE_PENALTY_BLUE:
+				return EGameState.PREPARE_PENALTY;
+			case DIRECT_FREE_YELLOW:
+			case DIRECT_FREE_BLUE:
+				return EGameState.DIRECT_FREE;
+			case INDIRECT_FREE_YELLOW:
+			case INDIRECT_FREE_BLUE:
+				return EGameState.INDIRECT_FREE;
 			case TIMEOUT_YELLOW:
-				builder.withState(EGameState.TIMEOUT).forTeam(ETeamColor.YELLOW);
-				break;
+			case TIMEOUT_BLUE:
+				return EGameState.TIMEOUT;
+			case BALL_PLACEMENT_YELLOW:
+			case BALL_PLACEMENT_BLUE:
+				return EGameState.BALL_PLACEMENT;
 			default:
-				break;
+				return null;
 		}
 	}
-	
-	
-	private void processNormalStart(final Command lastCommand, final GameState.Builder builder)
+
+
+	// Splitting this in multiple methods is not reasonable
+	@SuppressWarnings("squid:MethodCyclomaticComplexity")
+	private ETeamColor commandToTeam(final Command command)
+	{
+		switch (command)
+		{
+			case PREPARE_KICKOFF_YELLOW:
+			case PREPARE_PENALTY_YELLOW:
+			case DIRECT_FREE_YELLOW:
+			case INDIRECT_FREE_YELLOW:
+			case TIMEOUT_YELLOW:
+			case BALL_PLACEMENT_YELLOW:
+				return ETeamColor.YELLOW;
+
+			case PREPARE_KICKOFF_BLUE:
+			case PREPARE_PENALTY_BLUE:
+			case DIRECT_FREE_BLUE:
+			case INDIRECT_FREE_BLUE:
+			case TIMEOUT_BLUE:
+			case BALL_PLACEMENT_BLUE:
+				return ETeamColor.BLUE;
+
+			case HALT:
+			case STOP:
+			case NORMAL_START:
+			case FORCE_START:
+			default:
+				return ETeamColor.NEUTRAL;
+		}
+	}
+
+
+	private EGameState normalStartToState(final Command lastCommand)
 	{
 		switch (lastCommand)
 		{
 			case PREPARE_KICKOFF_BLUE:
-				builder.withState(EGameState.KICKOFF).forTeam(ETeamColor.BLUE);
-				break;
 			case PREPARE_KICKOFF_YELLOW:
-				builder.withState(EGameState.KICKOFF).forTeam(ETeamColor.YELLOW);
-				break;
+				return EGameState.KICKOFF;
 			case PREPARE_PENALTY_BLUE:
-				builder.withState(EGameState.PENALTY).forTeam(ETeamColor.BLUE);
-				break;
 			case PREPARE_PENALTY_YELLOW:
-				builder.withState(EGameState.PENALTY).forTeam(ETeamColor.YELLOW);
-				break;
+				return EGameState.PENALTY;
 			default:
-				builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);
-				break;
+				return EGameState.RUNNING;
 		}
 	}
-	
-	
+
+
 	private void storeBallPosition(final Command command, final IVector2 ballPos)
 	{
 		switch (command)
@@ -221,15 +239,15 @@ public class GameStateCalculator
 				break;
 		}
 	}
-	
-	
+
+
 	private void processBallMovement(final IVector2 ballPos, final GameState.Builder builder)
 	{
 		if (ballPosOnPrepare == null)
 		{
 			return;
 		}
-		
+
 		if (ballPos.distanceTo(ballPosOnPrepare) > ballMovedDistanceTol)
 		{
 			builder.withState(EGameState.RUNNING).forTeam(ETeamColor.NEUTRAL);

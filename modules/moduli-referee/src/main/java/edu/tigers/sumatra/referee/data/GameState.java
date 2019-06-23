@@ -16,73 +16,90 @@ import edu.tigers.sumatra.math.vector.IVector2;
 
 
 /**
- * @author AndreR <andre@ryll.cc>
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * The current game state and useful helper methods to query the state.
  */
 @Persistent
 public class GameState
 {
 	private final EGameState state;
+	private final EGameState nextState;
 	private final ETeamColor forTeam;
+	private final ETeamColor nextForTeam;
 	private final ETeamColor ourTeam;
 	private final boolean penaltyShootout;
 	private final IVector2 ballPlacementPosition;
-	
+
 	/** Neutral RUNNING state */
 	public static final GameState RUNNING = Builder.empty().withState(EGameState.RUNNING).build();
-	
+
 	/** Neutral STOP state */
 	public static final GameState STOP = Builder.empty().withState(EGameState.STOP).build();
-	
+
 	/** Neutral HALT state */
 	public static final GameState HALT = Builder.empty().withState(EGameState.HALT).build();
-	
-	
+
+
 	@SuppressWarnings("unused") // Required for persistence
 	private GameState()
 	{
 		state = EGameState.HALT;
+		nextState = EGameState.HALT;
 		forTeam = ETeamColor.NEUTRAL;
+		nextForTeam = ETeamColor.NEUTRAL;
 		ourTeam = ETeamColor.NEUTRAL;
 		penaltyShootout = false;
 		ballPlacementPosition = null;
 	}
-	
-	
+
+
 	private GameState(final Builder builder)
 	{
 		state = builder.state;
+		nextState = builder.nextState;
 		forTeam = builder.forTeam;
+		nextForTeam = builder.nextForTeam;
 		ourTeam = builder.ourTeam;
 		penaltyShootout = builder.penaltyShootout;
 		ballPlacementPosition = builder.ballPlacementPosition;
 	}
-	
-	
+
+
 	public EGameState getState()
 	{
 		return state;
 	}
-	
-	
+
+
 	public ETeamColor getForTeam()
 	{
 		return forTeam;
 	}
-	
-	
+
+
+	public EGameState getNextState()
+	{
+		return nextState;
+	}
+
+
+	public ETeamColor getNextForTeam()
+	{
+		return nextForTeam;
+	}
+
+
 	public ETeamColor getOurTeam()
 	{
 		return ourTeam;
 	}
-	
-	
+
+
 	public boolean isPenaltyShootout()
 	{
 		return penaltyShootout;
 	}
-	
-	
+
+
 	/**
 	 * @return Ball placement coordinates in vision frame.
 	 */
@@ -90,8 +107,8 @@ public class GameState
 	{
 		return ballPlacementPosition;
 	}
-	
-	
+
+
 	/**
 	 * @return Ball placement coordinates in local team frame.
 	 */
@@ -101,28 +118,49 @@ public class GameState
 		{
 			return ballPlacementPosition.multiplyNew(-1.0d);
 		}
-		
+
 		return ballPlacementPosition;
 	}
-	
-	
+
+
 	/**
 	 * Get the name of the current state appended by _BLUE or _YELLOW.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getStateNameWithColor()
 	{
-		StringBuilder sb = new StringBuilder(state.toString());
-		if (forTeam.isNonNeutral())
+		return getStateName(state, forTeam);
+	}
+
+
+	/**
+	 * Get the name of the next state appended by _BLUE or _YELLOW.
+	 *
+	 * @return
+	 */
+	public String getNextStateNameWithColor()
+	{
+		return getStateName(nextState, nextForTeam);
+	}
+
+
+	private String getStateName(EGameState gameState, ETeamColor teamColor)
+	{
+		if (gameState == null)
 		{
-			sb.append("_").append(forTeam);
+			return "-";
 		}
-		
+		StringBuilder sb = new StringBuilder(gameState.toString());
+		if (teamColor.isNonNeutral())
+		{
+			sb.append("_").append(teamColor);
+		}
+
 		return sb.toString();
 	}
-	
-	
+
+
 	/**
 	 * @return true if the ball must be at rest (PENALTY, KICKOFF, INDIRECT_FREE, DIRECT_FREE)
 	 */
@@ -139,8 +177,8 @@ public class GameState
 				return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return true on any stopped game state (BREAK, HALT, POST_GAME, STOP, TIMEOUT, BALL_PLACEMENT)
 	 */
@@ -159,8 +197,8 @@ public class GameState
 				return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return true on any "nothing-happens" state (BREAK, HALT, TIMEOUT, POST_GAME)
 	 */
@@ -168,8 +206,8 @@ public class GameState
 	{
 		return isPausedGame() || state == EGameState.POST_GAME;
 	}
-	
-	
+
+
 	/**
 	 * @return true on any state within a game, where nothing happens (BREAK, HALT, TIMEOUT)
 	 */
@@ -185,8 +223,8 @@ public class GameState
 				return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return true on any game state that requires a limited velocity.
 	 */
@@ -196,8 +234,8 @@ public class GameState
 		// annoying to change the gameState after each Sumatra restart.
 		return state == EGameState.STOP;
 	}
-	
-	
+
+
 	/**
 	 * @return true on any gamestate that requires that we keep a distance to the ball.
 	 */
@@ -211,7 +249,7 @@ public class GameState
 			default:
 				break;
 		}
-		
+
 		if (ourTeam != forTeam)
 		{
 			// some gamestate for THEM (or NEUTRAL)
@@ -226,14 +264,14 @@ public class GameState
 					break;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Check if this state equals a given state in state and forTeam.
-	 * 
+	 *
 	 * @param compare
 	 * @return
 	 */
@@ -241,8 +279,8 @@ public class GameState
 	{
 		return (state == compare.state) && (forTeam == compare.forTeam);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a <i>whatever-state</i> for us. Neutral situations will also return true.
 	 */
@@ -250,8 +288,8 @@ public class GameState
 	{
 		return (forTeam == ourTeam) || (forTeam == ETeamColor.NEUTRAL);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a <i>whatever-state</i> for the opponent.
 	 */
@@ -259,8 +297,26 @@ public class GameState
 	{
 		return !isGameStateForUs();
 	}
-	
-	
+
+
+	/**
+	 * @return true if the next state is a <i>whatever-state</i> for us. Neutral situations will also return true.
+	 */
+	public boolean isNextGameStateForUs()
+	{
+		return (nextForTeam == ourTeam) || (nextForTeam == ETeamColor.NEUTRAL);
+	}
+
+
+	/**
+	 * @return true if the next state is a <i>whatever-state</i> for the opponent.
+	 */
+	public boolean isNextGameStateForThem()
+	{
+		return !isNextGameStateForUs();
+	}
+
+
 	/**
 	 * @return true if this is a DIRECT_FREE or INDIRECT_FREE for the opponent.
 	 */
@@ -270,11 +326,11 @@ public class GameState
 		{
 			return false;
 		}
-		
+
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a DIRECT_FREE or INDIRECT_FREE for us.
 	 */
@@ -284,11 +340,25 @@ public class GameState
 		{
 			return false;
 		}
-		
+
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE);
 	}
-	
-	
+
+
+	/**
+	 * @return true if the next state is a DIRECT_FREE or INDIRECT_FREE for us.
+	 */
+	public boolean isNextStandardSituationForUs()
+	{
+		if (isNextGameStateForThem())
+		{
+			return false;
+		}
+
+		return (nextState == EGameState.DIRECT_FREE) || (nextState == EGameState.INDIRECT_FREE);
+	}
+
+
 	/**
 	 * @return true if this is a DIRECT_FREE or INDIRECT_FREE
 	 */
@@ -296,8 +366,8 @@ public class GameState
 	{
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a DIRECT_FREE, INDIRECT_FREE, or KICKOFF for the opponent.
 	 */
@@ -307,11 +377,11 @@ public class GameState
 		{
 			return false;
 		}
-		
+
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE) || (state == EGameState.KICKOFF);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a DIRECT_FREE, INDIRECT_FREE, or KICKOFF for us.
 	 */
@@ -321,11 +391,11 @@ public class GameState
 		{
 			return false;
 		}
-		
+
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE) || (state == EGameState.KICKOFF);
 	}
-	
-	
+
+
 	/**
 	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
 	 */
@@ -333,8 +403,8 @@ public class GameState
 	{
 		return (state == EGameState.KICKOFF) || (state == EGameState.PREPARE_KICKOFF);
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a KICKOFF or PREPARE_KICKOFF for us.
 	 */
@@ -342,8 +412,8 @@ public class GameState
 	{
 		return isKickoffOrPrepareKickoff() && isGameStateForUs();
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a KICKOFF or PREPARE_KICKOFF for them.
 	 */
@@ -351,8 +421,8 @@ public class GameState
 	{
 		return isKickoffOrPrepareKickoff() && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is an INDIRECT_FREE for us.
 	 */
@@ -360,20 +430,20 @@ public class GameState
 	{
 		return (state == EGameState.INDIRECT_FREE) && isGameStateForUs();
 	}
-	
-	
+
+
 	public boolean isDirectFreeForUs()
 	{
 		return state == EGameState.DIRECT_FREE && isGameStateForUs();
 	}
-	
-	
+
+
 	public boolean isDirectFreeForThem()
 	{
 		return state == EGameState.DIRECT_FREE && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is an INDIRECT_FREE for them.
 	 */
@@ -381,8 +451,8 @@ public class GameState
 	{
 		return (state == EGameState.INDIRECT_FREE) && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a BALL_PLACEMENT for them.
 	 */
@@ -390,8 +460,8 @@ public class GameState
 	{
 		return isBallPlacement() && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if this is a BALL_PLACEMENT for us.
 	 */
@@ -399,8 +469,8 @@ public class GameState
 	{
 		return isBallPlacement() && isGameStateForUs();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is BALL_PLACEMENT.
 	 */
@@ -408,8 +478,8 @@ public class GameState
 	{
 		return state == EGameState.BALL_PLACEMENT;
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is RUNNING.
 	 */
@@ -417,8 +487,8 @@ public class GameState
 	{
 		return state == EGameState.RUNNING;
 	}
-	
-	
+
+
 	/**
 	 * @return true if the game is in running state, in a standard situation or in kickoff (no prepare states)
 	 */
@@ -428,8 +498,8 @@ public class GameState
 				|| isStandardSituation()
 				|| getState() == EGameState.KICKOFF;
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PENALTY or PREPARE_PENALTY
 	 */
@@ -437,8 +507,8 @@ public class GameState
 	{
 		return (state == EGameState.PENALTY) || (state == EGameState.PREPARE_PENALTY);
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PENALTY or PREPARE_PENALTY for them
 	 */
@@ -446,8 +516,8 @@ public class GameState
 	{
 		return isPenaltyOrPreparePenalty() && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PENALTY or PREPARE_PENALTY for us
 	 */
@@ -455,8 +525,8 @@ public class GameState
 	{
 		return isPenaltyOrPreparePenalty() && isGameStateForUs();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_KICKOFF
 	 */
@@ -464,8 +534,8 @@ public class GameState
 	{
 		return state == EGameState.PREPARE_KICKOFF;
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_KICKOFF for them
 	 */
@@ -473,8 +543,8 @@ public class GameState
 	{
 		return isPrepareKickoff() && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_KICKOFF for us
 	 */
@@ -482,8 +552,8 @@ public class GameState
 	{
 		return isPrepareKickoff() && isGameStateForUs();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is STOP
 	 */
@@ -491,8 +561,8 @@ public class GameState
 	{
 		return state == EGameState.STOP;
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_PENALTY
 	 */
@@ -500,8 +570,8 @@ public class GameState
 	{
 		return state == EGameState.PREPARE_PENALTY;
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_PENALTY for them.
 	 */
@@ -509,8 +579,8 @@ public class GameState
 	{
 		return (state == EGameState.PREPARE_PENALTY) && isGameStateForThem();
 	}
-	
-	
+
+
 	/**
 	 * @return true if state is PREPARE_PENALTY for us.
 	 */
@@ -518,8 +588,8 @@ public class GameState
 	{
 		return (state == EGameState.PREPARE_PENALTY) && isGameStateForUs();
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -530,24 +600,26 @@ public class GameState
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Builder
 	 */
 	public static class Builder
 	{
 		private EGameState state;
+		private EGameState nextState = EGameState.UNKNOWN;
 		private ETeamColor forTeam;
+		private ETeamColor nextForTeam = ETeamColor.NEUTRAL;
 		private ETeamColor ourTeam;
 		private boolean penaltyShootout;
 		private IVector2 ballPlacementPosition = null;
-		
-		
+
+
 		private Builder()
 		{
 		}
-		
-		
+
+
 		/**
 		 * @return new builder
 		 */
@@ -555,8 +627,8 @@ public class GameState
 		{
 			return new Builder();
 		}
-		
-		
+
+
 		/**
 		 * @return this builder
 		 */
@@ -568,8 +640,8 @@ public class GameState
 			builder.ourTeam = ETeamColor.NEUTRAL;
 			return builder;
 		}
-		
-		
+
+
 		/**
 		 * @param state
 		 * @return this builder
@@ -579,8 +651,30 @@ public class GameState
 			this.state = state;
 			return this;
 		}
-		
-		
+
+
+		/**
+		 * @param nextState
+		 * @return this builder
+		 */
+		public Builder withNextState(final EGameState nextState)
+		{
+			this.nextState = nextState;
+			return this;
+		}
+
+
+		/**
+		 * @param color
+		 * @return this builder
+		 */
+		public Builder nextForTeam(final ETeamColor color)
+		{
+			nextForTeam = color;
+			return this;
+		}
+
+
 		/**
 		 * @param color
 		 * @return this builder
@@ -590,8 +684,8 @@ public class GameState
 			forTeam = color;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param color
 		 * @return this builder
@@ -601,8 +695,8 @@ public class GameState
 			ourTeam = color;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param penaltyShootout
 		 * @return this builder
@@ -612,8 +706,8 @@ public class GameState
 			this.penaltyShootout = penaltyShootout;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param ballPlacementPosition
 		 * @return this builder
@@ -623,8 +717,8 @@ public class GameState
 			this.ballPlacementPosition = ballPlacementPosition;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param gameState
 		 * @return this builder
@@ -632,14 +726,16 @@ public class GameState
 		public Builder withGameState(final GameState gameState)
 		{
 			state = gameState.state;
+			nextState = gameState.nextState;
 			forTeam = gameState.forTeam;
+			nextForTeam = gameState.nextForTeam;
 			ourTeam = gameState.ourTeam;
 			penaltyShootout = gameState.penaltyShootout;
 			ballPlacementPosition = gameState.ballPlacementPosition;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @return new instance
 		 */
@@ -651,19 +747,19 @@ public class GameState
 			return new GameState(this);
 		}
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final GameState gameState = (GameState) o;
-		
+
 		return new EqualsBuilder()
 				.append(penaltyShootout, gameState.penaltyShootout)
 				.append(state, gameState.state)
@@ -672,8 +768,8 @@ public class GameState
 				.append(ballPlacementPosition, gameState.ballPlacementPosition)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{
