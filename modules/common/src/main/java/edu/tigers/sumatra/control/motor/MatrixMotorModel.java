@@ -21,11 +21,9 @@ import edu.tigers.sumatra.math.vector.VectorN;
  */
 public class MatrixMotorModel extends AMotorModel
 {
-	private static final double	BOT_RADIUS		= 0.076;
-	private static final double	WHEEL_RADIUS	= 0.025;
-	
-	private final RealMatrix d;
-	private final RealMatrix dInv;
+	private RealMatrix d;
+	private RealMatrix dInv;
+	private double wheelRadius;
 	
 	
 	/**
@@ -33,17 +31,8 @@ public class MatrixMotorModel extends AMotorModel
 	 */
 	public MatrixMotorModel()
 	{
-		this(30, 45);
-	}
-	
-	
-	/**
-	 * @param d
-	 */
-	public MatrixMotorModel(final RealMatrix d)
-	{
-		this.d = d;
-		dInv = new SingularValueDecomposition(d).getSolver().getInverse();
+		// default values for v2016 robots
+		this(30, 45, 0.076, 0.025);
 	}
 	
 	
@@ -53,7 +42,24 @@ public class MatrixMotorModel extends AMotorModel
 	 * @param frontAngleDeg
 	 * @param backAngleDeg
 	 */
-	public MatrixMotorModel(final double frontAngleDeg, final double backAngleDeg)
+	public MatrixMotorModel(final double frontAngleDeg, final double backAngleDeg, final double botRadius,
+			final double wheelRadius)
+	{
+		updateGeometry(frontAngleDeg, backAngleDeg, botRadius, wheelRadius);
+	}
+	
+	
+	/**
+	 * Update robot geometry used for motor velocity computation.
+	 *
+	 * @param frontAngleDeg
+	 * @param backAngleDeg
+	 * @param botRadius
+	 * @param wheelRadius
+	 */
+	@Override
+	public void updateGeometry(final double frontAngleDeg, final double backAngleDeg, final double botRadius,
+			final double wheelRadius)
 	{
 		// convert to radian
 		final double frontAngleRad = frontAngleDeg * Math.PI / 180.0;
@@ -68,26 +74,10 @@ public class MatrixMotorModel extends AMotorModel
 		d = new Array2DRowRealMatrix(4, 3);
 		d.setColumnVector(0, theta.map(new Sin()).mapMultiplyToSelf(-1.0));
 		d.setColumnVector(1, theta.map(new Cos()));
-		d.setColumnVector(2, new ArrayRealVector(4, BOT_RADIUS));
+		d.setColumnVector(2, new ArrayRealVector(4, botRadius));
 		dInv = new SingularValueDecomposition(d).getSolver().getInverse();
-	}
-	
-	
-	/**
-	 * @param dw
-	 * @return
-	 */
-	public static MatrixMotorModel fromMatrixWithWheelVel(final RealMatrix dw)
-	{
-		RealMatrix d = dw.copy();
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				d.multiplyEntry(i, j, WHEEL_RADIUS);
-			}
-		}
-		return new MatrixMotorModel(d);
+		
+		this.wheelRadius = wheelRadius;
 	}
 	
 	
@@ -96,7 +86,7 @@ public class MatrixMotorModel extends AMotorModel
 	{
 		RealMatrix xyw = new Array2DRowRealMatrix(targetVel.toArray());
 		RealMatrix speedOverGround = d.multiply(xyw);
-		RealVector wheelSpeed = speedOverGround.getColumnVector(0).mapMultiply(1.0 / WHEEL_RADIUS);
+		RealVector wheelSpeed = speedOverGround.getColumnVector(0).mapMultiply(1.0 / wheelRadius);
 		return VectorN.fromReal(wheelSpeed);
 	}
 	
@@ -105,7 +95,7 @@ public class MatrixMotorModel extends AMotorModel
 	protected Vector3 getXywSpeedInternal(final IVectorN wheelSpeed)
 	{
 		RealMatrix wheel = new Array2DRowRealMatrix(wheelSpeed.toArray());
-		RealVector result = dInv.multiply(wheel).getColumnVector(0).mapMultiply(WHEEL_RADIUS);
+		RealVector result = dInv.multiply(wheel).getColumnVector(0).mapMultiply(wheelRadius);
 		return Vector3.fromXYZ(result.getEntry(0),
 				result.getEntry(1),
 				result.getEntry(2));
