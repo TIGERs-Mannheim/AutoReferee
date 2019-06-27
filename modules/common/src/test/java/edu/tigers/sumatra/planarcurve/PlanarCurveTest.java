@@ -3,20 +3,19 @@
  */
 package edu.tigers.sumatra.planarcurve;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-
-import java.util.List;
-import java.util.Random;
-
-import org.junit.Test;
-
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectory2D;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 
 /**
@@ -24,9 +23,9 @@ import edu.tigers.sumatra.trajectory.BangBangTrajectory2D;
  */
 public class PlanarCurveTest
 {
-	private static final int		NUMBER_OF_TESTS	= 10000;
-	private static final double	POS_LIMIT			= 10.0;
-	private final Random				rng					= new Random(0);
+	private static final int NUMBER_OF_TESTS = 10000;
+	private static final double POS_LIMIT = 10.0;
+	private final Random rng = new Random(0);
 	
 	
 	private double getRandomDouble(final double minmax)
