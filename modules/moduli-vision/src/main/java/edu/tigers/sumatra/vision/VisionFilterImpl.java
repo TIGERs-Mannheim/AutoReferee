@@ -70,7 +70,6 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private ExecutorService filterExecutor = null;
 	private Thread publisherThread = null;
-	private long lastDetectionFrameTimestamp = 0;
 
 
 	/**
@@ -93,10 +92,7 @@ public class VisionFilterImpl extends AVisionFilter
 		{
 			try
 			{
-				if ((System.nanoTime() - lastDetectionFrameTimestamp) < 1_000_000_000L)
-				{
-					publishFilteredVisionFrame(extrapolateFilteredFrame(lastFilteredFrame, nextRuntime));
-				}
+				publishFilteredVisionFrame(extrapolateFilteredFrame(lastFilteredFrame, nextRuntime));
 			} catch (Throwable e)
 			{
 				log.error("Exception in VisionFilter.", e);
@@ -143,8 +139,6 @@ public class VisionFilterImpl extends AVisionFilter
 	@Override
 	protected void updateCamDetectionFrame(final CamDetectionFrame camDetectionFrame)
 	{
-		lastDetectionFrameTimestamp = System.nanoTime();
-
 		if (filterExecutor == null)
 		{
 			processDetectionFrame(camDetectionFrame);

@@ -18,7 +18,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 /**
  * The current game state and useful helper methods to query the state.
  */
-@Persistent
+@Persistent(version = 1)
 public class GameState
 {
 	private final EGameState state;
