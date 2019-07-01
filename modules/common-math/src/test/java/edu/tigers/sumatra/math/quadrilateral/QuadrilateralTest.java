@@ -9,6 +9,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.v2.Lines;
+import org.assertj.core.data.Percentage;
 import org.junit.Test;
 
 import com.google.common.collect.Collections2;
@@ -42,14 +45,7 @@ public class QuadrilateralTest
 		}
 	}
 	
-	
-	@Test
-	public void triangles() throws Exception
-	{
-		
-	}
-	
-	
+
 	@Test
 	public void isPointInShape() throws Exception
 	{
@@ -60,7 +56,8 @@ public class QuadrilateralTest
 		acorners.add(Vector2.fromXY(1, 1));
 		acorners.add(Vector2.fromXY(-1, -1));
 		
-		for (List<IVector2> corners : Collections2.permutations(acorners)) {
+		for (List<IVector2> corners : Collections2.permutations(acorners))
+		{
 			IQuadrilateral quadrilateral = Quadrilateral.fromCorners(corners.get(0), corners.get(1), corners.get(2),
 					corners.get(3));
 			assertThat(quadrilateral.isPointInShape(Vector2.fromXY(0, 0))).isTrue();
@@ -77,12 +74,41 @@ public class QuadrilateralTest
 	
 	
 	@Test
-	public void isPointInShape1() throws Exception
+	public void getLineIntersections()
 	{
+		List<IVector2> corners = new ArrayList<>(4);
 		
+		corners.add(Vector2.fromXY(-1, -1));
+		corners.add(Vector2.fromXY(-1, 1));
+		corners.add(Vector2.fromXY(1, -1));
+		corners.add(Vector2.fromXY(1, 1));
+		IQuadrilateral quadrilateral = Quadrilateral.fromCorners(corners);
+
+		// test one intersection
+		ILineSegment line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-5, 0), Vector2.fromXY(0, 0));
+		List<IVector2> intersections = quadrilateral.lineIntersections(line1Intersection);
+		assertThat(intersections).hasSize(1);
+		assertThat(intersections.get(0).x()).isCloseTo(-1, Percentage.withPercentage(1e-3));
+		assertThat(intersections.get(0).y()).isCloseTo(0, Percentage.withPercentage(1e-3));
+
+		// test two intersections
+		line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-5, 0), Vector2.fromXY(5, 0));
+		intersections = quadrilateral.lineIntersections(line1Intersection);
+		assertThat(intersections).hasSize(2);
+
+		// test no intersections
+		line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-0.99, -0.99), Vector2.fromXY(0.99, 0.99));
+		intersections = quadrilateral.lineIntersections(line1Intersection);
+		assertThat(intersections).hasSize(0);
+
+		// test no intersections 2
+		line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-3, 5), Vector2.fromXY(3, 5));
+		intersections = quadrilateral.lineIntersections(line1Intersection);
+		assertThat(intersections).hasSize(0);
 	}
 	
 	
+
 	@Test
 	public void testEquals()
 	{
