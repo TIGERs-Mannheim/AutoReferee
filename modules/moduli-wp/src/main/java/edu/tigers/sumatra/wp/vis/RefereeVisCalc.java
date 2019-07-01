@@ -112,7 +112,8 @@ public class RefereeVisCalc implements IWpCalc
 						String.valueOf(msg.getTeamInfoYellow().getScore()),
 						Color.yellow));
 		txtShapes
-				.add(new DrawableBorderText(Vector2.fromXY(off[4], FIRST_LINE), msg.getTeamInfoYellow().getName(),
+				.add(new DrawableBorderText(Vector2.fromXY(off[4], FIRST_LINE),
+						msg.getTeamInfoYellow().getName(),
 						Color.yellow));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], FIRST_LINE), timeoutYellowStr, Color.yellow));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], FIRST_LINE), yellowCardYellowStr, Color.yellow));
@@ -122,8 +123,10 @@ public class RefereeVisCalc implements IWpCalc
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[2], SECOND_LINE),
 				String.valueOf(msg.getTeamInfoBlue().getScore()),
 				Color.blue));
+		
 		txtShapes.add(
-				new DrawableBorderText(Vector2.fromXY(off[4], SECOND_LINE), msg.getTeamInfoBlue().getName(), Color.blue));
+				new DrawableBorderText(Vector2.fromXY(off[4], SECOND_LINE),
+						msg.getTeamInfoBlue().getName(), Color.blue));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[5], SECOND_LINE), timeoutBlueStr, Color.blue));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[6], SECOND_LINE), yellowCardBlueStr, Color.blue));
 
@@ -136,9 +139,13 @@ public class RefereeVisCalc implements IWpCalc
 		String proposedGameEvents = "Proposed: "
 				+ msg.getProposedGameEvents().stream().map(ProposedGameEvent::getGameEvent)
 						.map(IGameEvent::getType).map(Enum::name).collect(Collectors.joining(","));
+		
+		
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], FIRST_LINE), nextStateAndCommand, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], SECOND_LINE), gameEvents, Color.white));
 		txtShapes.add(new DrawableBorderText(Vector2.fromXY(off[7], THIRD_LINE), proposedGameEvents, Color.white));
+		txtShapes
+				.add(new DrawableBorderText(Vector2.fromXY(off[7], FOURTH_LINE), getSubstitutionString(msg), Color.WHITE));
 
 		for (DrawableBorderText txt : txtShapes)
 		{
@@ -148,6 +155,25 @@ public class RefereeVisCalc implements IWpCalc
 		shapeMap.get(EWpShapesLayer.REFEREE).addAll(txtShapes);
 
 		paintShapes(shapeMap.get(EWpShapesLayer.REFEREE), wfw);
+	}
+	
+	
+	private String getSubstitutionString(RefereeMsg msg)
+	{
+		String substString = "";
+		if (msg.getTeamInfo(ETeamColor.BLUE).isBotSubstitutionIntent())
+		{
+			substString += " [blue]";
+		}
+		if (msg.getTeamInfo(ETeamColor.YELLOW).isBotSubstitutionIntent())
+		{
+			substString += " [yellow]";
+		}
+		if (substString.length() > 0)
+		{
+			substString = "Substitution Intents:" + substString;
+		}
+		return substString;
 	}
 
 
