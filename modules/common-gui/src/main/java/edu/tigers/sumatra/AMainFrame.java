@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
 
+import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.DummyView;
 import edu.tigers.sumatra.views.ESumatraViewType;
@@ -181,6 +183,27 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		views.add(view);
 	}
 
+	
+	private void compressReplay(Path path)
+	{
+		try
+		{
+			BerkeleyDb db = new BerkeleyDb(path);
+			db.open();
+			db.close();
+			db.compress();
+		} catch (IOException e)
+		{
+			log.error("Could not create ZIP file: " + path, e);
+		}
+	}
+	
+	
+	protected void startReplayCompressionThread(Path path)
+	{
+		Thread compressThread = new Thread(() -> compressReplay(path), "DatabaseCompression");
+		compressThread.start();
+	}
 
 	protected void exit()
 	{

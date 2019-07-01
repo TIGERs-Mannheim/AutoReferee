@@ -55,5 +55,9 @@
             <artifactId>miglayout-core</artifactId>
             <version>5.0</version>
         </dependency>
+        <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>moduli-record</artifactId>
+        </dependency>
     </dependencies>
 </project>

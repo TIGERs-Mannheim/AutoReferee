@@ -4,6 +4,7 @@
 package edu.tigers.autoref.gui.view;
 
 import java.awt.event.KeyEvent;
+import java.nio.file.Path;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
@@ -115,5 +116,12 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 	public void onOpenReplay(final BerkeleyDb db)
 	{
 		new AutoRefReplayPresenter().start(db, 0);
+	}
+	
+	
+	@Override
+	public void onCompressReplay(final Path path)
+	{
+		startReplayCompressionThread(path);
 	}
 }

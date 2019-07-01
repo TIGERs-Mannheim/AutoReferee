@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,26 +155,36 @@ public class ReplayLoadMenu extends JMenu
 		JMenuItem rename = new JMenuItem("rename");
 		JMenuItem run = new JMenuItem("run");
 		JMenuItem delete = new JMenuItem("delete");
+		JMenuItem zip = new JMenuItem("zip");
 		
 		subsubMenu.add(run);
 		subsubMenu.add(rename);
+		subsubMenu.add(zip);
 		subsubMenu.add(delete);
+		
+		if (file.getName().endsWith(".zip"))
+		{
+			zip.setEnabled(false);
+		}
+		
 		
 		run.addActionListener(new RunActionListener(file.getAbsolutePath()));
 		rename.addActionListener(new RenameActionListener(file.getAbsolutePath()));
 		delete.addActionListener(new DeleteActionListener(file.getAbsolutePath()));
+		zip.addActionListener(new ZipActionListener(file.getAbsolutePath()));
 	}
 	
 	
 	/**
 	 * Observer
 	 */
-	@FunctionalInterface
 	public interface IReplayLoadMenuObserver
 	{
 		void onOpenReplay(BerkeleyDb db);
+		
+		
+		void onCompressReplay(Path path);
 	}
-	
 	
 	private static class RecordDbFilter implements FileFilter
 	{
@@ -305,6 +316,27 @@ public class ReplayLoadMenu extends JMenu
 		}
 	}
 	
+	private class ZipActionListener implements ActionListener
+	{
+		
+		private final String filename;
+		
+		
+		public ZipActionListener(String filename)
+		{
+			this.filename = filename;
+		}
+		
+		
+		@Override
+		public void actionPerformed(final ActionEvent event)
+		{
+			for (IReplayLoadMenuObserver observer : observers)
+			{
+				observer.onCompressReplay(Paths.get(filename));
+			}
+		}
+	}
 	
 	private class SetDefaultPathListener implements ActionListener
 	{
