@@ -11,6 +11,7 @@ import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -78,6 +79,13 @@ public class GameStateCalculator
 		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT)
 		{
 			processBallMovement(ballPos, builder);
+		}
+		if ((refereeMsg.getCommand() == Command.BALL_PLACEMENT_BLUE
+				|| refereeMsg.getCommand() == Command.BALL_PLACEMENT_YELLOW)
+				&& refereeMsg.getBallPlacementPosNeutral() == null)
+		{
+			// just to avoid NPEs
+			builder.withBallPlacementPosition(Vector2.zero());
 		}
 
 		// we build this with NEUTRAL ourTeam because we don't know our team yet

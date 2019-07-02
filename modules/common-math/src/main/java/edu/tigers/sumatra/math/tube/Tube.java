@@ -58,7 +58,8 @@ public class Tube implements ITube
 	 */
 	public static Tube create(final IVector2 startCenter, final IVector2 endCenter, final double radius)
 	{
-
+		assert startCenter != null;
+		assert endCenter != null;
 		return new Tube(startCenter, endCenter, radius);
 	}
 
