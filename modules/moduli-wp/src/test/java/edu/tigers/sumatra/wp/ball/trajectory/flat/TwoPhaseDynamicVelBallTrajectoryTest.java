@@ -3,12 +3,6 @@
  */
 package edu.tigers.sumatra.wp.ball.trajectory.flat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -17,6 +11,11 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectory2D;
 import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
 import edu.tigers.sumatra.wp.ball.trajectory.flat.TwoPhaseDynamicVelBallTrajectory.TwoPhaseDynamicVelParameters;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -106,8 +105,7 @@ public class TwoPhaseDynamicVelBallTrajectoryTest
 		
 		assertTrue(velInf.isCloseTo(Vector3f.ZERO_VECTOR, 1e-6));
 	}
-	
-	
+
 	@Test
 	public void testGetAcc3ByTime()
 	{
