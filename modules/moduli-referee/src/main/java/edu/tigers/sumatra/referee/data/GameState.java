@@ -350,7 +350,7 @@ public class GameState
 	 */
 	public boolean isNextStandardSituationForUs()
 	{
-		if (isNextGameStateForThem())
+		if (isNextGameStateForThem() || isGameRunning())
 		{
 			return false;
 		}

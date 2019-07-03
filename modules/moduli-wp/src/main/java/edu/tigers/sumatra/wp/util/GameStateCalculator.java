@@ -142,6 +142,9 @@ public class GameStateCalculator
 		{
 			builder.withNextState(commandToState(nextCommand));
 			builder.nextForTeam(commandToTeam(nextCommand));
+		} else {
+			builder.withNextState(null);
+			builder.nextForTeam(ETeamColor.NEUTRAL);
 		}
 	}
 
