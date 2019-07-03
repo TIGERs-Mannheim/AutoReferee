@@ -18,6 +18,7 @@ public enum EAutoRefShapesLayer implements IShapeLayer
 	LAST_BALL_CONTACT_EXT("Ball Contact ext", "AutoReferee", false),
 	BALL_LEFT_FIELD("Ball Left Field", "AutoReferee", true),
 	ALLOWED_DISTANCES("Allowed Distances", "AutoReferee", true),
+	MODE("AutoRef Mode", "AutoReferee", true),
 	PUSHING("Pushing Detector", "AutoReferee", true);
 	
 	private final String id;

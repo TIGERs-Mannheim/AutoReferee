@@ -3,12 +3,17 @@
  */
 package edu.tigers.autoreferee;
 
+import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import edu.tigers.autoreferee.generic.BotPosition;
+import edu.tigers.autoreferee.module.AutoRefModule;
+import edu.tigers.sumatra.drawable.DrawableBorderText;
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
@@ -37,6 +42,8 @@ public class AutoRefFrame implements IAutoRefFrame
 	{
 		this.previousFrame = previousFrame;
 		this.worldFrameWrapper = worldFrameWrapper;
+		shapes.get(EAutoRefShapesLayer.MODE).add(new DrawableBorderText(Vector2.fromXY(10, 60),
+				"AutoRef: " + SumatraModel.getInstance().getModule(AutoRefModule.class).getMode().toString(), Color.WHITE));
 	}
 	
 	
