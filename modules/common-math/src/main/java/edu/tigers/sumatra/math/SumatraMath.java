@@ -416,4 +416,17 @@ public final class SumatraMath
 	{
 		return FastMath.tan(angle);
 	}
+	
+	
+	public static List<Double> evenDistribution1D(double min, double max, int n)
+	{
+		double len = max - min;
+		double step = len / n;
+		List<Double> points = new ArrayList<>();
+		for (int i = 0; i < n; i++)
+		{
+			points.add(min + step * i + 0.5 * step);
+		}
+		return points;
+	}
 }
