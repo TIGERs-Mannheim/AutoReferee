@@ -19,85 +19,95 @@ import edu.tigers.sumatra.trajectory.TrajectoryWithTime;
  */
 public interface IBot
 {
-	
+
 	/**
 	 * @return battery level between 0 and 1
 	 */
 	double getBatteryRelative();
-	
-	
+
+
+	/**
+	 * @return battery level
+	 */
+	default double getBatteryAbsolute()
+	{
+		return 0;
+	}
+
+
 	/**
 	 * @return
 	 */
 	double getKickerLevel();
-	
-	
+
+
 	/**
 	 * The absolute maximum kicker level possible for the bot (not the currently set max cap!)
 	 *
 	 * @return [V]
 	 */
 	double getKickerLevelMax();
-	
-	
+
+
 	/**
 	 * Each bot has its own hardware id that uniquely identifies a robot by hardware (mainboard)
 	 *
 	 * @return
 	 */
 	int getHardwareId();
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	boolean isAvailableToAi();
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	EBotType getType();
-	
-	
+
+
 	/**
 	 * @return the botFeatures
 	 */
 	Map<EFeature, EFeatureState> getBotFeatures();
-	
-	
+
+
 	/**
 	 * @return the controlledBy
 	 */
 	String getControlledBy();
-	
-	
+
+
 	/**
 	 * @return the color
 	 */
 	ETeamColor getColor();
 
+
 	double getDribblerTemp();
-	
-	
+
+
 	/**
 	 * @return the manualControl
 	 */
 	boolean isBlocked();
-	
-	
+
+
 	/**
 	 * @return the hideFromRcm
 	 */
 	boolean isHideFromRcm();
-	
-	
+
+
 	/**
 	 * @return the botId
 	 */
 	BotID getBotId();
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -105,17 +115,17 @@ public interface IBot
 	{
 		return getBotParams().getDimensions().getCenter2DribblerDist();
 	}
-	
-	
+
+
 	/**
 	 * Get internal state from sensory data
-	 * 
+	 *
 	 * @param timestamp
 	 * @return
 	 */
 	Optional<BotState> getSensoryState(long timestamp);
-	
-	
+
+
 	/**
 	 * @return the current bot trajectory in the coordinate system of the AI (you may have to mirror it when accessing
 	 *         outside AI or for opponent bot)
@@ -124,37 +134,37 @@ public interface IBot
 	{
 		return Optional.empty();
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	IBotParams getBotParams();
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	boolean isBarrierInterrupted();
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	ERobotMode getRobotMode();
-	
-	
+
+
 	/**
 	 * Is true iff the bot is completely okay. (Used for automatic interchange)
-	 * 
+	 *
 	 * @return
 	 */
 	boolean isOK();
-	
-	
+
+
 	/**
 	 * Get version string.
-	 * 
+	 *
 	 * @return
 	 */
 	default String getVersionString()
