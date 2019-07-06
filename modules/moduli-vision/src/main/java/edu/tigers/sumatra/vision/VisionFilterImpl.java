@@ -55,7 +55,7 @@ public class VisionFilterImpl extends AVisionFilter
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger(VisionFilterImpl.class.getName());
 
-	private static final long CLOCK_DT = 10_000_000;
+	private static final long CLOCK_DT = 12_500_000;
 
 	private final BallFilterPreprocessor ballFilterPreprocessor = new BallFilterPreprocessor();
 	private final BallFilter ballFilter = new BallFilter();
