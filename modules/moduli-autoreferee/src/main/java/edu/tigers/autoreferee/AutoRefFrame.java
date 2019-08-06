@@ -16,6 +16,7 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.util.ScalingUtil;
 import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
@@ -42,8 +43,12 @@ public class AutoRefFrame implements IAutoRefFrame
 	{
 		this.previousFrame = previousFrame;
 		this.worldFrameWrapper = worldFrameWrapper;
-		shapes.get(EAutoRefShapesLayer.MODE).add(new DrawableBorderText(Vector2.fromXY(10, 60),
-				"AutoRef: " + SumatraModel.getInstance().getModule(AutoRefModule.class).getMode().toString(), Color.WHITE));
+		shapes.get(EAutoRefShapesLayer.MODE).add(
+				new DrawableBorderText(
+						Vector2.fromXY(ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL),
+								ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL) * 5.1),
+						"AutoRef: " + SumatraModel.getInstance().getModule(AutoRefModule.class).getMode().toString(),
+						Color.WHITE));
 	}
 	
 	

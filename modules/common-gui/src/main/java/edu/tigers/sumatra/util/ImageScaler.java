@@ -24,10 +24,6 @@ public final class ImageScaler
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
 	
-	/**  */
-	public static final int	BUTTON_DEFAULT_SIZE	= 30;
-	
-	
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -85,7 +81,7 @@ public final class ImageScaler
 	public static ImageIcon scaleDefaultButtonImageIcon(final String path)
 	{
 		ImageIcon imageIcon = new ImageIcon(ImageScaler.class.getResource(path));
-		return scaleImageIcon(imageIcon, BUTTON_DEFAULT_SIZE, BUTTON_DEFAULT_SIZE);
+		return scaleImageIcon(imageIcon, ScalingUtil.getImageButtonSize(), ScalingUtil.getImageButtonSize());
 	}
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------

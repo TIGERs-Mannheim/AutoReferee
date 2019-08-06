@@ -24,13 +24,20 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
+
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>sumatra-model</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.miglayout</groupId>
             <artifactId>miglayout-swing</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>edu.tigers.sumatra</groupId>
+            <artifactId>common</artifactId>
         </dependency>
     </dependencies>
 </project>

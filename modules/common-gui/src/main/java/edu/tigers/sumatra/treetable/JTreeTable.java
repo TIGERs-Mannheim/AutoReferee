@@ -37,6 +37,7 @@ import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.lookandfeel.ILookAndFeelStateObserver;
 import edu.tigers.sumatra.lookandfeel.LookAndFeelStateAdapter;
+import edu.tigers.sumatra.util.ScalingUtil;
 
 
 /**
@@ -81,42 +82,49 @@ public class JTreeTable extends JTable
 		setTreeTableModel(treeTableModel);
 		this.treeTableModel = treeTableModel;
 		// setCellEditor(anEditor) // # Potentally check for validity...?
-
-        this.getTableHeader().setReorderingAllowed(false);
-
+		
+		this.getTableHeader().setReorderingAllowed(false);
+		
 		// Add Keyboard Actions
 		// Expand
 		this.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "expand");
-		this.getActionMap().put("expand", new AbstractAction() {
+		this.getActionMap().put("expand", new AbstractAction()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent actionEvent) {
+			public void actionPerformed(final ActionEvent actionEvent)
+			{
 				int r = JTreeTable.this.getSelectedRow();
 				JTreeTable.this.expandRow(r);
 			}
 		});
-
+		
 		// Collapse
 		this.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "collapse");
-		this.getActionMap().put("collapse", new AbstractAction() {
+		this.getActionMap().put("collapse", new AbstractAction()
+		{
 			@Override
-			public void actionPerformed(final ActionEvent actionEvent) {
+			public void actionPerformed(final ActionEvent actionEvent)
+			{
 				int r = JTreeTable.this.getSelectedRow();
 				JTreeTable.this.collapseRow(r);
 			}
 		});
-
-        // Edit
-        this.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("TAB"), "edit");
-        this.getActionMap().put("edit", new AbstractAction() {
-            @Override
-            public void actionPerformed(final ActionEvent actionEvent) {
-                int r = JTreeTable.this.getSelectedRow();
+		
+		// Edit
+		this.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("TAB"), "edit");
+		this.getActionMap().put("edit", new AbstractAction()
+		{
+			@Override
+			public void actionPerformed(final ActionEvent actionEvent)
+			{
+				int r = JTreeTable.this.getSelectedRow();
 				JTreeTable.this.editCellAt(r, 1);
-            }
-        });
-
+			}
+		});
+		
 	}
-
+	
+	
 	/**
 	 * Expand the given row
 	 *
@@ -127,7 +135,8 @@ public class JTreeTable extends JTable
 		this.tree.expandRow(row);
 		this.tree.setSelectionRow(row);
 	}
-
+	
+	
 	/**
 	 * Collapse the given row
 	 *
@@ -138,7 +147,8 @@ public class JTreeTable extends JTable
 		this.tree.collapseRow(row);
 		this.tree.setSelectionRow(row);
 	}
-
+	
+	
 	/**
 	 * Sets the {@link ITreeTableModel} to be shown by this JTreeTable
 	 * 
@@ -179,6 +189,9 @@ public class JTreeTable extends JTable
 		{
 			// Metal looks better like this.
 			setRowHeight(18);
+		} else
+		{
+			setRowHeight(ScalingUtil.getTableRowHeight());
 		}
 	}
 	
@@ -240,33 +253,33 @@ public class JTreeTable extends JTable
 	@Override
 	public TableCellEditor getCellEditor(final int row, final int column)
 	{
-		if (column == 1)
+		if (column != 1)
 		{
-			TreePath path = tree.getPathForRow(row);
-			Node node = (Node) path.getLastPathComponent();
-			for (ConfigurationNode attr : node.getAttributes("class"))
-			{
-				Class<?> classType = getClassFromValue(attr.getValue());
-				if (classType.isEnum())
-				{
-					String[] entries = new String[classType.getEnumConstants().length];
-					int i = 0;
-					for (Object obj : classType.getEnumConstants())
-					{
-						entries[i++] = obj.toString();
-					}
-					JComboBox<String> cb = new JComboBox<>(entries);
-					return new DefaultCellEditor(cb);
-				}
-				TableCellEditor defEditor = getDefaultEditor(classType);
-				if (defEditor == null)
-				{
-					return getDefaultEditor(String.class);
-				}
-				return defEditor;
-			}
+			return super.getCellEditor(row, column);
 		}
-		return super.getCellEditor(row, column);
+		
+		TreePath path = tree.getPathForRow(row);
+		Node node = (Node) path.getLastPathComponent();
+		ConfigurationNode attr = node.getAttributes("class").get(0);
+		
+		Class<?> classType = getClassFromValue(attr.getValue());
+		if (classType.isEnum())
+		{
+			String[] entries = new String[classType.getEnumConstants().length];
+			int i = 0;
+			for (Object obj : classType.getEnumConstants())
+			{
+				entries[i++] = obj.toString();
+			}
+			JComboBox<String> cb = new JComboBox<>(entries);
+			return new DefaultCellEditor(cb);
+		}
+		TableCellEditor defEditor = getDefaultEditor(classType);
+		if (defEditor == null)
+		{
+			return getDefaultEditor(String.class);
+		}
+		return defEditor;
 	}
 	
 	
@@ -578,37 +591,52 @@ public class JTreeTable extends JTable
 		 */
 		protected void updateSelectedPathsFromSelectedRows()
 		{
-			if (!updatingListSelectionModel)
+			if (updatingListSelectionModel)
 			{
-				updatingListSelectionModel = true;
-				try
+				return;
+			}
+			updatingListSelectionModel = true;
+			try
+			{
+				
+				Integer index = getSelectedIndex();
+				
+				clearSelection();
+				
+				if (index != null)
 				{
-					// This is way expensive, ListSelectionModel needs an
-					// enumerator for iterating.
-					final int min = listSelectionModel.getMinSelectionIndex();
-					final int max = listSelectionModel.getMaxSelectionIndex();
+					final TreePath selPath = tree.getPathForRow(index);
+					addSelectionPath(selPath);
+				}
+			} finally
+			{
+				updatingListSelectionModel = false;
+			}
+		}
+		
+		
+		private Integer getSelectedIndex()
+		{
+			final int min = listSelectionModel.getMinSelectionIndex();
+			final int max = listSelectionModel.getMaxSelectionIndex();
+			
+			if ((min == -1) || (max == -1))
+			{
+				return null;
+			}
+			for (int counter = min; counter <= max; counter++)
+			{
+				if (listSelectionModel.isSelectedIndex(counter))
+				{
+					final TreePath selPath = tree.getPathForRow(counter);
 					
-					clearSelection();
-					if ((min != -1) && (max != -1))
+					if (selPath != null)
 					{
-						for (int counter = min; counter <= max; counter++)
-						{
-							if (listSelectionModel.isSelectedIndex(counter))
-							{
-								final TreePath selPath = tree.getPathForRow(counter);
-								
-								if (selPath != null)
-								{
-									addSelectionPath(selPath);
-								}
-							}
-						}
+						return counter;
 					}
-				} finally
-				{
-					updatingListSelectionModel = false;
 				}
 			}
+			return null;
 		}
 		
 		/**

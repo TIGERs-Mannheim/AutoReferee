@@ -38,6 +38,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.util.ScalingUtil;
 import net.miginfocom.swing.MigLayout;
 
 
@@ -283,8 +284,10 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	
 	private void paintCoordinates(final Graphics2D g, final ETeamColor teamColor, final boolean inverted)
 	{
+		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
+		
 		g.setStroke(new BasicStroke());
-		g.setFont(new Font("", Font.PLAIN, 10));
+		g.setFont(new Font("", Font.PLAIN, fontSize));
 		
 		
 		int inv = inverted ? -1 : 1;
@@ -292,13 +295,13 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		g.setColor(teamColor == ETeamColor.YELLOW ? Color.YELLOW : Color.BLUE);
 		
 		int x;
-		int y = getHeight() - 18;
+		int y = getHeight() - (int) (fontSize * 1.5);
 		if (teamColor == ETeamColor.YELLOW)
 		{
 			x = 10;
 		} else
 		{
-			x = getWidth() - 60;
+			x = getWidth() - (int) (fontSize * 5.0);
 		}
 		char tColor = teamColor == ETeamColor.YELLOW ? 'Y' : 'B';
 		g.drawString(
@@ -306,17 +309,18 @@ public class FieldPanel extends JPanel implements IFieldPanel
 				x, y);
 		g.drawString(
 				String.format("   y:%5d", inv * (int) lastMousePoint.y()),
-				x, y + 11);
+				x, y + fontSize + 1);
 	}
 	
 	
 	private void paintFps(final Graphics2D g)
 	{
 		fpsCounter.newFrame(System.nanoTime());
-		g.setFont(new Font("", Font.PLAIN, 12));
+		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
+		g.setFont(new Font("", Font.PLAIN, fontSize));
 		g.setColor(Color.black);
 		
-		int x = getWidth() - 40;
+		int x = getWidth() - fontSize * 3;
 		int y = 20;
 		g.drawString(String.format("%.1f", fpsCounter.getAvgFps()), x, y);
 	}
