@@ -22,14 +22,14 @@ public class TimeSync
 {
 	@SuppressWarnings("unused")
 	private static final Logger	log				= Logger.getLogger(TimeSync.class.getName());
-	
+
 	private static final int		BUFFER_SIZE		= 30;
-	
+
 	private long						offset			= 0;
 	private final Queue<Long>		offsetBuffer	= new CircularFifoQueue<>(BUFFER_SIZE);
 	private final Queue<Long>		diffBuffer		= new CircularFifoQueue<>(BUFFER_SIZE);
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 */
@@ -38,11 +38,11 @@ public class TimeSync
 		long tNow = System.nanoTime();
 		long localSentNs = convertVision2LocalTime(timestamp, offset);
 		long diff = tNow - localSentNs;
-		
+
 		diffBuffer.add(diff);
-		
+
 		double avgDiff = Math.abs(average(diffBuffer));
-		
+
 		if ((avgDiff > 3e8) || !offsetBuffer.isEmpty())
 		{
 			offsetBuffer.add(calcOffset(tNow, timestamp));
@@ -54,8 +54,8 @@ public class TimeSync
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 * @return
@@ -63,22 +63,22 @@ public class TimeSync
 	public long sync(final double timestamp)
 	{
 		return convertVision2LocalTime(timestamp, offset);
-		
+
 	}
-	
-	
+
+
 	private long convertVision2LocalTime(final double visionS, final long offset)
 	{
 		return ((long) (visionS * 1e9)) - offset;
 	}
-	
-	
+
+
 	private long calcOffset(final long tNow, final double tVision)
 	{
 		return (long) (tVision * 1e9) - tNow;
 	}
-	
-	
+
+
 	private double average(final Collection<Long> deque)
 	{
 		int size = deque.size();
