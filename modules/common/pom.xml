@@ -53,11 +53,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.g3force</groupId>
-            <artifactId>instanceables</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.TIGERs-Mannheim.matlabcontrol</groupId>
             <artifactId>matlabcontrol</artifactId>
         </dependency>

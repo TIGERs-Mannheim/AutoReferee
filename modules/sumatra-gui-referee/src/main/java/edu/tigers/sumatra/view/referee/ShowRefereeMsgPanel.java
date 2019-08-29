@@ -20,12 +20,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.natives.OsDetector;
 import edu.tigers.sumatra.referee.Referee;
 import net.miginfocom.swing.MigLayout;
 
@@ -99,7 +99,7 @@ public class ShowRefereeMsgPanel extends JPanel
 				+ SumatraModel.getInstance().getModule(Referee.class).getGameControllerUiPort();
 		try
 		{
-			if (OsDetector.isUnix()
+			if (SystemUtils.IS_OS_UNIX
 					&& Runtime.getRuntime().exec(new String[] { "which", "xdg-open" }).getInputStream().read() != -1)
 			{
 				// Desktop#browse is not well supported with Linux, so try xdg-open first
