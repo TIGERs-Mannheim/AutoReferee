@@ -10,15 +10,15 @@ import edu.tigers.sumatra.model.SumatraModel;
 
 /**
  * Presenter for controlling the optionsPanel in the visualizer
- * 
+ *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class OptionsPanelPresenter implements IOptionsPanelObserver
 {
 	private final IFieldPanel fieldPanel;
 	private boolean saveOptions = true;
-	
-	
+
+
 	/**
 	 * @param fieldPanel
 	 */
@@ -26,8 +26,8 @@ public class OptionsPanelPresenter implements IOptionsPanelObserver
 	{
 		this.fieldPanel = fieldPanel;
 	}
-	
-	
+
+
 	/**
 	 * Options checkboxes-handling
 	 */
@@ -40,21 +40,21 @@ public class OptionsPanelPresenter implements IOptionsPanelObserver
 					OptionsPanelPresenter.class.getCanonicalName() + "." + actionCommand,
 					String.valueOf(isSelected));
 		}
-		
+
 		reactOnActionCommand(actionCommand, isSelected);
 	}
-	
-	
+
+
 	@Override
 	public void onActionFired(final EVisualizerOptions option, final boolean state)
 	{
 		fieldPanel.onOptionChanged(option, state);
 	}
-	
-	
+
+
 	/**
 	 * Do what has to be done for the specified action command
-	 * 
+	 *
 	 * @param actionCommand
 	 * @param isSelected
 	 */
@@ -64,6 +64,10 @@ public class OptionsPanelPresenter implements IOptionsPanelObserver
 		{
 			String layer = actionCommand.replace(VisualizerOptionsMenu.SOURCE_PREFIX, "");
 			fieldPanel.setSourceVisibility(layer, isSelected);
+		} else if (actionCommand.startsWith(VisualizerOptionsMenu.CATEGORY_PREFIX))
+		{
+			String layer = actionCommand.replace(VisualizerOptionsMenu.CATEGORY_PREFIX, "");
+			fieldPanel.setSourceCategoryVisibility(layer, isSelected);
 		} else if (isVisualizerOption(actionCommand))
 		{
 			EVisualizerOptions option = EVisualizerOptions.valueOf(actionCommand);
@@ -73,15 +77,15 @@ public class OptionsPanelPresenter implements IOptionsPanelObserver
 			fieldPanel.setShapeLayerVisibility(actionCommand, isSelected);
 		}
 	}
-	
-	
+
+
 	private boolean isVisualizerOption(String actionCommand)
 	{
 		return Arrays.stream(EVisualizerOptions.values()).map(Enum::name)
 				.anyMatch(actionCommand::equals);
 	}
-	
-	
+
+
 	/**
 	 * @param saveOptions the saveOptions to set
 	 */

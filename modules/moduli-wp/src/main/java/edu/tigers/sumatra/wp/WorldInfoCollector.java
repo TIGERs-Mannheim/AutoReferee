@@ -28,6 +28,7 @@ import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.data.TimestampBasedBuffer;
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
@@ -238,7 +239,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		ShapeMap shapeMap = new ShapeMap();
 		worldFrameVisualization.process(wfw, shapeMap);
-		notifyNewShapeMap(lastWFTimestamp, shapeMap, "WP");
+		notifyNewShapeMap(lastWFTimestamp, shapeMap, ShapeMapSource.of("World Frame"));
 	}
 
 
@@ -442,7 +443,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	public void onNewFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
 		processFilteredVisionFrame(filteredVisionFrame);
-		notifyNewShapeMap(lastWFTimestamp, filteredVisionFrame.getShapeMap(), "VISION_FILTER");
+		notifyNewShapeMap(lastWFTimestamp, filteredVisionFrame.getShapeMap(), ShapeMapSource.of("Vision Filter"));
 	}
 
 

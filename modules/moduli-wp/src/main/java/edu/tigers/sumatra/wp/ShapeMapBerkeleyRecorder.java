@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.persistence.IBerkeleyRecorder;
@@ -27,8 +28,8 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	private long latestWrittenTimestamp = 0;
 	private long latestReceivedTimestamp = 0;
 	private boolean running = false;
-	
-	
+
+
 	/**
 	 * Create berkeley storage for cam frames
 	 */
@@ -36,8 +37,8 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	{
 		this.db = db;
 	}
-	
-	
+
+
 	@Override
 	public void start()
 	{
@@ -45,8 +46,8 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 		wp.addObserver(wfwObserver);
 		running = true;
 	}
-	
-	
+
+
 	@Override
 	public void stop()
 	{
@@ -54,12 +55,13 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 		wp.removeObserver(wfwObserver);
 		running = false;
 	}
-	
+
+
 	@Override
 	public void flush()
 	{
 		Map<Long, BerkeleyShapeMapFrame> toSave = new HashMap<>();
-		
+
 		ShapeMapWithSource s = buffer.pollFirst();
 		while (s != null)
 		{
@@ -77,40 +79,40 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 				BerkeleyShapeMapFrame f = toSave.computeIfAbsent(s.timestamp, BerkeleyShapeMapFrame::new);
 				f.putShapeMap(s.source, s.shapeMap);
 			}
-			
+
 			s = buffer.poll();
 		}
-		
+
 		latestWrittenTimestamp = toSave.keySet().stream().mapToLong(i -> i).max().orElse(latestWrittenTimestamp);
-		
+
 		db.write(BerkeleyShapeMapFrame.class, toSave.values());
 	}
-	
-	
+
+
 	private boolean isBuffering(long timestamp)
 	{
 		return running && timestamp >= latestReceivedTimestamp - BUFFER_TIME;
 	}
-	
+
 	private static class ShapeMapWithSource
 	{
 		long timestamp;
 		ShapeMap shapeMap;
-		String source;
-		
-		
-		public ShapeMapWithSource(final long timestamp, final ShapeMap shapeMap, final String source)
+		ShapeMapSource source;
+
+
+		public ShapeMapWithSource(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
 		{
 			this.timestamp = timestamp;
 			this.shapeMap = shapeMap;
 			this.source = source;
 		}
 	}
-	
+
 	private class WfwObserver implements IWorldFrameObserver
 	{
 		@Override
-		public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final String source)
+		public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
 		{
 			ShapeMap shapeMapCopy = new ShapeMap(shapeMap);
 			shapeMapCopy.removeNonPersistent();

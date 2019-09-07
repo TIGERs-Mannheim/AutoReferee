@@ -33,23 +33,23 @@ import net.lingala.zip4j.util.Zip4jConstants;
 /**
  * This environment class manages a berkeley database.
  * It will be used to open und close a entity store
- * 
+ *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class BerkeleyEnv
 {
 	private static final Logger log = Logger.getLogger(BerkeleyEnv.class.getName());
 	private File envHome;
-	
+
 	private DatabaseSession session = new DatabaseSession();
-	
+
 	private EntityModel model = new AnnotationModel();
 	private EnvironmentConfig myEnvConfig = new EnvironmentConfig();
 	private StoreConfig storeConfig = new StoreConfig();
-	
+
 	private static final Map<File, DatabaseSession> SESSIONS = new HashMap<>();
-	
-	
+
+
 	public BerkeleyEnv()
 	{
 		model.registerClass(ColorProxy.class);
@@ -58,8 +58,8 @@ public class BerkeleyEnv
 		model.registerClass(LinkedHashSetProxy.class);
 		model.registerClass(TreeMapProxy.class);
 	}
-	
-	
+
+
 	/**
 	 * Open the database
 	 *
@@ -76,7 +76,7 @@ public class BerkeleyEnv
 		if (existingSession == null)
 		{
 			createFolders(envHome);
-			
+
 			// Open the environment and entity store
 			myEnvConfig.setAllowCreate(true);
 			storeConfig.setAllowCreate(true);
@@ -88,17 +88,17 @@ public class BerkeleyEnv
 			storeConfig = null;
 			model = null;
 			attachShutDownHook();
-			
+
 			SESSIONS.put(envHome, session);
 		} else
 		{
 			session = existingSession;
 		}
-		
+
 		session.numHandles++;
 	}
-	
-	
+
+
 	private void createFolders(final File envHome)
 	{
 		if (!envHome.exists())
@@ -110,11 +110,11 @@ public class BerkeleyEnv
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Close the store and environment
-	 * 
+	 *
 	 * @return true, if env was closed
 	 */
 	public void close()
@@ -124,7 +124,7 @@ public class BerkeleyEnv
 			log.warn("BerkeleyEnv already closed: " + envHome);
 			return;
 		}
-		
+
 		session.numHandles--;
 		if (session.numHandles > 0)
 		{
@@ -146,7 +146,7 @@ public class BerkeleyEnv
 		{
 			log.error("Error closing myEnv", dbe);
 		}
-		
+
 		if (session.compressOnClose)
 		{
 			try
@@ -157,11 +157,11 @@ public class BerkeleyEnv
 				log.error("Could not compress database.", e);
 			}
 		}
-		
+
 		SESSIONS.remove(envHome);
 	}
-	
-	
+
+
 	/**
 	 * Compress the database
 	 *
@@ -192,12 +192,12 @@ public class BerkeleyEnv
 			throw new IOException("Could not compress database.", e);
 		}
 		double duration = (System.nanoTime() - tStart) / 1e9;
-		
+
 		String fileSize = FileUtils.byteCountToDisplaySize(zipFileHandle.length());
 		log.info(String.format("Compressed database in %.2fs to %s", duration, fileSize));
 	}
-	
-	
+
+
 	private void attachShutDownHook()
 	{
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -208,31 +208,31 @@ public class BerkeleyEnv
 			}
 		}, "DB Shutdown"));
 	}
-	
-	
+
+
 	/**
 	 * Return a handle to the entity store
-	 * 
+	 *
 	 * @return
 	 */
 	public EntityStore getEntityStore()
 	{
 		return session.store;
 	}
-	
-	
+
+
 	public EntityModel getModel()
 	{
 		return model;
 	}
-	
-	
+
+
 	public StoreConfig getStoreConfig()
 	{
 		return storeConfig;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -240,14 +240,14 @@ public class BerkeleyEnv
 	{
 		return session.numHandles > 0;
 	}
-	
-	
+
+
 	public void setCompressOnClose(final boolean compressOnClose)
 	{
 		session.compressOnClose = compressOnClose;
 	}
-	
-	
+
+
 	private static class DatabaseSession
 	{
 		Environment myEnv;

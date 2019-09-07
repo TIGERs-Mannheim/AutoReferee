@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.IShapeLayer;
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
@@ -76,7 +78,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	private ScheduledExecutorService execService;
 	private WorldFrameWrapper lastWorldFrameWrapper = null;
 	private BotID selectedRobotId = BotID.noBot();
-	private final Map<String, ShapeMap> shapeMaps = new ConcurrentHashMap<>();
+	private final Map<ShapeMapSource, ShapeMap> shapeMaps = new ConcurrentHashMap<>();
 
 
 	/**
@@ -314,16 +316,28 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 
 
 	@Override
-	public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final String source)
+	public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
 	{
 		shapeMaps.put(source, shapeMap);
 	}
 
 
 	@Override
-	public void onClearShapeMap(final String source)
+	public void onRemoveSourceFromShapeMap(final String source)
 	{
-		shapeMaps.put(source, new ShapeMap());
+		shapeMaps.keySet().stream()
+				.filter(k -> k.getName().equals(source))
+				.forEach(k -> shapeMaps.put(k, new ShapeMap()));
+	}
+
+
+	@Override
+	public void onRemoveCategoryFromShapeMap(final String... category)
+	{
+		List<String> categories = Arrays.asList(category);
+		shapeMaps.keySet().stream()
+				.filter(k -> k.getCategories().containsAll(categories))
+				.forEach(k -> shapeMaps.put(k, new ShapeMap()));
 	}
 
 
@@ -450,7 +464,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		}
 
 
-		private void newShapeMap(final String source, final ShapeMap shapeMap)
+		private void newShapeMap(final ShapeMapSource source, final ShapeMap shapeMap)
 		{
 			panel.getOptionsMenu().addSourceMenuIfNotPresent(source);
 			for (IShapeLayer sl : shapeMap.getAllShapeLayersIdentifiers())
@@ -503,7 +517,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			IShapeLayer visionLayer = new VisionLayer();
 			shapeMap.get(visionLayer).addAll(shapes);
 			long timestamp = mergedFrames.stream().map(ExtendedCamDetectionFrame::gettCapture).findFirst().orElse(0L);
-			onNewShapeMap(timestamp, shapeMap, "CAM");
+			onNewShapeMap(timestamp, shapeMap, ShapeMapSource.of("Vision"));
 		}
 
 
