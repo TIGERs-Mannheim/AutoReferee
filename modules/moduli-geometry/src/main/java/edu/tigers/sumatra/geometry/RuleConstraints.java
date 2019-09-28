@@ -23,24 +23,26 @@ public class RuleConstraints
 	private static double distancePenaltyMarkToPenaltyLine = 400;
 	@Configurable(comment = "Bot speed in stop phases", defValue = "1.5")
 	private static double stopSpeed = 1.5;
+	@Configurable(comment = "This tolerance is subtracted from the default bot speed that is required on STOP", defValue = "0.2")
+	private static double stopSpeedTolerance = 0.2;
 	@Configurable(comment = "Distance between bots and penalty area in standard situations", defValue = "200.0")
 	private static double botToPenaltyAreaDistanceStandard = 200;
 	@Configurable(comment = "Ball placement accuracy tolerance of referee", defValue = "150.0")
 	private static double ballPlacementTolerance = 150;
 	@Configurable(comment = "The max allowed robot height", defValue = "150.0")
 	private static double maxRobotHeight = 150;
-	
+
 	static
 	{
 		ConfigRegistration.registerClass("ruleConst", RuleConstraints.class);
 	}
-	
-	
+
+
 	private RuleConstraints()
 	{
 	}
-	
-	
+
+
 	/**
 	 * @return the stopSpeed
 	 */
@@ -48,8 +50,17 @@ public class RuleConstraints
 	{
 		return stopSpeed;
 	}
-	
-	
+
+
+	/**
+	 * @return The bot speed for our bots during stop including a tolerance
+	 */
+	public static double getStopTargetSpeed()
+	{
+		return stopSpeed - stopSpeedTolerance;
+	}
+
+
 	/**
 	 * @return distance from penalty mark to penalty line
 	 */
@@ -57,8 +68,8 @@ public class RuleConstraints
 	{
 		return distancePenaltyMarkToPenaltyLine;
 	}
-	
-	
+
+
 	/**
 	 * distance between ball and bot required during stop signal (without ball and bot radius!)
 	 *
@@ -68,8 +79,8 @@ public class RuleConstraints
 	{
 		return stopRadius;
 	}
-	
-	
+
+
 	/**
 	 * Additional margin to opponents penalty area in our standard situations
 	 *
@@ -79,8 +90,8 @@ public class RuleConstraints
 	{
 		return botToPenaltyAreaDistanceStandard;
 	}
-	
-	
+
+
 	/**
 	 * Maximal speed allowed for kicking the ball
 	 *
@@ -90,14 +101,14 @@ public class RuleConstraints
 	{
 		return maxBallSpeed;
 	}
-	
-	
+
+
 	public static double getBallPlacementTolerance()
 	{
 		return ballPlacementTolerance;
 	}
-	
-	
+
+
 	public static double getMaxRobotHeight()
 	{
 		return maxRobotHeight;

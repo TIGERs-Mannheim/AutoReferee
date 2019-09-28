@@ -178,6 +178,15 @@ public final class TrackedBot implements ITrackedBot
 
 
 	@Override
+	public Optional<Pose> getDestinationPose()
+	{
+		return robotInfo.getTrajectory()
+				.map(t -> t.getPositionMM(Double.MAX_VALUE))
+				.map(Pose::from);
+	}
+
+
+	@Override
 	public IVector2 getPosByTime(final double t)
 	{
 		if (robotInfo.getTrajectory().isPresent())

@@ -13,6 +13,7 @@ import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.botshape.IBotShape;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 
 
@@ -127,6 +128,12 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 * @return
 	 */
 	MoveConstraints getMoveConstraints();
+
+
+	/**
+	 * @return the pose of the destination based on the current trajectory, if available
+	 */
+	Optional<Pose> getDestinationPose();
 
 
 	/**
