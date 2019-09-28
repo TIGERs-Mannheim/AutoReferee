@@ -26,41 +26,41 @@ import edu.tigers.sumatra.network.NetworkUtility;
 /**
  * The most important implementation of the {@link ACam}-type, which is capable of receiving SSL-Vision data on a
  * certain port (and multicast-group)
- * 
+ *
  * @author Gero
  */
 public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, IConfigObserver
 {
 	private static final Logger log = Logger.getLogger(SSLVisionCam.class.getName());
-	
+
 	private static final int BUFFER_SIZE = 10000;
 	private final byte[] bufferArr = new byte[BUFFER_SIZE];
-	
+
 	private Thread cam;
 	private MulticastUDPReceiver receiver;
 	private boolean expectIOE = false;
-	
+
 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
-	
-	
+
+
 	@Configurable(defValue = "10006")
 	private static int port = 10006;
-	
+
 	@Configurable(defValue = "224.5.23.2")
 	private static String address = "224.5.23.2";
-	
+
 	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
 	private static String network = "";
-	
+
 	private final TimeSync timeSync = new TimeSync();
-	
-	
+
+
 	static
 	{
 		ConfigRegistration.registerClass("user", SSLVisionCam.class);
 	}
-	
-	
+
+
 	@Override
 	public void startModule()
 	{
@@ -75,45 +75,45 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			receiver = new MulticastUDPReceiver(port, address, nif);
 		}
 		receiver.addObserver(this);
-		
+
 		cam = new Thread(this, "SSLVisionCam");
 		cam.start();
-		
+
 		ConfigRegistration.registerConfigurableCallback("user", this);
 	}
-	
-	
+
+
 	@Override
 	public void stopModule()
 	{
 		cleanup();
 		ConfigRegistration.unregisterConfigurableCallback("user", this);
 	}
-	
-	
+
+
 	@Override
 	public void run()
 	{
 		// Create new buffer
 		final ByteBuffer buffer = ByteBuffer.wrap(bufferArr);
-		
+
 		while (!Thread.currentThread().isInterrupted())
 		{
 			try
 			{
 				buffer.clear();
-				
+
 				// Fetch packet
 				final DatagramPacket packet = new DatagramPacket(buffer.array(), buffer.capacity());
-				
+
 				if (receiver == null)
 				{
 					break;
 				}
 				receiver.receive(packet);
-				
+
 				final ByteArrayInputStream packetIn = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
-				
+
 				// Translate
 				final SSL_WrapperPacket sslPacket;
 				try
@@ -124,23 +124,23 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					log.error("invalid ssl package", err);
 					continue;
 				}
-				
+
 				// start with sending out the detection. It is most time critical
 				if (sslPacket.hasDetection())
 				{
-					timeSync.update(sslPacket.getDetection().getTSent());
+					timeSync.update(sslPacket.getDetection().getTCapture());
 					notifyNewCameraFrame(sslPacket.getDetection(), timeSync);
 				}
-				
+
 				if (sslPacket.hasGeometry())
 				{
 					final CamGeometry geometry = geometryTranslator.translate(sslPacket.getGeometry());
-					
+
 					notifyNewCameraCalibration(geometry);
 				}
-				
+
 				notifyNewVisionPacket(sslPacket);
-				
+
 			} catch (final IOException err)
 			{
 				if (!expectIOE)
@@ -153,19 +153,19 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 				log.error("Error in SSL vision cam", err);
 			}
 		}
-		
+
 		// Cleanup
 		expectIOE = true;
 	}
-	
-	
+
+
 	@Override
 	public void onInterfaceTimedOut()
 	{
 		notifyVisionLost();
 	}
-	
-	
+
+
 	private void cleanup()
 	{
 		if (cam != null)
@@ -173,7 +173,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			cam.interrupt();
 			cam = null;
 		}
-		
+
 		if (receiver != null)
 		{
 			expectIOE = true;
@@ -181,8 +181,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			receiver = null;
 		}
 	}
-	
-	
+
+
 	@Override
 	public void afterApply(final IConfigClient configClient)
 	{
@@ -192,8 +192,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			startModule();
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return the port
 	 */
@@ -201,8 +201,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	{
 		return port;
 	}
-	
-	
+
+
 	/**
 	 * @return the address
 	 */
