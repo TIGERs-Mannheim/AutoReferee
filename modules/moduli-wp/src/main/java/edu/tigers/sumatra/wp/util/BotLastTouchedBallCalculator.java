@@ -56,6 +56,15 @@ public class BotLastTouchedBallCalculator
 	 */
 	public Set<BotID> currentlyTouchingBots()
 	{
+		return currentlyTouchingBotsWithMargin(10);
+	}
+	
+	
+	/**
+	 * @return botIDs of bots that last touched ball
+	 */
+	public Set<BotID> currentlyTouchingBotsWithMargin(final double margin)
+	{
 		if (wFrame.getBall().getPos3().z() > RuleConstraints.getMaxRobotHeight())
 		{
 			return Collections.emptySet();
@@ -65,7 +74,7 @@ public class BotLastTouchedBallCalculator
 		final IVector2 curHeading = wFrame.getBall().getVel();
 		
 		final Set<BotID> botsTouchingBall = getBotsCloseToBall().stream()
-				.filter(b -> b.getBotShape().isPointInShape(wFrame.getBall().getPos(), Geometry.getBallRadius() + 10))
+				.filter(b -> b.getBotShape().isPointInShape(wFrame.getBall().getPos(), Geometry.getBallRadius() + margin))
 				.map(ITrackedBot::getBotId)
 				.collect(Collectors.toSet());
 		
