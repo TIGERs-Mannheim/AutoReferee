@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.snapshot;
@@ -18,7 +18,8 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -30,17 +31,17 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 public class SnapshotController
 {
-	private static final Logger log = Logger.getLogger(SnapshotController.class.getName());
+	private static final Logger log = LogManager.getLogger(SnapshotController.class.getName());
 	private final Component parentComponent;
 	private WorldFrameWrapper wfw;
-	
-	
+
+
 	public SnapshotController(final Component parentComponent)
 	{
 		this.parentComponent = parentComponent;
 	}
-	
-	
+
+
 	/**
 	 * @param worldFrame
 	 * @return
@@ -55,14 +56,14 @@ public class SnapshotController
 					new SnapObject(Vector3.from2d(bot.getPos(), bot.getOrientation()),
 							Vector3.from2d(bot.getVel(), bot.getAngularVel())));
 		}
-		
+
 		ITrackedBall ball = worldFrame.getBall();
 		SnapObject snapBall = new SnapObject(ball.getPos3(), ball.getVel3());
-		
+
 		return new Snapshot(snapBots, snapBall);
 	}
-	
-	
+
+
 	/**
 	 * @param wfw
 	 */
@@ -70,19 +71,19 @@ public class SnapshotController
 	{
 		this.wfw = wfw;
 	}
-	
-	
+
+
 	/**
 	 * save snapshot to file
 	 */
 	public void onSnapshot()
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-		
+
 		SimpleWorldFrame worldFrame = wfw.getSimpleWorldFrame();
 		Snapshot snapshot = createSnapshot(worldFrame);
 		String defaultFilename = "data/snapshots/" + sdf.format(new Date()) + ".snap";
-		
+
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File("data/snapshots"));
 		fileChooser.setSelectedFile(new File(defaultFilename));
@@ -101,8 +102,8 @@ public class SnapshotController
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Copy snapshot to clipboard
 	 */
@@ -112,11 +113,11 @@ public class SnapshotController
 		{
 			return;
 		}
-		
+
 		SimpleWorldFrame worldFrame = wfw.getSimpleWorldFrame();
 		Snapshot snapshot = createSnapshot(worldFrame);
 		String snapJson = snapshot.toJSON().toJSONString();
-		
+
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection stringSelection = new StringSelection(snapJson);
 		clipboard.setContents(stringSelection, null);

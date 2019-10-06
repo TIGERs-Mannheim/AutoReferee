@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence;
@@ -9,7 +9,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -33,7 +34,7 @@ import edu.tigers.sumatra.referee.IRefereeObserver;
  */
 public class RecordManager extends AModule implements IRefereeObserver
 {
-	private static final Logger log = Logger.getLogger(RecordManager.class.getName());
+	private static final Logger log = LogManager.getLogger(RecordManager.class.getName());
 	private final List<IRecordObserver> observers = new CopyOnWriteArrayList<>();
 	private final List<IBerkeleyRecorderHook> hooks = new CopyOnWriteArrayList<>();
 	private long lastCommandCounter = -1;

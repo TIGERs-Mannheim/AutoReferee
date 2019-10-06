@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.sumatra.referee;
 
 import java.io.IOException;
@@ -5,7 +9,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Parser;
@@ -20,16 +25,16 @@ import com.google.protobuf.Parser;
  */
 public class GameControllerProtocol
 {
-	private static final Logger log = Logger.getLogger(GameControllerProtocol.class);
-	
+	private static final Logger log = LogManager.getLogger(GameControllerProtocol.class);
+
 	private String hostname;
 	private Socket socket;
 	private int port;
-	
+
 	private boolean connected = false;
 	private List<IConnectedHandler> connectHandlerList = new ArrayList<>();
-	
-	
+
+
 	/**
 	 * Constructor
 	 *
@@ -41,8 +46,8 @@ public class GameControllerProtocol
 		this.hostname = hostname;
 		this.port = port;
 	}
-	
-	
+
+
 	private void notifyOnConnect()
 	{
 		for (IConnectedHandler handler : connectHandlerList)
@@ -50,8 +55,8 @@ public class GameControllerProtocol
 			handler.onConnect();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Repeats connect until it succeeds
 	 * Will call the onConnected callbacks and will close old sockets if it was already connected (aka reconnect)
@@ -74,7 +79,7 @@ public class GameControllerProtocol
 		{
 			log.info("Connecting to " + hostname + ":" + port);
 		}
-		
+
 		long start = System.nanoTime();
 		while (true)
 		{
@@ -85,7 +90,7 @@ public class GameControllerProtocol
 				log.info("successfully connect to " + hostname + ":" + port + " after " + time + "ms");
 				return;
 			}
-			
+
 			try
 			{
 				Thread.sleep(1000);
@@ -97,8 +102,8 @@ public class GameControllerProtocol
 			}
 		}
 	}
-	
-	
+
+
 	private boolean connect()
 	{
 		try
@@ -114,8 +119,8 @@ public class GameControllerProtocol
 		}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Disconnect from the SSL-Game-Controller
 	 *
@@ -133,12 +138,12 @@ public class GameControllerProtocol
 		{
 			log.warn("Closing Socket failed", e);
 		}
-		
+
 		socket = null;
 		connected = false;
 	}
-	
-	
+
+
 	/**
 	 * Sends a Protobuf message to the controller
 	 * Before you pass a message to this function make sure that:
@@ -162,13 +167,13 @@ public class GameControllerProtocol
 		}
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Receive a message from the controller
 	 * This generic method accepts the type of the protobuf message as template
 	 * parameter.
-	 * 
+	 *
 	 * @param parser Protobuf-Parser for message type T
 	 * @param <T> Type of Protobuf Message
 	 * @return Parsed Message of type T or null if an error occurred
@@ -190,8 +195,8 @@ public class GameControllerProtocol
 		connectBlocking();
 		return null;
 	}
-	
-	
+
+
 	public boolean newMessageAvailable()
 	{
 		try
@@ -203,19 +208,19 @@ public class GameControllerProtocol
 			return false;
 		}
 	}
-	
-	
+
+
 	public void addConnectedHandler(IConnectedHandler cb)
 	{
 		connectHandlerList.add(cb);
 	}
-	
-	
+
+
 	public boolean isConnected()
 	{
 		return connected;
 	}
-	
+
 	@FunctionalInterface
 	public interface IConnectedHandler
 	{

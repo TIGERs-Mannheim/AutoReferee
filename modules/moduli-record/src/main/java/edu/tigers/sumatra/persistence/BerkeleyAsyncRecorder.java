@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence;
@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 
@@ -22,16 +23,16 @@ import edu.tigers.sumatra.thread.NamedThreadFactory;
  */
 public class BerkeleyAsyncRecorder
 {
-	private static final Logger log = Logger.getLogger(BerkeleyAsyncRecorder.class.getName());
-	
+	private static final Logger log = LogManager.getLogger(BerkeleyAsyncRecorder.class.getName());
+
 	private static final int TIME_OFFSET = 100;
-	
+
 	private final RecordSaver recordSaver = new RecordSaver();
 	private final BerkeleyDb db;
 	private final List<IBerkeleyRecorder> recorders = new ArrayList<>();
 	private boolean paused = false;
-	
-	
+
+
 	/**
 	 * Create recorder with given persistence
 	 *
@@ -41,14 +42,14 @@ public class BerkeleyAsyncRecorder
 	{
 		this.db = db;
 	}
-	
-	
+
+
 	public void add(IBerkeleyRecorder recorder)
 	{
 		recorders.add(recorder);
 	}
-	
-	
+
+
 	/**
 	 * Start recording
 	 */
@@ -58,8 +59,8 @@ public class BerkeleyAsyncRecorder
 		db.open();
 		recorders.forEach(IBerkeleyRecorder::start);
 	}
-	
-	
+
+
 	/**
 	 * Stop recording
 	 */
@@ -68,8 +69,8 @@ public class BerkeleyAsyncRecorder
 		recorders.forEach(IBerkeleyRecorder::stop);
 		recordSaver.close();
 	}
-	
-	
+
+
 	/**
 	 * Pause all recorders by calling their stop method
 	 */
@@ -81,8 +82,8 @@ public class BerkeleyAsyncRecorder
 			paused = true;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Resume all recorders after they have been paused
 	 */
@@ -94,8 +95,8 @@ public class BerkeleyAsyncRecorder
 			paused = false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Block until database is stopped.
 	 */
@@ -110,19 +111,19 @@ public class BerkeleyAsyncRecorder
 			Thread.currentThread().interrupt();
 		}
 	}
-	
-	
+
+
 	public BerkeleyDb getDb()
 	{
 		return db;
 	}
-	
-	
+
+
 	private class RecordSaver implements Runnable
 	{
 		private final ScheduledExecutorService execService;
-		
-		
+
+
 		/**
 		 */
 		RecordSaver()
@@ -130,16 +131,16 @@ public class BerkeleyAsyncRecorder
 			execService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("RecordSaver"));
 			execService.scheduleWithFixedDelay(this, TIME_OFFSET, TIME_OFFSET, TimeUnit.MILLISECONDS);
 		}
-		
-		
+
+
 		@Override
 		public void run()
 		{
 			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 			recorders.forEach(IBerkeleyRecorder::flush);
 		}
-		
-		
+
+
 		private void printPeriod()
 		{
 			Long firstKey = db.getFirstKey();
@@ -151,8 +152,8 @@ public class BerkeleyAsyncRecorder
 				log.info("Stop recording with a period of " + period);
 			}
 		}
-		
-		
+
+
 		private void close()
 		{
 			execService.execute(this);

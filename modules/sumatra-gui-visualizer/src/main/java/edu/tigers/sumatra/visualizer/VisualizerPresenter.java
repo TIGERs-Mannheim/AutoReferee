@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -19,7 +19,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.cam.data.CamBall;
@@ -68,7 +69,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class VisualizerPresenter extends ASumatraViewPresenter implements IRobotsPanelObserver, IFieldPanelObserver,
 		IWorldFrameObserver
 {
-	private static final Logger log = Logger.getLogger(VisualizerPresenter.class.getName());
+	private static final Logger log = LogManager.getLogger(VisualizerPresenter.class.getName());
 
 	private static final int VISUALIZATION_FPS = 24;
 

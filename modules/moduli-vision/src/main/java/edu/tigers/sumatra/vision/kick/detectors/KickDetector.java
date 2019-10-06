@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.math3.util.Pair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -38,34 +39,30 @@ import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 
 /**
  * Detect kicks based on velocity and direction changes.
- * 
- * @author AndreR <andre@ryll.cc>
  */
 public class KickDetector implements IKickDetector
 {
-	@SuppressWarnings("unused")
-	private static final Logger log = Logger
-			.getLogger(KickDetector.class.getName());
-	
+	private static final Logger log = LogManager.getLogger(KickDetector.class.getName());
+
 	private LinkedList<FrameRecord> frameHistory = new LinkedList<>();
-	
+
 	private static int frameHistorySize = 5;
-	
+
 	private long lastKickTimestamp;
-	
+
 	private List<IKickValidator> kickValidators = new ArrayList<>();
 	private String lastKVText = "";
 	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
-	
+
 	@Configurable(defValue = "0.1", comment = "Minimum time between two kicks [s]")
 	private static double minDeltaTime = 0.1;
-	
+
 	static
 	{
 		ConfigRegistration.registerClass("vision", KickDetector.class);
 	}
-	
-	
+
+
 	/**
 	 * Create kick detector.
 	 */
@@ -76,11 +73,11 @@ public class KickDetector implements IKickDetector
 		kickValidators.add(new InFrontValidator());
 		kickValidators.add(new IncreasingDistanceValidator());
 	}
-	
-	
+
+
 	/**
 	 * Add new flat ball record to the kick detector.
-	 * 
+	 *
 	 * @param mergedBall
 	 * @param mergedRobots
 	 */
@@ -88,30 +85,30 @@ public class KickDetector implements IKickDetector
 	public KickEvent addRecord(final MergedBall mergedBall, final List<FilteredVisionBot> mergedRobots)
 	{
 		lastKnownBallPosition = mergedBall.getCamPos();
-		
+
 		boolean isVirtualBall = mergedBall.getLatestCamBall().map(b -> b.getConfidence() < 0.1).orElse(false);
 		if (isVirtualBall)
 		{
 			return null;
 		}
-		
+
 		FrameRecord rec = new FrameRecord(mergedBall, mergedRobots);
 		frameHistory.add(rec);
-		
+
 		if (frameHistory.size() > frameHistorySize)
 		{
 			frameHistory.remove();
 		}
-		
+
 		if (frameHistory.size() == frameHistorySize)
 		{
 			return processFrames();
 		}
-		
+
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Clear history and kick timestamp.
 	 */
@@ -121,33 +118,33 @@ public class KickDetector implements IKickDetector
 		lastKickTimestamp = 0;
 		frameHistory.clear();
 	}
-	
-	
+
+
 	private KickEvent processFrames()
 	{
 		List<MergedBall> balls = frameHistory.stream()
 				.map(FrameRecord::getBall)
 				.collect(Collectors.toList());
-		
+
 		Map<BotID, List<FilteredVisionBot>> bots = frameHistory.stream()
 				.flatMap(f -> f.getRobots().stream())
 				.collect(Collectors.groupingBy(FilteredVisionBot::getBotID));
-		
+
 		// remove bots from checklist if no full history is available (new bot)
 		bots.entrySet().removeIf(e -> e.getValue().size() < frameHistorySize);
-		
+
 		// remove bots from checklist which are too far away
 		bots.entrySet().removeIf(e -> e.getValue().get(0).getPos().distanceTo(balls.get(0).getCamPos()) > 1000);
-		
+
 		lastKVText = "";
-		
+
 		StringBuilder kvText = new StringBuilder();
-		
+
 		List<FilteredVisionBot> kickedBot = null;
 		for (List<FilteredVisionBot> b : bots.values())
 		{
 			Validate.isTrue(b.size() == balls.size());
-			
+
 			boolean kick = true;
 			kvText.append("KV (" + b.get(0).getBotID() + "):");
 			for (IKickValidator k : kickValidators)
@@ -155,32 +152,32 @@ public class KickDetector implements IKickDetector
 				boolean valid = k.validateKick(b, balls);
 				kvText.append(valid ? "+" : "-");
 				kvText.append(k.getName() + ",");
-				
+
 				if (!valid)
 				{
 					kick = false;
 				}
 			}
-			
+
 			kvText.append("\n");
-			
+
 			if (kick)
 			{
 				kickedBot = b;
 				break;
 			}
 		}
-		
+
 		lastKVText = kvText.toString();
-		
+
 		if ((kickedBot != null) && (Math.abs((balls.get(0).getTimestamp() - lastKickTimestamp) * 1e-9) > minDeltaTime))
 		{
 			FilteredVisionBot bot = kickedBot.get(0);
-			log.debug("Kick detected, Bot: " + bot.getBotID());
-			
+			log.debug("Kick detected, Bot: {}", bot.getBotID());
+
 			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot, balls.get(0).getTimestamp(), balls, false);
 			lastKickTimestamp = balls.get(0).getTimestamp();
-			
+
 			Optional<Pair<Long, IVector2>> backtrack = DirectionValidator.backtrack(kickedBot, balls);
 			if (backtrack.isPresent())
 			{
@@ -188,26 +185,26 @@ public class KickDetector implements IKickDetector
 				kick = new KickEvent(backtrack.get().getSecond(), bot, backtrack.get().getFirst(), balls, false);
 				lastKickTimestamp = backtrack.get().getFirst();
 			}
-			
+
 			return kick;
 		}
-		
+
 		return null;
 	}
-	
-	
+
+
 	@Override
 	public List<IDrawableShape> getDrawableShapes()
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
-		
+
 		DrawableAnnotation kvText = new DrawableAnnotation(lastKnownBallPosition, lastKVText);
 		kvText.withOffset(Vector2.fromXY(0, 30));
 		kvText.withCenterHorizontally(true);
 		kvText.withFontHeight(20);
 		kvText.setColor(Color.MAGENTA);
 		shapes.add(kvText);
-		
+
 		return shapes;
 	}
 }

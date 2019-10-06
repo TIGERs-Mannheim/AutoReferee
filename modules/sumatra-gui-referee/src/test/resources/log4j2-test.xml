@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <File name="file" fileName="target/test.log">
+            <PatternLayout pattern="%d %-5p [%t|%c{1}] %m%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="file"/>
+        </Root>
+    </Loggers>
+</Configuration>

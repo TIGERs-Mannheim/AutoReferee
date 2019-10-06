@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra;
@@ -37,7 +37,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.WindowConstants;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.views.ASumatraView;
@@ -58,13 +59,11 @@ import net.infonode.util.Direction;
 
 /**
  * abstract base MainFrame
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
+@SuppressWarnings("squid:MaximumInheritanceDepth")
 public abstract class AMainFrame extends JFrame implements IMainFrame
 {
-	private static final Logger log = Logger
-			.getLogger(AMainFrame.class.getName());
+	private static final Logger log = LogManager.getLogger(AMainFrame.class.getName());
 	private static final long serialVersionUID = -6858464942004450029L;
 
 	private final RootWindow rootWindow;
@@ -183,7 +182,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		views.add(view);
 	}
 
-	
+
 	private void compressReplay(Path path)
 	{
 		try
@@ -197,13 +196,14 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 			log.error("Could not create ZIP file: " + path, e);
 		}
 	}
-	
-	
+
+
 	protected void startReplayCompressionThread(Path path)
 	{
 		Thread compressThread = new Thread(() -> compressReplay(path), "DatabaseCompression");
 		compressThread.start();
 	}
+
 
 	protected void exit()
 	{
@@ -261,7 +261,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	{
 		final File f = new File(path);
 		final String filename = f.getName();
-		log.trace("Loading layout file " + filename);
+		log.trace("Loading layout file {}", filename);
 
 		try (FileInputStream fileInputStream = new FileInputStream(f))
 		{
@@ -648,7 +648,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 				}
 			}
 			ESumatraViewType type = ESumatraViewType.fromId(id);
-			log.warn("View " + type + " with id " + id + " has been removed.");
+			log.warn("View {} with id {} has been removed.", type, id);
 			if (type == null)
 			{
 				type = ESumatraViewType.DUMMY;

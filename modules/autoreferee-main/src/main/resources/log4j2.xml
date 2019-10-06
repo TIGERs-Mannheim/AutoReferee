@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %p [%t|%c{1}] %m%n"/>
+        </Console>
+        <SumatraAppender name="berkeley"/>
+        <SumatraAppender name="logView">
+            <PatternLayout pattern="%d %p [%t|%c{1}] %m%n"/>
+        </SumatraAppender>
+        <Async name="ASYNC">
+            <AppenderRef ref="CONSOLE" level="warn"/>
+            <AppenderRef ref="berkeley" level="all"/>
+            <AppenderRef ref="logView" level="all"/>
+        </Async>
+    </Appenders>
+    <Loggers>
+        <Root level="all">
+            <AppenderRef ref="ASYNC"/>
+        </Root>
+        <Logger name="log4j.logger.net.java.games" level="warn">
+            <AppenderRef ref="ASYNC"/>
+        </Logger>
+    </Loggers>
+</Configuration>

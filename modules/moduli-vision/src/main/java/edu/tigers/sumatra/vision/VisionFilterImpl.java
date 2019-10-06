@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -15,7 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
@@ -53,7 +54,7 @@ public class VisionFilterImpl extends AVisionFilter
 		implements Runnable, IViewportArchitect, IBallModelIdentificationObserver
 {
 	@SuppressWarnings("unused")
-	private static final Logger log = Logger.getLogger(VisionFilterImpl.class.getName());
+	private static final Logger log = LogManager.getLogger(VisionFilterImpl.class.getName());
 
 	private static final long CLOCK_DT = 12_500_000;
 

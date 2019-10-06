@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamGeometry;
@@ -20,48 +19,32 @@ import edu.tigers.sumatra.model.SumatraModel;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Update global geometry data structure based on incoming ssl-vision frames.
  */
 public class GeometryUpdater extends AModule
 {
-	
-	@SuppressWarnings("unused")
-	private static final Logger		log							= Logger.getLogger(GeometryUpdater.class.getName());
-	
+	private static final Logger log = LogManager.getLogger(GeometryUpdater.class.getName());
+
 	@Configurable(comment = "Receive geometry from SSL vision")
-	private static boolean				receiveGeometry			= true;
-	
+	private static boolean receiveGeometry = true;
+
 	@Configurable(comment = "Receive geometry from SSL vision, but only once!")
-	private static boolean				receiveGeometryOnceOnly	= false;
-	
-	private boolean						geometryReceived			= false;
-	private final ICamFrameObserver	camFrameObserver			= new CamFrameObserver();
-	
+	private static boolean receiveGeometryOnceOnly = false;
+
+	private boolean geometryReceived = false;
+	private final ICamFrameObserver camFrameObserver = new CamFrameObserver();
+
 	static
 	{
 		ConfigRegistration.registerClass("geom", GeometryUpdater.class);
 	}
-	
-	
+
+
 	@Override
-	public void initModule() throws InitModuleException
-	{
-		// empty
-	}
-	
-	
-	@Override
-	public void deinitModule()
-	{
-		// empty
-	}
-	
-	
-	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		geometryReceived = false;
-		
+
 		try
 		{
 			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
@@ -71,8 +54,8 @@ public class GeometryUpdater extends AModule
 			log.error("Could not find cam module", err);
 		}
 	}
-	
-	
+
+
 	@Override
 	public void stopModule()
 	{
@@ -85,7 +68,7 @@ public class GeometryUpdater extends AModule
 			log.error("Could not find cam module", err);
 		}
 	}
-	
+
 	private class CamFrameObserver implements ICamFrameObserver
 	{
 		@Override
@@ -97,7 +80,7 @@ public class GeometryUpdater extends AModule
 				{
 					Geometry.setCamDetection(geometry);
 				}
-				
+
 				if (!geometryReceived)
 				{
 					geometryReceived = true;

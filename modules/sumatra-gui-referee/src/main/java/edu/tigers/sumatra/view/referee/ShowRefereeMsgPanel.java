@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.referee;
 
@@ -21,7 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
 import org.apache.commons.lang.SystemUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.Referee.SSL_Referee;
 import edu.tigers.sumatra.Referee.SSL_Referee.Command;
@@ -36,7 +37,7 @@ import net.miginfocom.swing.MigLayout;
 public class ShowRefereeMsgPanel extends JPanel
 {
 	private static final long serialVersionUID = -508393753936993622L;
-	private final Logger log = Logger.getLogger(ShowRefereeMsgPanel.class.getName());
+	private final Logger log = LogManager.getLogger(ShowRefereeMsgPanel.class.getName());
 	private static final int MAX_COMMANDS = 50;
 
 	private final JButton openControllerButton;

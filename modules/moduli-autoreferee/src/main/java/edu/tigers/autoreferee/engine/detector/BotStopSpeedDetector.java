@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.detector;
 
@@ -12,7 +12,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.Configurable;
 import com.google.common.collect.Sets;
@@ -32,26 +33,26 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
  */
 public class BotStopSpeedDetector extends AGameEventDetector
 {
-	private static final Logger log = Logger.getLogger(BotStopSpeedDetector.class);
-	
+	private static final Logger log = LogManager.getLogger(BotStopSpeedDetector.class);
+
 	@Configurable(comment = "[s] Grace period before reporting any events", defValue = "2.0")
 	private static double gracePeriod = 2.0;
 	@Configurable(comment = "[s] The number of milliseconds that a bot needs violate the stop speed limit to be reported", defValue = "0.3")
 	private static double minViolationDuration = 0.3;
-	
-	
+
+
 	private final Map<BotID, Long> currentViolators = new HashMap<>();
 	private final Set<BotID> lastViolators = new HashSet<>();
 	private final Map<ETeamColor, Boolean> infringementRecordedThisStopPhase = new EnumMap<>(ETeamColor.class);
 	private long entryTime = 0;
-	
-	
+
+
 	public BotStopSpeedDetector()
 	{
 		super(EGameEventDetectorType.BOT_STOP_SPEED, EGameState.STOP);
 	}
-	
-	
+
+
 	@Override
 	protected void doPrepare()
 	{
@@ -59,8 +60,8 @@ public class BotStopSpeedDetector extends AGameEventDetector
 		infringementRecordedThisStopPhase.put(ETeamColor.YELLOW, false);
 		infringementRecordedThisStopPhase.put(ETeamColor.BLUE, false);
 	}
-	
-	
+
+
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
@@ -71,15 +72,15 @@ public class BotStopSpeedDetector extends AGameEventDetector
 		{
 			return Optional.empty();
 		}
-		
+
 		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
-		
+
 		long delta = frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
 		Set<BotID> frameViolators = getViolators(bots.values());
 		Set<BotID> frameNonViolators = Sets.difference(bots.keySet(), frameViolators);
 		updateCurrentViolators(frameViolators, frameNonViolators, delta);
-		
-		
+
+
 		/*
 		 * Bots are considered to violate the rule if they have been speeding for more than MIN_FRAME_COUNT frames. To
 		 * allow a certain cooldown and avoid spamming bots are not reported again until they have not violated the speed
@@ -91,10 +92,10 @@ public class BotStopSpeedDetector extends AGameEventDetector
 					return (value / 1e9 >= minViolationDuration)
 							|| (lastViolators.contains(id) && (value > 0));
 				}).collect(Collectors.toSet());
-		
+
 		Set<BotID> oldViolators = Sets.difference(lastViolators, frameCountViolators).immutableCopy();
 		lastViolators.removeAll(oldViolators);
-		
+
 		Optional<BotID> optViolator = Sets.difference(frameCountViolators, lastViolators).stream().findFirst();
 		if (optViolator.isPresent())
 		{
@@ -106,19 +107,19 @@ public class BotStopSpeedDetector extends AGameEventDetector
 				return Optional.empty();
 			}
 			lastViolators.add(violator);
-			
+
 			if (!infringementRecordedThisStopPhase.getOrDefault(violator.getTeamColor(), true))
 			{
 				infringementRecordedThisStopPhase.put(violator.getTeamColor(), true);
 			}
-			
+
 			return Optional.of(new BotTooFastInStop(violator, bot.getPos(), bot.getVel().getLength()));
 		}
-		
+
 		return Optional.empty();
 	}
-	
-	
+
+
 	private Set<BotID> getViolators(final Collection<ITrackedBot> bots)
 	{
 		return bots.stream()
@@ -127,8 +128,8 @@ public class BotStopSpeedDetector extends AGameEventDetector
 				.map(ITrackedBot::getBotId)
 				.collect(Collectors.toSet());
 	}
-	
-	
+
+
 	private void updateCurrentViolators(final Set<BotID> violators, final Set<BotID> nonViolators, final long timeDelta)
 	{
 		for (BotID violator : violators)
@@ -144,7 +145,7 @@ public class BotStopSpeedDetector extends AGameEventDetector
 			}
 			currentViolators.put(violator, value);
 		}
-		
+
 		for (BotID nonViolator : nonViolators)
 		{
 			if (currentViolators.containsKey(nonViolator))
@@ -161,8 +162,8 @@ public class BotStopSpeedDetector extends AGameEventDetector
 			}
 		}
 	}
-	
-	
+
+
 	@Override
 	public void doReset()
 	{

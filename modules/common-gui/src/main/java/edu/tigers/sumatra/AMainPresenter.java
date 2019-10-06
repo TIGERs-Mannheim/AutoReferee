@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra;
 
@@ -14,7 +14,8 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.ScalingUtil;
@@ -26,7 +27,7 @@ import net.infonode.gui.laf.InfoNodeLookAndFeel;
  */
 public abstract class AMainPresenter implements IMainFrameObserver
 {
-	private static final Logger log = Logger.getLogger(AMainPresenter.class.getName());
+	private static final Logger log = LogManager.getLogger(AMainPresenter.class.getName());
 
 	private static final String LAYOUT_CONFIG_PATH = "./config/gui/";
 

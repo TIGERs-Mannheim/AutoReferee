@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.sumatra.referee;
 
 import java.io.File;
@@ -13,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -21,21 +26,21 @@ import org.apache.log4j.Logger;
  */
 public class SslGameControllerProcess implements Runnable
 {
-	private final Logger log = Logger.getLogger(SslGameControllerProcess.class.getName());
-	
+	private final Logger log = LogManager.getLogger(SslGameControllerProcess.class.getName());
+
 	private final int gcUiPort;
-	
+
 	private Process process = null;
 	private SslGameControllerClient client = null;
 	private CountDownLatch clientLatch = new CountDownLatch(1);
-	
-	
+
+
 	public SslGameControllerProcess(final int gcUiPort)
 	{
 		this.gcUiPort = gcUiPort;
 	}
-	
-	
+
+
 	private String locateModulesFolder() throws FileNotFoundException
 	{
 		StringBuilder prefix = new StringBuilder();
@@ -50,13 +55,13 @@ public class SslGameControllerProcess implements Runnable
 		}
 		throw new FileNotFoundException("Could not locate modules folder");
 	}
-	
-	
+
+
 	@Override
 	public void run()
 	{
 		Thread.currentThread().setName("ssl-game-controller");
-		
+
 		final String modulesFolder;
 		try
 		{
@@ -66,7 +71,7 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("No ssl-game-controller binary file found.", e);
 			return;
 		}
-		
+
 		String binaryFolder = modulesFolder + "/moduli-referee/target/ssl-game-controller";
 		final File[] files = new File(binaryFolder).listFiles();
 		if (files == null || files.length == 0)
@@ -75,14 +80,14 @@ public class SslGameControllerProcess implements Runnable
 			return;
 		}
 		Arrays.sort(files);
-		
+
 		File binaryFile = files[files.length - 1];
-		
+
 		if (files.length > 1)
 		{
 			log.info("Found multiple ssl-game-controller binaries. Choosing " + binaryFile);
 		}
-		
+
 		try
 		{
 			if (!binaryFile.canExecute() && !binaryFile.setExecutable(true))
@@ -90,14 +95,14 @@ public class SslGameControllerProcess implements Runnable
 				log.warn("Binary is not executable and could not be made executable.");
 				return;
 			}
-			
+
 			ProcessBuilder builder = new ProcessBuilder(binaryFile.getAbsolutePath(),
 					"-address", "localhost:" + gcUiPort);
 			builder.redirectErrorStream(true);
 			builder.directory(Paths.get("").toAbsolutePath().toFile());
 			process = builder.start();
 			log.debug("game-controller process started");
-			
+
 			Scanner s = new Scanner(process.getInputStream());
 			inputLoop(s);
 			s.close();
@@ -114,8 +119,8 @@ public class SslGameControllerProcess implements Runnable
 		}
 		log.debug("game-controller process thread finished");
 	}
-	
-	
+
+
 	private void inputLoop(final Scanner s)
 	{
 		while (s.hasNextLine())
@@ -127,21 +132,21 @@ public class SslGameControllerProcess implements Runnable
 			}
 		}
 	}
-	
-	
+
+
 	private void processLogLine(final String line)
 	{
 		// Remove log date: 2018/10/29 10:00:10
 		String truncatedLine = line.replaceFirst("[0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+ ", "");
 		log.debug(truncatedLine);
-		
+
 		if (truncatedLine.contains("UI is available at"))
 		{
 			createClient(truncatedLine);
 		}
 	}
-	
-	
+
+
 	private void createClient(final String truncatedLine)
 	{
 		final Pattern pattern = Pattern.compile("localhost:([0-9]+)");
@@ -173,15 +178,15 @@ public class SslGameControllerProcess implements Runnable
 			log.error("Could not extract port from log line, where a port was expected.");
 		}
 	}
-	
-	
+
+
 	public void stop()
 	{
 		if (process == null)
 		{
 			return;
 		}
-		
+
 		process.destroy();
 		try
 		{
@@ -197,14 +202,14 @@ public class SslGameControllerProcess implements Runnable
 		}
 		process = null;
 	}
-	
-	
+
+
 	public Optional<SslGameControllerClient> getClient()
 	{
 		return Optional.ofNullable(client);
 	}
-	
-	
+
+
 	/**
 	 * @return a connected client, waiting if necessary until it is available and connected
 	 */

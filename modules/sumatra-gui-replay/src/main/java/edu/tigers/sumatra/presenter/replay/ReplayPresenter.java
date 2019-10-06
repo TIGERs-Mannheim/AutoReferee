@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.presenter.replay;
@@ -14,7 +14,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.AMainPresenter;
@@ -38,7 +39,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 public class ReplayPresenter extends AMainPresenter
 		implements IReplayControlPanelObserver, IWorldFrameObserver
 {
-	private static final Logger log = Logger.getLogger(ReplayPresenter.class.getName());
+	private static final Logger log = LogManager.getLogger(ReplayPresenter.class.getName());
 
 	private static final String LAST_LAYOUT_FILENAME = "last_replay.ly";
 	private static final String LAYOUT_DEFAULT = "default_replay.ly";

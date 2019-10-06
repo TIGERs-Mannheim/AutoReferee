@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source;
 
@@ -10,7 +10,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Optional;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -26,14 +27,14 @@ import edu.tigers.sumatra.network.NetworkUtility;
  */
 public class NetworkRefereeReceiver extends ARefereeMessageSource implements Runnable, IReceiver
 {
-	private static final Logger log = Logger.getLogger(NetworkRefereeReceiver.class.getName());
+	private static final Logger log = LogManager.getLogger(NetworkRefereeReceiver.class.getName());
 
 	private static final int BUFFER_SIZE = 10000;
 
 	@Configurable(defValue = "224.5.23.1")
 	private static String address;
 
-	@Configurable(defValue = "")
+	@Configurable
 	private static String network;
 
 	private int port;
@@ -69,7 +70,7 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 			receiver = new MulticastUDPReceiver(port, address);
 		} else
 		{
-			log.info("Chose nif for referee: " + nif.getDisplayName() + ".");
+			log.info("Chose nif for referee: {}", nif.getDisplayName());
 			receiver = new MulticastUDPReceiver(port, address, nif);
 		}
 

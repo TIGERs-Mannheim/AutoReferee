@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.statemachine;
 
@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -17,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class StateMachine<T extends IState> implements IStateMachine<T>
 {
-	private static final Logger log = Logger.getLogger(StateMachine.class.getName());
+	private static final Logger log = LogManager.getLogger(StateMachine.class.getName());
 	private static final int MAX_STATE_CHANGES_PER_UPDATE = 15;
 
 	private final Map<IEvent, Map<IState, T>> transitions = new HashMap<>();
@@ -72,7 +73,7 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 			return;
 		}
 
-		extendedLogging(() -> log.trace(name + ": Switch state from " + currentState + " to " + newState));
+		extendedLogging(() -> log.trace("{}: Switch state from {} to {}", name, currentState, newState));
 
 		if (stateChangesSinceUpdate > MAX_STATE_CHANGES_PER_UPDATE)
 		{
@@ -109,7 +110,7 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 	public void triggerEvent(final IEvent event)
 	{
 		Validate.notNull(event);
-		extendedLogging(() -> log.trace(name + ": New event: " + event));
+		extendedLogging(() -> log.trace("{}: New event: {}", name, event));
 
 		T newState = getNextState(event);
 		if (newState != null)
@@ -135,10 +136,8 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 		T preState = subTransitions.put(currentState, state);
 		if (preState != null)
 		{
-			log.warn(name + ": Overwriting transition for event: " + event + " and state " + currentState
-					+ ". Change state from "
-					+ preState + " to "
-					+ state);
+			log.warn("{}: Overwriting transition for event: {} and state {}. Change state from {} to {}", name, event,
+					currentState, preState, state);
 		}
 	}
 

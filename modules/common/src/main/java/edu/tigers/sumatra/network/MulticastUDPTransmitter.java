@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.network;
@@ -12,7 +12,8 @@ import java.net.MulticastSocket;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -21,14 +22,14 @@ import org.apache.log4j.Logger;
  */
 public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 {
-	private static final Logger log = Logger.getLogger(MulticastUDPTransmitter.class);
+	private static final Logger log = LogManager.getLogger(MulticastUDPTransmitter.class);
 	private final int targetPort;
 	private final InetAddress targetAddr;
-	
+
 	private MulticastSocket socket = null;
 	private boolean lastSendFailed = false;
-	
-	
+
+
 	/**
 	 * @param targetAddr multicast address to send to
 	 * @param targetPort network port to send to
@@ -37,7 +38,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	{
 		this.targetPort = targetPort;
 		this.targetAddr = addressByName(targetAddr);
-		
+
 		try
 		{
 			socket = new MulticastSocket();
@@ -46,8 +47,8 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 			log.error("Error while creating MulticastSocket!", err);
 		}
 	}
-	
-	
+
+
 	private InetAddress addressByName(final String targetAddr)
 	{
 		try
@@ -59,8 +60,8 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 		}
 		return null;
 	}
-	
-	
+
+
 	@Override
 	public synchronized boolean send(final byte[] data)
 	{
@@ -73,9 +74,9 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 			}
 			return false;
 		}
-		
+
 		DatagramPacket tempPacket = new DatagramPacket(data, data.length, targetAddr, targetPort);
-		
+
 		// Receive _outside_ the synchronized state, to prevent blocking of the state
 		try
 		{
@@ -97,11 +98,11 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 			}
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	
+
+
 	@Override
 	public synchronized void close()
 	{

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.persistence;
 
@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
@@ -38,7 +39,7 @@ import net.lingala.zip4j.util.Zip4jConstants;
  */
 public class BerkeleyEnv
 {
-	private static final Logger log = Logger.getLogger(BerkeleyEnv.class.getName());
+	private static final Logger log = LogManager.getLogger(BerkeleyEnv.class.getName());
 	private File envHome;
 
 	private DatabaseSession session = new DatabaseSession();

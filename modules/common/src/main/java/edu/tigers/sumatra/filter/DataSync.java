@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.filter;
 
@@ -9,7 +9,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -18,12 +19,12 @@ import org.apache.log4j.Logger;
  */
 public class DataSync<T>
 {
-	private static final Logger log = Logger.getLogger(DataSync.class.getName());
-	
+	private static final Logger log = LogManager.getLogger(DataSync.class.getName());
+
 	private final int bufferSize;
 	private List<DataStore> buffer = new LinkedList<>();
-	
-	
+
+
 	/**
 	 * @param bufferSize
 	 */
@@ -31,8 +32,8 @@ public class DataSync<T>
 	{
 		this.bufferSize = bufferSize;
 	}
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 * @param data
@@ -52,11 +53,11 @@ public class DataSync<T>
 		}
 		buffer.add(store);
 	}
-	
-	
+
+
 	/**
 	 * Get the closest data to given timestamp
-	 * 
+	 *
 	 * @param timestamp
 	 * @return
 	 */
@@ -67,7 +68,7 @@ public class DataSync<T>
 		{
 			return Optional.empty();
 		}
-		
+
 		DataStore previous = null;
 		for (DataStore current : buffer)
 		{
@@ -81,8 +82,8 @@ public class DataSync<T>
 		}
 		return Optional.empty();
 	}
-	
-	
+
+
 	public synchronized Optional<DataStore> getLatest()
 	{
 		if (buffer.isEmpty())
@@ -91,38 +92,38 @@ public class DataSync<T>
 		}
 		return Optional.of(buffer.get(buffer.size() - 1));
 	}
-	
-	
+
+
 	public synchronized void reset()
 	{
 		buffer.clear();
 	}
-	
+
 	public class DataStore
 	{
 		private long timestamp;
 		private T data;
-		
-		
+
+
 		public DataStore(final long timestamp, final T data)
 		{
 			this.timestamp = timestamp;
 			this.data = data;
 		}
-		
-		
+
+
 		public long getTimestamp()
 		{
 			return timestamp;
 		}
-		
-		
+
+
 		public T getData()
 		{
 			return data;
 		}
-		
-		
+
+
 		@Override
 		public String toString()
 		{
@@ -132,32 +133,32 @@ public class DataSync<T>
 					.toString();
 		}
 	}
-	
+
 	public class DataPair
 	{
 		private DataStore first;
 		private DataStore second;
-		
-		
+
+
 		public DataPair(final DataStore first, final DataStore second)
 		{
 			this.first = first;
 			this.second = second;
 		}
-		
-		
+
+
 		public DataStore getFirst()
 		{
 			return first;
 		}
-		
-		
+
+
 		public DataStore getSecond()
 		{
 			return second;
 		}
-		
-		
+
+
 		@Override
 		public String toString()
 		{

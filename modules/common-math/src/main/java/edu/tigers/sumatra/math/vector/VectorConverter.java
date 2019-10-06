@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.s2vconverter.IString2ValueConverter;
 
@@ -14,12 +15,11 @@ import com.github.g3force.s2vconverter.IString2ValueConverter;
  */
 public class VectorConverter implements IString2ValueConverter
 {
-	@SuppressWarnings("unused")
-	private static final Logger	log					= Logger.getLogger(VectorConverter.class.getName());
-	
-	private static final String	MSG_NOT_PARSABLE	= "Could not parse vector.";
-	
-	
+	private static final Logger log = LogManager.getLogger(VectorConverter.class.getName());
+
+	private static final String MSG_NOT_PARSABLE = "Could not parse vector.";
+
+
 	@Override
 	public boolean supportedClass(final Class<?> impl)
 	{
@@ -28,8 +28,8 @@ public class VectorConverter implements IString2ValueConverter
 				|| impl.equals(IVector3.class)
 				|| impl.equals(IVectorN.class);
 	}
-	
-	
+
+
 	@Override
 	public Object parseString(final Class<?> impl, final String value)
 	{
@@ -45,21 +45,21 @@ public class VectorConverter implements IString2ValueConverter
 		}
 		return null;
 	}
-	
-	
+
+
 	private Object parseVector2(final String value)
 	{
 		try
 		{
-			return Vector2.valueOf(value);
+			return AVector2.valueOf(value);
 		} catch (NumberFormatException err)
 		{
 			log.warn(MSG_NOT_PARSABLE, err);
 			return Vector2f.ZERO_VECTOR;
 		}
 	}
-	
-	
+
+
 	private Object parseVector3(final String value)
 	{
 		try
@@ -71,8 +71,8 @@ public class VectorConverter implements IString2ValueConverter
 			return Vector3f.ZERO_VECTOR;
 		}
 	}
-	
-	
+
+
 	private Object parseVectorN(final String value)
 	{
 		try
@@ -84,13 +84,13 @@ public class VectorConverter implements IString2ValueConverter
 			return VectorN.zero(0);
 		}
 	}
-	
-	
+
+
 	@Override
 	public String toString(final Class<?> impl, final Object value)
 	{
 		IVector vec = (IVector) value;
 		return vec.getSaveableString();
 	}
-	
+
 }

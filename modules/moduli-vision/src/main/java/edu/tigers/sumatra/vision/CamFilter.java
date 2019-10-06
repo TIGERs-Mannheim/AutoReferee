@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -12,7 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -53,7 +54,7 @@ import edu.tigers.sumatra.vision.tracker.RobotTracker;
  */
 public class CamFilter
 {
-	private static final Logger log = Logger.getLogger(CamFilter.class.getName());
+	private static final Logger log = LogManager.getLogger(CamFilter.class.getName());
 
 	private final int camId;
 

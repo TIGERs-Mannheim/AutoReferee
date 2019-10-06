@@ -1,9 +1,14 @@
+/*
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.sumatra.referee.source;
 
 import java.io.IOException;
 import java.net.Socket;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.protobuf.CodedOutputStream;
 
@@ -16,33 +21,33 @@ import edu.tigers.sumatra.Referee;
  */
 public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 {
-	private static final Logger log = Logger.getLogger(CiRefereeSyncedReceiver.class);
-	
+	private static final Logger log = LogManager.getLogger(CiRefereeSyncedReceiver.class);
+
 	private static final String HOSTNAME = "localhost";
 	private int port = 10009;
 	private Socket socket;
-	
-	
+
+
 	public CiRefereeSyncedReceiver()
 	{
 		super(ERefereeMessageSource.CI);
 	}
-	
-	
+
+
 	@Override
 	public void start()
 	{
 		super.start();
-		
+
 		connect();
 	}
-	
-	
+
+
 	@Override
 	public void stop()
 	{
 		super.stop();
-		
+
 		if (socket != null)
 		{
 			try
@@ -55,8 +60,8 @@ public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 			}
 		}
 	}
-	
-	
+
+
 	private void connect()
 	{
 		try
@@ -68,8 +73,8 @@ public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 			log.warn("Connection to SSL-Game-Controller Failed", e);
 		}
 	}
-	
-	
+
+
 	private void sendTime(long timestamp)
 	{
 		try
@@ -82,8 +87,8 @@ public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 			log.warn("Could not write to socket", e);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Receive a referee message from the controller
 	 *
@@ -105,8 +110,8 @@ public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 			return null;
 		}
 	}
-	
-	
+
+
 	@Override
 	public void setCurrentTime(long timestamp)
 	{
@@ -123,8 +128,8 @@ public class CiRefereeSyncedReceiver extends ARefereeMessageSource
 			}
 		}
 	}
-	
-	
+
+
 	public void setPort(final int port)
 	{
 		this.port = port;

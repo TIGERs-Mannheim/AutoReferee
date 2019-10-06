@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -26,7 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.clock.FpsCounter;
 import edu.tigers.sumatra.drawable.EFieldTurn;
@@ -45,13 +46,10 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * Visualization of the field.
- *
- * @author Oliver Steinbrecher
  */
 public class FieldPanel extends JPanel implements IFieldPanel
 {
-	private static final Logger log = Logger
-			.getLogger(FieldPanel.class.getName());
+	private static final Logger log = LogManager.getLogger(FieldPanel.class.getName());
 
 	/** color of field background */
 	private static final Color FIELD_COLOR = new Color(0, 160, 30);

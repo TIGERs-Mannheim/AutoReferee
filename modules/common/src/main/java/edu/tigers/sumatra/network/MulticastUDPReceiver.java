@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.network;
@@ -23,19 +23,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * This class should be able to register to a multicast group, and receive {@link DatagramPacket}s
  * on it
- * 
+ *
  * @author Gero
  */
 public class MulticastUDPReceiver implements IReceiver
 {
-	private static final Logger log = Logger.getLogger(MulticastUDPReceiver.class.getName());
-	
+	private static final Logger log = LogManager.getLogger(MulticastUDPReceiver.class.getName());
+
 	private static final int SO_TIMEOUT = 500;
 	private static final String[] USELESS_PREFIXES = { "tap", "tun", "ham", "WAN" };
 	private static final String[] PREFERRED_PREFIXES = { "eth", "enp" };
@@ -47,8 +48,8 @@ public class MulticastUDPReceiver implements IReceiver
 	private InetAddress group = null;
 	/** The internal state-switch of this transmitter */
 	private boolean readyToReceive;
-	
-	
+
+
 	/**
 	 * @param port
 	 * @param groupStr
@@ -72,16 +73,16 @@ public class MulticastUDPReceiver implements IReceiver
 				log.error("Weird. Could not determine if network interface is p2p", err);
 			}
 		}
-		
+
 		setSocketTimeouts();
-		
+
 		readyToReceive = true;
 	}
-	
-	
+
+
 	/**
 	 * Creates a MultiCastUDPReceiver with only the given nif
-	 * 
+	 *
 	 * @param port
 	 * @param groupStr
 	 * @param iface
@@ -89,11 +90,11 @@ public class MulticastUDPReceiver implements IReceiver
 	public MulticastUDPReceiver(final int port, final String groupStr, final NetworkInterface iface)
 	{
 		addSocket(port, groupStr, iface);
-		
+
 		readyToReceive = true;
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -101,8 +102,8 @@ public class MulticastUDPReceiver implements IReceiver
 	{
 		observers.add(observer);
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -110,8 +111,8 @@ public class MulticastUDPReceiver implements IReceiver
 	{
 		observers.remove(observer);
 	}
-	
-	
+
+
 	private List<NetworkInterface> getNetworkInterfaces()
 	{
 		List<NetworkInterface> ifaces = new LinkedList<>();
@@ -125,8 +126,8 @@ public class MulticastUDPReceiver implements IReceiver
 		}
 		return ifaces;
 	}
-	
-	
+
+
 	private void setSocketTimeouts()
 	{
 		if (sockets.size() > 1)
@@ -143,8 +144,8 @@ public class MulticastUDPReceiver implements IReceiver
 			}
 		}
 	}
-	
-	
+
+
 	private boolean isUselessInterface(final NetworkInterface iface)
 	{
 		try
@@ -157,7 +158,7 @@ public class MulticastUDPReceiver implements IReceiver
 		{
 			log.error("Could not determine iface properties", err);
 		}
-		
+
 		for (String prefix : USELESS_PREFIXES)
 		{
 			if (iface.getDisplayName().contains(prefix))
@@ -167,8 +168,8 @@ public class MulticastUDPReceiver implements IReceiver
 		}
 		return false;
 	}
-	
-	
+
+
 	@SuppressWarnings("squid:S2095") // we do not want to close the multicast socket here
 	private void addSocket(final int port, final String groupStr, final NetworkInterface iface)
 	{
@@ -184,8 +185,8 @@ public class MulticastUDPReceiver implements IReceiver
 			log.info("Could not create multicast socket on iface " + iface.getDisplayName() + " and port " + port, err);
 		}
 	}
-	
-	
+
+
 	private int findSocketIndex(final MulticastSocket socket) throws SocketException
 	{
 		for (int i = 0; i < sockets.size(); i++)
@@ -204,8 +205,8 @@ public class MulticastUDPReceiver implements IReceiver
 		}
 		return sockets.size();
 	}
-	
-	
+
+
 	private void joinNetworkGroup(final MulticastSocket socket, final String groupStr)
 	{
 		// Parse group
@@ -216,7 +217,7 @@ public class MulticastUDPReceiver implements IReceiver
 		{
 			log.error("Unable to read multicast group address!", err);
 		}
-		
+
 		// Join group
 		try
 		{
@@ -228,8 +229,8 @@ public class MulticastUDPReceiver implements IReceiver
 			log.error("Could not resolve address: " + group, err);
 		}
 	}
-	
-	
+
+
 	@SuppressWarnings("squid:S2583")
 	@Override
 	public DatagramPacket receive(final DatagramPacket store) throws IOException
@@ -239,7 +240,7 @@ public class MulticastUDPReceiver implements IReceiver
 			log.error("Receiver is not ready to receive!");
 			return null;
 		}
-		
+
 		// first try current socket for performance reasons
 		if (currentSocket != null)
 		{
@@ -260,7 +261,7 @@ public class MulticastUDPReceiver implements IReceiver
 				}
 			}
 		}
-		
+
 		while (isReady())
 		{
 			for (MulticastSocket socket : sockets)
@@ -279,18 +280,18 @@ public class MulticastUDPReceiver implements IReceiver
 				}
 			}
 		}
-		
+
 		return store;
 	}
-	
-	
+
+
 	private void tryReceiving(final DatagramPacket store, final MulticastSocket socket) throws IOException
 	{
 		// blocking receive with a timeout of SO_TIMEOUT
 		socket.receive(store);
-		
+
 		// we have received something
-		
+
 		socketsTimedOut.remove(socket);
 		if (socket != currentSocket)
 		{
@@ -301,14 +302,14 @@ public class MulticastUDPReceiver implements IReceiver
 					+ socket.getLocalPort());
 		}
 	}
-	
-	
+
+
 	@Override
 	public void cleanup()
 	{
 		// No-working state after this line...
 		readyToReceive = false;
-		
+
 		for (MulticastSocket socket : sockets)
 		{
 			if (!socket.isClosed())
@@ -319,8 +320,8 @@ public class MulticastUDPReceiver implements IReceiver
 		}
 		observers.clear();
 	}
-	
-	
+
+
 	private void leaveMulticastGroup(final MulticastSocket socket)
 	{
 		try
@@ -335,8 +336,8 @@ public class MulticastUDPReceiver implements IReceiver
 			log.error("Error while leaving multicast group '" + group + "'!", err);
 		}
 	}
-	
-	
+
+
 	@Override
 	public boolean isReady()
 	{

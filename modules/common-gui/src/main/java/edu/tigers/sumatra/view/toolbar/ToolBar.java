@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.toolbar;
 
@@ -18,7 +18,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.GlobalShortcuts.EShortcut;
@@ -32,7 +33,7 @@ import net.miginfocom.swing.MigLayout;
  */
 public class ToolBar
 {
-	private static final Logger log = Logger.getLogger(ToolBar.class.getName());
+	private static final Logger log = LogManager.getLogger(ToolBar.class.getName());
 
 	private final List<IToolbarObserver> observers = new CopyOnWriteArrayList<>();
 

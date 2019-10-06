@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import com.sleepycat.persist.model.Persistent;
@@ -35,7 +36,7 @@ import edu.tigers.sumatra.model.SumatraModel;
 public class DynamicPosition
 {
 	@SuppressWarnings("unused")
-	private static final Logger log = Logger.getLogger(DynamicPosition.class.getName());
+	private static final Logger log = LogManager.getLogger(DynamicPosition.class.getName());
 
 	private IVector2 pos = Vector2f.ZERO_VECTOR;
 	private AObjectID trackedId;

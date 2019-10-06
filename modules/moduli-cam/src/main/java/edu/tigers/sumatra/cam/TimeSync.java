@@ -1,10 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2016, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Feb 26, 2016
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -12,7 +7,8 @@ import java.util.Collection;
 import java.util.Queue;
 
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -21,7 +17,7 @@ import org.apache.log4j.Logger;
 public class TimeSync
 {
 	@SuppressWarnings("unused")
-	private static final Logger	log				= Logger.getLogger(TimeSync.class.getName());
+	private static final Logger log = LogManager.getLogger(TimeSync.class.getName());
 
 	private static final int		BUFFER_SIZE		= 30;
 

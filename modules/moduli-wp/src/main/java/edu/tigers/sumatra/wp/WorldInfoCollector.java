@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -14,7 +14,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -73,7 +74,7 @@ import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 public class WorldInfoCollector extends AWorldPredictor
 		implements IRefereeObserver, IVisionFilterObserver, ICamFrameObserver
 {
-	private static final Logger log = Logger.getLogger(WorldInfoCollector.class.getName());
+	private static final Logger log = LogManager.getLogger(WorldInfoCollector.class.getName());
 
 	@Configurable(comment = "Use robot feedback for position and velocity.", defValue = "true")
 	private static boolean preferRobotFeedback = true;

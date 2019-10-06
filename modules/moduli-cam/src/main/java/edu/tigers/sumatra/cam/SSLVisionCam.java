@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -9,7 +9,8 @@ import java.net.DatagramPacket;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
@@ -31,7 +32,7 @@ import edu.tigers.sumatra.network.NetworkUtility;
  */
 public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, IConfigObserver
 {
-	private static final Logger log = Logger.getLogger(SSLVisionCam.class.getName());
+	private static final Logger log = LogManager.getLogger(SSLVisionCam.class.getName());
 
 	private static final int BUFFER_SIZE = 10000;
 	private final byte[] bufferArr = new byte[BUFFER_SIZE];

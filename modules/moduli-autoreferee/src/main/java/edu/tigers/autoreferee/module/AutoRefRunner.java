@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.module;
 
@@ -11,7 +11,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.autoreferee.AutoRefFrame;
 import edu.tigers.autoreferee.AutoRefFramePreprocessor;
@@ -34,7 +35,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  */
 public class AutoRefRunner implements Runnable, IWorldFrameObserver
 {
-	private static final Logger log = Logger.getLogger(AutoRefRunner.class);
+	private static final Logger log = LogManager.getLogger(AutoRefRunner.class);
 
 	private static final String AUTO_REF = "AutoRef";
 

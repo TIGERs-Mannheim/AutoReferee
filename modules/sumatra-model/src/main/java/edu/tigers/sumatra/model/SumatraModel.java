@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
@@ -12,10 +12,10 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Appender;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import edu.tigers.moduli.Moduli;
 import edu.tigers.moduli.exceptions.DependencyException;
@@ -37,7 +37,7 @@ import edu.tigers.moduli.exceptions.LoadModulesException;
  */
 public final class SumatraModel extends Moduli
 {
-	private static final Logger log = Logger.getLogger(SumatraModel.class.getName());
+	private static final Logger log = LogManager.getLogger(SumatraModel.class.getName());
 
 	// --- version ---
 	private static final String VERSION = getVersionNameFromManifest();
@@ -68,9 +68,6 @@ public final class SumatraModel extends Moduli
 	private String environment = "";
 
 
-	// --------------------------------------------------------------------------
-	// --- getInstance/constructor(s) -------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * Constructor from model.
 	 * Initializes data which is kept by the model.
@@ -81,12 +78,12 @@ public final class SumatraModel extends Moduli
 		String prod = System.getProperty("productive");
 		if (prod != null)
 		{
-			productive = Boolean.valueOf(prod);
+			productive = Boolean.parseBoolean(prod);
 		}
 		String test = System.getProperty("testMode");
 		if (test != null)
 		{
-			testMode = Boolean.valueOf(test);
+			testMode = Boolean.parseBoolean(test);
 		}
 	}
 
@@ -229,7 +226,7 @@ public final class SumatraModel extends Moduli
 		}
 		if (!(obj instanceof String))
 		{
-			log.warn("Object '" + obj + "' (which has been associated to '" + key + "') is no String!");
+			log.warn("Object '{}' (which has been associated to '{}') is no String!", obj, key);
 			return null;
 		}
 
@@ -341,10 +338,10 @@ public final class SumatraModel extends Moduli
 			try
 			{
 				out.close();
-				log.trace("Saved configuration to: " + uf.getPath());
+				log.trace("Saved configuration to: {}", uf.getPath());
 			} catch (IOException e)
 			{
-				log.warn("Could not close " + uf.getPath() + ", configuration is not saved", e);
+				log.warn("Could not close {}, configuration is not saved", uf.getPath(), e);
 			}
 		}
 	}
@@ -355,11 +352,7 @@ public final class SumatraModel extends Moduli
 	 */
 	public static void changeLogLevel(final Level lvl)
 	{
-		Appender appender = Logger.getRootLogger().getAppender("console");
-		if (appender instanceof ConsoleAppender)
-		{
-			((ConsoleAppender) appender).setThreshold(lvl);
-		}
+		Configurator.setRootLevel(lvl);
 	}
 
 
@@ -390,7 +383,7 @@ public final class SumatraModel extends Moduli
 				properties.load(manifestStream);
 
 				final String version = properties.getProperty("version", "unknown version")
-						.replaceAll("-SNAPSHOT", "");
+						.replace("-SNAPSHOT", "");
 				final String gitHash = properties.getProperty("git.hash", "");
 				if (StringUtils.isNotBlank(gitHash))
 				{

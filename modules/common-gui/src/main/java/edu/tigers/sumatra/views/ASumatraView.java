@@ -1,16 +1,12 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2013, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: Jul 19, 2013
- * Author(s): Nicolai Ommer <nicolai.ommer@gmail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.views;
 
 import java.awt.Component;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
@@ -20,7 +16,7 @@ import net.infonode.docking.View;
 
 /**
  * Base class for any Sumatra View (the tabs in the GUI)
- * 
+ *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public abstract class ASumatraView
@@ -28,12 +24,12 @@ public abstract class ASumatraView
 	// --------------------------------------------------------------------------
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
-	private static final Logger log = Logger.getLogger(ASumatraView.class.getName());
+	private static final Logger log = LogManager.getLogger(ASumatraView.class.getName());
 	private final ESumatraViewType type;
 	private ISumatraViewPresenter presenter = null;
 	private View view = null;
 	private EViewMode mode = EViewMode.NORMAL;
-	
+
 	/**
 	 * The view mode
 	 */
@@ -44,12 +40,12 @@ public abstract class ASumatraView
 		/**  */
 		REPLAY
 	}
-	
-	
+
+
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
-	
+
 	/**
 	 * @param type
 	 */
@@ -57,13 +53,13 @@ public abstract class ASumatraView
 	{
 		this.type = type;
 	}
-	
-	
+
+
 	// --------------------------------------------------------------------------
 	// --- methods --------------------------------------------------------------
 	// --------------------------------------------------------------------------
-	
-	
+
+
 	/**
 	 * Create presenter if not already done yet
 	 */
@@ -84,12 +80,12 @@ public abstract class ASumatraView
 			log.trace("Presenter created for view " + type.getTitle());
 		}
 	}
-	
-	
+
+
 	/**
 	 * The component which is to be displayed in the view panel.
 	 * This can be anything that extends from Component (e.g. JPanel).
-	 * 
+	 *
 	 * @return View component.
 	 */
 	public final synchronized Component getComponent()
@@ -97,8 +93,8 @@ public abstract class ASumatraView
 		ensureInitialized();
 		return presenter.getComponent();
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -107,8 +103,8 @@ public abstract class ASumatraView
 		ensureInitialized();
 		return presenter.getSumatraView();
 	}
-	
-	
+
+
 	/**
 	 * @return the view
 	 */
@@ -120,31 +116,31 @@ public abstract class ASumatraView
 		}
 		return view;
 	}
-	
-	
+
+
 	/**
 	 * Check if both, presenter and view were created
-	 * 
+	 *
 	 * @return
 	 */
 	public final synchronized boolean isInitialized()
 	{
 		return (presenter != null) && (view != null);
 	}
-	
-	
+
+
 	/**
 	 * Create your presenter here. This will be called at the right time and only once
-	 * 
+	 *
 	 * @return
 	 */
 	protected abstract ISumatraViewPresenter createPresenter();
-	
-	
+
+
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------
 	// --------------------------------------------------------------------------
-	
+
 	/**
 	 * @return the type
 	 */
@@ -152,8 +148,8 @@ public abstract class ASumatraView
 	{
 		return type;
 	}
-	
-	
+
+
 	/**
 	 * @return the presenter
 	 */
@@ -161,8 +157,8 @@ public abstract class ASumatraView
 	{
 		return presenter;
 	}
-	
-	
+
+
 	// String builder more readable
 	@SuppressWarnings("StringBufferReplaceableByString")
 	@Override
@@ -176,8 +172,8 @@ public abstract class ASumatraView
 		builder.append("]");
 		return builder.toString();
 	}
-	
-	
+
+
 	/**
 	 * @return the mode
 	 */
@@ -185,8 +181,8 @@ public abstract class ASumatraView
 	{
 		return mode;
 	}
-	
-	
+
+
 	/**
 	 * @param mode the mode to set
 	 */
