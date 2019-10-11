@@ -28,18 +28,12 @@ public class SslGameControllerProcess implements Runnable
 {
 	private final Logger log = LogManager.getLogger(SslGameControllerProcess.class.getName());
 
-	private final int gcUiPort;
-
+	private int gcUiPort = 50543;
+	private String publishAddress = "";
+	private String timeAcquisitionMode = "";
 	private Process process = null;
 	private SslGameControllerClient client = null;
 	private CountDownLatch clientLatch = new CountDownLatch(1);
-
-
-	public SslGameControllerProcess(final int gcUiPort)
-	{
-		this.gcUiPort = gcUiPort;
-	}
-
 
 	private String locateModulesFolder() throws FileNotFoundException
 	{
@@ -97,7 +91,9 @@ public class SslGameControllerProcess implements Runnable
 			}
 
 			ProcessBuilder builder = new ProcessBuilder(binaryFile.getAbsolutePath(),
-					"-address", "localhost:" + gcUiPort);
+					"-address", "localhost:" + gcUiPort,
+					"-timeAcquisitionMode", timeAcquisitionMode,
+					"-publishAddress", publishAddress);
 			builder.redirectErrorStream(true);
 			builder.directory(Paths.get("").toAbsolutePath().toFile());
 			process = builder.start();
@@ -231,5 +227,29 @@ public class SslGameControllerProcess implements Runnable
 			Thread.currentThread().interrupt();
 		}
 		return getClient();
+	}
+
+
+	public int getGcUiPort()
+	{
+		return gcUiPort;
+	}
+
+
+	public void setGcUiPort(final int gcUiPort)
+	{
+		this.gcUiPort = gcUiPort;
+	}
+
+
+	public void setPublishAddress(final String publishAddress)
+	{
+		this.publishAddress = publishAddress;
+	}
+
+
+	public void setTimeAcquisitionMode(final String timeAcquisitionMode)
+	{
+		this.timeAcquisitionMode = timeAcquisitionMode;
 	}
 }

@@ -20,16 +20,16 @@ import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 public abstract class AReferee extends AModule
 {
 	private final List<IRefereeObserver> observers = new CopyOnWriteArrayList<>();
-	
-	
+
+
 	/**
-	  * 
+	  *
 	  */
 	public AReferee()
 	{
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -37,8 +37,8 @@ public abstract class AReferee extends AModule
 	{
 		observers.add(observer);
 	}
-	
-	
+
+
 	/**
 	 * @param observer
 	 */
@@ -46,17 +46,17 @@ public abstract class AReferee extends AModule
 	{
 		observers.remove(observer);
 	}
-	
-	
+
+
 	/**
 	 * Send an event to the game controller. Use {@link GcEventFactory} to create new events
 	 */
 	public abstract void sendGameControllerEvent(Event event);
-	
-	
+
+
 	/**
 	 * Internal use only.
-	 * 
+	 *
 	 * @param refMsg
 	 */
 	protected void notifyNewRefereeMsg(final SSL_Referee refMsg)
@@ -66,8 +66,8 @@ public abstract class AReferee extends AModule
 			observer.onNewRefereeMsg(refMsg);
 		}
 	}
-	
-	
+
+
 	protected void notifyRefereeMsgSourceChanged(final ARefereeMessageSource src)
 	{
 		for (IRefereeObserver observer : observers)
@@ -75,39 +75,39 @@ public abstract class AReferee extends AModule
 			observer.onRefereeMsgSourceChanged(src);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Get active referee message source.
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract ARefereeMessageSource getActiveSource();
-	
-	
+
+
 	/**
 	 * Get a specific message source.
-	 * 
+	 *
 	 * @param type
 	 * @return
 	 */
 	public abstract ARefereeMessageSource getSource(ERefereeMessageSource type);
-	
-	
+
+
 	/**
 	 * @return true, if the referee can be controlled locally
 	 */
-	public abstract boolean isControllable();
-	
-	
+	public abstract boolean isInternalGameControllerUsed();
+
+
 	/**
 	 * Set the current time for the referee (the game-controller) if possible
-	 * 
+	 *
 	 * @param timestamp
 	 */
 	public abstract void setCurrentTime(long timestamp);
-	
-	
+
+
 	/**
 	 * Reset and initialize the game controller.
 	 */

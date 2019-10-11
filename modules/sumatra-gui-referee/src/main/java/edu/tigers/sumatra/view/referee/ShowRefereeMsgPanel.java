@@ -37,10 +37,12 @@ import net.miginfocom.swing.MigLayout;
 public class ShowRefereeMsgPanel extends JPanel
 {
 	private static final long serialVersionUID = -508393753936993622L;
-	private final Logger log = LogManager.getLogger(ShowRefereeMsgPanel.class.getName());
+	private static final Logger log = LogManager.getLogger(ShowRefereeMsgPanel.class.getName());
 	private static final int MAX_COMMANDS = 50;
+	private static final String SPAN_2 = "span 2";
 
 	private final JButton openControllerButton;
+	private final JButton toggleGameController;
 	private final DefaultListModel<Command> listModel = new DefaultListModel<>();
 	private Command lastCmd = null;
 	private final JLabel time;
@@ -57,7 +59,11 @@ public class ShowRefereeMsgPanel extends JPanel
 
 		openControllerButton = new JButton("Open SSL Game Controller UI");
 		openControllerButton.addActionListener(a -> open());
-		add(openControllerButton, "span 2");
+		add(openControllerButton, SPAN_2);
+
+		toggleGameController = new JButton("Start Game Controller");
+		toggleGameController.addActionListener(a -> toggleGameController());
+		add(toggleGameController, SPAN_2);
 
 		add(new JLabel("Stage:"));
 		stage = new JLabel();
@@ -90,7 +96,7 @@ public class ShowRefereeMsgPanel extends JPanel
 
 		JScrollPane listScroller = new JScrollPane(commandList);
 		listScroller.setPreferredSize(new Dimension(commandList.getMaximumSize().width, this.getPreferredSize().height));
-		add(listScroller, "span 2");
+		add(listScroller, SPAN_2);
 	}
 
 
@@ -118,6 +124,20 @@ public class ShowRefereeMsgPanel extends JPanel
 		{
 			log.warn("Could not execute command to open browser", e);
 		}
+	}
+
+
+	private void toggleGameController()
+	{
+		final Referee referee = SumatraModel.getInstance().getModule(Referee.class);
+		if (referee.isInternalGameControllerUsed())
+		{
+			referee.stopGameController();
+		} else
+		{
+			referee.startGameController();
+		}
+		updateToggleGameControllerButton();
 	}
 
 
@@ -158,5 +178,24 @@ public class ShowRefereeMsgPanel extends JPanel
 	{
 		super.setEnabled(enable);
 		EventQueue.invokeLater(() -> openControllerButton.setEnabled(enable));
+		EventQueue.invokeLater(() -> toggleGameController.setEnabled(enable));
+
+		if (enable)
+		{
+			updateToggleGameControllerButton();
+		}
+	}
+
+
+	private void updateToggleGameControllerButton()
+	{
+		final Referee referee = SumatraModel.getInstance().getModule(Referee.class);
+		if (referee.isInternalGameControllerUsed())
+		{
+			toggleGameController.setText("Stop Game Controller");
+		} else
+		{
+			toggleGameController.setText("Start Game Controller");
+		}
 	}
 }

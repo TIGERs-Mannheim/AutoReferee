@@ -25,56 +25,90 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 {
 	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
 			ERefereeMessageSource.class);
-	
+
 	private ARefereeMessageSource source;
 	private SslGameControllerProcess sslGameControllerProcess;
-	private boolean controllable = false;
-	
-	
+	private boolean internalGameControlledActive = false;
+
+
 	public Referee()
 	{
 		msgSources.put(ERefereeMessageSource.NETWORK, new NetworkRefereeReceiver());
 		msgSources.put(ERefereeMessageSource.INTERNAL_FORWARDER, new DirectRefereeMsgForwarder());
 		msgSources.put(ERefereeMessageSource.CI, new CiRefereeSyncedReceiver());
 	}
-	
-	
+
+
 	@Override
 	public void startModule()
 	{
 		ERefereeMessageSource activeSource = ERefereeMessageSource
 				.valueOf(getSubnodeConfiguration().getString("source", ERefereeMessageSource.NETWORK.name()));
-		int port = getSubnodeConfiguration().getInt("port", 10003);
 		boolean useGameController = getSubnodeConfiguration().getBoolean("gameController", false);
-		
-		if (useGameController)
-		{
-			sslGameControllerProcess = new SslGameControllerProcess(getGameControllerUiPort());
-			new Thread(sslGameControllerProcess).start();
-			initGameController();
-		}
-		
+		int port = getPort();
 		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(port);
 		((CiRefereeSyncedReceiver) msgSources.get(ERefereeMessageSource.CI)).setPort(port);
-		
+
 		source = msgSources.get(activeSource);
-		
+
+		if (useGameController)
+		{
+			startGameController();
+		}
+
 		source.addObserver(this);
 		source.start();
-		
-		controllable = useGameController;
-		
+
 		notifyRefereeMsgSourceChanged(source);
 	}
-	
-	
+
+
+	private int getPort()
+	{
+		return getSubnodeConfiguration().getInt("port", 10003);
+	}
+
+
+	public void startGameController()
+	{
+		sslGameControllerProcess = new SslGameControllerProcess();
+		if (getSubnodeConfiguration().containsKey("gc-ui-port"))
+		{
+			sslGameControllerProcess.setGcUiPort(getSubnodeConfiguration().getInt("gc-ui-port"));
+		}
+		if (source.getType() == ERefereeMessageSource.CI)
+		{
+			sslGameControllerProcess.setTimeAcquisitionMode("ci");
+		} else
+		{
+			sslGameControllerProcess.setTimeAcquisitionMode("system");
+		}
+		sslGameControllerProcess.setPublishAddress("224.5.23.1:" + getPort());
+
+		new Thread(sslGameControllerProcess).start();
+		initGameController();
+		internalGameControlledActive = true;
+	}
+
+
+	public void stopGameController()
+	{
+		if (sslGameControllerProcess != null)
+		{
+			sslGameControllerProcess.stop();
+			sslGameControllerProcess = null;
+		}
+		internalGameControlledActive = false;
+	}
+
+
 	@Override
 	public void initGameController()
 	{
 		sslGameControllerProcess.getClientBlocking().ifPresent(this::initGameController);
 	}
-	
-	
+
+
 	private void initGameController(SslGameControllerClient client)
 	{
 		client.sendEvent(GcEventFactory.triggerResetMatch());
@@ -82,33 +116,30 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		client.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
 		client.sendEvent(GcEventFactory.nextStage());
 	}
-	
-	
+
+
 	public int getGameControllerUiPort()
 	{
-		return getSubnodeConfiguration().getInt("gc-ui-port", 50543);
+		return sslGameControllerProcess.getGcUiPort();
 	}
-	
-	
+
+
 	@Override
 	public void stopModule()
 	{
 		source.stop();
 		source.removeObserver(this);
-		if (sslGameControllerProcess != null)
-		{
-			sslGameControllerProcess.stop();
-		}
+		stopGameController();
 	}
-	
-	
+
+
 	@Override
 	public void onNewRefereeMessage(final SSL_Referee msg)
 	{
 		notifyNewRefereeMsg(msg);
 	}
-	
-	
+
+
 	@Override
 	public void sendGameControllerEvent(final Event event)
 	{
@@ -117,29 +148,29 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 			sslGameControllerProcess.getClient().ifPresent(c -> c.sendEvent(event));
 		}
 	}
-	
-	
+
+
 	@Override
 	public ARefereeMessageSource getActiveSource()
 	{
 		return source;
 	}
-	
-	
+
+
 	@Override
 	public ARefereeMessageSource getSource(final ERefereeMessageSource type)
 	{
 		return msgSources.get(type);
 	}
-	
-	
+
+
 	@Override
-	public boolean isControllable()
+	public boolean isInternalGameControllerUsed()
 	{
-		return controllable;
+		return internalGameControlledActive;
 	}
-	
-	
+
+
 	@Override
 	public void setCurrentTime(long timestamp)
 	{

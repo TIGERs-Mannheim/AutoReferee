@@ -21,7 +21,7 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * Referee view.
- * 
+ *
  * @author Malte, DionH, FriederB
  */
 public class RefereePanel extends JPanel implements ISumatraView
@@ -30,41 +30,41 @@ public class RefereePanel extends JPanel implements ISumatraView
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
 	private static final long serialVersionUID = 5362158568331526086L;
-	
+
 	private final ShowRefereeMsgPanel showRefereeMsgPanel;
 	private final CommonCommandsPanel commonCommandsPanel;
 	private final ChangeStatePanel changeStatePanel;
 	private final Map<ETeamColor, TeamPanel> teamsPanel = new EnumMap<>(ETeamColor.class);
-	
-	
+
+
 	/** Constructor. */
 	public RefereePanel()
 	{
 		setLayout(new BorderLayout());
-		
+
 		JPanel componentPanel = new JPanel();
 		componentPanel.setLayout(new MigLayout("wrap 2", "[fill]10[fill]", ""));
 		new MigLayoutResizeListener(this, componentPanel, 2);
-		
+
 		showRefereeMsgPanel = new ShowRefereeMsgPanel();
 		commonCommandsPanel = new CommonCommandsPanel();
 		changeStatePanel = new ChangeStatePanel();
 		teamsPanel.put(ETeamColor.YELLOW, new TeamPanel(ETeamColor.YELLOW));
 		teamsPanel.put(ETeamColor.BLUE, new TeamPanel(ETeamColor.BLUE));
-		
+
 		componentPanel.add(showRefereeMsgPanel, "spany 2, aligny top");
 		componentPanel.add(commonCommandsPanel);
 		componentPanel.add(changeStatePanel);
 		componentPanel.add(teamsPanel.get(ETeamColor.YELLOW));
 		componentPanel.add(teamsPanel.get(ETeamColor.BLUE));
-		
+
 		BetterScrollPane scrollPane = new BetterScrollPane(componentPanel);
 		add(scrollPane, BorderLayout.CENTER);
 
 		setEnable(false);
 	}
-	
-	
+
+
 	/**
 	 * @return the showRefereeMsgPanel
 	 */
@@ -72,8 +72,8 @@ public class RefereePanel extends JPanel implements ISumatraView
 	{
 		return showRefereeMsgPanel;
 	}
-	
-	
+
+
 	/**
 	 * @param enable
 	 */
@@ -84,43 +84,43 @@ public class RefereePanel extends JPanel implements ISumatraView
 		changeStatePanel.setEnable(enable);
 		teamsPanel.values().forEach(t -> t.setEnable(enable));
 	}
-	
-	
+
+
 	@Override
 	public List<JMenu> getCustomMenus()
 	{
 		return Collections.emptyList();
 	}
-	
-	
+
+
 	@Override
 	public void onShown()
 	{
 		// nothing to do
 	}
-	
-	
+
+
 	@Override
 	public void onHidden()
 	{
 		// nothing to do
 	}
-	
-	
+
+
 	@Override
 	public void onFocused()
 	{
 		// nothing to do
 	}
-	
-	
+
+
 	@Override
 	public void onFocusLost()
 	{
 		// nothing to do
 	}
-	
-	
+
+
 	/**
 	 * @return the commonCommandsPanel
 	 */
@@ -128,8 +128,8 @@ public class RefereePanel extends JPanel implements ISumatraView
 	{
 		return commonCommandsPanel;
 	}
-	
-	
+
+
 	/**
 	 * @return the changeStatePanel
 	 */
@@ -137,8 +137,8 @@ public class RefereePanel extends JPanel implements ISumatraView
 	{
 		return changeStatePanel;
 	}
-	
-	
+
+
 	/**
 	 * @return the teamsPanel
 	 */

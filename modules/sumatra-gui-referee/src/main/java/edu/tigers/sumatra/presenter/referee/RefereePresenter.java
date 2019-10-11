@@ -31,7 +31,6 @@ import edu.tigers.sumatra.views.ISumatraView;
 public class RefereePresenter extends ASumatraViewPresenter
 		implements IRefereeObserver, IRefBoxRemoteControlRequestObserver
 {
-	@SuppressWarnings("unused")
 	private static final Logger log = LogManager.getLogger(RefereePresenter.class.getName());
 
 	private final RefereePanel refereePanel = new RefereePanel();
@@ -83,7 +82,7 @@ public class RefereePresenter extends ASumatraViewPresenter
 	@Override
 	public void onRefereeMsgSourceChanged(final ARefereeMessageSource src)
 	{
-		refereePanel.setEnable(referee != null && referee.isControllable());
+		refereePanel.setEnable(referee != null && referee.isInternalGameControllerUsed());
 	}
 
 
