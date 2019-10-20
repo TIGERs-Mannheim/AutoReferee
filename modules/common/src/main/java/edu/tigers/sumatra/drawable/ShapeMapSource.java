@@ -30,7 +30,7 @@ public final class ShapeMapSource implements Comparable<ShapeMapSource>
 	private ShapeMapSource()
 	{
 		name = null;
-		categories = Collections.emptySet();
+		categories = Collections.emptySortedSet();
 	}
 
 
