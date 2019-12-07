@@ -22,7 +22,7 @@
         <repository>
             <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
-            <url>https://tigers-mannheim.de/nexus/content/groups/public/</url>
+            <url>https://nexus.tigers-mannheim.de/content/groups/public/</url>
         </repository>
 
         <repository>
@@ -48,7 +48,7 @@
         <pluginRepository>
             <!-- main repository containing all dependencies. All other repositories are only for backup -->
             <id>tigers_public</id>
-            <url>https://tigers-mannheim.de/nexus/content/groups/public/</url>
+            <url>https://nexus.tigers-mannheim.de/content/groups/public/</url>
         </pluginRepository>
 
         <pluginRepository>
@@ -701,7 +701,7 @@
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.5.0.1254</version>
+                    <version>3.7.0.1746</version>
                 </plugin>
 
                 <plugin>
