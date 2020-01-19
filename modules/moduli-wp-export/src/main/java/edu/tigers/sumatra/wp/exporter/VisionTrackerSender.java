@@ -7,11 +7,13 @@ package edu.tigers.sumatra.wp.exporter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import edu.tigers.moduli.AModule;
 import edu.tigers.sumatra.MessagesRobocupSslDetectionTracked;
 import edu.tigers.sumatra.MessagesRobocupSslDetectionTracked.TrackedFrame;
+import edu.tigers.sumatra.MessagesRobocupSslWrapperTracked.TrackerWrapperPacket;
 import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.cam.TimeSync;
 import edu.tigers.sumatra.ids.BotID;
@@ -35,6 +37,7 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
  */
 public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 {
+	private static final String SOURCE_NAME = "TIGERs";
 	private static final Set<MessagesRobocupSslDetectionTracked.Capability> CAPABILITIES = new HashSet<>();
 
 	static
@@ -46,6 +49,7 @@ public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 	private MulticastUDPTransmitter transmitter;
 	private int frameNumber = 0;
 	private TimeSync timeSync;
+	private String uuid = "";
 
 	@Override
 	public void startModule()
@@ -53,6 +57,8 @@ public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 		String address = getSubnodeConfiguration().getString("address", "224.5.23.2");
 		int port = getSubnodeConfiguration().getInt("port", 10010);
 		transmitter = new MulticastUDPTransmitter(address, port);
+
+		uuid = UUID.randomUUID().toString();
 
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
 		timeSync = SumatraModel.getInstance().getModuleOpt(SSLVisionCam.class).map(SSLVisionCam::getTimeSync)
@@ -80,7 +86,11 @@ public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 				.map(s -> buildKickEvent(wfw.getSimpleWorldFrame(), s))
 				.ifPresent(frame::setKickedBall);
 		frame.addAllCapabilities(CAPABILITIES);
-		transmitter.send(frame.build().toByteArray());
+		TrackerWrapperPacket.Builder wrapper = TrackerWrapperPacket.newBuilder();
+		wrapper.setUuid(uuid);
+		wrapper.setSourceName(SOURCE_NAME);
+		wrapper.setTrackedFrame(frame);
+		transmitter.send(wrapper.build().toByteArray());
 	}
 
 
