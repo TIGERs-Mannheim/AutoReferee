@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -12,18 +12,17 @@ import org.apache.logging.log4j.Logger;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Synchronize between vision time and Sumatra internal time
  */
 public class TimeSync
 {
-	@SuppressWarnings("unused")
 	private static final Logger log = LogManager.getLogger(TimeSync.class.getName());
 
-	private static final int		BUFFER_SIZE		= 30;
+	private static final int BUFFER_SIZE = 30;
 
-	private long						offset			= 0;
-	private final Queue<Long>		offsetBuffer	= new CircularFifoQueue<>(BUFFER_SIZE);
-	private final Queue<Long>		diffBuffer		= new CircularFifoQueue<>(BUFFER_SIZE);
+	private long offset = 0;
+	private final Queue<Long> offsetBuffer = new CircularFifoQueue<>(BUFFER_SIZE);
+	private final Queue<Long> diffBuffer = new CircularFifoQueue<>(BUFFER_SIZE);
 
 
 	/**
@@ -45,7 +44,7 @@ public class TimeSync
 			offset = (long) average(offsetBuffer);
 			if (avgDiff < 100_000)
 			{
-				log.info("Synced with Vision clock. offset=" + offset + "ns diff=" + avgDiff + "ns");
+				log.info("Synced with Vision clock. offset={}ns diff={}ns", offset, avgDiff);
 				offsetBuffer.clear();
 			}
 		}
@@ -53,13 +52,26 @@ public class TimeSync
 
 
 	/**
+	 * Convert from unix seconds to internal nano seconds
+	 *
 	 * @param timestamp
 	 * @return
 	 */
 	public long sync(final double timestamp)
 	{
 		return convertVision2LocalTime(timestamp, offset);
+	}
 
+
+	/**
+	 * Convert from internal nano seconds to unix seconds
+	 *
+	 * @param timestamp
+	 * @return
+	 */
+	public double reverseSync(final long timestamp)
+	{
+		return (timestamp + offset) * 1e-9;
 	}
 
 

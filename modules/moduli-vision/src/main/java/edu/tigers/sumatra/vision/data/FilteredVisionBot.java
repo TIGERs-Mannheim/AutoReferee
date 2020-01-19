@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -33,6 +33,7 @@ public class FilteredVisionBot
 	private final double orientation;
 	/** [rad/s] */
 	private final double angularVel;
+	/** 0-1 */
 	private final double quality;
 
 
@@ -167,6 +168,7 @@ public class FilteredVisionBot
 		private Double orientation;
 		/** [rad/s] */
 		private Double angularVel;
+		/** 0-1 */
 		private double quality = 0;
 
 

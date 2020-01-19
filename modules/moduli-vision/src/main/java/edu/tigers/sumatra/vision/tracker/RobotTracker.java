@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.tracker;
 
@@ -29,7 +29,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 
 /**
  * Tracks and filters a single robot.
- * 
+ *
  * @author AndreR <andre@ryll.cc>
  */
 public class RobotTracker
@@ -39,16 +39,16 @@ public class RobotTracker
 	private final BotID botId;
 	private final int camId;
 	private final List<Long> updateTimestamps = new ArrayList<>();
-	
+
 	private long lastUpdateTimestamp;
-	
+
 	private double visionQuality;
 	private double lastCamOrientation;
 	private long orientationTurns = 0;
-	
+
 	private int health = 2;
-	
-	
+
+
 	@Configurable(defValue = "100.0")
 	private static double initialCovarianceXY = 100.0;
 	@Configurable(defValue = "0.1")
@@ -69,16 +69,16 @@ public class RobotTracker
 	private static double maxAngularVel = 30.0;
 	@Configurable(defValue = "20", comment = "Reciprocal health is used as uncertainty, increased on update, decreased on prediction")
 	private static int maxHealth = 20;
-	
+
 	static
 	{
 		ConfigRegistration.registerClass("vision", RobotTracker.class);
 	}
-	
-	
+
+
 	/**
 	 * Create a new tracker from a camera measurement.
-	 * 
+	 *
 	 * @param robot
 	 */
 	public RobotTracker(final CamRobot robot)
@@ -87,18 +87,18 @@ public class RobotTracker
 				robot.gettCapture());
 		filterW = new TrackingFilterPosVel1D(robot.getOrientation(), initialCovarianceW, modelErrorW, measErrorW,
 				robot.gettCapture());
-		
+
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.gettCapture();
 		botId = robot.getBotId();
 		camId = robot.getCameraId();
 	}
-	
-	
+
+
 	/**
 	 * Create a new tracker from camera measurement and prior state knowledge.
 	 * Position and velocity is initialized with filtered vision bot state.
-	 * 
+	 *
 	 * @param robot
 	 * @param filtered
 	 */
@@ -106,22 +106,22 @@ public class RobotTracker
 	{
 		RealVector xy = new ArrayRealVector(filtered.getPos().toArray(), filtered.getVel().toArray());
 		RealVector w = new ArrayRealVector(new double[] { filtered.getOrientation(), filtered.getAngularVel() });
-		
+
 		filterXY = new TrackingFilterPosVel2D(xy, initialCovarianceXY, modelErrorXY, measErrorXY,
 				robot.gettCapture());
 		filterW = new TrackingFilterPosVel1D(w, initialCovarianceW, modelErrorW, measErrorW,
 				robot.gettCapture());
-		
+
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.gettCapture();
 		botId = robot.getBotId();
 		camId = robot.getCameraId();
 	}
-	
-	
+
+
 	/**
 	 * Do a prediction step on all filters to a specific time.
-	 * 
+	 *
 	 * @param timestamp time in [ns]
 	 * @param avgFrameDt average frame delta time in [s]
 	 */
@@ -129,21 +129,21 @@ public class RobotTracker
 	{
 		filterXY.predict(timestamp);
 		filterW.predict(timestamp);
-		
+
 		if (health > 1)
 		{
 			health--;
 		}
-		
+
 		updateTimestamps.removeIf(t -> (timestamp - t) > 1_000_000_000L);
-		
+
 		visionQuality = (updateTimestamps.size() * avgFrameDt) + 0.01;
 	}
-	
-	
+
+
 	/**
 	 * Update this tracker with a camera measurement.
-	 * 
+	 *
 	 * @param robot
 	 */
 	public void update(final CamRobot robot)
@@ -155,55 +155,55 @@ public class RobotTracker
 			// measurement too far away => refuse update
 			return;
 		}
-		
+
 		double angDiff = Math.abs(AngleMath.difference(filterW.getPositionEstimate(), robot.getOrientation()));
 		if (angDiff > (dtInSec * maxAngularVel))
 		{
 			// orientation mismatch, maybe a +-90° vision switch => refuse update
 			return;
 		}
-		
+
 		// we have an update, increase health/certainty in this tracker
 		if (health < maxHealth)
 		{
 			health += 2;
 		}
-		
+
 		lastUpdateTimestamp = robot.gettCapture();
 		updateTimestamps.add(lastUpdateTimestamp);
-		
+
 		filterXY.correct(robot.getPos());
-		
+
 		double orient = robot.getOrientation();
-		
+
 		// multi-turn angle correction
 		if ((orient < -AngleMath.PI_HALF) && (lastCamOrientation > AngleMath.PI_HALF))
 		{
 			++orientationTurns;
 		}
-		
+
 		if ((orient > AngleMath.PI_HALF) && (lastCamOrientation < -AngleMath.PI_HALF))
 		{
 			--orientationTurns;
 		}
-		
+
 		lastCamOrientation = orient;
-		
+
 		orient += orientationTurns * AngleMath.PI_TWO;
-		
+
 		filterW.correct(orient);
 	}
-	
-	
+
+
 	public double getUncertainty()
 	{
 		return 1.0 / health;
 	}
-	
-	
+
+
 	/**
 	 * Get position estimate at specific timestamp.
-	 * 
+	 *
 	 * @param timestamp Query time.
 	 * @return Position in [mm]
 	 */
@@ -211,11 +211,11 @@ public class RobotTracker
 	{
 		return filterXY.getPositionEstimate(timestamp);
 	}
-	
-	
+
+
 	/**
 	 * Get normalized orientation estimate at specific timestamp.
-	 * 
+	 *
 	 * @param timestamp Query time.
 	 * @return Orientation in [rad]
 	 */
@@ -223,30 +223,30 @@ public class RobotTracker
 	{
 		return AngleMath.normalizeAngle(filterW.getPositionEstimate(timestamp));
 	}
-	
-	
+
+
 	/**
 	 * Get linear velocity estimate.
-	 * 
+	 *
 	 * @return Velocity in [mm/s]
 	 */
 	public IVector2 getVelocity()
 	{
 		return filterXY.getVelocityEstimate();
 	}
-	
-	
+
+
 	/**
 	 * Get angular velocity estimate.
-	 * 
+	 *
 	 * @return angular velocity in [rad/s]
 	 */
 	public double getAngularVelocity()
 	{
 		return filterW.getVelocityEstimate();
 	}
-	
-	
+
+
 	/**
 	 * @return timestamp in [ns]
 	 */
@@ -254,8 +254,8 @@ public class RobotTracker
 	{
 		return lastUpdateTimestamp;
 	}
-	
-	
+
+
 	/**
 	 * @return the id
 	 */
@@ -263,13 +263,13 @@ public class RobotTracker
 	{
 		return botId;
 	}
-	
-	
+
+
 	/**
 	 * This function merges a variable number of robot trackers and makes a filtered vision bot out of them.
 	 * Trackers are weighted according to their state uncertainties. A tracker with high uncertainty
 	 * has less influence on the final merge result.
-	 * 
+	 *
 	 * @param id BotID of the final robot.
 	 * @param robots List of robot trackers. Must not be empty.
 	 * @param timestamp Extrapolation time stamp to use for the final robot.
@@ -279,14 +279,14 @@ public class RobotTracker
 			final long timestamp)
 	{
 		Validate.notEmpty(robots);
-		
+
 		double totalPosUnc = 0;
 		double totalVelUnc = 0;
 		double totalOrientUnc = 0;
 		double totalAVelUnc = 0;
-		
+
 		double maxQuality = 0;
-		
+
 		// calculate sum of all uncertainties
 		for (RobotTracker t : robots)
 		{
@@ -300,21 +300,21 @@ public class RobotTracker
 				maxQuality = t.getVisionQuality();
 			}
 		}
-		
+
 		// all uncertainties must be > 0, otherwise we found a bug
 		Validate.isTrue(totalPosUnc > 0);
 		Validate.isTrue(totalVelUnc > 0);
 		Validate.isTrue(totalOrientUnc > 0);
 		Validate.isTrue(totalAVelUnc > 0);
-		
+
 		IVector2 pos = Vector2f.ZERO_VECTOR;
 		IVector2 vel = Vector2f.ZERO_VECTOR;
 		double orient = 0;
 		double aVel = 0;
-		
+
 		// cyclic coordinates don't like mean calculations, we will work with offsets though
 		double orientOffset = robots.get(0).getOrientation(timestamp);
-		
+
 		// take all trackers and calculate their pos/vel sum weighted by uncertainty.
 		// Trackers with high uncertainty have less influence on the merged result.
 		for (RobotTracker t : robots)
@@ -328,12 +328,12 @@ public class RobotTracker
 			orient += o * Math.pow(t.filterW.getPositionUncertainty() * f, -mergePower);
 			aVel += t.filterW.getVelocityEstimate() * Math.pow(t.filterW.getVelocityUncertainty() * f, -mergePower);
 		}
-		
+
 		pos = pos.multiplyNew(1.0 / totalPosUnc);
 		vel = vel.multiplyNew(1.0 / totalVelUnc);
 		orient /= totalOrientUnc;
 		aVel /= totalAVelUnc;
-		
+
 		return FilteredVisionBot.Builder.create()
 				.withId(id)
 				.withPos(pos)
@@ -343,8 +343,8 @@ public class RobotTracker
 				.withQuality(maxQuality)
 				.build();
 	}
-	
-	
+
+
 	/**
 	 * @return the filterXY
 	 */
@@ -352,8 +352,8 @@ public class RobotTracker
 	{
 		return filterXY;
 	}
-	
-	
+
+
 	/**
 	 * @return the filterW
 	 */
@@ -361,40 +361,40 @@ public class RobotTracker
 	{
 		return filterW;
 	}
-	
-	
+
+
 	/**
 	 * Info shapes for visualizer.
-	 * 
+	 *
 	 * @param timestamp
 	 * @return
 	 */
 	public List<IDrawableShape> getInfoShapes(final long timestamp)
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
-		
+
 		IVector2 pos = getPosition(timestamp);
 		double orient = getOrientation(timestamp);
-		
+
 		DrawableBotShape botShape = new DrawableBotShape(pos, orient, 120, 100);
 		botShape.setFillColor(null);
 		shapes.add(botShape);
-		
+
 		DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(botId.getNumber()), true);
 		id.withOffset(Vector2.fromY(150));
 		id.setColor(botId.getTeamColor().getColor());
 		shapes.add(id);
-		
+
 		DrawableAnnotation unc = new DrawableAnnotation(pos,
 				String.format("%3.2f", filterXY.getPositionUncertainty().getLength() * getUncertainty()));
 		unc.withOffset(Vector2.fromX(-150));
 		unc.setColor(botId.getTeamColor().getColor());
 		shapes.add(unc);
-		
+
 		return shapes;
 	}
-	
-	
+
+
 	/**
 	 * @return camera id
 	 */
@@ -402,8 +402,8 @@ public class RobotTracker
 	{
 		return camId;
 	}
-	
-	
+
+
 	/**
 	 * @return the visionQuality
 	 */

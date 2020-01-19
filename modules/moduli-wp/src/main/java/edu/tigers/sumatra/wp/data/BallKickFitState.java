@@ -1,12 +1,14 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - Tigers Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.wp.data;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.vision.data.ABallTrajectory;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 
@@ -15,13 +17,13 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
  * @author AndreR <andre@ryll.cc>
  */
 @Persistent
-public class BallKickFitState
+public class BallKickFitState implements IMirrorable<BallKickFitState>
 {
 	private final IVector2 kickPos;
 	private final IVector3 kickVel;
 	private final long kickTimestamp;
-	
-	
+
+
 	@SuppressWarnings("unused")
 	private BallKickFitState()
 	{
@@ -29,21 +31,21 @@ public class BallKickFitState
 		kickVel = null;
 		kickTimestamp = 0;
 	}
-	
-	
+
+
 	/**
 	 * @param kickPos
 	 * @param kickVel
 	 * @param kickTimestamp
 	 */
-	public BallKickFitState(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp)
+	private BallKickFitState(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp)
 	{
 		this.kickPos = kickPos;
 		this.kickVel = kickVel;
 		this.kickTimestamp = kickTimestamp;
 	}
-	
-	
+
+
 	/**
 	 * @param filteredBallState
 	 * @param timestampNow
@@ -55,26 +57,35 @@ public class BallKickFitState
 		kickVel = trajectory.getKickVel();
 		kickTimestamp = trajectory.getKickTimestamp();
 	}
-	
-	
+
+
+	@Override
+	public BallKickFitState mirrored()
+	{
+		return new BallKickFitState(kickPos.multiplyNew(-1),
+				Vector3.from2d(kickVel.getXYVector().multiplyNew(-1), kickVel.z()),
+				kickTimestamp);
+	}
+
+
 	/**
-	 * @return the kickPos
+	 * @return the kickPos [mm]
 	 */
 	public IVector2 getKickPos()
 	{
 		return kickPos;
 	}
-	
-	
+
+
 	/**
-	 * @return the kickVel
+	 * @return the kickVel [mm/s]
 	 */
 	public IVector3 getKickVel()
 	{
 		return kickVel;
 	}
-	
-	
+
+
 	/**
 	 * @return the kickTimestamp
 	 */
@@ -82,8 +93,8 @@ public class BallKickFitState
 	{
 		return kickTimestamp;
 	}
-	
-	
+
+
 	/**
 	 * @return the absolute kick speed
 	 */

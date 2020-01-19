@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -23,13 +23,13 @@ import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.botshape.IBotShape;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.trajectory.ITrajectory;
 
 
 /**
- * Simple data holder describing tracked bots
- *
- * @author Gero
+ * A tracked (filtered, predicted) robot.
  */
 @Persistent(version = 2)
 public final class TrackedBot implements ITrackedBot
@@ -42,6 +42,7 @@ public final class TrackedBot implements ITrackedBot
 	private final transient State bufferedTrajState;
 	private final long lastBallContact;
 	private final RobotInfo robotInfo;
+	private final double quality;
 
 
 	@SuppressWarnings("unused")
@@ -55,6 +56,7 @@ public final class TrackedBot implements ITrackedBot
 		lastBallContact = 0;
 		robotInfo = null;
 		tAssembly = 0;
+		quality = 0;
 	}
 
 
@@ -67,6 +69,7 @@ public final class TrackedBot implements ITrackedBot
 		bufferedTrajState = builder.bufferedTrajState;
 		lastBallContact = builder.lastBallContact;
 		robotInfo = builder.robotInfo;
+		quality = builder.quality;
 		tAssembly = System.nanoTime();
 	}
 
@@ -93,6 +96,7 @@ public final class TrackedBot implements ITrackedBot
 		builder.filteredState = copy.getFilteredState().orElse(null);
 		builder.robotInfo = copy.getRobotInfo();
 		builder.lastBallContact = copy.getLastBallContact();
+		builder.quality = copy.getQuality();
 		return builder;
 	}
 
@@ -189,9 +193,10 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public IVector2 getPosByTime(final double t)
 	{
-		if (robotInfo.getTrajectory().isPresent())
+		final Optional<ITrajectory<IVector3>> trajectory = robotInfo.getTrajectory();
+		if (trajectory.isPresent())
 		{
-			return robotInfo.getTrajectory().get().getPositionMM(t).getXYVector();
+			return trajectory.get().getPositionMM(t).getXYVector();
 		}
 		return getPos().addNew(getVel().multiplyNew(1000 * t));
 	}
@@ -200,9 +205,10 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public IVector2 getVelByTime(final double t)
 	{
-		if (robotInfo.getTrajectory().isPresent())
+		final Optional<ITrajectory<IVector3>> trajectory = robotInfo.getTrajectory();
+		if (trajectory.isPresent())
 		{
-			return robotInfo.getTrajectory().get().getVelocity(t).getXYVector();
+			return trajectory.get().getVelocity(t).getXYVector();
 		}
 		return getVel();
 	}
@@ -211,11 +217,9 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public double getAngleByTime(final double t)
 	{
-		if (robotInfo.getTrajectory().isPresent())
-		{
-			robotInfo.getTrajectory().get().getPosition(t).z();
-		}
-		return getOrientation();
+		final Optional<ITrajectory<IVector3>> trajectory = robotInfo.getTrajectory();
+		return trajectory.map(traj -> traj.getPosition(t).z())
+				.orElseGet(this::getOrientation);
 	}
 
 
@@ -236,7 +240,7 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public AObjectID getId()
 	{
-		return botId;
+		return getBotId();
 	}
 
 
@@ -325,6 +329,13 @@ public final class TrackedBot implements ITrackedBot
 
 
 	@Override
+	public double getQuality()
+	{
+		return quality;
+	}
+
+
+	@Override
 	public String toString()
 	{
 		return "TrackedBot [id=" +
@@ -380,6 +391,7 @@ public final class TrackedBot implements ITrackedBot
 		private State bufferedTrajState;
 		private Long lastBallContact;
 		private RobotInfo robotInfo;
+		private double quality;
 
 
 		private Builder()
@@ -556,6 +568,19 @@ public final class TrackedBot implements ITrackedBot
 		public Builder withBotInfo(final RobotInfo robotInfo)
 		{
 			this.robotInfo = robotInfo;
+			return this;
+		}
+
+
+		/**
+		 * Sets the {@code quality} and returns a reference to this Builder so that the methods can be chained together.
+		 *
+		 * @param quality the {@code quality} to set
+		 * @return a reference to this Builder
+		 */
+		public Builder withQuality(final double quality)
+		{
+			this.quality = quality;
 			return this;
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -115,6 +115,15 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
+	private Map<BotID, FilteredVisionBot> getFilteredBots(final Collection<FilteredVisionBot> visionBots)
+	{
+		return visionBots.stream()
+				.collect(Collectors.toMap(
+						FilteredVisionBot::getBotID,
+						Function.identity()));
+	}
+
+
 	private Map<BotID, BotState> getInternalBotStates(final Collection<RobotInfo> robotInfo)
 	{
 		return robotInfo.stream()
@@ -149,8 +158,11 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private TrackedBot createTrackedBot(RobotInfo robotInfo, Map<BotID, BotState> filteredBotStates,
-			BotState filterState, BotState internalState)
+	private TrackedBot createTrackedBot(final RobotInfo robotInfo,
+			final Map<BotID, BotState> filteredBotStates,
+			final BotState filterState,
+			final BotState internalState,
+			final FilteredVisionBot filteredVisionBot)
 	{
 		BotState currentBotState = select(filterState, internalState);
 		if (currentBotState == null)
@@ -176,6 +188,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withBufferedTrajState(trajState.orElse(null))
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
+				.withQuality(filteredVisionBot.getQuality())
 				.build();
 	}
 
@@ -200,10 +213,12 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		Map<BotID, BotState> filteredBotStates = getFilteredBotStates(filteredVisionBots);
 		Map<BotID, BotState> internalBotStates = getInternalBotStates(robotInfo);
+		Map<BotID, FilteredVisionBot> filteredVisionBotMap = getFilteredBots(filteredVisionBots);
 
 		Map<BotID, ITrackedBot> trackedBots = robotInfo.stream()
 				.map(r -> createTrackedBot(r, filteredBotStates, filteredBotStates.get(r.getBotId()),
-						internalBotStates.get(r.getBotId())))
+						internalBotStates.get(r.getBotId()),
+						filteredVisionBotMap.get(r.getBotId())))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return new BotIDMap<>(trackedBots);

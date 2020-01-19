@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -22,7 +22,6 @@ import edu.tigers.sumatra.ids.BallID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
-import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
 import edu.tigers.sumatra.wp.ball.prediction.IChipBallConsultant;
 import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
@@ -30,10 +29,7 @@ import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
 
 
 /**
- * Simple data holder describing balls that are recognized and tracked by the
- * {@link AWorldPredictor}
- * 
- * @author AndreR <andre@ryll.cc>
+ * A tracked (filtered, predicted) ball.
  */
 @Persistent
 public class TrackedBall implements ITrackedBall
@@ -42,15 +38,15 @@ public class TrackedBall implements ITrackedBall
 	private final long tAssembly;
 	private final BallTrajectoryState state;
 	private final long lastVisibleTimestamp;
-	
+
 	// cache some fields on demand to increase performance
 	private transient IVector2 pos;
 	private transient IVector2 vel;
 	private transient IBallTrajectory ballTrajectory;
 	private transient IStraightBallConsultant straightBallConsultant;
 	private transient IChipBallConsultant chipBallConsultant;
-	
-	
+
+
 	/**
 	 * Create an empty tracked ball.
 	 */
@@ -61,8 +57,8 @@ public class TrackedBall implements ITrackedBall
 		timestamp = 0;
 		tAssembly = 0;
 	}
-	
-	
+
+
 	/**
 	 * @param timestamp
 	 * @param state
@@ -74,11 +70,11 @@ public class TrackedBall implements ITrackedBall
 		this.state = state;
 		this.lastVisibleTimestamp = lastVisibleTimestamp;
 		tAssembly = System.nanoTime();
-		
+
 		Validate.isTrue(Double.isFinite(state.getvSwitchToRoll()) && (state.getvSwitchToRoll() >= 0));
 	}
-	
-	
+
+
 	/**
 	 * @return an empty tracked ball
 	 */
@@ -86,12 +82,12 @@ public class TrackedBall implements ITrackedBall
 	{
 		return new TrackedBall();
 	}
-	
-	
+
+
 	/**
 	 * Create a tracked ball from a BallTrajectoryState.<br>
 	 * The last visible timestamp is set to <code>timestamp</code> and therefore always visible.
-	 * 
+	 *
 	 * @param timestamp [ns]
 	 * @param state State in milli units.
 	 * @return
@@ -100,11 +96,11 @@ public class TrackedBall implements ITrackedBall
 	{
 		return new TrackedBall(timestamp, state, timestamp);
 	}
-	
-	
+
+
 	/**
 	 * Create a tracked ball from a BallTrajectoryState.<br>
-	 * 
+	 *
 	 * @param timestamp [ns]
 	 * @param state State in milli units.
 	 * @param lastVisibleTimestamp timestamp when the ball was last seen [ns]
@@ -115,11 +111,11 @@ public class TrackedBall implements ITrackedBall
 	{
 		return new TrackedBall(timestamp, state, lastVisibleTimestamp);
 	}
-	
-	
+
+
 	/**
 	 * Create a tracked ball from a FilteredVisionBall.
-	 * 
+	 *
 	 * @param timestamp
 	 * @param ball
 	 * @return
@@ -136,15 +132,15 @@ public class TrackedBall implements ITrackedBall
 				.build();
 		return new TrackedBall(timestamp, state, ball.getLastVisibleTimestamp());
 	}
-	
-	
+
+
 	@Override
 	public long getTimestamp()
 	{
 		return timestamp;
 	}
-	
-	
+
+
 	@Override
 	public IBallTrajectory getTrajectory()
 	{
@@ -154,22 +150,22 @@ public class TrackedBall implements ITrackedBall
 		}
 		return ballTrajectory;
 	}
-	
-	
+
+
 	@Override
 	public TrackedBall mirrored()
 	{
 		return new TrackedBall(timestamp, state.mirrored(), lastVisibleTimestamp);
 	}
-	
-	
+
+
 	@Override
 	public AObjectID getId()
 	{
 		return BallID.instance();
 	}
-	
-	
+
+
 	@Override
 	public double getRpm()
 	{
@@ -177,8 +173,8 @@ public class TrackedBall implements ITrackedBall
 		// RPM = v / (r x 0.10472)
 		return getVel().getLength2() / ((Geometry.getBallRadius() / 1000.0) * 0.10472);
 	}
-	
-	
+
+
 	@Override
 	public IVector2 getPos()
 	{
@@ -188,8 +184,8 @@ public class TrackedBall implements ITrackedBall
 		}
 		return pos;
 	}
-	
-	
+
+
 	@Override
 	public IVector2 getVel()
 	{
@@ -199,57 +195,57 @@ public class TrackedBall implements ITrackedBall
 		}
 		return vel;
 	}
-	
-	
+
+
 	@Override
 	public IVector2 getAcc()
 	{
 		return getAcc3().getXYVector();
 	}
-	
-	
+
+
 	@Override
 	public IVector3 getPos3()
 	{
 		return state.getPos().getXYZVector();
 	}
-	
-	
+
+
 	@Override
 	public IVector3 getVel3()
 	{
 		return state.getVel().multiplyNew(0.001).getXYZVector();
 	}
-	
-	
+
+
 	@Override
 	public IVector3 getAcc3()
 	{
 		return state.getAcc().multiplyNew(0.001).getXYZVector();
 	}
-	
-	
+
+
 	@Override
 	public boolean isOnCam()
 	{
 		return isOnCam(0.5);
 	}
-	
-	
+
+
 	@Override
 	public boolean isOnCam(final double horizon)
 	{
 		return (lastVisibleTimestamp == 0) || (((getTimestamp() - lastVisibleTimestamp) * 1e-9) < horizon);
 	}
-	
-	
+
+
 	@Override
 	public double getHeight()
 	{
 		return getPos3().z();
 	}
-	
-	
+
+
 	@Override
 	public IStraightBallConsultant getStraightConsultant()
 	{
@@ -259,8 +255,8 @@ public class TrackedBall implements ITrackedBall
 		}
 		return straightBallConsultant;
 	}
-	
-	
+
+
 	@Override
 	public IChipBallConsultant getChipConsultant()
 	{
@@ -270,36 +266,44 @@ public class TrackedBall implements ITrackedBall
 		}
 		return chipBallConsultant;
 	}
-	
-	
+
+
 	@Override
 	public long getLastVisibleTimestamp()
 	{
 		return lastVisibleTimestamp;
 	}
-	
-	
+
+
 	@Override
 	public double getvSwitchToRoll()
 	{
 		return state.getvSwitchToRoll() * 0.001;
 	}
-	
-	
+
+
 	@Override
 	public boolean isChipped()
 	{
 		return state.isChipped();
 	}
-	
-	
+
+
 	@Override
 	public BallTrajectoryState getState()
 	{
 		return state;
 	}
-	
-	
+
+
+	@Override
+	public double getQuality()
+	{
+		final double invisibleTime = (timestamp - lastVisibleTimestamp) / 1e9;
+		return 1 - Math.min(1, invisibleTime / 0.2);
+	}
+
+
 	@Override
 	public List<Number> getNumberList()
 	{
@@ -314,16 +318,16 @@ public class TrackedBall implements ITrackedBall
 		numbers.add(tAssembly);
 		return numbers;
 	}
-	
-	
+
+
 	@Override
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x", "acc_y", "acc_z",
 				"lastVisibleTimestamp", "vSwitchToRoll", "chipped", "tAssembly");
 	}
-	
-	
+
+
 	/**
 	 * @return timestamp [ns] of assembly of this ball
 	 */
@@ -331,8 +335,8 @@ public class TrackedBall implements ITrackedBall
 	{
 		return tAssembly;
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
