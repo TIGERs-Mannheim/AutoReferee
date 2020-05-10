@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.autoreferee.engine.log;
 
 import java.awt.Color;
@@ -23,21 +27,21 @@ public class AutoRefGameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String workGameLogEntry()
 	{
-		return gameEvent.getType().name() + " - " + gameEvent.toString();
+		return gameEvent.getType().name() + " - " + gameEvent.getDescription();
 	}
 
 
 	@Override
 	public String getToolTipText()
 	{
-		return "The AutoReferee has registered the following game event " + gameEvent;
+		return "The AutoReferee has registered the following game event " + gameEvent.getType();
 	}
 
 
 	@Override
 	public String toString()
 	{
-		return String.format("%d | %s | %s | %s", getTimestamp(), getGameTime(), getType(), gameEvent);
+		return String.format("%d | %s | %s | %s", getTimestamp(), getGameTime(), getType(), gameEvent.getDescription());
 	}
 
 
@@ -46,15 +50,11 @@ public class AutoRefGameEventGameLogEntry extends GameLogEntry
 	{
 		switch (gameEvent.getType().getType())
 		{
-			case MINOR_OFFENSE:
-				return new Color(250, 150, 31);
 			case FOUL:
 				return new Color(250, 14, 10);
-			case UNSPORTING:
-				return new Color(250, 12, 112);
-			case MATCH_PROCEEDING:
 			case BALL_LEFT_FIELD:
-			case REPEATED:
+				return new Color(250, 150, 31);
+			case OTHER:
 			default:
 				return super.getForegroundColor();
 		}

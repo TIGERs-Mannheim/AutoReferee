@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.data;
 
@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 
 
 /**
@@ -64,7 +64,7 @@ public class TeamInfo
 	/**
 	 * @param teamInfo
 	 */
-	public TeamInfo(final SSL_Referee.TeamInfo teamInfo)
+	public TeamInfo(final SslGcRefereeMessage.Referee.TeamInfo teamInfo)
 	{
 		name = teamInfo.getName();
 		score = teamInfo.getScore();
@@ -204,7 +204,7 @@ public class TeamInfo
 				.append("ballPlacementFailures", ballPlacementFailures)
 				.append("canPlaceBall", canPlaceBall)
 				.append("maxAllowedBots", maxAllowedBots)
-				.append("maxAllowedBots", botSubstitutionIntent)
+				.append("botSubstitutionIntent", botSubstitutionIntent)
 				.toString();
 	}
 }

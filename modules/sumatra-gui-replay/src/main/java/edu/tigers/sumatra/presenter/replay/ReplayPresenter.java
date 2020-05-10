@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.presenter.replay;
@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.AMainPresenter;
-import edu.tigers.sumatra.Referee;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.clock.ThreadUtil;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
@@ -59,7 +59,7 @@ public class ReplayPresenter extends AMainPresenter
 	private VisualizerPresenter visualizerPresenter;
 
 	private boolean skipStoppedGame = false;
-	private Referee.SSL_Referee.Command searchCommand = null;
+	private SslGcRefereeMessage.Referee.Command searchCommand = null;
 	private EGameEvent searchGameEvent = null;
 	private boolean skipBallPlacement = false;
 
@@ -245,7 +245,7 @@ public class ReplayPresenter extends AMainPresenter
 
 
 	@Override
-	public void onSearchCommand(final Referee.SSL_Referee.Command command)
+	public void onSearchCommand(final SslGcRefereeMessage.Referee.Command command)
 	{
 		this.searchCommand = command;
 	}

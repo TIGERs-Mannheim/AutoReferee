@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source;
 
@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.network.IReceiver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
@@ -101,10 +101,10 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 			refBoxAddress = packet.getAddress();
 			final ByteArrayInputStream packetIn = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
 
-			SSL_Referee sslRefereeMsg;
+			SslGcRefereeMessage.Referee sslRefereeMsg;
 			try
 			{
-				sslRefereeMsg = SSL_Referee.parseFrom(packetIn);
+				sslRefereeMsg = SslGcRefereeMessage.Referee.parseFrom(packetIn);
 
 				// Notify the receipt of a new RefereeMessage to any other observers
 				notifyNewRefereeMessage(sslRefereeMsg);

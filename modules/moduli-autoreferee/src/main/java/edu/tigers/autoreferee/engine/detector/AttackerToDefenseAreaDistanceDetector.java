@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.detector;
@@ -32,10 +32,10 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 {
 	@Configurable(comment = "[s] The grace period for the bots to position them after a the activation of the detector", defValue = "2.0")
 	private static double gracePeriod = 2.0;
-	
+
 	private static final double INACCURACY_TOLERANCE = 15;
-	
-	
+
+
 	/**
 	 * Default constructor
 	 */
@@ -45,8 +45,8 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 				EnumSet.of(EGameState.STOP, EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF));
 		setDeactivateOnFirstGameEvent(true);
 	}
-	
-	
+
+
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
@@ -61,8 +61,8 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 		}
 		return Optional.empty();
 	}
-	
-	
+
+
 	private ETeamColor getAttackingTeam()
 	{
 		ETeamColor attackingTeam;
@@ -75,33 +75,33 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 		}
 		return attackingTeam;
 	}
-	
-	
+
+
 	/**
 	 * The actual evaluation of this detector is encapsulated in this class. Since this class is created when the rule is
 	 * to be evaluated all required values can be stored as private final attributes. This makes the code cleaner because
 	 * these values do not need to be passed around between different functions.
 	 */
-	private static class Evaluator
+	private class Evaluator
 	{
 		private final double requiredMargin = RuleConstraints.getBotToPenaltyAreaMarginStandard()
 				+ Geometry.getBotRadius()
 				- INACCURACY_TOLERANCE;
-		
+
 		private final ETeamColor attackerColor;
 		private final IPenaltyArea defenderPenArea;
-		
+
 		private final Collection<ITrackedBot> bots;
-		
-		
+
+
 		public Evaluator(final IAutoRefFrame frame, final ETeamColor attackerColor)
 		{
 			this.attackerColor = attackerColor;
 			defenderPenArea = NGeometry.getPenaltyArea(attackerColor.opposite());
 			bots = frame.getWorldFrame().getBots().values();
 		}
-		
-		
+
+
 		private Optional<IGameEvent> evaluate()
 		{
 			Optional<ITrackedBot> optOffender = bots.stream()
@@ -109,11 +109,11 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 					.filter(bot -> defenderPenArea.isPointInShape(bot.getPos(), requiredMargin))
 					.filter(this::notBeingPushed)
 					.findFirst();
-			
+
 			return optOffender.map(this::buildViolation);
 		}
-		
-		
+
+
 		private boolean notBeingPushed(ITrackedBot bot)
 		{
 			ETeamColor defenderColor = attackerColor.opposite();
@@ -131,13 +131,14 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 					// if any intersection is present, some defender pushes the attacker
 					.isPresent();
 		}
-		
-		
+
+
 		private IGameEvent buildViolation(final ITrackedBot offender)
 		{
 			double distance = defenderPenArea.withMargin(requiredMargin).distanceToNearestPointOutside(offender.getPos());
-			
-			return new AttackerTooCloseToDefenseArea(offender.getBotId(), offender.getPos(), distance);
+
+			return new AttackerTooCloseToDefenseArea(offender.getBotId(), offender.getPos(), distance,
+					frame.getWorldFrame().getBall().getPos());
 		}
 	}
 }

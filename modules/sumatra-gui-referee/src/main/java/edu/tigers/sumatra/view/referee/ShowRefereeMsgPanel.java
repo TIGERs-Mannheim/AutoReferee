@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.referee;
 
@@ -24,8 +24,8 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.tigers.sumatra.Referee.SSL_Referee;
-import edu.tigers.sumatra.Referee.SSL_Referee.Command;
+import edu.tigers.sumatra.SslGcRefereeMessage;
+import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Command;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.Referee;
 import net.miginfocom.swing.MigLayout;
@@ -89,7 +89,7 @@ public class ShowRefereeMsgPanel extends JPanel
 
 		// Commands
 		add(new JLabel("All Commands: "), "wrap");
-		final JList commandList = new JList<>(listModel);
+		final JList<?> commandList = new JList<>(listModel);
 		commandList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		commandList.setLayoutOrientation(JList.VERTICAL);
 		commandList.setVisibleRowCount(-1);
@@ -144,7 +144,7 @@ public class ShowRefereeMsgPanel extends JPanel
 	/**
 	 * @param msg
 	 */
-	public void update(final SSL_Referee msg)
+	public void update(final SslGcRefereeMessage.Referee msg)
 	{
 		// Information on Top
 		EventQueue.invokeLater(() -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
@@ -33,7 +33,7 @@ public class SslGameControllerProcess implements Runnable
 	private String timeAcquisitionMode = "";
 	private Process process = null;
 	private SslGameControllerClient client = null;
-	private CountDownLatch clientLatch = new CountDownLatch(1);
+	private final CountDownLatch clientLatch = new CountDownLatch(1);
 
 	private String locateModulesFolder() throws FileNotFoundException
 	{
@@ -102,6 +102,7 @@ public class SslGameControllerProcess implements Runnable
 			Scanner s = new Scanner(process.getInputStream());
 			inputLoop(s);
 			s.close();
+			process = null;
 		} catch (IOException e)
 		{
 			if (!"Stream closed".equals(e.getMessage()))
@@ -134,7 +135,7 @@ public class SslGameControllerProcess implements Runnable
 	{
 		// Remove log date: 2018/10/29 10:00:10
 		String truncatedLine = line.replaceFirst("[0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+ ", "");
-		log.debug(truncatedLine);
+		log.debug("GC: " + truncatedLine);
 
 		if (truncatedLine.contains("UI is available at"))
 		{
@@ -182,6 +183,11 @@ public class SslGameControllerProcess implements Runnable
 		{
 			return;
 		}
+		if (client != null)
+		{
+			client.close();
+			client = null;
+		}
 
 		process.destroy();
 		try
@@ -196,7 +202,6 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("Interrupted while waiting for the process to exit");
 			Thread.currentThread().interrupt();
 		}
-		process = null;
 	}
 
 

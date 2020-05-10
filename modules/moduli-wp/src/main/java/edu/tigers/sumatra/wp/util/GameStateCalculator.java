@@ -1,14 +1,16 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
 
+import java.util.Optional;
+
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.sumatra.Referee.SSL_Referee.Command;
-import edu.tigers.sumatra.Referee.SSL_Referee.Stage;
+import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Command;
+import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Stage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -75,11 +77,8 @@ public class GameStateCalculator
 		processNextCommand(refereeMsg.getNextCommand(), refereeMsg.getCommand(), builder);
 		builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
 		processStage(refereeMsg.getStage(), builder);
+		processBallMovement(ballPos, builder);
 
-		if (refereeMsg.getStage() != Stage.PENALTY_SHOOTOUT)
-		{
-			processBallMovement(ballPos, builder);
-		}
 		if ((refereeMsg.getCommand() == Command.BALL_PLACEMENT_BLUE
 				|| refereeMsg.getCommand() == Command.BALL_PLACEMENT_YELLOW)
 				&& refereeMsg.getBallPlacementPosNeutral() == null)
@@ -125,8 +124,8 @@ public class GameStateCalculator
 			builder.forTeam(commandToTeam(lastCommand));
 		} else if (command != null)
 		{
-			builder.withState(commandToState(command));
-			builder.forTeam(commandToTeam(command));
+			Optional.ofNullable(commandToState(command)).ifPresent(builder::withState);
+			Optional.ofNullable(commandToTeam(command)).ifPresent(builder::forTeam);
 		}
 	}
 
@@ -142,7 +141,8 @@ public class GameStateCalculator
 		{
 			builder.withNextState(commandToState(nextCommand));
 			builder.nextForTeam(commandToTeam(nextCommand));
-		} else {
+		} else
+		{
 			builder.withNextState(null);
 			builder.nextForTeam(ETeamColor.NEUTRAL);
 		}
@@ -212,8 +212,9 @@ public class GameStateCalculator
 			case STOP:
 			case NORMAL_START:
 			case FORCE_START:
-			default:
 				return ETeamColor.NEUTRAL;
+			default:
+				return null;
 		}
 	}
 
@@ -254,7 +255,7 @@ public class GameStateCalculator
 
 	private void processBallMovement(final IVector2 ballPos, final GameState.Builder builder)
 	{
-		if (ballPosOnPrepare == null)
+		if (ballPosOnPrepare == null || lastGameState.isPenaltyOrPreparePenalty())
 		{
 			return;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -80,7 +80,7 @@ public class Geometry
 	 */
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP", "ANDRE" }, comment = "Distance (goal line - penalty mark)")
-	private static double distanceToPenaltyMark = 1200;
+	private static double distanceToPenaltyMark = 8000;
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH",
 			"ROBOCUP", "ANDRE" }, comment = "depth of the penalty area.")
 	private static double penaltyAreaDepth = 1200;

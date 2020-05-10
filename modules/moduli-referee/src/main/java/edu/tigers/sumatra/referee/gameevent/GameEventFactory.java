@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.g3force.instanceables.InstanceableClass;
 
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.SslGcGameEvent;
 
 
 public final class GameEventFactory
@@ -24,11 +24,19 @@ public final class GameEventFactory
 	}
 
 
-	public static Optional<IGameEvent> fromProtobuf(SslGameEvent.GameEvent event)
+	public static Optional<IGameEvent> fromProtobuf(SslGcGameEvent.GameEvent event)
 	{
+		if (event.getType() == SslGcGameEvent.GameEvent.Type.UNKNOWN_GAME_EVENT_TYPE)
+		{
+			return Optional.empty();
+		}
 		try
 		{
 			final EGameEvent gameEvent = EGameEvent.fromProto(event.getType());
+			if (gameEvent == null)
+			{
+				return Optional.empty();
+			}
 			return Optional.of((IGameEvent) gameEvent.getInstanceableClass().newInstance(event));
 		} catch (InstanceableClass.NotCreateableException e)
 		{

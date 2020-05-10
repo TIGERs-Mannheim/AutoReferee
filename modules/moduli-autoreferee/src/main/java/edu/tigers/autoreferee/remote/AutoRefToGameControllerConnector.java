@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.remote;
 
@@ -19,8 +19,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.protobuf.ByteString;
 
-import edu.tigers.sumatra.SslGameControllerAutoRef;
-import edu.tigers.sumatra.SslGameControllerCommon;
+import edu.tigers.sumatra.SslGcRcon;
+import edu.tigers.sumatra.SslGcRconAutoref;
 import edu.tigers.sumatra.referee.GameControllerProtocol;
 import edu.tigers.sumatra.referee.MessageSigner;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
@@ -70,8 +70,8 @@ public class AutoRefToGameControllerConnector implements Runnable
 	private void register()
 	{
 		log.debug("Starting registering");
-		SslGameControllerAutoRef.ControllerToAutoRef reply;
-		reply = protocol.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		SslGcRconAutoref.ControllerToAutoRef reply;
+		reply = protocol.receiveMessage(SslGcRconAutoref.ControllerToAutoRef.parser());
 		if (reply == null || !reply.hasControllerReply())
 		{
 			log.error("Receiving initial Message failed");
@@ -80,7 +80,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 
 		nextToken = reply.getControllerReply().getNextToken();
 
-		SslGameControllerAutoRef.AutoRefRegistration.Builder registration = SslGameControllerAutoRef.AutoRefRegistration
+		SslGcRconAutoref.AutoRefRegistration.Builder registration = SslGcRconAutoref.AutoRefRegistration
 				.newBuilder()
 				.setIdentifier(AUTO_REF_ID);
 		registration.getSignatureBuilder().setToken(nextToken).setPkcs1V15(ByteString.EMPTY);
@@ -89,11 +89,11 @@ public class AutoRefToGameControllerConnector implements Runnable
 
 		protocol.sendMessage(registration.build());
 
-		reply = protocol.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		reply = protocol.receiveMessage(SslGcRconAutoref.ControllerToAutoRef.parser());
 		if (reply == null)
 		{
 			log.error("Receiving AutoRefRegistration reply failed");
-		} else if (reply.getControllerReply().getStatusCode() != SslGameControllerCommon.ControllerReply.StatusCode.OK)
+		} else if (reply.getControllerReply().getStatusCode() != SslGcRcon.ControllerReply.StatusCode.OK)
 		{
 			log.error("Server did not allow registration: " + reply.getControllerReply().getStatusCode() + " - "
 					+ reply.getControllerReply().getReason());
@@ -167,7 +167,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 	private void readWriteLoop() throws InterruptedException
 	{
 		QueueEntry entry = commandQueue.take();
-		SslGameControllerAutoRef.AutoRefToController.Builder req = SslGameControllerAutoRef.AutoRefToController
+		SslGcRconAutoref.AutoRefToController.Builder req = SslGcRconAutoref.AutoRefToController
 				.newBuilder();
 		req.setGameEvent(entry.getEvent().toProtobuf());
 
@@ -185,13 +185,13 @@ public class AutoRefToGameControllerConnector implements Runnable
 			commandQueue.addFirst(entry);
 			return;
 		}
-		SslGameControllerAutoRef.ControllerToAutoRef reply = protocol
-				.receiveMessage(SslGameControllerAutoRef.ControllerToAutoRef.parser());
+		SslGcRconAutoref.ControllerToAutoRef reply = protocol
+				.receiveMessage(SslGcRconAutoref.ControllerToAutoRef.parser());
 		if (reply == null || !reply.hasControllerReply())
 		{
 			log.error("Receiving GameController Reply failed");
 		} else if (reply.getControllerReply()
-				.getStatusCode() != SslGameControllerCommon.ControllerReply.StatusCode.OK)
+				.getStatusCode() != SslGcRcon.ControllerReply.StatusCode.OK)
 		{
 			log.warn(
 					"Remote control rejected command " + entry.getEvent() + " with outcome "

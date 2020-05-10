@@ -1,28 +1,32 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee;
 
+import java.io.File;
 import java.util.EnumMap;
 import java.util.Map;
 
-import edu.tigers.sumatra.Referee.SSL_Referee;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import edu.tigers.sumatra.SslGcApi;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.referee.control.Event;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
-import edu.tigers.sumatra.referee.source.IRefereeSourceObserver;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
 
 
 /**
  * Implementation of {@link AReferee} which can use various referee message sources.
  */
-public class Referee extends AReferee implements IRefereeSourceObserver
+public class Referee extends AReferee
 {
+	private static final Logger log = LogManager.getLogger(Referee.class.getName());
 	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
 			ERefereeMessageSource.class);
 
@@ -47,7 +51,6 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		boolean useGameController = getSubnodeConfiguration().getBoolean("gameController", false);
 		int port = getPort();
 		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(port);
-		((CiRefereeSyncedReceiver) msgSources.get(ERefereeMessageSource.CI)).setPort(port);
 
 		source = msgSources.get(activeSource);
 
@@ -85,6 +88,12 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 		}
 		sslGameControllerProcess.setPublishAddress("224.5.23.1:" + getPort());
 
+		File stateStoreFile = new File("target/state-store.json.stream");
+		if (stateStoreFile.exists() && !stateStoreFile.delete())
+		{
+			log.warn("Could not remove state store file, although it exists");
+		}
+
 		new Thread(sslGameControllerProcess).start();
 		initGameController();
 		internalGameControlledActive = true;
@@ -111,10 +120,9 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 
 	private void initGameController(SslGameControllerClient client)
 	{
-		client.sendEvent(GcEventFactory.triggerResetMatch());
 		client.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
 		client.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
-		client.sendEvent(GcEventFactory.nextStage());
+		client.sendEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
 	}
 
 
@@ -134,14 +142,14 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 
 
 	@Override
-	public void onNewRefereeMessage(final SSL_Referee msg)
+	public void onNewRefereeMessage(final SslGcRefereeMessage.Referee msg)
 	{
 		notifyNewRefereeMsg(msg);
 	}
 
 
 	@Override
-	public void sendGameControllerEvent(final Event event)
+	public void sendGameControllerEvent(final SslGcApi.Input event)
 	{
 		if (sslGameControllerProcess != null)
 		{
@@ -171,9 +179,17 @@ public class Referee extends AReferee implements IRefereeSourceObserver
 	}
 
 
-	@Override
-	public void setCurrentTime(long timestamp)
+	public void addGcApiObserver(IGameControllerApiObserver o)
 	{
-		source.setCurrentTime(timestamp);
+		sslGameControllerProcess.getClient().ifPresent(c -> c.addObserver(o));
+	}
+
+
+	public void removeGcApiObserver(IGameControllerApiObserver o)
+	{
+		if (sslGameControllerProcess != null)
+		{
+			sslGameControllerProcess.getClient().ifPresent(c -> c.removeObserver(o));
+		}
 	}
 }

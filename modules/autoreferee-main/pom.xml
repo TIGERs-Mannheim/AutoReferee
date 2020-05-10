@@ -66,6 +66,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.github.TIGERs-Mannheim</groupId>
             <artifactId>moduli</artifactId>
         </dependency>
@@ -83,11 +88,6 @@
         <dependency>
             <groupId>edu.tigers.sumatra</groupId>
             <artifactId>sumatra-gui-visualizer</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.tigers.sumatra</groupId>
-            <artifactId>moduli-wp-export</artifactId>
         </dependency>
     </dependencies>
 
@@ -131,7 +131,7 @@
                                     org.apache.logging.log4j:log4j-1.2-api:jar
                                 </ignoredUnusedDeclaredDependency>
                                 <ignoredUnusedDeclaredDependency>
-                                    edu.tigers.sumatra:moduli-wp-export
+                                    org.slf4j:slf4j-log4j12:jar
                                 </ignoredUnusedDeclaredDependency>
                             </ignoredUnusedDeclaredDependencies>
                         </configuration>

@@ -20,7 +20,8 @@ import org.apache.logging.log4j.Logger;
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 
-import edu.tigers.sumatra.Referee;
+import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.ACam;
@@ -45,6 +46,7 @@ import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.vision.IVisionFilterObserver;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
@@ -94,11 +96,12 @@ public class WorldInfoCollector extends AWorldPredictor
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	private AReferee referee;
+	private CiGameControllerConnector ciGameControllerConnector;
 
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
 	private IKickEvent lastKickEvent;
-	private TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.1);
+	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.1);
 
 	static
 	{
@@ -273,7 +276,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	private void processFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
 		lastWFTimestamp = filteredVisionFrame.getTimestamp();
-		referee.setCurrentTime(lastWFTimestamp);
 		robotInfoProvider.setLastWFTimestamp(lastWFTimestamp);
 
 		ballContactCalculator.setBallPos(filteredVisionFrame.getBall().getPos().getXYVector());
@@ -291,6 +293,11 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		long frameNumber = filteredVisionFrame.getId();
 		SimpleWorldFrame swf = new SimpleWorldFrame(bots, ball, kickEvent, kickFitState, frameNumber, lastWFTimestamp);
+
+		if (ciGameControllerConnector != null)
+		{
+			ciGameControllerConnector.process(swf).forEach(referee::onNewRefereeMessage);
+		}
 
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
 
@@ -348,12 +355,33 @@ public class WorldInfoCollector extends AWorldPredictor
 
 
 	@Override
+	public void startModule() throws StartModuleException
+	{
+		super.startModule();
+
+		if (referee.getActiveSource().getType() == ERefereeMessageSource.CI)
+		{
+			ciGameControllerConnector = new CiGameControllerConnector();
+			int port = getSubnodeConfiguration().getInt("ci-port", 11009);
+			ciGameControllerConnector.setPort(port);
+			ciGameControllerConnector.start();
+		}
+	}
+
+
+	@Override
 	public final void stopModule()
 	{
 		unregisterFromVisionFilterModule();
 		unregisterFromRefereeModule();
 		unregisterFromCamModule();
 		unregisterToRecordManagerModule();
+
+		if (ciGameControllerConnector != null)
+		{
+			ciGameControllerConnector.stop();
+			ciGameControllerConnector = null;
+		}
 	}
 
 
@@ -464,7 +492,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 
 	@Override
-	public void onNewRefereeMsg(final Referee.SSL_Referee refMsg)
+	public void onNewRefereeMsg(final SslGcRefereeMessage.Referee refMsg)
 	{
 		long ts = lastWFTimestamp;
 		if (refMsg.getCommandCounter() == latestRefereeMsg.getCommandCounter())
@@ -476,7 +504,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private void updateTeamOnPositiveHalf(final Referee.SSL_Referee refMsg)
+	private void updateTeamOnPositiveHalf(final SslGcRefereeMessage.Referee refMsg)
 	{
 		if (refMsg.hasBlueTeamOnPositiveHalf())
 		{

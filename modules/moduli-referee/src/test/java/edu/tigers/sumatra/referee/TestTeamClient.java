@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
@@ -14,8 +14,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.protobuf.ByteString;
 
-import edu.tigers.sumatra.SslGameControllerCommon;
-import edu.tigers.sumatra.SslGameControllerTeam;
+import edu.tigers.sumatra.SslGcRcon;
+import edu.tigers.sumatra.SslGcRconTeam;
 
 
 public class TestTeamClient
@@ -59,33 +59,18 @@ public class TestTeamClient
 
 	private static void handleRequests(GameControllerProtocol gc)
 	{
-		SslGameControllerTeam.ControllerToTeam request;
-		request = gc.receiveMessage(SslGameControllerTeam.ControllerToTeam.parser());
+		SslGcRconTeam.ControllerToTeam request;
+		request = gc.receiveMessage(SslGcRconTeam.ControllerToTeam.parser());
 		if (request == null)
 		{
 			log.error("Failed to receive Controller Request");
-			return;
-		}
-
-		if (request.hasAdvantageChoice())
-		{
-			log.info("Replying to Advantage choice request: " + request.getAdvantageChoice().getFoul());
-			SslGameControllerTeam.TeamToController.Builder response = SslGameControllerTeam.TeamToController
-					.newBuilder();
-			response.setAdvantageResponse(SslGameControllerTeam.TeamToController.AdvantageResponse.CONTINUE);
-			response.getSignatureBuilder().setToken(nextToken).setPkcs1V15(ByteString.EMPTY);
-
-			ByteString signature = ByteString.copyFrom(signer.sign(response.build().toByteArray()));
-			response.getSignatureBuilder().setPkcs1V15(signature);
-
-			gc.sendMessage(response.build());
 		}
 	}
 
 
 	private static void setKeeper(GameControllerProtocol gc, int keeper)
 	{
-		SslGameControllerTeam.TeamToController.Builder keeperRequest = SslGameControllerTeam.TeamToController
+		SslGcRconTeam.TeamToController.Builder keeperRequest = SslGcRconTeam.TeamToController
 				.newBuilder();
 		keeperRequest.setDesiredKeeper(keeper);
 		keeperRequest.getSignatureBuilder().setPkcs1V15(ByteString.EMPTY).setToken(nextToken);
@@ -99,15 +84,15 @@ public class TestTeamClient
 
 	private static boolean register(GameControllerProtocol gc)
 	{
-		SslGameControllerCommon.ControllerReply reply;
-		reply = gc.receiveMessage(SslGameControllerCommon.ControllerReply.parser());
+		SslGcRcon.ControllerReply reply;
+		reply = gc.receiveMessage(SslGcRcon.ControllerReply.parser());
 		if (reply == null)
 		{
 			log.error("Receiving initial Message failed");
 			return false;
 		}
 
-		SslGameControllerTeam.TeamRegistration.Builder registration = SslGameControllerTeam.TeamRegistration.newBuilder();
+		SslGcRconTeam.TeamRegistration.Builder registration = SslGcRconTeam.TeamRegistration.newBuilder();
 		registration.setTeamName("TIGERs Mannheim");
 		registration.getSignatureBuilder().setToken(reply.getNextToken()).setPkcs1V15(ByteString.EMPTY);
 
@@ -116,14 +101,14 @@ public class TestTeamClient
 
 		gc.sendMessage(registration.build());
 
-		reply = gc.receiveMessage(SslGameControllerCommon.ControllerReply.parser());
+		reply = gc.receiveMessage(SslGcRcon.ControllerReply.parser());
 		if (reply == null)
 		{
 			log.error("Receiving Registration Reply failed");
 			return false;
 		}
 
-		if (reply.getStatusCode() != SslGameControllerCommon.ControllerReply.StatusCode.OK)
+		if (reply.getStatusCode() != SslGcRcon.ControllerReply.StatusCode.OK)
 		{
 			log.error(
 					"Server did not allow Registration: " + reply.getStatusCode().toString() + " - " + reply.getReason());

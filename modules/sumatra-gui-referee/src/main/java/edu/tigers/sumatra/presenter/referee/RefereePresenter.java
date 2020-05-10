@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.presenter.referee;
@@ -11,11 +11,11 @@ import org.apache.logging.log4j.Logger;
 
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.SslGcApi;
+import edu.tigers.sumatra.SslGcRefereeMessage.Referee;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
-import edu.tigers.sumatra.referee.control.Event;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.view.referee.IRefBoxRemoteControlRequestObserver;
 import edu.tigers.sumatra.view.referee.RefereePanel;
@@ -72,7 +72,7 @@ public class RefereePresenter extends ASumatraViewPresenter
 
 
 	@Override
-	public void onNewRefereeMsg(final SSL_Referee msg)
+	public void onNewRefereeMsg(final Referee msg)
 	{
 		refereePanel.getShowRefereeMsgPanel().update(msg);
 		refereePanel.getTeamsPanel().values().forEach(t -> t.update(msg));
@@ -101,7 +101,7 @@ public class RefereePresenter extends ASumatraViewPresenter
 
 
 	@Override
-	public void sendGameControllerEvent(final Event event)
+	public void sendGameControllerEvent(final SslGcApi.Input event)
 	{
 		referee.sendGameControllerEvent(event);
 	}

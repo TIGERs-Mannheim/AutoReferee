@@ -15,10 +15,13 @@
         </Async>
     </Appenders>
     <Loggers>
-        <Root level="all">
+        <Root level="info">
             <AppenderRef ref="ASYNC"/>
         </Root>
-        <Logger name="log4j.logger.net.java.games" level="warn">
+        <Logger name="edu.tigers" level="all" additivity="false">
+            <AppenderRef ref="ASYNC"/>
+        </Logger>
+        <Logger name="log4j.logger.net.java.games" level="warn" additivity="false">
             <AppenderRef ref="ASYNC"/>
         </Logger>
     </Loggers>

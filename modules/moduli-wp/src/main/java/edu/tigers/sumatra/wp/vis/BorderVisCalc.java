@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
@@ -31,12 +31,12 @@ public class BorderVisCalc implements IWpCalc
 	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
 	{
 		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS);
-		
+
 		shapes.add(new DrawableRectangle(Geometry.getField(), Color.WHITE));
 		shapes.add(new DrawableCircle(Geometry.getCenterCircle(), Color.WHITE));
 		shapes.add(new DrawableLine(Line.fromPoints(Vector2.fromXY(0, -Geometry.getFieldWidth() / 2.0),
 				Vector2.fromXY(0, Geometry.getFieldWidth() / 2.0)), Color.WHITE));
-		
+
 		List<IDrawableShape> additionalShapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS_ADDITIONAL);
 		additionalShapes.add(new DrawableLine(Line.fromPoints(Vector2.fromXY(-Geometry.getFieldLength() / 2, 0),
 				Vector2.fromXY(Geometry.getFieldLength() / 2.0, 0)), Color.WHITE));
@@ -48,23 +48,27 @@ public class BorderVisCalc implements IWpCalc
 				Line.fromPoints(Vector2.fromXY(Geometry.getFieldLength() / 4, -Geometry.getFieldWidth() / 2.0),
 						Vector2.fromXY(Geometry.getFieldLength() / 4, Geometry.getFieldWidth() / 2.0)),
 				Color.WHITE));
-		
+
 		shapes.addAll(Geometry.getPenaltyAreaOur().getDrawableShapes());
 		shapes.addAll(Geometry.getPenaltyAreaTheir().getDrawableShapes());
-		
+
 		Color ourColor = wfw.getRefereeMsg().getNegativeHalfTeam() == ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalOur(), shapes, ourColor);
-		
+
 		Color theirColor = wfw.getRefereeMsg().getNegativeHalfTeam() != ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalTheir(), shapes, theirColor);
-		
-		shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkTheir(), Geometry.getBallRadius() + 10),
-				Color.white).withFill(true));
-		shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkOur(), Geometry.getBallRadius() + 10),
-				Color.white).withFill(true));
+
+		if (wfw.getGameState().isPenaltyOrPreparePenalty())
+		{
+			shapes.add(
+					new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkTheir(), Geometry.getBallRadius() + 10),
+							Color.white).withFill(true));
+			shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkOur(), Geometry.getBallRadius() + 10),
+					Color.white).withFill(true));
+		}
 	}
-	
-	
+
+
 	private void drawGoal(final Goal goal, final List<IDrawableShape> shapes, final Color color)
 	{
 		IVector2 gpl = goal.getLeftPost();

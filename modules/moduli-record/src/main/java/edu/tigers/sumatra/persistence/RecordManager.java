@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence;
@@ -19,7 +19,7 @@ import com.sleepycat.persist.evolve.Renamer;
 
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.sumatra.Referee;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.log.BerkeleyLogEvent;
 import edu.tigers.sumatra.persistence.log.BerkeleyLogRecorder;
@@ -114,7 +114,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	}
 
 
-	private boolean isPreStage(final Referee.SSL_Referee refMsg)
+	private boolean isPreStage(final SslGcRefereeMessage.Referee refMsg)
 	{
 		switch (refMsg.getStage())
 		{
@@ -129,7 +129,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	}
 
 
-	private boolean isGameStage(final Referee.SSL_Referee refMsg)
+	private boolean isGameStage(final SslGcRefereeMessage.Referee refMsg)
 	{
 		switch (refMsg.getStage())
 		{
@@ -145,7 +145,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	}
 
 
-	private boolean isNoGameStage(final Referee.SSL_Referee refMsg)
+	private boolean isNoGameStage(final SslGcRefereeMessage.Referee refMsg)
 	{
 		switch (refMsg.getStage())
 		{
@@ -162,7 +162,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 
 
 	@Override
-	public void onNewRefereeMsg(final Referee.SSL_Referee refMsg)
+	public void onNewRefereeMsg(final SslGcRefereeMessage.Referee refMsg)
 	{
 		if (autoRecord && SumatraModel.getInstance().isProductive() && (refMsg != null)
 				&& refMsg.getCommandCounter() != lastCommandCounter)
@@ -173,11 +173,11 @@ public class RecordManager extends AModule implements IRefereeObserver
 	}
 
 
-	private void startStopRecording(final Referee.SSL_Referee refMsg)
+	private void startStopRecording(final SslGcRefereeMessage.Referee refMsg)
 	{
 		if (!isRecording() &&
 				(isGameStage(refMsg)
-						|| (isPreStage(refMsg) && (refMsg.getCommand() != Referee.SSL_Referee.Command.HALT))))
+						|| (isPreStage(refMsg) && (refMsg.getCommand() != SslGcRefereeMessage.Referee.Command.HALT))))
 		{
 			startRecording();
 		} else if (isRecording() && isNoGameStage(refMsg))

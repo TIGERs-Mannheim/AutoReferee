@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -25,7 +25,6 @@ import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.vector.AVector2;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.model.SumatraModel;
 
 
 /**
@@ -161,9 +160,6 @@ public class DynamicPosition
 				{
 					pos = botPos;
 				}
-			} else if (!SumatraModel.getInstance().isProductive())
-			{
-				log.warn("No tracked bot with id " + trackedId + " found.", new Exception());
 			}
 		}
 	}

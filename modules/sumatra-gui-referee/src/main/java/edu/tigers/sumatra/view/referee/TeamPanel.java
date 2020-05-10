@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.referee;
 
@@ -13,7 +13,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 
-import edu.tigers.sumatra.Referee.SSL_Referee;
+import edu.tigers.sumatra.SslGcRefereeMessage.Referee;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.AVector2;
@@ -28,10 +28,9 @@ import net.miginfocom.swing.MigLayout;
 public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 {
 	private static final long serialVersionUID = -4100647452685537602L;
-	
+
 	private final JButton timeoutBtn;
 	private final JButton direct;
-	private final JButton indirect;
 	private final JButton penalty;
 	private final JButton yellow;
 	private final JButton red;
@@ -42,25 +41,24 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 	private final JButton place;
 	private final JTextField placementPos;
 	private final JSpinner goalkeeperNumber;
-	
+
 	private final ETeamColor color;
 	private int goals = 0;
-	
-	
+
+
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param color
 	 */
 	public TeamPanel(final ETeamColor color)
 	{
 		this.color = color;
-		
+
 		setLayout(new MigLayout("wrap 2", "[fill]10[fill]"));
-		
+
 		timeoutBtn = new JButton("Timeout");
 		direct = new JButton("Direct");
-		indirect = new JButton("Indirect");
 		penalty = new JButton("Penalty");
 		yellow = new JButton("Yellow Card");
 		red = new JButton("Red Card");
@@ -73,14 +71,13 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 		final SpinnerNumberModel model = new SpinnerNumberModel(0, 0, BotID.BOT_ID_MAX, 1);
 		goalkeeperNumber = new JSpinner(model);
 		final JLabel goalieLabel = new JLabel("Goalkeeper");
-		
+
 		timeoutBtn.addActionListener(e -> sendGameControllerEvent(GcEventFactory.commandTimeout(color)));
 		direct.addActionListener(e -> sendGameControllerEvent(GcEventFactory.commandDirect(color)));
-		indirect.addActionListener(e -> sendGameControllerEvent(GcEventFactory.commandIndirect(color)));
 		penalty.addActionListener(e -> sendGameControllerEvent(GcEventFactory.commandPenalty(color)));
 		kickoff.addActionListener(e -> sendGameControllerEvent(GcEventFactory.commandKickoff(color)));
 		goal.addActionListener(e -> sendGameControllerEvent(GcEventFactory.goals(color, goals + 1)));
-		
+
 		place.addActionListener(e -> {
 			IVector2 pos;
 			try
@@ -91,49 +88,49 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 				placementPos.setText("Invalid input!");
 				pos = null;
 			}
-			
-			sendGameControllerEvent(GcEventFactory.ballPlacement(color, pos));
+
+			sendGameControllerEvent(GcEventFactory.ballPlacement(pos));
+			sendGameControllerEvent(GcEventFactory.commandBallPlacement(color));
 		});
-		
+
 		yellow.addActionListener(
 				e -> sendGameControllerEvent(GcEventFactory.yellowCard(color)));
 		red.addActionListener(
 				e -> sendGameControllerEvent(GcEventFactory.redCard(color)));
-		
+
 		goalkeeperNumber.addChangeListener(
 				e -> sendGameControllerEvent(GcEventFactory.goalkeeper(color, (Integer) goalkeeperNumber.getValue())));
-		
+
 		add(timeoutBtn);
 		add(goal);
 		add(new JLabel("Timeout Clock:"));
 		add(timeoutClock);
 		add(new JLabel("Timeouts left:"));
 		add(timeoutCount);
-		add(direct);
-		add(penalty);
-		add(indirect);
-		add(yellow);
-		add(kickoff);
-		add(red);
 		add(placementPos);
 		add(place);
-		add(goalkeeperNumber);
 		add(goalieLabel);
-		
+		add(goalkeeperNumber);
+		add(yellow);
+		add(red);
+		add(kickoff);
+		add(penalty);
+		add(direct);
+
 		setBorder(
 				BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.getColor().darker()), color.name()));
 	}
-	
-	
+
+
 	/**
 	 * @param msg
 	 */
-	public void update(final SSL_Referee msg)
+	public void update(final Referee msg)
 	{
 		EventQueue.invokeLater(() -> {
 			long timeoutTime;
 			int timeouts;
-			
+
 			if (color == ETeamColor.YELLOW)
 			{
 				timeoutTime = msg.getYellow().getTimeoutTime();
@@ -145,7 +142,7 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 				timeouts = msg.getBlue().getTimeouts();
 				goals = msg.getBlue().getScore();
 			}
-			
+
 			// Timeouts yellow
 			long minTo = TimeUnit.MICROSECONDS.toMinutes(timeoutTime);
 			long secTo = TimeUnit.MICROSECONDS.toSeconds(timeoutTime) % 60;
@@ -154,8 +151,8 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 			timeoutCount.setText(Integer.toString(timeouts));
 		});
 	}
-	
-	
+
+
 	/**
 	 * @param enable
 	 */
@@ -164,7 +161,6 @@ public class TeamPanel extends ARefBoxRemoteControlGeneratorPanel
 		EventQueue.invokeLater(() -> {
 			timeoutBtn.setEnabled(enable);
 			direct.setEnabled(enable);
-			indirect.setEnabled(enable);
 			penalty.setEnabled(enable);
 			yellow.setEnabled(enable);
 			red.setEnabled(enable);

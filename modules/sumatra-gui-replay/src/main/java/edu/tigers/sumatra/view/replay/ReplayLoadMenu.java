@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.replay;
 
@@ -38,8 +38,6 @@ import edu.tigers.sumatra.persistence.RecordManager;
 
 /**
  * This panel contains primary the record button for capturing
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 @SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 public class ReplayLoadMenu extends JMenu
@@ -47,7 +45,7 @@ public class ReplayLoadMenu extends JMenu
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LogManager.getLogger(ReplayLoadMenu.class.getName());
 
-	private transient FileFilter fileFilter;
+	private final transient FileFilter fileFilter;
 
 	private final transient List<IReplayLoadMenuObserver> observers = new CopyOnWriteArrayList<>();
 
@@ -192,7 +190,19 @@ public class ReplayLoadMenu extends JMenu
 		@Override
 		public boolean accept(final File pathname)
 		{
-			return pathname.isDirectory() || pathname.getName().endsWith(".zip");
+			if (pathname.isDirectory())
+			{
+				return true;
+			}
+
+			String path = pathname.getAbsolutePath();
+			if (path.endsWith(".zip"))
+			{
+				// only show, if there is not the extracted folder already
+				String folderPath = path.substring(0, path.length() - 4);
+				return !new File(folderPath).isDirectory();
+			}
+			return false;
 		}
 	}
 
@@ -259,7 +269,7 @@ public class ReplayLoadMenu extends JMenu
 		}
 	}
 
-	private class RenameActionListener implements ActionListener
+	private static class RenameActionListener implements ActionListener
 	{
 
 		private final String filename;
@@ -286,7 +296,7 @@ public class ReplayLoadMenu extends JMenu
 		}
 	}
 
-	private class DeleteActionListener implements ActionListener
+	private static class DeleteActionListener implements ActionListener
 	{
 
 		final String filename;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.SslGcGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -22,8 +22,8 @@ public class BotTooFastInStop extends AGameEvent
 	private final int bot;
 	private final IVector2 location;
 	private final double speed;
-	
-	
+
+
 	@SuppressWarnings("unsued") // used by berkeley
 	protected BotTooFastInStop()
 	{
@@ -32,14 +32,14 @@ public class BotTooFastInStop extends AGameEvent
 		location = null;
 		speed = 0;
 	}
-	
-	
+
+
 	/**
 	 * Default conversion constructor. Note: Called by reflection!
 	 *
 	 * @param event a protobuf event
 	 */
-	public BotTooFastInStop(SslGameEvent.GameEvent event)
+	public BotTooFastInStop(SslGcGameEvent.GameEvent event)
 	{
 		super(event);
 		this.team = toTeamColor(event.getBotTooFastInStop().getByTeam());
@@ -47,8 +47,8 @@ public class BotTooFastInStop extends AGameEvent
 		this.location = toVector(event.getBotTooFastInStop().getLocation());
 		this.speed = event.getBotTooFastInStop().getSpeed();
 	}
-	
-	
+
+
 	/**
 	 * @param bot
 	 * @param location
@@ -62,39 +62,39 @@ public class BotTooFastInStop extends AGameEvent
 		this.location = location;
 		this.speed = speed;
 	}
-	
-	
+
+
 	@Override
-	public SslGameEvent.GameEvent toProtobuf()
+	public SslGcGameEvent.GameEvent toProtobuf()
 	{
-		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
-		builder.setType(SslGameEvent.GameEventType.BOT_TOO_FAST_IN_STOP);
+		SslGcGameEvent.GameEvent.Builder builder = SslGcGameEvent.GameEvent.newBuilder();
+		builder.setType(SslGcGameEvent.GameEvent.Type.BOT_TOO_FAST_IN_STOP);
 		builder.getBotTooFastInStopBuilder().setByTeam(getTeam(team)).setByBot(bot).setSpeed((float) speed)
 				.setLocation(getLocationFromVector(location));
-		
+
 		return builder.build();
 	}
-	
-	
+
+
 	@Override
-	public String toString()
+	public String getDescription()
 	{
 		return String.format("Bot %d %s moved to fast during stop: vmax=%.2f @ %s", bot, team, speed,
 				formatVector(location));
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final BotTooFastInStop that = (BotTooFastInStop) o;
-		
+
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
 				.append(bot, that.bot)
@@ -103,8 +103,8 @@ public class BotTooFastInStop extends AGameEvent
 				.append(location, that.location)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{

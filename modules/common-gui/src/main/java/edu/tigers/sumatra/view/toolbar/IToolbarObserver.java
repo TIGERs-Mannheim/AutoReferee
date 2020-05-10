@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.toolbar;
 
@@ -31,14 +31,6 @@ public interface IToolbarObserver
 	 * Start or stop record
 	 */
 	default void onToggleRecord()
-	{
-	}
-
-
-	/**
-	 * Switch team sides
-	 */
-	default void onSwitchSides()
 	{
 	}
 }

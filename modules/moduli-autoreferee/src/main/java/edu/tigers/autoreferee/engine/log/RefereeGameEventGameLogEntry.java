@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.autoreferee.engine.log;
 
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
@@ -21,7 +25,7 @@ public class RefereeGameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String workGameLogEntry()
 	{
-		return gameEvent.getType().name() + " - " + gameEvent.toString();
+		return gameEvent.getType().name() + " - " + gameEvent.getDescription();
 	}
 
 
@@ -35,6 +39,6 @@ public class RefereeGameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String toString()
 	{
-		return String.format("%d | %s | %s | %s", getTimestamp(), getGameTime(), getType(), gameEvent);
+		return String.format("%d | %s | %s | %s", getTimestamp(), getGameTime(), getType(), gameEvent.getDescription());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.SslGcGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -22,8 +22,8 @@ public class BotHeldBallDeliberately extends AGameEvent
 	private final int bot;
 	private final IVector2 location;
 	private final double duration;
-	
-	
+
+
 	@SuppressWarnings("unsued") // used by berkeley
 	protected BotHeldBallDeliberately()
 	{
@@ -32,14 +32,14 @@ public class BotHeldBallDeliberately extends AGameEvent
 		location = null;
 		duration = 0;
 	}
-	
-	
+
+
 	/**
 	 * Default conversion constructor. Note: Called by reflection!
 	 *
 	 * @param event a protobuf event
 	 */
-	public BotHeldBallDeliberately(SslGameEvent.GameEvent event)
+	public BotHeldBallDeliberately(SslGcGameEvent.GameEvent event)
 	{
 		super(event);
 		this.team = toTeamColor(event.getBotHeldBallDeliberately().getByTeam());
@@ -47,8 +47,8 @@ public class BotHeldBallDeliberately extends AGameEvent
 		this.location = toVector(event.getBotHeldBallDeliberately().getLocation());
 		this.duration = event.getBotHeldBallDeliberately().getDuration();
 	}
-	
-	
+
+
 	/**
 	 * @param bot
 	 * @param location
@@ -62,39 +62,39 @@ public class BotHeldBallDeliberately extends AGameEvent
 		this.location = location;
 		this.duration = duration;
 	}
-	
-	
+
+
 	@Override
-	public SslGameEvent.GameEvent toProtobuf()
+	public SslGcGameEvent.GameEvent toProtobuf()
 	{
-		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
-		builder.setType(SslGameEvent.GameEventType.BOT_HELD_BALL_DELIBERATELY);
+		SslGcGameEvent.GameEvent.Builder builder = SslGcGameEvent.GameEvent.newBuilder();
+		builder.setType(SslGcGameEvent.GameEvent.Type.BOT_HELD_BALL_DELIBERATELY);
 		builder.getBotHeldBallDeliberatelyBuilder().setByBot(bot).setByTeam(getTeam(team)).setDuration((float) duration)
 				.setLocation(getLocationFromVector(location));
-		
+
 		return builder.build();
 	}
-	
-	
+
+
 	@Override
-	public String toString()
+	public String getDescription()
 	{
 		return String.format("Bot %d %s hold the ball deliberately for %.2f s @ %s", bot, team, duration,
 				formatVector(location));
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final BotHeldBallDeliberately that = (BotHeldBallDeliberately) o;
-		
+
 		return new EqualsBuilder()
 				.appendSuper(super.equals(o))
 				.append(bot, that.bot)
@@ -103,8 +103,8 @@ public class BotHeldBallDeliberately extends AGameEvent
 				.append(location, that.location)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -19,8 +19,8 @@ public class RuleConstraints
 	private static double maxBallSpeed = 6.5;
 	@Configurable(comment = "Stop radius around ball", defValue = "500.0")
 	private static double stopRadius = 500.0;
-	@Configurable(comment = "Bots must be behind this line on penalty shot", defValue = "400.0")
-	private static double distancePenaltyMarkToPenaltyLine = 400;
+	@Configurable(comment = "Bots must be behind this line on penalty shot", defValue = "1000.0")
+	private static double distancePenaltyMarkToPenaltyLine = 1000;
 	@Configurable(comment = "Bot speed in stop phases", defValue = "1.5")
 	private static double stopSpeed = 1.5;
 	@Configurable(comment = "This tolerance is subtracted from the default bot speed that is required on STOP", defValue = "0.2")

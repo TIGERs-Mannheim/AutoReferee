@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee;
 
@@ -7,17 +7,18 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.sumatra.Referee.SSL_Referee;
-import edu.tigers.sumatra.referee.control.Event;
+import edu.tigers.sumatra.SslGcApi;
+import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
+import edu.tigers.sumatra.referee.source.IRefereeSourceObserver;
 
 
 /**
  * The base class for all referee-implementations
  */
-public abstract class AReferee extends AModule
+public abstract class AReferee extends AModule implements IRefereeSourceObserver
 {
 	private final List<IRefereeObserver> observers = new CopyOnWriteArrayList<>();
 
@@ -51,7 +52,7 @@ public abstract class AReferee extends AModule
 	/**
 	 * Send an event to the game controller. Use {@link GcEventFactory} to create new events
 	 */
-	public abstract void sendGameControllerEvent(Event event);
+	public abstract void sendGameControllerEvent(SslGcApi.Input event);
 
 
 	/**
@@ -59,7 +60,7 @@ public abstract class AReferee extends AModule
 	 *
 	 * @param refMsg
 	 */
-	protected void notifyNewRefereeMsg(final SSL_Referee refMsg)
+	protected void notifyNewRefereeMsg(final SslGcRefereeMessage.Referee refMsg)
 	{
 		for (final IRefereeObserver observer : observers)
 		{
@@ -98,14 +99,6 @@ public abstract class AReferee extends AModule
 	 * @return true, if the referee can be controlled locally
 	 */
 	public abstract boolean isInternalGameControllerUsed();
-
-
-	/**
-	 * Set the current time for the referee (the game-controller) if possible
-	 *
-	 * @param timestamp
-	 */
-	public abstract void setCurrentTime(long timestamp);
 
 
 	/**

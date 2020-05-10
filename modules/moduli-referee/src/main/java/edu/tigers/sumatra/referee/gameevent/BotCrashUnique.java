@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.SslGcGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AngleMath;
@@ -46,7 +46,7 @@ public class BotCrashUnique extends AGameEvent
 	 *
 	 * @param event a protobuf event
 	 */
-	public BotCrashUnique(SslGameEvent.GameEvent event)
+	public BotCrashUnique(SslGcGameEvent.GameEvent event)
 	{
 		super(event);
 		this.team = toTeamColor(event.getBotCrashUnique().getByTeam());
@@ -105,9 +105,9 @@ public class BotCrashUnique extends AGameEvent
 
 
 	@Override
-	public SslGameEvent.GameEvent toProtobuf()
+	public SslGcGameEvent.GameEvent toProtobuf()
 	{
-		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
+		SslGcGameEvent.GameEvent.Builder builder = SslGcGameEvent.GameEvent.newBuilder();
 		builder.setType(getType().getProtoType());
 		builder.getBotCrashUniqueBuilder().setByTeam(getTeam(team)).setViolator(violator)
 				.setVictim(victim).setCrashSpeed((float) crashSpeed).setSpeedDiff((float) speedDiff)
@@ -118,7 +118,7 @@ public class BotCrashUnique extends AGameEvent
 
 
 	@Override
-	public String toString()
+	public String getDescription()
 	{
 		return String.format("Bot %d %s crashed into bot %d %s with %.2f m/s @ %s (Δv: %.2f m/s, angle: %.0f°)",
 				violator, team, victim, team.opposite(), crashSpeed, formatVector(location), speedDiff,

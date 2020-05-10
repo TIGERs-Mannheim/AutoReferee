@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.toolbar;
 
@@ -43,7 +43,6 @@ public class ToolBar
 	private final JButton btnStartStop;
 	private final JButton btnEmergency;
 	private final JButton btnRecSave;
-	private final JButton btnSwitchSides;
 
 
 	private final FpsPanel fpsPanel = new FpsPanel();
@@ -81,14 +80,6 @@ public class ToolBar
 		btnRecSave.setBorder(BorderFactory.createEmptyBorder());
 		btnRecSave.setBackground(new Color(0, 0, 0, 1));
 
-		btnSwitchSides = new JButton();
-		btnSwitchSides.addActionListener(new SwitchSidesButtonListener());
-		btnSwitchSides.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/switch.png"));
-		btnSwitchSides.setToolTipText("Switch sides");
-		btnSwitchSides.setEnabled(false);
-		btnSwitchSides.setBorder(BorderFactory.createEmptyBorder());
-		btnSwitchSides.setBackground(new Color(0, 0, 0, 1));
-
 		JPanel heapPanel = new JPanel(new BorderLayout());
 		heapLabel.setToolTipText("Memory Usage (current/total/maximum)");
 		heapPanel.add(heapLabel, BorderLayout.NORTH);
@@ -109,7 +100,6 @@ public class ToolBar
 		toolBarPanel.add(btnStartStop, "left");
 		toolBarPanel.add(btnEmergency, "left");
 		toolBarPanel.add(btnRecSave, "left");
-		toolBarPanel.add(btnSwitchSides, "left");
 		toolBarPanel.add(fpsPanel, "left");
 		toolBarPanel.add(heapPanel, "left");
 		jToolBar.add(toolBarPanel);
@@ -208,7 +198,6 @@ public class ToolBar
 		SwingUtilities.invokeLater(() -> {
 			btnEmergency.setEnabled(enabled);
 			btnRecSave.setEnabled(enabled);
-			btnSwitchSides.setEnabled(enabled);
 		});
 	}
 
@@ -275,19 +264,6 @@ public class ToolBar
 			});
 
 			t.start();
-		}
-	}
-
-
-	private class SwitchSidesButtonListener implements ActionListener
-	{
-		@Override
-		public void actionPerformed(final ActionEvent e)
-		{
-			for (IToolbarObserver observer : observers)
-			{
-				observer.onSwitchSides();
-			}
 		}
 	}
 

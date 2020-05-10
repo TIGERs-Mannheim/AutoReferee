@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
-import edu.tigers.sumatra.SslGameEvent;
+import edu.tigers.sumatra.SslGcGameEvent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -39,7 +39,7 @@ public class AttackerTouchedBallInDefenseArea extends AGameEvent
 	 *
 	 * @param event a protobuf event
 	 */
-	public AttackerTouchedBallInDefenseArea(SslGameEvent.GameEvent event)
+	public AttackerTouchedBallInDefenseArea(SslGcGameEvent.GameEvent event)
 	{
 		super(event);
 		this.team = toTeamColor(event.getAttackerTouchedBallInDefenseArea().getByTeam());
@@ -65,10 +65,10 @@ public class AttackerTouchedBallInDefenseArea extends AGameEvent
 
 
 	@Override
-	public SslGameEvent.GameEvent toProtobuf()
+	public SslGcGameEvent.GameEvent toProtobuf()
 	{
-		SslGameEvent.GameEvent.Builder builder = SslGameEvent.GameEvent.newBuilder();
-		builder.setType(SslGameEvent.GameEventType.ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA);
+		SslGcGameEvent.GameEvent.Builder builder = SslGcGameEvent.GameEvent.newBuilder();
+		builder.setType(SslGcGameEvent.GameEvent.Type.ATTACKER_TOUCHED_BALL_IN_DEFENSE_AREA);
 		builder.getAttackerTouchedBallInDefenseAreaBuilder().setByTeam(getTeam(team)).setByBot(bot)
 				.setDistance((float) distance / 1000.f)
 				.setLocation(getLocationFromVector(location));
@@ -78,7 +78,7 @@ public class AttackerTouchedBallInDefenseArea extends AGameEvent
 
 
 	@Override
-	public String toString()
+	public String getDescription()
 	{
 		return String.format("Attacker %d %s was %.2f mm in the defense Area @ %s", bot, team, distance,
 				formatVector(location));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.statemachine;
 
@@ -77,7 +77,8 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 
 		if (stateChangesSinceUpdate > MAX_STATE_CHANGES_PER_UPDATE)
 		{
-			log.error("Number of allowed state changes exceeded. Possible state loop!");
+			log.warn("Number of allowed state changes exceeded. Possible state loop! Last change from {} to {}.",
+					currentState, newState, new Exception());
 			return;
 		}
 		stateChangesSinceUpdate++;

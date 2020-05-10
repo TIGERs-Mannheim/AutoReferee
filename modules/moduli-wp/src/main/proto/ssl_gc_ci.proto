@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package edu.tigers.sumatra;
+option go_package = "github.com/RoboCup-SSL/ssl-game-controller/internal/app/ci";
+
+import "ssl_vision_wrapper_tracked.proto";
+import "ssl_gc_referee_message.proto";
+
+// The input format to the GC
+message CiInput {
+    // New unix timestamp in [ns] for the GC
+    optional int64 timestamp = 1;
+    // New tracker packet with ball and robot data
+    optional TrackerWrapperPacket tracker_packet = 2;
+}
+
+// The output format of the GC response
+message CiOutput {
+    // Latest referee message
+    optional Referee referee_msg = 1;
+}

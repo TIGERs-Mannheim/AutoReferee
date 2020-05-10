@@ -1,32 +1,50 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
 
 import java.net.URI;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 
-import edu.tigers.sumatra.referee.control.Event;
+import edu.tigers.sumatra.SslGcApi;
+import edu.tigers.sumatra.SslGcEngineConfig;
 
 
 public class SslGameControllerClient extends WebSocketClient
 {
 	private static final Logger log = LogManager.getLogger(SslGameControllerClient.class.getName());
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
+	private Set<IGameControllerApiObserver> observers = new CopyOnWriteArraySet<>();
+	private SslGcEngineConfig.Config latestConfig;
 
 	public SslGameControllerClient(final URI serverUri)
 	{
 		super(serverUri);
+	}
+
+
+	public void addObserver(IGameControllerApiObserver o)
+	{
+		observers.add(o);
+		if (latestConfig != null)
+		{
+			o.onConfigChange(latestConfig);
+		}
+	}
+
+
+	public void removeObserver(IGameControllerApiObserver o)
+	{
+		observers.remove(o);
 	}
 
 
@@ -40,7 +58,20 @@ public class SslGameControllerClient extends WebSocketClient
 	@Override
 	public void onMessage(final String message)
 	{
-		// empty - we are not interested in the message currently
+		SslGcApi.Output.Builder builder = SslGcApi.Output.newBuilder();
+		try
+		{
+			JsonFormat.parser().merge(message, builder);
+		} catch (InvalidProtocolBufferException e)
+		{
+			log.warn("Could not parse GC API output", e);
+		}
+		SslGcApi.Output output = builder.build();
+		if (output.hasConfig())
+		{
+			latestConfig = output.getConfig();
+			observers.forEach(o -> o.onConfigChange(latestConfig));
+		}
 	}
 
 
@@ -58,12 +89,14 @@ public class SslGameControllerClient extends WebSocketClient
 	}
 
 
-	public void sendEvent(Event event)
+	public void sendEvent(SslGcApi.Input event)
 	{
 		try
 		{
-			send(objectMapper.writeValueAsString(event));
-		} catch (JsonProcessingException e)
+			send(JsonFormat.printer()
+					.omittingInsignificantWhitespace()
+					.print(event));
+		} catch (InvalidProtocolBufferException e)
 		{
 			log.warn("Could not serialize game controller event.", e);
 		}
