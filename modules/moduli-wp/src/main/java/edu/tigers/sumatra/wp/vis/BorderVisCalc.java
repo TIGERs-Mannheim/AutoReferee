@@ -62,9 +62,9 @@ public class BorderVisCalc implements IWpCalc
 		{
 			shapes.add(
 					new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkTheir(), Geometry.getBallRadius() + 10),
-							Color.white).withFill(true));
+							Color.white).setFill(true));
 			shapes.add(new DrawableCircle(Circle.createCircle(Geometry.getPenaltyMarkOur(), Geometry.getBallRadius() + 10),
-					Color.white).withFill(true));
+					Color.white).setFill(true));
 		}
 	}
 

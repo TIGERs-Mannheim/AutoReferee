@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
@@ -16,23 +16,23 @@ import edu.tigers.sumatra.trajectory.StubTrajectory;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Drawable trajectory
  */
 @Persistent
 public class DrawableTrajectory2D implements IDrawableShape
 {
 	private final ITrajectory<? extends IVector> trajXY;
 	private final float colorBlue;
-	
-	
+
+
 	@SuppressWarnings("unused")
 	private DrawableTrajectory2D()
 	{
 		trajXY = StubTrajectory.vector2Zero();
 		colorBlue = 0;
 	}
-	
-	
+
+
 	/**
 	 * @param trajXY
 	 */
@@ -40,8 +40,8 @@ public class DrawableTrajectory2D implements IDrawableShape
 	{
 		this(trajXY, 0);
 	}
-	
-	
+
+
 	/**
 	 * @param trajXY
 	 * @param colorBlue
@@ -51,8 +51,8 @@ public class DrawableTrajectory2D implements IDrawableShape
 		this.trajXY = trajXY;
 		this.colorBlue = (float) colorBlue;
 	}
-	
-	
+
+
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
@@ -62,7 +62,7 @@ public class DrawableTrajectory2D implements IDrawableShape
 			IVector2 pos = trajXY.getPositionMM(t).getXYVector();
 			IVector2 posTrans = tool.transformToGuiCoordinates(pos, invert);
 			IVector2 vel = trajXY.getVelocity(t).getXYVector();
-			
+
 			double relVel = Math.min(1, vel.getLength2() / 2.0);
 			double colorGreen = 1;
 			double colorRed = 1;
@@ -74,12 +74,11 @@ public class DrawableTrajectory2D implements IDrawableShape
 			{
 				colorGreen = 1 + relVel;
 			}
-			
+
 			g.setColor(new Color((float) colorRed, (float) colorGreen, colorBlue));
-			
+
 			g.fillOval((int) Math.round(posTrans.x() - dotSize / 2.0), (int) Math.round(posTrans.y() - dotSize / 2.0),
 					dotSize, dotSize);
 		}
 	}
-	
 }
