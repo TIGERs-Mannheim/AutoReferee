@@ -38,11 +38,11 @@ public class BallPlacementSucceededDetector extends AGameEventDetector
 	@Configurable(defValue = "0.97", comment = "Alpha value for the exponential moving average filter on the ball pos that decides if a ball is still moving")
 	private static double ballMovingFilterAlpha = 0.97;
 
-	@Configurable(defValue = "50.0", comment = "Min distance [mm] between ball and bot, before ball placement is considered successful, if next command is a free kick")
-	private static double minDistanceToBallForFreeKick = 50.0;
+	@Configurable(defValue = "50.0", comment = "Min distance [mm] between ball and bot, before ball placement is considered successful, if next command is a free kick for the placing team")
+	private static double minDistanceToBallForOwnFreeKick = 50.0;
 
-	@Configurable(defValue = "50.0", comment = "Min distance [mm] between ball and bot, before ball placement is considered successful, if next command is a force start")
-	private static double minDistanceToBallForForceStart = 50.0;
+	@Configurable(defValue = "500.0", comment = "Min distance [mm] between ball and bot, before ball placement is considered successful, else")
+	private static double minDistanceToBallDefault = 500.0;
 
 	@Configurable(defValue = "2.0", comment = "Minimum time [s] that the ball placement must take to allow robots to move to valid positions")
 	private static double minBallPlacementDuration = 2.0;
@@ -141,8 +141,8 @@ public class BallPlacementSucceededDetector extends AGameEventDetector
 	{
 		final double minDistance = Geometry.getBotRadius() +
 				(isNextCommandForPlacingTeam()
-						? minDistanceToBallForFreeKick
-						: minDistanceToBallForForceStart);
+						? minDistanceToBallForOwnFreeKick
+						: minDistanceToBallDefault);
 
 		return frame.getWorldFrame().getBots().values().stream()
 				.filter(bot -> bot.getPos().distanceTo(frame.getWorldFrame().getBall().getPos()) < minDistance)
