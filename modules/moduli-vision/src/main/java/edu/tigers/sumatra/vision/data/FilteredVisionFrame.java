@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -16,7 +16,7 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 
 /**
  * The output frame of a vision filter
- * 
+ *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class FilteredVisionFrame
@@ -29,8 +29,8 @@ public class FilteredVisionFrame
 	private final ShapeMap shapeMap;
 	private final IKickEvent kickEvent;
 	private final FilteredVisionBall kickFitState;
-	
-	
+
+
 	private FilteredVisionFrame(final Builder builder)
 	{
 		id = builder.id;
@@ -46,53 +46,53 @@ public class FilteredVisionFrame
 		{
 			shapeMap = new ShapeMap();
 		}
-		
+
 		tAssembly = System.nanoTime();
 	}
-	
-	
+
+
 	public long getId()
 	{
 		return id;
 	}
-	
-	
+
+
 	public long getTimestamp()
 	{
 		return timestamp;
 	}
-	
-	
+
+
 	public FilteredVisionBall getBall()
 	{
 		return ball;
 	}
-	
-	
+
+
 	public List<FilteredVisionBot> getBots()
 	{
 		return bots;
 	}
-	
-	
+
+
 	public ShapeMap getShapeMap()
 	{
 		return shapeMap;
 	}
-	
-	
+
+
 	public Optional<IKickEvent> getKickEvent()
 	{
 		return Optional.ofNullable(kickEvent);
 	}
-	
-	
+
+
 	public Optional<FilteredVisionBall> getKickFitState()
 	{
 		return Optional.ofNullable(kickFitState);
 	}
-	
-	
+
+
 	/**
 	 * @return the assembly timestamp in [ns]
 	 */
@@ -100,8 +100,8 @@ public class FilteredVisionFrame
 	{
 		return tAssembly;
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -112,7 +112,7 @@ public class FilteredVisionFrame
 				", bots=" + bots +
 				'}';
 	}
-	
+
 	/**
 	 * Builder for this sub class
 	 */
@@ -125,13 +125,13 @@ public class FilteredVisionFrame
 		private IKickEvent kickEvent;
 		private ShapeMap shapeMap = null;
 		private FilteredVisionBall kickFitState;
-		
-		
+
+
 		private Builder()
 		{
 		}
-		
-		
+
+
 		/**
 		 * @return new builder
 		 */
@@ -139,22 +139,23 @@ public class FilteredVisionFrame
 		{
 			return new Builder();
 		}
-		
-		
+
+
 		/**
 		 * Create an empty frame, id is zero, ball at (0,0)
-		 * 
+		 *
 		 * @return
 		 */
 		public static FilteredVisionFrame createEmptyFrame()
 		{
 			FilteredVisionBall b = FilteredVisionBall.Builder.create()
+					.withTimestamp(0)
 					.withPos(Vector3f.ZERO_VECTOR)
 					.withVel(Vector3f.ZERO_VECTOR)
 					.withAcc(Vector3f.ZERO_VECTOR)
 					.withIsChipped(false)
 					.build();
-			
+
 			return create()
 					.withId(0)
 					.withTimestamp(0)
@@ -162,8 +163,8 @@ public class FilteredVisionFrame
 					.withBall(b)
 					.build();
 		}
-		
-		
+
+
 		/**
 		 * @param id frame id
 		 * @return this builder
@@ -173,8 +174,8 @@ public class FilteredVisionFrame
 			this.id = id;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param timestamp in [ns]
 		 * @return this builder
@@ -184,8 +185,8 @@ public class FilteredVisionFrame
 			this.timestamp = timestamp;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param ball currently detected ball
 		 * @return this builder
@@ -195,8 +196,8 @@ public class FilteredVisionFrame
 			this.ball = ball;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param bots currently detected balls
 		 * @return this builder
@@ -206,8 +207,8 @@ public class FilteredVisionFrame
 			this.bots = bots;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param event
 		 * @return
@@ -217,8 +218,8 @@ public class FilteredVisionFrame
 			kickEvent = event;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param ball
 		 * @return
@@ -228,8 +229,8 @@ public class FilteredVisionFrame
 			kickFitState = ball;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @param map
 		 * @return
@@ -239,8 +240,8 @@ public class FilteredVisionFrame
 			shapeMap = map;
 			return this;
 		}
-		
-		
+
+
 		/**
 		 * @return new instance
 		 */

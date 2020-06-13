@@ -49,19 +49,17 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 	@Override
 	public void update()
 	{
-		if (currentState == null)
-		{
-			// no initial state or done
-			return;
-		}
-		if (!initialStateInitialized)
+		if (!initialStateInitialized && currentState != null)
 		{
 			// initialize the very first state
 			currentState.doEntryActions();
 			initialStateInitialized = true;
 		}
 		stateChangesSinceUpdate = 0;
-		currentState.doUpdate();
+		if (currentState != null)
+		{
+			currentState.doUpdate();
+		}
 	}
 
 

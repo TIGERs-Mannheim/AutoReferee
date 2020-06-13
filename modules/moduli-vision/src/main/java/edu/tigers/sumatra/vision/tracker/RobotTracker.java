@@ -336,6 +336,7 @@ public class RobotTracker
 
 		return FilteredVisionBot.Builder.create()
 				.withId(id)
+				.withTimestamp(timestamp)
 				.withPos(pos)
 				.withVel(vel.multiplyNew(0.001))
 				.withAVel(aVel)

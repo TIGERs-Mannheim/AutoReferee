@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
@@ -120,10 +120,9 @@ public interface IBot
 	/**
 	 * Get internal state from sensory data
 	 *
-	 * @param timestamp
 	 * @return
 	 */
-	Optional<BotState> getSensoryState(long timestamp);
+	Optional<BotState> getSensoryState();
 
 
 	/**

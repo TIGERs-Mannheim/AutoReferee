@@ -21,7 +21,6 @@ import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 
 import edu.tigers.sumatra.MessagesRobocupSslGeometry;
-import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamFieldArc;
 import edu.tigers.sumatra.cam.data.CamFieldLine;
 import edu.tigers.sumatra.cam.data.CamFieldSize;
@@ -43,8 +42,6 @@ import edu.tigers.sumatra.model.SumatraModel;
 
 /**
  * Configuration object for geometry parameters.
- *
- * @author Oliver Steinbrecher <OST1988@aol.com>
  */
 public class Geometry
 {
@@ -119,6 +116,11 @@ public class Geometry
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
 
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValueSpezis = { "0.06",
+			"0.0", "0.06", "0.06", "0.06",
+			"0.06" }, comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision")
+	private static double feedbackDelay = 0.06;
+
 
 	private final IRectangle field;
 	private final IRectangle fieldWBorders;
@@ -192,7 +194,7 @@ public class Geometry
 		touchLines = new ArrayList<>();
 		touchLines.addAll(calcTouchLines());
 
-		lastCamGeometry = new CamGeometry(new HashMap<Integer, CamCalibration>(),
+		lastCamGeometry = new CamGeometry(new HashMap<>(),
 				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()));
 	}
 
@@ -632,5 +634,11 @@ public class Geometry
 	public static double getLineWidth()
 	{
 		return lineWidth;
+	}
+
+
+	public static double getFeedbackDelay()
+	{
+		return feedbackDelay;
 	}
 }

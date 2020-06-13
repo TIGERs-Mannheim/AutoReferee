@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.data.collector.ITimeSeriesDataProvider;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -52,28 +51,14 @@ public class TimeSeriesWpDataProvider implements ITimeSeriesDataProvider, IWorld
 	@Override
 	public void stop()
 	{
-		try
-		{
-			AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
-			wp.removeObserver(this);
-		} catch (ModuleNotFoundException err)
-		{
-			log.error("WP module not found.", err);
-		}
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
 	}
 
 
 	@Override
 	public void start()
 	{
-		try
-		{
-			AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
-			wp.addObserver(this);
-		} catch (ModuleNotFoundException err)
-		{
-			log.error("WP module not found.", err);
-		}
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
 	}
 
 
@@ -91,8 +76,8 @@ public class TimeSeriesWpDataProvider implements ITimeSeriesDataProvider, IWorld
 			numFramesBallStopped++;
 			if (numFramesBallStopped > 10)
 			{
-				log.debug("ball stopped, data size: "
-						+ dataBuffers.values().stream().map(Collection::size).collect(Collectors.toList()));
+				log.debug("ball stopped, data size: {}",
+						() -> dataBuffers.values().stream().map(Collection::size).collect(Collectors.toList()));
 				return true;
 			}
 		} else

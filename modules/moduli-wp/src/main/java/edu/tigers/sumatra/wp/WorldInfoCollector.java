@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.wp;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
+import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamBall;
@@ -36,8 +38,9 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
-import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.pose.Pose;
+import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -61,9 +64,10 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
+import edu.tigers.sumatra.wp.data.TrajTrackingQuality;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
-import edu.tigers.sumatra.wp.util.BotStateFromTrajectoryCalculator;
+import edu.tigers.sumatra.wp.util.BotStateTrajectorySync;
 import edu.tigers.sumatra.wp.util.CurrentBallDetector;
 import edu.tigers.sumatra.wp.util.DefaultRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
@@ -80,10 +84,6 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	@Configurable(comment = "Use robot feedback for position and velocity.", defValue = "true")
 	private static boolean preferRobotFeedback = true;
-	@Configurable(comment = "Prefer the state of the current trajectory that the bot executes", defValue = "true")
-	private static boolean preferTrajState = true;
-	@Configurable(defValue = "100.0")
-	private static double maxPositionDiff = 100.0;
 	@Configurable(comment = "Add a faked ball. Set pos,vel,acc in code.", defValue = "false")
 	private static boolean fakeBall = false;
 
@@ -92,7 +92,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private WorldFrameVisualization worldFrameVisualization;
 	private BallContactCalculator ballContactCalculator;
 	private CurrentBallDetector currentBallDetector;
-	private BotStateFromTrajectoryCalculator botStateFromTrajectoryCalculator;
+	private Map<BotID, BotStateTrajectorySync> botStateFromTraj = new HashMap<>();
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	private AReferee referee;
@@ -130,7 +130,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private Map<BotID, BotState> getInternalBotStates(final Collection<RobotInfo> robotInfo)
 	{
 		return robotInfo.stream()
-				.map(RobotInfo::getInternalState)
+				.map(ri -> ri.getInternalState().map(s -> estimate(s, ri.getTimestamp())))
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.collect(Collectors.toMap(
@@ -139,19 +139,26 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private BotState select(BotState filterState, BotState internalState)
+	private BotState estimate(BotState state, long timestamp)
+	{
+		double dt = (lastWFTimestamp - timestamp) / 1e9;
+		IVector2 pos = state.getPos().addNew(state.getVel2().multiplyNew(1000 * dt));
+		double orientation = AngleMath.normalizeAngle(state.getOrientation() + state.getAngularVel() * dt);
+		Pose pose = Pose.from(pos, orientation);
+		return BotState.of(state.getBotID(), State.of(pose, state.getVel3()));
+	}
+
+
+	private boolean useInternalState(BotState filterState, BotState internalState)
 	{
 		if (filterState == null)
 		{
-			return internalState;
+			return true;
 		} else if (internalState == null)
 		{
-			return filterState;
-		} else if (preferRobotFeedback)
-		{
-			return internalState;
+			return false;
 		}
-		return filterState;
+		return preferRobotFeedback;
 	}
 
 
@@ -167,20 +174,23 @@ public class WorldInfoCollector extends AWorldPredictor
 			final BotState internalState,
 			final FilteredVisionBot filteredVisionBot)
 	{
-		BotState currentBotState = select(filterState, internalState);
+		boolean useInternalState = useInternalState(filterState, internalState);
+		BotState currentBotState = useInternalState ? internalState : filterState;
 		if (currentBotState == null)
 		{
 			return null;
 		}
-		Optional<BotState> trajState = botStateFromTrajectoryCalculator.getState(robotInfo);
-		boolean similar = trajState.map(s -> isSimilar(s, currentBotState)).orElse(false);
-		if (trajState.isPresent() && (!similar || botCollidingWithOtherBot(filteredBotStates, trajState.get())))
-		{
-			botStateFromTrajectoryCalculator.reset(robotInfo.getBotId());
-		}
+		BotStateTrajectorySync calc = botStateFromTraj.computeIfAbsent(robotInfo.getBotId(),
+				b -> new BotStateTrajectorySync());
+		robotInfo.getTrajectory().ifPresent(t -> calc.add(t, lastWFTimestamp));
 
-		BotState botState = similar && preferTrajState
-				? botStateFromTrajectoryCalculator.getLatestState(robotInfo.getBotId()).orElse(currentBotState)
+		double feedbackDelay = useInternalState ? 0.0 : Geometry.getFeedbackDelay();
+		calc.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
+		TrajTrackingQuality trackingQuality = calc.getTrackingQuality();
+
+		Optional<State> bufferedState = calc.getState(lastWFTimestamp, 0.0);
+		BotState botState = !botCollidingWithOtherBot(filteredBotStates, currentBotState)
+				? BotState.of(robotInfo.getBotId(), bufferedState.orElse(currentBotState))
 				: currentBotState;
 
 		return TrackedBot.newBuilder()
@@ -188,10 +198,11 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withTimestamp(lastWFTimestamp)
 				.withState(botState)
 				.withFilteredState(filterState)
-				.withBufferedTrajState(trajState.orElse(null))
+				.withBufferedTrajState(bufferedState.orElse(null))
+				.withTrackingQuality(trackingQuality)
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
-				.withQuality(filteredVisionBot.getQuality())
+				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
 				.build();
 	}
 
@@ -201,12 +212,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		return filteredBotStates.values().stream()
 				.filter(b -> !b.getBotID().equals(trajState.getBotID()))
 				.anyMatch(s -> s.getPos().distanceTo(trajState.getPos()) < Geometry.getBotRadius() * 2);
-	}
-
-
-	private boolean isSimilar(final BotState trajState, final BotState currentState)
-	{
-		return trajState.getPos().distanceToSqr(currentState.getPos()) < SumatraMath.square(maxPositionDiff);
 	}
 
 
@@ -243,9 +248,10 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private IKickEvent getKickEvent(final FilteredVisionFrame filteredVisionFrame)
 	{
-		if (filteredVisionFrame.getKickEvent().isPresent())
+		final Optional<IKickEvent> kickEvent = filteredVisionFrame.getKickEvent();
+		if (kickEvent.isPresent())
 		{
-			lastKickEvent = filteredVisionFrame.getKickEvent().get();
+			lastKickEvent = kickEvent.get();
 		} else if (ballBuffer.getData().stream().allMatch(b -> b.getVel().getLength2() < 0.1))
 		{
 			lastKickEvent = null;
@@ -264,12 +270,10 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private BallKickFitState getKickFitState(final FilteredVisionFrame filteredVisionFrame)
 	{
-		if (filteredVisionFrame.getKickFitState().isPresent())
-		{
-			return new BallKickFitState(filteredVisionFrame.getKickFitState().get(), filteredVisionFrame.getTimestamp());
-		}
+		return filteredVisionFrame.getKickFitState()
+				.map(filteredVisionBall -> new BallKickFitState(filteredVisionBall, filteredVisionFrame.getTimestamp()))
+				.orElse(null);
 
-		return null;
 	}
 
 
@@ -319,6 +323,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private FilteredVisionBall fakeBall()
 	{
 		return FilteredVisionBall.Builder.create()
+				.withTimestamp(lastWFTimestamp)
 				.withPos(Vector3.fromXYZ(1500, 500, 0))
 				.withVel(Vector3.from2d(Vector2.fromXY(-1500, -900).scaleToNew(2000), 0))
 				.withAcc(Vector3.zero())
@@ -461,7 +466,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		worldFrameVisualization = new WorldFrameVisualization();
 		ballContactCalculator = new BallContactCalculator();
 		currentBallDetector = new CurrentBallDetector();
-		botStateFromTrajectoryCalculator = new BotStateFromTrajectoryCalculator();
+		botStateFromTraj.clear();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
 		lastKickEvent = null;
@@ -472,12 +477,12 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		if (!observers.isEmpty())
 		{
-			log.warn("There were observers left: " + observers);
+			log.warn("There were observers left: {}", observers);
 			observers.clear();
 		}
 		if (!consumers.isEmpty())
 		{
-			log.warn("There were consumers left: " + consumers);
+			log.warn("There were consumers left: {}", consumers);
 			consumers.clear();
 		}
 	}

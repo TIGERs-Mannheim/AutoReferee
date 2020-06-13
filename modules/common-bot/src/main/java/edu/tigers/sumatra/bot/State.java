@@ -1,8 +1,12 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -11,6 +15,8 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.sleepycat.persist.model.Persistent;
 
+import edu.tigers.sumatra.data.collector.IExportable;
+import edu.tigers.sumatra.filter.IInterpolatable;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -20,20 +26,20 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 
 
 @Persistent
-public class State implements IMirrorable<State>
+public class State implements IMirrorable<State>, IExportable, IInterpolatable<State>
 {
 	private final Pose pose;
 	/** [x,y,z] velocity in [m/s,m/s,rad/s] */
 	private final IVector3 vel3;
-	
-	
+
+
 	protected State()
 	{
 		pose = Pose.from(Vector3.zero());
 		vel3 = Vector3.zero();
 	}
-	
-	
+
+
 	/**
 	 * @param pose the pose
 	 * @param vel3 [m/s,m/s,rad/s]
@@ -43,8 +49,8 @@ public class State implements IMirrorable<State>
 		this.pose = pose;
 		this.vel3 = vel3;
 	}
-	
-	
+
+
 	/**
 	 * @param pose the pose
 	 * @param vel [m/s,m/s,rad/s]
@@ -54,35 +60,36 @@ public class State implements IMirrorable<State>
 	{
 		return new State(pose, vel);
 	}
-	
-	
+
+
 	public static State zero()
 	{
 		return State.of(Pose.zero(), Vector3f.zero());
 	}
-	
-	
+
+
 	@Override
 	public State mirrored()
 	{
 		return State.of(pose.mirrored(), Vector3.from2d(vel3.getXYVector().multiplyNew(-1), vel3.z()));
 	}
-	
-	
+
+
+	@Override
 	public State interpolate(final State state, double percentage)
 	{
 		IVector3 velDiff = state.vel3.subtractNew(vel3).multiply(percentage);
 		IVector3 intpVel = vel3.addNew(velDiff);
 		return State.of(pose.interpolate(state.pose, percentage), intpVel);
 	}
-	
-	
+
+
 	public Pose getPose()
 	{
 		return pose;
 	}
-	
-	
+
+
 	/**
 	 * @return [mm,mm]
 	 */
@@ -90,8 +97,8 @@ public class State implements IMirrorable<State>
 	{
 		return pose.getPos();
 	}
-	
-	
+
+
 	/**
 	 * @return [rad]
 	 */
@@ -99,8 +106,8 @@ public class State implements IMirrorable<State>
 	{
 		return pose.getOrientation();
 	}
-	
-	
+
+
 	/**
 	 * @return [m/s,m/s,rad/s]
 	 */
@@ -108,8 +115,8 @@ public class State implements IMirrorable<State>
 	{
 		return vel3;
 	}
-	
-	
+
+
 	/**
 	 * @return [m/s,m/s]
 	 */
@@ -117,8 +124,8 @@ public class State implements IMirrorable<State>
 	{
 		return vel3.getXYVector();
 	}
-	
-	
+
+
 	/**
 	 * @return [rad/s]
 	 */
@@ -126,26 +133,26 @@ public class State implements IMirrorable<State>
 	{
 		return vel3.z();
 	}
-	
-	
+
+
 	@Override
 	public boolean equals(final Object o)
 	{
 		if (this == o)
 			return true;
-		
+
 		if (o == null || getClass() != o.getClass())
 			return false;
-		
+
 		final State state = (State) o;
-		
+
 		return new EqualsBuilder()
 				.append(pose, state.pose)
 				.append(vel3, state.vel3)
 				.isEquals();
 	}
-	
-	
+
+
 	@Override
 	public int hashCode()
 	{
@@ -154,8 +161,8 @@ public class State implements IMirrorable<State>
 				.append(vel3)
 				.toHashCode();
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -163,5 +170,23 @@ public class State implements IMirrorable<State>
 				.append("pose", pose)
 				.append("vel3", vel3)
 				.toString();
+	}
+
+
+	@Override
+	public List<String> getHeaders()
+	{
+		return Arrays.asList("pos_x", "pos_y", "pos_w", "vel_x", "vel_y", "vel_w");
+	}
+
+
+	@Override
+	public List<Number> getNumberList()
+	{
+		List<Number> list = new ArrayList<>(6);
+		list.addAll(pose.getPos().getNumberList());
+		list.add(pose.getOrientation());
+		list.addAll(vel3.getNumberList());
+		return list;
 	}
 }

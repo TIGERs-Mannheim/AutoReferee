@@ -40,6 +40,7 @@ public final class TrackedBot implements ITrackedBot
 	private final State botState;
 	private final transient State filteredState;
 	private final transient State bufferedTrajState;
+	private final TrajTrackingQuality trackingQuality;
 	private final long lastBallContact;
 	private final RobotInfo robotInfo;
 	private final double quality;
@@ -53,6 +54,7 @@ public final class TrackedBot implements ITrackedBot
 		botState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
 		filteredState = null;
 		bufferedTrajState = null;
+		trackingQuality = null;
 		lastBallContact = 0;
 		robotInfo = null;
 		tAssembly = 0;
@@ -67,6 +69,7 @@ public final class TrackedBot implements ITrackedBot
 		botState = builder.state;
 		filteredState = builder.filteredState;
 		bufferedTrajState = builder.bufferedTrajState;
+		trackingQuality = builder.trackingQuality;
 		lastBallContact = builder.lastBallContact;
 		robotInfo = builder.robotInfo;
 		quality = builder.quality;
@@ -329,6 +332,13 @@ public final class TrackedBot implements ITrackedBot
 
 
 	@Override
+	public TrajTrackingQuality getTrackingQuality()
+	{
+		return trackingQuality;
+	}
+
+
+	@Override
 	public double getQuality()
 	{
 		return quality;
@@ -368,6 +378,11 @@ public final class TrackedBot implements ITrackedBot
 		numbers.add(robotInfo.getDribbleRpm());
 		numbers.add(robotInfo.isBarrierInterrupted() ? 1 : 0);
 		numbers.add(tAssembly);
+		numbers.addAll(getBufferedTrajState().map(bs -> Vector3.from2d(bs.getPos(), bs.getOrientation()))
+				.orElse(Vector3.zero()).getNumberList());
+		numbers.addAll(getBufferedTrajState().map(bs -> Vector3.from2d(bs.getVel2(), bs.getAngularVel()))
+				.orElse(Vector3.zero()).getNumberList());
+		numbers.add(trackingQuality.getCurDistance());
 		return numbers;
 	}
 
@@ -376,7 +391,10 @@ public final class TrackedBot implements ITrackedBot
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("id", "color", "timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x",
-				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleRpm", "barrierInterrupted", "tAssembly");
+				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleRpm", "barrierInterrupted", "tAssembly",
+				"buffered_pos_x", "buffered_pos_y", "buffered_pos_z",
+				"buffered_vel_x", "buffered_vel_y", "buffered_vel_z",
+				"dist2Traj");
 	}
 
 	/**
@@ -389,6 +407,7 @@ public final class TrackedBot implements ITrackedBot
 		private State state;
 		private State filteredState;
 		private State bufferedTrajState;
+		private TrajTrackingQuality trackingQuality;
 		private Long lastBallContact;
 		private RobotInfo robotInfo;
 		private double quality;
@@ -483,6 +502,21 @@ public final class TrackedBot implements ITrackedBot
 		public Builder withBufferedTrajState(final State bufferedTrajState)
 		{
 			this.bufferedTrajState = bufferedTrajState;
+			return this;
+		}
+
+
+		/**
+		 * Sets the {@code trackingQuality} and returns a reference to this Builder so that the methods can be
+		 * chained
+		 * together.
+		 *
+		 * @param trackingQuality the {@code trackingQuality} to set
+		 * @return a reference to this Builder
+		 */
+		public Builder withTrackingQuality(final TrajTrackingQuality trackingQuality)
+		{
+			this.trackingQuality = trackingQuality;
 			return this;
 		}
 

@@ -78,7 +78,7 @@ public class FileTree extends JPanel
 		// Lastly, put the JTree into a JScrollPane.
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.getViewport().add(tree);
-		scrollPane.setPreferredSize(new Dimension(250, 0));
+		scrollPane.setPreferredSize(new Dimension(400, 0));
 		add(BorderLayout.CENTER, scrollPane);
 	}
 

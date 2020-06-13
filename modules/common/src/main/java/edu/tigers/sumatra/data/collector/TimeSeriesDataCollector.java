@@ -156,6 +156,7 @@ public class TimeSeriesDataCollector implements Runnable
 	}
 
 
+	@SuppressWarnings("squid:S1181") // Catch Throwable here intentionally
 	private void stopIfDone()
 	{
 		try
@@ -243,19 +244,19 @@ public class TimeSeriesDataCollector implements Runnable
 		File dir = new File(folder);
 		if (dir.exists())
 		{
-			log.error("Target folder already exists: " + folder);
+			log.error("Target folder already exists: {}", folder);
 			return;
 		}
 		if (!dir.mkdirs())
 		{
-			log.error("Can not create target folder: " + folder);
+			log.error("Can not create target folder: {}", folder);
 			return;
 		}
 
 		dataProviders.forEach(
 				provider -> provider.getExportableData()
 						.forEach(
-								(key, dataBuffer) -> CSVExporter.exportCollection(folder, key, new ArrayList<>(dataBuffer))));
+								(name, dataBuffer) -> CSVExporter.exportCollection(folder, name, new ArrayList<>(dataBuffer))));
 	}
 
 

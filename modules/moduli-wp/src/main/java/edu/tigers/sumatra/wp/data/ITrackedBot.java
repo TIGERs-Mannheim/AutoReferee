@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -152,4 +152,10 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 * @return the buffered state of the current trajectory, synchronized with the filtered state
 	 */
 	Optional<State> getBufferedTrajState();
+
+
+	/**
+	 * @return the distance from the actual position to the current trajectory
+	 */
+	TrajTrackingQuality getTrackingQuality();
 }
