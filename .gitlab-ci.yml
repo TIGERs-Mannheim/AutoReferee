@@ -3,6 +3,6 @@ stages:
 
 build:
   stage: build
-  image: maven:3-jdk-8
+  image: openjdk:8
   script:
     - './build.sh'
