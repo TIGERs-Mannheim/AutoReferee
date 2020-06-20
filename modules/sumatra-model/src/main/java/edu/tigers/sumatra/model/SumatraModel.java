@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
+
+import edu.tigers.moduli.Moduli;
+import edu.tigers.moduli.exceptions.DependencyException;
+import edu.tigers.moduli.exceptions.LoadModulesException;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,16 +18,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
-
-import edu.tigers.moduli.Moduli;
-import edu.tigers.moduli.exceptions.DependencyException;
-import edu.tigers.moduli.exceptions.LoadModulesException;
 
 
 /**
@@ -52,9 +50,7 @@ public final class SumatraModel extends Moduli
 
 	// --- moduli config ---
 	private static final String KEY_MODULI_CONFIG = SumatraModel.class.getName() + ".moduliConfig";
-	/** */
 	public static final String MODULI_CONFIG_PATH = "./config/moduli/";
-	/**  */
 	public static final String MODULI_CONFIG_FILE_DEFAULT = "sim.xml";
 
 	// Application Properties
@@ -170,6 +166,8 @@ public final class SumatraModel extends Moduli
 	// --------------------------------------------------------------------------
 	// --- moduli config --------------------------------------------------------
 	// --------------------------------------------------------------------------
+
+
 	/**
 	 * @return the currentModuliConfig
 	 */
@@ -191,6 +189,7 @@ public final class SumatraModel extends Moduli
 	// --------------------------------------------------------------------------
 	// --- app properties -------------------------------------------------------
 	// --------------------------------------------------------------------------
+
 
 	/**
 	 * @return The applications {@link Properties}
@@ -381,15 +380,7 @@ public final class SumatraModel extends Moduli
 			{
 				final Properties properties = new Properties();
 				properties.load(manifestStream);
-
-				final String version = properties.getProperty("version", "unknown version")
-						.replace("-SNAPSHOT", "");
-				final String gitHash = properties.getProperty("git.hash", "");
-				if (StringUtils.isNotBlank(gitHash))
-				{
-					return version + "_" + gitHash;
-				}
-				return version;
+				return properties.getProperty("version", "unknown version");
 			} catch (IOException e)
 			{
 				log.error("Could not read manifest", e);

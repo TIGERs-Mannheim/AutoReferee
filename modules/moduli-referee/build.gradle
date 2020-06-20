@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id "java-library"
+    id "com.google.protobuf"
+    id "de.undercouch.download" version "4.0.4"
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':common-math')
+    implementation project(':moduli-geometry')
+
+    implementation 'com.github.TIGERs-Mannheim:moduli:2.2'
+    implementation 'com.github.g3force:configurable:3.0'
+    implementation 'com.github.g3force:instanceables:2.0'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'commons-configuration:commons-configuration:1.10'
+    implementation 'commons-io:commons-io:2.6'
+
+    api 'com.google.protobuf:protobuf-java:3.11.4'
+    implementation 'com.google.protobuf:protobuf-java-util:3.11.4'
+    implementation 'com.sleepycat:je:7.5.11'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.0'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.11.4'
+    }
+}
+
+def osClassifier = {
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("windows")) {
+        return "windows_amd64"
+    } else if (os.contains("linux")) {
+        return "linux_amd64"
+    } else if (os.contains("mac")) {
+        return "darwin_amd64"
+    } else {
+        throw new IllegalStateException("Unknown operating system: ${os}")
+    }
+}()
+
+def osExt = {
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("windows")) {
+        return ".exe"
+    }
+    return ""
+}()
+
+def gameControllerVersion = "v2.0.0-rc3"
+def gameControllerBinary = "ssl-game-controller_${gameControllerVersion}_${osClassifier}${osExt}".toString()
+
+task downloadGameController(type: Download) {
+    src "https://github.com/RoboCup-SSL/ssl-game-controller/releases/download/${gameControllerVersion}/${gameControllerBinary}"
+    dest buildDir
+    overwrite false
+    onlyIfModified true
+}
+
+processResources {
+    from("${buildDir}/${gameControllerBinary}") {
+        rename { "ssl-game-controller" }
+    }
+    dependsOn(downloadGameController)
+}

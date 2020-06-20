@@ -1,24 +1,28 @@
 # TIGERs Mannheim AutoReferee
 
-Homepage: https://www.tigers-mannheim.de  
-Mail: management@tigers-mannheim.de
+Homepage: https://tigers-mannheim.de  
+Mail: info@tigers-mannheim.de
 
 This is the AutoReferee implementation of TIGERs Mannheim. It is based on Sumatra, our AI framework.
-We use Maven for building the application. You can also use IntelliJ or Eclipse to build and run it. The required configuration files are included.
-Dependencies will be downloaded from Maven repositories, so you need an internet connection for the build.
+We use Gradle for building the application and IntelliJ as the primary IDE.
+All dependencies will be downloaded automatically, so you need an internet connection for the build.
 
 ## System Requirements
  * Java JDK 8
- * Maven
  * Internet connection
  * no limitations on OS known
 
 ## Build
-Configuration for IntelliJ and Eclipse is provided and should work out-of-the-box. Without an IDE, run `./build.sh` or `./build.bat`, depending on your system platform.
+Run `./build.sh` or `./build.bat`, depending on your system platform.
 
-## Run from command line
-Run `run.sh <mode>` or `run.bat`, where <mode> must be replaced with either `active` or `passive`. For Windows, the
-mode must be changed in the script. It is passive by default.
+## Run
+Run `./run.sh` or `run.bat`, depending on your system platform.
+
+You can pass `-h` to get the available arguments.
+
+## IntelliJ
+IntelliJ reads the Gradle configuration and can use Gradle to perform the build.
+Make sure to configure Gradle for build and tests under Build, Execution, Deployment -> Build Tools -> Gradle.
 
 # Usage
 
@@ -68,10 +72,3 @@ ssl-vision.
 The autoRef ships with the official ssl-game-controller. To activate it, change `gameController` to true in [config/moduli/moduli.xml](config/moduli/moduli.xml). The autoRef will internally launch the game-controller and connect to its websocket API
 to be able to send some basic commands through the **Ref** view. This view also contains a button to launch the full
 game-controller UI.
-
-## Recording Gameplay
-The autoRef can automatically start and stop recordings when a game starts/stops. To enable this feature, have a look in [run.sh](run.sh).
-The recording consumes a lot of memory. That's why by default, the heap size is set to 4GB. Make sure that your system has sufficient free memory. The recordings are stored in [data/record](data/record). They can grow to several Gigabyte, as they are stored uncompressed.
-Zipping the output files significantly reduces the size.
-
-You can access the replays by right-clicking a row in the GameLog view. This will jump directly to the time, the infringement occurred (30 seconds before). After a recording was closed, it can be accessed from the menu.

@@ -4,17 +4,17 @@
 
 package edu.tigers.sumatra.referee.control;
 
-import java.util.EnumMap;
-import java.util.Map;
-
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcChange;
-import edu.tigers.sumatra.SslGcCommon;
-import edu.tigers.sumatra.SslGcGeometry;
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.SslGcState;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcChange;
+import edu.tigers.sumatra.referee.proto.SslGcCommon;
+import edu.tigers.sumatra.referee.proto.SslGcGeometry;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.referee.proto.SslGcState;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 
 /**

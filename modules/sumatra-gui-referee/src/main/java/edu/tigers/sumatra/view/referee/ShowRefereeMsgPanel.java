@@ -3,14 +3,14 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.io.IOException;
-import java.net.URI;
-import java.text.DecimalFormat;
-import java.util.concurrent.TimeUnit;
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.Referee;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Command;
+import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -19,16 +19,14 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-
-import org.apache.commons.lang.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Command;
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.referee.Referee;
-import net.miginfocom.swing.MigLayout;
+import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.io.IOException;
+import java.net.URI;
+import java.text.DecimalFormat;
+import java.util.concurrent.TimeUnit;
 
 
 /**

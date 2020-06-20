@@ -1,0 +1,33 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id "java-library"
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':common-math')
+    implementation project(':common-bot')
+    implementation project(':sumatra-model')
+    implementation project(':moduli-wp')
+    implementation project(':moduli-vision')
+    implementation project(':moduli-geometry')
+    implementation project(':moduli-referee')
+    implementation project(':moduli-record')
+
+    implementation 'com.github.TIGERs-Mannheim:moduli:2.2'
+    implementation 'com.github.g3force:configurable:3.0'
+    api 'com.github.g3force:instanceables:2.0'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+
+    implementation 'commons-configuration:commons-configuration:1.10'
+    implementation 'com.google.guava:guava:27.0.1-jre'
+    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-lang:commons-lang:2.6'
+
+    implementation 'com.sleepycat:je:7.5.11'
+    implementation 'com.google.protobuf:protobuf-java:3.11.4'
+}

@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id "java-library"
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':common-gui')
+    implementation project(':sumatra-model')
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.12.1'
+
+    implementation 'com.miglayout:miglayout-swing:5.2'
+}

@@ -3,16 +3,16 @@
  */
 package edu.tigers.sumatra.referee;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import edu.tigers.moduli.AModule;
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.IRefereeSourceObserver;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**

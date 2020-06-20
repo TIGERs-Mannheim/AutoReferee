@@ -4,26 +4,26 @@
 
 package edu.tigers.sumatra.wp;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import edu.tigers.sumatra.SslGcCommon;
-import edu.tigers.sumatra.SslGcGeometry;
-import edu.tigers.sumatra.SslVisionDetectionTracked;
-import edu.tigers.sumatra.SslVisionWrapperTracked;
 import edu.tigers.sumatra.cam.TimeSync;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
+import edu.tigers.sumatra.referee.proto.SslGcCommon;
+import edu.tigers.sumatra.referee.proto.SslGcGeometry;
 import edu.tigers.sumatra.vision.data.IKickEvent;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
+import edu.tigers.sumatra.wp.proto.SslVisionDetectionTracked;
+import edu.tigers.sumatra.wp.proto.SslVisionWrapperTracked;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class TrackerPacketGenerator

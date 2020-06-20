@@ -1,0 +1,146 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id "java"
+    id "jacoco"
+    id "idea"
+    id "application"
+
+    id "com.google.protobuf" version "0.8.12" apply false
+    id "com.palantir.git-version" version "0.12.3"
+    id "ca.cutterslade.analyze" version "1.4.1"
+    id "com.google.cloud.tools.jib" version "2.4.0"
+}
+
+version versionDetails().lastTag + "-" + versionDetails().gitHash
+
+allprojects {
+    repositories {
+        maven {
+            url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
+        }
+
+        maven {
+            url = 'https://jitpack.io/'
+        }
+
+        maven {
+            url = 'https://download.oracle.com/maven'
+        }
+
+        jcenter()
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'idea'
+    apply plugin: 'ca.cutterslade.analyze'
+
+    sourceCompatibility = '1.8'
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
+    test {
+        exclude '**/*PerfTest.class'
+        exclude '**/*IntegrationTest.class'
+    }
+
+    jacoco {
+        toolVersion = "0.8.5"
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled = true
+            csv.enabled = false
+            html.enabled = false
+        }
+
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it,
+                        exclude: ['**/proto/**/*'])
+            }))
+        }
+
+        dependsOn(test)
+    }
+}
+
+tasks.named('wrapper') {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+dependencies {
+    implementation project(':autoreferee-gui')
+
+    implementation project(':common-gui')
+    implementation project(':common-gui-config')
+
+    implementation project(':sumatra-model')
+    implementation project(':sumatra-gui-log')
+    implementation project(':sumatra-gui-referee')
+    implementation project(':sumatra-gui-replay')
+    implementation project(':sumatra-gui-visualizer')
+
+    implementation project(':moduli-record')
+    implementation project(':moduli-autoreferee')
+    runtimeOnly project(':moduli-wp')
+    runtimeOnly project(':moduli-referee')
+
+    implementation 'com.github.TIGERs-Mannheim:moduli:2.2'
+    implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.12.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.12.1'
+    runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.25'
+
+    implementation 'commons-cli:commons-cli:1.4'
+}
+
+application {
+    mainClass.set('edu.tigers.autoref.AutoReferee')
+    applicationDefaultJvmArgs = [
+            '-Xms64m',
+            '-Xmx2G',
+            '-server',
+            '-Dsun.java2d.d3d=false',
+            '-Djava.net.preferIPv4Stack=true',
+    ]
+}
+
+jib {
+    to {
+        image = "registry.hub.docker.com/tigersmannheim/auto-referee:latest"
+        auth {
+            username = System.getenv("DOCKER_HUB_USERNAME")
+            password = System.getenv("DOCKER_HUB_PASSWORD")
+        }
+        tags = [rootProject.version]
+    }
+    from {
+        // gcr.io/distroless/java:8
+        image = "gcr.io/distroless/java@sha256:7cef6d99241bc86e09659d41842e3656a1cab99adf0e440a44d2858c8e52a71a"
+    }
+    container {
+        workingDirectory = "/AutoReferee"
+    }
+}
+
+run.workingDir = rootProject.projectDir
+
+// set version here to avoid overriding the project version.
+// version is set to null to skip it completely in the artifact names
+// Thus, it is guaranteed that old artifacts are always overwritten.
+distZip.archiveVersion.convention(null)
+jar.archiveVersion.convention(null)
+
+// disable tar distribution to avoid redundant artifacts
+distTar.enabled = false

@@ -3,8 +3,8 @@
  */
 package edu.tigers.autoreferee.engine.log;
 
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Stage;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Stage;
 
 
 /**

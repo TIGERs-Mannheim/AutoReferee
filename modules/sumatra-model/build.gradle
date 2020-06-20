@@ -1,0 +1,24 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id 'java-library'
+}
+
+import org.apache.tools.ant.filters.*
+
+dependencies {
+    api 'com.github.TIGERs-Mannheim:moduli:2.2'
+
+    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.12.1'
+
+    implementation 'commons-configuration:commons-configuration:1.10'
+}
+
+processResources {
+    filter ReplaceTokens, tokens: [
+            "application.version": rootProject.version,
+    ]
+}

@@ -5,17 +5,15 @@
 package edu.tigers.sumatra.referee;
 
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
+import com.google.protobuf.ByteString;
+import edu.tigers.sumatra.referee.proto.SslGcRcon;
+import edu.tigers.sumatra.referee.proto.SslGcRconTeam;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.protobuf.ByteString;
-
-import edu.tigers.sumatra.SslGcRcon;
-import edu.tigers.sumatra.SslGcRconTeam;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 
 public class TestTeamClient

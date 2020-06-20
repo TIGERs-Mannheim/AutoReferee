@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package edu.tigers.sumatra;
+option java_package = "edu.tigers.sumatra.wp.proto";
 option go_package = "github.com/RoboCup-SSL/ssl-game-controller/internal/app/ci";
 
 import "ssl_vision_wrapper_tracked.proto";
@@ -17,5 +17,5 @@ message CiInput {
 // The output format of the GC response
 message CiOutput {
     // Latest referee message
-    optional Referee referee_msg = 1;
+    optional edu.tigers.sumatra.referee.proto.Referee referee_msg = 1;
 }

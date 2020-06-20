@@ -3,15 +3,13 @@
  */
 package edu.tigers.sumatra.referee.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

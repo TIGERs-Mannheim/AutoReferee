@@ -3,25 +3,23 @@
  */
 package edu.tigers.sumatra.cam;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.IConfigClient;
+import com.github.g3force.configurable.IConfigObserver;
+import edu.tigers.sumatra.cam.data.CamGeometry;
+import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
+import edu.tigers.sumatra.network.IReceiverObserver;
+import edu.tigers.sumatra.network.MulticastUDPReceiver;
+import edu.tigers.sumatra.network.NetworkUtility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
-import com.github.g3force.configurable.IConfigClient;
-import com.github.g3force.configurable.IConfigObserver;
-
-import edu.tigers.sumatra.MessagesRobocupSslWrapper.SSL_WrapperPacket;
-import edu.tigers.sumatra.cam.data.CamGeometry;
-import edu.tigers.sumatra.network.IReceiverObserver;
-import edu.tigers.sumatra.network.MulticastUDPReceiver;
-import edu.tigers.sumatra.network.NetworkUtility;
 
 
 /**

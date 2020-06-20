@@ -4,7 +4,7 @@
 package edu.tigers.sumatra.referee.gameevent;
 
 
-import edu.tigers.sumatra.SslGcGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 
 
 /**

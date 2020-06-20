@@ -1,5 +1,5 @@
 syntax = "proto2";
-package edu.tigers.sumatra;
+option java_package = "edu.tigers.sumatra.cam.proto";
 
 // A 2D float vector.
 message Vector2f {

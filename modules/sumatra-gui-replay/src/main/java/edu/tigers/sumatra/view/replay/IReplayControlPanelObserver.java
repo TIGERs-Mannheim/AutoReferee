@@ -4,8 +4,8 @@
 
 package edu.tigers.sumatra.view.replay;
 
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.gameevent.EGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 
 
 /**

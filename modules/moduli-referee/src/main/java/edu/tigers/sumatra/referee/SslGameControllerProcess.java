@@ -4,12 +4,16 @@
 
 package edu.tigers.sumatra.referee;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
@@ -17,16 +21,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 
 /**
  * A wrapper around the ssl-game-controller executable
  */
 public class SslGameControllerProcess implements Runnable
 {
-	private final Logger log = LogManager.getLogger(SslGameControllerProcess.class.getName());
+	private static final Logger log = LogManager.getLogger(SslGameControllerProcess.class.getName());
 
 	private int gcUiPort = 50543;
 	private String publishAddress = "";
@@ -35,51 +36,17 @@ public class SslGameControllerProcess implements Runnable
 	private SslGameControllerClient client = null;
 	private final CountDownLatch clientLatch = new CountDownLatch(1);
 
-	private String locateModulesFolder() throws FileNotFoundException
-	{
-		StringBuilder prefix = new StringBuilder();
-		for (int i = 0; i < 3; i++)
-		{
-			String path = prefix + "modules";
-			if (new File(path).isDirectory())
-			{
-				return path;
-			}
-			prefix.append("../");
-		}
-		throw new FileNotFoundException("Could not locate modules folder");
-	}
-
 
 	@Override
 	public void run()
 	{
 		Thread.currentThread().setName("ssl-game-controller");
 
-		final String modulesFolder;
-		try
+		File binaryFile = getResourceAsFile("ssl-game-controller");
+		if (binaryFile == null)
 		{
-			modulesFolder = locateModulesFolder();
-		} catch (FileNotFoundException e)
-		{
-			log.warn("No ssl-game-controller binary file found.", e);
+			log.warn("Failed to start ssl-game-controller");
 			return;
-		}
-
-		String binaryFolder = modulesFolder + "/moduli-referee/target/ssl-game-controller";
-		final File[] files = new File(binaryFolder).listFiles();
-		if (files == null || files.length == 0)
-		{
-			log.error("No ssl-game-controller binary file found.");
-			return;
-		}
-		Arrays.sort(files);
-
-		File binaryFile = files[files.length - 1];
-
-		if (files.length > 1)
-		{
-			log.info("Found multiple ssl-game-controller binaries. Choosing " + binaryFile);
 		}
 
 		try
@@ -115,6 +82,33 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("game-controller has returned a non-zero exit code: " + process.exitValue());
 		}
 		log.debug("game-controller process thread finished");
+	}
+
+
+	private static File getResourceAsFile(String resourcePath)
+	{
+		try
+		{
+			InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(resourcePath);
+			if (in == null)
+			{
+				log.warn("Could not find {} in classpath", resourcePath);
+				return null;
+			}
+
+			File tempFile = File.createTempFile(String.valueOf(in.hashCode()), ".tmp");
+			tempFile.deleteOnExit();
+
+			try (FileOutputStream out = new FileOutputStream(tempFile))
+			{
+				IOUtils.copy(in, out);
+			}
+			return tempFile;
+		} catch (IOException e)
+		{
+			log.warn("Could not copy binary to temporary file", e);
+			return null;
+		}
 	}
 
 

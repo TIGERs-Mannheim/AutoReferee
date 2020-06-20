@@ -3,8 +3,23 @@
  */
 package edu.tigers.autoref.presenter;
 
-import static edu.tigers.sumatra.SslGcEngineConfig.Config.Behavior.BEHAVIOR_ACCEPT;
-import static edu.tigers.sumatra.SslGcEngineConfig.Config.Behavior.BEHAVIOR_IGNORE;
+import edu.tigers.autoref.view.main.AutoRefMainPanel;
+import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
+import edu.tigers.autoreferee.IAutoRefObserver;
+import edu.tigers.autoreferee.engine.EAutoRefMode;
+import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
+import edu.tigers.autoreferee.module.AutoRefModule;
+import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.IGameControllerApiObserver;
+import edu.tigers.sumatra.referee.Referee;
+import edu.tigers.sumatra.referee.gameevent.EGameEvent;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcEngineConfig;
+import edu.tigers.sumatra.views.ISumatraView;
+import edu.tigers.sumatra.views.ISumatraViewPresenter;
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -13,23 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.tigers.autoref.view.main.AutoRefMainPanel;
-import edu.tigers.autoref.view.main.StartStopPanel.IStartStopPanelObserver;
-import edu.tigers.autoreferee.IAutoRefObserver;
-import edu.tigers.autoreferee.engine.EAutoRefMode;
-import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
-import edu.tigers.autoreferee.module.AutoRefModule;
-import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcEngineConfig;
-import edu.tigers.sumatra.components.EnumCheckBoxPanel.IEnumPanelObserver;
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.referee.IGameControllerApiObserver;
-import edu.tigers.sumatra.referee.Referee;
-import edu.tigers.sumatra.referee.gameevent.EGameEvent;
-import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.views.ISumatraView;
-import edu.tigers.sumatra.views.ISumatraViewPresenter;
+import static edu.tigers.sumatra.referee.proto.SslGcEngineConfig.Config.Behavior.BEHAVIOR_ACCEPT;
+import static edu.tigers.sumatra.referee.proto.SslGcEngineConfig.Config.Behavior.BEHAVIOR_IGNORE;
 
 
 public class AutoRefPresenter

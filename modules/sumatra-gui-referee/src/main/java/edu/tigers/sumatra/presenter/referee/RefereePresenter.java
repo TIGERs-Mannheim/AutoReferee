@@ -4,23 +4,22 @@
 
 package edu.tigers.sumatra.presenter.referee;
 
-import java.awt.Component;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.view.referee.IRefBoxRemoteControlRequestObserver;
 import edu.tigers.sumatra.view.referee.RefereePanel;
 import edu.tigers.sumatra.views.ASumatraViewPresenter;
 import edu.tigers.sumatra.views.ISumatraView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Component;
 
 
 /**

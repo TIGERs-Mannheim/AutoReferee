@@ -1,18 +1,10 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -26,6 +18,12 @@ import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOu
 import edu.tigers.sumatra.vision.data.EBallState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -38,8 +36,8 @@ public class BallFilter
 	private IVector3 lastKnownPosition = Vector3f.ZERO_VECTOR;
 	private CircularFifoQueue<MergedBall> mergedBallHistory = new CircularFifoQueue<>(50);
 
-	@Configurable(defValue = "true", comment = "Always use merged ball velocity instead of kick model velocity.")
-	private static boolean alwaysUseMergedBallVelocity = true;
+	@Configurable(defValue = "false", comment = "Always use merged ball velocity instead of kick model velocity.")
+	private static boolean alwaysUseMergedBallVelocity = false;
 
 	static
 	{

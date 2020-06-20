@@ -5,18 +5,16 @@
 package edu.tigers.sumatra.referee.gameevent;
 
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.SslGcCommon;
-import edu.tigers.sumatra.SslGcGameEvent;
-import edu.tigers.sumatra.SslGcGeometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.proto.SslGcCommon;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcGeometry;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 
 @Persistent

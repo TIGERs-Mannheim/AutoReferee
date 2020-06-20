@@ -1,14 +1,11 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_FieldCicularArc;
-import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_FieldLineSegment;
-import edu.tigers.sumatra.MessagesRobocupSslGeometry.SSL_GeometryFieldSize;
+import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_FieldCicularArc;
+import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_FieldLineSegment;
+import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_GeometryFieldSize;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
@@ -19,10 +16,13 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * SSL vision field dimensions
- * 
+ *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class CamFieldSize
@@ -34,8 +34,8 @@ public class CamFieldSize
 	private final double					boundaryWidth;
 	private final List<CamFieldLine>	fieldLines;
 	private final List<CamFieldArc>	fieldArcs;
-	
-	
+
+
 	/**
 	 * @param field
 	 */
@@ -62,8 +62,8 @@ public class CamFieldSize
 			fieldArcs.add(new CamFieldArc(circle, arc.getName(), arc.getThickness(), arc.getA1(), arc.getA2()));
 		}
 	}
-	
-	
+
+
 	/**
 	 * @return the fieldLength
 	 */
@@ -71,8 +71,8 @@ public class CamFieldSize
 	{
 		return fieldLength;
 	}
-	
-	
+
+
 	/**
 	 * @return the fieldWidth
 	 */
@@ -80,8 +80,8 @@ public class CamFieldSize
 	{
 		return fieldWidth;
 	}
-	
-	
+
+
 	/**
 	 * @return the goalWidth
 	 */
@@ -89,8 +89,8 @@ public class CamFieldSize
 	{
 		return goalWidth;
 	}
-	
-	
+
+
 	/**
 	 * @return the goalDepth
 	 */
@@ -98,8 +98,8 @@ public class CamFieldSize
 	{
 		return goalDepth;
 	}
-	
-	
+
+
 	/**
 	 * @return the boundaryWidth
 	 */
@@ -107,8 +107,8 @@ public class CamFieldSize
 	{
 		return boundaryWidth;
 	}
-	
-	
+
+
 	/**
 	 * @return the fieldLines
 	 */
@@ -116,11 +116,11 @@ public class CamFieldSize
 	{
 		return fieldLines;
 	}
-	
-	
+
+
 	/**
 	 * Get field rectangle with boundary width.
-	 * 
+	 *
 	 * @return
 	 */
 	public IRectangle getFieldWithBoundary()
@@ -128,19 +128,19 @@ public class CamFieldSize
 		return Rectangle.fromCenter(Vector2f.ZERO_VECTOR, fieldLength + (2 * boundaryWidth),
 				fieldWidth + (2 * boundaryWidth));
 	}
-	
-	
+
+
 	/**
 	 * Get field rectangle.
-	 * 
+	 *
 	 * @return
 	 */
 	public IRectangle getField()
 	{
 		return Rectangle.fromCenter(Vector2f.ZERO_VECTOR, fieldLength, fieldWidth);
 	}
-	
-	
+
+
 	/**
 	 * @return the fieldArcs
 	 */

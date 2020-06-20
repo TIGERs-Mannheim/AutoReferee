@@ -4,27 +4,14 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.AMainPresenter;
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.clock.ThreadUtil;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.gameevent.EGameEvent;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.snapshot.SnapshotController;
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.view.replay.IReplayControlPanelObserver;
@@ -34,6 +21,18 @@ import edu.tigers.sumatra.views.ESumatraViewType;
 import edu.tigers.sumatra.visualizer.VisualizerPresenter;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public class ReplayPresenter extends AMainPresenter

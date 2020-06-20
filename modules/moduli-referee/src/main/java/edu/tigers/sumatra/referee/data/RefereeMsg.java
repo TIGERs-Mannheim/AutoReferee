@@ -3,20 +3,7 @@
  */
 package edu.tigers.sumatra.referee.data;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
 import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Command;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -25,6 +12,17 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.referee.RefereeProtoUtil;
 import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Command;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**

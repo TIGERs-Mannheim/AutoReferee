@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra.referee;
 
-import edu.tigers.sumatra.SslGcEngineConfig;
+import edu.tigers.sumatra.referee.proto.SslGcEngineConfig;
 
 
 public interface IGameControllerApiObserver

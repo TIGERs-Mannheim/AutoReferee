@@ -3,22 +3,21 @@
  */
 package edu.tigers.sumatra.referee;
 
-import java.io.File;
-import java.util.EnumMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.util.EnumMap;
+import java.util.Map;
 
 
 /**
@@ -88,7 +87,7 @@ public class Referee extends AReferee
 		}
 		sslGameControllerProcess.setPublishAddress("224.5.23.1:" + getPort());
 
-		File stateStoreFile = new File("target/state-store.json.stream");
+		File stateStoreFile = new File("build/state-store.json.stream");
 		if (stateStoreFile.exists() && !stateStoreFile.delete())
 		{
 			log.warn("Could not remove state store file, although it exists");
@@ -181,7 +180,10 @@ public class Referee extends AReferee
 
 	public void addGcApiObserver(IGameControllerApiObserver o)
 	{
-		sslGameControllerProcess.getClient().ifPresent(c -> c.addObserver(o));
+		if (sslGameControllerProcess != null)
+		{
+			sslGameControllerProcess.getClient().ifPresent(c -> c.addObserver(o));
+		}
 	}
 
 

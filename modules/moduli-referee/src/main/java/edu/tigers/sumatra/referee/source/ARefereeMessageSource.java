@@ -3,12 +3,12 @@
  */
 package edu.tigers.sumatra.referee.source;
 
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
 
 
 public abstract class ARefereeMessageSource

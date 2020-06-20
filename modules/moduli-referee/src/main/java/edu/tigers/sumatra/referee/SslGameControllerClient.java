@@ -4,20 +4,18 @@
 
 package edu.tigers.sumatra.referee;
 
-import java.net.URI;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcEngineConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.util.JsonFormat;
-
-import edu.tigers.sumatra.SslGcApi;
-import edu.tigers.sumatra.SslGcEngineConfig;
+import java.net.URI;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 
 public class SslGameControllerClient extends WebSocketClient

@@ -1,23 +1,11 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamCalibration;
@@ -47,6 +35,16 @@ import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -81,8 +79,8 @@ public class CamFilter
 
 	private CircularFifoQueue<CamBall> ballHistory = new CircularFifoQueue<>(100);
 
-	@Configurable(defValue = "0.2", comment = "Time in [s] after an invisible ball is removed")
-	private static double invisibleLifetimeBall = 0.2;
+	@Configurable(defValue = "1.0", comment = "Time in [s] after an invisible ball is removed")
+	private static double invisibleLifetimeBall = 1.0;
 
 	@Configurable(defValue = "2.0", comment = "Time in [s] after an invisible robot is removed")
 	private static double invisibleLifetimeRobot = 2.0;

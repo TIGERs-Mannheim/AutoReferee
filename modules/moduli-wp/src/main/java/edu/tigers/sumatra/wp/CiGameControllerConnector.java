@@ -4,18 +4,17 @@
 
 package edu.tigers.sumatra.wp;
 
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
+import edu.tigers.sumatra.wp.proto.SslGcCi;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.SslGcCi;
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 
 
 /**

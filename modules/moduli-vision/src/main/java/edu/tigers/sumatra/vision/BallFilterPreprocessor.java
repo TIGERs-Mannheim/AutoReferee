@@ -1,25 +1,10 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
@@ -46,6 +31,19 @@ import edu.tigers.sumatra.vision.kick.estimators.KickFitResult;
 import edu.tigers.sumatra.vision.kick.estimators.StraightKickEstimator;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 
 /**
@@ -64,8 +62,8 @@ public class BallFilterPreprocessor
 
 	private final List<IBallModelIdentificationObserver> observers = new CopyOnWriteArrayList<>();
 
-	@Configurable(comment = "Minimum search radius for cam balls around last known position [mm]")
-	private static double minSearchRadius = 300;
+	@Configurable(defValue = "300.0", comment = "Minimum search radius for cam balls around last known position [mm]")
+	private static double minSearchRadius = 300.0;
 
 	@Configurable(defValue = "0.2", comment = "Factor by which a estimator must be better than the last one to use it")
 	private static double estimatorSwitchHysteresis = 0.2;

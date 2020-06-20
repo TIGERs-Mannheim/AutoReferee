@@ -5,7 +5,7 @@
 package edu.tigers.autoreferee.remote;
 
 
-import edu.tigers.sumatra.SslGcRcon;
+import edu.tigers.sumatra.referee.proto.SslGcRcon;
 
 public class GameEventResponse
 {

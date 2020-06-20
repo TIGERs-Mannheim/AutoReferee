@@ -3,7 +3,7 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import edu.tigers.sumatra.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
 
 
 public interface IRefBoxRemoteControlRequestObserver

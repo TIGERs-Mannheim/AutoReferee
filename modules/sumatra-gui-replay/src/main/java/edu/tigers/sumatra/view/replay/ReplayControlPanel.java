@@ -4,23 +4,10 @@
 
 package edu.tigers.sumatra.view.replay;
 
-import static javax.swing.KeyStroke.getKeyStroke;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import edu.tigers.sumatra.referee.gameevent.EGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.util.ImageScaler;
+import edu.tigers.sumatra.views.ISumatraView;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -38,11 +25,23 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.referee.gameevent.EGameEvent;
-import edu.tigers.sumatra.util.ImageScaler;
-import edu.tigers.sumatra.views.ISumatraView;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 
 /**

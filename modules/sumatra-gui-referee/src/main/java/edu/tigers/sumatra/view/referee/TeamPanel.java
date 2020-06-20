@@ -3,8 +3,13 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import java.awt.EventQueue;
-import java.util.concurrent.TimeUnit;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.vector.AVector2;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.control.GcEventFactory;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -12,14 +17,8 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.vector.AVector2;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.referee.control.GcEventFactory;
-import net.miginfocom.swing.MigLayout;
+import java.awt.EventQueue;
+import java.util.concurrent.TimeUnit;
 
 
 /**

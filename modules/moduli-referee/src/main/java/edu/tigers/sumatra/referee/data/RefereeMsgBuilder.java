@@ -4,12 +4,12 @@
 
 package edu.tigers.sumatra.referee.data;
 
-import java.util.EnumMap;
-import java.util.Map;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 
 /**

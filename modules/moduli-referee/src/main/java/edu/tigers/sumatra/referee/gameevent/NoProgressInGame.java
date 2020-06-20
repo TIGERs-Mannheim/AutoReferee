@@ -4,13 +4,11 @@
 
 package edu.tigers.sumatra.referee.gameevent;
 
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.SslGcGameEvent;
-import edu.tigers.sumatra.math.vector.IVector2;
 
 
 @Persistent

@@ -1,0 +1,18 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+plugins {
+    id "java-library"
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':common-math')
+
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'com.sleepycat:je:7.5.11'
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+}

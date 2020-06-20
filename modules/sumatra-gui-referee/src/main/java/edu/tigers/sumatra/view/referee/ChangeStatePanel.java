@@ -3,15 +3,14 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import java.awt.EventQueue;
+import edu.tigers.sumatra.referee.control.GcEventFactory;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.referee.control.GcEventFactory;
-import net.miginfocom.swing.MigLayout;
+import java.awt.EventQueue;
 
 
 /**

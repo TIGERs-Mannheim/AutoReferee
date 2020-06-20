@@ -4,14 +4,12 @@
 
 package edu.tigers.sumatra.referee.gameevent;
 
-import java.util.Optional;
-
+import com.github.g3force.instanceables.InstanceableClass;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.g3force.instanceables.InstanceableClass;
-
-import edu.tigers.sumatra.SslGcGameEvent;
+import java.util.Optional;
 
 
 public final class GameEventFactory

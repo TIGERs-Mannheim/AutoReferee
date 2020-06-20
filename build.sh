@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-args="${@}"
-./mvnw clean install -Pfast -Dmaven.repo.local=repository ${args}
+./gradlew build -x test
+rm -rf autoReferee
+unzip build/distributions/autoReferee.zip

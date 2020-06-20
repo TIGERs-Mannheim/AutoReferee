@@ -3,23 +3,21 @@
  */
 package edu.tigers.sumatra.referee.source;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.network.IReceiver;
+import edu.tigers.sumatra.network.MulticastUDPReceiver;
+import edu.tigers.sumatra.network.NetworkUtility;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Optional;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
-
-import edu.tigers.sumatra.SslGcRefereeMessage;
-import edu.tigers.sumatra.network.IReceiver;
-import edu.tigers.sumatra.network.MulticastUDPReceiver;
-import edu.tigers.sumatra.network.NetworkUtility;
 
 
 /**

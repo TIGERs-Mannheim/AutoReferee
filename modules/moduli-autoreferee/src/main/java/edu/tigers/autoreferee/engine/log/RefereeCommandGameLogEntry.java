@@ -4,7 +4,7 @@
 
 package edu.tigers.autoreferee.engine.log;
 
-import edu.tigers.sumatra.SslGcRefereeMessage;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 
 
 public class RefereeCommandGameLogEntry extends GameLogEntry

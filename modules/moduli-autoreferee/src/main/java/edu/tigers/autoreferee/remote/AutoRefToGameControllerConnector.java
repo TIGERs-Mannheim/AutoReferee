@@ -3,6 +3,18 @@
  */
 package edu.tigers.autoreferee.remote;
 
+import com.google.protobuf.ByteString;
+import edu.tigers.sumatra.referee.GameControllerProtocol;
+import edu.tigers.sumatra.referee.MessageSigner;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcRcon;
+import edu.tigers.sumatra.referee.proto.SslGcRconAutoref;
+import edu.tigers.sumatra.thread.NamedThreadFactory;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,20 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.google.protobuf.ByteString;
-
-import edu.tigers.sumatra.SslGcRcon;
-import edu.tigers.sumatra.SslGcRconAutoref;
-import edu.tigers.sumatra.referee.GameControllerProtocol;
-import edu.tigers.sumatra.referee.MessageSigner;
-import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.thread.NamedThreadFactory;
 
 
 /**

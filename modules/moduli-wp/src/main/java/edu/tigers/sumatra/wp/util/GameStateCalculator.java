@@ -4,19 +4,18 @@
 
 package edu.tigers.sumatra.wp.util;
 
-import java.util.Optional;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Command;
-import edu.tigers.sumatra.SslGcRefereeMessage.Referee.Stage;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Command;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Stage;
+
+import java.util.Optional;
 
 
 /**

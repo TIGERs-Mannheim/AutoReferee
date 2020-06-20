@@ -4,20 +4,19 @@
 
 package edu.tigers.sumatra.referee.gameevent;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
-
-import edu.tigers.sumatra.SslGcGameEvent;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class GameEventFactoryTest

@@ -3,16 +3,8 @@
  */
 package edu.tigers.sumatra.vision.tracker;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.Validate;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableBotShape;
@@ -25,6 +17,12 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -53,8 +51,8 @@ public class RobotTracker
 	private static double initialCovarianceXY = 100.0;
 	@Configurable(defValue = "0.1")
 	private static double modelErrorXY = 0.1;
-	@Configurable(defValue = "2.0")
-	private static double measErrorXY = 2.0;
+	@Configurable(defValue = "20.0")
+	private static double measErrorXY = 20.0;
 	@Configurable(defValue = "100.0")
 	private static double initialCovarianceW = 100.0;
 	@Configurable(defValue = "0.1")

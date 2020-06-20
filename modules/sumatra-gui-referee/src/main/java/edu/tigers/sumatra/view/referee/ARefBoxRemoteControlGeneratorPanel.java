@@ -3,12 +3,11 @@
  */
 package edu.tigers.sumatra.view.referee;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
 
 import javax.swing.JPanel;
-
-import edu.tigers.sumatra.SslGcApi;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**

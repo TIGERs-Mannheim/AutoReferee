@@ -1,6 +1,6 @@
 *.iml
-.idea
-repository
-data/*
-target
-history.json
+/.idea
+/data/*
+/.gradle
+build
+/autoReferee

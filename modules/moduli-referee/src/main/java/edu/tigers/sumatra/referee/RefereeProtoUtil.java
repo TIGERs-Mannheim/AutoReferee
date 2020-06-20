@@ -4,8 +4,8 @@
 
 package edu.tigers.sumatra.referee;
 
-import edu.tigers.sumatra.SslGcRefereeMessage;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 
 
 /**

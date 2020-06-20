@@ -3,19 +3,18 @@
  */
 package edu.tigers.sumatra.referee.gameevent;
 
-import static edu.tigers.sumatra.referee.gameevent.EGameEventType.BALL_LEFT_FIELD;
-import static edu.tigers.sumatra.referee.gameevent.EGameEventType.FOUL;
-import static edu.tigers.sumatra.referee.gameevent.EGameEventType.OTHER;
+import com.github.g3force.instanceables.IInstanceableEnum;
+import com.github.g3force.instanceables.InstanceableClass;
+import com.github.g3force.instanceables.InstanceableParameter;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
+import edu.tigers.sumatra.referee.proto.SslGcGameEvent.GameEvent.Type;
 
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.github.g3force.instanceables.IInstanceableEnum;
-import com.github.g3force.instanceables.InstanceableClass;
-import com.github.g3force.instanceables.InstanceableParameter;
-
-import edu.tigers.sumatra.SslGcGameEvent;
-import edu.tigers.sumatra.SslGcGameEvent.GameEvent.Type;
+import static edu.tigers.sumatra.referee.gameevent.EGameEventType.BALL_LEFT_FIELD;
+import static edu.tigers.sumatra.referee.gameevent.EGameEventType.FOUL;
+import static edu.tigers.sumatra.referee.gameevent.EGameEventType.OTHER;
 
 
 /**

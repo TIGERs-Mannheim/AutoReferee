@@ -4,7 +4,7 @@
 package edu.tigers.sumatra.referee.source;
 
 
-import edu.tigers.sumatra.SslGcRefereeMessage;
+import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 
 @FunctionalInterface
 public interface IRefereeSourceObserver

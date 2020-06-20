@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ */
+
+pluginManagement {
+    repositories {
+        maven {
+            url "https://nexus.tigers-mannheim.de/content/groups/public/"
+        }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'autoReferee'
+
+include(':autoreferee-gui')
+include(':common')
+include(':common-bot')
+include(':common-gui')
+include(':common-gui-config')
+include(':common-math')
+include(':moduli-autoreferee')
+include(':moduli-cam')
+include(':moduli-geometry')
+include(':moduli-record')
+include(':moduli-referee')
+include(':moduli-vision')
+include(':moduli-wp')
+include(':sumatra-gui-log')
+include(':sumatra-gui-referee')
+include(':sumatra-gui-replay')
+include(':sumatra-gui-visualizer')
+include(':sumatra-model')
+include(':sumatra-snapshot')
+
+project(':autoreferee-gui').projectDir = file('modules/autoreferee-gui')
+project(':common').projectDir = file('modules/common')
+project(':common-bot').projectDir = file('modules/common-bot')
+project(':common-gui').projectDir = file('modules/common-gui')
+project(':common-gui-config').projectDir = file('modules/common-gui-config')
+project(':common-math').projectDir = file('modules/common-math')
+project(':moduli-autoreferee').projectDir = file('modules/moduli-autoreferee')
+project(':moduli-cam').projectDir = file('modules/moduli-cam')
+project(':moduli-geometry').projectDir = file('modules/moduli-geometry')
+project(':moduli-record').projectDir = file('modules/moduli-record')
+project(':moduli-referee').projectDir = file('modules/moduli-referee')
+project(':moduli-vision').projectDir = file('modules/moduli-vision')
+project(':moduli-wp').projectDir = file('modules/moduli-wp')
+project(':sumatra-gui-log').projectDir = file('modules/sumatra-gui-log')
+project(':sumatra-gui-referee').projectDir = file('modules/sumatra-gui-referee')
+project(':sumatra-gui-replay').projectDir = file('modules/sumatra-gui-replay')
+project(':sumatra-gui-visualizer').projectDir = file('modules/sumatra-gui-visualizer')
+project(':sumatra-model').projectDir = file('modules/sumatra-model')
+project(':sumatra-snapshot').projectDir = file('modules/sumatra-snapshot')
