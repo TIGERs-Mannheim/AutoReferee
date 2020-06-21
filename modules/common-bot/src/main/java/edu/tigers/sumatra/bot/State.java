@@ -4,17 +4,7 @@
 
 package edu.tigers.sumatra.bot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.filter.IInterpolatable;
 import edu.tigers.sumatra.math.IMirrorable;
@@ -23,13 +13,28 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Persistent
+@Data
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class State implements IMirrorable<State>, IExportable, IInterpolatable<State>
 {
+	@NonNull
 	private final Pose pose;
-	/** [x,y,z] velocity in [m/s,m/s,rad/s] */
+
+	/**
+	 * [x,y,z] velocity in [m/s,m/s,rad/s]
+	 */
+	@NonNull
 	private final IVector3 vel3;
 
 
@@ -42,18 +47,7 @@ public class State implements IMirrorable<State>, IExportable, IInterpolatable<S
 
 	/**
 	 * @param pose the pose
-	 * @param vel3 [m/s,m/s,rad/s]
-	 */
-	protected State(final Pose pose, final IVector3 vel3)
-	{
-		this.pose = pose;
-		this.vel3 = vel3;
-	}
-
-
-	/**
-	 * @param pose the pose
-	 * @param vel [m/s,m/s,rad/s]
+	 * @param vel  [m/s,m/s,rad/s]
 	 * @return
 	 */
 	public static State of(final Pose pose, final IVector3 vel)
@@ -84,14 +78,8 @@ public class State implements IMirrorable<State>, IExportable, IInterpolatable<S
 	}
 
 
-	public Pose getPose()
-	{
-		return pose;
-	}
-
-
 	/**
-	 * @return [mm,mm]
+	 * @return [mm, mm]
 	 */
 	public IVector2 getPos()
 	{
@@ -105,15 +93,6 @@ public class State implements IMirrorable<State>, IExportable, IInterpolatable<S
 	public double getOrientation()
 	{
 		return pose.getOrientation();
-	}
-
-
-	/**
-	 * @return [m/s,m/s,rad/s]
-	 */
-	public IVector3 getVel3()
-	{
-		return vel3;
 	}
 
 
@@ -132,44 +111,6 @@ public class State implements IMirrorable<State>, IExportable, IInterpolatable<S
 	public double getAngularVel()
 	{
 		return vel3.z();
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final State state = (State) o;
-
-		return new EqualsBuilder()
-				.append(pose, state.pose)
-				.append(vel3, state.vel3)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.append(pose)
-				.append(vel3)
-				.toHashCode();
-	}
-
-
-	@Override
-	public String toString()
-	{
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("pose", pose)
-				.append("vel3", vel3)
-				.toString();
 	}
 
 

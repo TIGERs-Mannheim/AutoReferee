@@ -10,6 +10,7 @@ import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.assertj.core.data.Percentage;
 import org.junit.Test;
 
@@ -110,7 +111,7 @@ public class QuadrilateralTest
 	public void testEquals()
 	{
 		EqualsVerifier.forClass(Quadrilateral.class)
+				.suppress(Warning.NULL_FIELDS)
 				.verify();
 	}
-
 }

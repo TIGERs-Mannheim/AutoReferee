@@ -1,8 +1,16 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
+
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.SumatraMath;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -15,16 +23,6 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.math.SumatraMath;
-
 
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
@@ -33,16 +31,16 @@ import edu.tigers.sumatra.math.SumatraMath;
 public abstract class AVector implements IVector
 {
 	private static final DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
-	
+
 	static
 	{
 		decimalFormatSymbols.setDecimalSeparator('.');
 		decimalFormatSymbols.setGroupingSeparator(',');
 	}
-	
+
 	private static final DecimalFormat df = new DecimalFormat("0.000", decimalFormatSymbols);
-	
-	
+
+
 	@Override
 	public final boolean equals(final Object o)
 	{
@@ -58,13 +56,13 @@ public abstract class AVector implements IVector
 		{
 			return false;
 		}
-		
+
 		final IVector vector = (IVector) o;
 		if (getNumDimensions() != vector.getNumDimensions())
 		{
 			return false;
 		}
-		
+
 		boolean identical = true;
 		for (int d = 0; d < getNumDimensions(); d++)
 		{
@@ -81,8 +79,8 @@ public abstract class AVector implements IVector
 		}
 		return similar;
 	}
-	
-	
+
+
 	@Override
 	public final int hashCode()
 	{
@@ -93,8 +91,8 @@ public abstract class AVector implements IVector
 		}
 		return builder.toHashCode();
 	}
-	
-	
+
+
 	@Override
 	public RealVector toRealVector()
 	{
@@ -105,8 +103,8 @@ public abstract class AVector implements IVector
 		}
 		return rv;
 	}
-	
-	
+
+
 	/**
 	 * @param list
 	 * @return
@@ -123,8 +121,8 @@ public abstract class AVector implements IVector
 		double[] arr = list.stream().mapToDouble(Number::doubleValue).toArray();
 		return VectorN.from(arr);
 	}
-	
-	
+
+
 	/**
 	 * Parse a string into a vector. <br>
 	 * Vector Elements are separated with , or ; <br>
@@ -151,20 +149,20 @@ public abstract class AVector implements IVector
 		}
 		return VectorN.from(fvalues);
 	}
-	
-	
+
+
 	private static Double valueOfElement(final String val)
 	{
 		String value = val.replaceAll("pi", String.valueOf(Math.PI));
-		
-		return parseStatement(value, "\\+", (x, y) -> x + y)
+
+		return parseStatement(value, "\\+", Double::sum)
 				.orElseGet(() -> parseStatement(value, "-", (x, y) -> x - y)
 						.orElseGet(() -> parseStatement(value, "\\*", (x, y) -> x * y)
 								.orElseGet(() -> parseStatement(value, "/", (x, y) -> x / y)
-										.orElseGet(() -> value.isEmpty() ? 0.0 : Double.valueOf(value)))));
+										.orElseGet(() -> value.isEmpty() ? 0.0 : Double.parseDouble(value)))));
 	}
-	
-	
+
+
 	private static Optional<Double> parseStatement(final String statement, final String regex,
 			final BiFunction<Double, Double, Double> operation)
 	{
@@ -175,8 +173,8 @@ public abstract class AVector implements IVector
 		}
 		return Optional.empty();
 	}
-	
-	
+
+
 	@Override
 	public double getLength()
 	{
@@ -187,8 +185,8 @@ public abstract class AVector implements IVector
 		}
 		return SumatraMath.sqrt(sum);
 	}
-	
-	
+
+
 	@Override
 	public double getL1Norm()
 	{
@@ -199,8 +197,8 @@ public abstract class AVector implements IVector
 		}
 		return sum;
 	}
-	
-	
+
+
 	@Override
 	public boolean isZeroVector()
 	{
@@ -213,8 +211,8 @@ public abstract class AVector implements IVector
 		}
 		return true;
 	}
-	
-	
+
+
 	@Override
 	public boolean isFinite()
 	{
@@ -227,15 +225,15 @@ public abstract class AVector implements IVector
 		}
 		return true;
 	}
-	
-	
+
+
 	@Override
 	public double getLength2()
 	{
 		return SumatraMath.sqrt((x() * x()) + (y() * y()));
 	}
-	
-	
+
+
 	@Override
 	public double[] toArray()
 	{
@@ -246,8 +244,8 @@ public abstract class AVector implements IVector
 		}
 		return arr;
 	}
-	
-	
+
+
 	@Override
 	public String toString()
 	{
@@ -272,8 +270,8 @@ public abstract class AVector implements IVector
 		sb.append(']');
 		return sb.toString();
 	}
-	
-	
+
+
 	@Override
 	public String getSaveableString()
 	{
@@ -286,8 +284,8 @@ public abstract class AVector implements IVector
 		}
 		return sb.toString();
 	}
-	
-	
+
+
 	@Override
 	public JSONObject toJSON()
 	{
@@ -298,8 +296,8 @@ public abstract class AVector implements IVector
 		}
 		return new JSONObject(jsonMapping);
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public JSONArray toJSONArray()
@@ -311,8 +309,8 @@ public abstract class AVector implements IVector
 		}
 		return arr;
 	}
-	
-	
+
+
 	@Override
 	public List<Number> getNumberList()
 	{
@@ -323,8 +321,8 @@ public abstract class AVector implements IVector
 		}
 		return numbers;
 	}
-	
-	
+
+
 	@Override
 	public boolean isCloseTo(final IVector vec, final double distance)
 	{
@@ -341,15 +339,15 @@ public abstract class AVector implements IVector
 		}
 		return false;
 	}
-	
-	
+
+
 	@Override
 	public boolean isCloseTo(final IVector vec)
 	{
 		return isCloseTo(vec, SumatraMath.getEqualTol());
 	}
-	
-	
+
+
 	/**
 	 * Mean value of a vector
 	 *
@@ -362,11 +360,11 @@ public abstract class AVector implements IVector
 		values.forEach(sum::add);
 		return sum.multiplyNew(1.0f / values.size());
 	}
-	
-	
+
+
 	/**
 	 * Variance of vectors
-	 * 
+	 *
 	 * @param values
 	 * @return
 	 */
@@ -381,8 +379,8 @@ public abstract class AVector implements IVector
 		}
 		return meanVector(val2);
 	}
-	
-	
+
+
 	/**
 	 * Standard deviation of vectors
 	 *

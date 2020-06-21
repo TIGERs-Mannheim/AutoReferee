@@ -1,14 +1,10 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.tube;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.line.ILine;
@@ -17,15 +13,27 @@ import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
  * Implementation of a {@link ITube}
  */
 @Persistent(version = 1)
+@ToString
+@EqualsAndHashCode
+@RequiredArgsConstructor(staticName = "create")
 public class Tube implements ITube
 {
+	@NonNull
 	private final IVector2 startCenter;
+	@NonNull
 	private final IVector2 endCenter;
 	private final double radius;
 
@@ -39,28 +47,6 @@ public class Tube implements ITube
 		startCenter = Vector2f.ZERO_VECTOR;
 		endCenter = Vector2f.ZERO_VECTOR;
 		radius = 1;
-	}
-
-
-	private Tube(final IVector2 startCenter, final IVector2 endCenter, final double radius)
-	{
-		this.startCenter = startCenter;
-		this.endCenter = endCenter;
-		this.radius = radius;
-	}
-
-
-	/**
-	 * @param startCenter center of first circle
-	 * @param endCenter center of second circle
-	 * @param radius [mm]
-	 * @return
-	 */
-	public static Tube create(final IVector2 startCenter, final IVector2 endCenter, final double radius)
-	{
-		assert startCenter != null;
-		assert endCenter != null;
-		return new Tube(startCenter, endCenter, radius);
 	}
 
 
