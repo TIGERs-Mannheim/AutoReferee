@@ -40,7 +40,8 @@ allprojects {
     apply plugin: 'idea'
     apply plugin: 'ca.cutterslade.analyze'
 
-    sourceCompatibility = '1.8'
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
