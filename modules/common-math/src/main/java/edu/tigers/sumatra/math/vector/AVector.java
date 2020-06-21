@@ -12,12 +12,9 @@ import org.apache.commons.math3.linear.RealVector;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -30,17 +27,6 @@ import java.util.stream.Collectors;
 @Persistent
 public abstract class AVector implements IVector
 {
-	private static final DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols(Locale.ENGLISH);
-
-	static
-	{
-		decimalFormatSymbols.setDecimalSeparator('.');
-		decimalFormatSymbols.setGroupingSeparator(',');
-	}
-
-	private static final DecimalFormat df = new DecimalFormat("0.000", decimalFormatSymbols);
-
-
 	@Override
 	public final boolean equals(final Object o)
 	{
@@ -249,26 +235,7 @@ public abstract class AVector implements IVector
 	@Override
 	public String toString()
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append('[');
-		if (getNumDimensions() > 0)
-		{
-			sb.append(df.format(get(0)));
-			for (int d = 1; d < getNumDimensions(); d++)
-			{
-				sb.append(',');
-				sb.append(df.format(get(d)));
-			}
-			sb.append("|l=");
-			sb.append(df.format(getLength()));
-			if ((getNumDimensions() > 1) && !getXYVector().isZeroVector())
-			{
-				sb.append("|a=");
-				sb.append(df.format(getXYVector().getAngle()));
-			}
-		}
-		sb.append(']');
-		return sb.toString();
+		return VectorFormatter.format(this);
 	}
 
 

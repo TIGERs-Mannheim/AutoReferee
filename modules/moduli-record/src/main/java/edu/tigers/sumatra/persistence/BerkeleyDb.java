@@ -190,9 +190,9 @@ public class BerkeleyDb
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private <T> IBerkeleyAccessor<T> getAccessor(Class<T> clazz)
 	{
-		// noinspection unchecked
 		return (IBerkeleyAccessor<T>) accessors.get(clazz);
 	}
 

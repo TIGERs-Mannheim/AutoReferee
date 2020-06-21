@@ -32,12 +32,6 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.16.1'
 }
 
-protobuf {
-    protoc {
-        artifact = 'com.google.protobuf:protoc:3.12.3'
-    }
-}
-
 def osClassifier = {
     def os = System.getProperty("os.name").toLowerCase()
     if (os.contains("windows")) {

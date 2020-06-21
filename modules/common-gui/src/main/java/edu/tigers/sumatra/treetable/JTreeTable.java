@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.treetable;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.util.EventObject;
+import edu.tigers.sumatra.lookandfeel.ILookAndFeelStateObserver;
+import edu.tigers.sumatra.lookandfeel.LookAndFeelStateAdapter;
+import edu.tigers.sumatra.util.ScalingUtil;
+import org.apache.commons.configuration.HierarchicalConfiguration.Node;
+import org.apache.commons.configuration.tree.ConfigurationNode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -30,15 +31,12 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
-
-import org.apache.commons.configuration.HierarchicalConfiguration.Node;
-import org.apache.commons.configuration.tree.ConfigurationNode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.lookandfeel.ILookAndFeelStateObserver;
-import edu.tigers.sumatra.lookandfeel.LookAndFeelStateAdapter;
-import edu.tigers.sumatra.util.ScalingUtil;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 
 /**
@@ -493,7 +491,7 @@ public class JTreeTable extends JTable
 					if (getColumnClass(counter) == ITreeTableModel.class)
 					{
 						final MouseEvent me = (MouseEvent) e;
-						final MouseEvent newME = new MouseEvent(tree, me.getID(), me.getWhen(), me.getModifiers(),
+						final MouseEvent newME = new MouseEvent(tree, me.getID(), me.getWhen(), me.getModifiersEx(),
 								me.getX() - getCellRect(0, counter, true).x, me.getY(), me.getClickCount(),
 								me.isPopupTrigger());
 						tree.dispatchEvent(newME);
