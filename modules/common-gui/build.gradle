@@ -12,12 +12,12 @@ dependencies {
     implementation project(':moduli-record')
 
     implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
-    api 'com.github.TIGERs-Mannheim:moduli:2.2'
+    api 'com.github.TIGERs-Mannheim:moduli:3.0'
 
     implementation 'commons-configuration:commons-configuration:1.10'
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
 
     implementation 'com.miglayout:miglayout-swing:5.2'
-    implementation 'com.miglayout:miglayout-core:5.0'
+    implementation 'com.miglayout:miglayout-core:5.2'
 }

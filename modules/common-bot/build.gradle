@@ -11,8 +11,8 @@ dependencies {
     implementation project(':common-math')
 
     implementation 'commons-lang:commons-lang:2.6'
-    implementation 'com.sleepycat:je:7.5.11'
+    implementation 'com.sleepycat:je:18.3.12'
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.assertj:assertj-core:3.16.1'
 }

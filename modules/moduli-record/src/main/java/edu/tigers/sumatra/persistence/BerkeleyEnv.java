@@ -1,16 +1,7 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.persistence;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
@@ -19,16 +10,24 @@ import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 import com.sleepycat.persist.model.AnnotationModel;
 import com.sleepycat.persist.model.EntityModel;
-
 import edu.tigers.sumatra.persistence.proxy.ColorProxy;
 import edu.tigers.sumatra.persistence.proxy.ConcurrentHashMapProxy;
 import edu.tigers.sumatra.persistence.proxy.EnumMapProxy;
 import edu.tigers.sumatra.persistence.proxy.LinkedHashSetProxy;
 import edu.tigers.sumatra.persistence.proxy.TreeMapProxy;
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
-import net.lingala.zip4j.util.Zip4jConstants;
+import net.lingala.zip4j.model.enums.CompressionLevel;
+import net.lingala.zip4j.model.enums.CompressionMethod;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -180,8 +179,8 @@ public class BerkeleyEnv
 			return;
 		}
 		ZipParameters zipParams = new ZipParameters();
-		zipParams.setCompressionMethod(Zip4jConstants.COMP_DEFLATE);
-		zipParams.setCompressionLevel(Zip4jConstants.DEFLATE_LEVEL_FAST);
+		zipParams.setCompressionMethod(CompressionMethod.DEFLATE);
+		zipParams.setCompressionLevel(CompressionLevel.FAST);
 		log.info("Compressing database...");
 		long tStart = System.nanoTime();
 		try

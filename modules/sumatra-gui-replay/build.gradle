@@ -19,9 +19,9 @@ dependencies {
     implementation project(':moduli-autoreferee')
     api project(':moduli-referee')
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.12.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
+    implementation 'org.apache.logging.log4j:log4j-core:2.13.3'
 
-    implementation 'commons-io:commons-io:2.6'
+    implementation 'commons-io:commons-io:2.7'
     implementation 'commons-lang:commons-lang:2.6'
 }
