@@ -21,6 +21,9 @@ import lombok.ToString;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  * Implementation of a {@link ITube}
@@ -114,14 +117,14 @@ public class Tube implements ITube
 		{
 			return Circle.createCircle(startCenter, radius).nearestPointOutside(point);
 		}
-		IVector2 nearestPointOutside = point;
-		ILineSegment tubeLineSeg = Lines.segmentFromPoints(startCenter, endCenter);
+		var nearestPointOutside = point;
+		var tubeLineSeg = Lines.segmentFromPoints(startCenter, endCenter);
 		if (tubeLineSeg.distanceTo(point) < radius)
 		{
-			IVector2 leadPoint = tubeLineSeg.closestPointOnLine(point);
+			var leadPoint = tubeLineSeg.closestPointOnLine(point);
 			if (leadPoint.equals(point))
 			{
-				IVector2 dir = tubeLineSeg.directionVector().getNormalVector().scaleTo(radius);
+				var dir = tubeLineSeg.directionVector().getNormalVector().scaleTo(radius);
 				nearestPointOutside = point.addNew(dir);
 			} else
 			{
