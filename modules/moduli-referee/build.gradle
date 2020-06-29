@@ -53,19 +53,13 @@ def osExt = {
     return ""
 }()
 
-def gameControllerVersion = "v2.0.0-rc3"
+def gameControllerVersion = "v2.0.0-rc5"
 def gameControllerBinary = "ssl-game-controller_${gameControllerVersion}_${osClassifier}${osExt}".toString()
 
 task downloadGameController(type: Download) {
     src "https://github.com/RoboCup-SSL/ssl-game-controller/releases/download/${gameControllerVersion}/${gameControllerBinary}"
-    dest buildDir
+    dest file("$buildDir/resources/main/ssl-game-controller")
     overwrite false
     onlyIfModified true
 }
-
-processResources {
-    from("${buildDir}/${gameControllerBinary}") {
-        rename { "ssl-game-controller" }
-    }
-    dependsOn(downloadGameController)
-}
+processResources.finalizedBy(downloadGameController)

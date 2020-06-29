@@ -3,16 +3,14 @@
  */
 package edu.tigers.sumatra.filter;
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -22,8 +20,6 @@ import org.apache.logging.log4j.Logger;
  */
 public class DataSync<T extends IInterpolatable<T>>
 {
-	private static final Logger log = LogManager.getLogger(DataSync.class.getName());
-
 	private final long horizon;
 	private List<DataStore> buffer = new LinkedList<>();
 
@@ -46,8 +42,6 @@ public class DataSync<T extends IInterpolatable<T>>
 		DataStore store = new DataStore(timestamp, data);
 		if (!buffer.isEmpty() && timestamp < buffer.get(0).getTimestamp())
 		{
-			log.debug("Clearing buffer, since incoming timestamp is smaller than buffered timestamp ({} < {})", timestamp,
-					buffer.get(0).getTimestamp());
 			buffer.clear();
 		}
 		buffer.removeIf(d -> d.timestamp < timestamp - horizon);

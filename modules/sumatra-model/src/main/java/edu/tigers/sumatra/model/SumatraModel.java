@@ -58,7 +58,6 @@ public final class SumatraModel extends Moduli
 
 
 	private boolean productive = false;
-	private boolean testMode = false;
 
 	private boolean simulation = false;
 	private String environment = "";
@@ -71,16 +70,6 @@ public final class SumatraModel extends Moduli
 	private SumatraModel()
 	{
 		loadApplicationProperties();
-		String prod = System.getProperty("productive");
-		if (prod != null)
-		{
-			productive = Boolean.parseBoolean(prod);
-		}
-		String test = System.getProperty("testMode");
-		if (test != null)
-		{
-			testMode = Boolean.parseBoolean(test);
-		}
 	}
 
 
@@ -275,26 +264,22 @@ public final class SumatraModel extends Moduli
 
 
 	/**
+	 * Set if application should run in productive mode
+	 *
+	 * @param productive
+	 */
+	public void setProductive(final boolean productive)
+	{
+		this.productive = productive;
+	}
+
+
+	/**
 	 * @return if we are in productive (match) mode
 	 */
 	public final boolean isProductive()
 	{
 		return productive;
-	}
-
-
-	public void setTestMode(final boolean testMode)
-	{
-		this.testMode = testMode;
-	}
-
-
-	/**
-	 * @return if we are in test mode
-	 */
-	public final boolean isTestMode()
-	{
-		return testMode;
 	}
 
 

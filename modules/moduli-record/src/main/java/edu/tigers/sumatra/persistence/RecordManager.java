@@ -41,7 +41,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed")
 	private static boolean compressOnClose = false;
 
-	@Configurable(defValue = "true", comment = "Automatically record game in productive/match mode (-Dproductive=true)")
+	@Configurable(defValue = "true", comment = "Automatically record game in productive mode")
 	private static boolean autoRecord = true;
 
 	static

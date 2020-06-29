@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Scanner;
@@ -28,6 +29,9 @@ import java.util.regex.Pattern;
 public class SslGameControllerProcess implements Runnable
 {
 	private static final Logger log = LogManager.getLogger(SslGameControllerProcess.class.getName());
+	private static final String BINARY_NAME = "ssl-game-controller";
+	private static final Path TEMP_DIR = Paths.get("temp");
+	private static final File BINARY_FILE = TEMP_DIR.resolve(BINARY_NAME).toFile();
 
 	private int gcUiPort = 50543;
 	private String publishAddress = "";
@@ -40,24 +44,16 @@ public class SslGameControllerProcess implements Runnable
 	@Override
 	public void run()
 	{
-		Thread.currentThread().setName("ssl-game-controller");
+		Thread.currentThread().setName(BINARY_NAME);
 
-		File binaryFile = getResourceAsFile("ssl-game-controller");
-		if (binaryFile == null)
+		if (!setupBinary())
 		{
-			log.warn("Failed to start ssl-game-controller");
 			return;
 		}
 
 		try
 		{
-			if (!binaryFile.canExecute() && !binaryFile.setExecutable(true))
-			{
-				log.warn("Binary is not executable and could not be made executable.");
-				return;
-			}
-
-			ProcessBuilder builder = new ProcessBuilder(binaryFile.getAbsolutePath(),
+			ProcessBuilder builder = new ProcessBuilder(BINARY_FILE.getAbsolutePath(),
 					"-address", "localhost:" + gcUiPort,
 					"-timeAcquisitionMode", timeAcquisitionMode,
 					"-publishAddress", publishAddress);
@@ -69,7 +65,6 @@ public class SslGameControllerProcess implements Runnable
 			Scanner s = new Scanner(process.getInputStream());
 			inputLoop(s);
 			s.close();
-			process = null;
 		} catch (IOException e)
 		{
 			if (!"Stream closed".equals(e.getMessage()))
@@ -85,7 +80,33 @@ public class SslGameControllerProcess implements Runnable
 	}
 
 
-	private static File getResourceAsFile(String resourcePath)
+	private boolean setupBinary()
+	{
+		if (BINARY_FILE.exists())
+		{
+			return true;
+		}
+		File tmpDir = TEMP_DIR.toFile();
+		if (tmpDir.mkdirs())
+		{
+			log.debug("Temp dir created: {}", tmpDir);
+			tmpDir.deleteOnExit();
+		}
+		if (!writeResourceToFile(BINARY_NAME, BINARY_FILE))
+		{
+			return false;
+		}
+		BINARY_FILE.deleteOnExit();
+		if (!BINARY_FILE.canExecute() && !BINARY_FILE.setExecutable(true))
+		{
+			log.warn("Binary is not executable and could not be made executable.");
+			return false;
+		}
+		return true;
+	}
+
+
+	private static boolean writeResourceToFile(String resourcePath, File targetFile)
 	{
 		try
 		{
@@ -93,22 +114,19 @@ public class SslGameControllerProcess implements Runnable
 			if (in == null)
 			{
 				log.warn("Could not find {} in classpath", resourcePath);
-				return null;
+				return false;
 			}
 
-			File tempFile = File.createTempFile(String.valueOf(in.hashCode()), ".tmp");
-			tempFile.deleteOnExit();
-
-			try (FileOutputStream out = new FileOutputStream(tempFile))
+			try (FileOutputStream out = new FileOutputStream(targetFile))
 			{
 				IOUtils.copy(in, out);
 			}
-			return tempFile;
+			return true;
 		} catch (IOException e)
 		{
 			log.warn("Could not copy binary to temporary file", e);
-			return null;
 		}
+		return false;
 	}
 
 
@@ -196,6 +214,7 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("Interrupted while waiting for the process to exit");
 			Thread.currentThread().interrupt();
 		}
+		process = null;
 	}
 
 
