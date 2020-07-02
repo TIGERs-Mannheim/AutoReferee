@@ -55,7 +55,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 		Mutations mutations = new Mutations();
 		mutations.addRenamer(new Renamer("edu.tigers.sumatra.referee.gameevent.AttackerInDefenseArea", 0,
 				"edu.tigers.sumatra.referee.gameevent.AttackerTouchedBallInDefenseArea"));
-		// add future mutations here
+		mutations.addRenamer(new Renamer("edu.tigers.sumatra.ai.metis.offense.action.moves.OffensiveAction", 3, "edu.tigers.sumatra.ai.metis.offense.action.OffensiveAction"));
 
 		return mutations;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.presenter.log;
 
@@ -121,7 +121,6 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	 */
 	public void clearEventStorage()
 	{
-		logPanel.getTextPane().clear();
 		numFatals = 0;
 		numErrors = 0;
 		numWarnings = 0;
@@ -129,7 +128,7 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 		{
 			eventBuffer.clear();
 		}
-		onLevelChanged(logLevel);
+		SwingUtilities.invokeLater(() -> logPanel.getTextPane().clear());
 	}
 
 
@@ -170,7 +169,6 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 
 		logLevel = level;
 		SumatraModel.getInstance().setUserProperty(LOG_LEVEL_KEY, level.toString());
-		logPanel.getTextPane().clear();
 
 		SwingUtilities.invokeLater(this::reappendAllEvents);
 	}
@@ -187,11 +185,11 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 
 	private void reappendAllEvents()
 	{
-		logPanel.getTextPane().clear();
 		updateCounters();
 
 		synchronized (eventSync)
 		{
+			logPanel.getTextPane().clear();
 			final List<LogEvent> events = StreamSupport.stream(eventBuffer.spliterator(), false)
 					.filter(this::checkFilters)
 					.collect(Collectors.toList());

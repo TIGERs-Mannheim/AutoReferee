@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view;
 
@@ -55,16 +55,9 @@ public class TextPane extends JScrollPane
 	}
 
 
-	public void setFontSize(int fontSize)
+	private void setFontSize(int fontSize)
 	{
 		pane.setFont(new Font("Verdana", Font.PLAIN, fontSize));
-	}
-
-
-	public void setText(final String text, final AttributeSet aset)
-	{
-		clear();
-		append(text, aset);
 	}
 
 
@@ -91,7 +84,9 @@ public class TextPane extends JScrollPane
 			if (entryLengths.size() > maxCapacity)
 			{
 				final Integer end = entryLengths.pollFirst();
-				doc.remove(0, end);
+				if(end != null) {
+					doc.remove(0, end);
+				}
 			}
 
 			// Memorize the message-length
@@ -115,7 +110,9 @@ public class TextPane extends JScrollPane
 			if (entryLengths.size() > maxCapacity)
 			{
 				final Integer end = entryLengths.pollLast();
-				doc.remove(doc.getLength(), end);
+				if(end != null) {
+					doc.remove(doc.getLength(), end);
+				}
 			}
 
 			// Memorize the message-length

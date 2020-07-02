@@ -4,8 +4,6 @@
 
 package edu.tigers.sumatra.wp.data;
 
-import java.util.Optional;
-
 import edu.tigers.sumatra.bot.MoveConstraints;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.bot.State;
@@ -15,6 +13,8 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.botshape.IBotShape;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
+
+import java.util.Optional;
 
 
 /**
