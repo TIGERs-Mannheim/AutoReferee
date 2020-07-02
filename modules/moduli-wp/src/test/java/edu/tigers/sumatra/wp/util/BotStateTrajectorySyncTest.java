@@ -48,6 +48,7 @@ public class BotStateTrajectorySyncTest
 	private Optional<State> updateState(IVector3 pos, long timestamp)
 	{
 		c.add(StubTrajectory.vector3Static(pos), timestamp);
-		return c.updateState(timestamp, 1e-9, BotState.of(BotID.createBotId(0, ETeamColor.YELLOW), State.zero()));
+		c.updateState(timestamp, 1e-9, BotState.of(BotID.createBotId(0, ETeamColor.YELLOW), State.zero()));
+		return c.getState(timestamp, 1e-9);
 	}
 }

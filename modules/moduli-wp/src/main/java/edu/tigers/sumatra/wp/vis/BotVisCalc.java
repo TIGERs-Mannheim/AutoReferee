@@ -55,11 +55,10 @@ public class BotVisCalc implements IWpCalc
 
 	private DrawableAnnotation createDistanceToTrajectoryShape(final ITrackedBot bot)
 	{
-		String text = String.format("tq: %.1f %.1f %.1f",
+		String text = String.format("tq: %.1f %.3f",
 				bot.getTrackingQuality().getCurDistance(),
-				bot.getTrackingQuality().getMaxDistance(),
-				bot.getTrackingQuality().getRelOnTrajectory());
-		Color color = bot.getTrackingQuality().getRelOnTrajectory() < 1 ? Color.red : Color.green;
+				bot.getTrackingQuality().getTimeOffTrajectory());
+		Color color = bot.getTrackingQuality().getTimeOffTrajectory() > 0 ? Color.red : Color.green;
 		return new DrawableAnnotation(bot.getPos(), text).withOffset(Vector2.fromY(-200)).withCenterHorizontally(true)
 				.setColor(color);
 	}
@@ -138,7 +137,7 @@ public class BotVisCalc implements IWpCalc
 	private Color fillColor(final ITrackedBot bot)
 	{
 		Color color = bot.getTeamColor().getColor();
-		if (!bot.getFilteredState().isPresent())
+		if (bot.getFilteredState().isEmpty())
 		{
 			color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 150);
 		}

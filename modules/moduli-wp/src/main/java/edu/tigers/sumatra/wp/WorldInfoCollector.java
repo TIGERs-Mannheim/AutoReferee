@@ -49,7 +49,6 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
-import edu.tigers.sumatra.wp.data.TrajTrackingQuality;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
 import edu.tigers.sumatra.wp.util.BotStateTrajectorySync;
@@ -184,7 +183,6 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		double feedbackDelay = useInternalState ? 0.0 : Geometry.getFeedbackDelay();
 		calc.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
-		TrajTrackingQuality trackingQuality = calc.getTrackingQuality();
 
 		Optional<State> bufferedState = calc.getState(lastWFTimestamp, 0.0);
 		BotState botState = !botCollidingWithOtherBot(filteredBotStates, currentBotState)
@@ -197,7 +195,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withState(botState)
 				.withFilteredState(filterState)
 				.withBufferedTrajState(bufferedState.orElse(null))
-				.withTrackingQuality(trackingQuality)
+				.withTrackingQuality(calc.getTrajTrackingQuality())
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
 				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
