@@ -3,12 +3,12 @@
  */
 package edu.tigers.sumatra.visualizer;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JPanel;
-
 import edu.tigers.sumatra.views.ISumatraView;
 import net.miginfocom.swing.MigLayout;
+
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 
 /**
@@ -17,7 +17,7 @@ import net.miginfocom.swing.MigLayout;
  * 
  * @author BernhardP, OliverS
  */
-public class VisualizerPanel extends JPanel implements ISumatraView
+public class VisualizerPanel extends JPanel implements ISumatraView, IScreenshotListener
 {
 	private static final long serialVersionUID = 2686191777355388548L;
 	
@@ -34,6 +34,7 @@ public class VisualizerPanel extends JPanel implements ISumatraView
 	{
 		setLayout(new BorderLayout());
 		menuBar = new VisualizerOptionsMenu();
+		menuBar.setScreenshotListener(this);
 		panel = new JPanel();
 		add(menuBar, BorderLayout.PAGE_START);
 		add(panel, BorderLayout.CENTER);
@@ -49,7 +50,7 @@ public class VisualizerPanel extends JPanel implements ISumatraView
 		panel.add(fieldPanel, "grow, top");
 	}
 	
-	
+
 	/**
 	 * Remove the robots panel
 	 */
@@ -84,5 +85,18 @@ public class VisualizerPanel extends JPanel implements ISumatraView
 	public VisualizerOptionsMenu getOptionsMenu()
 	{
 		return menuBar;
+	}
+	
+	
+	@Override
+	public void takeScreenshot(final EScreenshotOption screenshotOption, final int w, final int h)
+	{
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Save Screenshot to");
+		int res = chooser.showSaveDialog(this);
+		if (res == JFileChooser.APPROVE_OPTION)
+		{
+			fieldPanel.saveScreenshot(screenshotOption, chooser.getSelectedFile().getAbsolutePath(), w, h);
+		}
 	}
 }

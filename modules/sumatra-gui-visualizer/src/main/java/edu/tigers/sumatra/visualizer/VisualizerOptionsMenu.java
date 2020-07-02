@@ -4,6 +4,17 @@
 
 package edu.tigers.sumatra.visualizer;
 
+import edu.tigers.sumatra.drawable.IShapeLayer;
+import edu.tigers.sumatra.drawable.ShapeMapSource;
+import edu.tigers.sumatra.model.SumatraModel;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -13,15 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-
-import edu.tigers.sumatra.drawable.IShapeLayer;
-import edu.tigers.sumatra.drawable.ShapeMapSource;
-import edu.tigers.sumatra.model.SumatraModel;
 
 
 /**
@@ -39,11 +41,12 @@ public class VisualizerOptionsMenu extends JMenuBar
 	private final List<JCheckBoxMenuItem> checkBoxes = new ArrayList<>();
 	private final Set<IShapeLayer> knownShapeLayers = new HashSet<>();
 	private final CheckboxListener checkboxListener;
-	
+	private IScreenshotListener screenshotListener;
+
 	private final JMenu pSources;
 	private final Map<String, JMenu> pSourcesSub;
-	
-	
+
+
 	/**
 	 * Default
 	 */
@@ -51,44 +54,69 @@ public class VisualizerOptionsMenu extends JMenuBar
 	{
 		// --- checkbox-listener ---
 		checkboxListener = new CheckboxListener();
-		
-		
+
+
 		JMenu pActions = new JMenu("Visualizer");
 		add(pActions);
 		parentMenus.put(pActions.getText(), pActions);
-		
+
 		JMenuItem btnTurn = new JMenuItem("Turn");
 		btnTurn.addActionListener(new TurnFieldListener());
 		JMenuItem btnReset = new JMenuItem("Reset");
 		btnReset.addActionListener(new ResetFieldListener());
 		pActions.add(btnTurn);
 		pActions.add(btnReset);
-		
+
 		addMenuEntry(EVisualizerOptions.FANCY);
 		addMenuEntry(EVisualizerOptions.DARK);
-		
+
 		JMenu pShortcuts = new JMenu("Shortcuts");
 		add(pShortcuts);
 		pShortcuts.add(new JMenuItem("Left mouse click:"));
 		pShortcuts.add(new JMenuItem("  ctrl: Look at Ball"));
 		pShortcuts.add(new JMenuItem("  shift: Kick to"));
 		pShortcuts.add(new JMenuItem("  ctrl+shift: Follow mouse"));
-		
+
 		pShortcuts.add(new JMenuItem("Right mouse click:"));
 		pShortcuts.add(new JMenuItem("  none: place ball"));
 		pShortcuts.add(new JMenuItem("  ctrl: 8m/s to target"));
 		pShortcuts.add(new JMenuItem("  shift: stop at target"));
 		pShortcuts.add(new JMenuItem("  ctrl+shift: 2m/s at target"));
 		pShortcuts.add(new JMenuItem("  above combinations + alt: chip ball"));
-		
+
+		JMenuItem btnScreenshot = new JMenuItem("take screenshot");
+		pActions.addSeparator();
+		pActions.add(new JLabel("Screenshot settings:"));
+		JRadioButton normalizeFieldBtn = new JRadioButton("record full field");
+		pActions.addSeparator();
+		pActions.add(new JLabel("width:"));
+		JTextField wTextField = new JTextField("5000");
+		JTextField hTextField = new JTextField("3500");
+		pActions.add(wTextField);
+		pActions.add(new JLabel("height:"));
+		pActions.add(hTextField);
+		pActions.add(normalizeFieldBtn);
+		pActions.addSeparator();
+		pActions.add(btnScreenshot);
+
+		btnScreenshot.addActionListener(actionEvent ->
+		{
+			EScreenshotOption option = normalizeFieldBtn.isSelected() ?
+					EScreenshotOption.FULL_FIELD :
+					EScreenshotOption.CURRENT_SECTION;
+			screenshotListener
+					.takeScreenshot(option, Integer.parseInt(wTextField.getText()),
+							Integer.parseInt(hTextField.getText()));
+		});
+
 		pSources = new JMenu("Sources");
 		add(pSources);
-		
+
 		pSourcesSub = new HashMap<>();
 		pSourcesSub.put("general", pSources);
 	}
-	
-	
+
+
 	/**
 	 * Update with latest set of layers. Existing layers will not be removed
 	 *
@@ -105,11 +133,11 @@ public class VisualizerOptionsMenu extends JMenuBar
 				pSourcesSub.put(category, catMenu);
 				pSources.add(catMenu);
 			}
-			
+
 			checkBoxes.add(
 					createCheckBox(source.getName(), SOURCE_PREFIX + source.getName(), true, pSourcesSub.get(category)));
 		}
-		
+
 		for (String category : source.getCategories())
 		{
 			if (missesMenuItem(category, CATEGORY_PREFIX))
@@ -118,8 +146,14 @@ public class VisualizerOptionsMenu extends JMenuBar
 			}
 		}
 	}
-	
-	
+
+
+	public void setScreenshotListener(IScreenshotListener listener)
+	{
+		this.screenshotListener = listener;
+	}
+
+
 	private boolean missesMenuItem(String name, String prefix)
 	{
 		for (JMenu menu : pSourcesSub.values())
@@ -135,8 +169,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 		}
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * @param shapeLayer
 	 */
@@ -153,18 +187,18 @@ public class VisualizerOptionsMenu extends JMenuBar
 			add(parent);
 			parentMenus.put(shapeLayer.getCategory(), parent);
 		}
-		
+
 		knownShapeLayers.add(shapeLayer);
 		checkBoxes.add(createCheckBox(shapeLayer, parent));
 	}
-	
-	
+
+
 	private JCheckBoxMenuItem createCheckBox(final IShapeLayer option, final JMenu parent)
 	{
 		return createCheckBox(option.getLayerName(), option.getId(), option.isVisibleByDefault(), parent);
 	}
-	
-	
+
+
 	private JCheckBoxMenuItem createCheckBox(final String name, String actionCommand, boolean visible,
 			final JMenu parent)
 	{
@@ -172,7 +206,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 		checkbox.addActionListener(checkboxListener);
 		checkbox.setActionCommand(actionCommand);
 		insertMenuItem(name, parent, checkbox);
-		
+
 		String value = SumatraModel.getInstance().getUserProperty(
 				OptionsPanelPresenter.class.getCanonicalName() + "." + checkbox.getActionCommand());
 		if (value == null)
@@ -187,11 +221,11 @@ public class VisualizerOptionsMenu extends JMenuBar
 		{
 			o.onCheckboxClick(checkbox.getActionCommand(), checkbox.isSelected());
 		}
-		
+
 		return checkbox;
 	}
-	
-	
+
+
 	private void insertMenuItem(final String name, final JMenu parent, final JCheckBoxMenuItem checkbox)
 	{
 		for (int i = 0; i < parent.getItemCount(); i++)
@@ -210,8 +244,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 		}
 		parent.add(checkbox);
 	}
-	
-	
+
+
 	/**
 	 * initialize button states
 	 */
@@ -225,8 +259,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param enable
 	 */
@@ -237,8 +271,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 			cb.setEnabled(enable);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param o
 	 */
@@ -247,8 +281,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 	{
 		observers.add(o);
 	}
-	
-	
+
+
 	/**
 	 * @param o
 	 */
@@ -257,15 +291,15 @@ public class VisualizerOptionsMenu extends JMenuBar
 	{
 		observers.remove(o);
 	}
-	
-	
+
+
 	// --------------------------------------------------------------
 	// --- action listener ------------------------------------------
 	// --------------------------------------------------------------
-	
+
 	protected class CheckboxListener implements ActionListener
 	{
-		
+
 		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
@@ -275,12 +309,12 @@ public class VisualizerOptionsMenu extends JMenuBar
 						((JCheckBoxMenuItem) e.getSource()).isSelected());
 			}
 		}
-		
+
 	}
-	
+
 	protected class TurnFieldListener implements ActionListener
 	{
-		
+
 		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
@@ -289,12 +323,12 @@ public class VisualizerOptionsMenu extends JMenuBar
 				o.onActionFired(EVisualizerOptions.TURN_NEXT, true);
 			}
 		}
-		
+
 	}
-	
+
 	protected class ResetFieldListener implements ActionListener
 	{
-		
+
 		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
@@ -303,6 +337,6 @@ public class VisualizerOptionsMenu extends JMenuBar
 				o.onActionFired(EVisualizerOptions.RESET_FIELD, true);
 			}
 		}
-		
+
 	}
 }

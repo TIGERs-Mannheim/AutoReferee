@@ -4,31 +4,6 @@
 
 package edu.tigers.sumatra.visualizer;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import edu.tigers.sumatra.clock.FpsCounter;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.ShapeMap;
@@ -42,6 +17,33 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.ScalingUtil;
 import net.miginfocom.swing.MigLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -51,10 +53,14 @@ public class FieldPanel extends JPanel implements IFieldPanel
 {
 	private static final Logger log = LogManager.getLogger(FieldPanel.class.getName());
 
-	/** color of field background */
+	/**
+	 * color of field background
+	 */
 	private static final Color FIELD_COLOR = new Color(0, 160, 30);
 	private static final Color FIELD_COLOR_DARK = new Color(77, 77, 77);
-	/** color of field background */
+	/**
+	 * color of field background
+	 */
 	private static final Color FIELD_COLOR_REFEREE = new Color(93, 93, 93);
 	private static final String SCALE_FACTOR_PROPERTY = FieldPanel.class.getCanonicalName() + ".scaleFactor";
 	private static final String FIELD_ORIGIN_X_PROPERTY = FieldPanel.class.getCanonicalName() + ".fieldOriginX";
@@ -62,11 +68,14 @@ public class FieldPanel extends JPanel implements IFieldPanel
 
 	// --- repaint ---
 	private transient Image offImage = null;
+	private transient Image screenshotImage = null;
 	private final transient OfflineFieldSync offImageSync = new OfflineFieldSync()
 	{
 	};
 
-	/**  */
+	/**
+	 *
+	 */
 	private static final long serialVersionUID = 4330620225157027091L;
 
 	// --- observer ---
@@ -86,7 +95,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private double fieldOriginY = 0;
 	private double fieldOriginX = 0;
 
-
 	private boolean fancyPainting = false;
 	private boolean darkMode = false;
 
@@ -99,6 +107,14 @@ public class FieldPanel extends JPanel implements IFieldPanel
 
 	private transient IVector2 lastMousePoint = Vector2f.ZERO_VECTOR;
 	private final transient FpsCounter fpsCounter = new FpsCounter();
+
+	private String snapshotFilePath = "";
+	private boolean takeScreenshot = false;
+	private EScreenshotOption normalizeScreenshot = EScreenshotOption.CURRENT_SECTION;
+	private int snapshotWidth = 5000;
+	private int snapshotHeight = 5000;
+	private int adjustedWidth = 5000;
+	private int adjustedHeight = 5000;
 
 
 	public FieldPanel()
@@ -189,7 +205,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			}
 		} else
 		{
-			g1.clearRect(0, 0, getWidth(), getHeight());
+			g1.clearRect(0, 0, adjustedWidth, adjustedHeight);
 		}
 	}
 
@@ -202,15 +218,22 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		 * produce an error. This scenario is possible if the moduli start up before the GUI layouting has been completed
 		 * and the component size is still 0|0.
 		 */
-		if ((getWidth() == 0) || (getHeight() == 0))
+		if ((adjustedWidth == 0) || (adjustedHeight == 0))
 		{
 			return;
 		}
 
-		if ((offImage == null) || (offImage.getHeight(this) != getHeight()) || (offImage.getWidth(this) != getWidth()))
+		adjustedWidth = getWidth();
+		adjustedHeight = getHeight();
+
+		if ((offImage == null) || (offImage.getHeight(this) != adjustedHeight)
+				|| (offImage.getWidth(this) != adjustedWidth))
 		{
-			offImage = createImage(getWidth(), getHeight());
-			resetField();
+			offImage = createImage(adjustedWidth, adjustedHeight);
+			double scale = resetField(adjustedWidth, adjustedHeight);
+			setScaleFactor(scale);
+			setFieldOriginX(0);
+			setFieldOriginY(0);
 		}
 
 		@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
@@ -219,42 +242,112 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		synchronized (offImageSync)
 		{
 			final Graphics2D g2 = (Graphics2D) offImage.getGraphics();
-			g2.setColor(FIELD_COLOR_REFEREE);
-			g2.fillRect(0, 0, getWidth(), getHeight());
+			drawFieldGraphics(defaultStroke, g2, this.fieldOriginX, this.fieldOriginY, this.adjustedWidth,
+					this.adjustedHeight, this.scaleFactor);
+		}
 
-			g2.translate(fieldOriginX, fieldOriginY);
-			g2.scale(scaleFactor, scaleFactor);
-
-			turnField(getFieldTurn(), -AngleMath.PI_HALF, g2);
-			g2.setColor(darkMode ? FIELD_COLOR_DARK : FIELD_COLOR);
-			g2.fillRect(0, 0, getFieldTotalWidth(), getFieldTotalHeight());
-			turnField(getFieldTurn(), AngleMath.PI_HALF, g2);
-
-			if (fancyPainting)
+		if (takeScreenshot)
+		{
+			screenshotImage = createImage(this.snapshotWidth, this.snapshotHeight);
+			final Graphics2D g2 = (Graphics2D) screenshotImage.getGraphics();
+			switch (normalizeScreenshot)
 			{
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				case FULL_FIELD:
+					drawFullFieldScreenshot(defaultStroke, g2);
+					break;
+				case CURRENT_SECTION:
+					drawCurrentSectionScreenshot(defaultStroke, g2);
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid Screenshot option");
 			}
-
-			shapeMaps.entrySet().stream()
-					.filter(s -> showSources.contains(s.getKey().getName()))
-					.filter(s -> showCategories.containsAll(s.getKey().getCategories()))
-					.map(Map.Entry::getValue)
-					.map(ShapeMap::getAllShapeLayers)
-					.flatMap(Collection::stream)
-					.sorted()
-					.filter(e -> shapeVisibilityMap.getOrDefault(e.getIdentifier().getId(), true))
-					.forEach(shapeLayer -> paintShapeMap(g2, shapeLayer, defaultStroke));
-
-			g2.scale(1.0 / scaleFactor, 1.0 / scaleFactor);
-			g2.translate(-fieldOriginX, -fieldOriginY);
-
-			paintCoordinates(g2, ETeamColor.YELLOW, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
-			paintCoordinates(g2, ETeamColor.BLUE, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
-
-			paintFps(g2);
+			takeScreenshot();
+			takeScreenshot = false;
 		}
 		repaint();
+	}
+
+
+	private void drawFullFieldScreenshot(final BasicStroke defaultStroke, final Graphics2D g2)
+	{
+		double scale = resetField(this.snapshotWidth, this.snapshotHeight);
+		drawFieldGraphics(defaultStroke, g2, 0, 0, this.snapshotWidth, this.snapshotHeight, scale);
+	}
+
+
+	private void drawCurrentSectionScreenshot(final BasicStroke defaultStroke, final Graphics2D g2)
+	{
+		final Point mPoint = new Point(0, 0);
+		final double xLen = ((mPoint.x - fieldOriginX) / scaleFactor) * 2;
+		final double yLen = ((mPoint.y - fieldOriginY) / scaleFactor) * 2;
+		final double oldLenX = (xLen) * scaleFactor;
+		final double oldLenY = (yLen) * scaleFactor;
+		double normalizedScale = scaleFactor * Math
+				.min(this.snapshotWidth / (double) getWidth(), this.snapshotHeight / (double) getHeight());
+		final double newLenX = (xLen) * normalizedScale;
+		final double newLenY = (yLen) * normalizedScale;
+		double orgX = (fieldOriginX - ((newLenX - oldLenX) / 2.0));
+		double orgY = (fieldOriginY - ((newLenY - oldLenY) / 2.0));
+		drawFieldGraphics(defaultStroke, g2, orgX, orgY, this.snapshotWidth, this.snapshotHeight,
+				normalizedScale);
+	}
+
+
+	private void drawFieldGraphics(final BasicStroke defaultStroke, final Graphics2D g2, double offsetX, double offsetY,
+			int width, int height, double scale)
+	{
+		g2.setColor(FIELD_COLOR_REFEREE);
+		g2.fillRect(0, 0, width, height);
+
+		g2.translate(offsetX, offsetY);
+		g2.scale(scale, scale);
+
+		turnField(getFieldTurn(), -AngleMath.PI_HALF, g2);
+		g2.setColor(darkMode ? FIELD_COLOR_DARK : FIELD_COLOR);
+		g2.fillRect(0, 0, getFieldTotalWidth(), getFieldTotalHeight());
+		turnField(getFieldTurn(), AngleMath.PI_HALF, g2);
+
+		if (fancyPainting)
+		{
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		}
+
+		shapeMaps.entrySet().stream()
+				.filter(s -> showSources.contains(s.getKey().getName()))
+				.filter(s -> showCategories.containsAll(s.getKey().getCategories()))
+				.map(Map.Entry::getValue)
+				.map(ShapeMap::getAllShapeLayers)
+				.flatMap(Collection::stream)
+				.sorted()
+				.filter(e -> shapeVisibilityMap.getOrDefault(e.getIdentifier().getId(), true))
+				.forEach(shapeLayer -> paintShapeMap(g2, shapeLayer, defaultStroke));
+
+		g2.scale(1.0 / scale, 1.0 / scale);
+		g2.translate(-offsetX, -offsetY);
+
+		paintCoordinates(g2, ETeamColor.YELLOW, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
+		paintCoordinates(g2, ETeamColor.BLUE, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
+
+		paintFps(g2, width);
+	}
+
+
+	private void takeScreenshot()
+	{
+		try
+		{
+			String path = snapshotFilePath;
+			if (!snapshotFilePath.endsWith(".png"))
+			{
+				path += ".png";
+			}
+			ImageIO.write((BufferedImage) screenshotImage, "png", new File(path));
+			log.info("Finished saving screenshot to: " + path);
+		} catch (IOException e)
+		{
+			log.warn("Could not take Screenshot", e);
+		}
 	}
 
 
@@ -267,7 +360,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	private void paintCoordinates(final Graphics2D g, final ETeamColor teamColor, final boolean inverted)
+	private void paintCoordinates(final Graphics2D g, final ETeamColor teamColor,
+			final int width, final int height, final boolean inverted)
 	{
 		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
 
@@ -280,13 +374,13 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		g.setColor(teamColor == ETeamColor.YELLOW ? Color.YELLOW : Color.BLUE);
 
 		int x;
-		int y = getHeight() - (int) (fontSize * 1.5);
+		int y = height - (int) (fontSize * 1.5);
 		if (teamColor == ETeamColor.YELLOW)
 		{
 			x = 10;
 		} else
 		{
-			x = getWidth() - (int) (fontSize * 5.0);
+			x = width - (int) (fontSize * 5.0);
 		}
 		char tColor = teamColor == ETeamColor.YELLOW ? 'Y' : 'B';
 		g.drawString(
@@ -298,14 +392,14 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	private void paintFps(final Graphics2D g)
+	private void paintFps(final Graphics2D g, final int width)
 	{
 		fpsCounter.newFrame(System.nanoTime());
 		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
 		g.setFont(new Font("", Font.PLAIN, fontSize));
 		g.setColor(Color.black);
 
-		int x = getWidth() - fontSize * 3;
+		int x = width - fontSize * 3;
 		int y = 20;
 		g.drawString(String.format("%.1f", fpsCounter.getAvgFps()), x, y);
 	}
@@ -500,6 +594,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	// --- Presenter Interface --------------------------------------------------
 	// --------------------------------------------------------------------------
 
+
 	@Override
 	public void setPanelVisible(final boolean visible)
 	{
@@ -581,7 +676,10 @@ public class FieldPanel extends JPanel implements IFieldPanel
 				turnNext();
 				break;
 			case RESET_FIELD:
-				resetField();
+				double scale = resetField(adjustedWidth, adjustedHeight);
+				setScaleFactor(scale);
+				setFieldOriginX(0);
+				setFieldOriginY(0);
 				break;
 			default:
 				break;
@@ -637,27 +735,25 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	private void resetField()
+	private double resetField(int width, int height)
 	{
 		double heightScaleFactor;
 		double widthScaleFactor;
-		if (getWidth() > getHeight())
+		if (width > height)
 		{
 			setFieldTurn(EFieldTurn.T90);
 
-			heightScaleFactor = (double) getHeight() / getFieldTotalWidth();
-			widthScaleFactor = (double) getWidth() / getFieldTotalHeight();
+			heightScaleFactor = (double) height / getFieldTotalWidth();
+			widthScaleFactor = (double) width / getFieldTotalHeight();
 		} else
 		{
 			setFieldTurn(EFieldTurn.NORMAL);
 
-			heightScaleFactor = ((double) getHeight()) / getFieldTotalHeight();
-			widthScaleFactor = ((double) getWidth()) / getFieldTotalWidth();
+			heightScaleFactor = ((double) height) / getFieldTotalHeight();
+			widthScaleFactor = ((double) width) / getFieldTotalWidth();
 		}
 
-		setScaleFactor(Math.min(heightScaleFactor, widthScaleFactor));
-		setFieldOriginX(0);
-		setFieldOriginY(0);
+		return Math.min(heightScaleFactor, widthScaleFactor);
 	}
 
 
@@ -700,6 +796,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		this.fieldOriginX = fieldOriginX;
 		SumatraModel.getInstance().setUserProperty(FIELD_ORIGIN_X_PROPERTY, String.valueOf(fieldOriginX));
 	}
+
 
 	protected class MouseEvents extends MouseAdapter
 	{
@@ -782,6 +879,16 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
+	public void saveScreenshot(EScreenshotOption normalize, String path, int width, int height)
+	{
+		this.snapshotFilePath = path;
+		this.takeScreenshot = true;
+		this.normalizeScreenshot = normalize;
+		this.snapshotWidth = width;
+		this.snapshotHeight = height;
+	}
+
+
 	/**
 	 * @return the scaleFactor
 	 */
@@ -821,6 +928,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
 		return (int) ((Geometry.getBoundaryWidth()) * yScaleFactor);
 	}
+
 
 	private interface OfflineFieldSync
 	{

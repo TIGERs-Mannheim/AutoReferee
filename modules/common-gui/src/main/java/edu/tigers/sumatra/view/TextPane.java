@@ -3,9 +3,9 @@
  */
 package edu.tigers.sumatra.view;
 
-import java.awt.Font;
-import java.util.Deque;
-import java.util.LinkedList;
+import edu.tigers.sumatra.util.ScalingUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -13,11 +13,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.util.ScalingUtil;
+import java.awt.Font;
+import java.util.Deque;
+import java.util.LinkedList;
 
 
 /**
