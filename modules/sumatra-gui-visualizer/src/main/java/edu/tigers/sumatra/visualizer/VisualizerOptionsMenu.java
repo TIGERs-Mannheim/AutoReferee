@@ -13,7 +13,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,16 +34,21 @@ public class VisualizerOptionsMenu extends JMenuBar
 {
 	static final String SOURCE_PREFIX = "SOURCE_";
 	static final String CATEGORY_PREFIX = "CATEGORY_";
-	private static final long serialVersionUID = 6408342941543334436L;
 	private final List<IOptionsPanelObserver> observers = new CopyOnWriteArrayList<>();
 	private final Map<String, JMenu> parentMenus = new HashMap<>();
 	private final List<JCheckBoxMenuItem> checkBoxes = new ArrayList<>();
 	private final Set<IShapeLayer> knownShapeLayers = new HashSet<>();
 	private final CheckboxListener checkboxListener;
-	private IScreenshotListener screenshotListener;
 
 	private final JMenu pSources;
 	private final Map<String, JMenu> pSourcesSub;
+
+	private JTextField wTextField = new JTextField("1024");
+	private JMenuItem btnScreenshot = new JMenuItem("Take screenshot");
+	private JCheckBoxMenuItem normalizeFieldBtn = new JCheckBoxMenuItem("Follow visualizer motion");
+	private JMenuItem recordVideoStart = new JMenuItem("Start recording video");
+	private JMenuItem recordVideoStop = new JMenuItem("Stop recording video");
+	private IMediaRecorderListener mediaRecordingListener;
 
 
 	/**
@@ -54,7 +58,6 @@ public class VisualizerOptionsMenu extends JMenuBar
 	{
 		// --- checkbox-listener ---
 		checkboxListener = new CheckboxListener();
-
 
 		JMenu pActions = new JMenu("Visualizer");
 		add(pActions);
@@ -84,36 +87,67 @@ public class VisualizerOptionsMenu extends JMenuBar
 		pShortcuts.add(new JMenuItem("  ctrl+shift: 2m/s at target"));
 		pShortcuts.add(new JMenuItem("  above combinations + alt: chip ball"));
 
-		JMenuItem btnScreenshot = new JMenuItem("take screenshot");
 		pActions.addSeparator();
-		pActions.add(new JLabel("Screenshot settings:"));
-		JRadioButton normalizeFieldBtn = new JRadioButton("record full field");
-		pActions.addSeparator();
-		pActions.add(new JLabel("width:"));
-		JTextField wTextField = new JTextField("5000");
-		JTextField hTextField = new JTextField("3500");
-		pActions.add(wTextField);
-		pActions.add(new JLabel("height:"));
-		pActions.add(hTextField);
-		pActions.add(normalizeFieldBtn);
+		JMenu mediaSettings = new JMenu("Media Settings");
+		pActions.add(mediaSettings);
+		mediaSettings.add(new JLabel("width:"));
+		mediaSettings.add(wTextField);
+		mediaSettings.add(normalizeFieldBtn);
 		pActions.addSeparator();
 		pActions.add(btnScreenshot);
+		pActions.addSeparator();
 
-		btnScreenshot.addActionListener(actionEvent ->
-		{
-			EScreenshotOption option = normalizeFieldBtn.isSelected() ?
-					EScreenshotOption.FULL_FIELD :
-					EScreenshotOption.CURRENT_SECTION;
-			screenshotListener
-					.takeScreenshot(option, Integer.parseInt(wTextField.getText()),
-							Integer.parseInt(hTextField.getText()));
-		});
+		recordVideoStop.setEnabled(false);
 
+		btnScreenshot.addActionListener(e -> takeScreenshotPressed());
+		recordVideoStart.addActionListener(e -> startRecordingPressed());
+		recordVideoStop.addActionListener(e -> stopRecordingPressed());
+
+		pActions.add(recordVideoStart);
+		pActions.add(recordVideoStop);
 		pSources = new JMenu("Sources");
 		add(pSources);
 
 		pSourcesSub = new HashMap<>();
 		pSourcesSub.put("general", pSources);
+	}
+
+
+	private void stopRecordingPressed()
+	{
+		mediaRecordingListener.stopRecordingVideo();
+		recordVideoStop.setEnabled(false);
+		recordVideoStart.setEnabled(true);
+		normalizeFieldBtn.setEnabled(true);
+		wTextField.setEnabled(true);
+		btnScreenshot.setEnabled(true);
+	}
+
+
+	private void startRecordingPressed()
+	{
+		EMediaOption option = !normalizeFieldBtn.isSelected() ?
+				EMediaOption.FULL_FIELD :
+				EMediaOption.CURRENT_SECTION;
+		mediaRecordingListener.setMediaParameters(Integer.parseInt(wTextField.getText()), 0, option);
+		if (mediaRecordingListener.startRecordingVideo())
+		{
+			recordVideoStart.setEnabled(false);
+			normalizeFieldBtn.setEnabled(false);
+			wTextField.setEnabled(false);
+			recordVideoStop.setEnabled(true);
+			btnScreenshot.setEnabled(false);
+		}
+	}
+
+
+	private void takeScreenshotPressed()
+	{
+		EMediaOption option = !normalizeFieldBtn.isSelected() ?
+				EMediaOption.FULL_FIELD :
+				EMediaOption.CURRENT_SECTION;
+		mediaRecordingListener.setMediaParameters(Integer.parseInt(wTextField.getText()), 0, option);
+		mediaRecordingListener.takeScreenshot();
 	}
 
 
@@ -148,9 +182,9 @@ public class VisualizerOptionsMenu extends JMenuBar
 	}
 
 
-	public void setScreenshotListener(IScreenshotListener listener)
+	public void setMediaRecordingListener(IMediaRecorderListener listener)
 	{
-		this.screenshotListener = listener;
+		this.mediaRecordingListener = listener;
 	}
 
 

@@ -3,15 +3,14 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.util.ScalingUtil;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 
 
 /**
@@ -53,9 +52,6 @@ public class DrawableBorderText implements IDrawableShape
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
-		g.scale(1f / tool.getScaleFactor(), 1.0 / tool.getScaleFactor());
-		g.translate(-tool.getFieldOriginX(), -tool.getFieldOriginY());
-
 		final IVector2 transPoint = pos;
 		int pointSize = 3;
 		final int drawingX = (int) transPoint.x() - (pointSize / 2);
@@ -65,9 +61,6 @@ public class DrawableBorderText implements IDrawableShape
 		g.setFont(font);
 		g.setColor(color);
 		g.drawString(text, drawingX, drawingY);
-
-		g.translate(tool.getFieldOriginX(), tool.getFieldOriginY());
-		g.scale(tool.getScaleFactor(), tool.getScaleFactor());
 	}
 
 
@@ -79,4 +72,10 @@ public class DrawableBorderText implements IDrawableShape
 		this.fontSize = fontSize;
 	}
 
+
+	@Override
+	public boolean isBorderText()
+	{
+		return true;
+	}
 }

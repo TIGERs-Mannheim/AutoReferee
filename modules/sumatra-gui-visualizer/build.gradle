@@ -16,7 +16,6 @@ dependencies {
     implementation project(':moduli-cam')
     implementation project(':moduli-vision')
     implementation project(':moduli-geometry')
-
     implementation 'com.github.TIGERs-Mannheim:moduli:3.0'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
@@ -24,4 +23,8 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
 
     implementation 'com.miglayout:miglayout-swing:5.2'
+
+    implementation 'io.humble:humble-video-noarch:0.3.0'
+
+    runtimeOnly 'io.humble:humble-video-all:0.3.0'
 }

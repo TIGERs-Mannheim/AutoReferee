@@ -4,8 +4,9 @@
 
 package edu.tigers.sumatra.visualizer;
 
-public enum EScreenshotOption
+public enum EMediaOption
 {
 	FULL_FIELD,
-	CURRENT_SECTION
+	CURRENT_SECTION,
+	VISUALIZER
 }

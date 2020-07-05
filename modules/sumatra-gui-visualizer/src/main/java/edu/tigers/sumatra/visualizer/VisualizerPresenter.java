@@ -4,24 +4,6 @@
 
 package edu.tigers.sumatra.visualizer;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.SwingUtilities;
-
-import org.apache.commons.lang.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamRobot;
@@ -55,6 +37,22 @@ import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingConsult
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import org.apache.commons.lang.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.SwingUtilities;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -70,6 +68,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		IWorldFrameObserver
 {
 	private static final Logger log = LogManager.getLogger(VisualizerPresenter.class.getName());
+
 
 	private static final int VISUALIZATION_FPS = 24;
 
@@ -419,6 +418,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		return panel;
 	}
 
+
 	private class UpdaterSelfSchedule extends Updater
 	{
 		@Override
@@ -532,5 +532,11 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			botShape.setId(String.valueOf(bot.getRobotID()));
 			return botShape;
 		}
+	}
+
+
+	public static int getVisualizationFps()
+	{
+		return VISUALIZATION_FPS;
 	}
 }

@@ -6,6 +6,7 @@ package edu.tigers.sumatra.visualizer;
 
 import edu.tigers.sumatra.clock.FpsCounter;
 import edu.tigers.sumatra.drawable.EFieldTurn;
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -58,6 +59,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	 */
 	private static final Color FIELD_COLOR = new Color(0, 160, 30);
 	private static final Color FIELD_COLOR_DARK = new Color(77, 77, 77);
+
 	/**
 	 * color of field background
 	 */
@@ -84,7 +86,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	// --- field constants / size of the loaded image in pixel ---
 	private static final int SCROLL_SPEED = 20;
 	private static final int DEF_FIELD_WIDTH = 10000;
-
+	private static final double BORDER_TEXT_NORMALIZED_WIDTH = 750;
 
 	private final int fieldWidth;
 
@@ -110,11 +112,17 @@ public class FieldPanel extends JPanel implements IFieldPanel
 
 	private String snapshotFilePath = "";
 	private boolean takeScreenshot = false;
-	private EScreenshotOption normalizeScreenshot = EScreenshotOption.CURRENT_SECTION;
+	private boolean videoIsRecording = false;
+	private EMediaOption mediaOption = EMediaOption.CURRENT_SECTION;
+	private int snapshotWidthBase = 5000;
+	private int snapshotHeightBase = 5000;
 	private int snapshotWidth = 5000;
 	private int snapshotHeight = 5000;
 	private int adjustedWidth = 5000;
 	private int adjustedHeight = 5000;
+
+	private VideoExporter videoExporter = null;
+	private long recordingAnimation = 0;
 
 
 	public FieldPanel()
@@ -213,18 +221,18 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public void paintOffline()
 	{
+		adjustedWidth = getWidth();
+		adjustedHeight = getHeight();
+
 		/*
 		 * Drawing only makes sense if we have a valid/existent drawing area because creating an image with size 0 will
 		 * produce an error. This scenario is possible if the moduli start up before the GUI layouting has been completed
 		 * and the component size is still 0|0.
 		 */
-		if ((adjustedWidth == 0) || (adjustedHeight == 0))
+		if ((adjustedWidth < 20) || (adjustedHeight < 20))
 		{
 			return;
 		}
-
-		adjustedWidth = getWidth();
-		adjustedHeight = getHeight();
 
 		if ((offImage == null) || (offImage.getHeight(this) != adjustedHeight)
 				|| (offImage.getWidth(this) != adjustedWidth))
@@ -236,46 +244,107 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			setFieldOriginY(0);
 		}
 
-		@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
-		final BasicStroke defaultStroke = new BasicStroke(Math.max(1, scaleYLength(10)));
-
 		synchronized (offImageSync)
 		{
 			final Graphics2D g2 = (Graphics2D) offImage.getGraphics();
-			drawFieldGraphics(defaultStroke, g2, this.fieldOriginX, this.fieldOriginY, this.adjustedWidth,
-					this.adjustedHeight, this.scaleFactor);
+			drawFieldGraphics(g2, this.fieldOriginX, this.fieldOriginY, this.adjustedWidth,
+					this.adjustedHeight, this.scaleFactor, EMediaOption.VISUALIZER);
 		}
 
-		if (takeScreenshot)
-		{
-			screenshotImage = createImage(this.snapshotWidth, this.snapshotHeight);
-			final Graphics2D g2 = (Graphics2D) screenshotImage.getGraphics();
-			switch (normalizeScreenshot)
-			{
-				case FULL_FIELD:
-					drawFullFieldScreenshot(defaultStroke, g2);
-					break;
-				case CURRENT_SECTION:
-					drawCurrentSectionScreenshot(defaultStroke, g2);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid Screenshot option");
-			}
-			takeScreenshot();
-			takeScreenshot = false;
-		}
+		handleScreenshotAndVideoRecording();
 		repaint();
 	}
 
 
-	private void drawFullFieldScreenshot(final BasicStroke defaultStroke, final Graphics2D g2)
+	private void handleScreenshotAndVideoRecording()
 	{
-		double scale = resetField(this.snapshotWidth, this.snapshotHeight);
-		drawFieldGraphics(defaultStroke, g2, 0, 0, this.snapshotWidth, this.snapshotHeight, scale);
+		if (takeScreenshot || videoExporter != null)
+		{
+			try {
+				// Images can be huge and cause the heap to run out
+				screenshotImage = createImage(this.snapshotWidth, this.snapshotHeight);
+			} catch (OutOfMemoryError error)
+			{
+				log.error("Out of Memory, stopping recording of Video", error);
+				stopRecordingVideo();
+			}
+			final Graphics2D g2 = (Graphics2D) screenshotImage.getGraphics();
+			switch (mediaOption)
+			{
+				case FULL_FIELD:
+					drawFullFieldScreenshot(g2);
+					break;
+				case CURRENT_SECTION:
+					drawCurrentSectionScreenshot(g2);
+					break;
+				default:
+					break;
+			}
+			if (takeScreenshot)
+			{
+				takeScreenshot();
+				takeScreenshot = false;
+			}
+			if (videoExporter != null && videoExporter.isInitialized())
+			{
+				videoExporter.addImageToVideo(toBufferedImage(screenshotImage));
+				if (!videoIsRecording)
+				{
+					videoExporter.close();
+					videoExporter = null;
+				}
+			}
+		}
 	}
 
 
-	private void drawCurrentSectionScreenshot(final BasicStroke defaultStroke, final Graphics2D g2)
+	private void calculateAndSetScreenshotDimensions()
+	{
+		int width = this.snapshotWidthBase;
+		int height = this.snapshotHeightBase;
+		EFieldTurn turn = getFieldTurn(width, height);
+		double widthToHeightRatio;
+		if (turn == EFieldTurn.NORMAL || turn == EFieldTurn.T180)
+		{
+			widthToHeightRatio = getFieldTotalHeight() / (double) getFieldTotalWidth();
+		} else
+		{
+			widthToHeightRatio = getFieldTotalWidth() / (double) getFieldTotalHeight();
+		}
+		if (this.snapshotWidth <= 0 && this.snapshotHeight <= 0)
+		{
+			log.warn("Invalid screenshot size, taking image with default values");
+			width = 1024;
+			height = (int) (width * widthToHeightRatio);
+		}
+		if (this.snapshotWidth <= 0)
+		{
+			width = (int) (height / widthToHeightRatio);
+		}
+		if (this.snapshotHeight <= 0)
+		{
+			height = (int) (width * widthToHeightRatio);
+		}
+
+		double borderTextScale = calculateBorerTextScale(mediaOption);
+		int refAreaOffset = calculateRefAreaOffset(mediaOption, borderTextScale);
+		height += refAreaOffset;
+
+		// numbers have to always be divisible by 2 for media encoding
+		this.snapshotWidth = width + (width % 2);
+		this.snapshotHeight = height + (height % 2);
+	}
+
+
+	private void drawFullFieldScreenshot(final Graphics2D g2)
+	{
+		double scale = getFieldScale(this.snapshotWidth, this.snapshotHeight);
+		drawFieldGraphics(g2, 0, 0, this.snapshotWidth, this.snapshotHeight, scale,
+				EMediaOption.FULL_FIELD);
+	}
+
+
+	private void drawCurrentSectionScreenshot(final Graphics2D g2)
 	{
 		final Point mPoint = new Point(0, 0);
 		final double xLen = ((mPoint.x - fieldOriginX) / scaleFactor) * 2;
@@ -288,19 +357,32 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		final double newLenY = (yLen) * normalizedScale;
 		double orgX = (fieldOriginX - ((newLenX - oldLenX) / 2.0));
 		double orgY = (fieldOriginY - ((newLenY - oldLenY) / 2.0));
-		drawFieldGraphics(defaultStroke, g2, orgX, orgY, this.snapshotWidth, this.snapshotHeight,
-				normalizedScale);
+		drawFieldGraphics(g2, orgX, orgY, this.snapshotWidth, this.snapshotHeight,
+				normalizedScale, EMediaOption.CURRENT_SECTION);
 	}
 
 
-	private void drawFieldGraphics(final BasicStroke defaultStroke, final Graphics2D g2, double offsetX, double offsetY,
-			int width, int height, double scale)
+	private void drawFieldGraphics(final Graphics2D g2,
+			double offsetX, double offsetY,
+			int width, int height, double scale,
+			EMediaOption mediaOption)
 	{
+		@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
+		final BasicStroke defaultStroke = new BasicStroke(Math.max(1, scaleYLength(10)));
 		g2.setColor(FIELD_COLOR_REFEREE);
 		g2.fillRect(0, 0, width, height);
 
-		g2.translate(offsetX, offsetY);
+		double borderTextScale = calculateBorerTextScale(mediaOption);
+		int refAreaOffset = calculateRefAreaOffset(mediaOption, borderTextScale);
+
+		g2.translate(offsetX, offsetY + refAreaOffset);
 		g2.scale(scale, scale);
+
+		EFieldTurn oldTurn = getFieldTurn();
+		if (mediaOption != EMediaOption.VISUALIZER)
+		{
+			setFieldTurn(getFieldTurn(width, height));
+		}
 
 		turnField(getFieldTurn(), -AngleMath.PI_HALF, g2);
 		g2.setColor(darkMode ? FIELD_COLOR_DARK : FIELD_COLOR);
@@ -324,12 +406,60 @@ public class FieldPanel extends JPanel implements IFieldPanel
 				.forEach(shapeLayer -> paintShapeMap(g2, shapeLayer, defaultStroke));
 
 		g2.scale(1.0 / scale, 1.0 / scale);
-		g2.translate(-offsetX, -offsetY);
+		g2.translate(-offsetX, -offsetY - refAreaOffset);
 
-		paintCoordinates(g2, ETeamColor.YELLOW, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
-		paintCoordinates(g2, ETeamColor.BLUE, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
+		g2.scale(borderTextScale, borderTextScale);
 
-		paintFps(g2, width);
+		shapeMaps.entrySet().stream()
+				.filter(s -> showSources.contains(s.getKey().getName()))
+				.filter(s -> showCategories.containsAll(s.getKey().getCategories()))
+				.map(Map.Entry::getValue)
+				.map(ShapeMap::getAllShapeLayers)
+				.flatMap(Collection::stream)
+				.sorted()
+				.filter(e -> shapeVisibilityMap.getOrDefault(e.getIdentifier().getId(), true))
+				.forEach(shapeLayer -> paintShapeMapBorderText(g2, shapeLayer, defaultStroke));
+
+		g2.scale(1 / borderTextScale, 1 / borderTextScale);
+
+		if (mediaOption == EMediaOption.VISUALIZER)
+		{
+			paintCoordinates(g2, ETeamColor.YELLOW, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
+			paintCoordinates(g2, ETeamColor.BLUE, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
+
+			if (videoExporter != null)
+			{
+				g2.setColor(Color.red);
+				int recordingRadius = 15 + (int) ((Math.sin(recordingAnimation / 7.0)) * 10);
+				int recX = getWidth() - 50 - recordingRadius / 2;
+				int recY = 15 - recordingRadius / 2;
+				g2.fillOval(recX, recY, recordingRadius, recordingRadius);
+
+				@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
+				final BasicStroke newStroke = new BasicStroke(Math.max(1, scaleYLength(15)));
+
+				g2.setStroke(newStroke);
+				g2.drawString("REC",getWidth() - 50 + 17, 15 + 4);
+				g2.setStroke(defaultStroke);
+				recordingAnimation++;
+			} else {
+				paintFps(g2, width);
+			}
+		}
+		setFieldTurn(oldTurn);
+	}
+
+
+	private int calculateRefAreaOffset(final EMediaOption mediaOption, final double borderTextScale)
+	{
+		return mediaOption == EMediaOption.VISUALIZER ? 0 : ((int) (70 * borderTextScale));
+	}
+
+
+	private double calculateBorerTextScale(final EMediaOption mediaOption)
+	{
+		int relevantViewWidth = mediaOption == EMediaOption.VISUALIZER ? getWidth() : this.snapshotWidth;
+		return relevantViewWidth / BORDER_TEXT_NORMALIZED_WIDTH;
 	}
 
 
@@ -351,11 +481,24 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
+	private void paintShapeMapBorderText(Graphics2D g, ShapeMap.ShapeLayer shapeLayer, BasicStroke defaultStroke)
+	{
+		final Graphics2D gDerived = (Graphics2D) g.create();
+		gDerived.setStroke(defaultStroke);
+		shapeLayer.getShapes().stream()
+				.filter(IDrawableShape::isBorderText)
+				.forEach(s -> s.paintShape(gDerived, this, shapeLayer.isInverted()));
+		gDerived.dispose();
+	}
+
+
 	private void paintShapeMap(Graphics2D g, ShapeMap.ShapeLayer shapeLayer, BasicStroke defaultStroke)
 	{
 		final Graphics2D gDerived = (Graphics2D) g.create();
 		gDerived.setStroke(defaultStroke);
-		shapeLayer.getShapes().forEach(s -> s.paintShape(gDerived, this, shapeLayer.isInverted()));
+		shapeLayer.getShapes().stream()
+				.filter(e -> !e.isBorderText())
+				.forEach(s -> s.paintShape(gDerived, this, shapeLayer.isInverted()));
 		gDerived.dispose();
 	}
 
@@ -734,26 +877,35 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		fieldOriginY = 0;
 	}
 
-
-	private double resetField(int width, int height)
+	private double getFieldScale(int width, int height)
 	{
 		double heightScaleFactor;
 		double widthScaleFactor;
 		if (width > height)
 		{
-			setFieldTurn(EFieldTurn.T90);
-
 			heightScaleFactor = (double) height / getFieldTotalWidth();
 			widthScaleFactor = (double) width / getFieldTotalHeight();
 		} else
 		{
-			setFieldTurn(EFieldTurn.NORMAL);
-
 			heightScaleFactor = ((double) height) / getFieldTotalHeight();
 			widthScaleFactor = ((double) width) / getFieldTotalWidth();
 		}
-
 		return Math.min(heightScaleFactor, widthScaleFactor);
+	}
+
+	private EFieldTurn getFieldTurn(int width, int height)
+	{
+		if (width > height)
+		{
+			return EFieldTurn.T90;
+		}
+		return EFieldTurn.NORMAL;
+	}
+
+	private double resetField(int width, int height)
+	{
+		setFieldTurn(getFieldTurn(width, height));
+		return getFieldScale(width, height);
 	}
 
 
@@ -795,6 +947,42 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	{
 		this.fieldOriginX = fieldOriginX;
 		SumatraModel.getInstance().setUserProperty(FIELD_ORIGIN_X_PROPERTY, String.valueOf(fieldOriginX));
+	}
+
+
+	public boolean startRecordingVideo(final String filename)
+	{
+		videoExporter = new VideoExporter();
+		try
+		{
+			if (!videoExporter.open(filename, this.snapshotWidth, this.snapshotHeight))
+			{
+				return false;
+			}
+		} catch (Exception e)
+		{
+			log.error("Could not record video", e);
+			return false;
+		}
+		videoIsRecording = true;
+		return true;
+	}
+
+
+	public void stopRecordingVideo()
+	{
+		videoIsRecording = false;
+	}
+
+
+	public void setMediaParameters(final int w, final int h, final EMediaOption mediaOption)
+	{
+		this.snapshotWidthBase = w;
+		this.snapshotHeightBase = h;
+		this.snapshotWidth = w;
+		this.snapshotHeight = h;
+		this.mediaOption = mediaOption;
+		calculateAndSetScreenshotDimensions();
 	}
 
 
@@ -879,13 +1067,30 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	public void saveScreenshot(EScreenshotOption normalize, String path, int width, int height)
+	private BufferedImage toBufferedImage(Image img)
+	{
+		if (img instanceof BufferedImage)
+		{
+			return (BufferedImage) img;
+		}
+
+		// Create a buffered image with transparency
+		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bimage.createGraphics();
+		bGr.drawImage(img, 0, 0, null);
+		bGr.dispose();
+
+		// Return the buffered image
+		return bimage;
+	}
+
+
+	public void saveScreenshot(String path)
 	{
 		this.snapshotFilePath = path;
 		this.takeScreenshot = true;
-		this.normalizeScreenshot = normalize;
-		this.snapshotWidth = width;
-		this.snapshotHeight = height;
 	}
 
 
