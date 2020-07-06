@@ -5,6 +5,7 @@ package edu.tigers.sumatra.drawable;
 
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.util.ScalingUtil;
 
@@ -22,7 +23,7 @@ public class DrawableBorderText implements IDrawableShape
 	private final IVector2 pos;
 	private final String text;
 	private final Color color;
-	private int fontSize;
+	private EFontSize fontSizeType = EFontSize.SMALL;
 
 
 	@SuppressWarnings("unused")
@@ -31,7 +32,6 @@ public class DrawableBorderText implements IDrawableShape
 		pos = Vector2f.ZERO_VECTOR;
 		text = "";
 		color = Color.red;
-		fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
 	}
 
 
@@ -45,18 +45,18 @@ public class DrawableBorderText implements IDrawableShape
 		this.pos = pos;
 		this.text = text;
 		this.color = color;
-		this.fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
 	}
 
 
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
-		final IVector2 transPoint = pos;
+		final IVector2 transPoint = Vector2.fromXY(ScalingUtil.scale(pos.x()), ScalingUtil.scale(pos.y()));
 		int pointSize = 3;
 		final int drawingX = (int) transPoint.x() - (pointSize / 2);
 		final int drawingY = (int) transPoint.y() - (pointSize / 2);
 
+		int fontSize = ScalingUtil.getFontSize(fontSizeType);
 		Font font = new Font("", Font.PLAIN, fontSize);
 		g.setFont(font);
 		g.setColor(color);
@@ -65,11 +65,11 @@ public class DrawableBorderText implements IDrawableShape
 
 
 	/**
-	 * @param fontSize the fontSize to set
+	 * @param fontSizeType the fontSize to set
 	 */
-	public final void setFontSize(final int fontSize)
+	public final void setFontSize(final EFontSize fontSizeType)
 	{
-		this.fontSize = fontSize;
+		this.fontSizeType = fontSizeType;
 	}
 
 

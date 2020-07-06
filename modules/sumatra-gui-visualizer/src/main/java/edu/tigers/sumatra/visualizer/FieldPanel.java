@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
 
 import edu.tigers.sumatra.clock.FpsCounter;
 import edu.tigers.sumatra.drawable.EFieldTurn;
+import edu.tigers.sumatra.drawable.EFontSize;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
@@ -506,7 +507,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private void paintCoordinates(final Graphics2D g, final ETeamColor teamColor,
 			final int width, final int height, final boolean inverted)
 	{
-		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
+		int fontSize = ScalingUtil.getFontSize(EFontSize.SMALL);
 
 		g.setStroke(new BasicStroke());
 		g.setFont(new Font("", Font.PLAIN, fontSize));
@@ -538,7 +539,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private void paintFps(final Graphics2D g, final int width)
 	{
 		fpsCounter.newFrame(System.nanoTime());
-		int fontSize = ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL);
+		int fontSize = ScalingUtil.getFontSize(EFontSize.SMALL);
 		g.setFont(new Font("", Font.PLAIN, fontSize));
 		g.setColor(Color.black);
 

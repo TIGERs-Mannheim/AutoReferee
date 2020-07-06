@@ -4,35 +4,26 @@
 
 package edu.tigers.sumatra.util;
 
-import javax.swing.JTextPane;
+import edu.tigers.sumatra.drawable.EFontSize;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 
 /**
  * Util class for getting default GUI dimensions.
  * Needed for the GUI to scale properly on high DPI screens with gui scaling.
- *
- * @author David Risch <DavidR@tigers-mannheim.de>
  */
 public class ScalingUtil
 {
-	public enum FontSize
-	{
-		SMALL,
-		MEDIUM,
-		LARGE
-	}
-
-	private static int fontSizeSmall;
-	private static int fontSizeMedium;
-	private static int fontSizeLarge;
+	private static final Map<EFontSize, Integer> FONT_SIZES = new EnumMap<>(EFontSize.class);
 	private static int imageButtonSize;
 	private static int tableRowHeight;
+	private static double baselineSize = 10;
 
 	// Size of various GUI elements relative to the default text size set by the selected LookAndFeel
 	private static final double TABLE_ROW_FACTOR = 1.5;
 	private static final double IMAGE_BUTTON_FACTOR = 2.25;
-	private static final double FONT_SMALL_FACTOR = 0.8;
-	private static final double FONT_LARGE_FACTOR = 1.2;
 
 	static
 	{
@@ -45,18 +36,16 @@ public class ScalingUtil
 	}
 
 
-	public static int getFontSize(FontSize fontSize)
+	public static void updateBaselineSize(double baselineSize)
 	{
-		if (fontSize == FontSize.SMALL)
-		{
-			return fontSizeSmall;
-		} else if (fontSize == FontSize.LARGE)
-		{
-			return fontSizeLarge;
-		} else
-		{
-			return fontSizeMedium;
-		}
+		ScalingUtil.baselineSize = baselineSize;
+		update();
+	}
+
+
+	public static int getFontSize(EFontSize fontSize)
+	{
+		return FONT_SIZES.get(fontSize);
 	}
 
 
@@ -72,20 +61,25 @@ public class ScalingUtil
 	}
 
 
+	public static int scale(double value)
+	{
+		return (int) Math.ceil(baselineSize * value);
+	}
+
+
 	/**
 	 * Gets the default font size of the active LookAndFeel.
 	 * If the LookAndFeel supports GUI scaling this value will depend on the scale factor.
 	 * This function must only be called after the LookAndFeel has been set (in MainPresenter.onSelectLookAndFeel)
 	 */
-	public static void update()
+	private static void update()
 	{
-		double baselineSize = new JTextPane().getFont().getSize();
-		fontSizeSmall = (int) Math.ceil(baselineSize * FONT_SMALL_FACTOR);
-		fontSizeMedium = (int) Math.ceil(baselineSize * 1.0);
-		fontSizeLarge = (int) Math.ceil(baselineSize * FONT_LARGE_FACTOR);
+		for (EFontSize fontSize : EFontSize.values())
+		{
+			FONT_SIZES.put(fontSize, scale(fontSize.getScaleFactor()));
+		}
 
-		imageButtonSize = (int) Math.ceil(baselineSize * IMAGE_BUTTON_FACTOR);
-
-		tableRowHeight = (int) Math.ceil(baselineSize * TABLE_ROW_FACTOR);
+		imageButtonSize = scale(IMAGE_BUTTON_FACTOR);
+		tableRowHeight = scale(TABLE_ROW_FACTOR);
 	}
 }

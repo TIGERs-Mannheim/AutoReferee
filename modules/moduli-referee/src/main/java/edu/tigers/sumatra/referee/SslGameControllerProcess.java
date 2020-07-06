@@ -54,7 +54,7 @@ public class SslGameControllerProcess implements Runnable
 		try
 		{
 			ProcessBuilder builder = new ProcessBuilder(BINARY_FILE.getAbsolutePath(),
-					"-address", "localhost:" + gcUiPort,
+					"-address", ":" + gcUiPort,
 					"-timeAcquisitionMode", timeAcquisitionMode,
 					"-publishAddress", publishAddress);
 			builder.redirectErrorStream(true);
@@ -158,7 +158,7 @@ public class SslGameControllerProcess implements Runnable
 
 	private void createClient(final String truncatedLine)
 	{
-		final Pattern pattern = Pattern.compile("localhost:([0-9]+)");
+		final Pattern pattern = Pattern.compile(":([0-9]+)");
 		final Matcher matcher = pattern.matcher(truncatedLine);
 		if (matcher.find())
 		{

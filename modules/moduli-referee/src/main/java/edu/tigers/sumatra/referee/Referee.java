@@ -16,6 +16,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -88,9 +90,19 @@ public class Referee extends AReferee
 		sslGameControllerProcess.setPublishAddress("224.5.23.1:" + getPort());
 
 		File stateStoreFile = new File("build/state-store.json.stream");
-		if (stateStoreFile.exists() && !stateStoreFile.delete())
+		if (stateStoreFile.getParentFile().mkdirs())
 		{
-			log.warn("Could not remove state store file, although it exists");
+			log.debug("state store dir created: {}", stateStoreFile);
+		}
+		if (stateStoreFile.exists())
+		{
+			try
+			{
+				Files.delete(stateStoreFile.toPath());
+			} catch (IOException e)
+			{
+				log.warn("Could not remove state store file, although it exists", e);
+			}
 		}
 
 		new Thread(sslGameControllerProcess).start();

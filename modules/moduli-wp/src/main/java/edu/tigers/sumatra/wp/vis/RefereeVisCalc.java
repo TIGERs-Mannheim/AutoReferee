@@ -4,16 +4,10 @@
 
 package edu.tigers.sumatra.wp.vis;
 
-import java.awt.Color;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import edu.tigers.sumatra.drawable.DrawableBorderText;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawablePoint;
+import edu.tigers.sumatra.drawable.EFontSize;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -26,9 +20,15 @@ import edu.tigers.sumatra.referee.data.GameEventProposalGroup;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.data.TeamInfo;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.util.ScalingUtil;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+
+import java.awt.Color;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -140,7 +140,7 @@ public class RefereeVisCalc implements IWpCalc
 
 		for (DrawableBorderText txt : txtShapes)
 		{
-			txt.setFontSize(ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL));
+			txt.setFontSize(EFontSize.SMALL);
 		}
 
 		shapeMap.get(EWpShapesLayer.REFEREE).addAll(txtShapes);
@@ -187,8 +187,8 @@ public class RefereeVisCalc implements IWpCalc
 	private Vector2 getPosition(int column, int row)
 	{
 		return Vector2.fromXY(
-				offsetsX[column] * ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL),
-				(row + 1.1) * ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL));
+				offsetsX[column],
+				(row + 1.1));
 
 	}
 

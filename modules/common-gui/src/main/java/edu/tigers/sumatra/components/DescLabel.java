@@ -1,8 +1,11 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.components;
+
+import edu.tigers.sumatra.drawable.EFontSize;
+import edu.tigers.sumatra.util.ScalingUtil;
 
 import javax.swing.JTextArea;
 import java.awt.Color;
@@ -11,8 +14,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
-
-import edu.tigers.sumatra.util.ScalingUtil;
 
 
 /**
@@ -24,27 +25,27 @@ import edu.tigers.sumatra.util.ScalingUtil;
  */
 public class DescLabel extends JTextArea
 {
-	
+
 	public DescLabel(String text)
 	{
 		super(text);
-		
+
 		this.setBackground(new Color(0, 0, 0, 0));
 		this.setEditable(false);
-		
+
 		Map<TextAttribute, Object> attributes = new HashMap<>();
-		
+
 		attributes.put(TextAttribute.FAMILY, Font.SANS_SERIF);
 		attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_SEMIBOLD);
-		attributes.put(TextAttribute.SIZE, ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL));
-		
+		attributes.put(TextAttribute.SIZE, ScalingUtil.getFontSize(EFontSize.SMALL));
+
 		this.setFont(Font.getFont(attributes));
-		
+
 		this.setLineWrap(true);
 		this.setWrapStyleWord(true);
 	}
-	
-	
+
+
 	@Override
 	public synchronized void addMouseMotionListener(final MouseMotionListener mouseMotionListener)
 	{
@@ -53,5 +54,5 @@ public class DescLabel extends JTextArea
 		 * adding them
 		 */
 	}
-	
+
 }

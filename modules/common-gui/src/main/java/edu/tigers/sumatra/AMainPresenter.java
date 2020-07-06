@@ -3,6 +3,15 @@
  */
 package edu.tigers.sumatra;
 
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.util.ScalingUtil;
+import net.infonode.gui.laf.InfoNodeLookAndFeel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
@@ -10,16 +19,6 @@ import java.awt.HeadlessException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Properties;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.util.ScalingUtil;
-import net.infonode.gui.laf.InfoNodeLookAndFeel;
 
 
 /**
@@ -36,7 +35,7 @@ public abstract class AMainPresenter implements IMainFrameObserver
 	static
 	{
 		InfoNodeLookAndFeel.install();
-		ScalingUtil.update();
+		ScalingUtil.updateBaselineSize(new JTextPane().getFont().getSize());
 	}
 
 

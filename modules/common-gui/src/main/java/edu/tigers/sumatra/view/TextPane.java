@@ -3,6 +3,7 @@
  */
 package edu.tigers.sumatra.view;
 
+import edu.tigers.sumatra.drawable.EFontSize;
 import edu.tigers.sumatra.util.ScalingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +43,7 @@ public class TextPane extends JScrollPane
 		DefaultCaret caret = (DefaultCaret) pane.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
-		setFontSize(ScalingUtil.getFontSize(ScalingUtil.FontSize.SMALL));
+		setFontSize(ScalingUtil.getFontSize(EFontSize.SMALL));
 		pane.setEditable(false);
 		pane.setOpaque(false);
 		pane.setFocusable(true);
@@ -82,7 +83,8 @@ public class TextPane extends JScrollPane
 			if (entryLengths.size() > maxCapacity)
 			{
 				final Integer end = entryLengths.pollFirst();
-				if(end != null) {
+				if (end != null)
+				{
 					doc.remove(0, end);
 				}
 			}
@@ -108,7 +110,8 @@ public class TextPane extends JScrollPane
 			if (entryLengths.size() > maxCapacity)
 			{
 				final Integer end = entryLengths.pollLast();
-				if(end != null) {
+				if (end != null)
+				{
 					doc.remove(doc.getLength(), end);
 				}
 			}
