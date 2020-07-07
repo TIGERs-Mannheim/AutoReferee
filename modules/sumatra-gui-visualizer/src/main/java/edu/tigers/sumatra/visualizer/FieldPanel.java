@@ -409,6 +409,12 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		g2.scale(1.0 / scale, 1.0 / scale);
 		g2.translate(-offsetX, -offsetY - refAreaOffset);
 
+		if (mediaOption != EMediaOption.VISUALIZER)
+		{
+			g2.setColor(FIELD_COLOR_REFEREE);
+			g2.fillRect(0,0, width, refAreaOffset);
+		}
+
 		g2.scale(borderTextScale, borderTextScale);
 
 		shapeMaps.entrySet().stream()
@@ -983,6 +989,13 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		this.snapshotWidth = w;
 		this.snapshotHeight = h;
 		this.mediaOption = mediaOption;
+		if (getFieldTurn() == EFieldTurn.NORMAL && mediaOption == EMediaOption.CURRENT_SECTION)
+		{
+			this.snapshotWidthBase = h;
+			this.snapshotHeightBase = w;
+			this.snapshotWidth = h;
+			this.snapshotHeight = w;
+		}
 		calculateAndSetScreenshotDimensions();
 	}
 
