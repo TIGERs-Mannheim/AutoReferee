@@ -55,12 +55,12 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 
 
 	/**
-	 * Check if the ball was visible within the given horizon
+	 * Check if the ball was visible within the given seconds
 	 *
-	 * @param horizon within this horizon
+	 * @param seconds within this time horizon
 	 * @return true, if the ball is detected by any camera
 	 */
-	boolean isOnCam(double horizon);
+	boolean isOnCam(double seconds);
 
 
 	/**

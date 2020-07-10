@@ -4,16 +4,7 @@
 
 package edu.tigers.autoreferee.engine.detector;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -29,6 +20,14 @@ import edu.tigers.sumatra.referee.gameevent.BotCrashDrawn;
 import edu.tigers.sumatra.referee.gameevent.BotCrashUnique;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -62,7 +61,6 @@ public class BotCollisionDetector extends AGameEventDetector
 				EGameState.STOP,
 				EGameState.INDIRECT_FREE,
 				EGameState.DIRECT_FREE,
-				EGameState.INDIRECT_FREE,
 				EGameState.BALL_PLACEMENT,
 				EGameState.PREPARE_PENALTY,
 				EGameState.PREPARE_KICKOFF,

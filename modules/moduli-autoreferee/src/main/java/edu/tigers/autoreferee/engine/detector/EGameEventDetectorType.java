@@ -4,12 +4,12 @@
 
 package edu.tigers.autoreferee.engine.detector;
 
+import com.github.g3force.instanceables.IInstanceableEnum;
+import com.github.g3force.instanceables.InstanceableClass;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.github.g3force.instanceables.IInstanceableEnum;
-import com.github.g3force.instanceables.InstanceableClass;
 
 
 /**
@@ -35,7 +35,7 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 	BALL_PLACEMENT_SUCCEEDED(new InstanceableClass(BallPlacementSucceededDetector.class)),
 
 	BALL_LEFT_FIELD(new InstanceableClass(BallLeftFieldDetector.class)),
-
+	BOUNDARY_CROSSING(new InstanceableClass(BoundaryCrossingDetector.class)),
 
 	PUSHING(new InstanceableClass(PushingDetector.class), false),
 

@@ -4,18 +4,7 @@
 
 package edu.tigers.sumatra.wp.data;
 
-import static edu.tigers.sumatra.wp.data.BallTrajectoryState.aBallState;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BallID;
@@ -26,6 +15,15 @@ import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
 import edu.tigers.sumatra.wp.ball.prediction.IChipBallConsultant;
 import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
 import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static edu.tigers.sumatra.wp.data.BallTrajectoryState.aBallState;
 
 
 /**
@@ -233,9 +231,9 @@ public class TrackedBall implements ITrackedBall
 
 
 	@Override
-	public boolean isOnCam(final double horizon)
+	public boolean isOnCam(final double seconds)
 	{
-		return (lastVisibleTimestamp == 0) || (((getTimestamp() - lastVisibleTimestamp) * 1e-9) < horizon);
+		return (lastVisibleTimestamp == 0) || (((getTimestamp() - lastVisibleTimestamp) * 1e-9) < seconds);
 	}
 
 
