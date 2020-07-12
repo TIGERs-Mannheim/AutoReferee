@@ -4,25 +4,27 @@
 
 package edu.tigers.autoreferee.engine.detector;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
-
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.autoreferee.AutoRefUtil.ColorFilter;
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
+import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.AttackerTooCloseToDefenseArea;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -34,6 +36,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	private static double gracePeriod = 2.0;
 
 	private static final double INACCURACY_TOLERANCE = 15;
+	private final Map<BotID, Long> eventsSentForBotMap = new HashMap<>();
 
 
 	/**
@@ -43,7 +46,13 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	{
 		super(EGameEventDetectorType.ATTACKER_TO_DEFENSE_AREA_DISTANCE,
 				EnumSet.of(EGameState.STOP, EGameState.INDIRECT_FREE, EGameState.DIRECT_FREE, EGameState.KICKOFF));
-		setDeactivateOnFirstGameEvent(true);
+	}
+
+
+	@Override
+	protected void doReset()
+	{
+		eventsSentForBotMap.clear();
 	}
 
 
@@ -105,19 +114,29 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 		private Optional<IGameEvent> evaluate()
 		{
 			Optional<ITrackedBot> optOffender = bots.stream()
+					.filter(this::notSentRecently)
 					.filter(ColorFilter.get(attackerColor))
 					.filter(bot -> defenderPenArea.isPointInShape(bot.getPos(), requiredMargin))
 					.filter(this::notBeingPushed)
 					.findFirst();
 
+			optOffender.ifPresent(g -> eventsSentForBotMap.put(g.getBotId(), g.getTimestamp()));
+
 			return optOffender.map(this::buildViolation);
+		}
+
+
+		private boolean notSentRecently(ITrackedBot bot)
+		{
+			Long lastTimeSent = eventsSentForBotMap.get(bot.getBotId());
+			return lastTimeSent == null || (bot.getTimestamp() - lastTimeSent) / 1e9 > gracePeriod;
 		}
 
 
 		private boolean notBeingPushed(ITrackedBot bot)
 		{
 			ETeamColor defenderColor = attackerColor.opposite();
-			return !bots.stream()
+			return bots.stream()
 					// bots from defending team
 					.filter(ColorFilter.get(defenderColor))
 					// that touch the attacker
@@ -129,7 +148,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 					.flatMap(List::stream)
 					.findAny()
 					// if any intersection is present, some defender pushes the attacker
-					.isPresent();
+					.isEmpty();
 		}
 
 
