@@ -19,7 +19,6 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 {
 	ATTACKER_TO_DEFENSE_AREA_DISTANCE(new InstanceableClass(AttackerToDefenseAreaDistanceDetector.class)),
 	BOT_IN_DEFENSE_AREA(new InstanceableClass(BotInDefenseAreaDetector.class)),
-	BALL_HOLD_IN_DEFENSE_AREA(new InstanceableClass(BallHoldInDefenseAreaDetector.class)),
 	DRIBBLING(new InstanceableClass(DribblingDetector.class)),
 
 	BALL_SPEEDING(new InstanceableClass(BallSpeedingDetector.class)),
