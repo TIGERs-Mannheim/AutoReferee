@@ -4,13 +4,6 @@
 
 package edu.tigers.sumatra.wp.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Optional;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.ids.BotID;
@@ -19,6 +12,12 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.trajectory.StubTrajectory;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class BotStateTrajectorySyncTest

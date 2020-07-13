@@ -21,8 +21,19 @@ dependencies {
 
     implementation 'com.sleepycat:je:18.3.12'
     implementation 'gov.nist.math:jama:1.0.3'
+    implementation 'net.jafama:jafama:2.3.1'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.assertj:assertj-core:3.16.1'
+
+    testImplementation 'org.openjdk.jmh:jmh-core:1.23'
+    testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
+}
+
+task runBangBangTrajectoryBenchmark(type: JavaExec) {
+    group = "Execution"
+    description = "Run BangBangTrajectoryBenchmark"
+    classpath = sourceSets.test.runtimeClasspath
+    main = "edu.tigers.sumatra.trajectory.BangBangTrajectoryBenchmark"
 }

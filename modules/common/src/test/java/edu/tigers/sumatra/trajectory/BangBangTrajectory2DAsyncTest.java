@@ -1,8 +1,10 @@
 /*
  * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
+
 package edu.tigers.sumatra.trajectory;
 
+import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import org.junit.Test;
@@ -13,10 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 
-/**
- * Test 2D bang bang trajectories.
- */
-public class BangBangTrajectory2DTest
+public class BangBangTrajectory2DAsyncTest
 {
 	private static final int NUMBER_OF_TESTS = 1000;
 	private static final double POS_LIMIT = 10.0;
@@ -57,13 +56,15 @@ public class BangBangTrajectory2DTest
 			IVector2 initPos = getRandomVector(POS_LIMIT);
 			IVector2 finalPos = getRandomVector(POS_LIMIT);
 			IVector2 initVel = getRandomVector(2.0f);
+			IVector2 primaryDirection = Vector2.fromAngle(getRandomDouble(AngleMath.PI_TWO));
 
-			BangBangTrajectory2D traj = trajectoryFactory.sync(initPos, finalPos, initVel, 2.0, 3.0);
+			BangBangTrajectory2DAsync traj = trajectoryFactory
+					.async(initPos, finalPos, initVel, 2.0, 3.0, primaryDirection);
 
 			assertThat(traj.getTotalTime()).isGreaterThanOrEqualTo(0f);
 
-			checkTimeOrder(traj.x);
-			checkTimeOrder(traj.y);
+			checkTimeOrder(traj.child.x);
+			checkTimeOrder(traj.child.y);
 
 			// check final velocity == 0
 			assertThat(traj.getVelocity(traj.getTotalTime()).getLength2()).isCloseTo(0.0f, within(VEL_TOLERANCE));
@@ -83,13 +84,15 @@ public class BangBangTrajectory2DTest
 			IVector2 initPos = getRandomVector(POS_LIMIT);
 			IVector2 finalPos = getRandomVector(POS_LIMIT);
 			IVector2 initVel = getRandomVector(4.0f);
+			IVector2 primaryDirection = Vector2.fromAngle(getRandomDouble(AngleMath.PI_TWO));
 
-			BangBangTrajectory2D traj = trajectoryFactory.sync(initPos, finalPos, initVel, 2.0, 3.0);
+			BangBangTrajectory2DAsync traj = trajectoryFactory
+					.async(initPos, finalPos, initVel, 2.0, 3.0, primaryDirection);
 
 			assertThat(traj.getTotalTime()).isGreaterThanOrEqualTo(0f);
 
-			checkTimeOrder(traj.x);
-			checkTimeOrder(traj.y);
+			checkTimeOrder(traj.child.x);
+			checkTimeOrder(traj.child.y);
 
 			// check final velocity == 0
 			assertThat(traj.getVelocity(traj.getTotalTime()).getLength2()).isCloseTo(0.0f, within(VEL_TOLERANCE));
@@ -98,31 +101,5 @@ public class BangBangTrajectory2DTest
 			assertThat(traj.getPositionMM(traj.getTotalTime()).x() * 1e-3).isCloseTo(finalPos.x(), within(POS_TOLERANCE));
 			assertThat(traj.getPositionMM(traj.getTotalTime()).y() * 1e-3).isCloseTo(finalPos.y(), within(POS_TOLERANCE));
 		}
-	}
-
-
-	@Test
-	public void testAccuracy()
-	{
-		IVector2 pos = Vector2.fromXY(-677.6483764648438, 0.011869861744344234);
-		IVector2 dest = Vector2.fromXY(-186.5, -0.0);
-		IVector2 vel1 = Vector2.fromXY(0.09700202941894531, 4.835854306293186E-4);
-		IVector2 vel2 = Vector2.fromXY(0.09700202941894531, 0);
-
-		BangBangTrajectory2D traj1 = trajectoryFactory.sync(
-				pos.multiplyNew(1e-3f),
-				dest.multiplyNew(1e-3f),
-				vel1,
-				2.0,
-				2.0);
-
-		BangBangTrajectory2D traj2 = trajectoryFactory.sync(
-				pos.multiplyNew(1e-3f),
-				dest.multiplyNew(1e-3f),
-				vel2,
-				2.0,
-				2.0);
-
-		assertThat(traj1.getTotalTime()).isCloseTo(traj2.getTotalTime(), within(1e-4));
 	}
 }
