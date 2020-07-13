@@ -9,17 +9,19 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class BotHeldBallDeliberately extends AGameEvent
 {
-	private final ETeamColor team;
-	private final int bot;
-	private final IVector2 location;
-	private final double duration;
+	ETeamColor team;
+	int bot;
+	IVector2 location;
+	double duration;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -79,39 +81,5 @@ public class BotHeldBallDeliberately extends AGameEvent
 	{
 		return String.format("Bot %d %s hold the ball deliberately for %.2f s @ %s", bot, team, duration,
 				formatVector(location));
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final BotHeldBallDeliberately that = (BotHeldBallDeliberately) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(bot, that.bot)
-				.append(duration, that.duration)
-				.append(team, that.team)
-				.append(location, that.location)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(bot)
-				.append(location)
-				.append(duration)
-				.toHashCode();
 	}
 }

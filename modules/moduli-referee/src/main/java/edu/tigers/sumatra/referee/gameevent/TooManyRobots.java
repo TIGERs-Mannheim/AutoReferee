@@ -8,17 +8,19 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class TooManyRobots extends AGameEvent
 {
-	private final ETeamColor team;
-	private final int numRobotsAllowed;
-	private final int numRobotsOnField;
-	private final IVector2 ballLocation;
+	ETeamColor team;
+	int numRobotsAllowed;
+	int numRobotsOnField;
+	IVector2 ballLocation;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -76,39 +78,5 @@ public class TooManyRobots extends AGameEvent
 	{
 		return String.format("Team %s has %d robots on the field, but only %d are allowed", team, numRobotsOnField,
 				numRobotsAllowed);
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final TooManyRobots that = (TooManyRobots) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(team, that.team)
-				.append(numRobotsAllowed, that.numRobotsAllowed)
-				.append(numRobotsOnField, that.numRobotsOnField)
-				.append(ballLocation, that.ballLocation)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(numRobotsAllowed)
-				.append(numRobotsOnField)
-				.append(ballLocation)
-				.toHashCode();
 	}
 }

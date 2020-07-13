@@ -4,43 +4,91 @@
 
 package edu.tigers.sumatra.wp;
 
+import edu.tigers.sumatra.clock.ThreadUtil;
+import edu.tigers.sumatra.referee.proto.SslGcApi;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
+import edu.tigers.sumatra.thread.Watchdog;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.proto.SslGcCi;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.apache.commons.codec.binary.Base64OutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
  * This connector connects to the CI interface of a local game-controller directly with a fast TCP connection.
  * It sends the current time and the tracker packets to the GC and receives the updated referee messages afterwards.
  */
+@RequiredArgsConstructor
+@Log4j2
 public class CiGameControllerConnector
 {
-	private static final Logger log = LogManager.getLogger(CiGameControllerConnector.class);
-
 	private static final String HOSTNAME = "localhost";
-	private int port = 10009;
+	private final int port;
 	private Socket socket;
+	private Watchdog watchdog;
+	private SslGcCi.CiInput lastInput;
 
 	private TrackerPacketGenerator trackerPacketGenerator;
 
 
-	public void start()
+	public synchronized void start()
 	{
+		log.trace("Starting");
 		trackerPacketGenerator = new TrackerPacketGenerator();
+		watchdog = new Watchdog(5000, this.getClass().getSimpleName(), this::onTimeout);
+		watchdog.start();
 		connect();
+		// Initialize connection by performing one roundtrip
+		send(0);
+		receiveRefereeMessages();
+		log.trace("Started");
 	}
 
 
-	public void stop()
+	public synchronized void stop()
 	{
+		log.trace("Stopping");
+		watchdog.stop();
+		disconnect();
+		log.trace("Stopped");
+	}
+
+
+	private void connect()
+	{
+		log.trace("Connecting");
+
+		for (int i = 0; i < 10; i++)
+		{
+			// Allow the GC to come up
+			ThreadUtil.parkNanosSafe(TimeUnit.MILLISECONDS.toNanos(200));
+			try
+			{
+				socket = new Socket(HOSTNAME, port);
+				socket.setTcpNoDelay(true);
+				log.debug("Connected");
+				return;
+			} catch (IOException e)
+			{
+				log.debug("Connection to SSL-Game-Controller failed", e);
+			}
+		}
+		log.warn("Connection to SSL-Game-Controller failed repeatedly");
+	}
+
+
+	private void disconnect()
+	{
+		log.trace("Disconnect");
 		if (socket != null)
 		{
 			try
@@ -52,20 +100,7 @@ public class CiGameControllerConnector
 				log.warn("Closing socket failed", e);
 			}
 		}
-	}
-
-
-	private void connect()
-	{
-		try
-		{
-			socket = new Socket(HOSTNAME, port);
-			socket.setTcpNoDelay(true);
-			send(0);
-		} catch (IOException e)
-		{
-			log.warn("Connection to SSL-Game-Controller Failed", e);
-		}
+		log.trace("Disconnected");
 	}
 
 
@@ -77,11 +112,13 @@ public class CiGameControllerConnector
 	}
 
 
-	private void send(final SimpleWorldFrame swf)
+	private void send(final SimpleWorldFrame swf,
+			final List<SslGcApi.Input> inputs)
 	{
 		send(SslGcCi.CiInput.newBuilder()
 				.setTimestamp(swf.getTimestamp())
 				.setTrackerPacket(trackerPacketGenerator.generate(swf))
+				.addAllApiInputs(inputs)
 				.build());
 	}
 
@@ -90,8 +127,11 @@ public class CiGameControllerConnector
 	{
 		try
 		{
+			lastInput = input;
 			input.writeDelimitedTo(socket.getOutputStream());
 			socket.getOutputStream().flush();
+			watchdog.reset();
+			watchdog.setActive(true);
 		} catch (IOException e)
 		{
 			log.warn("Could not write to socket", e);
@@ -112,9 +152,8 @@ public class CiGameControllerConnector
 				SslGcCi.CiOutput output = SslGcCi.CiOutput.parseDelimitedFrom(socket.getInputStream());
 				if (output == null)
 				{
-					log.warn("Receiving Message failed: Socket was at EOF, most likely the connection was closed");
-					stop();
-					break;
+					throw new IOException(
+							"Receiving Message failed: Socket was at EOF, most likely the connection was closed");
 				}
 
 				if (output.hasRefereeMsg())
@@ -125,26 +164,49 @@ public class CiGameControllerConnector
 		} catch (IOException e)
 		{
 			log.warn("Receiving CI message from SSL-Game-Controller failed", e);
-			stop();
+			disconnect();
+		} finally
+		{
+			watchdog.setActive(false);
 		}
 		return messages;
 	}
 
 
-	public List<SslGcRefereeMessage.Referee> process(final SimpleWorldFrame swf)
+	public synchronized List<SslGcRefereeMessage.Referee> process(final SimpleWorldFrame swf,
+			List<SslGcApi.Input> inputs)
 	{
+		if (socket == null)
+		{
+			connect();
+		}
 		if (socket == null)
 		{
 			return Collections.emptyList();
 		}
 
-		send(swf);
+		send(swf, inputs);
 		return receiveRefereeMessages();
 	}
 
 
-	public void setPort(final int port)
+	private void onTimeout()
 	{
-		this.port = port;
+		log.error("Sumatra to GC communication got stuck! Last input: {}", lastInput);
+		if (lastInput != null)
+		{
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			Base64OutputStream stream = new Base64OutputStream(baos);
+			try
+			{
+				lastInput.writeDelimitedTo(stream);
+				String base64EncodedInput = new String(baos.toByteArray());
+				log.error("Base64 encoded last input: {}", base64EncodedInput);
+			} catch (IOException e)
+			{
+				log.error("Could not convert last input to base64", e);
+			}
+		}
+		disconnect();
 	}
 }

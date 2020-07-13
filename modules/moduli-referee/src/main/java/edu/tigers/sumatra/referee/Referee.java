@@ -12,28 +12,31 @@ import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
  * Implementation of {@link AReferee} which can use various referee message sources.
  */
+@Log4j2
 public class Referee extends AReferee
 {
-	private static final Logger log = LogManager.getLogger(Referee.class.getName());
+	private static final int DEFAULT_GC_UI_PORT = 50543;
 	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
 			ERefereeMessageSource.class);
 
 	private ARefereeMessageSource source;
 	private SslGameControllerProcess sslGameControllerProcess;
 	private boolean internalGameControlledActive = false;
+	private List<SslGcApi.Input> changeQueue = new CopyOnWriteArrayList<>();
 
 
 	public Referee()
@@ -75,19 +78,10 @@ public class Referee extends AReferee
 
 	public void startGameController()
 	{
-		sslGameControllerProcess = new SslGameControllerProcess();
-		if (getSubnodeConfiguration().containsKey("gc-ui-port"))
-		{
-			sslGameControllerProcess.setGcUiPort(getSubnodeConfiguration().getInt("gc-ui-port"));
-		}
-		if (source.getType() == ERefereeMessageSource.CI)
-		{
-			sslGameControllerProcess.setTimeAcquisitionMode("ci");
-		} else
-		{
-			sslGameControllerProcess.setTimeAcquisitionMode("system");
-		}
-		sslGameControllerProcess.setPublishAddress("224.5.23.1:" + getPort());
+		var port = getSubnodeConfiguration().getInt("gc-ui-port", DEFAULT_GC_UI_PORT);
+		var publishAddress = "224.5.23.1:" + getPort();
+		var timeAcquisitionMode = source.getType() == ERefereeMessageSource.CI ? "ci" : "system";
+		sslGameControllerProcess = new SslGameControllerProcess(port, publishAddress, timeAcquisitionMode);
 
 		File stateStoreFile = new File("build/state-store.json.stream");
 		if (stateStoreFile.getParentFile().mkdirs())
@@ -125,15 +119,9 @@ public class Referee extends AReferee
 	@Override
 	public void initGameController()
 	{
-		sslGameControllerProcess.getClientBlocking().ifPresent(this::initGameController);
-	}
-
-
-	private void initGameController(SslGameControllerClient client)
-	{
-		client.sendEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
-		client.sendEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
-		client.sendEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
+		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
+		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
+		sendGameControllerEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
 	}
 
 
@@ -164,7 +152,7 @@ public class Referee extends AReferee
 	{
 		if (sslGameControllerProcess != null)
 		{
-			sslGameControllerProcess.getClient().ifPresent(c -> c.sendEvent(event));
+			changeQueue.add(event);
 		}
 	}
 
@@ -190,20 +178,10 @@ public class Referee extends AReferee
 	}
 
 
-	public void addGcApiObserver(IGameControllerApiObserver o)
+	public List<SslGcApi.Input> flushChanges()
 	{
-		if (sslGameControllerProcess != null)
-		{
-			sslGameControllerProcess.getClient().ifPresent(c -> c.addObserver(o));
-		}
-	}
-
-
-	public void removeGcApiObserver(IGameControllerApiObserver o)
-	{
-		if (sslGameControllerProcess != null)
-		{
-			sslGameControllerProcess.getClient().ifPresent(c -> c.removeObserver(o));
-		}
+		var currentQueue = changeQueue;
+		changeQueue = new CopyOnWriteArrayList<>();
+		return currentQueue;
 	}
 }

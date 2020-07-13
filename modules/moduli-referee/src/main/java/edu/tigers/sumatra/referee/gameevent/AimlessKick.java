@@ -9,18 +9,19 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class AimlessKick extends AGameEvent
 {
-	private final ETeamColor team;
-	private final Integer bot;
-	private final IVector2 location;
-	private final IVector2 kickLocation;
+	ETeamColor team;
+	Integer bot;
+	IVector2 location;
+	IVector2 kickLocation;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -89,51 +90,5 @@ public class AimlessKick extends AGameEvent
 	public String getDescription()
 	{
 		return String.format("Aimless kick by Bot %d %s @ %s", bot, team, formatVector(location));
-	}
-
-
-	@Override
-	public String toString()
-	{
-		return new ToStringBuilder(this)
-				.append("team", team)
-				.append("bot", bot)
-				.append("location", location)
-				.append("kickLocation", kickLocation)
-				.toString();
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final AimlessKick that = (AimlessKick) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(bot, that.bot)
-				.append(team, that.team)
-				.append(location, that.location)
-				.append(kickLocation, that.kickLocation)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(bot)
-				.append(location)
-				.append(kickLocation)
-				.toHashCode();
 	}
 }

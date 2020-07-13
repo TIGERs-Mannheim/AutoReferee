@@ -7,17 +7,19 @@ package edu.tigers.sumatra.referee.gameevent;
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class PlacementSucceeded extends AGameEvent
 {
-	private final ETeamColor team;
-	private final double timeTaken;
-	private final double precision;
-	private final double distance;
+	ETeamColor team;
+	double timeTaken;
+	double precision;
+	double distance;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -78,39 +80,5 @@ public class PlacementSucceeded extends AGameEvent
 	{
 		return String.format("Placement of team %s successful with a precision of %.2f mm over %.2f mm (took: %.2f s)",
 				team, precision, distance, timeTaken);
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final PlacementSucceeded that = (PlacementSucceeded) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(timeTaken, that.timeTaken)
-				.append(precision, that.precision)
-				.append(distance, that.distance)
-				.append(team, that.team)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(timeTaken)
-				.append(precision)
-				.append(distance)
-				.toHashCode();
 	}
 }

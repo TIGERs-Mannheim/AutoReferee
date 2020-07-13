@@ -10,19 +10,21 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class BotCrashDrawn extends AGameEvent
 {
-	private final int botY;
-	private final int botB;
-	private final IVector2 location;
-	private final double crashSpeed;
-	private final double speedDiff;
-	private final double crashAngle;
+	int botY;
+	int botB;
+	IVector2 location;
+	double crashSpeed;
+	double speedDiff;
+	double crashAngle;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -103,43 +105,5 @@ public class BotCrashDrawn extends AGameEvent
 		return String.format(
 				"Bots %d YELLOW and %d BLUE crashed into each other with %.2f m/s @ %s (Δv: %.2f m/s, angle: %.0f°)",
 				botY, botB, crashSpeed, formatVector(location), speedDiff, AngleMath.rad2deg(crashAngle));
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final BotCrashDrawn that = (BotCrashDrawn) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(botY, that.botY)
-				.append(botB, that.botB)
-				.append(crashSpeed, that.crashSpeed)
-				.append(speedDiff, that.speedDiff)
-				.append(crashAngle, that.crashAngle)
-				.append(location, that.location)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(botY)
-				.append(botB)
-				.append(location)
-				.append(crashSpeed)
-				.append(speedDiff)
-				.append(crashAngle)
-				.toHashCode();
 	}
 }

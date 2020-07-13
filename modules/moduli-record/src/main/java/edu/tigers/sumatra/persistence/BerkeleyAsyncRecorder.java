@@ -4,18 +4,17 @@
 
 package edu.tigers.sumatra.persistence;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
+import edu.tigers.sumatra.thread.NamedThreadFactory;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.tigers.sumatra.thread.NamedThreadFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -55,9 +54,10 @@ public class BerkeleyAsyncRecorder
 	 */
 	public void start()
 	{
-		log.info("Start recording");
+		log.debug("Starting recording");
 		db.open();
 		recorders.forEach(IBerkeleyRecorder::start);
+		log.info("Started recording");
 	}
 
 

@@ -29,8 +29,8 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.RecordManager;
-import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
+import edu.tigers.sumatra.referee.Referee;
 import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
@@ -92,7 +92,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private Map<BotID, BotStateTrajectorySync> botStateFromTraj = new HashMap<>();
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
-	private AReferee referee;
+	private Referee referee;
 	private CiGameControllerConnector ciGameControllerConnector;
 
 	private long lastWFTimestamp;
@@ -296,7 +296,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		if (ciGameControllerConnector != null)
 		{
-			ciGameControllerConnector.process(swf).forEach(referee::onNewRefereeMessage);
+			ciGameControllerConnector.process(swf, referee.flushChanges()).forEach(referee::onNewRefereeMessage);
 		}
 
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
@@ -362,9 +362,8 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		if (referee.getActiveSource().getType() == ERefereeMessageSource.CI)
 		{
-			ciGameControllerConnector = new CiGameControllerConnector();
 			int port = getSubnodeConfiguration().getInt("ci-port", 11009);
-			ciGameControllerConnector.setPort(port);
+			ciGameControllerConnector = new CiGameControllerConnector(port);
 			ciGameControllerConnector.start();
 		}
 	}
@@ -424,7 +423,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private void registerToRefereeModule()
 	{
-		referee = SumatraModel.getInstance().getModule(AReferee.class);
+		referee = SumatraModel.getInstance().getModule(Referee.class);
 		referee.addObserver(this);
 	}
 

@@ -9,17 +9,19 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent(version = 1)
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class AttackerTouchedBallInDefenseArea extends AGameEvent
 {
-	private final ETeamColor team;
-	private final int bot;
-	private final IVector2 location;
-	private final double distance;
+	ETeamColor team;
+	int bot;
+	IVector2 location;
+	double distance;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -80,39 +82,5 @@ public class AttackerTouchedBallInDefenseArea extends AGameEvent
 	{
 		return String.format("Attacker %d %s was %.2f mm in the defense Area @ %s", bot, team, distance,
 				formatVector(location));
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final AttackerTouchedBallInDefenseArea that = (AttackerTouchedBallInDefenseArea) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(bot, that.bot)
-				.append(distance, that.distance)
-				.append(team, that.team)
-				.append(location, that.location)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(bot)
-				.append(location)
-				.append(distance)
-				.toHashCode();
 	}
 }

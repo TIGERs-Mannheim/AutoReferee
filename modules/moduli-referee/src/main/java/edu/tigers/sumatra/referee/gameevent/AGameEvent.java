@@ -20,7 +20,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 @Persistent
 public abstract class AGameEvent implements IGameEvent
 {
-	private final EGameEvent type;
+	EGameEvent type;
 
 
 	@SuppressWarnings("unsued") // used by berkeley

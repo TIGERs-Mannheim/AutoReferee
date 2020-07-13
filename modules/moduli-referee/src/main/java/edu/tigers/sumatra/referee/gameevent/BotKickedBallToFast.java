@@ -9,18 +9,20 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 
 @Persistent
+@Value
+@EqualsAndHashCode(callSuper = true)
 public class BotKickedBallToFast extends AGameEvent
 {
-	private final ETeamColor team;
-	private final int bot;
-	private final IVector2 location;
-	private final double initialBallSpeed;
-	private final EKickType kickType;
+	ETeamColor team;
+	int bot;
+	IVector2 location;
+	double initialBallSpeed;
+	EKickType kickType;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
@@ -89,42 +91,6 @@ public class BotKickedBallToFast extends AGameEvent
 		return String.format("Bot %d %s %s ball too fast: vmax=%.2f m/s @ %s",
 				bot, team, kickType == EKickType.STRAIGHT ? "kicked" : "chipped", initialBallSpeed,
 				formatVector(location));
-	}
-
-
-	@Override
-	public boolean equals(final Object o)
-	{
-		if (this == o)
-			return true;
-
-		if (o == null || getClass() != o.getClass())
-			return false;
-
-		final BotKickedBallToFast that = (BotKickedBallToFast) o;
-
-		return new EqualsBuilder()
-				.appendSuper(super.equals(o))
-				.append(bot, that.bot)
-				.append(initialBallSpeed, that.initialBallSpeed)
-				.append(kickType, that.kickType)
-				.append(team, that.team)
-				.append(location, that.location)
-				.isEquals();
-	}
-
-
-	@Override
-	public int hashCode()
-	{
-		return new HashCodeBuilder(17, 37)
-				.appendSuper(super.hashCode())
-				.append(team)
-				.append(bot)
-				.append(location)
-				.append(initialBallSpeed)
-				.append(kickType)
-				.toHashCode();
 	}
 
 	public enum EKickType

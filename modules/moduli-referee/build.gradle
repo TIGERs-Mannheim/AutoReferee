@@ -24,9 +24,7 @@ dependencies {
     implementation 'commons-io:commons-io:2.7'
 
     api 'com.google.protobuf:protobuf-java:3.12.2'
-    implementation 'com.google.protobuf:protobuf-java-util:3.12.2'
     implementation 'com.sleepycat:je:18.3.12'
-    implementation 'org.java-websocket:Java-WebSocket:1.5.1'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.assertj:assertj-core:3.16.1'
@@ -53,13 +51,24 @@ def osExt = {
     return ""
 }()
 
-def gameControllerVersion = "v2.0.0-rc5"
+def gameControllerVersion = "v2.2.0"
 def gameControllerBinary = "ssl-game-controller_${gameControllerVersion}_${osClassifier}${osExt}".toString()
+def gameControllerBinaryLocation = "$buildDir/resources/main/ssl-game-controller"
+
+task verifyGameControllerBinary() {
+    inputs.property("binary.version", gameControllerVersion)
+    outputs.upToDateWhen { true }
+    doFirst {
+        // Delete binary, if GC version has changed
+        delete(gameControllerBinaryLocation)
+    }
+}
 
 task downloadGameController(type: Download) {
     src "https://github.com/RoboCup-SSL/ssl-game-controller/releases/download/${gameControllerVersion}/${gameControllerBinary}"
-    dest file("$buildDir/resources/main/ssl-game-controller")
+    dest file(gameControllerBinaryLocation)
     overwrite false
     onlyIfModified true
+    dependsOn(verifyGameControllerBinary)
 }
 processResources.finalizedBy(downloadGameController)
