@@ -14,8 +14,10 @@ import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Command;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -29,31 +31,47 @@ import java.util.stream.Collectors;
  * Complete referee command
  */
 @Persistent(version = 2)
+@Value
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RefereeMsg
 {
-	/** in nanoseconds */
-	private final long frameTimestamp;
-	private final Command command;
-	/** in microseconds */
-	private final long cmdTimestamp;
-	private final long cmdCounter;
-	/** in microseconds */
-	private final long packetTimestamp;
-	private final SslGcRefereeMessage.Referee.Stage stage;
-	/** microseconds left in the stage */
-	private final long stageTimeLeft;
-	private final TeamInfo teamInfoYellow;
-	private final TeamInfo teamInfoBlue;
+	/**
+	 * The timestamp of the last world frame when this message was received [ns]
+	 */
+	long frameTimestamp;
+	Command command;
+	/**
+	 * in microseconds
+	 */
+	long cmdTimestamp;
+	long cmdCounter;
+	/**
+	 * in microseconds
+	 */
+	long packetTimestamp;
+	SslGcRefereeMessage.Referee.Stage stage;
+	/**
+	 * microseconds left in the stage
+	 */
+	long stageTimeLeft;
+	TeamInfo teamInfoYellow;
+	TeamInfo teamInfoBlue;
 
-	private final ETeamColor negativeHalfTeam;
-	private final IVector2 ballPlacementPos;
+	ETeamColor negativeHalfTeam;
+	/**
+	 * Designated ball position in vision coordinates
+	 */
+	IVector2 ballPlacementPos;
 
-	private final Command nextCommand;
-	private final List<IGameEvent> gameEvents;
-	private final List<GameEventProposalGroup> gameEventProposalGroups;
+	Command nextCommand;
+	List<IGameEvent> gameEvents;
+	List<GameEventProposalGroup> gameEventProposalGroups;
 
-	/** in seconds */
-	private double currentActionTimeRemaining;
+	/**
+	 * in seconds
+	 */
+	double currentActionTimeRemaining;
 
 
 	/**
@@ -83,7 +101,7 @@ public class RefereeMsg
 	 * Create a referee message based on a protobuf message
 	 *
 	 * @param frameTimestamp the Sumatra-internal timestamp
-	 * @param sslRefereeMsg the protobuf message
+	 * @param sslRefereeMsg  the protobuf message
 	 */
 	public RefereeMsg(final long frameTimestamp, final SslGcRefereeMessage.Referee sslRefereeMsg)
 	{
@@ -178,15 +196,6 @@ public class RefereeMsg
 	}
 
 
-	/**
-	 * @return
-	 */
-	public final Command getCommand()
-	{
-		return command;
-	}
-
-
 	public ETeamColor getTeamFromCommand()
 	{
 		if (command != null)
@@ -194,75 +203,6 @@ public class RefereeMsg
 			return RefereeProtoUtil.teamForCommand(command);
 		}
 		return ETeamColor.NEUTRAL;
-	}
-
-
-	/**
-	 * The command timestamp value from the protobuf message
-	 *
-	 * @return UNIX timestamp in microseconds
-	 */
-	public final long getCommandTimestamp()
-	{
-		return cmdTimestamp;
-	}
-
-
-	/**
-	 * @return
-	 */
-	public final long getCommandCounter()
-	{
-		return cmdCounter;
-	}
-
-
-	/**
-	 * The packet timestamp value from the protobuf message
-	 *
-	 * @return UNIX timestamp in microseconds
-	 */
-	public final long getPacketTimestamp()
-	{
-		return packetTimestamp;
-	}
-
-
-	/**
-	 * @return
-	 */
-	public final SslGcRefereeMessage.Referee.Stage getStage()
-	{
-		return stage;
-	}
-
-
-	/**
-	 * The number of microseconds left in the current stage ({@link #getStage()}
-	 *
-	 * @return microseconds left in the stage
-	 */
-	public final long getStageTimeLeft()
-	{
-		return stageTimeLeft;
-	}
-
-
-	/**
-	 * @return
-	 */
-	public final TeamInfo getTeamInfoBlue()
-	{
-		return teamInfoBlue;
-	}
-
-
-	/**
-	 * @return
-	 */
-	public final TeamInfo getTeamInfoYellow()
-	{
-		return teamInfoYellow;
 	}
 
 
@@ -290,15 +230,6 @@ public class RefereeMsg
 
 
 	/**
-	 * @return the negativeHalfTeam
-	 */
-	public final ETeamColor getNegativeHalfTeam()
-	{
-		return negativeHalfTeam;
-	}
-
-
-	/**
 	 * The position that the ball is to be placed at by the designated team
 	 *
 	 * @return the ballPlacementPos in vision coordinates
@@ -306,17 +237,6 @@ public class RefereeMsg
 	public IVector2 getBallPlacementPosNeutral()
 	{
 		return ballPlacementPos;
-	}
-
-
-	/**
-	 * The timestamp of the last world frame when this message was received
-	 *
-	 * @return the frameTimestamp in nanoseconds
-	 */
-	public final long getFrameTimestamp()
-	{
-		return frameTimestamp;
 	}
 
 
@@ -334,31 +254,12 @@ public class RefereeMsg
 	}
 
 
-	/**
-	 * Return a map with the names of each team
-	 *
-	 * @return
-	 */
-	public Map<ETeamColor, String> getTeamNames()
-	{
-		String yellowName = teamInfoYellow.getName();
-		String blueName = teamInfoBlue.getName();
-		return buildMap(blueName, yellowName);
-	}
-
-
 	private <T> Map<ETeamColor, T> buildMap(final T blue, final T yellow)
 	{
 		Map<ETeamColor, T> map = new EnumMap<>(ETeamColor.class);
 		map.put(ETeamColor.YELLOW, yellow);
 		map.put(ETeamColor.BLUE, blue);
 		return map;
-	}
-
-
-	public Command getNextCommand()
-	{
-		return nextCommand;
 	}
 
 
@@ -369,49 +270,5 @@ public class RefereeMsg
 			return RefereeProtoUtil.teamForCommand(nextCommand);
 		}
 		return ETeamColor.NEUTRAL;
-	}
-
-
-	public List<IGameEvent> getGameEvents()
-	{
-		return gameEvents;
-	}
-
-
-	public List<GameEventProposalGroup> getGameEventProposalGroups()
-	{
-		return gameEventProposalGroups;
-	}
-
-
-	/**
-	 * @return [s]
-	 */
-	public double getCurrentActionTimeRemaining()
-	{
-		return currentActionTimeRemaining;
-	}
-
-
-	@Override
-	public String toString()
-	{
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("frameTimestamp", frameTimestamp)
-				.append("command", command)
-				.append("cmdTimestamp", cmdTimestamp)
-				.append("cmdCounter", cmdCounter)
-				.append("packetTimestamp", packetTimestamp)
-				.append("stage", stage)
-				.append("stageTimeLeft", stageTimeLeft)
-				.append("teamInfoYellow", teamInfoYellow)
-				.append("teamInfoBlue", teamInfoBlue)
-				.append("negativeHalfTeam", negativeHalfTeam)
-				.append("ballPlacementPos", ballPlacementPos)
-				.append("nextCommand", nextCommand)
-				.append("gameEvents", gameEvents)
-				.append("gameEventProposalGroups", gameEventProposalGroups)
-				.append("currentActionTimeRemaining", currentActionTimeRemaining)
-				.toString();
 	}
 }

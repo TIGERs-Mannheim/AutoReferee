@@ -5,8 +5,10 @@ package edu.tigers.sumatra.referee.data;
 
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,28 +18,33 @@ import java.util.List;
  * Persistent wrapper for TeamInfo
  */
 @Persistent(version = 1)
+@Value
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class TeamInfo
 {
-	private final String name;
-	private final int score;
-	private final int redCards;
-	private final int yellowCards;
+	String name;
+	int score;
+	int redCards;
+	int yellowCards;
 	/**
 	 * The amount of time (in microseconds) left on each yellow card issued to the team.
 	 * If no yellow cards are issued, this array has no elements.
 	 * Otherwise, times are ordered from smallest to largest.
 	 */
-	private final List<Integer> yellowCardsTimes;
-	private final int timeouts;
-	/** in microseconds */
-	private final int timeoutTime;
-	private final int goalie;
+	List<Integer> yellowCardsTimes;
+	int timeouts;
+	/**
+	 * in microseconds
+	 */
+	int timeoutTime;
+	int goalie;
 
-	private final int foulCounter;
-	private final int ballPlacementFailures;
-	private final boolean canPlaceBall;
-	private final int maxAllowedBots;
-	private final boolean botSubstitutionIntent;
+	int foulCounter;
+	int ballPlacementFailures;
+	boolean canPlaceBall;
+	int maxAllowedBots;
+	boolean botSubstitutionIntent;
 
 
 	@SuppressWarnings("unused")
@@ -77,132 +84,5 @@ public class TeamInfo
 		canPlaceBall = !teamInfo.hasCanPlaceBall() || teamInfo.getCanPlaceBall();
 		maxAllowedBots = teamInfo.hasMaxAllowedBots() ? teamInfo.getMaxAllowedBots() : 8;
 		botSubstitutionIntent = teamInfo.hasBotSubstitutionIntent() && teamInfo.getBotSubstitutionIntent();
-	}
-
-
-	/**
-	 * @return the name
-	 */
-	public final String getName()
-	{
-		return name;
-	}
-
-
-	/**
-	 * @return the score
-	 */
-	public final int getScore()
-	{
-		return score;
-	}
-
-
-	/**
-	 * @return the redCards
-	 */
-	public final int getRedCards()
-	{
-		return redCards;
-	}
-
-
-	/**
-	 * @return the yellowCards
-	 */
-	public final int getYellowCards()
-	{
-		return yellowCards;
-	}
-
-
-	/**
-	 * The amount of time (in microseconds) left on each yellow card issued to the team.
-	 * If no yellow cards are issued, this array has no elements.
-	 * Otherwise, times are ordered from smallest to largest.
-	 *
-	 * @return the yellowCardsTimes in microseconds
-	 */
-	public final List<Integer> getYellowCardsTimes()
-	{
-		return yellowCardsTimes;
-	}
-
-
-	/**
-	 * @return the timeouts
-	 */
-	public final int getTimeouts()
-	{
-		return timeouts;
-	}
-
-
-	/**
-	 * @return the timeoutTime left for the team in microseconds
-	 */
-	public final int getTimeoutTime()
-	{
-		return timeoutTime;
-	}
-
-
-	/**
-	 * @return the goalie
-	 */
-	public final int getGoalie()
-	{
-		return goalie;
-	}
-
-
-	public int getFoulCounter()
-	{
-		return foulCounter;
-	}
-
-
-	public int getBallPlacementFailures()
-	{
-		return ballPlacementFailures;
-	}
-
-
-	public boolean isCanPlaceBall()
-	{
-		return canPlaceBall;
-	}
-
-
-	public int getMaxAllowedBots()
-	{
-		return maxAllowedBots;
-	}
-
-
-	public boolean isBotSubstitutionIntent()
-	{
-		return botSubstitutionIntent;
-	}
-
-
-	@Override
-	public String toString()
-	{
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("name", name)
-				.append("score", score)
-				.append("redCards", redCards)
-				.append("yellowCards", yellowCards)
-				.append("yellowCardsTimes", yellowCardsTimes)
-				.append("timeouts", timeouts)
-				.append("timeoutTime", timeoutTime)
-				.append("goalie", goalie)
-				.append("foulCounter", foulCounter)
-				.append("ballPlacementFailures", ballPlacementFailures)
-				.append("canPlaceBall", canPlaceBall)
-				.append("maxAllowedBots", maxAllowedBots)
-				.append("botSubstitutionIntent", botSubstitutionIntent)
-				.toString();
 	}
 }

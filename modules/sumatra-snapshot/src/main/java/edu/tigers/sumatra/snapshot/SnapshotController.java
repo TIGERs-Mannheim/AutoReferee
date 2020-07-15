@@ -1,9 +1,18 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.snapshot;
 
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.wp.data.ITrackedBall;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import lombok.extern.log4j.Log4j2;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -15,23 +24,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.wp.data.ITrackedBall;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
-import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
-import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
-
-
+@Log4j2
 public class SnapshotController
 {
-	private static final Logger log = LogManager.getLogger(SnapshotController.class.getName());
 	private final Component parentComponent;
 	private WorldFrameWrapper wfw;
 
@@ -42,14 +38,10 @@ public class SnapshotController
 	}
 
 
-	/**
-	 * @param worldFrame
-	 * @return
-	 */
-	private static Snapshot createSnapshot(final SimpleWorldFrame worldFrame)
+	private Snapshot createSnapshot()
 	{
 		Map<BotID, SnapObject> snapBots = new HashMap<>();
-		for (Map.Entry<BotID, ITrackedBot> entry : worldFrame.getBots())
+		for (Map.Entry<BotID, ITrackedBot> entry : wfw.getSimpleWorldFrame().getBots())
 		{
 			ITrackedBot bot = entry.getValue();
 			snapBots.put(entry.getKey(),
@@ -57,10 +49,16 @@ public class SnapshotController
 							Vector3.from2d(bot.getVel(), bot.getAngularVel())));
 		}
 
-		ITrackedBall ball = worldFrame.getBall();
+		ITrackedBall ball = wfw.getSimpleWorldFrame().getBall();
 		SnapObject snapBall = new SnapObject(ball.getPos3(), ball.getVel3());
 
-		return new Snapshot(snapBots, snapBall);
+		return Snapshot.builder()
+				.bots(snapBots)
+				.ball(snapBall)
+				.command(wfw.getRefereeMsg().getCommand())
+				.stage(wfw.getRefereeMsg().getStage())
+				.placementPos(wfw.getRefereeMsg().getBallPlacementPos())
+				.build();
 	}
 
 
@@ -80,8 +78,7 @@ public class SnapshotController
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
-		SimpleWorldFrame worldFrame = wfw.getSimpleWorldFrame();
-		Snapshot snapshot = createSnapshot(worldFrame);
+		Snapshot snapshot = createSnapshot();
 		String defaultFilename = "data/snapshots/" + sdf.format(new Date()) + ".snap";
 
 		JFileChooser fileChooser = new JFileChooser();
@@ -114,8 +111,7 @@ public class SnapshotController
 			return;
 		}
 
-		SimpleWorldFrame worldFrame = wfw.getSimpleWorldFrame();
-		Snapshot snapshot = createSnapshot(worldFrame);
+		Snapshot snapshot = createSnapshot();
 		String snapJson = snapshot.toJSON().toJSONString();
 
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

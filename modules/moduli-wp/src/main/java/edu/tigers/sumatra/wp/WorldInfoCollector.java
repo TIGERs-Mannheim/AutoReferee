@@ -20,7 +20,6 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
-import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.pose.Pose;
@@ -495,20 +494,20 @@ public class WorldInfoCollector extends AWorldPredictor
 	public void onNewRefereeMsg(final SslGcRefereeMessage.Referee refMsg)
 	{
 		long ts = lastWFTimestamp;
-		if (refMsg.getCommandCounter() == latestRefereeMsg.getCommandCounter())
+		if (refMsg.getCommandCounter() == latestRefereeMsg.getCmdCounter())
 		{
 			ts = latestRefereeMsg.getFrameTimestamp();
 		}
-		updateTeamOnPositiveHalf(refMsg);
 		latestRefereeMsg = new RefereeMsg(ts, refMsg);
+		updateTeamOnPositiveHalf(latestRefereeMsg);
 	}
 
 
-	private void updateTeamOnPositiveHalf(final SslGcRefereeMessage.Referee refMsg)
+	private void updateTeamOnPositiveHalf(final RefereeMsg refMsg)
 	{
-		if (refMsg.hasBlueTeamOnPositiveHalf())
+		if (refMsg.getNegativeHalfTeam().isNonNeutral())
 		{
-			Geometry.setNegativeHalfTeam(refMsg.getBlueTeamOnPositiveHalf() ? ETeamColor.YELLOW : ETeamColor.BLUE);
+			Geometry.setNegativeHalfTeam(refMsg.getNegativeHalfTeam());
 		}
 	}
 

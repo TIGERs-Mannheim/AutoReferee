@@ -73,14 +73,14 @@ public class BallPlacementSucceededDetector extends AGameEventDetector
 		tStart = frame.getTimestamp();
 		initialBallPos = frame.getWorldFrame().getBall().getPos();
 		eventRaised = false;
-		lastCommandCounter = frame.getRefereeMsg().getCommandCounter();
+		lastCommandCounter = frame.getRefereeMsg().getCmdCounter();
 	}
 
 
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
-		if (frame.getRefereeMsg().getCommandCounter() != lastCommandCounter)
+		if (frame.getRefereeMsg().getCmdCounter() != lastCommandCounter)
 		{
 			// still in ball placement state, but with a new command (probably other team)
 			resetState(frame);
