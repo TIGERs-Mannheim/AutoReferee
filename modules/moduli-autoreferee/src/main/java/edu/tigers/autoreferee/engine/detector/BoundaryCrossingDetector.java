@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.detector;
 
@@ -12,7 +12,6 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.BoundaryCrossing;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.EnumSet;
@@ -65,7 +64,6 @@ public class BoundaryCrossingDetector extends AGameEventDetector
 		{
 			if (lastTouchedBy != ETeamColor.NEUTRAL)
 			{
-				Optional<BallLeftFieldPosition> ballLeftFieldPos = frame.getBallLeftFieldPos();
 				IVector2 pos = frame.getBallLeftFieldPos()
 						.map(ballLeftFieldPosition -> ballLeftFieldPosition.getPosition().getPos()).orElse(lastKnownPosition);
 

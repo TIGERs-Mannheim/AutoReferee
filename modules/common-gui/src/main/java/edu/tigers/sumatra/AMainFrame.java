@@ -1,9 +1,35 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra;
 
+import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.DummyView;
+import edu.tigers.sumatra.views.ESumatraViewType;
+import net.infonode.docking.DockingWindow;
+import net.infonode.docking.DockingWindowAdapter;
+import net.infonode.docking.RootWindow;
+import net.infonode.docking.View;
+import net.infonode.docking.ViewSerializer;
+import net.infonode.docking.properties.RootWindowProperties;
+import net.infonode.docking.theme.ShapedGradientDockingTheme;
+import net.infonode.docking.util.DockingUtil;
+import net.infonode.docking.util.MixedViewHandler;
+import net.infonode.docking.util.ViewMap;
+import net.infonode.util.Direction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -27,34 +53,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.WindowConstants;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.persistence.BerkeleyDb;
-import edu.tigers.sumatra.views.ASumatraView;
-import edu.tigers.sumatra.views.DummyView;
-import edu.tigers.sumatra.views.ESumatraViewType;
-import net.infonode.docking.DockingWindow;
-import net.infonode.docking.DockingWindowAdapter;
-import net.infonode.docking.RootWindow;
-import net.infonode.docking.View;
-import net.infonode.docking.ViewSerializer;
-import net.infonode.docking.properties.RootWindowProperties;
-import net.infonode.docking.theme.ShapedGradientDockingTheme;
-import net.infonode.docking.util.DockingUtil;
-import net.infonode.docking.util.MixedViewHandler;
-import net.infonode.docking.util.ViewMap;
-import net.infonode.util.Direction;
 
 
 /**
@@ -357,7 +355,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 
 	private void addToCustomMenu(final List<JMenu> menus, final ASumatraView view)
 	{
-		if (menus != null)
+		if (menus != null && !menus.isEmpty())
 		{
 			if (customMenuMap.containsKey(view))
 			{
