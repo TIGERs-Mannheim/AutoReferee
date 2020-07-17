@@ -166,9 +166,9 @@ public class Snapshot
 	 * @param target
 	 * @throws IOException
 	 */
-	public void save(final String target) throws IOException
+	public void save(final Path target) throws IOException
 	{
-		File file = Paths.get("", target).toFile();
+		File file = target.toFile();
 		// noinspection ResultOfMethodCallIgnored
 		file.getParentFile().mkdirs();
 		boolean fileCreated = file.createNewFile();

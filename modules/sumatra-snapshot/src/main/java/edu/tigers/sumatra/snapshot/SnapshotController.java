@@ -92,7 +92,7 @@ public class SnapshotController
 			// save to file
 			try
 			{
-				snapshot.save(file.getAbsolutePath());
+				snapshot.save(file.toPath());
 			} catch (IOException e)
 			{
 				log.error("Could not save snapshot file", e);
