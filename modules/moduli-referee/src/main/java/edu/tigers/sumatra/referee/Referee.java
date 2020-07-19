@@ -79,8 +79,9 @@ public class Referee extends AReferee
 	public void startGameController()
 	{
 		var port = getSubnodeConfiguration().getInt("gc-ui-port", DEFAULT_GC_UI_PORT);
-		var publishAddress = "224.5.23.1:" + getPort();
 		var timeAcquisitionMode = source.getType() == ERefereeMessageSource.CI ? "ci" : "system";
+		var publishRefereeMessages = getSubnodeConfiguration().getBoolean("publishRefereeMessages", false);
+		var publishAddress = publishRefereeMessages ? "224.5.23.1:" + getPort() : "";
 		sslGameControllerProcess = new SslGameControllerProcess(port, publishAddress, timeAcquisitionMode);
 
 		File stateStoreFile = new File("build/state-store.json.stream");

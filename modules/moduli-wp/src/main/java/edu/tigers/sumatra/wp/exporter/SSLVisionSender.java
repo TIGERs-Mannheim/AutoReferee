@@ -44,7 +44,7 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 	@Override
 	public void startModule()
 	{
-		int port = getSubnodeConfiguration().getInt("port", 10006);
+		int port = getSubnodeConfiguration().getInt("port", 11006);
 		transmitter = new MulticastUDPTransmitter(ADDRESS, port);
 
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);

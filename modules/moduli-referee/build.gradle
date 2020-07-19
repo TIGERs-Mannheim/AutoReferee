@@ -51,7 +51,7 @@ def osExt = {
     return ""
 }()
 
-def gameControllerVersion = "v2.2.1"
+def gameControllerVersion = "v2.3.0"
 def gameControllerBinary = "ssl-game-controller_${gameControllerVersion}_${osClassifier}${osExt}".toString()
 def gameControllerBinaryLocation = "$buildDir/resources/main/ssl-game-controller"
 
