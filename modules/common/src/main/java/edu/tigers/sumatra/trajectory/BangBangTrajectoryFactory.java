@@ -80,6 +80,7 @@ public final class BangBangTrajectoryFactory
 			final double maxAcc
 	)
 	{
-		return new BangBangTrajectory1DOrient(singleDim(initialPos, finalPos, initialVel, maxVel, maxAcc));
+		var adaptedFinalPos = initialPos + AngleMath.normalizeAngle(finalPos - AngleMath.normalizeAngle(initialPos));
+		return new BangBangTrajectory1DOrient(singleDim(initialPos, adaptedFinalPos, initialVel, maxVel, maxAcc));
 	}
 }
