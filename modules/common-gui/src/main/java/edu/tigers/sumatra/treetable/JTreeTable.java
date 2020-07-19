@@ -491,7 +491,8 @@ public class JTreeTable extends JTable
 					if (getColumnClass(counter) == ITreeTableModel.class)
 					{
 						final MouseEvent me = (MouseEvent) e;
-						final MouseEvent newME = new MouseEvent(tree, me.getID(), me.getWhen(), me.getModifiersEx(),
+						@SuppressWarnings({ "deprecation", "squid:CallToDeprecatedMethod" }) // getModifiersEx() does not work
+						final MouseEvent newME = new MouseEvent(tree, me.getID(), me.getWhen(), me.getModifiers(),
 								me.getX() - getCellRect(0, counter, true).x, me.getY(), me.getClickCount(),
 								me.isPopupTrigger());
 						tree.dispatchEvent(newME);
