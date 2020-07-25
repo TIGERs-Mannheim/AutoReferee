@@ -984,7 +984,7 @@ public class FieldPanel extends JPanel implements IDrawableTool
 			final double yScaleFactor = fieldGlobalLength / getFieldHeight();
 
 			final IVector2 transPosition = guiPosTurned.subtractNew(
-					Vector2.fromXY(fieldGlobalLength / xScaleFactor, fieldGlobalWidth / yScaleFactor));
+					Vector2.fromXY(fieldGlobalBoundaryWidth / xScaleFactor, fieldGlobalBoundaryWidth / yScaleFactor));
 
 			double x = (transPosition.y() * yScaleFactor) - fieldGlobalLength / 2.0;
 			double y = (transPosition.x() * xScaleFactor) - fieldGlobalWidth / 2.0;
