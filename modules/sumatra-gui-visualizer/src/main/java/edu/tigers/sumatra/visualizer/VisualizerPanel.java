@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.visualizer;
 
@@ -72,7 +72,7 @@ public class VisualizerPanel extends JPanel implements ISumatraView, IMediaRecor
 	/**
 	 * @return
 	 */
-	public IFieldPanel getFieldPanel()
+	public FieldPanel getFieldPanel()
 	{
 		return fieldPanel;
 	}
@@ -140,7 +140,7 @@ public class VisualizerPanel extends JPanel implements ISumatraView, IMediaRecor
 		{
 			log.error("Could not create screencast directory");
 		}
-		
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		sdf.setTimeZone(TimeZone.getDefault());
 		String filename = "/" + prefix + "_" + sdf.format(new Date()) + ending;

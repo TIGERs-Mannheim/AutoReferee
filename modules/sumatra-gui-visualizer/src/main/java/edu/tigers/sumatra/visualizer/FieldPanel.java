@@ -5,9 +5,11 @@
 package edu.tigers.sumatra.visualizer;
 
 import edu.tigers.sumatra.clock.FpsCounter;
+import edu.tigers.sumatra.drawable.DrawableFieldBackground;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.EFontSize;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.drawable.IDrawableTool;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -18,9 +20,8 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.ScalingUtil;
+import lombok.extern.log4j.Log4j2;
 import net.miginfocom.swing.MigLayout;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -51,10 +52,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Visualization of the field.
  */
-public class FieldPanel extends JPanel implements IFieldPanel
+@Log4j2
+public class FieldPanel extends JPanel implements IDrawableTool
 {
-	private static final Logger log = LogManager.getLogger(FieldPanel.class.getName());
-
 	/**
 	 * color of field background
 	 */
@@ -65,16 +65,10 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	 * color of field background
 	 */
 	private static final Color FIELD_COLOR_REFEREE = new Color(93, 93, 93);
-	private static final String SCALE_FACTOR_PROPERTY = FieldPanel.class.getCanonicalName() + ".scaleFactor";
-	private static final String FIELD_ORIGIN_X_PROPERTY = FieldPanel.class.getCanonicalName() + ".fieldOriginX";
-	private static final String FIELD_ORIGIN_Y_PROPERTY = FieldPanel.class.getCanonicalName() + ".fieldOriginY";
 
-	// --- repaint ---
 	private transient Image offImage = null;
 	private transient Image screenshotImage = null;
-	private final transient OfflineFieldSync offImageSync = new OfflineFieldSync()
-	{
-	};
+	private final transient Object offImageSync = new Object();
 
 	/**
 	 *
@@ -90,6 +84,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private static final double BORDER_TEXT_NORMALIZED_WIDTH = 750;
 
 	private final int fieldWidth;
+	private double fieldGlobalWidth = Geometry.getFieldWidth();
+	private double fieldGlobalLength = Geometry.getFieldLength();
+	private double fieldGlobalBoundaryWidth = Geometry.getBoundaryWidth();
 
 	private final transient MouseEvents mouseEventsListener = new MouseEvents();
 
@@ -145,31 +142,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 				log.error("Could not parse field turn.", err);
 			}
 		}
-
-		String strScaleFactor = SumatraModel.getInstance().getUserProperty(SCALE_FACTOR_PROPERTY);
-		if (strScaleFactor != null)
-		{
-			scaleFactor = Double.parseDouble(SumatraModel.getInstance().getUserProperty(SCALE_FACTOR_PROPERTY));
-		}
-
-		String strFieldOriginX = SumatraModel.getInstance().getUserProperty(FIELD_ORIGIN_X_PROPERTY);
-		if (strFieldOriginX != null)
-		{
-			fieldOriginX = Double.parseDouble(SumatraModel.getInstance().getUserProperty(FIELD_ORIGIN_X_PROPERTY));
-		}
-
-		String strFieldOriginY = SumatraModel.getInstance().getUserProperty(FIELD_ORIGIN_Y_PROPERTY);
-		if (strFieldOriginY != null)
-		{
-			fieldOriginY = Double.parseDouble(SumatraModel.getInstance().getUserProperty(FIELD_ORIGIN_Y_PROPERTY));
-		}
 	}
 
 
-	/**
-	 *
-	 */
-	@Override
 	public void start()
 	{
 		addMouseListener(mouseEventsListener);
@@ -178,10 +153,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	/**
-	 *
-	 */
-	@Override
 	public void stop()
 	{
 		removeMouseListener(mouseEventsListener);
@@ -190,7 +161,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void setShapeMap(final ShapeMapSource source, final ShapeMap shapeMap)
 	{
 		if (shapeMap == null)
@@ -219,7 +189,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void paintOffline()
 	{
 		adjustedWidth = getWidth();
@@ -261,7 +230,8 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	{
 		if (takeScreenshot || videoExporter != null)
 		{
-			try {
+			try
+			{
 				// Images can be huge and cause the heap to run out
 				screenshotImage = createImage(this.snapshotWidth, this.snapshotHeight);
 			} catch (OutOfMemoryError error)
@@ -327,7 +297,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			height = (int) (width * widthToHeightRatio);
 		}
 
-		double borderTextScale = calculateBorerTextScale(mediaOption);
+		double borderTextScale = calculateBorderTextScale(mediaOption);
 		int refAreaOffset = calculateRefAreaOffset(mediaOption, borderTextScale);
 		height += refAreaOffset;
 
@@ -368,12 +338,11 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			int width, int height, double scale,
 			EMediaOption mediaOption)
 	{
-		@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
 		final BasicStroke defaultStroke = new BasicStroke(Math.max(1, scaleYLength(10)));
 		g2.setColor(FIELD_COLOR_REFEREE);
 		g2.fillRect(0, 0, width, height);
 
-		double borderTextScale = calculateBorerTextScale(mediaOption);
+		double borderTextScale = calculateBorderTextScale(mediaOption);
 		int refAreaOffset = calculateRefAreaOffset(mediaOption, borderTextScale);
 
 		g2.translate(offsetX, offsetY + refAreaOffset);
@@ -385,16 +354,23 @@ public class FieldPanel extends JPanel implements IFieldPanel
 			setFieldTurn(getFieldTurn(width, height));
 		}
 
-		turnField(getFieldTurn(), -AngleMath.PI_HALF, g2);
-		g2.setColor(darkMode ? FIELD_COLOR_DARK : FIELD_COLOR);
-		g2.fillRect(0, 0, getFieldTotalWidth(), getFieldTotalHeight());
-		turnField(getFieldTurn(), AngleMath.PI_HALF, g2);
-
 		if (fancyPainting)
 		{
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		}
+
+		shapeMaps.values().stream()
+				.flatMap(m -> m.getAllShapeLayers().stream())
+				.flatMap(l -> l.getShapes().stream())
+				.filter(s -> s.getClass().equals(DrawableFieldBackground.class))
+				.findAny()
+				.map(s -> (DrawableFieldBackground) s)
+				.ifPresent(s -> {
+					fieldGlobalBoundaryWidth = s.getBoundaryWidth();
+					fieldGlobalLength = s.getFieldWithBorder().xExtent() - 2 * fieldGlobalBoundaryWidth;
+					fieldGlobalWidth = s.getFieldWithBorder().yExtent() - 2 * fieldGlobalBoundaryWidth;
+				});
 
 		shapeMaps.entrySet().stream()
 				.filter(s -> showSources.contains(s.getKey().getName()))
@@ -412,7 +388,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		if (mediaOption != EMediaOption.VISUALIZER)
 		{
 			g2.setColor(FIELD_COLOR_REFEREE);
-			g2.fillRect(0,0, width, refAreaOffset);
+			g2.fillRect(0, 0, width, refAreaOffset);
 		}
 
 		g2.scale(borderTextScale, borderTextScale);
@@ -442,14 +418,14 @@ public class FieldPanel extends JPanel implements IFieldPanel
 				int recY = 15 - recordingRadius / 2;
 				g2.fillOval(recX, recY, recordingRadius, recordingRadius);
 
-				@SuppressWarnings({ "squid:S1481", "squid:S1854" }) // FP detection
 				final BasicStroke newStroke = new BasicStroke(Math.max(1, scaleYLength(15)));
 
 				g2.setStroke(newStroke);
-				g2.drawString("REC",getWidth() - 50 + 17, 15 + 4);
+				g2.drawString("REC", getWidth() - 50 + 17, 15 + 4);
 				g2.setStroke(defaultStroke);
 				recordingAnimation++;
-			} else {
+			} else
+			{
 				paintFps(g2, width);
 			}
 		}
@@ -463,7 +439,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	private double calculateBorerTextScale(final EMediaOption mediaOption)
+	private double calculateBorderTextScale(final EMediaOption mediaOption)
 	{
 		int relevantViewWidth = mediaOption == EMediaOption.VISUALIZER ? getWidth() : this.snapshotWidth;
 		return relevantViewWidth / BORDER_TEXT_NORMALIZED_WIDTH;
@@ -555,7 +531,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void clearField()
 	{
 		offImage = null;
@@ -563,7 +538,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@SuppressWarnings("squid:S128")
 	@Override
 	public void turnField(final EFieldTurn fieldTurn, final double angle, final Graphics2D g2)
 	{
@@ -621,35 +595,22 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	private IVector2 turnGlobalPoint(final EFieldTurn fieldTurn, final IVector2 point)
+	/**
+	 * Transforms a global(field)position into a gui position.
+	 *
+	 * @param globalPosition
+	 * @return guiPosition
+	 */
+	private IVector2 transformToGuiCoordinates(final IVector2 globalPosition)
 	{
-		switch (fieldTurn)
-		{
-			case NORMAL:
-				return point;
-			case T90:
-				return Vector2.fromXY(getFieldTotalWidth() - point.y(), point.x());
-			case T180:
-				return Vector2.fromXY(-point.x() + getFieldTotalWidth(), -point.y() + getFieldTotalHeight());
-			case T270:
-				return Vector2.fromXY(point.y(), -point.x() + getFieldTotalHeight());
-			default:
-				throw new IllegalStateException();
-		}
-	}
+		final double yScaleFactor = fieldWidth / fieldGlobalWidth;
+		final double xScaleFactor = getFieldHeight() / fieldGlobalLength;
 
+		final IVector2 transPosition = globalPosition.addNew(Vector2.fromXY(fieldGlobalLength / 2,
+				fieldGlobalWidth / 2.0));
 
-	@Override
-	public IVector2 transformToGuiCoordinates(final IVector2 globalPosition)
-	{
-		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
-		final double xScaleFactor = getFieldHeight() / Geometry.getFieldLength();
-
-		final IVector2 transPosition = globalPosition.addNew(Vector2.fromXY(Geometry.getFieldLength() / 2,
-				Geometry.getFieldWidth() / 2.0));
-
-		double y = transPosition.x() * xScaleFactor + Geometry.getBoundaryLength() * xScaleFactor;
-		double x = transPosition.y() * yScaleFactor + Geometry.getBoundaryWidth() * yScaleFactor;
+		double y = transPosition.x() * xScaleFactor + fieldGlobalBoundaryWidth * xScaleFactor;
+		double x = transPosition.y() * yScaleFactor + fieldGlobalBoundaryWidth * yScaleFactor;
 
 		return turnGuiPoint(fieldTurn, Vector2.fromXY(x, y));
 	}
@@ -668,39 +629,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 
 
 	@Override
-	public IVector2 transformToGlobalCoordinates(final IVector2 guiPosition)
-	{
-		IVector2 guiPosTurned = turnGlobalPoint(fieldTurn, guiPosition);
-
-		final double xScaleFactor = Geometry.getFieldWidth() / fieldWidth;
-		final double yScaleFactor = Geometry.getFieldLength() / getFieldHeight();
-
-		final IVector2 transPosition = guiPosTurned.subtractNew(
-				Vector2.fromXY(Geometry.getBoundaryLength() / xScaleFactor, Geometry.getBoundaryWidth() / yScaleFactor));
-
-		double x = (transPosition.y() * yScaleFactor) - Geometry.getFieldLength() / 2.0;
-		double y = (transPosition.x() * xScaleFactor) - Geometry.getFieldWidth() / 2.0;
-
-		return Vector2.fromXY(x, y);
-	}
-
-
-	@Override
-	public IVector2 transformToGlobalCoordinates(final IVector2 globalPosition, final boolean invert)
-	{
-		int r = 1;
-		if (invert)
-		{
-			r = -1;
-		}
-		return transformToGlobalCoordinates(Vector2.fromXY(r * globalPosition.x(), r * globalPosition.y()));
-	}
-
-
-	@Override
 	public int scaleXLength(final double length)
 	{
-		final double xScaleFactor = getFieldHeight() / Geometry.getFieldLength();
+		final double xScaleFactor = getFieldHeight() / fieldGlobalLength;
 		return (int) (length * xScaleFactor);
 	}
 
@@ -708,21 +639,17 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	@Override
 	public int scaleYLength(final double length)
 	{
-		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
+		final double yScaleFactor = fieldWidth / fieldGlobalWidth;
 		return (int) (length * yScaleFactor);
 	}
 
 
-	@Override
-	@SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 	public void addObserver(final IFieldPanelObserver o)
 	{
 		observers.add(o);
 	}
 
 
-	@Override
-	@SuppressWarnings("squid:S2250") // Collection methods with O(n) performance should be used carefully
 	public void removeObserver(final IFieldPanelObserver o)
 	{
 		observers.remove(o);
@@ -735,58 +662,35 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private void setScaleFactor(final double scaleFactor)
 	{
 		this.scaleFactor = scaleFactor;
-		SumatraModel.getInstance().setUserProperty(SCALE_FACTOR_PROPERTY,
-				String.valueOf(scaleFactor));
 	}
 
 
-	// --------------------------------------------------------------------------
-	// --- Presenter Interface --------------------------------------------------
-	// --------------------------------------------------------------------------
-
-
-	@Override
 	public void setPanelVisible(final boolean visible)
 	{
 		setVisible(visible);
 	}
 
 
-	/**
-	 * width with margins
-	 *
-	 * @return
-	 */
-	@Override
-	public int getFieldTotalWidth()
+	private int getFieldTotalWidth()
 	{
-		final double yScaleFactor = getFieldWidth() / Geometry.getFieldWidth();
-		return getFieldWidth() + (int) ((2 * Geometry.getBoundaryWidth()) * yScaleFactor);
+		final double yScaleFactor = getFieldWidth() / fieldGlobalWidth;
+		return getFieldWidth() + (int) ((2 * fieldGlobalBoundaryWidth) * yScaleFactor);
 	}
 
 
-	/**
-	 * height width margins
-	 *
-	 * @return
-	 */
-	@Override
-	public int getFieldTotalHeight()
+	private int getFieldTotalHeight()
 	{
-		final double xScaleFactor = getFieldHeight() / Geometry.getFieldLength();
-		return getFieldHeight() + (int) ((2 * Geometry.getBoundaryLength()) * xScaleFactor);
+		final double xScaleFactor = getFieldHeight() / fieldGlobalLength;
+		return getFieldHeight() + (int) ((2 * fieldGlobalBoundaryWidth) * xScaleFactor);
 	}
 
 
 	private double getFieldRatio()
 	{
-		return Geometry.getFieldLength() / Geometry.getFieldWidth();
+		return fieldGlobalLength / fieldGlobalWidth;
 	}
 
 
-	/**
-	 * @return
-	 */
 	@Override
 	public final int getFieldHeight()
 	{
@@ -794,9 +698,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	/**
-	 * @return
-	 */
 	@Override
 	public final int getFieldWidth()
 	{
@@ -804,14 +705,12 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void setShapeLayerVisibility(final String layerId, final boolean visible)
 	{
 		shapeVisibilityMap.put(layerId, visible);
 	}
 
 
-	@Override
 	public void onOptionChanged(final EVisualizerOptions option, final boolean isSelected)
 	{
 		switch (option)
@@ -837,7 +736,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void setSourceVisibility(final String source, final boolean visible)
 	{
 		if (visible)
@@ -850,7 +748,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	@Override
 	public void setSourceCategoryVisibility(final String category, final boolean visible)
 	{
 		if (visible)
@@ -884,6 +781,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		fieldOriginY = 0;
 	}
 
+
 	private double getFieldScale(int width, int height)
 	{
 		double heightScaleFactor;
@@ -900,6 +798,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		return Math.min(heightScaleFactor, widthScaleFactor);
 	}
 
+
 	private EFieldTurn getFieldTurn(int width, int height)
 	{
 		if (width > height)
@@ -909,6 +808,7 @@ public class FieldPanel extends JPanel implements IFieldPanel
 		return EFieldTurn.NORMAL;
 	}
 
+
 	private double resetField(int width, int height)
 	{
 		setFieldTurn(getFieldTurn(width, height));
@@ -916,9 +816,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	/**
-	 * @return the fieldTurn
-	 */
 	@Override
 	public final EFieldTurn getFieldTurn()
 	{
@@ -926,14 +823,9 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	/**
-	 * @param fieldTurn the fieldTurn to set
-	 */
-	@Override
-	public void setFieldTurn(final EFieldTurn fieldTurn)
+	private void setFieldTurn(final EFieldTurn fieldTurn)
 	{
 		this.fieldTurn = fieldTurn;
-		SumatraModel.getInstance().setUserProperty(FieldPanel.class.getCanonicalName() + ".fieldTurn", fieldTurn.name());
 	}
 
 
@@ -943,7 +835,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private void setFieldOriginY(final double fieldOriginY)
 	{
 		this.fieldOriginY = fieldOriginY;
-		SumatraModel.getInstance().setUserProperty(FIELD_ORIGIN_Y_PROPERTY, String.valueOf(fieldOriginY));
 	}
 
 
@@ -953,7 +844,6 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	private void setFieldOriginX(final double fieldOriginX)
 	{
 		this.fieldOriginX = fieldOriginX;
-		SumatraModel.getInstance().setUserProperty(FIELD_ORIGIN_X_PROPERTY, String.valueOf(fieldOriginX));
 	}
 
 
@@ -1078,6 +968,47 @@ public class FieldPanel extends JPanel implements IFieldPanel
 
 			lastMousePoint = transformToGlobalCoordinates(guiPos);
 		}
+
+
+		/**
+		 * Transforms a gui position into a global(field)position.
+		 *
+		 * @param guiPosition
+		 * @return globalPosition
+		 */
+		private IVector2 transformToGlobalCoordinates(final IVector2 guiPosition)
+		{
+			IVector2 guiPosTurned = turnGlobalPoint(fieldTurn, guiPosition);
+
+			final double xScaleFactor = fieldGlobalWidth / fieldWidth;
+			final double yScaleFactor = fieldGlobalLength / getFieldHeight();
+
+			final IVector2 transPosition = guiPosTurned.subtractNew(
+					Vector2.fromXY(fieldGlobalLength / xScaleFactor, fieldGlobalWidth / yScaleFactor));
+
+			double x = (transPosition.y() * yScaleFactor) - fieldGlobalLength / 2.0;
+			double y = (transPosition.x() * xScaleFactor) - fieldGlobalWidth / 2.0;
+
+			return Vector2.fromXY(x, y);
+		}
+
+
+		private IVector2 turnGlobalPoint(final EFieldTurn fieldTurn, final IVector2 point)
+		{
+			switch (fieldTurn)
+			{
+				case NORMAL:
+					return point;
+				case T90:
+					return Vector2.fromXY(getFieldTotalWidth() - point.y(), point.x());
+				case T180:
+					return Vector2.fromXY(-point.x() + getFieldTotalWidth(), -point.y() + getFieldTotalHeight());
+				case T270:
+					return Vector2.fromXY(point.y(), -point.x() + getFieldTotalHeight());
+				default:
+					throw new IllegalStateException();
+			}
+		}
 	}
 
 
@@ -1108,48 +1039,17 @@ public class FieldPanel extends JPanel implements IFieldPanel
 	}
 
 
-	/**
-	 * @return the scaleFactor
-	 */
-	@Override
-	public final double getScaleFactor()
-	{
-		return scaleFactor;
-	}
-
-
-	/**
-	 * @return the fieldOriginY
-	 */
-	@Override
-	public final double getFieldOriginY()
-	{
-		return fieldOriginY;
-	}
-
-
-	/**
-	 * @return the fieldOriginX
-	 */
-	@Override
-	public final double getFieldOriginX()
-	{
-		return fieldOriginX;
-	}
-
-
-	/**
-	 * @return
-	 */
 	@Override
 	public int getFieldMargin()
 	{
-		final double yScaleFactor = fieldWidth / Geometry.getFieldWidth();
-		return (int) ((Geometry.getBoundaryWidth()) * yScaleFactor);
+		final double yScaleFactor = fieldWidth / fieldGlobalWidth;
+		return (int) (fieldGlobalBoundaryWidth * yScaleFactor);
 	}
 
 
-	private interface OfflineFieldSync
+	@Override
+	public Color getFieldColor()
 	{
+		return darkMode ? FIELD_COLOR_DARK : FIELD_COLOR;
 	}
 }

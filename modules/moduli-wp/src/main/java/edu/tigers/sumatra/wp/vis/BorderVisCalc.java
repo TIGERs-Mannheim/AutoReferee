@@ -4,10 +4,8 @@
 
 package edu.tigers.sumatra.wp.vis;
 
-import java.awt.Color;
-import java.util.List;
-
 import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.DrawableFieldBackground;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -21,6 +19,9 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
+import java.awt.Color;
+import java.util.List;
+
 
 /**
  * Generate field lines
@@ -32,6 +33,7 @@ public class BorderVisCalc implements IWpCalc
 	{
 		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS);
 
+		shapes.add(new DrawableFieldBackground(Geometry.getField(), Geometry.getBoundaryWidth()));
 		shapes.add(new DrawableRectangle(Geometry.getField(), Color.WHITE));
 		shapes.add(new DrawableCircle(Geometry.getCenterCircle(), Color.WHITE));
 		shapes.add(new DrawableLine(Line.fromPoints(Vector2.fromXY(0, -Geometry.getFieldWidth() / 2.0),

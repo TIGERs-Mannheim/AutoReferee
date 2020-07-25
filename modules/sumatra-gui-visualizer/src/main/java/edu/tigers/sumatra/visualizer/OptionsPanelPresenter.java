@@ -1,28 +1,26 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.visualizer;
 
-import java.util.Arrays;
-
 import edu.tigers.sumatra.model.SumatraModel;
+
+import java.util.Arrays;
 
 
 /**
  * Presenter for controlling the optionsPanel in the visualizer
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class OptionsPanelPresenter implements IOptionsPanelObserver
 {
-	private final IFieldPanel fieldPanel;
+	private final FieldPanel fieldPanel;
 	private boolean saveOptions = true;
 
 
 	/**
 	 * @param fieldPanel
 	 */
-	public OptionsPanelPresenter(final IFieldPanel fieldPanel)
+	public OptionsPanelPresenter(final FieldPanel fieldPanel)
 	{
 		this.fieldPanel = fieldPanel;
 	}
@@ -58,7 +56,7 @@ public class OptionsPanelPresenter implements IOptionsPanelObserver
 	 * @param actionCommand
 	 * @param isSelected
 	 */
-	public void reactOnActionCommand(final String actionCommand, final boolean isSelected)
+	private void reactOnActionCommand(final String actionCommand, final boolean isSelected)
 	{
 		if (actionCommand.startsWith(VisualizerOptionsMenu.SOURCE_PREFIX))
 		{
