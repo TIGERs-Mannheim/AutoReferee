@@ -56,7 +56,8 @@ public class RefereeVisCalc implements IWpCalc
 		// Time
 		final long min = TimeUnit.MICROSECONDS.toMinutes(msg.getStageTimeLeft());
 		final long sec = TimeUnit.MICROSECONDS.toSeconds(msg.getStageTimeLeft()) - (60 * min);
-		String timeStr = df2.format(min) + ":" + df2.format(Math.abs(sec));
+		String timeStr =
+				(msg.getStageTimeLeft() < 0 ? "-" : "") + df2.format(Math.abs(min)) + ":" + df2.format(Math.abs(sec));
 
 		// Timeouts
 		String timeoutYellowStr = getTimeoutString(msg.getTeamInfoYellow());

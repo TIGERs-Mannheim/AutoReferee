@@ -43,7 +43,10 @@ public class Watchdog
 
 	public void stop()
 	{
-		executorService.shutdown();
+		if (executorService != null)
+		{
+			executorService.shutdown();
+		}
 	}
 
 
