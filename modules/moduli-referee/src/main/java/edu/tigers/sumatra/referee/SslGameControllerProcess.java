@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -57,10 +59,19 @@ public class SslGameControllerProcess implements Runnable
 		try
 		{
 			log.debug("Starting with: {} {} {}", gcUiPort, timeAcquisitionMode, publishAddress);
-			ProcessBuilder builder = new ProcessBuilder(BINARY_FILE.getAbsolutePath(),
-					"-address", ":" + gcUiPort,
-					"-timeAcquisitionMode", timeAcquisitionMode,
-					"-publishAddress", publishAddress);
+			List<String> command = new ArrayList<>();
+			command.add(BINARY_FILE.getAbsolutePath());
+			command.add("-address");
+			command.add(":" + gcUiPort);
+			command.add("-timeAcquisitionMode");
+			command.add(timeAcquisitionMode);
+			if(!publishAddress.isBlank())
+			{
+				command.add("-publishAddress");
+				command.add(publishAddress);
+			}
+
+			ProcessBuilder builder = new ProcessBuilder(command);
 			builder.redirectErrorStream(true);
 			builder.directory(Paths.get("").toAbsolutePath().toFile());
 			Process gcProcess = builder.start();
