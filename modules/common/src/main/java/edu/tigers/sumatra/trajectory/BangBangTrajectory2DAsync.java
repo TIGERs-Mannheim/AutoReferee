@@ -73,24 +73,10 @@ class BangBangTrajectory2DAsync implements ITrajectory<IVector2>
 	@Override
 	public BangBangTrajectory2DAsync mirrored()
 	{
-		BangBangTrajectory2DAsync mirrored = new BangBangTrajectory2DAsync(
-				new BangBangTrajectory2D(),
+		return new BangBangTrajectory2DAsync(
+				child,
 				initialPos.multiplyNew(-1),
 				AngleMath.normalizeAngle(rotation + AngleMath.PI));
-		for (int i = 0; i < BangBangTrajectory1D.MAX_PARTS; i++)
-		{
-			mirrored.child.x.parts[i].tEnd = child.x.parts[i].tEnd;
-			mirrored.child.x.parts[i].acc = -child.x.parts[i].acc;
-			mirrored.child.x.parts[i].v0 = -child.x.parts[i].v0;
-			mirrored.child.x.parts[i].s0 = -child.x.parts[i].s0;
-			mirrored.child.y.parts[i].tEnd = child.y.parts[i].tEnd;
-			mirrored.child.y.parts[i].acc = -child.y.parts[i].acc;
-			mirrored.child.y.parts[i].v0 = -child.y.parts[i].v0;
-			mirrored.child.y.parts[i].s0 = -child.y.parts[i].s0;
-		}
-		mirrored.child.x.numParts = child.x.numParts;
-		mirrored.child.y.numParts = child.y.numParts;
-		return mirrored;
 	}
 
 

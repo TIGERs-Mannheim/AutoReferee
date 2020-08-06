@@ -47,6 +47,23 @@ public class BangBangTrajectory2DAsyncTest
 		}
 	}
 
+	@Test
+	public void testMirror() {
+
+		var initPos = Vector2.fromXY(1,1);
+		var finalPos = Vector2.fromXY(2,2);
+		var initVel = Vector2.fromXY(1,1);
+		var primaryDirection = Vector2.fromXY(1,1);
+		var traj = trajectoryFactory
+				.async(initPos, finalPos, initVel, 2.0, 3.0, primaryDirection);
+		var mirrored = traj.mirrored();
+
+		assertThat(mirrored.getPosition(0)).isEqualTo(initPos.multiply(-1));
+		assertThat(mirrored.getVelocity(0)).isEqualTo(initVel.multiply(-1));
+		assertThat(mirrored.getPosition(10)).isEqualTo(finalPos.multiply(-1));
+		assertThat(mirrored.getVelocity(10)).isEqualTo(Vector2.zero());
+	}
+
 
 	@Test
 	public void testMonteCarloWithinVMax()

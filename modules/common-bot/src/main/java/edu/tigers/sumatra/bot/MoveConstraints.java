@@ -1,19 +1,18 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.bot.params.IBotMovementLimits;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -51,6 +50,13 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	 */
 	public MoveConstraints(final IBotMovementLimits moveLimits)
 	{
+		resetLimits(moveLimits);
+	}
+
+
+	public void resetLimits(final IBotMovementLimits moveLimits)
+	{
+
 		velMax = moveLimits.getVelMax();
 		accMax = moveLimits.getAccMax();
 		brkMax = moveLimits.getBrkMax();
