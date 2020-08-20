@@ -3,26 +3,6 @@
  */
 package edu.tigers.sumatra.presenter.log;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import javax.swing.SwingUtilities;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-
 import edu.tigers.sumatra.log.ILogEventConsumer;
 import edu.tigers.sumatra.log.SumatraAppender;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -32,6 +12,22 @@ import edu.tigers.sumatra.view.log.ISlidePanelObserver;
 import edu.tigers.sumatra.view.log.LogPanel;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+
+import javax.swing.SwingUtilities;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -59,13 +55,10 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 
 	private static final int DISPLAY_CAPACITY = 1000;
 	private static final String LOG_LEVEL_KEY = LogPresenter.class.getName() + ".loglevel";
-	private final LogEventBuffer eventBuffer = new LogEventBuffer();
+	private final LogEventBuffer liveEventBuffer = new LogEventBuffer();
+	private LogEventBuffer eventBuffer = liveEventBuffer;
 	private final Map<Level, AttributeSet> attributeSets = new HashMap<>();
 	private final SumatraAppender appender;
-
-	private final LogEventSync eventSync = new LogEventSync()
-	{
-	};
 
 	private LogPanel logPanel;
 	private List<String> allowedStrings = new ArrayList<>();
@@ -73,7 +66,6 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	private int numFatals = 0;
 	private int numErrors = 0;
 	private int numWarnings = 0;
-	private boolean freeze = false;
 
 	private final UiThrottler logAppendThrottler = new UiThrottler(100);
 
@@ -124,21 +116,15 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 		numFatals = 0;
 		numErrors = 0;
 		numWarnings = 0;
-		synchronized (eventSync)
-		{
-			eventBuffer.clear();
-		}
-		SwingUtilities.invokeLater(() -> logPanel.getTextPane().clear());
+		eventBuffer.clear();
+		SwingUtilities.invokeLater(this::reappendAllEvents);
 	}
 
 
 	@Override
 	public void onNewLogEvent(final LogEvent logEvent)
 	{
-		synchronized (eventSync)
-		{
-			eventBuffer.append(logEvent);
-		}
+		liveEventBuffer.append(logEvent);
 
 		final Level lvl = logEvent.getLevel();
 		if (lvl.equals(Level.FATAL))
@@ -152,10 +138,7 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 			numWarnings++;
 		}
 
-		if (!freeze)
-		{
-			logAppendThrottler.execute(this::reappendAllEvents);
-		}
+		logAppendThrottler.execute(this::appendNewEvents);
 	}
 
 
@@ -183,18 +166,22 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	}
 
 
-	private void reappendAllEvents()
+	private void appendNewEvents()
 	{
 		updateCounters();
 
-		synchronized (eventSync)
-		{
-			logPanel.getTextPane().clear();
-			final List<LogEvent> events = StreamSupport.stream(eventBuffer.spliterator(), false)
-					.filter(this::checkFilters)
-					.collect(Collectors.toList());
-			events.forEach(this::appendLogEvent);
-		}
+		eventBuffer.getNewEvents().stream()
+				.filter(this::checkFilters)
+				.forEach(this::appendLogEvent);
+	}
+
+
+	private void reappendAllEvents()
+	{
+		updateCounters();
+		eventBuffer.reset();
+		logPanel.getTextPane().clear();
+		appendNewEvents();
 	}
 
 
@@ -208,6 +195,7 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	{
 		return new String(appender.getLayout().toByteArray(event));
 	}
+
 
 	private void updateCounters()
 	{
@@ -275,15 +263,13 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	@Override
 	public void onFreeze(final boolean freeze)
 	{
-		this.freeze = freeze;
-		eventBuffer.setFreeze(freeze);
-		if (!freeze)
+		if (freeze)
 		{
-			SwingUtilities.invokeLater(this::reappendAllEvents);
+			eventBuffer = liveEventBuffer.copy();
+		} else
+		{
+			eventBuffer = liveEventBuffer;
+			logAppendThrottler.execute(this::appendNewEvents);
 		}
-	}
-
-	private interface LogEventSync
-	{
 	}
 }
