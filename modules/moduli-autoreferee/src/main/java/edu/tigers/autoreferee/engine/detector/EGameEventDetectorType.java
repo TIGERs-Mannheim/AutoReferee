@@ -38,6 +38,7 @@ public enum EGameEventDetectorType implements IInstanceableEnum
 
 	PUSHING(new InstanceableClass(PushingDetector.class), false),
 
+	PENALTY_KICK_FAILED(new InstanceableClass(PenaltyKickFailedDetector.class)),
 	;
 
 	private final InstanceableClass clazz;
