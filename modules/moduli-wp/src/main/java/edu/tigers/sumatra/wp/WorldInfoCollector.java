@@ -40,7 +40,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.IKickEvent;
-import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
+import edu.tigers.sumatra.wp.data.BallContact;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
@@ -158,7 +158,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private long getLastBallContact(final RobotInfo robotInfo, final Pose pose)
+	private BallContact getLastBallContact(final RobotInfo robotInfo, final Pose pose)
 	{
 		return ballContactCalculator.ballContact(robotInfo, pose, robotInfo.getCenter2DribblerDist());
 	}
@@ -266,7 +266,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	private BallKickFitState getKickFitState(final FilteredVisionFrame filteredVisionFrame)
 	{
 		return filteredVisionFrame.getKickFitState()
-				.map(filteredVisionBall -> new BallKickFitState(filteredVisionBall, filteredVisionFrame.getTimestamp()))
+				.map(f -> f.getTrajectory(filteredVisionFrame.getTimestamp()))
+				.map(t -> new BallKickFitState(t.getKickPos(), t.getKickVel(), t.getKickTimestamp()))
 				.orElse(null);
 
 	}
@@ -317,13 +318,13 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private FilteredVisionBall fakeBall()
 	{
-		return FilteredVisionBall.Builder.create()
+		return FilteredVisionBall.builder()
 				.withTimestamp(lastWFTimestamp)
-				.withPos(Vector3.fromXYZ(1500, 500, 0))
-				.withVel(Vector3.from2d(Vector2.fromXY(-1500, -900).scaleToNew(2000), 0))
-				.withAcc(Vector3.zero())
-				.withIsChipped(false)
-				.withvSwitch(0)
+				.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+						.withPos(Vector3.fromXYZ(1500, 500, 0))
+						.withVel(Vector3.from2d(Vector2.fromXY(-1500, -900).scaleToNew(2000), 0))
+						.withAcc(Vector3.zero())
+						.build())
 				.withLastVisibleTimestamp(lastWFTimestamp)
 				.build();
 	}
@@ -342,7 +343,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		registerToCamModule();
 		registerToRecordManagerModule();
 
-		BallFactory.updateConfigs();
 		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isProductive());
 	}
 

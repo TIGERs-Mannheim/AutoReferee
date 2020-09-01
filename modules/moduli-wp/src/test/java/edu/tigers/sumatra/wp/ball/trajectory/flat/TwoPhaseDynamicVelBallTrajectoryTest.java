@@ -11,8 +11,7 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectoryFactory;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.trajectory.PlanarCurveFactory;
-import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
-import edu.tigers.sumatra.wp.ball.trajectory.flat.TwoPhaseDynamicVelBallTrajectory.TwoPhaseDynamicVelParameters;
+import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
 import org.junit.Before;
 import org.junit.Test;
 

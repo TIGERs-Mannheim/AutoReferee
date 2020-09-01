@@ -16,6 +16,7 @@ import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3f;
+import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
@@ -96,7 +97,7 @@ public class BallFilterPreprocessor
 	{
 		MergedBall optMergedBall = ballTrackerMerger.process(ballTrackers, timestamp, lastFilteredBall);
 		KickEvent optKickEvent = kickDetectors.process(optMergedBall, mergedRobots);
-		FilteredVisionBall optKickFitState = kickEstimators.process(optKickEvent,
+		BallTrajectoryState optKickFitState = kickEstimators.process(optKickEvent,
 				optMergedBall, mergedRobots, robotInfos, timestamp);
 
 		return new BallFilterPreprocessorOutput(optMergedBall, optKickEvent, optKickFitState);
@@ -174,7 +175,7 @@ public class BallFilterPreprocessor
 		}
 
 
-		private FilteredVisionBall process(final KickEvent kickEvent, final MergedBall ball,
+		private BallTrajectoryState process(final KickEvent kickEvent, final MergedBall ball,
 				final List<FilteredVisionBot> mergedRobots, final Map<BotID, RobotInfo> robotInfos,
 				final long timestamp)
 		{
@@ -219,7 +220,7 @@ public class BallFilterPreprocessor
 				final Map<BotID, RobotInfo> robotInfos, final long timestamp)
 		{
 			// check for kick event (needs direction vector)
-			if ((kickEvent == null) || !kickEvent.getKickDirection().isPresent())
+			if ((kickEvent == null) || kickEvent.getKickDirection().isEmpty())
 			{
 				// get best kick fit state
 				return;
@@ -303,7 +304,7 @@ public class BallFilterPreprocessor
 		}
 
 
-		private FilteredVisionBall getBestKickFitState(final long timestamp)
+		private BallTrajectoryState getBestKickFitState(final long timestamp)
 		{
 			Optional<IKickEstimator> bestEstimator = estimators.stream()
 					.filter(k -> k.getFitResult().isPresent())
@@ -396,7 +397,7 @@ public class BallFilterPreprocessor
 			}
 
 			// is this merged ball based on a real measurement?
-			if (!mergedBall.getLatestCamBall().isPresent())
+			if (mergedBall.getLatestCamBall().isEmpty())
 			{
 				return null;
 			}
@@ -543,7 +544,7 @@ public class BallFilterPreprocessor
 	{
 		private final MergedBall mergedBall;
 		private final KickEvent kickEvent;
-		private final FilteredVisionBall kickFitState;
+		private final BallTrajectoryState kickFitState;
 
 
 		/**
@@ -552,7 +553,7 @@ public class BallFilterPreprocessor
 		 * @param optKickFitState
 		 */
 		public BallFilterPreprocessorOutput(final MergedBall optMergedBall, final KickEvent optKickEvent,
-				final FilteredVisionBall optKickFitState)
+				final BallTrajectoryState optKickFitState)
 		{
 			mergedBall = optMergedBall;
 			kickEvent = optKickEvent;
@@ -572,7 +573,7 @@ public class BallFilterPreprocessor
 		}
 
 
-		public Optional<FilteredVisionBall> getKickFitState()
+		public Optional<BallTrajectoryState> getKickFitState()
 		{
 			return Optional.ofNullable(kickFitState);
 		}

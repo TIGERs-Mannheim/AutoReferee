@@ -1,23 +1,10 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
@@ -32,8 +19,8 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.ChipBallTrajectory;
-import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
@@ -42,6 +29,17 @@ import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverLin3Offset;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverLin5Offset;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverNonLin3Direct;
 import edu.tigers.sumatra.vision.kick.estimators.chip.ChipKickSolverNonLinIdentDirect;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -137,7 +135,7 @@ public class ChipKickEstimator implements IKickEstimator
 		double kickVelZ = Math.sin(angle);
 		double kickVelXY = Math.cos(angle);
 
-		IVector2 kickBotDir = Vector2.fromAngle(event.getKickingFilteredVisionBot().getOrientation());
+		IVector2 kickBotDir = Vector2.fromAngle(event.getBotDirection());
 		IVector3 kickVel = Vector3.from2d(kickBotDir.scaleToNew(kickVelXY * kickSpeed), kickVelZ * kickSpeed);
 
 		currentTraj = new ChipBallTrajectory(event.getPosition(), kickVel, event.getTimestamp());
@@ -176,7 +174,7 @@ public class ChipKickEstimator implements IKickEstimator
 
 		Optional<KickSolverResult> optSolverResult = runSolvers();
 
-		if (!optSolverResult.isPresent())
+		if (optSolverResult.isEmpty())
 		{
 			failures++;
 			return;
@@ -326,7 +324,7 @@ public class ChipKickEstimator implements IKickEstimator
 			return true;
 		}
 
-		FilteredVisionBall state = fitResult.getState(timestamp);
+		BallTrajectoryState state = fitResult.getState(timestamp);
 		IVector2 posNow = state.getPos().getXYVector();
 		double minDistToRobot = mergedRobots.stream()
 				.mapToDouble(r -> r.getPos().distanceTo(posNow))

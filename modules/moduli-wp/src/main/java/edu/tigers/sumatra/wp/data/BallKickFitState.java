@@ -4,94 +4,56 @@
 package edu.tigers.sumatra.wp.data;
 
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.vision.data.ABallTrajectory;
-import edu.tigers.sumatra.vision.data.FilteredVisionBall;
+import lombok.AllArgsConstructor;
+import lombok.Value;
 
 
 /**
- * @author AndreR <andre@ryll.cc>
+ * State of a kicked ball after fitting.
  */
 @Persistent
+@Value
+@AllArgsConstructor
 public class BallKickFitState implements IMirrorable<BallKickFitState>
 {
-	private final IVector2 kickPos;
-	private final IVector3 kickVel;
-	private final long kickTimestamp;
+	/**
+	 * Kick pos [mm]
+	 */
+	IVector2 kickPos;
+
+	/**
+	 * Kick velocity [mm/s]
+	 */
+	IVector3 kickVel;
+
+	/**
+	 * Kick timestamp [ns]
+	 */
+	long kickTimestamp;
 
 
 	@SuppressWarnings("unused")
 	private BallKickFitState()
 	{
-		kickPos = null;
-		kickVel = null;
+		kickPos = Vector2.zero();
+		kickVel = Vector3.zero();
 		kickTimestamp = 0;
-	}
-
-
-	/**
-	 * @param kickPos
-	 * @param kickVel
-	 * @param kickTimestamp
-	 */
-	private BallKickFitState(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp)
-	{
-		this.kickPos = kickPos;
-		this.kickVel = kickVel;
-		this.kickTimestamp = kickTimestamp;
-	}
-
-
-	/**
-	 * @param filteredBallState
-	 * @param timestampNow
-	 */
-	public BallKickFitState(final FilteredVisionBall filteredBallState, final long timestampNow)
-	{
-		ABallTrajectory trajectory = filteredBallState.getTrajectory(timestampNow);
-		kickPos = trajectory.getKickPos();
-		kickVel = trajectory.getKickVel();
-		kickTimestamp = trajectory.getKickTimestamp();
 	}
 
 
 	@Override
 	public BallKickFitState mirrored()
 	{
-		return new BallKickFitState(kickPos.multiplyNew(-1),
+		return new BallKickFitState(
+				kickPos.multiplyNew(-1),
 				Vector3.from2d(kickVel.getXYVector().multiplyNew(-1), kickVel.z()),
-				kickTimestamp);
-	}
-
-
-	/**
-	 * @return the kickPos [mm]
-	 */
-	public IVector2 getKickPos()
-	{
-		return kickPos;
-	}
-
-
-	/**
-	 * @return the kickVel [mm/s]
-	 */
-	public IVector3 getKickVel()
-	{
-		return kickVel;
-	}
-
-
-	/**
-	 * @return the kickTimestamp
-	 */
-	public long getKickTimestamp()
-	{
-		return kickTimestamp;
+				kickTimestamp
+		);
 	}
 
 

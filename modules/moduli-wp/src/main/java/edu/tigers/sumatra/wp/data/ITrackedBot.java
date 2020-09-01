@@ -65,6 +65,11 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 */
 	long getLastBallContact();
 
+	/**
+	 * @return the ball contact information
+	 */
+	BallContact getBallContact();
+
 
 	/**
 	 * @return

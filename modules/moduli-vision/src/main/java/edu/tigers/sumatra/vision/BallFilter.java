@@ -15,9 +15,11 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
+import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.EBallState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import lombok.Value;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.awt.Color;
@@ -70,39 +72,43 @@ public class BallFilter
 		// process ball position hint if there is one
 		if (ballPosHint != null)
 		{
-			FilteredVisionBall ball = FilteredVisionBall.Builder.create()
+			FilteredVisionBall ball = FilteredVisionBall.builder()
 					.withTimestamp(timestamp)
-					.withPos(Vector3.from2d(ballPosHint, 0))
-					.withVel(Vector3f.ZERO_VECTOR)
-					.withAcc(Vector3f.ZERO_VECTOR)
-					.withIsChipped(false)
-					.withvSwitch(0)
+					.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+							.withPos(Vector3.from2d(ballPosHint, 0))
+							.withVel(Vector3f.ZERO_VECTOR)
+							.withAcc(Vector3f.ZERO_VECTOR)
+							.withChipped(false)
+							.withVSwitchToRoll(0)
+							.build())
 					.withLastVisibleTimestamp(timestamp)
 					.build();
 
 			ballPosHint = null;
 
-			return new BallFilterOutput(ball, ball.getPos(), EBallState.ROLLING, preInput);
+			return new BallFilterOutput(ball, ball.getPos(), preInput);
 		}
 
 		// returned last output if there is no valid ball at all
-		if (!preInput.getMergedBall().isPresent())
+		if (preInput.getMergedBall().isEmpty())
 		{
-			FilteredVisionBall ball = FilteredVisionBall.Builder.create()
+			FilteredVisionBall ball = FilteredVisionBall.builder()
 					.withTimestamp(timestamp)
-					.withPos(lastFilteredBall.getPos())
-					.withVel(Vector3f.ZERO_VECTOR)
-					.withAcc(Vector3f.ZERO_VECTOR)
-					.withIsChipped(false)
-					.withvSwitch(0)
+					.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+							.withPos(lastFilteredBall.getPos())
+							.withVel(Vector3f.ZERO_VECTOR)
+							.withAcc(Vector3f.ZERO_VECTOR)
+							.withChipped(false)
+							.withVSwitchToRoll(0)
+							.build())
 					.withLastVisibleTimestamp(lastFilteredBall.getLastVisibleTimestamp())
 					.build();
 
-			return new BallFilterOutput(ball, lastFilteredBall.getPos(), ballState, preInput);
+			return new BallFilterOutput(ball, lastFilteredBall.getPos(), preInput);
 		}
 
 		MergedBall mergedBall = preInput.getMergedBall().get();
-		long lastVisibleTimestamp = 0;
+		long lastVisibleTimestamp = lastFilteredBall.getLastVisibleTimestamp();
 
 		if (mergedBall.getLatestCamBall().isPresent())
 		{
@@ -111,7 +117,7 @@ public class BallFilter
 			mergedBallHistory.add(mergedBall);
 		}
 
-		Optional<FilteredVisionBall> optKickFitState = preInput.getKickFitState();
+		Optional<BallTrajectoryState> optKickFitState = preInput.getKickFitState();
 
 		IVector3 pos;
 		IVector3 vel;
@@ -120,10 +126,10 @@ public class BallFilter
 
 		if (optKickFitState.isPresent())
 		{
-			FilteredVisionBall kickFitState = optKickFitState.get();
+			BallTrajectoryState kickFitState = optKickFitState.get();
 			acc = kickFitState.getAcc();
 			vel = kickFitState.getVel();
-			vSwitch = kickFitState.getVSwitch();
+			vSwitch = kickFitState.getVSwitchToRoll();
 
 			if (kickFitState.isChipped())
 			{
@@ -149,35 +155,19 @@ public class BallFilter
 			vSwitch = vel.getLength2();
 		}
 
-		FilteredVisionBall filteredBall = FilteredVisionBall.Builder.create()
+		FilteredVisionBall filteredBall = FilteredVisionBall.builder()
 				.withTimestamp(timestamp)
-				.withPos(pos)
-				.withVel(vel)
-				.withAcc(acc)
-				.withIsChipped(ballState == EBallState.AIRBORNE)
-				.withvSwitch(vSwitch)
+				.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+						.withPos(pos)
+						.withVel(vel)
+						.withAcc(acc)
+						.withChipped(ballState == EBallState.AIRBORNE)
+						.withVSwitchToRoll(vSwitch)
+						.build())
 				.withLastVisibleTimestamp(lastVisibleTimestamp)
 				.build();
 
-		return new BallFilterOutput(filteredBall, lastKnownPosition, ballState, preInput);
-	}
-
-
-	/**
-	 * @return the ballState
-	 */
-	public EBallState getBallState()
-	{
-		return ballState;
-	}
-
-
-	/**
-	 * @param ballState the ballState to set
-	 */
-	public void setBallState(final EBallState ballState)
-	{
-		this.ballState = ballState;
+		return new BallFilterOutput(filteredBall, lastKnownPosition, preInput);
 	}
 
 
@@ -201,57 +191,15 @@ public class BallFilter
 		return shapes;
 	}
 
+
 	/**
 	 * Output of final ball filter.
-	 *
-	 * @author AndreR <andre@ryll.cc>
 	 */
+	@Value
 	public static class BallFilterOutput
 	{
-		private final FilteredVisionBall filteredBall;
-		private final IVector3 lastKnownPosition;
-		private final EBallState ballState;
-		private final BallFilterPreprocessorOutput preprocessorOutput;
-
-
-		/**
-		 * @param filteredBall
-		 * @param lastKnownPosition
-		 * @param ballState
-		 * @param preprocessorOutput
-		 */
-		public BallFilterOutput(final FilteredVisionBall filteredBall, final IVector3 lastKnownPosition,
-				final EBallState ballState,
-				final BallFilterPreprocessorOutput preprocessorOutput)
-		{
-			this.filteredBall = filteredBall;
-			this.lastKnownPosition = lastKnownPosition;
-			this.ballState = ballState;
-			this.preprocessorOutput = preprocessorOutput;
-		}
-
-
-		public FilteredVisionBall getFilteredBall()
-		{
-			return filteredBall;
-		}
-
-
-		public IVector3 getLastKnownPosition()
-		{
-			return lastKnownPosition;
-		}
-
-
-		public EBallState getBallState()
-		{
-			return ballState;
-		}
-
-
-		public BallFilterPreprocessorOutput getPreprocessorOutput()
-		{
-			return preprocessorOutput;
-		}
+		FilteredVisionBall filteredBall;
+		IVector3 lastKnownPosition;
+		BallFilterPreprocessorOutput preprocessorOutput;
 	}
 }

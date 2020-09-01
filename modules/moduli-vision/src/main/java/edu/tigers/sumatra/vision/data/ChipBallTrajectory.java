@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.data;
 
@@ -27,14 +27,12 @@ public class ChipBallTrajectory extends ABallTrajectory
 	 * Create new chipped ball trajectory from a ball that is already in the air.
 	 *
 	 * @param timestampNow
-	 * @param p position in [mm]
-	 * @param v velocity in [mm/s]
+	 * @param p            position in [mm]
+	 * @param v            velocity in [mm/s]
 	 * @param spin
 	 */
 	public ChipBallTrajectory(final long timestampNow, final IVector3 p, final IVector3 v, final double spin)
 	{
-		super(timestampNow);
-
 		BallParameters ballParams = Geometry.getBallParameters();
 		dampingXYFirstHop = ballParams.getChipDampingXYFirstHop();
 		dampingXYOtherHops = ballParams.getChipDampingXYOtherHops();
@@ -58,28 +56,14 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 
 	/**
-	 * Create new chipped ball trajectory from a ball that is already in the air.
-	 *
-	 * @param timestampNow
-	 * @param ball
-	 */
-	public ChipBallTrajectory(final long timestampNow, final FilteredVisionBall ball)
-	{
-		this(timestampNow, ball.getPos(), ball.getVel(), ball.getSpin());
-	}
-
-
-	/**
 	 * Create a chipped ball trajectory from a ball where kick position/velocity is known.
 	 *
-	 * @param kickPos kick position in [mm]
-	 * @param kickVel kick velocity in [mm/s]
+	 * @param kickPos       kick position in [mm]
+	 * @param kickVel       kick velocity in [mm/s]
 	 * @param kickTimestamp
 	 */
 	public ChipBallTrajectory(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp)
 	{
-		super(kickTimestamp);
-
 		BallParameters ballParams = Geometry.getBallParameters();
 		dampingXYFirstHop = ballParams.getChipDampingXYFirstHop();
 		dampingXYOtherHops = ballParams.getChipDampingXYOtherHops();
@@ -94,78 +78,10 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 
 	/**
-	 * Copy constructor with new accRoll.
-	 *
-	 * @param original
-	 * @param accRoll
-	 */
-	public ChipBallTrajectory(final ChipBallTrajectory original, final double accRoll)
-	{
-		this(original.getKickPos(), original.getKickVel(), original.getKickTimestamp(), original.getDampingXY(),
-				original.getDampingZ(), accRoll);
-	}
-
-
-	/**
 	 * Create a chipped ball trajectory from a ball where kick position/velocity is known.
 	 *
-	 * @param kickPos kick position in [mm]
-	 * @param kickVel kick velocity in [mm/s]
-	 * @param kickTimestamp
-	 * @param dampingXY
-	 * @param dampingZ
-	 */
-	public ChipBallTrajectory(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp,
-			final double dampingXY, final double dampingZ)
-	{
-		super(kickTimestamp);
-
-		BallParameters ballParams = Geometry.getBallParameters();
-		dampingXYFirstHop = dampingXY;
-		dampingXYOtherHops = ballParams.getChipDampingXYOtherHops();
-		this.dampingZ = dampingZ;
-		accRoll = Geometry.getBallParameters().getAccRoll();
-		initialSpin = 0;
-
-		this.kickPos = Vector3.from2d(kickPos, 0);
-		this.kickVel = kickVel;
-		this.kickTimestamp = kickTimestamp;
-	}
-
-
-	/**
-	 * Create a chipped ball trajectory from a ball where kick position/velocity is known.
-	 *
-	 * @param kickPos kick position in [mm]
-	 * @param kickVel kick velocity in [mm/s]
-	 * @param kickTimestamp
-	 * @param dampingXY
-	 * @param dampingZ
-	 * @param accRoll
-	 */
-	public ChipBallTrajectory(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp,
-			final double dampingXY, final double dampingZ, final double accRoll)
-	{
-		super(kickTimestamp);
-
-		BallParameters ballParams = Geometry.getBallParameters();
-		dampingXYFirstHop = dampingXY;
-		dampingXYOtherHops = ballParams.getChipDampingXYOtherHops();
-		this.dampingZ = dampingZ;
-		this.accRoll = accRoll;
-		initialSpin = 0;
-
-		this.kickPos = Vector3.from2d(kickPos, 0);
-		this.kickVel = kickVel;
-		this.kickTimestamp = kickTimestamp;
-	}
-
-
-	/**
-	 * Create a chipped ball trajectory from a ball where kick position/velocity is known.
-	 *
-	 * @param kickPos kick position in [mm]
-	 * @param kickVel kick velocity in [mm/s]
+	 * @param kickPos         kick position in [mm]
+	 * @param kickVel         kick velocity in [mm/s]
 	 * @param kickTimestamp
 	 * @param dampingXYFirst
 	 * @param dampingXYOthers
@@ -175,8 +91,6 @@ public class ChipBallTrajectory extends ABallTrajectory
 	public ChipBallTrajectory(final IVector2 kickPos, final IVector3 kickVel, final long kickTimestamp,
 			final double dampingXYFirst, final double dampingXYOthers, final double dampingZ, final double accRoll)
 	{
-		super(kickTimestamp);
-
 		dampingXYFirstHop = dampingXYFirst;
 		dampingXYOtherHops = dampingXYOthers;
 		this.dampingZ = dampingZ;
@@ -190,19 +104,18 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 
 	@Override
-	public FilteredVisionBall getStateAtTimestamp(final long timestamp)
+	public BallTrajectoryState getStateAtTimestamp(final long timestamp)
 	{
 		Vector3 accNow = Vector3.fromXYZ(0, 0, -9810);
 
 		double tQuery = (timestamp - kickTimestamp) * 1e-9;
 		if (tQuery < 0)
 		{
-			return FilteredVisionBall.Builder.create()
-					.withTimestamp(timestamp)
+			return BallTrajectoryState.builder()
 					.withPos(kickPos)
 					.withVel(kickVel)
 					.withAcc(accNow)
-					.withIsChipped(true)
+					.withChipped(true)
 					.withSpin(initialSpin)
 					.build();
 		}
@@ -232,12 +145,11 @@ public class ChipBallTrajectory extends ABallTrajectory
 				posNow.add(velNow.multiplyNew(t)).add(Vector3.fromXYZ(0, 0, -0.5 * 9810 * t * t));
 				velNow.add(Vector3.fromXYZ(0, 0, -9810 * t));
 
-				return FilteredVisionBall.Builder.create()
-						.withTimestamp(timestamp)
+				return BallTrajectoryState.builder()
 						.withPos(posNow)
 						.withVel(velNow)
 						.withAcc(accNow)
-						.withIsChipped(true)
+						.withChipped(true)
 						.withSpin(spin)
 						.build();
 			}
@@ -270,12 +182,11 @@ public class ChipBallTrajectory extends ABallTrajectory
 				.add(velNow.normalizeNew().multiply(0.5 * accRoll * t * t));
 		velNow.add(velNow.normalizeNew().multiply(accRoll * t));
 
-		return FilteredVisionBall.Builder.create()
-				.withTimestamp(timestamp)
+		return BallTrajectoryState.builder()
 				.withPos(posNow)
 				.withVel(velNow)
 				.withAcc(accNow)
-				.withIsChipped(false)
+				.withChipped(false)
 				.withSpin(spin)
 				.build();
 	}
@@ -300,32 +211,5 @@ public class ChipBallTrajectory extends ABallTrajectory
 		double tFly = (2 * kickVel.z()) / 9810;
 
 		return kickTimestamp + (long) (tFly * 1e9);
-	}
-
-
-	/**
-	 * @return the dampingXY
-	 */
-	public double getDampingXY()
-	{
-		return dampingXYFirstHop;
-	}
-
-
-	/**
-	 * @return the dampingZ
-	 */
-	public double getDampingZ()
-	{
-		return dampingZ;
-	}
-
-
-	/**
-	 * @return the accRoll
-	 */
-	public double getAccRoll()
-	{
-		return accRoll;
 	}
 }

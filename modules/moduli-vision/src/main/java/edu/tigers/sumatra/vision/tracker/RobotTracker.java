@@ -193,7 +193,7 @@ public class RobotTracker
 	}
 
 
-	public double getUncertainty()
+	private double getUncertainty()
 	{
 		return 1.0 / health;
 	}
@@ -293,9 +293,9 @@ public class RobotTracker
 			totalVelUnc += Math.pow(t.filterXY.getVelocityUncertainty().getLength() * f, -mergePower);
 			totalOrientUnc += Math.pow(t.filterW.getPositionUncertainty() * f, -mergePower);
 			totalAVelUnc += Math.pow(t.filterW.getVelocityUncertainty() * f, -mergePower);
-			if (t.getVisionQuality() > maxQuality)
+			if (t.visionQuality > maxQuality)
 			{
-				maxQuality = t.getVisionQuality();
+				maxQuality = t.visionQuality;
 			}
 		}
 
@@ -332,33 +332,15 @@ public class RobotTracker
 		orient /= totalOrientUnc;
 		aVel /= totalAVelUnc;
 
-		return FilteredVisionBot.Builder.create()
-				.withId(id)
+		return FilteredVisionBot.builder()
+				.withBotID(id)
 				.withTimestamp(timestamp)
 				.withPos(pos)
 				.withVel(vel.multiplyNew(0.001))
-				.withAVel(aVel)
+				.withAngularVel(aVel)
 				.withOrientation(AngleMath.normalizeAngle(orient + orientOffset))
 				.withQuality(maxQuality)
 				.build();
-	}
-
-
-	/**
-	 * @return the filterXY
-	 */
-	public TrackingFilterPosVel2D getFilterXY()
-	{
-		return filterXY;
-	}
-
-
-	/**
-	 * @return the filterW
-	 */
-	public TrackingFilterPosVel1D getFilterW()
-	{
-		return filterW;
 	}
 
 
@@ -400,14 +382,5 @@ public class RobotTracker
 	public int getCamId()
 	{
 		return camId;
-	}
-
-
-	/**
-	 * @return the visionQuality
-	 */
-	public double getVisionQuality()
-	{
-		return visionQuality;
 	}
 }

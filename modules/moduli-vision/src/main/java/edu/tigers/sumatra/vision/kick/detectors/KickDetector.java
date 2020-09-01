@@ -1,24 +1,10 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.Validate;
-import org.apache.commons.math3.util.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.ids.BotID;
@@ -35,6 +21,18 @@ import edu.tigers.sumatra.vision.kick.validators.InFrontValidator;
 import edu.tigers.sumatra.vision.kick.validators.IncreasingDistanceValidator;
 import edu.tigers.sumatra.vision.kick.validators.VelocityValidator;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import org.apache.commons.lang.Validate;
+import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -175,14 +173,28 @@ public class KickDetector implements IKickDetector
 			FilteredVisionBot bot = kickedBot.get(0);
 			log.debug("Kick detected, Bot: {}", bot.getBotID());
 
-			KickEvent kick = new KickEvent(balls.get(0).getCamPos(), bot, balls.get(0).getTimestamp(), balls, false);
+			KickEvent kick = KickEvent.builder()
+					.kickingBot(bot.getBotID())
+					.position(balls.get(0).getCamPos())
+					.botDirection(bot.getOrientation())
+					.timestamp(balls.get(0).getTimestamp())
+					.recordsSinceKick(balls)
+					.isEarlyDetection(false)
+					.build();
 			lastKickTimestamp = balls.get(0).getTimestamp();
 
 			Optional<Pair<Long, IVector2>> backtrack = DirectionValidator.backtrack(kickedBot, balls);
 			if (backtrack.isPresent())
 			{
 				log.debug("Backtrack possible");
-				kick = new KickEvent(backtrack.get().getSecond(), bot, backtrack.get().getFirst(), balls, false);
+				kick = KickEvent.builder()
+						.kickingBot(bot.getBotID())
+						.position(backtrack.get().getSecond())
+						.botDirection(bot.getOrientation())
+						.timestamp(backtrack.get().getFirst())
+						.recordsSinceKick(balls)
+						.isEarlyDetection(false)
+						.build();
 				lastKickTimestamp = backtrack.get().getFirst();
 			}
 

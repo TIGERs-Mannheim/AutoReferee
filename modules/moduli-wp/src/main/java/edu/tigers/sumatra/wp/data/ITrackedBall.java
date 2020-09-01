@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.wp.ball.prediction.IBallTrajectory;
-import edu.tigers.sumatra.wp.ball.prediction.IChipBallConsultant;
-import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
+import edu.tigers.sumatra.vision.data.BallTrajectoryState;
+import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
+import edu.tigers.sumatra.wp.ball.trajectory.IChipBallConsultant;
+import edu.tigers.sumatra.wp.ball.trajectory.IStraightBallConsultant;
 
 
 /**
+ *
  */
 public interface ITrackedBall extends ITrackedObject, IExportable
 {
@@ -29,7 +31,7 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 
 
 	/**
-	 * @return [mm,mm,mm]
+	 * @return [mm, mm, mm]
 	 */
 	IVector3 getPos3();
 
@@ -47,11 +49,9 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 
 
 	/**
-	 * Check if the ball was visible within the last half second
-	 *
-	 * @return true, if the ball is detected by any camera
+	 * @return the time [s] that the ball is invisible (0 means it is visible)
 	 */
-	boolean isOnCam();
+	double invisibleFor();
 
 
 	/**
@@ -75,14 +75,6 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 	 * @return
 	 */
 	long getLastVisibleTimestamp();
-
-
-	/**
-	 * Get the velocity where the ball switches to rolling.
-	 *
-	 * @return
-	 */
-	double getvSwitchToRoll();
 
 
 	/**

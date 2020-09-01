@@ -1,7 +1,20 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
+
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.cam.data.CamBall;
+import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.vision.data.FilteredVisionBot;
+import edu.tigers.sumatra.vision.data.KickEvent;
+import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,21 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
-
-import edu.tigers.sumatra.cam.data.CamBall;
-import edu.tigers.sumatra.drawable.IDrawableShape;
-import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.vision.data.FilteredVisionBot;
-import edu.tigers.sumatra.vision.data.KickEvent;
-import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 
 
 /**
@@ -112,12 +110,16 @@ public class EarlyKickDetector implements IKickDetector
 				.filter(b -> b.getTimestamp() >= kickBall.getTimestamp())
 				.collect(Collectors.toList());
 
-		KickEvent kickEvent = new KickEvent(kickBall.getCamPos(), kickingBot, kickBall.getTimestamp(),
-				allBalls, true);
-
 		log.debug("Early kick detected, bot: {}", kickingBot.getBotID());
 
-		return kickEvent;
+		return KickEvent.builder()
+				.kickingBot(kickingBot.getBotID())
+				.position(kickBall.getCamPos())
+				.botDirection(kickingBot.getOrientation())
+				.timestamp(kickBall.getTimestamp())
+				.isEarlyDetection(true)
+				.recordsSinceKick(allBalls)
+				.build();
 	}
 
 

@@ -1,8 +1,37 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
+
+import edu.tigers.sumatra.cam.data.CamCalibration;
+import edu.tigers.sumatra.cam.data.CamDetectionFrame;
+import edu.tigers.sumatra.cam.data.CamGeometry;
+import edu.tigers.sumatra.clock.ThreadUtil;
+import edu.tigers.sumatra.drawable.DrawableAnnotation;
+import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.rectangle.IRectangle;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.thread.NamedThreadFactory;
+import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
+import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
+import edu.tigers.sumatra.vision.ViewportArchitect.IViewportArchitect;
+import edu.tigers.sumatra.vision.data.EVisionFilterShapesLayer;
+import edu.tigers.sumatra.vision.data.FilteredVisionBall;
+import edu.tigers.sumatra.vision.data.FilteredVisionBot;
+import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
+import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
+import edu.tigers.sumatra.vision.data.KickEvent;
+import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import edu.tigers.sumatra.vision.tracker.BallTracker;
+import edu.tigers.sumatra.vision.tracker.RobotTracker;
+import lombok.extern.log4j.Log4j2;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -15,47 +44,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.cam.data.CamCalibration;
-import edu.tigers.sumatra.cam.data.CamDetectionFrame;
-import edu.tigers.sumatra.cam.data.CamGeometry;
-import edu.tigers.sumatra.clock.ThreadUtil;
-import edu.tigers.sumatra.drawable.DrawableAnnotation;
-import edu.tigers.sumatra.drawable.DrawableCircle;
-import edu.tigers.sumatra.drawable.IDrawableShape;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.rectangle.IRectangle;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.thread.NamedThreadFactory;
-import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
-import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
-import edu.tigers.sumatra.vision.ViewportArchitect.IViewportArchitect;
-import edu.tigers.sumatra.vision.data.EBallState;
-import edu.tigers.sumatra.vision.data.EVisionFilterShapesLayer;
-import edu.tigers.sumatra.vision.data.FilteredVisionBall;
-import edu.tigers.sumatra.vision.data.FilteredVisionBot;
-import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
-import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
-import edu.tigers.sumatra.vision.data.KickEvent;
-import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
-import edu.tigers.sumatra.vision.tracker.BallTracker;
-import edu.tigers.sumatra.vision.tracker.RobotTracker;
-
 
 /**
- * @author AndreR
+ * Vision filter implementation.
  */
+@Log4j2
 public class VisionFilterImpl extends AVisionFilter
 		implements Runnable, IViewportArchitect, IBallModelIdentificationObserver
 {
-	@SuppressWarnings("unused")
-	private static final Logger log = LogManager.getLogger(VisionFilterImpl.class.getName());
-
 	private static final long CLOCK_DT = 12_500_000;
 
 	private final BallFilterPreprocessor ballFilterPreprocessor = new BallFilterPreprocessor();
@@ -78,9 +74,12 @@ public class VisionFilterImpl extends AVisionFilter
 	 */
 	public VisionFilterImpl()
 	{
-		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
-		lastBallFilterOutput = new BallFilterOutput(lastFilteredFrame.getBall(), lastFilteredFrame.getBall().getPos(),
-				EBallState.ROLLING, new BallFilterPreprocessorOutput(null, null, null));
+		lastFilteredFrame = FilteredVisionFrame.createEmptyFrame();
+		lastBallFilterOutput = new BallFilterOutput(
+				lastFilteredFrame.getBall(),
+				lastFilteredFrame.getBall().getPos(),
+				new BallFilterPreprocessorOutput(null, null, null)
+		);
 	}
 
 
@@ -125,13 +124,13 @@ public class VisionFilterImpl extends AVisionFilter
 				.collect(Collectors.toList());
 
 		// construct extrapolated vision frame
-		return FilteredVisionFrame.Builder.create()
+		return FilteredVisionFrame.builder()
 				.withId(frame.getId())
 				.withTimestamp(timestampFuture)
 				.withBall(frame.getBall().extrapolate(timestampNow, timestampFuture))
 				.withBots(extrapolatedBots)
 				.withKickEvent(frame.getKickEvent().orElse(null))
-				.withKickFitState(frame.getBall())
+				.withKickFitState(frame.getKickFitState().orElse(null))
 				.withShapeMap(frame.getShapeMap())
 				.build();
 	}
@@ -197,13 +196,14 @@ public class VisionFilterImpl extends AVisionFilter
 		FilteredVisionBall ball = selectAndMergeBall(cams.values(), timestamp, filteredRobots);
 
 		// construct filtered vision frame
-		FilteredVisionFrame frame = FilteredVisionFrame.Builder.create()
+		FilteredVisionFrame frame = FilteredVisionFrame.builder()
 				.withId(lastFilteredFrame.getId() + 1)
 				.withTimestamp(timestamp)
 				.withBall(ball)
 				.withBots(filteredRobots)
 				.withKickEvent(lastKickEvent)
 				.withKickFitState(lastBallFilterOutput.getPreprocessorOutput().getKickFitState().orElse(null))
+				.withShapeMap(new ShapeMap())
 				.build();
 
 		// forward frame for inspection
@@ -344,7 +344,7 @@ public class VisionFilterImpl extends AVisionFilter
 		viewportArchitect.removeObserver(this);
 		ballFilterPreprocessor.removeObserver(this);
 		ballFilterPreprocessor.clear();
-		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
+		lastFilteredFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 
 
@@ -369,7 +369,7 @@ public class VisionFilterImpl extends AVisionFilter
 		super.onClearCamFrame();
 		cams.clear();
 		ballFilterPreprocessor.clear();
-		lastFilteredFrame = FilteredVisionFrame.Builder.createEmptyFrame();
+		lastFilteredFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 
 

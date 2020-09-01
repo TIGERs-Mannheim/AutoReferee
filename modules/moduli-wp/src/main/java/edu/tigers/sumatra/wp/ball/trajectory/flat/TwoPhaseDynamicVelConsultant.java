@@ -1,17 +1,16 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.ball.trajectory.flat;
 
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.wp.ball.trajectory.IStraightBallConsultant;
+
 import static edu.tigers.sumatra.math.SumatraMath.sqrt;
 import static java.lang.Math.max;
 import static java.lang.Math.pow;
-
-import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.wp.ball.prediction.IStraightBallConsultant;
-import edu.tigers.sumatra.wp.ball.trajectory.flat.TwoPhaseDynamicVelBallTrajectory.TwoPhaseDynamicVelParameters;
 
 
 /**
@@ -19,21 +18,21 @@ import edu.tigers.sumatra.wp.ball.trajectory.flat.TwoPhaseDynamicVelBallTrajecto
  */
 public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 {
-	
+
 	private final TwoPhaseDynamicVelParameters parameters;
-	
-	
+
+
 	/**
 	 * Create a new consultant for the dynamic vel ball model
-	 * 
+	 *
 	 * @param parameters
 	 */
 	public TwoPhaseDynamicVelConsultant(final TwoPhaseDynamicVelParameters parameters)
 	{
 		this.parameters = parameters;
 	}
-	
-	
+
+
 	@Override
 	public double getInitVelForTime(final double endVel, final double time)
 	{
@@ -50,8 +49,8 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 		}
 		return initialVel;
 	}
-	
-	
+
+
 	@Override
 	public double getInitVelForDist(final double distance, final double endVel)
 	{
@@ -71,8 +70,8 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 		}
 		return initialVel;
 	}
-	
-	
+
+
 	@Override
 	public double getTimeForKick(final double distance, final double kickVel)
 	{
@@ -80,8 +79,8 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 				.fromKick(Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickVel), parameters)
 				.getTimeByDist(distance);
 	}
-	
-	
+
+
 	@Override
 	public double getVelForKickByTime(final double kickSpeed, final double travelTime)
 	{
@@ -90,8 +89,8 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 				.getVelByTime(travelTime)
 				.getLength2();
 	}
-	
-	
+
+
 	@Override
 	public double getInitVelForTimeDist(final double distance, final double time)
 	{
@@ -117,6 +116,6 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 			initialVel = s / t - .5 * ar * t;
 		}
 		return 1e-3 * initialVel;
-		
+
 	}
 }
