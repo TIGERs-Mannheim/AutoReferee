@@ -21,17 +21,17 @@ import java.util.List;
 @Persistent
 public class MoveConstraints implements IExportable, IMoveConstraints
 {
-	private double velMax = 0;
-	private double accMax = 0;
-	private double brkMax = 0;
-	private double jerkMax = 0;
-	private double velMaxW = 0;
-	private double accMaxW = 0;
-	private double jerkMaxW = 0;
-	private double velMaxFast = 0;
-	private double accMaxFast = 0;
+	private double velMax;
+	private double accMax;
+	private double brkMax;
+	private double jerkMax;
+	private double velMaxW;
+	private double accMaxW;
+	private double jerkMaxW;
+	private double velMaxFast;
+	private double accMaxFast;
 
-	private boolean fastMove = false;
+	private boolean fastMove;
 	private IVector2 primaryDirection = Vector2f.ZERO_VECTOR;
 
 
@@ -40,6 +40,22 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	 */
 	public MoveConstraints()
 	{
+	}
+
+
+	public MoveConstraints(MoveConstraints mc)
+	{
+		velMax = mc.velMax;
+		accMax = mc.accMax;
+		brkMax = mc.brkMax;
+		jerkMax = mc.jerkMax;
+		velMaxW = mc.velMaxW;
+		accMaxW = mc.accMaxW;
+		jerkMaxW = mc.jerkMaxW;
+		velMaxFast = mc.velMaxFast;
+		accMaxFast = mc.accMaxFast;
+		fastMove = mc.fastMove;
+		primaryDirection = mc.primaryDirection;
 	}
 
 
@@ -56,7 +72,6 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 
 	public void resetLimits(final IBotMovementLimits moveLimits)
 	{
-
 		velMax = moveLimits.getVelMax();
 		accMax = moveLimits.getAccMax();
 		brkMax = moveLimits.getBrkMax();
@@ -66,6 +81,20 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 		jerkMaxW = moveLimits.getJerkMaxW();
 		velMaxFast = moveLimits.getVelMaxFast();
 		accMaxFast = moveLimits.getAccMaxFast();
+	}
+
+
+	public void limit(final IBotMovementLimits movementLimits)
+	{
+		velMax = Math.min(velMax, movementLimits.getVelMax());
+		accMax = Math.min(accMax, movementLimits.getAccMax());
+		brkMax = Math.min(brkMax, movementLimits.getBrkMax());
+		jerkMax = Math.min(jerkMax, movementLimits.getJerkMax());
+		velMaxW = Math.min(velMaxW, movementLimits.getVelMaxW());
+		accMaxW = Math.min(accMaxW, movementLimits.getAccMaxW());
+		jerkMaxW = Math.min(jerkMaxW, movementLimits.getJerkMaxW());
+		velMaxFast = Math.min(velMaxFast, movementLimits.getVelMaxFast());
+		accMaxFast = Math.min(accMaxFast, movementLimits.getAccMaxFast());
 	}
 
 

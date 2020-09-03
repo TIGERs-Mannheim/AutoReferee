@@ -184,9 +184,13 @@ public class WorldInfoCollector extends AWorldPredictor
 		calc.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
 
 		Optional<State> bufferedState = calc.getState(lastWFTimestamp, 0.0);
-		BotState botState = !botCollidingWithOtherBot(filteredBotStates, currentBotState)
-				? BotState.of(robotInfo.getBotId(), bufferedState.orElse(currentBotState))
-				: currentBotState;
+		BotState botState = botCollidingWithOtherBot(filteredBotStates, currentBotState)
+				? currentBotState
+				: BotState.of(
+				robotInfo.getBotId(),
+				bufferedState.map(s -> State.of(Pose.from(s.getPos(), currentBotState.getOrientation()),
+						Vector3.from2d(s.getVel2(), currentBotState.getAngularVel())))
+						.orElse(currentBotState));
 
 		return TrackedBot.newBuilder()
 				.withBotId(botState.getBotID())

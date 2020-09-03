@@ -4,10 +4,6 @@
 
 package edu.tigers.sumatra.wp.vis;
 
-import java.awt.Color;
-import java.util.List;
-import java.util.Objects;
-
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableBotPattern;
 import edu.tigers.sumatra.drawable.DrawableBotShape;
@@ -19,6 +15,10 @@ import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+
+import java.awt.Color;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -55,10 +55,15 @@ public class BotVisCalc implements IWpCalc
 
 	private DrawableAnnotation createDistanceToTrajectoryShape(final ITrackedBot bot)
 	{
-		String text = String.format("tq: %.1f %.3f",
+		String text = String.format("%.1f>%.1f: %.3f",
 				bot.getTrackingQuality().getCurDistance(),
+				bot.getTrackingQuality().getMaxDistance(),
 				bot.getTrackingQuality().getTimeOffTrajectory());
-		Color color = bot.getTrackingQuality().getTimeOffTrajectory() > 0 ? Color.red : Color.green;
+		var color = bot.getTrackingQuality().getCurDistance() > bot.getTrackingQuality().getMaxDistance()
+				? Color.red
+				: bot.getTrackingQuality().getTimeOffTrajectory() > 0
+				? Color.orange
+				: Color.green;
 		return new DrawableAnnotation(bot.getPos(), text).withOffset(Vector2.fromY(-200)).withCenterHorizontally(true)
 				.setColor(color);
 	}

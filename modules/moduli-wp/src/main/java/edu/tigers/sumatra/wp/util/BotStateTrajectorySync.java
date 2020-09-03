@@ -26,8 +26,8 @@ public class BotStateTrajectorySync
 	@Configurable(defValue = "0.5", comment = "Max time [s] that robot can be off the trajectory before a reset")
 	private static double maxTimeOffTrajectory = 0.5;
 
-	@Configurable(defValue = "0.02", comment = "Max time difference [s] between trajectory and measured state")
-	private static double maxDt = 0.02;
+	@Configurable(defValue = "0.03", comment = "Max time difference [s] between trajectory and measured state")
+	private static double maxDt = 0.03;
 
 	@Configurable(defValue = "1.0", comment = "Min velocity [m/s] to consider for calculating maxDiff on trajectory")
 	private static double minVel = 1.0;
@@ -86,7 +86,7 @@ public class BotStateTrajectorySync
 					buffer.reset();
 				}
 			}
-			trajTrackingQuality = new TrajTrackingQuality(curDistance, timeOffTrajectory);
+			trajTrackingQuality = new TrajTrackingQuality(curDistance, maxDistance, timeOffTrajectory);
 		}
 		lastTimestamp = timestamp;
 	}
