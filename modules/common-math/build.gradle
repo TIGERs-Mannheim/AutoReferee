@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'com.github.g3force:String2ValueConverter:2.1'
+    implementation 'com.github.g3force:String2ValueConverter:2.2'
 
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'commons-lang:commons-lang:2.6'

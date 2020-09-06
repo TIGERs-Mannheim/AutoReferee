@@ -8,6 +8,8 @@ import com.github.g3force.instanceables.InstanceableClass;
 import com.github.g3force.instanceables.InstanceableParameter;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent.GameEvent.Type;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -20,6 +22,8 @@ import static edu.tigers.sumatra.referee.gameevent.EGameEventType.OTHER;
 /**
  * AutoRef game events and mapping to human readable texts and referee protocol enum
  */
+@Getter
+@AllArgsConstructor
 public enum EGameEvent implements IInstanceableEnum
 {
 	// Ball out of field events (stopping)
@@ -74,7 +78,7 @@ public enum EGameEvent implements IInstanceableEnum
 	;
 
 
-	private final InstanceableClass impl;
+	private final InstanceableClass<?> instanceableClass;
 	private final Type protoType;
 	private final EGameEventType type;
 
@@ -83,29 +87,10 @@ public enum EGameEvent implements IInstanceableEnum
 
 	EGameEvent(final Type protoType, final Class<? extends IGameEvent> wrapperImpl, final EGameEventType type)
 	{
-		this.impl = new InstanceableClass(wrapperImpl,
+		this.instanceableClass = new InstanceableClass<>(wrapperImpl,
 				new InstanceableParameter(SslGcGameEvent.GameEvent.class, "", null));
 		this.protoType = protoType;
 		this.type = type;
-	}
-
-
-	@Override
-	public InstanceableClass getInstanceableClass()
-	{
-		return impl;
-	}
-
-
-	public Type getProtoType()
-	{
-		return protoType;
-	}
-
-
-	public EGameEventType getType()
-	{
-		return type;
 	}
 
 

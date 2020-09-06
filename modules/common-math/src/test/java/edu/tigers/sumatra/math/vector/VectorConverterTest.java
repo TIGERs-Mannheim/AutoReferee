@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
+ *
  */
 public class VectorConverterTest
 {
@@ -40,10 +41,10 @@ public class VectorConverterTest
 	@Test
 	public void testParseStringInvalid()
 	{
-		assertThat(converter.parseString(IVector2.class, "42;133a7")).isEqualTo(Vector2.zero());
-		assertThat(converter.parseString(IVector3.class, "42;1337,3.a14")).isEqualTo(Vector3.zero());
-		assertThat(converter.parseString(IVectorN.class, "42;1337,3.14,-5a")).isEqualTo(VectorN.zero(0));
-		assertThat(converter.parseString(IVector.class, "4a2;1337")).isEqualTo(VectorN.zero(0));
+		assertThat(converter.parseString(IVector2.class, "42;133a7")).isNull();
+		assertThat(converter.parseString(IVector3.class, "42;1337,3.a14")).isNull();
+		assertThat(converter.parseString(IVectorN.class, "42;1337,3.14,-5a")).isNull();
+		assertThat(converter.parseString(IVector.class, "4a2;1337")).isNull();
 		assertThat(converter.parseString(Object.class, "")).isNull();
 	}
 

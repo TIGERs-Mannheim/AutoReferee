@@ -19,7 +19,7 @@ dependencies {
     implementation project(':moduli-record')
 
     implementation 'com.github.TIGERs-Mannheim:moduli:3.0'
-    implementation 'com.github.g3force:String2ValueConverter:2.1'
+    implementation 'com.github.g3force:String2ValueConverter:2.2'
     api 'com.github.g3force:configurable:3.0'
 
     implementation 'commons-lang:commons-lang:2.6'

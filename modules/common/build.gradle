@@ -10,7 +10,7 @@ dependencies {
     api project(':common-math')
 
     implementation 'com.github.TIGERs-Mannheim.matlabcontrol:matlabcontrol:4.1.2'
-    implementation 'com.github.g3force:String2ValueConverter:2.1'
+    implementation 'com.github.g3force:String2ValueConverter:2.2'
 
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'org.apache.commons:commons-math3:3.6.1'

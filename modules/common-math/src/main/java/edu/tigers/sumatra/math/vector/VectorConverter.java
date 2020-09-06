@@ -1,13 +1,12 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
 
+import com.github.g3force.s2vconverter.IString2ValueConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.github.g3force.s2vconverter.IString2ValueConverter;
 
 
 /**
@@ -55,7 +54,7 @@ public class VectorConverter implements IString2ValueConverter
 		} catch (NumberFormatException err)
 		{
 			log.warn(MSG_NOT_PARSABLE, err);
-			return Vector2f.ZERO_VECTOR;
+			return null;
 		}
 	}
 
@@ -68,7 +67,7 @@ public class VectorConverter implements IString2ValueConverter
 		} catch (NumberFormatException err)
 		{
 			log.warn(MSG_NOT_PARSABLE, err);
-			return Vector3f.ZERO_VECTOR;
+			return null;
 		}
 	}
 
@@ -81,7 +80,7 @@ public class VectorConverter implements IString2ValueConverter
 		} catch (NumberFormatException err)
 		{
 			log.warn(MSG_NOT_PARSABLE, err);
-			return VectorN.zero(0);
+			return null;
 		}
 	}
 
