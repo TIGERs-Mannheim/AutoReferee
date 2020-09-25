@@ -255,6 +255,8 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 			}
 		}
 
+		camFrames.clear();
+		shapeMaps.clear();
 		panel.getRobotsPanel().clearView();
 		panel.getFieldPanel().setPanelVisible(false);
 		panel.getFieldPanel().clearField();
