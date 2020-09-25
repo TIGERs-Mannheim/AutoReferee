@@ -111,4 +111,11 @@ public enum EGameEvent implements IInstanceableEnum
 		}
 		return null;
 	}
+
+
+	@Override
+	public IInstanceableEnum parse(String value)
+	{
+		return valueOf(value);
+	}
 }
