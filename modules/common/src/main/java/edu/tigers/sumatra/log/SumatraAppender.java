@@ -1,12 +1,8 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.log;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
@@ -20,11 +16,19 @@ import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 
 @Plugin(name = "SumatraAppender", category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
 public class SumatraAppender extends AbstractAppender
 {
+	private static final int BUFFER_SIZE = 1000;
 	private final List<ILogEventConsumer> consumers = new CopyOnWriteArrayList<>();
+	private final List<LogEvent> logEventBuffer = new LinkedList<>();
+
 
 	@SuppressWarnings("squid:CallToDeprecatedMethod") // false positive
 	private SumatraAppender(String name, Filter filter, final Layout<? extends Serializable> layout)
@@ -44,9 +48,10 @@ public class SumatraAppender extends AbstractAppender
 	}
 
 
-	public void addConsumer(ILogEventConsumer consumer)
+	public synchronized void addConsumer(ILogEventConsumer consumer)
 	{
 		consumers.add(consumer);
+		logEventBuffer.forEach(consumer::onNewLogEvent);
 	}
 
 
@@ -57,8 +62,13 @@ public class SumatraAppender extends AbstractAppender
 
 
 	@Override
-	public void append(final LogEvent logEvent)
+	public synchronized void append(final LogEvent logEvent)
 	{
 		consumers.forEach(c -> c.onNewLogEvent(logEvent));
+		if (logEventBuffer.size() >= BUFFER_SIZE)
+		{
+			logEventBuffer.remove(0);
+		}
+		logEventBuffer.add(logEvent);
 	}
 }

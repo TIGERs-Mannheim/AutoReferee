@@ -7,9 +7,9 @@ package edu.tigers.sumatra.model;
 import edu.tigers.moduli.Moduli;
 import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
+import edu.tigers.moduli.listenerVariables.ModulesState;
+import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
@@ -30,13 +30,10 @@ import java.util.Properties;
  * The model make use of a Singleton - pattern,
  * so you can access the Model
  * with a simple SumatraModel.getInstance() .
- *
- * @author bernhard
  */
+@Log4j2
 public final class SumatraModel extends Moduli
 {
-	private static final Logger log = LogManager.getLogger(SumatraModel.class.getName());
-
 	// --- version ---
 	private static final String VERSION = getVersionNameFromManifest();
 
@@ -83,6 +80,22 @@ public final class SumatraModel extends Moduli
 		return INSTANCE;
 	}
 
+	public void startUp(final String moduliConfig)
+	{
+		try
+		{
+			if (getModulesState().get() == ModulesState.ACTIVE)
+			{
+				stopModules();
+			}
+			SumatraModel.getInstance().setCurrentModuliConfig(moduliConfig);
+			loadModulesOfConfig(getCurrentModuliConfig());
+			startModules();
+		} catch (Throwable e)
+		{
+			log.error("Could not start Sumatra.", e);
+		}
+	}
 
 	/**
 	 * Load application properties in two steps

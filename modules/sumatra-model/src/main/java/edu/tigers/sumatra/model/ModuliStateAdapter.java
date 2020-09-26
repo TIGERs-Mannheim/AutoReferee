@@ -1,19 +1,18 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.model;
+
+import edu.tigers.moduli.IModuliStateObserver;
+import edu.tigers.moduli.Moduli;
+import edu.tigers.moduli.listenerVariables.ModulesState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.moduli.IModuliStateObserver;
-import edu.tigers.moduli.Moduli;
-import edu.tigers.moduli.listenerVariables.ModulesState;
 
 
 /**
@@ -50,6 +49,7 @@ public final class ModuliStateAdapter implements PropertyChangeListener
 	public void addObserver(final IModuliStateObserver o)
 	{
 		observers.add(o);
+		o.onModuliStateChanged(SumatraModel.getInstance().getModulesState().get());
 	}
 
 

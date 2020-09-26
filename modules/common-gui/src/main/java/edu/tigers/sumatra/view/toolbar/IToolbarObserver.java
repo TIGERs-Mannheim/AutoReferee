@@ -12,14 +12,6 @@ package edu.tigers.sumatra.view.toolbar;
 public interface IToolbarObserver
 {
 	/**
-	 * Start or stop all modules
-	 */
-	default void onStartStopModules()
-	{
-	}
-
-
-	/**
 	 * trigger emergency stop
 	 */
 	default void onEmergencyStop()

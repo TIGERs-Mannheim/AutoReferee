@@ -1,30 +1,23 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.views;
 
-import java.awt.Component;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
-import edu.tigers.sumatra.model.SumatraModel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import net.infonode.docking.View;
+
+import java.awt.Component;
 
 
 /**
- * Base class for any Sumatra View (the tabs in the GUI)
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Base class for any Sumatra View (the tabs in the GUI).
  */
+@Log4j2
+@RequiredArgsConstructor
 public abstract class ASumatraView
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
-	private static final Logger log = LogManager.getLogger(ASumatraView.class.getName());
 	private final ESumatraViewType type;
 	private ISumatraViewPresenter presenter = null;
 	private View view = null;
@@ -35,29 +28,9 @@ public abstract class ASumatraView
 	 */
 	public enum EViewMode
 	{
-		/**  */
 		NORMAL,
-		/**  */
-		REPLAY
+		REPLAY,
 	}
-
-
-	// --------------------------------------------------------------------------
-	// --- constructors ---------------------------------------------------------
-	// --------------------------------------------------------------------------
-
-	/**
-	 * @param type
-	 */
-	public ASumatraView(final ESumatraViewType type)
-	{
-		this.type = type;
-	}
-
-
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
 
 
 	/**
@@ -73,9 +46,6 @@ public abstract class ASumatraView
 			if (mode == EViewMode.NORMAL)
 			{
 				ModuliStateAdapter.getInstance().addObserver(presenter);
-				// let the presenter update itself according to the current moduli state
-				ModulesState currentState = SumatraModel.getInstance().getModulesState().get();
-				presenter.onModuliStateChanged(currentState);
 			}
 			log.trace("Presenter created for view " + type.getTitle());
 		}
@@ -140,6 +110,7 @@ public abstract class ASumatraView
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------
 	// --------------------------------------------------------------------------
+
 
 	/**
 	 * @return the type

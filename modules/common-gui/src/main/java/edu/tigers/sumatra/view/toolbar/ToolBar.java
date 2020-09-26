@@ -3,12 +3,12 @@
  */
 package edu.tigers.sumatra.view.toolbar;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import edu.tigers.sumatra.util.GlobalShortcuts;
+import edu.tigers.sumatra.util.GlobalShortcuts.EShortcut;
+import edu.tigers.sumatra.util.ImageScaler;
+import edu.tigers.sumatra.view.FpsPanel;
+import lombok.extern.log4j.Log4j2;
+import net.miginfocom.swing.MigLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -16,32 +16,24 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.util.GlobalShortcuts;
-import edu.tigers.sumatra.util.GlobalShortcuts.EShortcut;
-import edu.tigers.sumatra.util.ImageScaler;
-import edu.tigers.sumatra.view.FpsPanel;
-import net.miginfocom.swing.MigLayout;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
  * The frame tool bar.
  */
+@Log4j2
 public class ToolBar
 {
-	private static final Logger log = LogManager.getLogger(ToolBar.class.getName());
-
 	private final List<IToolbarObserver> observers = new CopyOnWriteArrayList<>();
 
-	// --- toolbar ---
 	private final JToolBar jToolBar;
 
-	private final JButton btnStartStop;
-	private final JButton btnEmergency;
 	private final JButton btnRecSave;
 
 
@@ -56,19 +48,12 @@ public class ToolBar
 	public ToolBar()
 	{
 		log.trace("Create toolbar");
-		// --- configure buttons ---
-		btnStartStop = new JButton();
-		btnStartStop.addActionListener(new StartStopModules());
-		btnStartStop.setBorder(BorderFactory.createEmptyBorder());
-		btnStartStop.setBackground(new Color(0, 0, 0, 1));
-		btnStartStop.setToolTipText("Start/Stop");
 
-		btnEmergency = new JButton();
+		var btnEmergency = new JButton();
 		btnEmergency.setForeground(Color.red);
 		btnEmergency.addActionListener(new EmergencyStopListener());
 		btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/stop-emergency.png"));
 		btnEmergency.setToolTipText("Emergency stop [Esc]");
-		btnEmergency.setEnabled(false);
 		btnEmergency.setBorder(BorderFactory.createEmptyBorder());
 		btnEmergency.setBackground(new Color(0, 0, 0, 1));
 
@@ -76,7 +61,6 @@ public class ToolBar
 		btnRecSave.addActionListener(new RecordSaveButtonListener());
 		btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/record.png"));
 		btnRecSave.setToolTipText("Start/Stop recording");
-		btnRecSave.setEnabled(false);
 		btnRecSave.setBorder(BorderFactory.createEmptyBorder());
 		btnRecSave.setBackground(new Color(0, 0, 0, 1));
 
@@ -97,7 +81,6 @@ public class ToolBar
 		toolBarPanel.setLayout(new MigLayout("inset 1"));
 
 		// --- add buttons ---
-		toolBarPanel.add(btnStartStop, "left");
 		toolBarPanel.add(btnEmergency, "left");
 		toolBarPanel.add(btnRecSave, "left");
 		toolBarPanel.add(fpsPanel, "left");
@@ -116,13 +99,8 @@ public class ToolBar
 				o.onEmergencyStop();
 			}
 		});
-		GlobalShortcuts.register(EShortcut.START_STOP, this::startStopModules);
 	}
 
-
-	// --------------------------------------------------------------------------
-	// --- methods --------------------------------------------------------------
-	// --------------------------------------------------------------------------
 
 	/**
 	 * @param o
@@ -165,53 +143,6 @@ public class ToolBar
 
 
 	/**
-	 * @param enable
-	 * @param state
-	 */
-	public void setStartStopButtonState(final boolean enable, final EStartStopButtonState state)
-	{
-		SwingUtilities.invokeLater(() -> {
-			btnStartStop.setEnabled(enable);
-			btnStartStop.setIcon(state.getIcon());
-			switch (state)
-			{
-				case LOADING:
-					btnStartStop.setDisabledIcon(state.getIcon());
-					break;
-				case START:
-				case STOP:
-					btnStartStop.setDisabledIcon(null);
-					break;
-				default:
-					break;
-			}
-			jToolBar.repaint();
-		});
-	}
-
-
-	/**
-	 * @param enabled
-	 */
-	public void setActive(final boolean enabled)
-	{
-		SwingUtilities.invokeLater(() -> {
-			btnEmergency.setEnabled(enabled);
-			btnRecSave.setEnabled(enabled);
-		});
-	}
-
-
-	private void startStopModules()
-	{
-		for (final IToolbarObserver o : observers)
-		{
-			o.onStartStopModules();
-		}
-	}
-
-
-	/**
 	 * @param recording
 	 */
 	public void setRecordingEnabled(final boolean recording)
@@ -236,15 +167,6 @@ public class ToolBar
 			{
 				o.onEmergencyStop();
 			}
-		}
-	}
-
-	private class StartStopModules implements ActionListener
-	{
-		@Override
-		public void actionPerformed(final ActionEvent e)
-		{
-			startStopModules();
 		}
 	}
 
