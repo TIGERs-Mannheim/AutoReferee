@@ -5,7 +5,9 @@
 package edu.tigers.sumatra.visualizer;
 
 import edu.tigers.sumatra.clock.FpsCounter;
+import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableFieldBackground;
+import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.EFontSize;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -15,6 +17,7 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -25,6 +28,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -106,6 +110,8 @@ public class FieldPanel extends JPanel implements IDrawableTool
 	private EFieldTurn fieldTurn = EFieldTurn.NORMAL;
 
 	private transient IVector2 lastMousePoint = Vector2f.ZERO_VECTOR;
+	private transient IVector2 dragPointStart = null;
+	private transient IVector2 dragPointEnd = null;
 	private final transient FpsCounter fpsCounter = new FpsCounter();
 
 	private String snapshotFilePath = "";
@@ -382,6 +388,8 @@ public class FieldPanel extends JPanel implements IDrawableTool
 				.filter(e -> shapeVisibilityMap.getOrDefault(e.getIdentifier().getId(), true))
 				.forEach(shapeLayer -> paintShapeMap(g2, shapeLayer, defaultStroke));
 
+		paintDragPoints(g2);
+
 		g2.scale(1.0 / scale, 1.0 / scale);
 		g2.translate(-offsetX, -offsetY - refAreaOffset);
 
@@ -483,6 +491,22 @@ public class FieldPanel extends JPanel implements IDrawableTool
 				.filter(e -> !e.isBorderText())
 				.forEach(s -> s.paintShape(gDerived, this, shapeLayer.isInverted()));
 		gDerived.dispose();
+	}
+
+
+	private void paintDragPoints(Graphics2D g)
+	{
+		IVector2 start = dragPointStart;
+		IVector2 end = dragPointEnd;
+		if (start != null && end != null)
+		{
+			IVector2 start2End = end.subtractNew(start);
+			new DrawableLine(Line.fromPoints(start, end)).paintShape(g, this, false);
+			new DrawableAnnotation(start, String.format("%.1f/%.1f", start.x(), start.y())).paintShape(g, this, false);
+			new DrawableAnnotation(end, String.format("%.1f/%.1f", end.x(), end.y())).paintShape(g, this, false);
+			new DrawableAnnotation(start.addNew(start2End.multiplyNew(0.5)), start2End.toString())
+					.paintShape(g, this, false);
+		}
 	}
 
 
@@ -904,11 +928,7 @@ public class FieldPanel extends JPanel implements IDrawableTool
 			IVector2 guiPos = Vector2.fromXY((e.getX()) - fieldOriginX, (e.getY()) - fieldOriginY)
 					.multiply(1f / scaleFactor);
 
-			// --- notify observer ---
-			for (final IFieldPanelObserver observer : observers)
-			{
-				observer.onFieldClick(transformToGlobalCoordinates(guiPos), e);
-			}
+			observers.forEach(observer -> observer.onFieldClick(transformToGlobalCoordinates(guiPos), e));
 		}
 
 
@@ -917,19 +937,43 @@ public class FieldPanel extends JPanel implements IDrawableTool
 		{
 			mousePressedY = e.getY();
 			mousePressedX = e.getX();
+			IVector2 guiPos = Vector2.fromXY((e.getX()) - fieldOriginX, (e.getY()) - fieldOriginY)
+					.multiply(1f / scaleFactor);
+			dragPointStart = transformToGlobalCoordinates(guiPos);
 		}
 
 
 		@Override
 		public void mouseDragged(final MouseEvent e)
 		{
-			// --- move the field over the panel ---
-			final int dy = e.getY() - mousePressedY;
-			final int dx = e.getX() - mousePressedX;
-			setFieldOriginY(fieldOriginY + dy);
-			setFieldOriginX(fieldOriginX + dx);
-			mousePressedY += dy;
-			mousePressedX += dx;
+			if (SwingUtilities.isLeftMouseButton(e) && (e.isControlDown() || e.isAltDown()))
+			{
+				IVector2 guiPos = Vector2.fromXY((e.getX()) - fieldOriginX, (e.getY()) - fieldOriginY)
+						.multiply(1f / scaleFactor);
+				dragPointEnd = transformToGlobalCoordinates(guiPos);
+			} else
+			{
+				// --- move the field over the panel ---
+				final int dy = e.getY() - mousePressedY;
+				final int dx = e.getX() - mousePressedX;
+				setFieldOriginY(fieldOriginY + dy);
+				setFieldOriginX(fieldOriginX + dx);
+				mousePressedY += dy;
+				mousePressedX += dx;
+			}
+		}
+
+
+		@Override
+		public void mouseReleased(final MouseEvent e)
+		{
+			super.mouseReleased(e);
+
+			if (dragPointStart != null && dragPointEnd != null)
+			{
+				dragPointStart = null;
+				dragPointEnd = null;
+			}
 		}
 
 

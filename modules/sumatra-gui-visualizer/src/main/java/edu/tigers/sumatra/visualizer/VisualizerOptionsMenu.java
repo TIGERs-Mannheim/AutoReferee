@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -27,8 +27,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Visualizes all available robots.
- *
- * @author bernhard
  */
 public class VisualizerOptionsMenu extends JMenuBar
 {
@@ -79,6 +77,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 		pShortcuts.add(new JMenuItem("  ctrl: Look at Ball"));
 		pShortcuts.add(new JMenuItem("  shift: Kick to"));
 		pShortcuts.add(new JMenuItem("  ctrl+shift: Follow mouse"));
+		pShortcuts.add(new JMenuItem("  alt: ruler"));
 
 		pShortcuts.add(new JMenuItem("Right mouse click:"));
 		pShortcuts.add(new JMenuItem("  none: place ball"));
