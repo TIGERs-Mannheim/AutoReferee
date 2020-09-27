@@ -9,6 +9,8 @@ import edu.tigers.sumatra.bot.params.IBotMovementLimits;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import java.util.List;
  * Constraints on the movement of robots.
  */
 @Persistent
+@Data
 public class MoveConstraints implements IExportable, IMoveConstraints
 {
 	private double velMax;
@@ -32,6 +35,7 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	private double accMaxFast;
 
 	private boolean fastMove;
+	@NonNull // Primary direction must not be null. Set it to a Zero-Vector to disable it.
 	private IVector2 primaryDirection = Vector2f.ZERO_VECTOR;
 
 
@@ -84,7 +88,7 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	}
 
 
-	public void limit(final IBotMovementLimits movementLimits)
+	public MoveConstraints limit(final IBotMovementLimits movementLimits)
 	{
 		velMax = Math.min(velMax, movementLimits.getVelMax());
 		accMax = Math.min(accMax, movementLimits.getAccMax());
@@ -95,25 +99,7 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 		jerkMaxW = Math.min(jerkMaxW, movementLimits.getJerkMaxW());
 		velMaxFast = Math.min(velMaxFast, movementLimits.getVelMaxFast());
 		accMaxFast = Math.min(accMaxFast, movementLimits.getAccMaxFast());
-	}
-
-
-	@Override
-	public String toString()
-	{
-		return "MoveConstraints{" +
-				"velMax=" + velMax +
-				", accMax=" + accMax +
-				", brkMax=" + brkMax +
-				", jerkMax=" + jerkMax +
-				", velMaxW=" + velMaxW +
-				", accMaxW=" + accMaxW +
-				", jerkMaxW=" + jerkMaxW +
-				", velMaxFast=" + velMaxFast +
-				", accMaxFast=" + accMaxFast +
-				", fastMove=" + fastMove +
-				", primaryDirection=" + primaryDirection +
-				'}';
+		return this;
 	}
 
 
@@ -162,20 +148,6 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	}
 
 
-	public void setVelMaxFast(final double velMaxFast)
-	{
-		assert velMax >= 0 : "vel: " + velMaxFast;
-		this.velMaxFast = velMaxFast;
-	}
-
-
-	@Override
-	public double getVelMaxW()
-	{
-		return velMaxW;
-	}
-
-
 	public void setVelMaxW(final double velMaxW)
 	{
 		assert velMaxW >= 0;
@@ -186,101 +158,38 @@ public class MoveConstraints implements IExportable, IMoveConstraints
 	@Override
 	public double getAccMax()
 	{
-		if (fastMove)
-		{
-			return accMaxFast;
-		}
 		return accMax;
 	}
 
 
-	/**
-	 * @param accMax the accMax to set
-	 */
-	public void setAccMax(final double accMax)
+	public MoveConstraints setAccMax(final double accMax)
 	{
 		assert accMax >= 0;
 		this.accMax = accMax;
+		return this;
 	}
 
 
-	@Override
-	public double getBrkMax()
-	{
-		return brkMax;
-	}
-
-
-	@Override
-	public double getAccMaxW()
-	{
-		return accMaxW;
-	}
-
-
-	public void setAccMaxW(final double accMaxW)
+	public MoveConstraints setAccMaxW(final double accMaxW)
 	{
 		assert accMaxW >= 0;
 		this.accMaxW = accMaxW;
+		return this;
 	}
 
 
-	@Override
-	public double getJerkMax()
-	{
-		return jerkMax;
-	}
-
-
-	public void setJerkMax(final double jerkMax)
+	public MoveConstraints setJerkMax(final double jerkMax)
 	{
 		assert jerkMax >= 0;
 		this.jerkMax = jerkMax;
+		return this;
 	}
 
 
-	@Override
-	public double getJerkMaxW()
-	{
-		return jerkMaxW;
-	}
-
-
-	public void setJerkMaxW(final double jerkMaxW)
+	public MoveConstraints setJerkMaxW(final double jerkMaxW)
 	{
 		assert jerkMaxW >= 0;
 		this.jerkMaxW = jerkMaxW;
-	}
-
-
-	/**
-	 * Activate the fastPos move skill.
-	 *
-	 * @param fastMove activate fast move skill
-	 */
-	public void setFastMove(final boolean fastMove)
-	{
-		this.fastMove = fastMove;
-	}
-
-
-	@Override
-	public boolean isFastMove()
-	{
-		return fastMove;
-	}
-
-
-	public void setPrimaryDirection(final IVector2 primaryDirection)
-	{
-		assert primaryDirection != null;
-		this.primaryDirection = primaryDirection;
-	}
-
-
-	@Override
-	public IVector2 getPrimaryDirection()
-	{
-		return primaryDirection;
+		return this;
 	}
 }
