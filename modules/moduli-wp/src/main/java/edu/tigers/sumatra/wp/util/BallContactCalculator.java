@@ -18,6 +18,7 @@ import edu.tigers.sumatra.wp.data.BallContact;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -37,7 +38,8 @@ public class BallContactCalculator
 
 	public BallContact ballContact(final RobotInfo robotInfo, final Pose pose, final double center2Dribbler)
 	{
-		boolean ballContact = hasBallContact(robotInfo, pose, center2Dribbler);
+		boolean ballContactFromVision = hasBallContactFromVision(robotInfo, pose, center2Dribbler);
+		boolean ballContact = hasBallContact(robotInfo).orElse(ballContactFromVision);
 		ballContactLastFrame.put(robotInfo.getBotId(), ballContact);
 		if (ballContact)
 		{
@@ -51,18 +53,19 @@ public class BallContactCalculator
 		return new BallContact(
 				robotInfo.getTimestamp(),
 				startBallContactMap.getOrDefault(robotInfo.getBotId(), -10000000L),
-				endBallContactMap.getOrDefault(robotInfo.getBotId(), -10000000L)
+				endBallContactMap.getOrDefault(robotInfo.getBotId(), -10000000L),
+				ballContactFromVision
 		);
 	}
 
 
-	private boolean hasBallContact(final RobotInfo robotInfo, final Pose pose, final double center2Dribbler)
+	private Optional<Boolean> hasBallContact(final RobotInfo robotInfo)
 	{
 		if (robotInfo.getBotFeatures().get(EFeature.BARRIER) == EFeatureState.WORKING)
 		{
-			return robotInfo.isBarrierInterrupted();
+			return Optional.of(robotInfo.isBarrierInterrupted());
 		}
-		return hasBallContactFromVision(robotInfo, pose, center2Dribbler);
+		return Optional.empty();
 	}
 
 

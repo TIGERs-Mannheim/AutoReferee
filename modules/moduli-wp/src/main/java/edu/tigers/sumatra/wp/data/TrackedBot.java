@@ -53,7 +53,7 @@ public final class TrackedBot implements ITrackedBot
 		filteredState = null;
 		bufferedTrajState = null;
 		trackingQuality = null;
-		ballContact = new BallContact(timestamp, -10000000, -10000000);
+		ballContact = BallContact.def(timestamp);
 		robotInfo = null;
 		tAssembly = 0;
 		quality = 0;
@@ -115,7 +115,7 @@ public final class TrackedBot implements ITrackedBot
 				.withBotId(botID)
 				.withTimestamp(timestamp)
 				.withState(State.zero())
-				.withLastBallContact(new BallContact(timestamp, -10000000, -10000000))
+				.withLastBallContact(BallContact.def(timestamp))
 				.withBotInfo(RobotInfo.stub(botID, timestamp));
 	}
 

@@ -20,6 +20,7 @@ public class BallContact
 	long current;
 	long start;
 	long end;
+	boolean ballContactFromVision;
 
 
 	@SuppressWarnings("unused")
@@ -28,6 +29,13 @@ public class BallContact
 		current = 0;
 		start = 0;
 		end = 0;
+		ballContactFromVision = false;
+	}
+
+
+	public static BallContact def(long timestamp)
+	{
+		return new BallContact(timestamp, -10000000, -10000000, false);
 	}
 
 
