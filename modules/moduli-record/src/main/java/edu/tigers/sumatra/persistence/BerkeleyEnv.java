@@ -13,16 +13,16 @@ import com.sleepycat.persist.model.EntityModel;
 import edu.tigers.sumatra.persistence.proxy.ColorProxy;
 import edu.tigers.sumatra.persistence.proxy.ConcurrentHashMapProxy;
 import edu.tigers.sumatra.persistence.proxy.EnumMapProxy;
+import edu.tigers.sumatra.persistence.proxy.IdentityHashMapProxy;
 import edu.tigers.sumatra.persistence.proxy.LinkedHashSetProxy;
 import edu.tigers.sumatra.persistence.proxy.TreeMapProxy;
+import lombok.extern.log4j.Log4j2;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.model.ZipParameters;
 import net.lingala.zip4j.model.enums.CompressionLevel;
 import net.lingala.zip4j.model.enums.CompressionMethod;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +33,10 @@ import java.util.Map;
 /**
  * This environment class manages a berkeley database.
  * It will be used to open und close a entity store
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
+@Log4j2
 public class BerkeleyEnv
 {
-	private static final Logger log = LogManager.getLogger(BerkeleyEnv.class.getName());
 	private File envHome;
 
 	private DatabaseSession session = new DatabaseSession();
@@ -57,6 +55,7 @@ public class BerkeleyEnv
 		model.registerClass(ConcurrentHashMapProxy.class);
 		model.registerClass(LinkedHashSetProxy.class);
 		model.registerClass(TreeMapProxy.class);
+		model.registerClass(IdentityHashMapProxy.class);
 	}
 
 

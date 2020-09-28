@@ -6,66 +6,43 @@ package edu.tigers.sumatra.wp.data;
 
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.BotIDMap;
-import edu.tigers.sumatra.ids.BotIDMapConst;
-import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.vision.data.IKickEvent;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 
 /**
  * This frame contains tracked (filtered) objects from vision in the vision coordinate system.
  */
-@Persistent(version = 4)
+@Persistent(version = 5)
 @Data
+@RequiredArgsConstructor
 public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 {
 	private final long frameNumber;
 	private final long timestamp;
-	private final IBotIDMap<ITrackedBot> bots;
+	private final Map<BotID, ITrackedBot> bots;
 	private final ITrackedBall ball;
 	private final IKickEvent kickEvent;
 	private final BallKickFitState kickFitState;
+	private transient Map<BotID, ITrackedBot> botsReadOnly;
 
 
 	@SuppressWarnings("unused")
 	private SimpleWorldFrame()
 	{
 		frameNumber = 0;
+		timestamp = 0;
 		bots = null;
 		ball = null;
 		kickEvent = null;
 		kickFitState = null;
-		timestamp = 0;
-	}
-
-
-	/**
-	 * @param bots
-	 * @param ball
-	 * @param kickEvent
-	 * @param kickFitState
-	 * @param frameNumber
-	 * @param timestamp
-	 */
-	public SimpleWorldFrame(
-			final IBotIDMap<ITrackedBot> bots,
-			final ITrackedBall ball,
-			final IKickEvent kickEvent,
-			final BallKickFitState kickFitState,
-			final long frameNumber,
-			final long timestamp
-	)
-	{
-		this.ball = ball;
-		this.timestamp = timestamp;
-		this.frameNumber = frameNumber;
-		this.bots = BotIDMapConst.unmodifiableBotIDMap(bots);
-		this.kickEvent = kickEvent;
-		this.kickFitState = kickFitState;
 	}
 
 
@@ -93,7 +70,7 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	@Override
 	public SimpleWorldFrame mirrored()
 	{
-		IBotIDMap<ITrackedBot> newBots = new BotIDMap<>();
+		Map<BotID, ITrackedBot> newBots = new IdentityHashMap<>();
 		for (ITrackedBot bot : bots.values())
 		{
 			ITrackedBot mBot = bot.mirrored();
@@ -102,7 +79,7 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 		ITrackedBall mBall = getBall().mirrored();
 		IKickEvent mKickEvent = Optional.ofNullable(kickEvent).map(IKickEvent::mirrored).orElse(null);
 		BallKickFitState mKickFitState = Optional.ofNullable(kickFitState).map(BallKickFitState::mirrored).orElse(null);
-		return new SimpleWorldFrame(newBots, mBall, mKickEvent, mKickFitState, frameNumber, timestamp);
+		return new SimpleWorldFrame(frameNumber, timestamp, newBots, mBall, mKickEvent, mKickFitState);
 	}
 
 
@@ -112,7 +89,7 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	 */
 	public ITrackedBot getBot(final BotID botId)
 	{
-		return bots.getWithNull(botId);
+		return bots.get(botId);
 	}
 
 
@@ -131,5 +108,15 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	public Optional<BallKickFitState> getKickFitState()
 	{
 		return Optional.ofNullable(kickFitState);
+	}
+
+
+	public Map<BotID, ITrackedBot> getBots()
+	{
+		if (botsReadOnly == null)
+		{
+			botsReadOnly = Collections.unmodifiableMap(bots);
+		}
+		return botsReadOnly;
 	}
 }

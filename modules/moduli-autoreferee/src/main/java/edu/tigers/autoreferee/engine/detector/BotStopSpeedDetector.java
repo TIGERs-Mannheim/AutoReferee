@@ -1,7 +1,19 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.detector;
+
+import com.github.g3force.configurable.Configurable;
+import com.google.common.collect.Sets;
+import edu.tigers.sumatra.geometry.RuleConstraints;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.BotTooFastInStop;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -11,21 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.g3force.configurable.Configurable;
-import com.google.common.collect.Sets;
-
-import edu.tigers.sumatra.geometry.RuleConstraints;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.ids.IBotIDMap;
-import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.referee.gameevent.BotTooFastInStop;
-import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
@@ -73,7 +70,7 @@ public class BotStopSpeedDetector extends AGameEventDetector
 			return Optional.empty();
 		}
 
-		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
+		Map<BotID, ITrackedBot> bots = frame.getWorldFrame().getBots();
 
 		long delta = frame.getTimestamp() - frame.getPreviousFrame().getTimestamp();
 		Set<BotID> frameViolators = getViolators(bots.values());
@@ -100,7 +97,7 @@ public class BotStopSpeedDetector extends AGameEventDetector
 		if (optViolator.isPresent())
 		{
 			BotID violator = optViolator.get();
-			ITrackedBot bot = bots.getWithNull(violator);
+			ITrackedBot bot = bots.get(violator);
 			if (bot == null)
 			{
 				log.debug("Bot Stop Speed violator disappeard from the field: " + violator);

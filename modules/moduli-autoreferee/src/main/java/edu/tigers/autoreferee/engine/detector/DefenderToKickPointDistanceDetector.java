@@ -1,8 +1,23 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.detector;
+
+import com.github.g3force.configurable.Configurable;
+import com.google.common.collect.Sets;
+import edu.tigers.autoreferee.AutoRefUtil;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.geometry.RuleConstraints;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.circle.Circle;
+import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.referee.data.EGameState;
+import edu.tigers.sumatra.referee.gameevent.DefenderTooCloseToKickPoint;
+import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -12,23 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.github.g3force.configurable.Configurable;
-import com.google.common.collect.Sets;
-
-import edu.tigers.autoreferee.AutoRefUtil;
-import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.geometry.RuleConstraints;
-import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.ids.IBotIDMap;
-import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.referee.gameevent.DefenderTooCloseToKickPoint;
-import edu.tigers.sumatra.referee.gameevent.IGameEvent;
-import edu.tigers.sumatra.wp.data.ITrackedBot;
 
 
 /**
@@ -105,7 +103,7 @@ public class DefenderToKickPointDistanceDetector extends AGameEventDetector
 	{
 		ETeamColor attackingColor = frame.getGameState().getForTeam();
 
-		IBotIDMap<ITrackedBot> bots = frame.getWorldFrame().getBots();
+		Map<BotID, ITrackedBot> bots = frame.getWorldFrame().getBots();
 		List<ITrackedBot> defendingBots = AutoRefUtil.filterByColor(bots, attackingColor.opposite());
 
 

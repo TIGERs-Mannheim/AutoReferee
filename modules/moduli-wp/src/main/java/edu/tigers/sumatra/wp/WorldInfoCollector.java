@@ -19,8 +19,6 @@ import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.BotIDMap;
-import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -61,6 +59,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -214,7 +213,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private IBotIDMap<ITrackedBot> collectTrackedBots(
+	private Map<BotID, ITrackedBot> collectTrackedBots(
 			final List<FilteredVisionBot> filteredVisionBots,
 			final Collection<RobotInfo> robotInfo)
 	{
@@ -228,7 +227,7 @@ public class WorldInfoCollector extends AWorldPredictor
 						filteredVisionBotMap.get(r.getBotId())))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
-		return new BotIDMap<>(trackedBots);
+		return new IdentityHashMap<>(trackedBots);
 	}
 
 
@@ -287,7 +286,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		Map<BotID, RobotInfo> robotInfo = collectRobotInfo(filteredVisionFrame.getBots());
 		visionFilter.setRobotInfoMap(robotInfo);
 
-		IBotIDMap<ITrackedBot> bots = collectTrackedBots(filteredVisionFrame.getBots(), robotInfo.values());
+		Map<BotID, ITrackedBot> bots = collectTrackedBots(filteredVisionFrame.getBots(), robotInfo.values());
 
 		ITrackedBall ball = getTrackedBall(filteredVisionFrame);
 		ballBuffer.add(ball);
@@ -296,7 +295,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		BallKickFitState kickFitState = getKickFitState(filteredVisionFrame);
 
 		long frameNumber = filteredVisionFrame.getId();
-		SimpleWorldFrame swf = new SimpleWorldFrame(bots, ball, kickEvent, kickFitState, frameNumber, lastWFTimestamp);
+		SimpleWorldFrame swf = new SimpleWorldFrame(frameNumber, lastWFTimestamp, bots, ball, kickEvent, kickFitState);
 
 		if (ciGameControllerConnector != null)
 		{

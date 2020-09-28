@@ -8,15 +8,15 @@ import com.sleepycat.persist.model.Persistent;
 import com.sleepycat.persist.model.PersistentProxy;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 
 /**
- * Proxy for {@link TreeMap}
+ * Proxy for {@link IdentityHashMap}
  */
-@Persistent(proxyFor = TreeMap.class)
-public class TreeMapProxy implements PersistentProxy<Map<?, ?>>
+@Persistent(proxyFor = IdentityHashMap.class)
+public class IdentityHashMapProxy implements PersistentProxy<Map<?, ?>>
 {
 	private Map<?, ?> map;
 
@@ -31,6 +31,6 @@ public class TreeMapProxy implements PersistentProxy<Map<?, ?>>
 	@Override
 	public Map<?, ?> convertProxy()
 	{
-		return new TreeMap<>(map);
+		return new IdentityHashMap<>(map);
 	}
 }

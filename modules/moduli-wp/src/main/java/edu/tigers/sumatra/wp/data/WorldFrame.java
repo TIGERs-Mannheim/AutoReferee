@@ -7,14 +7,12 @@ package edu.tigers.sumatra.wp.data;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.BotIDMap;
-import edu.tigers.sumatra.ids.BotIDMapConst;
 import edu.tigers.sumatra.ids.EAiTeam;
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.ids.IBotIDMap;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -28,9 +26,9 @@ import java.util.stream.Stream;
 @EqualsAndHashCode(callSuper = true)
 public class WorldFrame extends SimpleWorldFrame
 {
-	private final BotIDMapConst<ITrackedBot> opponentBots;
-	private final BotIDMapConst<ITrackedBot> tigerBotsVisible;
-	private final IBotIDMap<ITrackedBot> tigerBotsAvailable;
+	private final Map<BotID, ITrackedBot> opponentBots;
+	private final Map<BotID, ITrackedBot> tigerBotsVisible;
+	private final Map<BotID, ITrackedBot> tigerBotsAvailable;
 	private final ETeamColor teamColor;
 	private final boolean inverted;
 
@@ -41,10 +39,9 @@ public class WorldFrame extends SimpleWorldFrame
 		this.teamColor = team.getTeamColor();
 		this.inverted = inverted;
 
-		opponentBots = BotIDMapConst.unmodifiableBotIDMap(computeOpponentBots(simpleWorldFrame, team));
-		tigerBotsAvailable = BotIDMapConst
-				.unmodifiableBotIDMap(computeAvailableTigers(simpleWorldFrame, team));
-		tigerBotsVisible = BotIDMapConst.unmodifiableBotIDMap(computeTigersVisible(simpleWorldFrame, team));
+		opponentBots = computeOpponentBots(simpleWorldFrame, team);
+		tigerBotsAvailable = computeAvailableTigers(simpleWorldFrame, team);
+		tigerBotsVisible = computeTigersVisible(simpleWorldFrame, team);
 	}
 
 
@@ -59,9 +56,9 @@ public class WorldFrame extends SimpleWorldFrame
 		super(original);
 		teamColor = original.getTeamColor();
 		inverted = original.isInverted();
-		opponentBots = BotIDMapConst.unmodifiableBotIDMap(original.getOpponentBots());
+		opponentBots = original.getOpponentBots();
 		tigerBotsAvailable = original.getTigerBotsAvailable();
-		tigerBotsVisible = BotIDMapConst.unmodifiableBotIDMap(original.getTigerBotsVisible());
+		tigerBotsVisible = original.getTigerBotsVisible();
 	}
 
 
@@ -72,16 +69,16 @@ public class WorldFrame extends SimpleWorldFrame
 	}
 
 
-	private BotIDMap<ITrackedBot> computeAvailableTigers(final SimpleWorldFrame simpleWorldFrame,
+	private Map<BotID, ITrackedBot> computeAvailableTigers(final SimpleWorldFrame simpleWorldFrame,
 			final EAiTeam aiTeam)
 	{
 		Map<BotID, ITrackedBot> availableTigers = createStreamOfAiTeam(simpleWorldFrame, aiTeam)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
-		return new BotIDMap<>(availableTigers);
+		return Collections.unmodifiableMap(availableTigers);
 	}
 
 
-	private BotIDMap<ITrackedBot> computeOpponentBots(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	private Map<BotID, ITrackedBot> computeOpponentBots(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
 	{
 
 		Map<BotID, ITrackedBot> opponents = simpleWorldFrame.getBots().values().stream()
@@ -95,16 +92,16 @@ public class WorldFrame extends SimpleWorldFrame
 							.build();
 				})
 				.collect(Collectors.toMap(TrackedBot::getBotId, Function.identity()));
-		return new BotIDMap<>(opponents);
+		return Collections.unmodifiableMap(opponents);
 	}
 
 
-	private BotIDMap<ITrackedBot> computeTigersVisible(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	private Map<BotID, ITrackedBot> computeTigersVisible(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
 	{
 		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
 				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor()))
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
-		return new BotIDMap<>(visible);
+		return Collections.unmodifiableMap(visible);
 	}
 
 

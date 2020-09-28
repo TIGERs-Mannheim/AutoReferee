@@ -17,7 +17,6 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -354,7 +353,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		WorldFrameWrapper lastFrame = lastWorldFrameWrapper;
 		if (lastFrame != null)
 		{
-			IBotIDMap<ITrackedBot> tBotsMap = lastFrame.getSimpleWorldFrame().getBots();
+			Map<BotID, ITrackedBot> tBotsMap = lastFrame.getSimpleWorldFrame().getBots();
 			for (ITrackedBot tBot : tBotsMap.values())
 			{
 				BotStatus status = panel.getRobotsPanel().getBotStatus(tBot.getBotId());

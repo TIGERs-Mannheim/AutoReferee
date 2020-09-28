@@ -41,7 +41,7 @@ public class SnapshotController
 	private Snapshot createSnapshot()
 	{
 		Map<BotID, SnapObject> snapBots = new HashMap<>();
-		for (Map.Entry<BotID, ITrackedBot> entry : wfw.getSimpleWorldFrame().getBots())
+		for (Map.Entry<BotID, ITrackedBot> entry : wfw.getSimpleWorldFrame().getBots().entrySet())
 		{
 			ITrackedBot bot = entry.getValue();
 			snapBots.put(entry.getKey(),
