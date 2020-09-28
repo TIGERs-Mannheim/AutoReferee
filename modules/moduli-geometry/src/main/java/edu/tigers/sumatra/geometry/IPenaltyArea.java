@@ -4,8 +4,6 @@
 
 package edu.tigers.sumatra.geometry;
 
-import java.util.List;
-
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.line.ILine;
@@ -13,6 +11,8 @@ import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+
+import java.util.List;
 
 
 /**
@@ -88,13 +88,13 @@ public interface IPenaltyArea extends I2DShape
 
 
 	/**
-	 * @return Position of the front corner with negative y (looking towards enemy goal)
+	 * @return Position of the front corner with negative y (looking towards opponent goal)
 	 */
 	IVector2 getNegCorner();
 
 
 	/**
-	 * @return Position of the front corner with positive y (looking towards enemy goal)
+	 * @return Position of the front corner with positive y (looking towards opponent goal)
 	 */
 	IVector2 getPosCorner();
 

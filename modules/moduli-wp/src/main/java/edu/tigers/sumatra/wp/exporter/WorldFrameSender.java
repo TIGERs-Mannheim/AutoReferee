@@ -92,7 +92,7 @@ public class WorldFrameSender extends AModule implements IWorldFrameObserver
 	private SumatraWfExport.WorldFrame.Builder getWfExportBuilder(final SimpleWorldFrame swf)
 	{
 		SumatraWfExport.WorldFrame.Builder wfBuilder = SumatraWfExport.WorldFrame.newBuilder();
-		wfBuilder.setFrameId(swf.getId()).setTimestamp(swf.getTimestamp());
+		wfBuilder.setFrameId(swf.getFrameNumber()).setTimestamp(swf.getTimestamp());
 
 		SumatraWfExport.Ball.Builder ball = SumatraWfExport.Ball.newBuilder();
 		ball.setPos(convertVector(swf.getBall().getPos3().multiplyNew(1e-3)))

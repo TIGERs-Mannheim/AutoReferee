@@ -4,29 +4,27 @@
 
 package edu.tigers.sumatra.wp.data;
 
-import java.util.Optional;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.BotIDMap;
 import edu.tigers.sumatra.ids.BotIDMapConst;
 import edu.tigers.sumatra.ids.IBotIDMap;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.vision.data.IKickEvent;
+import lombok.Data;
+
+import java.util.Optional;
 
 
 /**
- * This frame contains tracked (filtered) objects from vision
- *
- * @author Gero
+ * This frame contains tracked (filtered) objects from vision in the vision coordinate system.
  */
 @Persistent(version = 4)
+@Data
 public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 {
 	private final long frameNumber;
 	private final long timestamp;
-	private final long tAssembly;
 	private final IBotIDMap<ITrackedBot> bots;
 	private final ITrackedBall ball;
 	private final IKickEvent kickEvent;
@@ -42,7 +40,6 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 		kickEvent = null;
 		kickFitState = null;
 		timestamp = 0;
-		tAssembly = 0;
 	}
 
 
@@ -54,10 +51,14 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	 * @param frameNumber
 	 * @param timestamp
 	 */
-	public SimpleWorldFrame(final IBotIDMap<ITrackedBot> bots, final ITrackedBall ball, final IKickEvent kickEvent,
+	public SimpleWorldFrame(
+			final IBotIDMap<ITrackedBot> bots,
+			final ITrackedBall ball,
+			final IKickEvent kickEvent,
 			final BallKickFitState kickFitState,
 			final long frameNumber,
-			final long timestamp)
+			final long timestamp
+	)
 	{
 		this.ball = ball;
 		this.timestamp = timestamp;
@@ -65,8 +66,6 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 		this.bots = BotIDMapConst.unmodifiableBotIDMap(bots);
 		this.kickEvent = kickEvent;
 		this.kickFitState = kickFitState;
-
-		tAssembly = System.nanoTime();
 	}
 
 
@@ -79,7 +78,6 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	{
 		ball = swf.getBall();
 		timestamp = swf.timestamp;
-		tAssembly = swf.tAssembly;
 		frameNumber = swf.frameNumber;
 		bots = swf.bots;
 		kickEvent = swf.kickEvent;
@@ -109,63 +107,12 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 
 
 	/**
-	 * Creates a new WorldFrame without bots
-	 *
-	 * @param frameNumber the id of this frame
-	 * @param timestamp
-	 * @return
-	 */
-	public static SimpleWorldFrame createEmptyWorldFrame(final long frameNumber, final long timestamp)
-	{
-		final IBotIDMap<ITrackedBot> bots = new BotIDMap<>();
-		final IKickEvent kickEvent = null;
-		return new SimpleWorldFrame(bots, TrackedBall.createStub(), kickEvent, null, frameNumber, timestamp);
-	}
-
-
-	/**
-	 * @return all bots
-	 */
-	public IBotIDMap<ITrackedBot> getBots()
-	{
-		return bots;
-	}
-
-
-	/**
 	 * @param botId
 	 * @return the bot or null
 	 */
 	public ITrackedBot getBot(final BotID botId)
 	{
 		return bots.getWithNull(botId);
-	}
-
-
-	/**
-	 * @return the ball
-	 */
-	public final ITrackedBall getBall()
-	{
-		return ball;
-	}
-
-
-	/**
-	 * @return the id
-	 */
-	public final long getId()
-	{
-		return frameNumber;
-	}
-
-
-	/**
-	 * @return the timestamp
-	 */
-	public final long getTimestamp()
-	{
-		return timestamp;
 	}
 
 
@@ -184,14 +131,5 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	public Optional<BallKickFitState> getKickFitState()
 	{
 		return Optional.ofNullable(kickFitState);
-	}
-
-
-	/**
-	 * @return the assembly timestamp in [ns]
-	 */
-	public long gettAssembly()
-	{
-		return tAssembly;
 	}
 }
