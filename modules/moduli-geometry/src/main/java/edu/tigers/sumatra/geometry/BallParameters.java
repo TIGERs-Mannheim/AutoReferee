@@ -66,9 +66,9 @@ public class BallParameters
 
 	@Configurable(
 			comment = "If a chipped ball does not reach this height it is considered rolling [mm]",
-			defValue = "40.0"
+			defValue = "10.0"
 	)
-	private double minHopHeight = 40.0;
+	private double minHopHeight = 10;
 
 	@Configurable(
 			comment = "Max. ball height that can be intercepted by robots [mm]",

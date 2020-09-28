@@ -52,17 +52,17 @@ public class Geometry
 	private static double fieldLength = 12000;
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double fieldWidth = 9000;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "350.0")
 	private static double boundaryWidth = 350;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "425.0")
 	private static double judgesBorderWidth = 425;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "500.0")
 	private static double centerCircleRadius = 500;
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double goalWidth = 1200;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "180.0")
 	private static double goalDepth = 180;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "155.0")
 	private static double goalHeight = 155;
 	@Configurable(comment = "Name of the CenterCircle arc defined in SSL-Vision", defValue = "CenterCircle")
 	private static String centerCircleName = "CenterCircle";
@@ -94,15 +94,15 @@ public class Geometry
 	/**
 	 * Object Geometry
 	 */
-	@Configurable
+	@Configurable(defValue = "21.5")
 	private static double ballRadius = 21.5;
-	@Configurable
+	@Configurable(defValue = "90.0")
 	private static double botRadius = 90;
-	@Configurable
+	@Configurable(defValue = "85.0")
 	private static double opponentCenter2DribblerDist = 85;
-	@Configurable
+	@Configurable(defValue = "20.0")
 	private static double goalWallThickness = 20;
-	@Configurable
+	@Configurable(defValue = "10.0")
 	private static double lineWidth = 10;
 
 	/**
@@ -111,7 +111,7 @@ public class Geometry
 	@Configurable(defValue = "10.0")
 	private static double penaltyAreaMargin = 10.0;
 
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(defValue = "0", spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
 
 	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValueSpezis = { "0.06",

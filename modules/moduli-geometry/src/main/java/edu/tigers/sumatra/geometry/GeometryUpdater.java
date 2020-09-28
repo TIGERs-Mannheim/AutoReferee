@@ -1,21 +1,19 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.moduli.AModule;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.model.SumatraModel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -25,10 +23,10 @@ public class GeometryUpdater extends AModule
 {
 	private static final Logger log = LogManager.getLogger(GeometryUpdater.class.getName());
 
-	@Configurable(comment = "Receive geometry from SSL vision")
+	@Configurable(comment = "Receive geometry from SSL vision", defValue = "true")
 	private static boolean receiveGeometry = true;
 
-	@Configurable(comment = "Receive geometry from SSL vision, but only once!")
+	@Configurable(comment = "Receive geometry from SSL vision, but only once!", defValue = "false")
 	private static boolean receiveGeometryOnceOnly = false;
 
 	private boolean geometryReceived = false;
