@@ -175,17 +175,21 @@ public class WorldInfoCollector extends AWorldPredictor
 		{
 			return null;
 		}
-		BotStateTrajectorySync calc = botStateFromTraj.computeIfAbsent(robotInfo.getBotId(),
+		BotStateTrajectorySync sync = botStateFromTraj.computeIfAbsent(robotInfo.getBotId(),
 				b -> new BotStateTrajectorySync());
-		robotInfo.getTrajectory().ifPresent(t -> calc.add(t, lastWFTimestamp));
+		if (botCollidingWithOtherBot(filteredBotStates, currentBotState))
+		{
+			sync.reset();
+		} else
+		{
+			robotInfo.getTrajectory().ifPresentOrElse(t -> sync.add(t, lastWFTimestamp), sync::reset);
+		}
 
-		double feedbackDelay = useInternalState ? 0.0 : Geometry.getFeedbackDelay();
-		calc.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
+		var feedbackDelay = useInternalState ? 0.0 : Geometry.getFeedbackDelay();
+		var trackedState = sync.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
 
-		Optional<State> bufferedState = calc.getState(lastWFTimestamp, 0.0);
-		BotState botState = botCollidingWithOtherBot(filteredBotStates, currentBotState)
-				? currentBotState
-				: BotState.of(
+		Optional<State> bufferedState = sync.getLatestState();
+		BotState botState = BotState.of(
 				robotInfo.getBotId(),
 				bufferedState.map(s -> State.of(Pose.from(s.getPos(), currentBotState.getOrientation()),
 						Vector3.from2d(s.getVel2(), currentBotState.getAngularVel())))
@@ -196,8 +200,8 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withTimestamp(lastWFTimestamp)
 				.withState(botState)
 				.withFilteredState(filterState)
-				.withBufferedTrajState(bufferedState.orElse(null))
-				.withTrackingQuality(calc.getTrajTrackingQuality())
+				.withBufferedTrajState(trackedState)
+				.withTrackingQuality(sync.getTrajTrackingQuality())
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
 				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
@@ -209,7 +213,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		return filteredBotStates.values().stream()
 				.filter(b -> !b.getBotID().equals(trajState.getBotID()))
-				.anyMatch(s -> s.getPos().distanceTo(trajState.getPos()) < Geometry.getBotRadius() * 2);
+				.anyMatch(s -> s.getPos().distanceTo(trajState.getPos()) < Geometry.getBotRadius() * 2 + 10);
 	}
 
 

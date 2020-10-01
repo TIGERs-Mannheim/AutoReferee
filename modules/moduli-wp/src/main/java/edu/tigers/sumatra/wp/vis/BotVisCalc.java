@@ -55,7 +55,7 @@ public class BotVisCalc implements IWpCalc
 
 	private DrawableAnnotation createDistanceToTrajectoryShape(final ITrackedBot bot)
 	{
-		String text = String.format("%.1f>%.1f: %.3f",
+		String text = String.format("%.0f>%.0f: %.2fs",
 				bot.getTrackingQuality().getCurDistance(),
 				bot.getTrackingQuality().getMaxDistance(),
 				bot.getTrackingQuality().getTimeOffTrajectory());

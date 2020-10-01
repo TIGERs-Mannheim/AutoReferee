@@ -59,25 +59,21 @@ public class BotStateTrajectorySync
 	}
 
 
-	public void updateState(final long timestamp, final double feedbackDelay, final BotState state)
+	public State updateState(final long timestamp, final double feedbackDelay, final BotState state)
 	{
-		State currentState = getState(timestamp, feedbackDelay).orElse(null);
-		if (currentState == null || lastTimestamp == 0)
+		var trackedState = getState(timestamp, feedbackDelay).orElse(null);
+		if (trackedState == null || lastTimestamp == 0)
 		{
 			trajTrackingQuality = new TrajTrackingQuality();
 		} else
 		{
 			double dt = (timestamp - lastTimestamp) / 1e9;
-			double curDistance = distanceToTrajectory(currentState, state);
-			double maxDistance = Math.max(minVel, currentState.getVel2().getLength2()) * maxDt * 1000;
+			double curDistance = distanceToTrajectory(trackedState, state);
+			double maxDistance = Math.max(minVel, trackedState.getVel2().getLength2()) * maxDt * 1000;
 			double timeOffTrajectory = trajTrackingQuality.getTimeOffTrajectory();
 			if (curDistance <= maxDistance)
 			{
-				timeOffTrajectory -= dt;
-				if (timeOffTrajectory < 0)
-				{
-					timeOffTrajectory = 0;
-				}
+				timeOffTrajectory = Math.max(0, timeOffTrajectory - dt);
 			} else
 			{
 				timeOffTrajectory += dt;
@@ -89,19 +85,32 @@ public class BotStateTrajectorySync
 			trajTrackingQuality = new TrajTrackingQuality(curDistance, maxDistance, timeOffTrajectory);
 		}
 		lastTimestamp = timestamp;
+		return trackedState;
 	}
 
 
-	public Optional<State> getState(final long timestamp, final double feedbackDelay)
+	public Optional<State> getLatestState()
+	{
+		return buffer.getLatest().map(DataSync.DataStore::getData);
+	}
+
+
+	public void reset()
+	{
+		buffer.reset();
+	}
+
+
+	private Optional<State> getState(final long timestamp, final double feedbackDelay)
 	{
 		long pastTimestamp = timestamp - (long) (feedbackDelay * 1e9);
 		return buffer.get(pastTimestamp).map(p -> p.interpolate(pastTimestamp));
 	}
 
 
-	private double distanceToTrajectory(final State bufferedState, final BotState currentState)
+	private double distanceToTrajectory(final State state, final BotState botState)
 	{
-		return bufferedState.getPos().distanceTo(currentState.getPos());
+		return state.getPos().distanceTo(botState.getPos());
 	}
 
 
