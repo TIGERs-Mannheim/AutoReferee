@@ -51,6 +51,12 @@ public class BallContact
 	}
 
 
+	public boolean hasContactFromVisionOrBarrier()
+	{
+		return hasContact() || isBallContactFromVision();
+	}
+
+
 	public double getContactDuration()
 	{
 		if (hasNoContact())

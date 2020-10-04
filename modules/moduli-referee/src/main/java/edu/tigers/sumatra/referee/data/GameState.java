@@ -515,6 +515,15 @@ public class GameState
 
 
 	/**
+	 * @return true if state is PENALTY
+	 */
+	public boolean isPenalty()
+	{
+		return state == EGameState.PENALTY;
+	}
+
+
+	/**
 	 * @return true if state is PENALTY or PREPARE_PENALTY
 	 */
 	public boolean isPenaltyOrPreparePenalty()
