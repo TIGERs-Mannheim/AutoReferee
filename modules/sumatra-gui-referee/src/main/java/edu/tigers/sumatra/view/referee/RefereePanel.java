@@ -21,23 +21,18 @@ import net.miginfocom.swing.MigLayout;
 
 /**
  * Referee view.
- *
- * @author Malte, DionH, FriederB
  */
 public class RefereePanel extends JPanel implements ISumatraView
 {
-	// --------------------------------------------------------------------------
-	// --- variables and constants ----------------------------------------------
-	// --------------------------------------------------------------------------
 	private static final long serialVersionUID = 5362158568331526086L;
 
-	private final ShowRefereeMsgPanel showRefereeMsgPanel;
-	private final CommonCommandsPanel commonCommandsPanel;
-	private final ChangeStatePanel changeStatePanel;
+	private final ControlGameControllerPanel controlGameControllerPanel = new ControlGameControllerPanel();
+	private final ShowRefereeMsgPanel showRefereeMsgPanel = new ShowRefereeMsgPanel();
+	private final CommonCommandsPanel commonCommandsPanel = new CommonCommandsPanel();
+	private final ChangeStatePanel changeStatePanel = new ChangeStatePanel();
 	private final Map<ETeamColor, TeamPanel> teamsPanel = new EnumMap<>(ETeamColor.class);
 
 
-	/** Constructor. */
 	public RefereePanel()
 	{
 		setLayout(new BorderLayout());
@@ -46,13 +41,11 @@ public class RefereePanel extends JPanel implements ISumatraView
 		componentPanel.setLayout(new MigLayout("wrap 2", "[fill]10[fill]", ""));
 		new MigLayoutResizeListener(this, componentPanel, 2);
 
-		showRefereeMsgPanel = new ShowRefereeMsgPanel();
-		commonCommandsPanel = new CommonCommandsPanel();
-		changeStatePanel = new ChangeStatePanel();
 		teamsPanel.put(ETeamColor.YELLOW, new TeamPanel(ETeamColor.YELLOW));
 		teamsPanel.put(ETeamColor.BLUE, new TeamPanel(ETeamColor.BLUE));
 
-		componentPanel.add(showRefereeMsgPanel, "spany 2, aligny top");
+		componentPanel.add(showRefereeMsgPanel, "spany 3, aligny top");
+		componentPanel.add(controlGameControllerPanel);
 		componentPanel.add(commonCommandsPanel);
 		componentPanel.add(changeStatePanel);
 		componentPanel.add(teamsPanel.get(ETeamColor.YELLOW));
@@ -79,6 +72,7 @@ public class RefereePanel extends JPanel implements ISumatraView
 	 */
 	public void setEnable(final boolean enable)
 	{
+		controlGameControllerPanel.setEnabled(enable);
 		showRefereeMsgPanel.setEnabled(enable);
 		commonCommandsPanel.setEnable(enable);
 		changeStatePanel.setEnable(enable);

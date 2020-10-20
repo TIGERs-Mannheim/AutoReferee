@@ -12,6 +12,7 @@ import edu.tigers.sumatra.referee.IRefereeObserver;
 import edu.tigers.sumatra.referee.proto.SslGcApi;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
+import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.view.referee.IRefBoxRemoteControlRequestObserver;
 import edu.tigers.sumatra.view.referee.RefereePanel;
 import edu.tigers.sumatra.views.ASumatraViewPresenter;
@@ -81,7 +82,7 @@ public class RefereePresenter extends ASumatraViewPresenter
 	@Override
 	public void onRefereeMsgSourceChanged(final ARefereeMessageSource src)
 	{
-		refereePanel.setEnable(referee != null && referee.isInternalGameControllerUsed());
+		refereePanel.setEnable(referee != null && src.getType() == ERefereeMessageSource.CI);
 	}
 
 
