@@ -4,16 +4,16 @@
 
 package edu.tigers.sumatra.wp;
 
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.persistence.IBerkeleyRecorder;
+
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 
 /**
@@ -114,7 +114,8 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 		@Override
 		public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
 		{
-			ShapeMap shapeMapCopy = new ShapeMap(shapeMap);
+			ShapeMap shapeMapCopy = new ShapeMap();
+			shapeMapCopy.addAll(shapeMap);
 			shapeMapCopy.removeNonPersistent();
 			buffer.addLast(new ShapeMapWithSource(timestamp, shapeMapCopy, source));
 			latestReceivedTimestamp = timestamp;
