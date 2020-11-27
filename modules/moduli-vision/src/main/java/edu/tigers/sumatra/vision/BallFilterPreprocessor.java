@@ -39,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,10 +82,10 @@ public class BallFilterPreprocessor
 	 * Update ball preprocessor with new information.
 	 *
 	 * @param lastFilteredBall
-	 * @param ballTrackers All ball trackers on the field.
-	 * @param mergedRobots Already merged robots.
-	 * @param robotInfos Robot info map
-	 * @param timestamp Prediction/Frame timestamp.
+	 * @param ballTrackers     All ball trackers on the field.
+	 * @param mergedRobots     Already merged robots.
+	 * @param robotInfos       Robot info map
+	 * @param timestamp        Prediction/Frame timestamp.
 	 * @return
 	 */
 	public BallFilterPreprocessorOutput update(final FilteredVisionBall lastFilteredBall,
@@ -186,18 +185,20 @@ public class BallFilterPreprocessor
 			}
 
 			// run completed check
-			for (Iterator<IKickEstimator> iter = estimators.iterator(); iter.hasNext();)
+			if (doModelIdentification)
 			{
-				IKickEstimator est = iter.next();
-				if (est.isDone(mergedRobots, timestamp))
-				{
-					if (doModelIdentification)
-					{
-						Optional<IBallModelIdentResult> identResult = est.getModelIdentResult();
-						identResult.ifPresent(this::notifyBallModelIdentificationResult);
-					}
-					iter.remove();
-				}
+				estimators.stream()
+						.filter(e -> e.isDone(mergedRobots, timestamp))
+						.map(IKickEstimator::getModelIdentResult)
+						.flatMap(Optional::stream)
+						.forEach(this::notifyBallModelIdentificationResult);
+			}
+			if (lastBestEstimator != null && lastBestEstimator.isDone(mergedRobots, timestamp))
+			{
+				// remove all estimators, if the currently active one finished
+				// Example: If the straight kick estimator stops because the ball hits a robot
+				// the chip estimator should also be stopped, as it else might take over for a short time.
+				estimators.clear();
 			}
 			estimators.removeIf(k -> k.isDone(mergedRobots, timestamp));
 
@@ -316,7 +317,7 @@ public class BallFilterPreprocessor
 				boolean noLastBestEstimator = (lastBestEstimator == null) || !estimators.contains(lastBestEstimator);
 				if (noLastBestEstimator || ((est != lastBestEstimator) && (est.getFitResult().get()
 						.getAvgDistance() < (lastBestEstimator.getFitResult().get().getAvgDistance()
-								* (1.0 - estimatorSwitchHysteresis))))
+						* (1.0 - estimatorSwitchHysteresis))))
 						|| (lastBestEstimator.getType() == est.getType()))
 				{
 					lastBestEstimator = est;

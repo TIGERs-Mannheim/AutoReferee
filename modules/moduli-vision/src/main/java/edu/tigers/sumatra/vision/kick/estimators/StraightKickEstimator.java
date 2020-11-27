@@ -44,6 +44,7 @@ import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverNonL
 
 
 /**
+ *
  */
 public class StraightKickEstimator implements IKickEstimator
 {
@@ -85,6 +86,13 @@ public class StraightKickEstimator implements IKickEstimator
 		List<CamBall> camBalls = event.getRecordsSinceKick().stream()
 				.map(r -> r.getLatestCamBall().get())
 				.collect(Collectors.toList());
+
+		if (camBalls.size() > 2 && (camBalls.get(1).getTimestamp() - camBalls.get(0).getTimestamp()) * 1e-9 > 0.1)
+		{
+			// remove first sample, as it is much older than the next one
+			// This can happen, if the ball is not visible for some time before it is kicked
+			camBalls.remove(0);
+		}
 
 		records.addAll(camBalls);
 		allRecords.addAll(camBalls);
