@@ -16,7 +16,7 @@ dependencies {
     implementation project(':moduli-cam')
     implementation project(':moduli-vision')
     implementation project(':moduli-geometry')
-    implementation 'com.github.TIGERs-Mannheim:moduli:3.0'
+    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
 
     implementation 'org.apache.logging.log4j:log4j-api:2.13.3'
 

@@ -3,12 +3,12 @@
  */
 package edu.tigers.sumatra.statemachine;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -163,5 +163,11 @@ public class StateMachine<T extends IState> implements IStateMachine<T>
 	public void setName(final String name)
 	{
 		this.name = name;
+	}
+
+	@Override
+	public Map<IEvent, Map<IState, T>> getTransitions()
+	{
+		return transitions;
 	}
 }

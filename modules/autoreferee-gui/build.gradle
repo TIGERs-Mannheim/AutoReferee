@@ -17,7 +17,7 @@ dependencies {
     implementation project(':moduli-wp')
     implementation project(':moduli-geometry')
 
-    implementation 'com.github.TIGERs-Mannheim:moduli:3.0'
+    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
     implementation 'com.github.g3force:configurable:3.0'
 
     implementation 'commons-lang:commons-lang:2.6'

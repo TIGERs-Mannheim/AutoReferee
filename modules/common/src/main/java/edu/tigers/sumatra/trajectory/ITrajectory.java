@@ -97,4 +97,10 @@ public interface ITrajectory<T> extends IMirrorable<ITrajectory<T>>
 	{
 		throw new IllegalStateException("Not implemented");
 	}
+
+
+	default double getTotalTimeToPrimaryDirection()
+	{
+		return getTotalTime();
+	}
 }

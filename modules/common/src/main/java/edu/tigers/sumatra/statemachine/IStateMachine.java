@@ -9,6 +9,9 @@
 package edu.tigers.sumatra.statemachine;
 
 
+import java.util.Map;
+
+
 /**
  * Interface for a state machine
  *
@@ -79,4 +82,10 @@ public interface IStateMachine<T extends IState>
 	 * @param name
 	 */
 	void setName(String name);
+
+	/**
+	 *
+	 * @return statemachine graph
+	 */
+	Map<IEvent, Map<IState, T>> getTransitions();
 }

@@ -4,13 +4,12 @@
 
 package edu.tigers.sumatra.drawable;
 
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.vector.IVector2;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
-
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.math.vector.IVector2;
 
 
 @Persistent

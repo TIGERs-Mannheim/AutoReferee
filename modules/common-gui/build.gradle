@@ -12,7 +12,7 @@ dependencies {
     implementation project(':moduli-record')
 
     implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
-    api 'com.github.TIGERs-Mannheim:moduli:3.0'
+    api 'com.github.TIGERs-Mannheim:moduli:4.1'
 
     implementation 'commons-configuration:commons-configuration:1.10'
 

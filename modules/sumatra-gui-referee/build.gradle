@@ -13,7 +13,7 @@ dependencies {
     implementation project(':sumatra-model')
     implementation project(':moduli-referee')
 
-    implementation 'com.github.TIGERs-Mannheim:moduli:3.0'
+    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
 
     implementation 'commons-lang:commons-lang:2.6'
 

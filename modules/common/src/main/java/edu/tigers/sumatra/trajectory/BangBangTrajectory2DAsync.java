@@ -64,6 +64,7 @@ class BangBangTrajectory2DAsync implements ITrajectory<IVector2>
 	}
 
 
+	@Override
 	public double getTotalTimeToPrimaryDirection()
 	{
 		return child.y.getTotalTime();
