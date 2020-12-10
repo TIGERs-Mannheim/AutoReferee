@@ -18,19 +18,22 @@ version versionDetails().lastTag + "-" + versionDetails().gitHash
 
 allprojects {
     repositories {
-        maven {
-            url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
-        }
+
+        jcenter()
 
         maven {
             url = 'https://jitpack.io/'
         }
 
         maven {
+            // For Berkeley DB
             url = 'https://download.oracle.com/maven'
         }
 
-        jcenter()
+        maven {
+            // Fallback: TIGERs server (publicly available)
+            url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
+        }
     }
 }
 
