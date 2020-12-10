@@ -68,7 +68,6 @@ task downloadGameController(type: Download) {
     src "https://github.com/RoboCup-SSL/ssl-game-controller/releases/download/${gameControllerVersion}/${gameControllerBinary}"
     dest file(gameControllerBinaryLocation)
     overwrite false
-    onlyIfModified true
     dependsOn(verifyGameControllerBinary)
 }
 processResources.finalizedBy(downloadGameController)
