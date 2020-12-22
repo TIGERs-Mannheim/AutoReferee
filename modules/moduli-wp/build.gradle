@@ -14,7 +14,7 @@ dependencies {
     implementation project(':sumatra-model')
     api project(':moduli-cam')
     api project(':moduli-referee')
-    implementation project(':moduli-vision')
+    api project(':moduli-vision')
     implementation project(':moduli-geometry')
     implementation project(':moduli-record')
 

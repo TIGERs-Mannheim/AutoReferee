@@ -93,6 +93,15 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 
 
 	/**
+	 * Calculates the position of the dribbler/kicker of the given bot plus some margin like the ball radius.
+	 *
+	 * @param margin added to the center2Dribbler distance
+	 * @return
+	 */
+	IVector2 getBotKickerPos(double margin);
+
+
+	/**
 	 * @return id of the bot
 	 */
 	BotID getBotId();

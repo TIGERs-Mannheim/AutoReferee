@@ -109,7 +109,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 
 	/**
 	 * Get time to reach given position.<br>
-	 * If the position can not be reached, the velocity will be zero.<br>
+	 * If the position can not be reached, the time will be Inf.<br>
 	 * This method assumes that the position is on the ball traveling line!
 	 *
 	 * @param targetPosition in [mm]

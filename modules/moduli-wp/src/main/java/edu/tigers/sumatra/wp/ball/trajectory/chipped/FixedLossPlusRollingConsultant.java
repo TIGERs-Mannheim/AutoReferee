@@ -38,10 +38,19 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	}
 
 
-	@Override
-	public IVector2 absoluteKickVelToVector(final double vel)
+	IVector2 absoluteKickVelToVector(final double vel)
 	{
 		return Vector2.fromXY(SumatraMath.cos(chipAngle) * vel, SumatraMath.sin(chipAngle) * vel);
+	}
+
+
+	@Override
+	public IVector3 speedToVel(double direction, double speed)
+	{
+		double length = SumatraMath.cos(chipAngle) * speed;
+		double z = SumatraMath.sin(chipAngle) * speed;
+		IVector2 flat = Vector2.fromAngleLength(direction, length);
+		return Vector3.from2d(flat, z);
 	}
 
 
@@ -49,11 +58,9 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	public double botVelocityToChipFartherThanMaximumDistance(final double distance, final int numTouchdowns,
 			final double absMaxVel)
 	{
-		double partVelz = SumatraMath.cos(chipAngle) * absMaxVel * 1000;
-		double partVelxy = SumatraMath.sin(chipAngle) * absMaxVel * 1000;
-		IVector3 maxVel = Vector3.fromXYZ(partVelxy, 0, partVelz);
+		IVector3 kickVel = speedToVel(0, absMaxVel * 1000);
 		List<IVector2> touchdowns = BallFactory
-				.createTrajectoryFromKick(Vector2f.ZERO_VECTOR, maxVel, true)
+				.createTrajectoryFromChipKick(Vector2f.ZERO_VECTOR, kickVel)
 				.getTouchdownLocations();
 		if (!touchdowns.isEmpty())
 		{
@@ -65,7 +72,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 		}
 
 		double initialVel = getInitVelForDistAtTouchdown(distance, numTouchdowns);
-		return Math.abs((SumatraMath.sin(chipAngle) * initialVel) - (partVelxy / 1000));
+		return Math.abs((SumatraMath.sin(chipAngle) * initialVel) - (kickVel.x() / 1000));
 	}
 
 
@@ -165,7 +172,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	@Override
 	public double getTimeForKick(final double distance, final double kickSpeed)
 	{
-		IVector2 xyVect = BallFactory.createChipConsultant().absoluteKickVelToVector(kickSpeed * 1000);
+		IVector2 xyVect = absoluteKickVelToVector(kickSpeed * 1000);
 		IVector3 kickVel = Vector3.fromXYZ(0, xyVect.x(), xyVect.y());
 		return BallFactory.createTrajectoryFromChipKick(Vector2.zero(), kickVel).getTimeByDist(distance);
 	}
@@ -174,10 +181,20 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	@Override
 	public double getVelForKick(final double distance, final double kickSpeed)
 	{
-		IVector2 xyVect = BallFactory.createChipConsultant().absoluteKickVelToVector(kickSpeed * 1000);
+		IVector2 xyVect = absoluteKickVelToVector(kickSpeed * 1000);
 		IVector3 kickVel = Vector3.fromXYZ(0, xyVect.x(), xyVect.y());
 		var chipTraj = BallFactory.createTrajectoryFromChipKick(Vector2.zero(), kickVel);
 		double time = chipTraj.getTimeByDist(distance);
 		return chipTraj.getVelByTime(time).getLength2();
+	}
+
+
+	@Override
+	public double getVelForKickByTime(final double kickSpeed, final double travelTime)
+	{
+		var kickSpeedXy = 1e3 * kickSpeed / Math.sqrt(2);
+		var kickVel = Vector3.fromXYZ(0, kickSpeedXy, kickSpeedXy);
+		return FixedLossPlusRollingBallTrajectory.fromKick(Vector2f.ZERO_VECTOR, kickVel,
+				0, new FixedLossPlusRollingParameters()).getVelByTime(travelTime).getLength2();
 	}
 }

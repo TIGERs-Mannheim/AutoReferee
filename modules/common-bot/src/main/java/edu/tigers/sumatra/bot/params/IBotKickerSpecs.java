@@ -20,6 +20,12 @@ public interface IBotKickerSpecs
 	 */
 	double getMaxAbsoluteChipVelocity();
 
+
+	/**
+	 * @return the maxAbsoluteStraightVelocity
+	 */
+	double getMaxAbsoluteStraightVelocity();
+
 	/**
 	 * @return max dribble speed to apply on robot
 	 */

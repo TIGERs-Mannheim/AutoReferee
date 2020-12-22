@@ -61,7 +61,7 @@ public class EarlyKickDetector implements IKickDetector
 			return null;
 		}
 
-		boolean isVirtualBall = camBall.get().getConfidence() < 0.1;
+		boolean isVirtualBall = camBall.get().getConfidence() <= 0.0;
 		if (isVirtualBall)
 		{
 			return null;

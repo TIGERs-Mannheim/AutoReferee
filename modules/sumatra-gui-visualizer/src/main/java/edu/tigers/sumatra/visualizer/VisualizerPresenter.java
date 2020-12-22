@@ -31,8 +31,7 @@ import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
-import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingConsultant;
-import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingParameters;
+import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
@@ -110,10 +109,8 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	{
 		double kickSpeed = lastWorldFrameWrapper.getSimpleWorldFrame().getBall().getChipConsultant()
 				.getInitVelForDistAtTouchdown(dist, numTouchdown);
-		IVector2 kickVector = new FixedLossPlusRollingConsultant(new FixedLossPlusRollingParameters())
-				.absoluteKickVelToVector(kickSpeed);
 		IVector2 ballPos = lastWorldFrameWrapper.getSimpleWorldFrame().getBall().getPos();
-		return Vector3.from2d(posIn.subtractNew(ballPos).scaleTo(kickVector.x()), kickVector.y());
+		return BallFactory.createChipConsultant().speedToVel(posIn.subtractNew(ballPos).getAngle(), kickSpeed);
 	}
 
 

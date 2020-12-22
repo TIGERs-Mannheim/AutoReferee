@@ -13,16 +13,23 @@ import java.awt.geom.AffineTransform;
 
 
 @Persistent
-public class DrawableArrow implements IDrawableShape
+public class DrawableArrow extends ADrawable
 {
 	private IVector2 position;
 	private IVector2 direction;
-	private Color color;
 	private int arrowSize = 25;
 
+
 	@SuppressWarnings("unused") // berkeley
-	public DrawableArrow()
+	private DrawableArrow()
 	{
+	}
+
+
+	public DrawableArrow(IVector2 position, IVector2 direction)
+	{
+		this.position = position;
+		this.direction = direction;
 	}
 
 
@@ -30,7 +37,7 @@ public class DrawableArrow implements IDrawableShape
 	{
 		this.position = position;
 		this.direction = direction;
-		this.color = color;
+		setColor(color);
 	}
 
 
@@ -44,10 +51,10 @@ public class DrawableArrow implements IDrawableShape
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
+		super.paintShape(g, tool, invert);
 		IVector2 guiPosition = tool.transformToGuiCoordinates(position, invert);
 		IVector2 guiDestination = tool.transformToGuiCoordinates(position.addNew(direction), invert);
 
-		g.setColor(color);
 		drawArrow(g, (int) guiPosition.x(), (int) guiPosition.y(), (int) guiDestination.x(), (int) guiDestination.y(),
 				tool.scaleXLength(arrowSize));
 
@@ -69,13 +76,5 @@ public class DrawableArrow implements IDrawableShape
 		g.drawLine(0, 0, len - arrowTipSize, 0);
 		g.fillPolygon(new int[] { len, len - arrowTipSize, len - arrowTipSize, len },
 				new int[] { 0, -arrowTipSize, arrowTipSize, 0 }, 4);
-	}
-
-
-	@Override
-	public DrawableArrow setColor(final Color color)
-	{
-		this.color = color;
-		return this;
 	}
 }

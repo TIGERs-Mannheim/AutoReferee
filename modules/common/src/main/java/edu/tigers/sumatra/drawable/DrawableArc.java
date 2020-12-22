@@ -4,18 +4,17 @@
 
 package edu.tigers.sumatra.drawable;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
-import java.awt.geom.Arc2D;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.Arc2D;
 
 
 /**
@@ -37,10 +36,12 @@ public class DrawableArc extends Arc implements IDrawableShape
 	}
 
 
-	/**
-	 * @param arc
-	 * @param color
-	 */
+	public DrawableArc(final IArc arc)
+	{
+		super(arc);
+	}
+
+
 	public DrawableArc(final IArc arc, final Color color)
 	{
 		super(arc);

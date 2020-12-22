@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.wp.vis;
 
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
+import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.DrawablePoint;
@@ -81,11 +82,12 @@ public class BallVisCalc implements IWpCalc
 			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(roll);
 		}
 
-		if (wfw.getSimpleWorldFrame().getKickEvent().isPresent())
-		{
-			shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
-					.add(new DrawablePoint(wfw.getSimpleWorldFrame().getKickEvent().get().getPosition(), Color.red)
-							.withSize(50));
-		}
+		wfw.getSimpleWorldFrame().getKickEvent().ifPresent(event -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
+				.add(new DrawablePoint(event.getPosition(), Color.red)
+						.withSize(50)));
+
+		wfw.getSimpleWorldFrame().getKickFitState().ifPresent(state -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
+				.add(new DrawableArrow(state.getKickPos(), state.getKickVel().getXYVector())
+						.setColor(Color.magenta)));
 	}
 }

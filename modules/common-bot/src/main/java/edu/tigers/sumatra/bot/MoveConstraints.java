@@ -11,6 +11,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import lombok.Data;
 import lombok.NonNull;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ import java.util.List;
  */
 @Persistent
 @Data
+@Accessors(chain = true)
 public class MoveConstraints implements IExportable, IMoveConstraints
 {
 	private double velMax;

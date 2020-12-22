@@ -125,7 +125,7 @@ public class RefereeMsg
 			ballPlacementPos = null;
 		}
 
-		negativeHalfTeam = Geometry.getNegativeHalfTeam();
+		negativeHalfTeam = sslRefereeMsg.getBlueTeamOnPositiveHalf() ? ETeamColor.YELLOW : ETeamColor.BLUE;
 
 		nextCommand = sslRefereeMsg.hasNextCommand() ? sslRefereeMsg.getNextCommand() : null;
 		gameEvents = sslRefereeMsg.getGameEventsList().stream()

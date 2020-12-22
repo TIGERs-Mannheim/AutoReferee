@@ -43,7 +43,6 @@ public class DynamicPosition
 	AObjectID trackedId;
 	double lookahead;
 	boolean useKickerPos;
-	double passRange;
 
 
 	/**
@@ -51,7 +50,7 @@ public class DynamicPosition
 	 */
 	public DynamicPosition(@NonNull final AObjectID objId)
 	{
-		this(Vector2f.ZERO_VECTOR, objId, 0, true, 0);
+		this(Vector2f.ZERO_VECTOR, objId, 0, true);
 	}
 
 
@@ -60,7 +59,7 @@ public class DynamicPosition
 	 */
 	public DynamicPosition(@NonNull final ITrackedObject obj)
 	{
-		this(obj.getPos(), obj.getId(), 0, true, 0);
+		this(obj.getPos(), obj.getId(), 0, true);
 	}
 
 
@@ -69,13 +68,13 @@ public class DynamicPosition
 	 */
 	public DynamicPosition(final IVector2 pos)
 	{
-		this(pos, null, 0, true, 0);
+		this(pos, null, 0, true);
 	}
 
 
 	private DynamicPosition()
 	{
-		this(Vector2f.ZERO_VECTOR, null, 0, true, 0);
+		this(Vector2f.ZERO_VECTOR, null, 0, true);
 	}
 
 

@@ -11,6 +11,7 @@ import edu.tigers.sumatra.vision.data.IKickEvent;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -118,5 +119,17 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 			botsReadOnly = Collections.unmodifiableMap(bots);
 		}
 		return botsReadOnly;
+	}
+
+
+	/**
+	 * @param botID
+	 * @return a new map containing all bots except for the given ones
+	 */
+	public Map<BotID, ITrackedBot> getAllBotsBut(BotID... botID)
+	{
+		var allBots = new IdentityHashMap<>(bots);
+		allBots.keySet().removeAll(Arrays.asList(botID));
+		return allBots;
 	}
 }

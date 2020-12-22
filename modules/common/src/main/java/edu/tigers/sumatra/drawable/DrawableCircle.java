@@ -4,15 +4,14 @@
 
 package edu.tigers.sumatra.drawable;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
 
 
 /**
@@ -52,6 +51,16 @@ public class DrawableCircle extends ADrawableWithStroke
 	{
 		this.circle = circle;
 		setColor(color);
+	}
+
+
+	/**
+	 * @param center
+	 * @param radius
+	 */
+	public DrawableCircle(final IVector2 center, final double radius)
+	{
+		circle = Circle.createCircle(center, radius);
 	}
 
 

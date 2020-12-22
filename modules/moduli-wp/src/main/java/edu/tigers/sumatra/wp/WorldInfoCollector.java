@@ -96,7 +96,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
 	private IKickEvent lastKickEvent;
-	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.1);
+	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
 
 	static
 	{

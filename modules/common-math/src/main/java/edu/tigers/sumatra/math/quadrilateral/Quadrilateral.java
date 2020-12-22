@@ -82,18 +82,36 @@ public final class Quadrilateral implements IQuadrilateral
 	 * @param d corner d
 	 * @return a new quadrilateral
 	 */
-	public static IQuadrilateral fromCorners(@NonNull final IVector2 a, @NonNull final IVector2 b, @NonNull final IVector2 c, @NonNull final IVector2 d)
+	public static IQuadrilateral fromCorners(@NonNull final IVector2 a, @NonNull final IVector2 b,
+			@NonNull final IVector2 c, @NonNull final IVector2 d)
 	{
-		Validate.notNull(a);
-		Validate.notNull(b);
-		Validate.notNull(c);
-		Validate.notNull(d);
 		List<IVector2> corners = new ArrayList<>(4);
 		corners.add(a);
 		corners.add(b);
 		corners.add(c);
 		corners.add(d);
 		return fromCorners(corners);
+	}
+
+
+	/**
+	 * Create a isosceles trapezoid (gleichschenkliges Trapez)
+	 *
+	 * @param p1 first point (center of the lower edge)
+	 * @param w1 width of the lower edge
+	 * @param p2 second point (center of the upper edge)
+	 * @param w2 width of the upper edge
+	 * @return a new quadrilateral
+	 */
+	public static IQuadrilateral isoscelesTrapezoid(@NonNull IVector2 p1, double w1, @NonNull IVector2 p2, double w2)
+	{
+		IVector2 normal = p2.subtractNew(p1).getNormalVector().normalize();
+		return fromCorners(
+				p1.addNew(normal.multiplyNew(w1 / 2)),
+				p1.addNew(normal.multiplyNew(-w1 / 2)),
+				p2.addNew(normal.multiplyNew(w2 / 2)),
+				p2.addNew(normal.multiplyNew(-w2 / 2))
+		);
 	}
 
 

@@ -9,7 +9,9 @@ import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.clock.ThreadUtil;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
+import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableCircle;
+import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.ids.BotID;
@@ -221,9 +223,25 @@ public class VisionFilterImpl extends AVisionFilter
 				.addAll(getBallTrackerShapes(timestamp));
 		frame.getShapeMap().get(EVisionFilterShapesLayer.ROBOT_QUALITY_INSPECTOR)
 				.addAll(getRobotQualityInspectorShapes(mergedRobots));
+		frame.getShapeMap().get(EVisionFilterShapesLayer.VISION_FRAME)
+				.addAll(getVisionFrameShapes(frame));
 
 		// store this frame
 		lastFilteredFrame = frame;
+	}
+
+
+	private Collection<? extends IDrawableShape> getVisionFrameShapes(FilteredVisionFrame frame)
+	{
+		List<IDrawableShape> shapes = new ArrayList<>();
+		frame.getKickEvent().ifPresent(event -> shapes
+				.add(new DrawablePoint(event.getPosition(), Color.red)
+						.withSize(50)));
+
+		frame.getKickFitState().ifPresent(state -> shapes
+				.add(new DrawableArrow(state.getPos().getXYVector(), state.getVel().getXYVector())
+						.setColor(Color.magenta)));
+		return shapes;
 	}
 
 

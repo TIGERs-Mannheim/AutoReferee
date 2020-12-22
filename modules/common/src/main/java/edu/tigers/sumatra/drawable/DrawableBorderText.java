@@ -67,9 +67,10 @@ public class DrawableBorderText implements IDrawableShape
 	/**
 	 * @param fontSizeType the fontSize to set
 	 */
-	public final void setFontSize(final EFontSize fontSizeType)
+	public final DrawableBorderText setFontSize(final EFontSize fontSizeType)
 	{
 		this.fontSizeType = fontSizeType;
+		return this;
 	}
 
 

@@ -4,11 +4,9 @@
 
 package edu.tigers.sumatra.wp.ball.trajectory;
 
-import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingBallTrajectory;
 import edu.tigers.sumatra.wp.ball.trajectory.chipped.FixedLossPlusRollingConsultant;
@@ -47,32 +45,6 @@ public final class BallFactory
 				state.getVel().getXYVector(),
 				state.getVSwitchToRoll(),
 				new TwoPhaseDynamicVelParameters());
-	}
-
-
-	/**
-	 * Create a ball trajectory with 2d velocity vector and given chip angle
-	 *
-	 * @param chip
-	 * @param chipAngle [rad]
-	 * @param kickPos   [mm/mm]
-	 * @param kickVel   [mm/s]
-	 * @return
-	 */
-	public static IBallTrajectory createTrajectoryFrom2DKick(final IVector2 kickPos, final IVector2 kickVel,
-			final double chipAngle, final boolean chip)
-	{
-
-		IVector2 xyVector = kickVel;
-		double partVelz = 0;
-		if (chip)
-		{
-			partVelz = SumatraMath.cos(chipAngle) * kickVel.getLength2();
-			double partVelxy = SumatraMath.sin(chipAngle) * kickVel.getLength2();
-
-			xyVector = kickVel.scaleToNew(partVelxy);
-		}
-		return createTrajectoryFromKick(kickPos, Vector3.from2d(xyVector, partVelz), chip);
 	}
 
 
