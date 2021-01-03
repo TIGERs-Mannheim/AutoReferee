@@ -8,6 +8,31 @@ plugins {
     id "de.undercouch.download" version "4.0.4"
 }
 
+configurations {
+    gc
+}
+
+def osClassifier = {
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("windows")) {
+        return "windows_amd64"
+    } else if (os.contains("linux")) {
+        return "linux_amd64"
+    } else if (os.contains("mac")) {
+        return "darwin_amd64"
+    } else {
+        throw new IllegalStateException("Unknown operating system: ${os}")
+    }
+}()
+
+def osExt = {
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("windows")) {
+        return "exe"
+    }
+    return ""
+}()
+
 dependencies {
     implementation project(':common')
     implementation project(':common-math')
@@ -28,46 +53,14 @@ dependencies {
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.assertj:assertj-core:3.16.1'
+
+    gc "com.github.robocup-ssl:ssl-game-controller:v2.4.0:${osClassifier}@${osExt}"
 }
 
-def osClassifier = {
-    def os = System.getProperty("os.name").toLowerCase()
-    if (os.contains("windows")) {
-        return "windows_amd64"
-    } else if (os.contains("linux")) {
-        return "linux_amd64"
-    } else if (os.contains("mac")) {
-        return "darwin_amd64"
-    } else {
-        throw new IllegalStateException("Unknown operating system: ${os}")
-    }
-}()
-
-def osExt = {
-    def os = System.getProperty("os.name").toLowerCase()
-    if (os.contains("windows")) {
-        return ".exe"
-    }
-    return ""
-}()
-
-def gameControllerVersion = "v2.3.0"
-def gameControllerBinary = "ssl-game-controller_${gameControllerVersion}_${osClassifier}${osExt}".toString()
-def gameControllerBinaryLocation = "$buildDir/resources/main/ssl-game-controller"
-
-task verifyGameControllerBinary() {
-    inputs.property("binary.version", gameControllerVersion)
-    outputs.upToDateWhen { true }
-    doFirst {
-        // Delete binary, if GC version has changed
-        delete(gameControllerBinaryLocation)
-    }
+task copyGameControllerBinary(type: Copy) {
+    from configurations.gc.singleFile
+    into "${buildDir}/resources/main"
+    rename { "ssl-game-controller" }
 }
 
-task downloadGameController(type: Download) {
-    src "https://github.com/RoboCup-SSL/ssl-game-controller/releases/download/${gameControllerVersion}/${gameControllerBinary}"
-    dest file(gameControllerBinaryLocation)
-    overwrite false
-    dependsOn(verifyGameControllerBinary)
-}
-processResources.finalizedBy(downloadGameController)
+processResources.finalizedBy(copyGameControllerBinary)
