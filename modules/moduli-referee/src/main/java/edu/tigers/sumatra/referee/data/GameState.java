@@ -409,6 +409,14 @@ public class GameState
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE) || (state == EGameState.KICKOFF);
 	}
 
+	/**
+	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
+	 */
+	public boolean isKickoff()
+	{
+		return state == EGameState.KICKOFF;
+	}
+
 
 	/**
 	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
