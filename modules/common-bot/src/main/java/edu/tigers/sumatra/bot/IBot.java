@@ -87,7 +87,7 @@ public interface IBot
 	ETeamColor getColor();
 
 
-	double getDribblerTemp();
+	EDribblerState getDribblerState();
 
 
 	/**
