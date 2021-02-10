@@ -11,7 +11,7 @@ plugins {
     id "com.google.protobuf" version "0.8.12" apply false
     id "com.palantir.git-version" version "0.12.3"
     id "ca.cutterslade.analyze" version "1.4.1"
-    id "com.google.cloud.tools.jib" version "2.4.0"
+    id "com.google.cloud.tools.jib" version "2.7.1"
 }
 
 version versionDetails().lastTag + "-" + versionDetails().gitHash
@@ -130,8 +130,8 @@ jib {
         tags = [rootProject.version]
     }
     from {
-        // gcr.io/distroless/java:8
-        image = "gcr.io/distroless/java@sha256:7cef6d99241bc86e09659d41842e3656a1cab99adf0e440a44d2858c8e52a71a"
+        // gcr.io/distroless/java:11
+        image = "gcr.io/distroless/java@sha256:9d4092ba5e1c9dc4d1490fdead1dd7ea5c64e635b729fee11a6af55f51b337f8"
     }
     container {
         workingDirectory = "/AutoReferee"
