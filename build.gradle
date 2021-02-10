@@ -12,6 +12,7 @@ plugins {
     id "com.palantir.git-version" version "0.12.3"
     id "ca.cutterslade.analyze" version "1.4.1"
     id "com.google.cloud.tools.jib" version "2.7.1"
+    id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
 version versionDetails().lastTag + "-" + versionDetails().gitHash
@@ -148,3 +149,10 @@ jar.archiveVersion.convention(null)
 
 // disable tar distribution to avoid redundant artifacts
 distTar.enabled = false
+
+githubRelease {
+    token System.getenv("GITHUB_TOKEN") ?: ""
+    owner "TIGERs-Mannheim"
+    repo "AutoReferee"
+    releaseAssets distZip
+}
