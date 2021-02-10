@@ -22,4 +22,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
       - name: Publish to Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: ./gradlew jib
