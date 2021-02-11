@@ -1,13 +1,12 @@
-name: Java CI with Gradle
+name: Perform Release
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+  create:
+    tags:
+      - version/*
 
 jobs:
-  build:
+  release:
 
     runs-on: ubuntu-20.04
 

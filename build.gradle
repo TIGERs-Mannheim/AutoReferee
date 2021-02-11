@@ -16,7 +16,7 @@ plugins {
 }
 
 ext.versionDetails = versionDetails(prefix: "version/")
-version versionDetails.lastTag + "-" + versionDetails.gitHash
+version gitVersion(prefix: "version/")
 
 allprojects {
     repositories {
