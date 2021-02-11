@@ -18,8 +18,17 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Publish to Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: ./gradlew jib
+      - name: Install curl
+        run: sudo apt-get install -y curl
+      - name: Trigger Docker Hub build
+        env:
+          BUILD_TRIGGERS: ${{ secrets.BUILD_TRIGGERS }}
+        run: ./.github/workflows/trigger_docker.sh
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
