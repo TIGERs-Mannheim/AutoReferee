@@ -138,6 +138,18 @@ jib {
     container {
         workingDirectory = "/AutoReferee"
     }
+    extraDirectories {
+        paths {
+            path {
+                from = file('config')
+                into = '/AutoReferee/config'
+            }
+            path {
+                from = file('src/main/jib')
+                into = '/AutoReferee/'
+            }
+        }
+    }
 }
 
 run.workingDir = rootProject.projectDir
@@ -150,6 +162,16 @@ jar.archiveVersion.convention(null)
 
 // disable tar distribution to avoid redundant artifacts
 distTar.enabled = false
+
+distributions {
+    main {
+        contents {
+            from('config') {
+                into 'config'
+            }
+        }
+    }
+}
 
 githubRelease {
     token System.getenv("GITHUB_TOKEN") ?: ""
