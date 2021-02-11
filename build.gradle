@@ -15,7 +15,8 @@ plugins {
     id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
-version versionDetails().lastTag + "-" + versionDetails().gitHash
+ext.versionDetails = versionDetails(prefix: "version/")
+version versionDetails.lastTag + "-" + versionDetails.gitHash
 
 allprojects {
     repositories {
@@ -153,6 +154,7 @@ distTar.enabled = false
 githubRelease {
     token System.getenv("GITHUB_TOKEN") ?: ""
     owner "TIGERs-Mannheim"
-    repo "AutoReferee"
+    repo.set("AutoReferee")
     releaseAssets distZip
+    tagName.set("")
 }
