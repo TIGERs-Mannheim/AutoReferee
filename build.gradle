@@ -135,18 +135,15 @@ jib {
         // gcr.io/distroless/java:11
         image = "gcr.io/distroless/java@sha256:9d4092ba5e1c9dc4d1490fdead1dd7ea5c64e635b729fee11a6af55f51b337f8"
     }
-    container {
-        workingDirectory = "/AutoReferee"
-    }
     extraDirectories {
         paths {
             path {
                 from = file('config')
-                into = '/AutoReferee/config'
+                into = '/config'
             }
             path {
                 from = file('src/main/jib')
-                into = '/AutoReferee/'
+                into = '/'
             }
         }
     }

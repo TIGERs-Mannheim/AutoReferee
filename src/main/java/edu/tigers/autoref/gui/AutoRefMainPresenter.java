@@ -46,6 +46,12 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 	}
 
 
+	public void setWindowSize(int width, int height)
+	{
+		getMainFrame().setSize(width, height);
+	}
+
+
 	@Override
 	protected String getLastLayoutFile()
 	{
