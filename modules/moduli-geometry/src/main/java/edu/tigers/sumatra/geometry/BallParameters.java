@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -17,17 +17,17 @@ public class BallParameters
 {
 	@Configurable(
 			comment = "Ball sliding acceleration [mm/s^2]",
-			defValue = "-3600.0",
+			defValue = "-3000.0",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI" }
 	)
-	private double accSlide = -3600.0;
+	private double accSlide = -3000.0;
 
 	@Configurable(
 			comment = "Ball rolling acceleration [mm/s^2]",
-			defValue = "-400.0",
+			defValue = "-260.0",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI" }
 	)
-	private double accRoll = -400.0;
+	private double accRoll = -260.0;
 
 	@Configurable(
 			comment = "Fraction of the initial velocity where the ball starts to roll",
@@ -59,10 +59,10 @@ public class BallParameters
 
 	@Configurable(
 			comment = "Chip kick velocity damping factor in Z direction",
-			defValue = "0.6",
+			defValue = "0.5",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI" }
 	)
-	private double chipDampingZ = 0.6;
+	private double chipDampingZ = 0.5;
 
 	@Configurable(
 			comment = "If a chipped ball does not reach this height it is considered rolling [mm]",

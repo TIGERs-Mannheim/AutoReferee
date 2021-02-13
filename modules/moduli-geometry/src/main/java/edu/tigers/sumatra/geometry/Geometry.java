@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -17,7 +17,6 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.line.v2.ILine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
@@ -26,8 +25,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,53 +39,104 @@ import java.util.Set;
 /**
  * Configuration object for geometry parameters.
  */
+@Log4j2
 public class Geometry
 {
-	private static final Logger log = LogManager.getLogger(Geometry.class.getName());
-
 	/**
 	 * Field Geometry
 	 */
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "12000.0"
+	)
 	private static double fieldLength = 12000;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "9000.0"
+	)
 	private static double fieldWidth = 9000;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "350.0")
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "350.0"
+	)
 	private static double boundaryWidth = 350;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "425.0")
-	private static double judgesBorderWidth = 425;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "500.0")
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "500.0"
+	)
 	private static double centerCircleRadius = 500;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
-	private static double goalWidth = 1200;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "180.0")
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "1800.0"
+	)
+	private static double goalWidth = 1800;
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "180.0"
+	)
 	private static double goalDepth = 180;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValue = "155.0")
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "155.0"
+	)
 	private static double goalHeight = 155;
-	@Configurable(comment = "Name of the CenterCircle arc defined in SSL-Vision", defValue = "CenterCircle")
+
+	@Configurable(
+			comment = "Name of the CenterCircle arc defined in SSL-Vision",
+			defValue = "CenterCircle"
+	)
 	private static String centerCircleName = "CenterCircle";
 
-	@Configurable(comment = "The team on the negative half", defValue = "BLUE")
+	@Configurable(
+			comment = "The team on the negative half",
+			defValue = "BLUE"
+	)
 	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;
 
 	/**
 	 * Penalty Area
 	 */
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH",
-			"ROBOCUP", "ANDRE" }, comment = "Distance (goal line - penalty mark)")
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			comment = "Distance (goal line - penalty mark)",
+			defValue = "8000.0"
+	)
 	private static double distanceToPenaltyMark = 8000;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH",
-			"ROBOCUP", "ANDRE" }, comment = "depth of the penalty area.")
-	private static double penaltyAreaDepth = 1200;
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP",
-			"ANDRE" }, comment = "the length of the short line of the penalty area, that is parallel to the goal line")
-	private static double penaltyAreaFrontLineLength = 2400;
-	@Configurable(defValue = "LeftPenaltyStretch", comment = "Name of the LeftPenaltyStretch line defined in SSL-Vision")
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValue = "1800.0"
+	)
+	private static double penaltyAreaDepth = 1800;
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			comment = "the length of the short line of the penalty area, that is parallel to the goal line",
+			defValue = "3600.0"
+	)
+	private static double penaltyAreaFrontLineLength = 3600;
+
+	@Configurable(
+			defValue = "LeftPenaltyStretch",
+			comment = "Name of the LeftPenaltyStretch line defined in SSL-Vision"
+	)
 	private static String leftPenaltyStretchName = "LeftPenaltyStretch";
-	@Configurable(defValue = "RightPenaltyStretch", comment = "Name of the RightPenaltyStretch line defined in SSL-Vision")
+
+	@Configurable(
+			defValue = "RightPenaltyStretch",
+			comment = "Name of the RightPenaltyStretch line defined in SSL-Vision"
+	)
 	private static String rightPenaltyStretchName = "RightPenaltyStretch";
+
 	@Configurable(defValue = "LeftFieldRightPenaltyArc")
 	private static String leftFieldRightPenaltyArcName = "LeftFieldRightPenaltyArc";
+
 	@Configurable(defValue = "false")
 	private static boolean legacyPenArea = false;
 
@@ -114,15 +163,16 @@ public class Geometry
 	@Configurable(defValue = "0", spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
 
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" }, defValueSpezis = { "0.06",
-			"0.0", "0.06", "0.06", "0.06",
-			"0.06" }, comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision")
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
+			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06" },
+			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision"
+	)
 	private static double feedbackDelay = 0.06;
 
 
 	private final IRectangle field;
 	private final IRectangle fieldWBorders;
-	private final IRectangle fieldWReferee;
 	private final Goal goalOur;
 	private final Goal goalTheir;
 	private final IPenaltyArea penaltyAreaOur;
@@ -130,7 +180,6 @@ public class Geometry
 	private final ICircle centerCircle;
 	private final IRectangle ourHalf;
 	private final IRectangle theirHalf;
-	private final ILine halfLine;
 	private final List<ILineSegment> touchLines;
 
 	private CamGeometry lastCamGeometry;
@@ -157,14 +206,11 @@ public class Geometry
 	}
 
 
-	/**
-	 */
 	private Geometry()
 	{
 		// noinspection SuspiciousNameCombination
 		field = Rectangle.fromCenter(Vector2f.ZERO_VECTOR, fieldLength, fieldWidth);
 		fieldWBorders = field.withMargin(boundaryOffset + boundaryWidth);
-		fieldWReferee = fieldWBorders.withMargin(judgesBorderWidth);
 		goalOur = calcOurGoal(goalWidth, goalDepth, fieldLength);
 		goalTheir = calcTheirGoal(goalWidth, goalDepth, fieldLength);
 
@@ -188,7 +234,6 @@ public class Geometry
 				field.xExtent() / 2,
 				field.yExtent());
 
-		halfLine = calcHalfLine();
 		touchLines = new ArrayList<>();
 		touchLines.addAll(calcTouchLines());
 
@@ -205,12 +250,6 @@ public class Geometry
 		lines.add(Lines.segmentFromPoints(Vector2.fromXY(-fieldLength / 2, -fieldWidth / 2),
 				Vector2.fromXY(fieldLength / 2, -fieldWidth / 2)));
 		return lines;
-	}
-
-
-	private ILine calcHalfLine()
-	{
-		return Lines.lineFromPoints(Vector2.fromY(-fieldWidth / 2), Vector2.fromY(fieldWidth / 2));
 	}
 
 
@@ -476,17 +515,6 @@ public class Geometry
 
 
 	/**
-	 * Field including referee area
-	 *
-	 * @return the fieldWBorders
-	 */
-	public static IRectangle getFieldWReferee()
-	{
-		return instance.fieldWReferee;
-	}
-
-
-	/**
 	 * @return
 	 */
 	public static IVector2 getCenter()
@@ -602,12 +630,6 @@ public class Geometry
 	public static BallParameters getBallParameters()
 	{
 		return ballParameters;
-	}
-
-
-	public static ILine getHalfLine()
-	{
-		return instance.halfLine;
 	}
 
 
