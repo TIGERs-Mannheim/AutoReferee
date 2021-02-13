@@ -1,6 +1,6 @@
 *.iml
 /.idea
 /data/*
-/.gradle
+.gradle
 build
 /autoReferee

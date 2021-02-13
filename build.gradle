@@ -1,85 +1,22 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 plugins {
-    id "java"
-    id "jacoco"
-    id "idea"
-    id "application"
+    id 'sumatra.java-conventions'
+    id 'application'
 
-    id "com.google.protobuf" version "0.8.12" apply false
-    id "com.palantir.git-version" version "0.12.3"
-    id "ca.cutterslade.analyze" version "1.4.1"
-    id "com.google.cloud.tools.jib" version "2.7.1"
+    id 'com.palantir.git-version' version '0.12.3'
+    id 'ca.cutterslade.analyze' version '1.4.3'
+    id 'com.google.cloud.tools.jib' version '2.7.0'
     id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
 ext.versionDetails = versionDetails(prefix: "version/")
 version gitVersion(prefix: "version/")
 
-allprojects {
-    repositories {
-
-        jcenter()
-
-        maven {
-            url = 'https://jitpack.io/'
-        }
-
-        maven {
-            // For Berkeley DB
-            url = 'https://download.oracle.com/maven'
-        }
-
-        maven {
-            // Fallback: TIGERs server (publicly available)
-            url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
-        }
-    }
-}
-
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'jacoco'
-    apply plugin: 'idea'
-    apply plugin: 'ca.cutterslade.analyze'
-
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
-
-    test {
-        exclude '**/*PerfTest.class'
-        exclude '**/*IntegrationTest.class'
-    }
-
-    jacoco {
-        toolVersion = "0.8.5"
-    }
-
-    jacocoTestReport {
-        reports {
-            xml.enabled = true
-            csv.enabled = false
-            html.enabled = false
-        }
-
-        afterEvaluate {
-            classDirectories.setFrom(files(classDirectories.files.collect {
-                fileTree(dir: it,
-                        exclude: ['**/proto/**/*'])
-            }))
-        }
-
-        dependsOn(test)
-    }
-}
-
-tasks.named('wrapper') {
+tasks.named('wrapper').configure {
+    // Use the 'all' distributable when upgrading the Gradle wrapper
     distributionType = Wrapper.DistributionType.ALL
 }
 
@@ -109,14 +46,6 @@ dependencies {
     runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.25'
 
     implementation 'commons-cli:commons-cli:1.4'
-}
-
-allprojects {
-    dependencies {
-        annotationProcessor "org.projectlombok:lombok:1.18.12"
-        compileOnly "org.projectlombok:lombok:1.18.12"
-        permitUnusedDeclared "org.projectlombok:lombok:1.18.12"
-    }
 }
 
 application {
