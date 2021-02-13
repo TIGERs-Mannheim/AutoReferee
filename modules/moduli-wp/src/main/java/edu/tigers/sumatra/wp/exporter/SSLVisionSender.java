@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.exporter;
@@ -9,6 +9,7 @@ import edu.tigers.sumatra.cam.proto.MessagesRobocupSslDetection;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslDetection.SSL_DetectionBall;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslDetection.SSL_DetectionFrame;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry;
+import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_FieldCircularArc;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_FieldLineSegment;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_GeometryData;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_GeometryFieldSize;
@@ -103,10 +104,10 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 		}
 		wrapper.setDetection(frame);
 
-		if ((System.nanoTime() - tLastGeometrySent) / 1e9 > GEOMETRY_BROADCAST_INTERVAL)
+		if ((wFrameWrapper.getTimestamp() - tLastGeometrySent) / 1e9 > GEOMETRY_BROADCAST_INTERVAL)
 		{
 			wrapper.setGeometry(createGeometryMessage());
-			tLastGeometrySent = System.nanoTime();
+			tLastGeometrySent = wFrameWrapper.getTimestamp();
 		}
 
 		transmitter.send(wrapper.build().toByteArray());
@@ -172,8 +173,7 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 						Vector2.fromX(Geometry.getFieldLength() / 2),
 						Vector2.fromX(-Geometry.getFieldLength() / 2))));
 
-		MessagesRobocupSslGeometry.SSL_FieldCicularArc.Builder centerCircle = MessagesRobocupSslGeometry.SSL_FieldCicularArc
-				.newBuilder();
+		SSL_FieldCircularArc.Builder centerCircle = SSL_FieldCircularArc.newBuilder();
 		centerCircle.setCenter(Vector2f.newBuilder().setX(0).setY(0).build());
 		centerCircle.setA1(0);
 		centerCircle.setA2((float) AngleMath.PI_TWO);
@@ -183,6 +183,19 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 		field.addFieldArcs(centerCircle);
 
 		geometry.setField(field);
+
+		geometry.setModels(MessagesRobocupSslGeometry.SSL_GeometryModels.newBuilder()
+				.setStraightTwoPhase(MessagesRobocupSslGeometry.SSL_BallModelStraightTwoPhase.newBuilder()
+						.setAccSlide(Geometry.getBallParameters().getAccSlide())
+						.setAccRoll(Geometry.getBallParameters().getAccRoll())
+						.setKSwitch(Geometry.getBallParameters().getKSwitch())
+						.build())
+				.setChipFixedLoss(MessagesRobocupSslGeometry.SSL_BallModelChipFixedLoss.newBuilder()
+						.setDampingXyFirstHop(Geometry.getBallParameters().getChipDampingXYFirstHop())
+						.setDampingXyOtherHops(Geometry.getBallParameters().getChipDampingXYOtherHops())
+						.setDampingZ(Geometry.getBallParameters().getChipDampingZ())
+						.build())
+				.build());
 		return geometry;
 	}
 

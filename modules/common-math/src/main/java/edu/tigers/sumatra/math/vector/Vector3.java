@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
@@ -78,6 +78,17 @@ public class Vector3 extends AVector3
 	public static Vector3 zero()
 	{
 		return new Vector3();
+	}
+
+
+	/**
+	 * Create new NaN vector
+	 *
+	 * @return new instance
+	 */
+	public static Vector3 nan()
+	{
+		return new Vector3(Double.NaN, Double.NaN, Double.NaN);
 	}
 
 

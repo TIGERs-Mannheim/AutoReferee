@@ -1,10 +1,9 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
 
-import edu.tigers.sumatra.cam.TimeSync;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
@@ -32,23 +31,11 @@ public class TrackerPacketGenerator
 	private static final Set<SslVisionDetectionTracked.Capability> CAPABILITIES = new HashSet<>();
 	private int frameNumber = 0;
 	private final String uuid = UUID.randomUUID().toString();
-	private final TimeSync timeSync;
 
 	static
 	{
 		CAPABILITIES.add(SslVisionDetectionTracked.Capability.CAPABILITY_DETECT_FLYING_BALLS);
 		CAPABILITIES.add(SslVisionDetectionTracked.Capability.CAPABILITY_DETECT_KICKED_BALLS);
-	}
-
-	public TrackerPacketGenerator()
-	{
-		timeSync = new TimeSync();
-	}
-
-
-	public TrackerPacketGenerator(final TimeSync timeSync)
-	{
-		this.timeSync = timeSync;
 	}
 
 
@@ -155,6 +142,6 @@ public class TrackerPacketGenerator
 
 	private double buildTimestamp(long timestamp)
 	{
-		return timeSync.reverseSync(timestamp);
+		return timestamp / 1e9;
 	}
 }

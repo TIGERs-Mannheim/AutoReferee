@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -32,6 +32,7 @@ import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
+import edu.tigers.sumatra.util.Safe;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.vision.IVisionFilterObserver;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
@@ -56,6 +57,7 @@ import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -309,8 +311,8 @@ public class WorldInfoCollector extends AWorldPredictor
 		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
 
 		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState);
-		consumers.forEach(c -> c.onNewWorldFrame(wfw));
-		observers.forEach(c -> c.onNewWorldFrame(wfw));
+		Safe.forEach(consumers, c -> c.onNewWorldFrame(wfw));
+		Safe.forEach(observers, c -> c.onNewWorldFrame(wfw));
 
 		visualize(wfw);
 	}
@@ -370,7 +372,14 @@ public class WorldInfoCollector extends AWorldPredictor
 		{
 			int port = getSubnodeConfiguration().getInt("ci-port", 11009);
 			ciGameControllerConnector = new CiGameControllerConnector(port);
-			ciGameControllerConnector.start();
+			try
+			{
+				ciGameControllerConnector.start();
+			} catch (IOException e)
+			{
+				log.error("Failed to start game controller", e);
+				ciGameControllerConnector = null;
+			}
 		}
 	}
 

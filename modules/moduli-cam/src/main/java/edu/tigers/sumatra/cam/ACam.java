@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -51,9 +51,9 @@ public abstract class ACam extends AModule
 	}
 
 
-	protected void notifyNewCameraFrame(final SSL_DetectionFrame frame, final TimeSync timeSync)
+	protected void notifyNewCameraFrame(final SSL_DetectionFrame frame)
 	{
-		CamDetectionFrame camDetectionFrame = camDetectionConverter.convertDetectionFrame(frame, timeSync);
+		CamDetectionFrame camDetectionFrame = camDetectionConverter.convertDetectionFrame(frame);
 		camDetectionFrame = camObjectFilter.filter(camDetectionFrame);
 		for (ICamFrameObserver observer : observers)
 		{

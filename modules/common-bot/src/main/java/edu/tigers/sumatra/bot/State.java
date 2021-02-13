@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
@@ -59,6 +59,12 @@ public class State implements IMirrorable<State>, IExportable, IInterpolatable<S
 	public static State zero()
 	{
 		return State.of(Pose.zero(), Vector3f.zero());
+	}
+
+
+	public static State nan()
+	{
+		return State.of(Pose.nan(), Vector3f.nan());
 	}
 
 

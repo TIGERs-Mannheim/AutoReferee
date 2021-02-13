@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.trajectory;
 
@@ -22,7 +22,7 @@ public class TrajectoryXyw implements ITrajectory<IVector3>
 	@Override
 	public IVector3 getPositionMM(final double t)
 	{
-		return Vector3.from2d(trajXy.getPositionMM(t), trajW.getPositionMM(t));
+		return Vector3.from2d(trajXy.getPositionMM(t), trajW.getPosition(t));
 	}
 
 

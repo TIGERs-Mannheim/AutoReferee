@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -7,13 +7,13 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
+import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
 import edu.tigers.sumatra.network.IReceiverObserver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,38 +25,38 @@ import java.nio.ByteBuffer;
 /**
  * The most important implementation of the {@link ACam}-type, which is capable of receiving SSL-Vision data on a
  * certain port (and multicast-group)
- *
- * @author Gero
  */
+@Log4j2
 public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, IConfigObserver
 {
-	private static final Logger log = LogManager.getLogger(SSLVisionCam.class.getName());
-
 	private static final int BUFFER_SIZE = 10000;
 	private final byte[] bufferArr = new byte[BUFFER_SIZE];
 
 	private Thread cam;
 	private MulticastUDPReceiver receiver;
 	private boolean expectIOE = false;
+	private int port;
+	private String address;
 
 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
 
 
-	@Configurable(defValue = "10006")
-	private static int port = 10006;
-
-	@Configurable(defValue = "224.5.23.2")
-	private static String address = "224.5.23.2";
-
 	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
 	private static String network = "";
 
-	private final TimeSync timeSync = new TimeSync();
 
 
 	static
 	{
 		ConfigRegistration.registerClass("user", SSLVisionCam.class);
+	}
+
+	@Override
+	public void initModule() throws InitModuleException
+	{
+		super.initModule();
+		port = getSubnodeConfiguration().getInt("port", 10006);
+		address = getSubnodeConfiguration().getString("address", "224.5.23.2");
 	}
 
 
@@ -127,8 +127,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 				// start with sending out the detection. It is most time critical
 				if (sslPacket.hasDetection())
 				{
-					timeSync.update(sslPacket.getDetection().getTCapture());
-					notifyNewCameraFrame(sslPacket.getDetection(), timeSync);
+					notifyNewCameraFrame(sslPacket.getDetection());
 				}
 
 				if (sslPacket.hasGeometry())
@@ -208,11 +207,5 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	public final String getAddress()
 	{
 		return address;
-	}
-
-
-	public TimeSync getTimeSync()
-	{
-		return timeSync;
 	}
 }

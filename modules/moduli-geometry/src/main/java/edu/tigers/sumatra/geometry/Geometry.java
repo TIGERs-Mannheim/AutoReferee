@@ -163,11 +163,9 @@ public class Geometry
 	@Configurable(defValue = "0", spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
 
-	@Configurable(
-			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" },
-			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06" },
-			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision"
-	)
+	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
+			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06", "0.03" },
+			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision")
 	private static double feedbackDelay = 0.06;
 
 
@@ -238,7 +236,8 @@ public class Geometry
 		touchLines.addAll(calcTouchLines());
 
 		lastCamGeometry = new CamGeometry(new HashMap<>(),
-				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()));
+				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()),
+				MessagesRobocupSslGeometry.SSL_GeometryModels.getDefaultInstance());
 	}
 
 
@@ -256,10 +255,6 @@ public class Geometry
 	private static synchronized void update()
 	{
 		instance = new Geometry();
-
-		String env = SumatraModel.getInstance().getEnvironment();
-		ConfigRegistration.applySpezis(ballParameters, "geom", "");
-		ConfigRegistration.applySpezis(ballParameters, "geom", env);
 	}
 
 
@@ -278,11 +273,38 @@ public class Geometry
 
 		extractGeometryFromFieldMarkings(geometry);
 
+		applyBallModels(geometry);
+
 		update();
 
 		instance.lastCamGeometry = saveCamGeometry;
 
 		instance.lastCamGeometry.update(geometry);
+	}
+
+
+	private static void applyBallModels(CamGeometry geometry)
+	{
+		BallParameters newBallParameters = new BallParameters();
+
+		String env = SumatraModel.getInstance().getEnvironment();
+		ConfigRegistration.applySpezis(newBallParameters, "geom", "");
+		ConfigRegistration.applySpezis(newBallParameters, "geom", env);
+
+		var models = geometry.getCamBallModels();
+		if (models.hasStraightTwoPhase())
+		{
+			newBallParameters.setAccSlide(models.getStraightTwoPhase().getAccSlide() * 1000);
+			newBallParameters.setAccRoll(models.getStraightTwoPhase().getAccRoll() * 1000);
+			newBallParameters.setKSwitch(models.getStraightTwoPhase().getKSwitch());
+		}
+		if (models.hasChipFixedLoss())
+		{
+			newBallParameters.setChipDampingXYFirstHop(models.getChipFixedLoss().getDampingXyFirstHop());
+			newBallParameters.setChipDampingXYOtherHops(models.getChipFixedLoss().getDampingXyOtherHops());
+			newBallParameters.setChipDampingZ(models.getChipFixedLoss().getDampingZ());
+		}
+		ballParameters = newBallParameters;
 	}
 
 
@@ -304,8 +326,8 @@ public class Geometry
 		if (leftPenaltyStretch.isPresent() && rightPenaltyStretch.isPresent())
 		{
 			// calculate length of penalty area front line
-			double leftLength = leftPenaltyStretch.get().directionVector().getLength2();
-			double rightLength = rightPenaltyStretch.get().directionVector().getLength2();
+			double leftLength = leftPenaltyStretch.get().getLine().directionVector().getLength2();
+			double rightLength = rightPenaltyStretch.get().getLine().directionVector().getLength2();
 
 			if (!SumatraMath.isEqual(leftLength, rightLength))
 			{
@@ -316,8 +338,8 @@ public class Geometry
 			penaltyAreaFrontLineLength = leftLength;
 
 			// calculate penalty area radius/distance to front line/distance to penalty mark
-			double leftDist = Math.abs(leftPenaltyStretch.get().supportVector().x());
-			double rightDist = Math.abs(rightPenaltyStretch.get().supportVector().x());
+			double leftDist = Math.abs(leftPenaltyStretch.get().getLine().supportVector().x());
+			double rightDist = Math.abs(rightPenaltyStretch.get().getLine().supportVector().x());
 			double fieldHalfLength = geometry.getField().getFieldLength() / 2.0;
 
 			if (!SumatraMath.isEqual(leftDist, rightDist))
@@ -346,7 +368,7 @@ public class Geometry
 		if (centerArc.isPresent())
 		{
 			// use radius + half thickness to reflect outer radius of field marking
-			centerCircleRadius = centerArc.get().radius() + (centerArc.get().getThickness() / 2.0);
+			centerCircleRadius = centerArc.get().getArc().radius() + (centerArc.get().getThickness() / 2.0);
 		} else
 		{
 			log.warn("CenterCircle arc not found in vision geometry. Using defaults.");
@@ -361,6 +383,8 @@ public class Geometry
 	{
 		String env = SumatraModel.getInstance().getEnvironment();
 		ConfigRegistration.applySpezi("geom", env);
+		ConfigRegistration.applySpezis(ballParameters, "geom", "");
+		ConfigRegistration.applySpezis(ballParameters, "geom", env);
 		update();
 	}
 

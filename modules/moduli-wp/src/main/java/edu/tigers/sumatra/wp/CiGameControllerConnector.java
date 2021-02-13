@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -40,7 +40,7 @@ public class CiGameControllerConnector
 	private TrackerPacketGenerator trackerPacketGenerator;
 
 
-	public synchronized void start()
+	public synchronized void start() throws IOException
 	{
 		log.trace("Starting");
 		trackerPacketGenerator = new TrackerPacketGenerator();
@@ -63,7 +63,7 @@ public class CiGameControllerConnector
 	}
 
 
-	private void connect()
+	private void connect() throws IOException
 	{
 		log.trace("Connecting");
 
@@ -82,7 +82,7 @@ public class CiGameControllerConnector
 				log.debug("Connection to SSL-Game-Controller failed", e);
 			}
 		}
-		log.warn("Connection to SSL-Game-Controller failed repeatedly");
+		throw new IOException("Connection to SSL-Game-Controller failed repeatedly");
 	}
 
 
@@ -125,6 +125,10 @@ public class CiGameControllerConnector
 
 	private void send(final SslGcCi.CiInput input)
 	{
+		if (socket == null)
+		{
+			return;
+		}
 		try
 		{
 			lastInput = input;
@@ -178,7 +182,13 @@ public class CiGameControllerConnector
 	{
 		if (socket == null)
 		{
-			connect();
+			try
+			{
+				connect();
+			} catch (IOException e)
+			{
+				log.warn("Failed to reconnect", e);
+			}
 		}
 		if (socket == null)
 		{
@@ -200,7 +210,7 @@ public class CiGameControllerConnector
 			try
 			{
 				lastInput.writeDelimitedTo(stream);
-				String base64EncodedInput = new String(baos.toByteArray());
+				String base64EncodedInput = baos.toString();
 				log.error("Base64 encoded last input: {}", base64EncodedInput);
 			} catch (IOException e)
 			{

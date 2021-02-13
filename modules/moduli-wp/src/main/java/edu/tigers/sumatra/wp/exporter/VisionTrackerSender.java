@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.exporter;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.sumatra.cam.SSLVisionCam;
-import edu.tigers.sumatra.cam.TimeSync;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.network.MulticastUDPTransmitter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
@@ -31,10 +29,9 @@ public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 		int port = getSubnodeConfiguration().getInt("port", 10010);
 		transmitter = new MulticastUDPTransmitter(address, port);
 
+		trackerPacketGenerator = new TrackerPacketGenerator();
+
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
-		TimeSync timeSync = SumatraModel.getInstance().getModuleOpt(SSLVisionCam.class).map(SSLVisionCam::getTimeSync)
-				.orElseGet(TimeSync::new);
-		trackerPacketGenerator = new TrackerPacketGenerator(timeSync);
 	}
 
 

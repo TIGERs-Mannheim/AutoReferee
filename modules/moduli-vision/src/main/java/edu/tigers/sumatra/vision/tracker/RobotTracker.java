@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.tracker;
 
@@ -102,7 +102,7 @@ public class RobotTracker
 	 */
 	public RobotTracker(final CamRobot robot, final FilteredVisionBot filtered)
 	{
-		RealVector xy = new ArrayRealVector(filtered.getPos().toArray(), filtered.getVel().toArray());
+		RealVector xy = new ArrayRealVector(filtered.getPos().toArray(), filtered.getVel().multiplyNew(1000.0).toArray());
 		RealVector w = new ArrayRealVector(new double[] { filtered.getOrientation(), filtered.getAngularVel() });
 
 		filterXY = new TrackingFilterPosVel2D(xy, initialCovarianceXY, modelErrorXY, measErrorXY,

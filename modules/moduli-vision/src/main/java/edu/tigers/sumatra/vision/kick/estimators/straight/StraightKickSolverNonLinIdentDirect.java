@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators.straight;
 
@@ -10,6 +10,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 /**
  * @author AndreR <andre@ryll.cc>
  */
+@Log4j2
 public class StraightKickSolverNonLinIdentDirect
 {
 	@SuppressWarnings("squid:S1166") // Exception from solver not logged
@@ -55,8 +57,8 @@ public class StraightKickSolverNonLinIdentDirect
 		double kSwitch = Geometry.getBallParameters().getKSwitch();
 
 		double[] initialGuess = new double[] { velocities.get(0).getVelocity(), accSlide, accRoll, kSwitch };
-		double[] lowerBounds = new double[] { 100, -8000, -2000, 0.5 };
-		double[] upperBounds = new double[] { 8000, -100, -10, 0.8 };
+		double[] lowerBounds = new double[] { 100, -20000, -2000, 0.5 };
+		double[] upperBounds = new double[] { 12000, -100, -10, 0.8 };
 
 		CMAESOptimizer optimizer = new CMAESOptimizer(10000, 0.1, true, 10, 0, new MersenneTwister(), false, null);
 
@@ -76,6 +78,7 @@ public class StraightKickSolverNonLinIdentDirect
 					records.get(0).gettCapture(), optimum.getPointRef()));
 		} catch (IllegalStateException | MathIllegalArgumentException e)
 		{
+			log.debug("No solution found", e);
 			return Optional.empty();
 		}
 	}

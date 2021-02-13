@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
@@ -48,7 +48,7 @@ public final class SumatraModel extends Moduli
 	// --- moduli config ---
 	private static final String KEY_MODULI_CONFIG = SumatraModel.class.getName() + ".moduliConfig";
 	public static final String MODULI_CONFIG_PATH = "./config/moduli/";
-	public static final String MODULI_CONFIG_FILE_DEFAULT = "sim.xml";
+	private static final String MODULI_CONFIG_FILE_DEFAULT = "sim.xml";
 
 	// Application Properties
 	private static final String CONFIG_SETTINGS_PATH = "./config/";
@@ -128,7 +128,15 @@ public final class SumatraModel extends Moduli
 	@SuppressWarnings("squid:S1160") // throwing two exceptions, because this is only a proxy method
 	public void loadModulesOfConfig(final String configFileName) throws DependencyException, LoadModulesException
 	{
-		super.loadModules(MODULI_CONFIG_PATH + configFileName);
+		try
+		{
+			super.loadModules(MODULI_CONFIG_PATH + configFileName);
+		} catch (LoadModulesException e)
+		{
+			log.error("Could not load moduli config {}. Trying default one.", configFileName, e);
+			setCurrentModuliConfig(MODULI_CONFIG_FILE_DEFAULT);
+			super.loadModules(MODULI_CONFIG_PATH + MODULI_CONFIG_FILE_DEFAULT);
+		}
 		updateInternalStateFromGlobalConfig();
 	}
 

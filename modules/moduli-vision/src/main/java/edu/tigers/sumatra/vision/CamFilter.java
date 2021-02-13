@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -106,6 +106,9 @@ public class CamFilter
 	@Configurable(defValue = "130.0", comment = "Max. height for ball-bot collision check")
 	private static double maxHeightForCollision = 130.0;
 
+	@Configurable(defValue = "200.0", comment = "Max. distance to copy state from filtered bot to new trackers")
+	private static double copyTrackerMaxDistance = 200.0;
+
 	static
 	{
 		ConfigRegistration.registerClass("vision", CamFilter.class);
@@ -201,7 +204,7 @@ public class CamFilter
 		{
 			if (lastCamFrameId != 0)
 			{
-				log.warn("Missing cam frame: " + lastCamFrameId + " -> " + frame.getCamFrameNumber());
+				log.warn("Non-consecutive cam frame: " + lastCamFrameId + " -> " + frame.getCamFrameNumber());
 			}
 			frameIntervalFilter.reset();
 		}
@@ -216,10 +219,6 @@ public class CamFilter
 		IVector2 estimate = frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(frame.gettCapture(), 0.0));
 
 		double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
-		if (tCapture < 0)
-		{
-			log.warn("Negative tCapture: " + tCapture + ". Check your vision-setup.");
-		}
 
 		return new CamDetectionFrame(frame, (long) tCapture);
 	}
@@ -368,7 +367,8 @@ public class CamFilter
 				.findFirst();
 
 		if (filteredBot.isPresent() && fieldRectWithBoundary.isPresent()
-				&& fieldRectWithBoundary.get().isPointInShape(filteredBot.get().getPos()))
+				&& fieldRectWithBoundary.get().isPointInShape(filteredBot.get().getPos())
+				&& filteredBot.get().getPos().distanceTo(robot.getPos()) < copyTrackerMaxDistance)
 		{
 			// but it is on a different camera already, copy its state from there
 			tracker = new RobotTracker(robot, filteredBot.get());

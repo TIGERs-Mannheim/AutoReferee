@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
@@ -49,7 +49,7 @@ public class BallVisCalc implements IWpCalc
 		shapeMap.get(EWpShapesLayer.BALL).add(point);
 
 		var invisibleFor = ball.invisibleFor();
-		if (invisibleFor > 0)
+		if (invisibleFor > 0.05)
 		{
 			shapeMap.get(EWpShapesLayer.BALL)
 					.add(new DrawableAnnotation(ball.getPos(), String.format("Invisible for:\n%.2fs", invisibleFor))

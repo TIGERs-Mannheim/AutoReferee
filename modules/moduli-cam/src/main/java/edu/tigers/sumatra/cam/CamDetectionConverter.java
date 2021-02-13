@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.cam;
@@ -47,14 +47,12 @@ public class CamDetectionConverter
 
 	/**
 	 * @param detectionFrame SSL vision frame from a single camera
-	 * @param timeSync sync handle to convert timestamps
 	 * @return a cam detection frame based on the SSL vision frame
 	 */
-	public CamDetectionFrame convertDetectionFrame(final MessagesRobocupSslDetection.SSL_DetectionFrame detectionFrame,
-			final TimeSync timeSync)
+	public CamDetectionFrame convertDetectionFrame(final MessagesRobocupSslDetection.SSL_DetectionFrame detectionFrame)
 	{
-		long localCaptureNs = timeSync.sync(detectionFrame.getTCapture());
-		long localSentNs = timeSync.sync(detectionFrame.getTSent());
+		long localCaptureNs = (long) (detectionFrame.getTCapture() * 1e9);
+		long localSentNs = (long) (detectionFrame.getTSent() * 1e9);
 
 		final List<CamBall> balls = new ArrayList<>();
 		final List<CamRobot> blues = new ArrayList<>();

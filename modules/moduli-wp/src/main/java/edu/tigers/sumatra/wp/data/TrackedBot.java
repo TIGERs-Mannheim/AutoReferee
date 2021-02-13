@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
 import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.MoveConstraints;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.bot.State;
@@ -390,11 +391,9 @@ public final class TrackedBot implements ITrackedBot
 		numbers.add(robotInfo.getDribbleRpm());
 		numbers.add(robotInfo.isBarrierInterrupted() ? 1 : 0);
 		numbers.add(tAssembly);
-		numbers.addAll(getBufferedTrajState().map(bs -> Vector3.from2d(bs.getPos(), bs.getOrientation()))
-				.orElse(Vector3.zero()).getNumberList());
-		numbers.addAll(getBufferedTrajState().map(bs -> Vector3.from2d(bs.getVel2(), bs.getAngularVel()))
-				.orElse(Vector3.zero()).getNumberList());
+		numbers.addAll(getBufferedTrajState().orElse(State.nan()).getNumberList());
 		numbers.add(trackingQuality.getCurDistance());
+		numbers.addAll(robotInfo.getInternalState().orElse(BotState.nan()).getNumberList());
 		return numbers;
 	}
 
@@ -406,7 +405,10 @@ public final class TrackedBot implements ITrackedBot
 				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleRpm", "barrierInterrupted", "tAssembly",
 				"buffered_pos_x", "buffered_pos_y", "buffered_pos_z",
 				"buffered_vel_x", "buffered_vel_y", "buffered_vel_z",
-				"dist2Traj");
+				"dist2Traj",
+				"feedback_pos_x", "feedback_pos_y", "feedback_pos_z",
+				"feedback_vel_x", "feedback_vel_y", "feedback_vel_z"
+		);
 	}
 
 

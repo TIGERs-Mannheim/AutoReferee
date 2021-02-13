@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.circle;
@@ -60,7 +60,7 @@ public class Circle extends ACircle
 	 */
 	protected Circle(final IVector2 center, final double radius)
 	{
-		if (radius <= 0)
+		if (radius < 0)
 		{
 			throw new IllegalArgumentException("Radius of a circle must be larger than zero!");
 		}

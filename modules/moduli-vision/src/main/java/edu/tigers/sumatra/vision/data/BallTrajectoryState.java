@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -100,7 +100,7 @@ public class BallTrajectoryState implements IMirrorable<BallTrajectoryState>
 		}
 
 		long switchTimestamp = timestampNow;
-		if (getAcc().getLength2() > 1e-6)
+		if (getAcc().getLength2() > 1e-6 && vSwitchToRoll > 0.0)
 		{
 			switchTimestamp =
 					timestampNow + (long) (((vel.getLength2() - vSwitchToRoll) / getAcc().getLength2()) * 1e9);

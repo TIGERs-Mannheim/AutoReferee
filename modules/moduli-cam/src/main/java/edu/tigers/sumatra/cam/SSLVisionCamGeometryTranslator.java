@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -14,15 +14,9 @@ import java.util.Map;
 
 /**
  * Translate geometry data from protobuf message to our format
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class SSLVisionCamGeometryTranslator
 {
-	/**
-	 * @param geometryData
-	 * @return
-	 */
 	public CamGeometry translate(final SSL_GeometryData geometryData)
 	{
 		Map<Integer, CamCalibration> calibrations = new HashMap<>();
@@ -30,6 +24,6 @@ public class SSLVisionCamGeometryTranslator
 
 		CamFieldSize fieldSize = new CamFieldSize(geometryData.getField());
 
-		return new CamGeometry(calibrations, fieldSize);
+		return new CamGeometry(calibrations, fieldSize, geometryData.getModels());
 	}
 }

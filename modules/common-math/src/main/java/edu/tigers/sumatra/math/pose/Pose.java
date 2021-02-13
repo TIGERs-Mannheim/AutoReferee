@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.pose;
@@ -57,6 +57,12 @@ public class Pose implements IMirrorable<Pose>
 	public static Pose zero()
 	{
 		return Pose.from(Vector3f.zero());
+	}
+
+
+	public static Pose nan()
+	{
+		return Pose.from(Vector3f.nan());
 	}
 
 
