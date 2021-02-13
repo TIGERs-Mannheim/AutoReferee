@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 plugins {
-    id "java-library"
+    id 'sumatra.java-conventions'
+    id 'java-library'
 }
 
 dependencies {

@@ -3,8 +3,9 @@
  */
 
 plugins {
-    id "java-library"
-    id "com.google.protobuf"
+    id 'sumatra.java-conventions'
+    id 'java-library'
+    id 'sumatra.protobuf-conventions'
 }
 
 dependencies {
