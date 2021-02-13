@@ -12,6 +12,12 @@ configurations {
     gc
 }
 
+repositories {
+    maven {
+        url  "https://dl.bintray.com/robocup-ssl/ssl-game-controller"
+    }
+}
+
 def osClassifier = {
     def os = System.getProperty("os.name").toLowerCase()
     if (os.contains("windows")) {

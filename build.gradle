@@ -111,6 +111,14 @@ dependencies {
     implementation 'commons-cli:commons-cli:1.4'
 }
 
+allprojects {
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:1.18.12"
+        compileOnly "org.projectlombok:lombok:1.18.12"
+        permitUnusedDeclared "org.projectlombok:lombok:1.18.12"
+    }
+}
+
 application {
     mainClass.set('edu.tigers.autoref.AutoReferee')
     applicationDefaultJvmArgs = [
