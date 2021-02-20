@@ -8,7 +8,7 @@ We use Gradle for building the application and IntelliJ as the primary IDE.
 All dependencies will be downloaded automatically, so you need an internet connection for the build.
 
 ## System Requirements
- * Java JDK 8
+ * Java JDK 11
  * Internet connection
  * no limitations on OS known
 
