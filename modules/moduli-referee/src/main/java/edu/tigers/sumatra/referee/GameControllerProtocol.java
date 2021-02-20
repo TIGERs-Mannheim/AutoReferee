@@ -1,19 +1,18 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
+
+import com.google.protobuf.Message;
+import com.google.protobuf.Parser;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.google.protobuf.Message;
-import com.google.protobuf.Parser;
 
 
 /**
@@ -23,10 +22,10 @@ import com.google.protobuf.Parser;
  * For more details about this protocol, visit the Repository of the official SSL-Game-Controller:
  * https://github.com/RoboCup-SSL/ssl-game-controller
  */
+@Log4j2
 public class GameControllerProtocol
 {
-	private static final Logger log = LogManager.getLogger(GameControllerProtocol.class);
-
+	@Setter
 	private String hostname;
 	private Socket socket;
 	private int port;
@@ -115,7 +114,7 @@ public class GameControllerProtocol
 			return true;
 		} catch (IOException e)
 		{
-			log.warn("Connection to SSL-Game-Controller Failed", e);
+			log.warn("Connection to SSL-Game-Controller ({}:{}) failed", hostname, port, e);
 		}
 		return false;
 	}

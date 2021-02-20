@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.remote;
 
@@ -62,6 +62,12 @@ public class AutoRefToGameControllerConnector implements Runnable
 			log.error("Could not read certificates from classpath", e);
 			signer = new MessageSigner();
 		}
+	}
+
+
+	public void updateHostname(String hostname)
+	{
+		protocol.setHostname(hostname);
 	}
 
 
@@ -208,6 +214,7 @@ public class AutoRefToGameControllerConnector implements Runnable
 	{
 		this.responseObserverList.add(observer);
 	}
+
 
 	private static class QueueEntry
 	{

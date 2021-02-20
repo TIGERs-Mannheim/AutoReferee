@@ -1,13 +1,7 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine;
-
-import java.net.InetAddress;
-import java.util.Set;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
@@ -21,6 +15,11 @@ import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.net.InetAddress;
+import java.util.Set;
 
 
 public class ActiveAutoRefEngine extends AutoRefEngine
@@ -65,6 +64,12 @@ public class ActiveAutoRefEngine extends AutoRefEngine
 	@Override
 	public void process(final IAutoRefFrame frame)
 	{
+		AReferee referee = SumatraModel.getInstance().getModule(AReferee.class);
+		String hostname = referee.getActiveSource().getRefBoxAddress()
+				.map(InetAddress::getHostAddress)
+				.orElse(DEFAULT_REFEREE_HOST);
+		remote.updateHostname(hostname);
+
 		processEngine(frame).forEach(this::processGameEvent);
 
 		if (SumatraModel.getInstance().isSimulation())
