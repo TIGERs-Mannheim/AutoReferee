@@ -27,14 +27,15 @@ import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
  * Send out SSL vision frames based on WorldFrames
  */
+@Log4j2
 public class SSLVisionSender extends AModule implements IWorldFrameObserver
 {
-	private static final String ADDRESS = "224.5.23.2";
 	private static final double GEOMETRY_BROADCAST_INTERVAL = 3;
 
 	private MulticastUDPTransmitter transmitter;
@@ -45,8 +46,20 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 	@Override
 	public void startModule()
 	{
+		String address = getSubnodeConfiguration().getString("address", "224.5.23.2");
 		int port = getSubnodeConfiguration().getInt("port", 11006);
-		transmitter = new MulticastUDPTransmitter(ADDRESS, port);
+		transmitter = new MulticastUDPTransmitter(address, port);
+
+		String nifName = getSubnodeConfiguration().getString("interface", null);
+		if (nifName != null)
+		{
+			log.info("Publishing vision packets to {}:{} ({})", address, port, nifName);
+			transmitter.connectTo(nifName);
+		} else
+		{
+			log.info("Publishing vision packets to {}:{} (all interfaces)", address, port);
+			transmitter.connectToAllInterfaces();
+		}
 
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
 	}

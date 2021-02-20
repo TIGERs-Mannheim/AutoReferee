@@ -1,32 +1,37 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.network;
 
 
+import lombok.extern.log4j.Log4j2;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
  * This class is an {@link ITransmitter} implementation capable of sending some {@code byte[]}-data via UDP to a
  * multicast-group.
  */
+@Log4j2
 public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 {
-	private static final Logger log = LogManager.getLogger(MulticastUDPTransmitter.class);
 	private final int targetPort;
 	private final InetAddress targetAddr;
 
-	private MulticastSocket socket = null;
+	private final List<MulticastSocket> sockets = new ArrayList<>();
 	private boolean lastSendFailed = false;
 
 
@@ -38,13 +43,65 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	{
 		this.targetPort = targetPort;
 		this.targetAddr = addressByName(targetAddr);
+	}
 
+
+	private List<NetworkInterface> getNetworkInterfaces()
+	{
 		try
 		{
-			socket = new MulticastSocket();
-		} catch (IOException err)
+			return NetworkInterface.networkInterfaces().collect(Collectors.toUnmodifiableList());
+		} catch (SocketException e)
 		{
-			log.error("Error while creating MulticastSocket!", err);
+			log.error("Could not get available network interfaces", e);
+		}
+		return Collections.emptyList();
+	}
+
+
+	public void connectToAllInterfaces()
+	{
+		var networkInterfaces = getNetworkInterfaces();
+		for (var nif : networkInterfaces)
+		{
+			connectTo(nif);
+		}
+	}
+
+
+	public void connectTo(String nifName)
+	{
+		try
+		{
+			var nif = NetworkInterface.getByName(nifName);
+			if (nif != null)
+			{
+				connectTo(nif);
+			} else
+			{
+				log.warn("Specified nif not found: {}", nifName);
+			}
+		} catch (SocketException e)
+		{
+			log.error("Could not get an interface by name", e);
+		}
+	}
+
+
+	private void connectTo(NetworkInterface nif)
+	{
+		try
+		{
+			if (nif.supportsMulticast())
+			{
+				@SuppressWarnings("squid:S2095") // closing resources: can not close resource here
+				var socket = new MulticastSocket();
+				socket.setNetworkInterface(nif);
+				sockets.add(socket);
+			}
+		} catch (IOException e)
+		{
+			log.warn("Could not connect at {}", nif, e);
 		}
 	}
 
@@ -65,11 +122,11 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	@Override
 	public synchronized boolean send(final byte[] data)
 	{
-		if (socket == null)
+		if (sockets.isEmpty())
 		{
 			if (!lastSendFailed)
 			{
-				log.error("Transmitter is not ready to send!");
+				log.warn("Transmitter is not ready to send!");
 				lastSendFailed = true;
 			}
 			return false;
@@ -77,39 +134,37 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 
 		DatagramPacket tempPacket = new DatagramPacket(data, data.length, targetAddr, targetPort);
 
-		// Receive _outside_ the synchronized state, to prevent blocking of the state
-		try
+		for (var socket : sockets)
 		{
-			socket.send(tempPacket); // DatagramPacket is sent...
-			lastSendFailed = false;
-		} catch (NoRouteToHostException nrh)
-		{
-			log.warn("No route to host: '" + targetAddr + "'. Dropping packet...", nrh);
-			return false;
-		} catch (IOException err)
-		{
-			if (!lastSendFailed)
+			// Receive _outside_ the synchronized state, to prevent blocking of the state
+			try
 			{
-				log.error("Error while sending data to: '" + targetAddr + ":" + targetPort + "'. "
-						+ "If you are not in any network, multicast is not supported by default. "
-						+ "On Linux, you can enable multicast on the loopback interface by executing following commands as root: "
-						+ "route add -net 224.0.0.0 netmask 240.0.0.0 dev lo && ifconfig lo multicast", err);
-				lastSendFailed = true;
+				socket.send(tempPacket); // DatagramPacket is sent...
+				lastSendFailed = false;
+			} catch (NoRouteToHostException nrh)
+			{
+				log.warn("No route to host: '" + targetAddr + "'. Dropping packet...", nrh);
+			} catch (IOException err)
+			{
+				if (!lastSendFailed)
+				{
+					log.warn("Error while sending data to: '" + targetAddr + ":" + targetPort + "'. "
+							+ "If you are not in any network, multicast is not supported by default. "
+							+ "On Linux, you can enable multicast on the loopback interface by executing following commands as root: "
+							+ "route add -net 224.0.0.0 netmask 240.0.0.0 dev lo && ifconfig lo multicast", err);
+					lastSendFailed = true;
+				}
 			}
-			return false;
 		}
 
-		return true;
+		return !lastSendFailed;
 	}
 
 
 	@Override
 	public synchronized void close()
 	{
-		if (socket != null)
-		{
-			socket.close();
-			socket = null;
-		}
+		sockets.forEach(MulticastSocket::close);
+		sockets.clear();
 	}
 }

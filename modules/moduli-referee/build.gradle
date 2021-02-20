@@ -6,7 +6,6 @@ plugins {
     id 'sumatra.java-conventions'
     id 'java-library'
     id 'sumatra.protobuf-conventions'
-    id "de.undercouch.download" version "4.0.4"
 }
 
 configurations {

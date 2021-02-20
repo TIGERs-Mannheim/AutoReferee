@@ -43,7 +43,7 @@ public class CiGameControllerConnector
 	public synchronized void start() throws IOException
 	{
 		log.trace("Starting");
-		trackerPacketGenerator = new TrackerPacketGenerator();
+		trackerPacketGenerator = new TrackerPacketGenerator("TIGERs");
 		watchdog = new Watchdog(5000, this.getClass().getSimpleName(), this::onTimeout);
 		watchdog.start();
 		connect();

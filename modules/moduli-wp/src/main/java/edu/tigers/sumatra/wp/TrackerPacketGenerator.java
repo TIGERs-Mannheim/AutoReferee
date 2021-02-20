@@ -17,6 +17,7 @@ import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.proto.SslVisionDetectionTracked;
 import edu.tigers.sumatra.wp.proto.SslVisionWrapperTracked;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,9 +26,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
+@RequiredArgsConstructor
 public class TrackerPacketGenerator
 {
-	private static final String SOURCE_NAME = "TIGERs";
+	private final String sourceName;
 	private static final Set<SslVisionDetectionTracked.Capability> CAPABILITIES = new HashSet<>();
 	private int frameNumber = 0;
 	private final String uuid = UUID.randomUUID().toString();
@@ -53,7 +55,7 @@ public class TrackerPacketGenerator
 		SslVisionWrapperTracked.TrackerWrapperPacket.Builder wrapper = SslVisionWrapperTracked.TrackerWrapperPacket
 				.newBuilder();
 		wrapper.setUuid(uuid);
-		wrapper.setSourceName(SOURCE_NAME);
+		wrapper.setSourceName(sourceName);
 		wrapper.setTrackedFrame(frame);
 		return wrapper.build();
 	}

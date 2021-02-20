@@ -5,6 +5,7 @@
 plugins {
     id 'java'
     id 'jacoco'
+    id 'idea'
     id 'ca.cutterslade.analyze'
 }
 

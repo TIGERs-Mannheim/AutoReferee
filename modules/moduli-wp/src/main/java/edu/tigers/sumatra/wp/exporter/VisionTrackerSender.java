@@ -12,15 +12,18 @@ import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.TrackerPacketGenerator;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.proto.SslVisionWrapperTracked;
+import lombok.extern.log4j.Log4j2;
 
 
 /**
  * Export standardized vision tracking data.
  */
+@Log4j2
 public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 {
 	private MulticastUDPTransmitter transmitter;
 	private TrackerPacketGenerator trackerPacketGenerator;
+
 
 	@Override
 	public void startModule()
@@ -29,7 +32,19 @@ public class VisionTrackerSender extends AModule implements IWorldFrameObserver
 		int port = getSubnodeConfiguration().getInt("port", 10010);
 		transmitter = new MulticastUDPTransmitter(address, port);
 
-		trackerPacketGenerator = new TrackerPacketGenerator();
+		String nifName = getSubnodeConfiguration().getString("interface", null);
+		if (nifName != null)
+		{
+			log.info("Publishing vision tracking packets to {}:{} ({})", address, port, nifName);
+			transmitter.connectTo(nifName);
+		} else
+		{
+			log.info("Publishing vision tracking packets to {}:{} (all interfaces)", address, port);
+			transmitter.connectToAllInterfaces();
+		}
+
+		String sourceName = getSubnodeConfiguration().getString("source-name", "TIGERs");
+		trackerPacketGenerator = new TrackerPacketGenerator(sourceName);
 
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
 	}
