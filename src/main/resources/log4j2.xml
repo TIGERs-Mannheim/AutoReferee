@@ -9,7 +9,7 @@
             <PatternLayout pattern="%d %p [%t|%c{1}] %m%n"/>
         </SumatraAppender>
         <Async name="ASYNC">
-            <AppenderRef ref="CONSOLE" level="warn"/>
+            <AppenderRef ref="CONSOLE" level="info"/>
             <AppenderRef ref="berkeley" level="all"/>
             <AppenderRef ref="logView" level="all"/>
         </Async>
