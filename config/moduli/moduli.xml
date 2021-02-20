@@ -66,8 +66,10 @@
         <implementation>edu.tigers.sumatra.wp.exporter.VisionTrackerSender</implementation>
 
         <properties>
+            <source-name>TIGERs AutoRef</source-name>
             <address>224.5.23.2</address>
             <port>10010</port>
+<!--            <interface>enp12s0</interface>-->
         </properties>
     </module>
 
