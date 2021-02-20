@@ -16,6 +16,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import javax.swing.SwingUtilities;
+
 
 /**
  * Main class for auto referee.
@@ -36,10 +38,11 @@ public final class AutoReferee
 		cmd = parseOptions(args, options, new DefaultParser());
 
 		ifHasOption("h", () -> printHelp(options));
-		ifNotHasOption("hl", AutoReferee::startUi);
-		ifHasOption("a", AutoReferee::activateAutoRef);
+		ifNotHasOption("hl", () -> SwingUtilities.invokeLater(AutoReferee::startUi));
 		  
 		start();
+		
+		ifHasOption("a", AutoReferee::activateAutoRef);
 	}
 
 
