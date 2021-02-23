@@ -8,16 +8,6 @@ plugins {
     id 'sumatra.protobuf-conventions'
 }
 
-configurations {
-    gc
-}
-
-repositories {
-    maven {
-        url  "https://dl.bintray.com/robocup-ssl/ssl-game-controller"
-    }
-}
-
 def osClassifier = {
     def os = System.getProperty("os.name").toLowerCase()
     if (os.contains("windows")) {
@@ -29,14 +19,6 @@ def osClassifier = {
     } else {
         throw new IllegalStateException("Unknown operating system: ${os}")
     }
-}()
-
-def osExt = {
-    def os = System.getProperty("os.name").toLowerCase()
-    if (os.contains("windows")) {
-        return "exe"
-    }
-    return ""
 }()
 
 dependencies {
@@ -60,13 +42,5 @@ dependencies {
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.assertj:assertj-core:3.16.1'
 
-    gc "com.github.robocup-ssl:ssl-game-controller:v2.4.0:${osClassifier}@${osExt}"
+    runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:2.6.2.1:${osClassifier}"
 }
-
-task copyGameControllerBinary(type: Copy) {
-    from configurations.gc.singleFile
-    into "${buildDir}/resources/main"
-    rename { "ssl-game-controller" }
-}
-
-processResources.finalizedBy(copyGameControllerBinary)
