@@ -78,6 +78,7 @@ public class UdpTransceiver
 			} catch (IOException e)
 			{
 				log.warn("Failed to setup socket for {}", this, e);
+				socket = null;
 			}
 		}
 	}
@@ -125,7 +126,7 @@ public class UdpTransceiver
 
 	public void send(byte[] bytes)
 	{
-		if (socket == null)
+		if (socket == null || address == null)
 		{
 			return;
 		}

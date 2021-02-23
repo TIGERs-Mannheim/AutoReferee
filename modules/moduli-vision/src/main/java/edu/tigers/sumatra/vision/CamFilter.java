@@ -35,16 +35,20 @@ import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
+import lombok.Getter;
+import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -62,6 +66,8 @@ public class CamFilter
 	private final FirstOrderMultiSampleEstimator frameIntervalFilter = new FirstOrderMultiSampleEstimator(
 			FRAME_FILTER_NUM_SAMPLES);
 	private long lastCamFrameId;
+	@Getter
+	private long timestamp;
 
 	private Optional<CamCalibration> calibration = Optional.empty();
 	private Optional<IRectangle> fieldRectWithBoundary = Optional.empty();
@@ -71,13 +77,13 @@ public class CamFilter
 	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
 	private long lastBallVisibleTimestamp = 0;
 
-	private final Map<BotID, RobotTracker> robots = new HashMap<>();
+	private final Map<BotID, RobotTracker> robots = new ConcurrentHashMap<>();
 
-	private final List<BallTracker> balls = new ArrayList<>();
+	private final List<BallTracker> balls = Collections.synchronizedList(new ArrayList<>());
 
-	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
+	private Map<BotID, RobotInfo> robotInfoMap = new ConcurrentHashMap<>();
 
-	private CircularFifoQueue<CamBall> ballHistory = new CircularFifoQueue<>(100);
+	private Queue<CamBall> ballHistory = QueueUtils.synchronizedQueue(new CircularFifoQueue<>(100));
 
 	@Configurable(defValue = "1.0", comment = "Time in [s] after an invisible ball is removed")
 	private static double invisibleLifetimeBall = 1.0;
@@ -132,16 +138,15 @@ public class CamFilter
 	 *
 	 * @param frame
 	 * @param lastFilteredFrame
-	 * @return adjusted tCapture
 	 */
-	public long update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
+	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
 	{
 		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
 
 		processRobots(adjustedFrame, lastFilteredFrame.getBots());
 		processBalls(adjustedFrame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots());
 
-		return adjustedFrame.gettCapture();
+		timestamp = adjustedFrame.gettCapture();
 	}
 
 
@@ -204,7 +209,8 @@ public class CamFilter
 		{
 			if (lastCamFrameId != 0)
 			{
-				log.warn("Non-consecutive cam frame: " + lastCamFrameId + " -> " + frame.getCamFrameNumber());
+				log.warn("Non-consecutive cam frame for cam {}: {} -> {}", frame.getCameraId(), lastCamFrameId,
+						frame.getCamFrameNumber());
 			}
 			frameIntervalFilter.reset();
 		}

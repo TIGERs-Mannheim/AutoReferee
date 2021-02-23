@@ -35,7 +35,6 @@ import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.Color;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,11 +57,8 @@ import java.util.stream.Collectors;
 public class VisionFilterImpl extends AVisionFilter
 		implements IViewportArchitect, IBallModelIdentificationObserver
 {
-	@Configurable(defValue = "0.0125", comment = "Publish frequency")
+	@Configurable(defValue = "0.0125", comment = "Publish frequency (requires restart)")
 	private static double publishDt = 0.0125;
-
-	@Configurable(defValue = "false", comment = "When using a publish thread, compensate the frame age with prediction")
-	private static boolean predictToNow = false;
 
 	static
 	{
@@ -77,38 +72,22 @@ public class VisionFilterImpl extends AVisionFilter
 	private final RobotQualityInspector robotQualityInspector = new RobotQualityInspector();
 
 	private Map<Integer, CamFilter> cams = new ConcurrentHashMap<>();
-	private VisionFilterFrame lastFrame = new VisionFilterFrame(System.nanoTime(),
-			FilteredVisionFrame.createEmptyFrame());
+	private FilteredVisionFrame lastFrame = FilteredVisionFrame.createEmptyFrame();
 	private KickEvent lastKickEvent;
 	private BallFilterOutput lastBallFilterOutput = new BallFilterOutput(
-			lastFrame.frame.getBall(),
-			lastFrame.frame.getBall().getPos(),
+			lastFrame.getBall(),
+			lastFrame.getBall().getPos(),
 			new BallFilterPreprocessorOutput(null, null, null)
 	);
 
-	private ExecutorService filterExecutor = null;
-	private ScheduledExecutorService publisherExecutor = null;
-	private Publisher publisher = new Publisher();
+	private ScheduledExecutorService publisherExecutor;
 
 
-	private class Publisher implements Runnable
+	private void publish()
 	{
-		@Override
-		public void run()
-		{
-			var currentFrame = lastFrame;
-
-			long frameNow = currentFrame.frame.getTimestamp();
-			if (predictToNow)
-			{
-				var systemNow = System.nanoTime();
-				var frameAge = Math.max(0, systemNow - currentFrame.systemTimestamp);
-				frameNow += frameAge;
-			}
-
-			var extrapolatedFrame = extrapolateFilteredFrame(currentFrame.frame, frameNow);
-			publishFilteredVisionFrame(extrapolatedFrame);
-		}
+		lastFrame = constructFilteredVisionFrame(lastFrame);
+		var extrapolatedFrame = extrapolateFilteredFrame(lastFrame, lastFrame.getTimestamp());
+		publishFilteredVisionFrame(extrapolatedFrame);
 	}
 
 
@@ -141,28 +120,20 @@ public class VisionFilterImpl extends AVisionFilter
 	@Override
 	protected void updateCamDetectionFrame(final CamDetectionFrame camDetectionFrame)
 	{
-		long tReceive = System.nanoTime();
 		if (camDetectionFrame.gettCapture() <= 0)
 		{
 			// skip negative timestamps. They can produce unexpected behavior
 			return;
 		}
-		if (filterExecutor == null)
+		processCamDetectionFrame(camDetectionFrame);
+		if (publisherExecutor == null)
 		{
-			var newFrame = processDetectionFrame(camDetectionFrame, lastFrame.frame);
-			var extrapolatedFrame = extrapolateFilteredFrame(newFrame, newFrame.getTimestamp());
-			publishFilteredVisionFrame(extrapolatedFrame);
-			lastFrame = new VisionFilterFrame(tReceive, newFrame);
-		} else
-		{
-			filterExecutor.submit(() ->
-					lastFrame = new VisionFilterFrame(tReceive, processDetectionFrame(camDetectionFrame, lastFrame.frame))
-			);
+			publish();
 		}
 	}
 
 
-	private FilteredVisionFrame processDetectionFrame(CamDetectionFrame camDetectionFrame, FilteredVisionFrame lastFrame)
+	private void processCamDetectionFrame(CamDetectionFrame camDetectionFrame)
 	{
 		int camId = camDetectionFrame.getCameraId();
 
@@ -170,19 +141,28 @@ public class VisionFilterImpl extends AVisionFilter
 		viewportArchitect.newDetectionFrame(camDetectionFrame);
 
 		// add camera if it does not exist yet
-		cams.computeIfAbsent(camId, CamFilter::new);
+		var camFilter = cams.computeIfAbsent(camId, CamFilter::new);
 
 		// set viewport
-		cams.get(camId).updateViewport(viewportArchitect.getViewport(camId));
+		camFilter.updateViewport(viewportArchitect.getViewport(camId));
 
 		// update robot infos on all camera filters
-		cams.get(camId).setRobotInfoMap(getRobotInfoMap());
+		camFilter.setRobotInfoMap(getRobotInfoMap());
 
 		// set latest ball info on all camera filters (to generate virtual balls from barrier info)
-		cams.get(camId).setBallInfo(lastBallFilterOutput);
+		camFilter.setBallInfo(lastBallFilterOutput);
 
 		// update camera filter with new detection frame
-		long timestamp = cams.get(camId).update(camDetectionFrame, lastFrame);
+		camFilter.update(camDetectionFrame, lastFrame);
+
+		// update robot quality inspector
+		camDetectionFrame.getRobots().forEach(robotQualityInspector::addDetection);
+	}
+
+
+	private FilteredVisionFrame constructFilteredVisionFrame(FilteredVisionFrame lastFrame)
+	{
+		long timestamp = cams.values().stream().mapToLong(CamFilter::getTimestamp).max().orElse(lastFrame.getTimestamp());
 
 		// use newest timestamp to prevent negative delta time in filtered frames
 		timestamp = Math.max(lastFrame.getTimestamp(), timestamp);
@@ -191,7 +171,6 @@ public class VisionFilterImpl extends AVisionFilter
 		List<FilteredVisionBot> mergedRobots = mergeRobots(cams.values(), timestamp);
 
 		// update robot quality inspector
-		camDetectionFrame.getRobots().forEach(robotQualityInspector::addDetection);
 		robotQualityInspector.prune(timestamp);
 		final double averageDt = cams.values().stream().mapToDouble(CamFilter::getAverageFrameDt).max().orElse(0.01);
 		robotQualityInspector.updateAverageDt(averageDt);
@@ -301,13 +280,7 @@ public class VisionFilterImpl extends AVisionFilter
 	@Override
 	public void onNewCameraGeometry(final CamGeometry geometry)
 	{
-		if (filterExecutor == null)
-		{
-			processGeometryFrame(geometry);
-		} else
-		{
-			filterExecutor.submit(() -> Safe.run(this::processGeometryFrame, geometry));
-		}
+		processGeometryFrame(geometry);
 	}
 
 
@@ -347,12 +320,10 @@ public class VisionFilterImpl extends AVisionFilter
 
 		if (useThreads)
 		{
-			filterExecutor = Executors
-					.newSingleThreadScheduledExecutor(new NamedThreadFactory("VisionFilter Processor"));
 			publisherExecutor = Executors
 					.newSingleThreadScheduledExecutor(new NamedThreadFactory("VisionFilter Publisher"));
 			publisherExecutor
-					.scheduleAtFixedRate(() -> Safe.run(publisher), 0, (long) (publishDt * 1e9), TimeUnit.NANOSECONDS);
+					.scheduleAtFixedRate(() -> Safe.run(this::publish), 0, (long) (publishDt * 1e9), TimeUnit.NANOSECONDS);
 			log.info("Using threaded VisionFilter");
 		}
 	}
@@ -362,11 +333,6 @@ public class VisionFilterImpl extends AVisionFilter
 	protected void stop()
 	{
 		super.stop();
-		if (filterExecutor != null)
-		{
-			filterExecutor.shutdown();
-			filterExecutor = null;
-		}
 		if (publisherExecutor != null)
 		{
 			publisherExecutor.shutdown();
@@ -376,7 +342,7 @@ public class VisionFilterImpl extends AVisionFilter
 		viewportArchitect.removeObserver(this);
 		ballFilterPreprocessor.removeObserver(this);
 		ballFilterPreprocessor.clear();
-		lastFrame = new VisionFilterFrame(System.nanoTime(), FilteredVisionFrame.createEmptyFrame());
+		lastFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 
 
@@ -401,7 +367,7 @@ public class VisionFilterImpl extends AVisionFilter
 		super.onClearCamFrame();
 		cams.clear();
 		ballFilterPreprocessor.clear();
-		lastFrame = new VisionFilterFrame(System.nanoTime(), FilteredVisionFrame.createEmptyFrame());
+		lastFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 
 
@@ -492,13 +458,5 @@ public class VisionFilterImpl extends AVisionFilter
 					.withCenterHorizontally(true));
 		}
 		return shapes;
-	}
-
-
-	@AllArgsConstructor
-	private static class VisionFilterFrame
-	{
-		long systemTimestamp;
-		FilteredVisionFrame frame;
 	}
 }

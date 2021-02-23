@@ -1,21 +1,10 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
@@ -30,22 +19,32 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 
 /**
  * The viewport architect inspects all camera geometries and aligns their viewports to a predefined overlap.
- * 
+ *
  * @author AndreR <andre@ryll.cc>
  */
 public class ViewportArchitect
 {
-	private Map<Integer, Viewport> viewports = new HashMap<>();
+	private Map<Integer, Viewport> viewports = new ConcurrentSkipListMap<>();
 	private final List<IViewportArchitect> observers = new CopyOnWriteArrayList<>();
 	private Viewport field;
-	
-	
+
+
 	@Configurable(defValue = "400.0", comment = "Maximum camera overlap. [mm]")
 	private static double maxViewportOverlap = 400.0;
-	
+
 	@Configurable(defValue = "DYNAMICALLY", comment = "Method to be used to construct viewports.")
 	private static EViewportConstruction viewportConstruction = EViewportConstruction.DYNAMICALLY;
 	

@@ -24,6 +24,10 @@ public class FpsCounter
 	public boolean newFrame(final long timestamp)
 	{
 		boolean fpsChanged = false;
+		if (timestamp < lastTime)
+		{
+			reset();
+		}
 		double timeDiff = (timestamp - lastTime) / 1e9;
 		if (timeDiff > TIME_WINDOW)
 		{

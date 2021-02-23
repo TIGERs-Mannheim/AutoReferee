@@ -1,15 +1,18 @@
+/*
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.sumatra.vision;
+
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.cam.data.CamRobot;
+import edu.tigers.sumatra.ids.BotID;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
-
-import edu.tigers.sumatra.cam.data.CamRobot;
-import edu.tigers.sumatra.ids.BotID;
 
 
 /**
@@ -42,13 +45,13 @@ public class RobotQualityInspector
 	}
 
 
-	public void addDetection(CamRobot camRobot)
+	public synchronized void addDetection(CamRobot camRobot)
 	{
 		measurements.get(camRobot.getBotId()).add(camRobot.getTimestamp());
 	}
 
 
-	public void prune(long currentTimestamp)
+	public synchronized void prune(long currentTimestamp)
 	{
 		long timestamp = currentTimestamp - (long) (trackingTimeHorizon * 1e9);
 		for (List<Long> timestamps : measurements.values())
@@ -67,7 +70,7 @@ public class RobotQualityInspector
 	}
 
 
-	public void updateAverageDt(double averageDt)
+	public synchronized void updateAverageDt(double averageDt)
 	{
 		maxPossibleDetectionsPerCam = trackingTimeHorizon / averageDt;
 	}
@@ -79,19 +82,19 @@ public class RobotQualityInspector
 	}
 
 
-	public long getNumDetections(final BotID botID)
+	public synchronized long getNumDetections(final BotID botID)
 	{
 		return measurements.get(botID).size();
 	}
 
 
-	public double getPossibleDetections()
+	public synchronized double getPossibleDetections()
 	{
 		return maxPossibleDetectionsPerCam;
 	}
 
 
-	public boolean passesQualityInspection(final BotID botID)
+	public synchronized boolean passesQualityInspection(final BotID botID)
 	{
 		return getQuality(botID) > robotQualityThreshold;
 	}

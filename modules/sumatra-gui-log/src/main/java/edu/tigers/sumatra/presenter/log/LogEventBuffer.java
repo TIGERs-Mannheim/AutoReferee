@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.presenter.log;
 
@@ -66,7 +66,8 @@ public class LogEventBuffer
 
 	public synchronized List<LogEvent> getNewEvents()
 	{
-		List<LogEvent> subList = new ArrayList<>(eventStorage.subList((int) (start - offset), (int) (end - offset)));
+		List<LogEvent> subList = new ArrayList<>(
+				eventStorage.subList((int) Math.max(0, start - offset), (int) (end - offset)));
 		start = end;
 		return subList;
 	}

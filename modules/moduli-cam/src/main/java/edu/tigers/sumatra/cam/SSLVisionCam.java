@@ -18,8 +18,10 @@ import lombok.extern.log4j.Log4j2;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 
 /**
@@ -37,13 +39,13 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	private boolean expectIOE = false;
 	private int port;
 	private String address;
+	private InetAddress visionAddress;
 
 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
 
 
 	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
 	private static String network = "";
-
 
 
 	static
@@ -111,6 +113,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 				}
 				receiver.receive(packet);
 
+				visionAddress = packet.getAddress();
 				final ByteArrayInputStream packetIn = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
 
 				// Translate
@@ -207,5 +210,11 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	public final String getAddress()
 	{
 		return address;
+	}
+
+
+	public Optional<InetAddress> getVisionAddress()
+	{
+		return Optional.ofNullable(visionAddress);
 	}
 }
