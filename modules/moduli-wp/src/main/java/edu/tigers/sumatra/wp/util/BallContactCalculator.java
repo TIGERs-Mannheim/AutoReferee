@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -10,8 +10,6 @@ import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.botshape.BotShape;
-import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.wp.data.BallContact;
@@ -82,9 +80,7 @@ public class BallContactCalculator
 
 		final IVector2 optimalBallPossPos = BotShape.getKickerCenterPos(pose.getPos(), pose.getOrientation(),
 				center2Dribbler + Geometry.getBallRadius());
-		ICircle circle = Circle.createCircle(optimalBallPossPos, ballPossTolerance);
-
-		return circle.isPointInShape(ballPos);
+		return optimalBallPossPos.distanceTo(ballPos) < ballPossTolerance;
 	}
 
 

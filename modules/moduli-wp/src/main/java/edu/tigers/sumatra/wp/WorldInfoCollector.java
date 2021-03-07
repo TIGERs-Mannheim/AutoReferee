@@ -187,7 +187,9 @@ public class WorldInfoCollector extends AWorldPredictor
 			robotInfo.getTrajectory().ifPresentOrElse(t -> sync.add(t, lastWFTimestamp), sync::reset);
 		}
 
-		var feedbackDelay = useInternalState ? 0.0 : Geometry.getFeedbackDelay();
+		var feedbackDelay = useInternalState
+				? Geometry.getRobotFeedbackDelay()
+				: Geometry.getFeedbackDelay();
 		var trackedState = sync.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
 
 		Optional<State> bufferedState = sync.getLatestState();

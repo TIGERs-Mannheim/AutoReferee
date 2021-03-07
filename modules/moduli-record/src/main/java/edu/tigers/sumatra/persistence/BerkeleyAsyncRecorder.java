@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence;
@@ -124,8 +124,6 @@ public class BerkeleyAsyncRecorder
 		private final ScheduledExecutorService execService;
 
 
-		/**
-		 */
 		RecordSaver()
 		{
 			execService = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("RecordSaver"));
@@ -160,6 +158,17 @@ public class BerkeleyAsyncRecorder
 			execService.execute(this::printPeriod);
 			execService.execute(db::close);
 			execService.shutdown();
+			try
+			{
+				boolean terminated = execService.awaitTermination(10, TimeUnit.SECONDS);
+				if (!terminated)
+				{
+					log.warn("Could not terminate record saver within 10s");
+				}
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 }

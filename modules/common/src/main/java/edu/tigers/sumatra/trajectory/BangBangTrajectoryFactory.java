@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.trajectory;
@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 public final class BangBangTrajectoryFactory
 {
+	private static final double MAX_VEL_TOLERANCE = 0.2;
 	private static final float SYNC_ACCURACY = 1e-3f;
 
 
@@ -54,8 +55,14 @@ public final class BangBangTrajectoryFactory
 			final double acc
 	)
 	{
-		return new BangBangTrajectory2D()
-				.generate(s0, s1, v0, (float) vmax, (float) acc, SYNC_ACCURACY, Function.identity());
+		return new BangBangTrajectory2D().generate(
+				s0,
+				s1,
+				adaptVel(v0, vmax),
+				(float) vmax,
+				(float) acc,
+				SYNC_ACCURACY,
+				Function.identity());
 	}
 
 
@@ -67,8 +74,12 @@ public final class BangBangTrajectoryFactory
 			final double maxAcc
 	)
 	{
-		return new BangBangTrajectory1D()
-				.generate((float) initialPos, (float) finalPos, (float) initialVel, (float) maxVel, (float) maxAcc);
+		return new BangBangTrajectory1D().generate(
+				(float) initialPos,
+				(float) finalPos,
+				(float) adaptVel(initialVel, maxVel),
+				(float) maxVel,
+				(float) maxAcc);
 	}
 
 
@@ -81,6 +92,38 @@ public final class BangBangTrajectoryFactory
 	)
 	{
 		var adaptedFinalPos = initialPos + AngleMath.normalizeAngle(finalPos - AngleMath.normalizeAngle(initialPos));
-		return new BangBangTrajectory1DOrient(singleDim(initialPos, adaptedFinalPos, initialVel, maxVel, maxAcc));
+		return new BangBangTrajectory1DOrient(
+				singleDim(initialPos, adaptedFinalPos, adaptVel(initialVel, maxVel), maxVel, maxAcc));
+	}
+
+
+	/**
+	 * Limit the current speed to the max speed, if it is only slightly above velMax.
+	 * Trajectories are often generated based on the last trajectory and imprecision will lead to a
+	 * propagating error that lets the robot drive significantly faster than velMax (like >+0.2m/s with 1.5m/s)
+	 *
+	 * @param v0
+	 * @param vMax
+	 * @return
+	 */
+	private static IVector2 adaptVel(IVector2 v0, double vMax)
+	{
+		var curVelAbs = v0.getLength2();
+		if (curVelAbs > vMax && curVelAbs < vMax + MAX_VEL_TOLERANCE)
+		{
+			return v0.scaleToNew(vMax);
+		}
+		return v0;
+	}
+
+
+	private static double adaptVel(double v0, double vMax)
+	{
+		var curVelAbs = v0;
+		if (curVelAbs > vMax && curVelAbs < vMax + MAX_VEL_TOLERANCE)
+		{
+			return vMax;
+		}
+		return v0;
 	}
 }

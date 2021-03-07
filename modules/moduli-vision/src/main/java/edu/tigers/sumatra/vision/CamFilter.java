@@ -378,13 +378,12 @@ public class CamFilter
 		{
 			// but it is on a different camera already, copy its state from there
 			tracker = new RobotTracker(robot, filteredBot.get());
-			robots.put(robot.getBotId(), tracker);
 		} else
 		{
 			// completely new robot on the field
 			tracker = new RobotTracker(robot);
-			robots.put(robot.getBotId(), tracker);
 		}
+		robots.put(robot.getBotId(), tracker);
 	}
 
 
@@ -446,7 +445,7 @@ public class CamFilter
 		// if this ball is not used by any other tracker we may do:
 		// - if we know the field size => only accept new balls on the field (not in boundary area)
 		// - if we don't know the field size => simply accept the ball
-		if (!fieldRectWithBoundary.isPresent() || fieldRectWithBoundary.get().isPointInShape(cam.getPos().getXYVector()))
+		if (fieldRectWithBoundary.isEmpty() || fieldRectWithBoundary.get().isPointInShape(cam.getPos().getXYVector()))
 		{
 			// if nobody else wanted this ball we create a new tracker, very gentle :)
 			BallTracker tracker;
@@ -503,7 +502,7 @@ public class CamFilter
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 
-		if (!calibration.isPresent())
+		if (calibration.isEmpty())
 		{
 			return shapes;
 		}
@@ -604,7 +603,8 @@ public class CamFilter
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 
-		for (CamBall b : ballHistory)
+		var ballHistorySnapshot = new ArrayList<>(ballHistory);
+		for (CamBall b : ballHistorySnapshot)
 		{
 			DrawableCircle pos = new DrawableCircle(b.getFlatPos(), 15, Color.BLACK);
 			pos.setFill(false);

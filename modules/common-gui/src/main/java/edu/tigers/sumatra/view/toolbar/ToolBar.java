@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.toolbar;
 
@@ -218,7 +218,7 @@ public class ToolBar
 					observer.onToggleRecord();
 				}
 				btnRecSave.setEnabled(true);
-			});
+			}, "RecordSaveButton");
 
 			t.start();
 		}
