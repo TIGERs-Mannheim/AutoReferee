@@ -50,8 +50,8 @@ public class BallContactCalculator
 
 		return new BallContact(
 				robotInfo.getTimestamp(),
-				startBallContactMap.getOrDefault(robotInfo.getBotId(), -10000000L),
-				endBallContactMap.getOrDefault(robotInfo.getBotId(), -10000000L),
+				startBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9),
+				endBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9),
 				ballContactFromVision
 		);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -35,7 +35,7 @@ public class BallContact
 
 	public static BallContact def(long timestamp)
 	{
-		return new BallContact(timestamp, -10000000, -10000000, false);
+		return new BallContact(timestamp, (long) -1e9, (long) -1e9, false);
 	}
 
 
