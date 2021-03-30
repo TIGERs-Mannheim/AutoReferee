@@ -489,7 +489,7 @@ public class CamFilter
 	 */
 	public List<BallTracker> getBalls()
 	{
-		return balls;
+		return new ArrayList<>(balls);
 	}
 
 

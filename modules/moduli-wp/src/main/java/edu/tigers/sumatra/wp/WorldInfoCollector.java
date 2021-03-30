@@ -19,9 +19,7 @@ import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.pose.Pose;
-import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -127,22 +125,12 @@ public class WorldInfoCollector extends AWorldPredictor
 	private Map<BotID, BotState> getInternalBotStates(final Collection<RobotInfo> robotInfo)
 	{
 		return robotInfo.stream()
-				.map(ri -> ri.getInternalState().map(s -> estimate(s, ri.getTimestamp())))
+				.map(RobotInfo::getInternalState)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.collect(Collectors.toMap(
 						BotState::getBotID,
 						Function.identity()));
-	}
-
-
-	private BotState estimate(BotState state, long timestamp)
-	{
-		double dt = (lastWFTimestamp - timestamp) / 1e9;
-		IVector2 pos = state.getPos().addNew(state.getVel2().multiplyNew(1000 * dt));
-		double orientation = AngleMath.normalizeAngle(state.getOrientation() + state.getAngularVel() * dt);
-		Pose pose = Pose.from(pos, orientation);
-		return BotState.of(state.getBotID(), State.of(pose, state.getVel3()));
 	}
 
 
