@@ -162,6 +162,10 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private FilteredVisionFrame constructFilteredVisionFrame(FilteredVisionFrame lastFrame)
 	{
+		// remove old camera filters
+		long avgTimestamp = (long) cams.values().stream().mapToLong(CamFilter::getTimestamp).average().orElse(0);
+		cams.values().removeIf(f -> Math.abs(avgTimestamp - f.getTimestamp()) / 1e9 > 0.5);
+
 		long timestamp = cams.values().stream().mapToLong(CamFilter::getTimestamp).max().orElse(lastFrame.getTimestamp());
 
 		// use newest timestamp to prevent negative delta time in filtered frames
@@ -199,6 +203,9 @@ public class VisionFilterImpl extends AVisionFilter
 
 		// forward frame for inspection
 		qualityInspector.inspectFilteredVisionFrame(frame);
+
+		// Update active cameras in viewport architect
+		viewportArchitect.updateCameras(cams.keySet());
 
 		// add debug and info shapes for visualizer
 		frame.getShapeMap().get(EVisionFilterShapesLayer.VIEWPORT_SHAPES).addAll(viewportArchitect.getInfoShapes());
@@ -289,9 +296,10 @@ public class VisionFilterImpl extends AVisionFilter
 		for (CamCalibration c : geometry.getCalibrations().values())
 		{
 			int camId = c.getCameraId();
-			if (cams.containsKey(camId))
+			CamFilter camFilter = cams.get(camId);
+			if (camFilter != null)
 			{
-				cams.get(camId).update(c);
+				camFilter.update(c);
 			}
 		}
 

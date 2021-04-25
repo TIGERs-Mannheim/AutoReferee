@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -381,6 +381,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	public void onNewCamDetectionFrame(final ExtendedCamDetectionFrame frame)
 	{
 		camFrames.put(frame.getCameraId(), frame);
+		camFrames.values().removeIf(f -> Math.abs(frame.gettCapture() - f.gettCapture()) / 1e9 > 1);
 	}
 
 

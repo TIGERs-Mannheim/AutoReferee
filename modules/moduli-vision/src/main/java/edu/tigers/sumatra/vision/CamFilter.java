@@ -141,6 +141,7 @@ public class CamFilter
 	 */
 	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
 	{
+		checkForNonConsecutiveFrames(frame);
 		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
 
 		processRobots(adjustedFrame, lastFilteredFrame.getBots());
@@ -203,20 +204,19 @@ public class CamFilter
 	}
 
 
+	private void reset()
+	{
+		frameIntervalFilter.reset();
+		lastKnownBallPosition = Vector2f.ZERO_VECTOR;
+		lastBallVisibleTimestamp = 0;
+		robots.clear();
+		balls.clear();
+		ballHistory.clear();
+	}
+
+
 	private CamDetectionFrame adjustTCapture(final CamDetectionFrame frame)
 	{
-		if (frame.getCamFrameNumber() != (lastCamFrameId + 1))
-		{
-			if (lastCamFrameId != 0)
-			{
-				log.warn("Non-consecutive cam frame for cam {}: {} -> {}", frame.getCameraId(), lastCamFrameId,
-						frame.getCamFrameNumber());
-			}
-			frameIntervalFilter.reset();
-		}
-
-		lastCamFrameId = frame.getCamFrameNumber();
-
 		if ((frame.getCamFrameNumber() % FRAME_FILTER_DIVIDER) == 0)
 		{
 			frameIntervalFilter.addSample(frame.getCamFrameNumber(), frame.gettCapture());
@@ -227,6 +227,26 @@ public class CamFilter
 		double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
 
 		return new CamDetectionFrame(frame, (long) tCapture);
+	}
+
+
+	private void checkForNonConsecutiveFrames(CamDetectionFrame frame)
+	{
+		if (frame.getCamFrameNumber() != (lastCamFrameId + 1))
+		{
+			if (lastCamFrameId != 0)
+			{
+				log.warn("Non-consecutive cam frame for cam {}: {} -> {}", frame.getCameraId(), lastCamFrameId,
+						frame.getCamFrameNumber());
+			}
+			if (Math.abs(frame.getCamFrameNumber() - lastCamFrameId + 1) > 10)
+			{
+				log.info("Resetting cam filter for cam {}", camId);
+				reset();
+			}
+		}
+
+		lastCamFrameId = frame.getCamFrameNumber();
 	}
 
 
