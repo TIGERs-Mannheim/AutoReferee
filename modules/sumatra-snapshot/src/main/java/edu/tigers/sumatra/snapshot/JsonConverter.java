@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.snapshot;
@@ -45,7 +45,16 @@ public final class JsonConverter
 
 	static IVector3 decodeVector3(final JSONArray jsonArray)
 	{
-		return Vector3.fromXYZ((double) jsonArray.get(0), (double) jsonArray.get(1), (double) jsonArray.get(2));
+		Vector3 vector = Vector3.zero();
+		if (jsonArray == null)
+		{
+			return vector;
+		}
+		for (int i = 0; i < jsonArray.size(); i++)
+		{
+			vector.set(i, ((Number) jsonArray.get(i)).doubleValue());
+		}
+		return vector;
 	}
 
 
@@ -61,7 +70,16 @@ public final class JsonConverter
 
 	static IVector2 decodeVector2(final JSONArray jsonArray)
 	{
-		return Vector2.fromXY((double) jsonArray.get(0), (double) jsonArray.get(1));
+		Vector2 vector = Vector2.zero();
+		if (jsonArray == null)
+		{
+			return vector;
+		}
+		for (int i = 0; i < jsonArray.size(); i++)
+		{
+			vector.set(i, ((Number) jsonArray.get(i)).doubleValue());
+		}
+		return vector;
 	}
 
 
