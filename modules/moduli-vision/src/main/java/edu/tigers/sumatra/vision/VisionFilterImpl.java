@@ -85,9 +85,18 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private void publish()
 	{
-		lastFrame = constructFilteredVisionFrame(lastFrame);
-		var extrapolatedFrame = extrapolateFilteredFrame(lastFrame, lastFrame.getTimestamp());
-		publishFilteredVisionFrame(extrapolatedFrame);
+		try
+		{
+			lastFrame = constructFilteredVisionFrame(lastFrame);
+			var extrapolatedFrame = extrapolateFilteredFrame(lastFrame, lastFrame.getTimestamp());
+			publishFilteredVisionFrame(extrapolatedFrame);
+		} catch (Exception e)
+		{
+			log.warn("Uncaught exception while publishing vision filter frames", e);
+		} catch (Throwable e)
+		{
+			log.error("Uncaught throwable while publishing vision filter frames", e);
+		}
 	}
 
 
