@@ -32,9 +32,6 @@ public class RuleConstraints
 	@Configurable(comment = "Bot speed in stop phases", defValue = "1.5")
 	private static double stopSpeed = 1.5;
 	@Getter
-	@Configurable(comment = "This tolerance is subtracted from the default bot speed that is required on STOP", defValue = "0.2")
-	private static double stopSpeedTolerance = 0.2;
-	@Getter
 	@Configurable(comment = "Distance between bots and penalty area in standard situations", defValue = "200.0")
 	private static double botToPenaltyAreaMarginStandard = 200;
 	@Getter
@@ -55,14 +52,5 @@ public class RuleConstraints
 
 	private RuleConstraints()
 	{
-	}
-
-
-	/**
-	 * @return The bot speed for our bots during stop including a tolerance
-	 */
-	public static double getStopTargetSpeed()
-	{
-		return stopSpeed - stopSpeedTolerance;
 	}
 }
