@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.visualizer;
@@ -371,7 +371,7 @@ public class FieldPanel extends JPanel implements IDrawableTool
 				.flatMap(l -> l.getShapes().stream())
 				.filter(s -> s.getClass().equals(DrawableFieldBackground.class))
 				.findAny()
-				.map(s -> (DrawableFieldBackground) s)
+				.map(DrawableFieldBackground.class::cast)
 				.ifPresent(s -> {
 					fieldGlobalBoundaryWidth = s.getBoundaryWidth();
 					fieldGlobalLength = s.getFieldWithBorder().xExtent() - 2 * fieldGlobalBoundaryWidth;
@@ -417,6 +417,7 @@ public class FieldPanel extends JPanel implements IDrawableTool
 		{
 			paintCoordinates(g2, ETeamColor.YELLOW, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.YELLOW);
 			paintCoordinates(g2, ETeamColor.BLUE, width, height, Geometry.getNegativeHalfTeam() != ETeamColor.BLUE);
+			paintCoordinates(g2, ETeamColor.NEUTRAL, width, height, false);
 
 			if (videoExporter != null)
 			{
@@ -521,23 +522,27 @@ public class FieldPanel extends JPanel implements IDrawableTool
 
 		int inv = inverted ? -1 : 1;
 
-		g.setColor(teamColor == ETeamColor.YELLOW ? Color.YELLOW : Color.BLUE);
+		g.setColor(
+				teamColor == ETeamColor.YELLOW ? Color.YELLOW : teamColor == ETeamColor.BLUE ? Color.BLUE : Color.WHITE);
 
 		int x;
 		int y = height - (int) (fontSize * 1.5);
 		if (teamColor == ETeamColor.YELLOW)
 		{
 			x = 10;
-		} else
+		} else if (teamColor == ETeamColor.BLUE)
 		{
 			x = width - (int) (fontSize * 5.0);
+		} else
+		{
+			x = width / 2 - (int) (fontSize * 5.0);
 		}
-		char tColor = teamColor == ETeamColor.YELLOW ? 'Y' : 'B';
+
 		g.drawString(
-				String.format("%c x:%5d", tColor, inv * (int) lastMousePoint.x()),
+				String.format("x:%5d", inv * (int) lastMousePoint.x()),
 				x, y);
 		g.drawString(
-				String.format("   y:%5d", inv * (int) lastMousePoint.y()),
+				String.format("y:%5d", inv * (int) lastMousePoint.y()),
 				x, y + fontSize + 1);
 	}
 

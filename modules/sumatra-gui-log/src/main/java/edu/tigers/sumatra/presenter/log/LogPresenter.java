@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.presenter.log;
 
@@ -124,7 +124,7 @@ public class LogPresenter implements ISumatraViewPresenter, IFilterPanelObserver
 	@Override
 	public void onNewLogEvent(final LogEvent logEvent)
 	{
-		liveEventBuffer.append(logEvent);
+		liveEventBuffer.append(logEvent.toImmutable());
 
 		final Level lvl = logEvent.getLevel();
 		if (lvl.equals(Level.FATAL))

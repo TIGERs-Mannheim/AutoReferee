@@ -171,8 +171,11 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private FilteredVisionFrame constructFilteredVisionFrame(FilteredVisionFrame lastFrame)
 	{
-		// remove old camera filters
-		long avgTimestamp = (long) cams.values().stream().mapToLong(CamFilter::getTimestamp).average().orElse(0);
+		// remove old camera filters (taking care of overflow in average())
+		long avgTimestamp = (long) (cams.values().stream()
+				.mapToDouble(c -> c.getTimestamp() / 1e9)
+				.average()
+				.orElse(0) * 1e9);
 		cams.values().removeIf(f -> Math.abs(avgTimestamp - f.getTimestamp()) / 1e9 > 0.5);
 
 		long timestamp = cams.values().stream().mapToLong(CamFilter::getTimestamp).max().orElse(lastFrame.getTimestamp());
@@ -359,6 +362,7 @@ public class VisionFilterImpl extends AVisionFilter
 		viewportArchitect.removeObserver(this);
 		ballFilterPreprocessor.removeObserver(this);
 		ballFilterPreprocessor.clear();
+		robotQualityInspector.reset();
 		lastFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 

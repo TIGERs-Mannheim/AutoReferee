@@ -14,7 +14,6 @@ dependencies {
     implementation project(':common-gui')
     implementation project(':sumatra-model')
     implementation project(':moduli-wp')
-    implementation project(':moduli-cam')
     implementation project(':moduli-vision')
     implementation project(':moduli-geometry')
     implementation 'com.github.TIGERs-Mannheim:moduli:4.1'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -20,7 +20,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 @Persistent
 public abstract class AGameEvent implements IGameEvent
 {
-	EGameEvent type;
+	private final EGameEvent type;
 
 
 	@SuppressWarnings("unsued") // used by berkeley

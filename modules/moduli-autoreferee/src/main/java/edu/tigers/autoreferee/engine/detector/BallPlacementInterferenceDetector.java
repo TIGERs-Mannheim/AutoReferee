@@ -1,14 +1,10 @@
+/*
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ */
+
 package edu.tigers.autoreferee.engine.detector;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.autoreferee.AutoRefUtil;
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.sumatra.drawable.DrawableTube;
@@ -23,6 +19,13 @@ import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.BotInterferedPlacement;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -77,10 +80,10 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 		IVector2 placePos = frame.getGameState().getBallPlacementPositionNeutral();
 		ITube placementTube = Tube.create(ballPos, placePos, RuleConstraints.getStopRadius() + Geometry.getBotRadius());
 		ETeamColor placingTeam = frame.getGameState().getForTeam();
-		
-		frame.getShapes().get(EAutoRefShapesLayer.ALLOWED_DISTANCES)
+
+		frame.getShapes().get(EAutoRefShapesLayer.VIOLATED_DISTANCES)
 				.add(new DrawableTube(placementTube.withMargin(-Geometry.getBotRadius()), Color.red));
-		
+
 		return frame.getWorldFrame().getBots().values().stream()
 				.filter(AutoRefUtil.ColorFilter.get(placingTeam.opposite()))
 				.filter(bot -> placementTube.isPointInShape(bot.getPos()))

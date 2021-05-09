@@ -316,7 +316,7 @@ public class CamFilter
 	 *
 	 * @return
 	 */
-	private Optional<IVector3> getCameraPosition()
+	public Optional<IVector3> getCameraPosition()
 	{
 		return calibration.map(CamCalibration::getCameraPosition);
 
@@ -330,7 +330,7 @@ public class CamFilter
 	 */
 	public double getAverageFrameDt()
 	{
-		return frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(0, 0)).y() * 1e-9;
+		return frameIntervalFilter.getBestEstimate().map(IVector2::y).map(d -> d * 1e-9).orElse(0.01);
 	}
 
 

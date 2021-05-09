@@ -33,11 +33,22 @@ public class RobotQualityInspector
 
 	private final Map<BotID, List<Long>> measurements = new IdentityHashMap<>();
 
-	private double maxPossibleDetectionsPerCam = trackingTimeHorizon / 0.01;
+	private long initialTimestamp;
+	private double maxPossibleDetectionsPerCam;
+	private double avgDt;
 
 
 	public RobotQualityInspector()
 	{
+		reset();
+	}
+
+
+	public void reset()
+	{
+		initialTimestamp = -1;
+		maxPossibleDetectionsPerCam = 0;
+		avgDt = 0.01;
 		for (BotID botID : BotID.getAll())
 		{
 			measurements.put(botID, new ArrayList<>());
@@ -48,6 +59,15 @@ public class RobotQualityInspector
 	public synchronized void addDetection(CamRobot camRobot)
 	{
 		measurements.get(camRobot.getBotId()).add(camRobot.getTimestamp());
+
+		if (initialTimestamp < 0)
+		{
+			initialTimestamp = camRobot.getTimestamp();
+		}
+
+		double trackingTime = (camRobot.getTimestamp() - initialTimestamp) / 1e9;
+		double time = Math.min(trackingTime, trackingTimeHorizon);
+		maxPossibleDetectionsPerCam = time / avgDt;
 	}
 
 
@@ -72,7 +92,7 @@ public class RobotQualityInspector
 
 	public synchronized void updateAverageDt(double averageDt)
 	{
-		maxPossibleDetectionsPerCam = trackingTimeHorizon / averageDt;
+		avgDt = averageDt;
 	}
 
 

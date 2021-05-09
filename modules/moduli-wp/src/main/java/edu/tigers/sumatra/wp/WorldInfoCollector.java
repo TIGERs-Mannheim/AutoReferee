@@ -87,6 +87,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private WorldFrameVisualization worldFrameVisualization;
 	private BallContactCalculator ballContactCalculator;
 	private CurrentBallDetector currentBallDetector;
+	private CamFrameShapeMapProducer camFrameShapeMapProducer;
 	private Map<BotID, BotStateTrajectorySync> botStateFromTraj = new HashMap<>();
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
@@ -441,21 +442,13 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private void registerToCamModule()
 	{
-		if (!SumatraModel.getInstance().isSimulation())
-		{
-			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
-			cam.addObserver(this);
-		}
+		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(cam -> cam.addObserver(this));
 	}
 
 
 	private void unregisterFromCamModule()
 	{
-		if (!SumatraModel.getInstance().isSimulation())
-		{
-			ACam cam = SumatraModel.getInstance().getModule(ACam.class);
-			cam.removeObserver(this);
-		}
+		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(cam -> cam.removeObserver(this));
 	}
 
 
@@ -466,6 +459,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		worldFrameVisualization = new WorldFrameVisualization();
 		ballContactCalculator = new BallContactCalculator();
 		currentBallDetector = new CurrentBallDetector();
+		camFrameShapeMapProducer = new CamFrameShapeMapProducer();
 		botStateFromTraj.clear();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
@@ -524,6 +518,8 @@ public class WorldInfoCollector extends AWorldPredictor
 		CamBall ball = currentBallDetector.findCurrentBall(camDetectionFrame.getBalls());
 		ExtendedCamDetectionFrame eFrame = new ExtendedCamDetectionFrame(camDetectionFrame, ball);
 		observers.forEach(o -> o.onNewCamDetectionFrame(eFrame));
+		var shapeMap = camFrameShapeMapProducer.updateCamFrameShapes(eFrame);
+		notifyNewShapeMap(eFrame.gettCapture(), shapeMap, ShapeMapSource.of("Vision"));
 	}
 
 
@@ -533,6 +529,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		observers.forEach(IWorldFrameObserver::onClearCamDetectionFrame);
 		lastWFTimestamp = 0;
 		currentBallDetector.reset();
+		camFrameShapeMapProducer.reset();
 		gameStateCalculator.reset();
 		worldFrameVisualization.reset();
 		latestRefereeMsg = new RefereeMsg();

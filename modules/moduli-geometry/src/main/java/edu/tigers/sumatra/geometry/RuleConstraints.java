@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
@@ -43,6 +43,9 @@ public class RuleConstraints
 	@Getter
 	@Configurable(comment = "The max allowed robot height", defValue = "150.0")
 	private static double maxRobotHeight = 150;
+	@Getter
+	@Configurable(comment = "[s] The amount of time before a violation is reported again", defValue = "2.0")
+	private static double gracePeriod = 2.0;
 
 	static
 	{

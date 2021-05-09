@@ -1,15 +1,14 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.persistence.log;
 
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
-
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
 
 
 /**
@@ -53,7 +52,7 @@ public class BerkeleyLogEvent
 	public final LogEvent getLogEvent()
 	{
 		return Log4jLogEvent.newBuilder()
-				.setLoggerName(clazz)
+				.setLoggerName(clazz == null ? "Unknown" : clazz)
 				.setLevel(Level.toLevel(level))
 				.setMessage(new SimpleMessage(message))
 				.setThreadName(thread)

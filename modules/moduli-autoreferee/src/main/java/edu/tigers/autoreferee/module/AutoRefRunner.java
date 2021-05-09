@@ -1,18 +1,7 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.module;
-
-import java.util.Set;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import edu.tigers.autoreferee.AutoRefFrame;
 import edu.tigers.autoreferee.AutoRefFramePreprocessor;
@@ -28,6 +17,16 @@ import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import org.apache.commons.lang.Validate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -40,9 +39,9 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	private static final String AUTO_REF = "AutoRef";
 
 	private final BlockingDeque<WorldFrameWrapper> consumableFrames = new LinkedBlockingDeque<>(1);
-	private final AutoRefFramePreprocessor preprocessor = new AutoRefFramePreprocessor();
 	private final Set<EGameEventDetectorType> activeDetectors = EGameEventDetectorType.valuesEnabledByDefault();
 
+	private AutoRefFramePreprocessor preprocessor;
 	private ExecutorService executorService;
 	private AutoRefEngine engine = new AutoRefEngine(activeDetectors);
 	private final IAutoRefEngineObserver callback;
@@ -73,6 +72,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	 */
 	public void start()
 	{
+		preprocessor = new AutoRefFramePreprocessor();
 		// make sure, the engine is initially in a clean off state
 		changeMode(EAutoRefMode.OFF);
 		// register to WP frames

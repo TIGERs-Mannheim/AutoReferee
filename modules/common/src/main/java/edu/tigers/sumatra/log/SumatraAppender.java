@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.log;
@@ -48,6 +48,12 @@ public class SumatraAppender extends AbstractAppender
 	}
 
 
+	public void clear()
+	{
+		logEventBuffer.clear();
+	}
+
+
 	public synchronized void addConsumer(ILogEventConsumer consumer)
 	{
 		consumers.add(consumer);
@@ -69,6 +75,6 @@ public class SumatraAppender extends AbstractAppender
 		{
 			logEventBuffer.remove(0);
 		}
-		logEventBuffer.add(logEvent);
+		logEventBuffer.add(logEvent.toImmutable());
 	}
 }

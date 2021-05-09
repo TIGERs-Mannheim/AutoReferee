@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.engine.detector;
 
@@ -12,8 +12,7 @@ import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.BotTooFastInStop;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -28,14 +27,13 @@ import java.util.stream.Collectors;
 /**
  * Monitors the maximum allowed bot speed during a game stoppage
  */
+@Log4j2
 public class BotStopSpeedDetector extends AGameEventDetector
 {
-	private static final Logger log = LogManager.getLogger(BotStopSpeedDetector.class);
-
 	@Configurable(comment = "[s] Grace period before reporting any events", defValue = "2.0")
 	private static double gracePeriod = 2.0;
-	@Configurable(comment = "[s] The number of milliseconds that a bot needs violate the stop speed limit to be reported", defValue = "0.3")
-	private static double minViolationDuration = 0.3;
+	@Configurable(comment = "[s] The number of milliseconds that a bot needs violate the stop speed limit to be reported", defValue = "0.0")
+	private static double minViolationDuration = 0.0;
 
 
 	private final Map<BotID, Long> currentViolators = new HashMap<>();
@@ -77,18 +75,12 @@ public class BotStopSpeedDetector extends AGameEventDetector
 		Set<BotID> frameNonViolators = Sets.difference(bots.keySet(), frameViolators);
 		updateCurrentViolators(frameViolators, frameNonViolators, delta);
 
-
-		/*
-		 * Bots are considered to violate the rule if they have been speeding for more than MIN_FRAME_COUNT frames. To
-		 * allow a certain cooldown and avoid spamming bots are not reported again until they have not violated the speed
-		 * limit for more than MIN_FRAME_COUNT frames.
-		 */
-		Set<BotID> frameCountViolators = currentViolators.keySet().stream()
-				.filter(id -> {
-					long value = currentViolators.get(id);
-					return (value / 1e9 >= minViolationDuration)
-							|| (lastViolators.contains(id) && (value > 0));
-				}).collect(Collectors.toSet());
+		Set<BotID> frameCountViolators = currentViolators.entrySet().stream()
+				.filter(entry ->
+						(entry.getValue() / 1e9 >= minViolationDuration)
+								|| (lastViolators.contains(entry.getKey()) && (entry.getValue() > 0)))
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
 
 		Set<BotID> oldViolators = Sets.difference(lastViolators, frameCountViolators).immutableCopy();
 		lastViolators.removeAll(oldViolators);
@@ -100,7 +92,7 @@ public class BotStopSpeedDetector extends AGameEventDetector
 			ITrackedBot bot = bots.get(violator);
 			if (bot == null)
 			{
-				log.debug("Bot Stop Speed violator disappeard from the field: " + violator);
+				log.debug("Bot Stop Speed violator disappeared from the field: " + violator);
 				return Optional.empty();
 			}
 			lastViolators.add(violator);
@@ -120,8 +112,8 @@ public class BotStopSpeedDetector extends AGameEventDetector
 	private Set<BotID> getViolators(final Collection<ITrackedBot> bots)
 	{
 		return bots.stream()
-				.filter(bot -> bot.getFilteredState().orElse(bot.getBotState()).getVel2().getLength()
-						* 1e-3 > RuleConstraints.getStopSpeed())
+				.filter(bot -> bot.getFilteredState().orElse(bot.getBotState()).getVel2().getLength() > RuleConstraints
+						.getStopSpeed())
 				.map(ITrackedBot::getBotId)
 				.collect(Collectors.toSet());
 	}

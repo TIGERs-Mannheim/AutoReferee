@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -11,15 +11,19 @@ import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.drawable.animated.AnimatedCircle;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.StatisticsMath;
+import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
+import lombok.AllArgsConstructor;
 import org.apache.commons.math3.util.Pair;
 
 import java.awt.Color;
@@ -43,6 +47,7 @@ public class QualityInspector
 	private List<RobotDeviationIssue> deviationIssues = new ArrayList<>();
 	private List<RobotInvisibleIssue> invisibleIssues = new ArrayList<>();
 	private List<FilteredVisionBot> filteredBots = new ArrayList<>();
+	private List<CameraTimeDiffIssue> camTimeDiffIssues = new ArrayList<>();
 	private Map<Integer, CamCalibration> calibrations = new HashMap<>();
 
 	@Configurable(defValue = "true", comment = "Draw camera issues in quality layer.")
@@ -140,6 +145,13 @@ public class QualityInspector
 			// investigate tracker distances
 			checkPositionDeviation(timestamp, allPairs);
 		}
+
+		// check for large differences in latest timestamp to cameras' timestamps
+		camTimeDiffIssues = camFilters.stream()
+				.filter(c -> timestamp - c.getTimestamp() > c.getAverageFrameDt() * 2e9)
+				.map(c -> new CameraTimeDiffIssue(c.getCameraPosition().orElse(Vector3f.ZERO_VECTOR).getXYVector(),
+						timestamp - c.getTimestamp()))
+				.collect(Collectors.toList());
 	}
 
 
@@ -258,6 +270,13 @@ public class QualityInspector
 		}
 	}
 
+	@AllArgsConstructor
+	private static class CameraTimeDiffIssue
+	{
+		private IVector2 camPos;
+		private long diff;
+	}
+
 
 	/**
 	 * Inspect new filtered vision frame.
@@ -317,22 +336,67 @@ public class QualityInspector
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 
-		if (drawCameraIssues)
+		addCameraIssues(shapes);
+		addRobotDeviationIssues(shapes);
+		addRobotInvisibleIssues(shapes);
+		addRobotQualityIssues(shapes);
+
+		return shapes;
+	}
+
+
+	private void addRobotQualityIssues(List<IDrawableShape> shapes)
+	{
+		if (drawRobotQualityIssues)
 		{
-			// mark problematic cameras (height)
-			for (CamCalibration calib : problematicCams)
+			for (FilteredVisionBot bot : filteredBots)
 			{
-				DrawableCircle circle = new DrawableCircle(calib.getCameraPosition().getXYVector(), 200, Color.RED);
+				if (bot.getQuality() > 0.8)
+				{
+					continue;
+				}
+
+				DrawableAnnotation unc = new DrawableAnnotation(bot.getPos(),
+						String.format("%.0f", bot.getQuality() * 100), true);
+				unc.withOffset(Vector2.fromY(120));
+				unc.setColor(bot.getBotID().getTeamColor().getColor());
+				unc.withFontHeight(60);
+				shapes.add(unc);
+			}
+		}
+	}
+
+
+	private void addRobotInvisibleIssues(List<IDrawableShape> shapes)
+	{
+		if (drawRobotInvisibleIssues)
+		{
+			// draw invisible fast robots
+			for (RobotInvisibleIssue issue : invisibleIssues)
+			{
+				DrawableCircle circle = new DrawableCircle(issue.getCenterPos(), 160,
+						issue.botId.getTeamColor().getColor());
 				circle.setStrokeWidth(20);
 				shapes.add(circle);
 
-				DrawableAnnotation warn = new DrawableAnnotation(
-						calib.getCameraPosition().getXYVector().addNew(Vector2.fromXY(0, 280)), "CAM_HEIGHT", false);
-				warn.withFontHeight(100).withBold(true).setColor(Color.RED);
-				shapes.add(warn);
+				DrawableLine line = new DrawableLine(Line.fromPoints(issue.firstPos, issue.lastPos),
+						issue.botId.getTeamColor().getColor());
+				line.setStrokeWidth(20);
+				shapes.add(line);
+
+				DrawableAnnotation botId = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, 240)),
+						issue.botId.toString(), true);
+				botId.setColor(issue.botId.getTeamColor().getColor());
+				botId.withFontHeight(100);
+				botId.withBold(true);
+				shapes.add(botId);
 			}
 		}
+	}
 
+
+	private void addRobotDeviationIssues(List<IDrawableShape> shapes)
+	{
 		if (drawRobotDeviationIssues)
 		{
 			// draw problematic robot deviations
@@ -368,49 +432,38 @@ public class QualityInspector
 				shapes.add(dist);
 			}
 		}
+	}
 
-		if (drawRobotInvisibleIssues)
+
+	private void addCameraIssues(List<IDrawableShape> shapes)
+	{
+		if (drawCameraIssues)
 		{
-			// draw invisible fast robots
-			for (RobotInvisibleIssue issue : invisibleIssues)
+			// mark problematic cameras (height)
+			for (CamCalibration calib : problematicCams)
 			{
-				DrawableCircle circle = new DrawableCircle(issue.getCenterPos(), 160,
-						issue.botId.getTeamColor().getColor());
+				DrawableCircle circle = new DrawableCircle(calib.getCameraPosition().getXYVector(), 200, Color.RED);
 				circle.setStrokeWidth(20);
 				shapes.add(circle);
 
-				DrawableLine line = new DrawableLine(Line.fromPoints(issue.firstPos, issue.lastPos),
-						issue.botId.getTeamColor().getColor());
-				line.setStrokeWidth(20);
-				shapes.add(line);
-
-				DrawableAnnotation botId = new DrawableAnnotation(issue.getCenterPos().addNew(Vector2.fromXY(0, 240)),
-						issue.botId.toString(), true);
-				botId.setColor(issue.botId.getTeamColor().getColor());
-				botId.withFontHeight(100);
-				botId.withBold(true);
-				shapes.add(botId);
+				DrawableAnnotation warn = new DrawableAnnotation(
+						calib.getCameraPosition().getXYVector().addNew(Vector2.fromXY(0, 280)), "CAM_HEIGHT", false);
+				warn.withFontHeight(100).withBold(true).setColor(Color.RED);
+				shapes.add(warn);
 			}
-		}
 
-		if (drawRobotQualityIssues)
-		{
-			for (FilteredVisionBot bot : filteredBots)
+			// and cameras with time diff issues
+			for (var issue : camTimeDiffIssues)
 			{
-				if (bot.getQuality() > 0.8)
-				{
-					continue;
-				}
+				shapes.add(AnimatedCircle
+						.aCircleWithPulsingLineColor(Circle.createCircle(issue.camPos, 180), Color.RED, Color.WHITE, 0.2f));
 
-				DrawableAnnotation unc = new DrawableAnnotation(bot.getPos(),
-						String.format("%.0f", bot.getQuality() * 100), true);
-				unc.withOffset(Vector2.fromY(120));
-				unc.setColor(bot.getBotID().getTeamColor().getColor());
-				unc.withFontHeight(60);
-				shapes.add(unc);
+				DrawableAnnotation warn = new DrawableAnnotation(
+						issue.camPos.addNew(Vector2.fromXY(0, -280)), String.format("TIME DIFF: %.3f", issue.diff * 1e-9),
+						true);
+				warn.withFontHeight(100).withBold(true).setColor(Color.RED);
+				shapes.add(warn);
 			}
 		}
-
-		return shapes;
 	}
 }

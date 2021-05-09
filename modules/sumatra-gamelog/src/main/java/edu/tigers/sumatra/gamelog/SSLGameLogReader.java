@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.gamelog;
 
@@ -111,8 +111,7 @@ public class SSLGameLogReader
 					break;
 				default:
 				case UNKNOWN:
-					log.error("Logfile Type Unknown");
-					break;
+					throw new IOException("Logfile Type Unknown");
 			}
 
 			fileStream.close();
