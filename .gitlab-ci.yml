@@ -6,3 +6,9 @@ build:
   image: openjdk:11
   script:
     - './build.sh'
+
+test:
+  stage: build
+  image: openjdk:11
+  script:
+    - './gradlew --stacktrace --no-daemon check integrationTest'
