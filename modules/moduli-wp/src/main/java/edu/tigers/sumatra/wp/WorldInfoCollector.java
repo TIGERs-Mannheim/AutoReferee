@@ -257,9 +257,12 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private void visualize(final WorldFrameWrapper wfw)
 	{
-		ShapeMap shapeMap = new ShapeMap();
-		worldFrameVisualization.process(wfw, shapeMap);
-		notifyNewShapeMap(lastWFTimestamp, shapeMap, ShapeMapSource.of("World Frame"));
+		ShapeMap wfShapeMap = new ShapeMap();
+		worldFrameVisualization.process(wfw, wfShapeMap);
+		notifyNewShapeMap(lastWFTimestamp, wfShapeMap, ShapeMapSource.of("World Frame"));
+
+		ShapeMap visionShapeMap = camFrameShapeMapProducer.createShapeMap();
+		notifyNewShapeMap(lastWFTimestamp, visionShapeMap, ShapeMapSource.of("Vision"));
 	}
 
 
@@ -518,8 +521,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		CamBall ball = currentBallDetector.findCurrentBall(camDetectionFrame.getBalls());
 		ExtendedCamDetectionFrame eFrame = new ExtendedCamDetectionFrame(camDetectionFrame, ball);
 		observers.forEach(o -> o.onNewCamDetectionFrame(eFrame));
-		var shapeMap = camFrameShapeMapProducer.updateCamFrameShapes(eFrame);
-		notifyNewShapeMap(eFrame.gettCapture(), shapeMap, ShapeMapSource.of("Vision"));
+		camFrameShapeMapProducer.updateCamFrameShapes(eFrame);
 	}
 
 

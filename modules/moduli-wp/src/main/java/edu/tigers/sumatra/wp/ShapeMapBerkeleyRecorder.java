@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -9,22 +9,26 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.persistence.IBerkeleyRecorder;
+import lombok.Value;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 
 /**
  * Berkeley storage for cam frames
  */
+@Log4j2
 public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 {
 	private static final long BUFFER_TIME = 1_000_000_000L;
 	private final WfwObserver wfwObserver = new WfwObserver();
 	private final BerkeleyDb db;
-	private final Deque<ShapeMapWithSource> buffer = new ConcurrentLinkedDeque<>();
+	private List<ShapeMapWithSource> globalBuffer = new ArrayList<>();
 	private long latestWrittenTimestamp = 0;
 	private long latestReceivedTimestamp = 0;
 	private boolean running = false;
@@ -62,8 +66,13 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 	{
 		Map<Long, BerkeleyShapeMapFrame> toSave = new HashMap<>();
 
-		ShapeMapWithSource s = buffer.pollFirst();
-		while (s != null)
+		List<ShapeMapWithSource> newBuffer = new ArrayList<>(globalBuffer.size());
+		List<ShapeMapWithSource> localBuffer = globalBuffer;
+		globalBuffer = newBuffer;
+
+		Collections.sort(localBuffer);
+
+		for (ShapeMapWithSource s : localBuffer)
 		{
 			// drop frame, if it is too old
 			if (s.timestamp > latestWrittenTimestamp)
@@ -73,14 +82,16 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 				{
 					// this frame is still within the buffering time and so will all following
 					// we have to re-add it to the buffer for next time
-					buffer.addFirst(s);
+					int currentIndex = localBuffer.indexOf(s);
+					globalBuffer.addAll(localBuffer.subList(currentIndex, localBuffer.size()));
 					break;
 				}
 				BerkeleyShapeMapFrame f = toSave.computeIfAbsent(s.timestamp, BerkeleyShapeMapFrame::new);
 				f.putShapeMap(s.source, s.shapeMap);
+			} else
+			{
+				log.warn("Dropping too old shape map ({})", (s.timestamp - latestReceivedTimestamp));
 			}
-
-			s = buffer.poll();
 		}
 
 		latestWrittenTimestamp = toSave.keySet().stream().mapToLong(i -> i).max().orElse(latestWrittenTimestamp);
@@ -94,18 +105,19 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 		return running && timestamp >= latestReceivedTimestamp - BUFFER_TIME;
 	}
 
-	private static class ShapeMapWithSource
+
+	@Value
+	private static class ShapeMapWithSource implements Comparable<ShapeMapWithSource>
 	{
 		long timestamp;
 		ShapeMap shapeMap;
 		ShapeMapSource source;
 
 
-		public ShapeMapWithSource(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
+		@Override
+		public int compareTo(ShapeMapWithSource o)
 		{
-			this.timestamp = timestamp;
-			this.shapeMap = shapeMap;
-			this.source = source;
+			return Long.compare(timestamp, o.timestamp);
 		}
 	}
 
@@ -117,8 +129,8 @@ public class ShapeMapBerkeleyRecorder implements IBerkeleyRecorder
 			ShapeMap shapeMapCopy = new ShapeMap();
 			shapeMapCopy.addAll(shapeMap);
 			shapeMapCopy.removeNonPersistent();
-			buffer.addLast(new ShapeMapWithSource(timestamp, shapeMapCopy, source));
-			latestReceivedTimestamp = timestamp;
+			globalBuffer.add(new ShapeMapWithSource(timestamp, shapeMapCopy, source));
+			latestReceivedTimestamp = Math.max(timestamp, latestReceivedTimestamp);
 		}
 	}
 }

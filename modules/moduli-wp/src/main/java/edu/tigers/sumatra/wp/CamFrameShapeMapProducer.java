@@ -38,11 +38,15 @@ public class CamFrameShapeMapProducer
 	}
 
 
-	public ShapeMap updateCamFrameShapes(final ExtendedCamDetectionFrame frame)
+	public void updateCamFrameShapes(final ExtendedCamDetectionFrame frame)
 	{
 		camFrames.put(frame.getCameraId(), frame);
 		camFrames.values().removeIf(f -> Math.abs(frame.gettCapture() - f.gettCapture()) / 1e9 > 1);
+	}
 
+
+	public ShapeMap createShapeMap()
+	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 		var mergedFrames = camFrames.values().stream()
 				.sorted(Comparator.comparing(CamDetectionFrame::gettCapture))
