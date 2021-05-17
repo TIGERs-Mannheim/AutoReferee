@@ -17,7 +17,7 @@ repositories {
         url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
     }
 
-    jcenter()
+    mavenCentral()
 
     maven {
         url = 'https://jitpack.io/'
@@ -33,7 +33,7 @@ test {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 
 jacocoTestReport {
@@ -54,7 +54,7 @@ jacocoTestReport {
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
-    compileOnly "org.projectlombok:lombok:1.18.12"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.20"
+    compileOnly "org.projectlombok:lombok:1.18.20"
+    permitUnusedDeclared "org.projectlombok:lombok:1.18.20"
 }

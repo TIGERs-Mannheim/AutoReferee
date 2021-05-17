@@ -37,6 +37,7 @@ public class SimilarityChecker
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public boolean isSimilar(IGameEvent e1, IGameEvent e2)
 	{
 		if (!e1.getClass().equals(e2.getClass()))
@@ -47,7 +48,6 @@ public class SimilarityChecker
 		{
 			return false;
 		}
-		//noinspection unchecked
 		return map.getOrDefault(e1.getClass(), Collections.emptyList()).stream().allMatch(c -> c.isSimilar(e1, e2));
 	}
 

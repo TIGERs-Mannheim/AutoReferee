@@ -14,6 +14,6 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.sleepycat:je:18.3.12'
 
-    testImplementation 'junit:junit:4.13'
-    testImplementation 'org.assertj:assertj-core:3.16.1'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.assertj:assertj-core:3.19.0'
 }
