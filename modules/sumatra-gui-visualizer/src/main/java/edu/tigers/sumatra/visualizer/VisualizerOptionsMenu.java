@@ -37,6 +37,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 	private final List<JCheckBoxMenuItem> checkBoxes = new ArrayList<>();
 	private final Set<IShapeLayer> knownShapeLayers = new HashSet<>();
 	private final CheckboxListener checkboxListener;
+	private final List<String> fixedMenuEntries = new ArrayList<>();
 
 	private final JMenu pSources;
 	private final Map<String, JMenu> pSourcesSub;
@@ -60,6 +61,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 		JMenu pActions = new JMenu("Visualizer");
 		add(pActions);
 		parentMenus.put(pActions.getText(), pActions);
+		fixedMenuEntries.add(pActions.getText());
 
 		JMenuItem btnTurn = new JMenuItem("Turn");
 		btnTurn.addActionListener(new TurnFieldListener());
@@ -73,6 +75,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 
 		JMenu pShortcuts = new JMenu("Shortcuts");
 		add(pShortcuts);
+		fixedMenuEntries.add(pShortcuts.getText());
 		pShortcuts.add(new JMenuItem("Left mouse click:"));
 		pShortcuts.add(new JMenuItem("  ctrl: Look at Ball"));
 		pShortcuts.add(new JMenuItem("  shift: Kick to"));
@@ -106,6 +109,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 		pActions.add(recordVideoStop);
 		pSources = new JMenu("Sources");
 		add(pSources);
+		fixedMenuEntries.add(pSources.getText());
 
 		pSourcesSub = new HashMap<>();
 		pSourcesSub.put("general", pSources);
@@ -217,8 +221,13 @@ public class VisualizerOptionsMenu extends JMenuBar
 		if (parent == null)
 		{
 			parent = new JMenu(shapeLayer.getCategory());
-			add(parent);
 			parentMenus.put(shapeLayer.getCategory(), parent);
+			while(getMenuCount() > fixedMenuEntries.size()) {
+				remove(fixedMenuEntries.size());
+			}
+			parentMenus.entrySet().stream()
+					.filter(e -> !fixedMenuEntries.contains(e.getKey()))
+					.sorted(Map.Entry.comparingByKey()).map(Map.Entry::getValue).forEach(this::add);
 		}
 
 		knownShapeLayers.add(shapeLayer);
