@@ -119,8 +119,8 @@ public final class SumatraMath
 	/**
 	 * Checks two double values for equality with a small tolerance value
 	 *
-	 * @param a first value
-	 * @param b second value
+	 * @param a         first value
+	 * @param b         second value
 	 * @param tolerance to use for comparison
 	 * @return true, if absolute difference between both values is smaller than or equal to tolerance
 	 */
@@ -146,23 +146,18 @@ public final class SumatraMath
 	/**
 	 * Checks if x is a Number between to values (inclusive)
 	 *
-	 * @param x a value
+	 * @param x   a value
 	 * @param min smaller value
 	 * @param max larger value
 	 * @return true, if min <= x <= max
 	 */
 	public static boolean isBetween(final double x, final double min, final double max)
 	{
-		boolean result;
 		if (max > min)
 		{
-			result = (x >= min) && (x <= max);
-		} else
-		{
-			result = (x >= max) && (x <= min);
+			return (x >= min) && (x <= max);
 		}
-
-		return result;
+		return (x >= max) && (x <= min);
 	}
 
 
@@ -180,8 +175,8 @@ public final class SumatraMath
 	 * Project value to a relative values between 0 and 1
 	 *
 	 * @param value the value
-	 * @param from the value that corresponds to 0
-	 * @param to the value that corresponds to 1
+	 * @param from  the value that corresponds to 0
+	 * @param to    the value that corresponds to 1
 	 * @return value in range [0..1]
 	 */
 	public static double relative(final double value, final double from, final double to)
@@ -214,11 +209,10 @@ public final class SumatraMath
 	/**
 	 * Solves for the real roots of a quadratic equation with real
 	 * coefficients. The quadratic equation is of the form
-	 * <P>
+	 * <p>
 	 * <I>ax</I><SUP>2</SUP> + <I>bx</I> + <I>c</I> = 0
-	 * <P>
+	 * <p>
 	 *
-	 * @author AndreR <andre@ryll.cc>
 	 * @param a Coefficient of <I>x</I><SUP>2</SUP>.
 	 * @param b Coefficient of <I>x</I>.
 	 * @param c Constant coefficient.
@@ -272,12 +266,11 @@ public final class SumatraMath
 	/**
 	 * Solves for the real roots of a cubic equation with real
 	 * coefficients. The cubic equation is of the form
-	 * <P>
+	 * <p>
 	 * <I>ax</I><SUP>3</SUP> + <I>bx</I><SUP>2</SUP> + <I>cx</I> + <I>d</I> = 0
-	 * <P>
+	 * <p>
 	 * Source taken from: https://github.com/davidzof/wattzap/blob/master/src/com/wattzap/model/power/Cubic.java
 	 *
-	 * @author AndreR <andre@ryll.cc>
 	 * @param a3 Coefficient of <I>x</I><SUP>3</SUP>.
 	 * @param b2 Coefficient of <I>x</I><SUP>2</SUP>.
 	 * @param c1 Coefficient of <I>x</I>.

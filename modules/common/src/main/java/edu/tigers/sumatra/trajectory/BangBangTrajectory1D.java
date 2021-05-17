@@ -43,9 +43,10 @@ class BangBangTrajectory1D implements ITrajectory<Double>
 			return (double) (lastPart.s0 + (lastPart.v0 * t) + (0.5f * lastPart.acc * t * t));
 		}
 
-		final var piece = findPart(trajTime);
-		final var tPieceStart = findStart(trajTime);
-		final var t = trajTime - tPieceStart;
+		var pieceIdx = findPartIdx(trajTime);
+		var piece = parts[pieceIdx];
+		var tPieceStart = pieceIdx < 1 ? 0 : parts[pieceIdx - 1].tEnd;
+		var t = trajTime - tPieceStart;
 		return (double) (piece.s0 + (piece.v0 * t) + (0.5f * piece.acc * t * t));
 	}
 
@@ -68,9 +69,10 @@ class BangBangTrajectory1D implements ITrajectory<Double>
 			return 0.0;
 		}
 
-		final var piece = findPart(trajTime);
-		final var tPieceStart = findStart(trajTime);
-		final var t = trajTime - tPieceStart;
+		var pieceIdx = findPartIdx(trajTime);
+		var piece = parts[pieceIdx];
+		var tPieceStart = pieceIdx < 1 ? 0 : parts[pieceIdx - 1].tEnd;
+		var t = trajTime - tPieceStart;
 		return (double) (piece.v0 + (piece.acc * t));
 	}
 
@@ -124,9 +126,10 @@ class BangBangTrajectory1D implements ITrajectory<Double>
 			return new PosVelAcc<>(getPosition(tt), 0.0, 0.0);
 		}
 
-		final var piece = findPart(trajTime);
-		final var tPieceStart = findStart(trajTime);
-		final var t = trajTime - tPieceStart;
+		var pieceIdx = findPartIdx(trajTime);
+		var piece = parts[pieceIdx];
+		var tPieceStart = pieceIdx < 1 ? 0 : parts[pieceIdx - 1].tEnd;
+		var t = trajTime - tPieceStart;
 		return new PosVelAcc<>(
 				(double) (piece.s0 + (piece.v0 * t) + (0.5f * piece.acc * t * t)),
 				(double) (piece.v0 + (piece.acc * t)),
@@ -147,31 +150,22 @@ class BangBangTrajectory1D implements ITrajectory<Double>
 	}
 
 
-	private BBTrajectoryPart findPart(double t)
+	private int findPartIdx(double t)
 	{
 		for (int i = 0; i < numParts; i++)
 		{
 			if (t < parts[i].tEnd)
 			{
-				return parts[i];
+				return i;
 			}
 		}
-		return parts[numParts - 1];
+		return numParts - 1;
 	}
 
 
-	private float findStart(double t)
+	private BBTrajectoryPart findPart(double t)
 	{
-		float tStart = 0;
-		for (int i = 0; i < numParts; i++)
-		{
-			if (t < parts[i].tEnd)
-			{
-				break;
-			}
-			tStart = parts[i].tEnd;
-		}
-		return tStart;
+		return parts[findPartIdx(t)];
 	}
 
 

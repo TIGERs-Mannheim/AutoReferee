@@ -86,7 +86,7 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public boolean isValid()
 	{
-		return !directionVector().isZeroVector();
+		return !start.equals(end);
 	}
 	
 	
