@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.data;
@@ -409,6 +409,7 @@ public class GameState
 		return (state == EGameState.DIRECT_FREE) || (state == EGameState.INDIRECT_FREE) || (state == EGameState.KICKOFF);
 	}
 
+
 	/**
 	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
 	 */
@@ -463,6 +464,12 @@ public class GameState
 	public boolean isDirectFreeForThem()
 	{
 		return state == EGameState.DIRECT_FREE && isGameStateForThem();
+	}
+
+
+	public boolean isFreeKick()
+	{
+		return state == EGameState.DIRECT_FREE || state == EGameState.INDIRECT_FREE;
 	}
 
 
