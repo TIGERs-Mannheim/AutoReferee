@@ -63,14 +63,31 @@ public class DrawableTrajectoryPath implements IDrawableShape
 		{
 			IVector2 pos = trajXY.getPositionMM(t).getXYVector();
 			IVector2 vel = trajXY.getVelocity(t).getXYVector();
-			if ((vLast == null)
-					|| (vel.angleToAbs(vLast).orElse(vel.getAngle(0)) > PRECISION))
+			if (shouldAddPoint(vLast, vel))
 			{
 				points.add(pos);
 				vLast = vel;
 			}
 		}
 		points.add(trajXY.getPositionMM(trajXY.getTotalTime()).getXYVector());
+	}
+
+
+	private boolean shouldAddPoint(IVector2 vLast, IVector2 vCur)
+	{
+		if (vLast == null)
+		{
+			// first point
+			return true;
+		}
+
+		var vDiff = vCur.angleToAbs(vLast);
+		if (vDiff.isEmpty())
+		{
+			// vCur or vLast is zero, this only happens at the beginning or end of the trajectory
+			return true;
+		}
+		return vDiff.get() > PRECISION;
 	}
 
 
