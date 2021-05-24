@@ -4,6 +4,7 @@ package edu.tigers.sumatra.referee.proto;
 option go_package = "github.com/RoboCup-SSL/ssl-game-controller/internal/app/rcon";
 
 import "ssl_gc_rcon.proto";
+import "ssl_gc_common.proto";
 
 // a registration that must be send by teams to the controller as the very first message
 message TeamRegistration {
@@ -11,6 +12,8 @@ message TeamRegistration {
     required string team_name = 1;
     // signature can optionally be specified to enable secure communication
     optional Signature signature = 2;
+    // the team (relevant only if a team plays against itself)
+    optional Team team = 3;
 }
 
 // wrapper for all messages from a team's computer to the controller
