@@ -1,14 +1,8 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.detector;
-
-import java.awt.Color;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Optional;
-import java.util.Set;
 
 import edu.tigers.autoreferee.EAutoRefShapesLayer;
 import edu.tigers.autoreferee.generic.BotPosition;
@@ -22,6 +16,12 @@ import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.AttackerDoubleTouchedBall;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+
+import java.awt.Color;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Optional;
+import java.util.Set;
 
 
 /**
@@ -102,7 +102,7 @@ public class DoubleTouchDetector extends AGameEventDetector
 		
 		if (frame.getBotsTouchingBall().stream().anyMatch(b -> b.getBotID().equals(kickerID)))
 		{
-			return Optional.of(new AttackerDoubleTouchedBall(kickerID, getBall().getPos()));
+			return Optional.of(new AttackerDoubleTouchedBall(kickerID, initialBallPos));
 		}
 		
 		// situation is not decided yet
