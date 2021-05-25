@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -56,6 +57,21 @@ public class SslGameControllerProcess implements Runnable
 			return;
 		}
 
+
+		Path engineConfig = Path.of("config", "engine.yaml");
+		Path engineConfigDefault = Path.of("config", "engine-default.yaml");
+		if (!Files.exists(engineConfig) && Files.exists(engineConfigDefault))
+		{
+			log.info("Initialize engine.yaml with engine-default.yaml");
+			try
+			{
+				Files.copy(engineConfigDefault, engineConfig);
+			} catch (IOException e)
+			{
+				log.warn("Could not copy default engine config", e);
+			}
+		}
+
 		try
 		{
 			log.debug("Starting with: {} {} {}", gcUiPort, timeAcquisitionMode, publishAddress);
@@ -65,7 +81,7 @@ public class SslGameControllerProcess implements Runnable
 			command.add(":" + gcUiPort);
 			command.add("-timeAcquisitionMode");
 			command.add(timeAcquisitionMode);
-			if(!publishAddress.isBlank())
+			if (!publishAddress.isBlank())
 			{
 				command.add("-publishAddress");
 				command.add(publishAddress);
