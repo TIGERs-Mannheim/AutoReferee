@@ -115,6 +115,9 @@ public class CamFilter
 	@Configurable(defValue = "200.0", comment = "Max. distance to copy state from filtered bot to new trackers")
 	private static double copyTrackerMaxDistance = 200.0;
 
+	@Configurable(defValue = "false", comment = "Adjust frame times based on estimated frame rate and frame number")
+	private static boolean adjustTCapture = false;
+
 	static
 	{
 		ConfigRegistration.registerClass("vision", CamFilter.class);
@@ -222,11 +225,16 @@ public class CamFilter
 			frameIntervalFilter.addSample(frame.getCamFrameNumber(), frame.gettCapture());
 		}
 
-		IVector2 estimate = frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(frame.gettCapture(), 0.0));
+		if (adjustTCapture)
+		{
+			IVector2 estimate = frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(frame.gettCapture(), 0.0));
 
-		double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
+			double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
 
-		return new CamDetectionFrame(frame, (long) tCapture);
+			return new CamDetectionFrame(frame, (long) tCapture);
+		}
+
+		return frame;
 	}
 
 
