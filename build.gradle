@@ -7,8 +7,8 @@ plugins {
     id 'application'
 
     id 'com.palantir.git-version' version '0.12.3'
-    id 'ca.cutterslade.analyze' version '1.4.3'
-    id 'com.google.cloud.tools.jib' version '2.7.0'
+    id 'ca.cutterslade.analyze' version '1.6.0'
+    id 'com.google.cloud.tools.jib' version '3.0.0'
     id "com.github.breadmoirai.github-release" version "2.2.12"
 }
 
