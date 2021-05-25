@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -13,6 +13,8 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.botshape.IBotShape;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.trajectory.ITrajectory;
 
 import java.util.Optional;
 
@@ -59,11 +61,6 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 */
 	boolean hadBallContact(double horizon);
 
-
-	/**
-	 * @return the last time when ball contact was reported
-	 */
-	long getLastBallContact();
 
 	/**
 	 * @return the ball contact information
@@ -151,9 +148,15 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 
 
 	/**
-	 * @return the current robot state
+	 * @return the current robot state (internal, filtered or buffered)
 	 */
 	State getBotState();
+
+
+	/**
+	 * @return the current robot state (internal or filtered)
+	 */
+	DelayedBotState getCurrentState();
 
 
 	/**
@@ -161,15 +164,8 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 	 */
 	Optional<State> getFilteredState();
 
-
 	/**
-	 * @return the buffered state of the current trajectory, synchronized with the filtered state
+	 * @return the current trajectory, if present
 	 */
-	Optional<State> getBufferedTrajState();
-
-
-	/**
-	 * @return the distance from the actual position to the current trajectory
-	 */
-	TrajTrackingQuality getTrackingQuality();
+	Optional<ITrajectory<IVector3>> getCurrentTrajectory();
 }

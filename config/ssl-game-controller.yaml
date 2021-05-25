@@ -44,6 +44,7 @@ game:
   ball-placement-min-robot-distance: 0.05
   distance-to-ball-in-stop: 0.5
   auto-approve-goals: true
+  continue-from-halt: false
   challenge-flags: 3
   emergency-stop-grace-period: 10s
   normal:

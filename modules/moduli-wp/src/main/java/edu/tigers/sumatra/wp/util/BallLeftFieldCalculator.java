@@ -1,10 +1,11 @@
-package edu.tigers.sumatra.wp.util;
+/*
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ */
 
-import java.util.LinkedList;
+package edu.tigers.sumatra.wp.util;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
 import edu.tigers.sumatra.math.line.ILine;
@@ -14,6 +15,8 @@ import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TimedPosition;
+
+import java.util.LinkedList;
 
 
 public class BallLeftFieldCalculator
@@ -140,7 +143,7 @@ public class BallLeftFieldCalculator
 
 	private void reduceBallPosBuffer(final long currentTimestamp)
 	{
-		ballPosBuffer.removeIf(t -> t.getTimestamp() > currentTimestamp);
+		ballPosBuffer.removeIf(t -> t.getTimestamp() >= currentTimestamp);
 		while (!ballPosBuffer.isEmpty())
 		{
 			double age = (currentTimestamp - ballPosBuffer.get(ballPosBuffer.size() - 1).getTimestamp()) / 1e9;

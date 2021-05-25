@@ -134,8 +134,13 @@ public class BerkeleyAsyncRecorder
 		@Override
 		public void run()
 		{
-			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-			recorders.forEach(IBerkeleyRecorder::flush);
+			try
+			{
+				recorders.forEach(IBerkeleyRecorder::flush);
+			} catch (Exception e)
+			{
+				log.error("Unexpected exception while flushing", e);
+			}
 		}
 
 

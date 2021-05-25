@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.vis;
@@ -26,7 +26,6 @@ public enum EWpShapesLayer implements IShapeLayer
 	BOTS("Bots", "Field", true),
 	BOT_FEEDBACK("Bot Feedback", "Field", false),
 	BOT_FILTER("Bot Filter", "Field", false),
-	BOT_BUFFERED_TRAJ("Bot Buffered Traj", "Field", false, DEBUG_PERSIST),
 	BOT_PATTERNS("Bot Patterns", "Field", false, DEBUG_PERSIST),
 	BALL("Ball", "Field", true),
 	BALL_HIGHLIGHTER("Ball highlighter", "Field", true),

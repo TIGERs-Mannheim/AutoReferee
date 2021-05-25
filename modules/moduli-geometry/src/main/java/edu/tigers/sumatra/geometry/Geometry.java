@@ -25,7 +25,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.model.SumatraModel;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
@@ -163,17 +162,6 @@ public class Geometry
 
 	@Configurable(defValue = "0", spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE" })
 	private static double boundaryOffset = 0;
-
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
-			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06", "0.03" },
-			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision")
-	private static double feedbackDelay = 0.06;
-
-	@Getter
-	@Configurable(spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
-			defValueSpezis = { "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0125" },
-			comment = "Delay [s] between path planning trajectory state and robot feedback state")
-	private static double robotFeedbackDelay = 0.0;
 
 
 	private final IRectangle field;
@@ -685,11 +673,5 @@ public class Geometry
 	public static double getLineWidth()
 	{
 		return lineWidth;
-	}
-
-
-	public static double getFeedbackDelay()
-	{
-		return feedbackDelay;
 	}
 }

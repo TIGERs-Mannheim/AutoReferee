@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -14,6 +14,7 @@ import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Command;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage.Referee.Stage;
+import edu.tigers.sumatra.time.TimestampTimer;
 
 import java.util.Optional;
 
@@ -32,6 +33,7 @@ public class GameStateCalculator
 	}
 
 	private IVector2 ballPosOnPrepare = null;
+	private final TimestampTimer ballMovedTimer = new TimestampTimer(0.1);
 	private long lastRefMsgCounter = -1;
 	private GameState lastGameState = GameState.empty().build();
 	private Command lastRefCmd = Command.STOP;
@@ -54,6 +56,7 @@ public class GameStateCalculator
 		lastGameState = gameState;
 		lastRefMsgCounter = -1;
 		ballPosOnPrepare = null;
+		ballMovedTimer.reset();
 	}
 
 
@@ -62,15 +65,15 @@ public class GameStateCalculator
 	 * @param ballPos    current ball position
 	 * @return next game state
 	 */
-	public GameState getNextGameState(final RefereeMsg refereeMsg, final IVector2 ballPos)
+	public GameState getNextGameState(final RefereeMsg refereeMsg, final IVector2 ballPos, long timestamp)
 	{
-		GameState nextGameState = calcGameState(refereeMsg, ballPos);
+		GameState nextGameState = calcGameState(refereeMsg, ballPos, timestamp);
 		lastGameState = nextGameState;
 		return nextGameState;
 	}
 
 
-	private GameState calcGameState(final RefereeMsg refereeMsg, final IVector2 ballPos)
+	private GameState calcGameState(final RefereeMsg refereeMsg, final IVector2 ballPos, long timestamp)
 	{
 		GameState.GameStateBuilder builder = lastGameState.toBuilder();
 
@@ -85,7 +88,7 @@ public class GameStateCalculator
 		processNextCommand(refereeMsg.getNextCommand(), refereeMsg.getCommand(), builder);
 		builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
 		processStage(refereeMsg.getStage(), builder);
-		processBallMovement(ballPos, builder);
+		processBallMovement(ballPos, builder, timestamp);
 
 		if ((refereeMsg.getCommand() == Command.BALL_PLACEMENT_BLUE
 				|| refereeMsg.getCommand() == Command.BALL_PLACEMENT_YELLOW)
@@ -262,7 +265,7 @@ public class GameStateCalculator
 	}
 
 
-	private void processBallMovement(final IVector2 ballPos, final GameState.GameStateBuilder builder)
+	private void processBallMovement(IVector2 ballPos, GameState.GameStateBuilder builder, long timestamp)
 	{
 		if (ballPosOnPrepare == null || lastGameState.isPenaltyOrPreparePenalty())
 		{
@@ -271,8 +274,15 @@ public class GameStateCalculator
 
 		if (ballPos.distanceTo(ballPosOnPrepare) > ballMovedDistanceTol)
 		{
-			builder.withState(EGameState.RUNNING).withForTeam(ETeamColor.NEUTRAL);
-			ballPosOnPrepare = null;
+			ballMovedTimer.update(timestamp);
+			if (ballMovedTimer.isTimeUp(timestamp))
+			{
+				builder.withState(EGameState.RUNNING).withForTeam(ETeamColor.NEUTRAL);
+				ballPosOnPrepare = null;
+			}
+		} else
+		{
+			ballMovedTimer.reset();
 		}
 	}
 }

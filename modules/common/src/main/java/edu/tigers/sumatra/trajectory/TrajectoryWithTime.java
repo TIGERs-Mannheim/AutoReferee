@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.trajectory;
 
@@ -35,6 +35,13 @@ public class TrajectoryWithTime<T>
 	public long gettStart()
 	{
 		return tStart;
+	}
+
+
+	public ITrajectory<T> synchronizeTo(long timestamp)
+	{
+		double age = (timestamp - tStart) / 1e9;
+		return new TrajectoryWrapper<>(trajectory, age, trajectory.getTotalTime());
 	}
 
 

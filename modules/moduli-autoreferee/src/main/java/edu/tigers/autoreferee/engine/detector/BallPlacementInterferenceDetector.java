@@ -77,7 +77,7 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 	private Set<BotID> violatingBots()
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
-		IVector2 placePos = frame.getGameState().getBallPlacementPositionNeutral();
+		IVector2 placePos = Optional.ofNullable(frame.getGameState().getBallPlacementPositionNeutral()).orElse(ballPos);
 		ITube placementTube = Tube.create(ballPos, placePos, RuleConstraints.getStopRadius() + Geometry.getBotRadius());
 		ETeamColor placingTeam = frame.getGameState().getForTeam();
 
@@ -104,20 +104,21 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 	{
 		return (frame.getTimestamp() - violator.getStartTimestamp()) / 1e9 > violationTime;
 	}
-	
+
+
 	private enum PunishedStatus
 	{
 		PUNISHED,
 		UNPUNISHED
 	}
-	
-	private class Violator
+
+	private static class Violator
 	{
 		private final BotID botId;
 		private final long startTimestamp;
 		private PunishedStatus punished;
-		
-		
+
+
 		private Violator(final BotID botId, final long startTimestamp)
 		{
 			this.botId = botId;

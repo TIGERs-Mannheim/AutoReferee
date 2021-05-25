@@ -6,6 +6,8 @@ package edu.tigers.sumatra.wp;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.IConfigClient;
+import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
@@ -20,6 +22,7 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.pose.Pose;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -30,6 +33,7 @@ import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
+import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.util.Safe;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.vision.IVisionFilterObserver;
@@ -39,6 +43,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.IKickEvent;
 import edu.tigers.sumatra.wp.data.BallContact;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
+import edu.tigers.sumatra.wp.data.DelayedBotState;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -47,17 +52,14 @@ import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import edu.tigers.sumatra.wp.util.BallContactCalculator;
-import edu.tigers.sumatra.wp.util.BotStateTrajectorySync;
 import edu.tigers.sumatra.wp.util.CurrentBallDetector;
 import edu.tigers.sumatra.wp.util.DefaultRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -72,15 +74,35 @@ import java.util.stream.Collectors;
 /**
  * This module collects some AI-independent world information, like filtered camera data and vision data
  */
+@Log4j2
 public class WorldInfoCollector extends AWorldPredictor
 		implements IRefereeObserver, IVisionFilterObserver, ICamFrameObserver
 {
-	private static final Logger log = LogManager.getLogger(WorldInfoCollector.class.getName());
-
-	@Configurable(comment = "Use robot feedback for position and velocity.", defValue = "true")
-	private static boolean preferRobotFeedback = true;
-	@Configurable(comment = "Add a faked ball. Set pos,vel,acc in code.", defValue = "false")
+	@Configurable(
+			comment = "Add a faked ball. Set pos,vel,acc in code.",
+			defValue = "false"
+	)
 	private static boolean fakeBall = false;
+
+	@Configurable(
+			comment = "Use robot feedback for position and velocity.",
+			defValue = "true"
+	)
+	private static boolean preferRobotFeedback = true;
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
+			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06", "0.03" },
+			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision"
+	)
+	private static double visionFeedbackDelay = 0.06;
+
+	@Configurable(
+			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
+			defValueSpezis = { "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0125" },
+			comment = "Delay [s] between path planning trajectory state and robot feedback state"
+	)
+	private static double robotFeedbackDelay = 0.0;
 
 	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
 	private GameStateCalculator gameStateCalculator;
@@ -88,7 +110,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	private BallContactCalculator ballContactCalculator;
 	private CurrentBallDetector currentBallDetector;
 	private CamFrameShapeMapProducer camFrameShapeMapProducer;
-	private Map<BotID, BotStateTrajectorySync> botStateFromTraj = new HashMap<>();
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	private Referee referee;
@@ -102,6 +123,15 @@ public class WorldInfoCollector extends AWorldPredictor
 	static
 	{
 		ConfigRegistration.registerClass("wp", WorldInfoCollector.class);
+		ConfigRegistration.registerConfigurableCallback("wp", new IConfigObserver()
+		{
+			@Override
+			public void afterApply(IConfigClient configClient)
+			{
+				String env = SumatraModel.getInstance().getEnvironment();
+				ConfigRegistration.applySpezi("wp", env);
+			}
+		});
 	}
 
 
@@ -135,16 +165,13 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private boolean useInternalState(BotState filterState, BotState internalState)
+	private DelayedBotState selectRobotState(BotState filterState, BotState internalState)
 	{
-		if (filterState == null)
+		if ((internalState != null && preferRobotFeedback) || filterState == null)
 		{
-			return true;
-		} else if (internalState == null)
-		{
-			return false;
+			return DelayedBotState.fromBotState(internalState, robotFeedbackDelay);
 		}
-		return preferRobotFeedback;
+		return DelayedBotState.fromBotState(filterState, visionFeedbackDelay);
 	}
 
 
@@ -154,59 +181,35 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private TrackedBot createTrackedBot(final RobotInfo robotInfo,
-			final Map<BotID, BotState> filteredBotStates,
-			final BotState filterState,
-			final BotState internalState,
-			final FilteredVisionBot filteredVisionBot)
+	private State trajectoryToState(final ITrajectory<IVector3> traj)
 	{
-		boolean useInternalState = useInternalState(filterState, internalState);
-		BotState currentBotState = useInternalState ? internalState : filterState;
-		if (currentBotState == null)
+		return State.of(Pose.from(traj.getPositionMM(0.0)), traj.getVelocity(0.0));
+	}
+
+
+	private TrackedBot createTrackedBot(
+			RobotInfo robotInfo,
+			BotState filterState,
+			BotState internalState,
+			FilteredVisionBot filteredVisionBot)
+	{
+		if (filterState == null && internalState == null)
 		{
 			return null;
 		}
-		BotStateTrajectorySync sync = botStateFromTraj.computeIfAbsent(robotInfo.getBotId(),
-				b -> new BotStateTrajectorySync());
-		if (botCollidingWithOtherBot(filteredBotStates, currentBotState))
-		{
-			sync.reset();
-		} else
-		{
-			robotInfo.getTrajectory().ifPresentOrElse(t -> sync.add(t, lastWFTimestamp), sync::reset);
-		}
-
-		var feedbackDelay = useInternalState
-				? Geometry.getRobotFeedbackDelay()
-				: Geometry.getFeedbackDelay();
-		var trackedState = sync.updateState(lastWFTimestamp, feedbackDelay, currentBotState);
-
-		Optional<State> bufferedState = sync.getLatestState();
-		BotState botState = BotState.of(
-				robotInfo.getBotId(),
-				bufferedState.map(s -> State.of(Pose.from(s.getPos(), currentBotState.getOrientation()),
-						Vector3.from2d(s.getVel2(), currentBotState.getAngularVel())))
-						.orElse(currentBotState));
+		var currentBotState = selectRobotState(filterState, internalState);
+		var botState = robotInfo.getTrajectory().map(this::trajectoryToState).orElse(currentBotState);
 
 		return TrackedBot.newBuilder()
-				.withBotId(botState.getBotID())
+				.withBotId(robotInfo.getBotId())
 				.withTimestamp(lastWFTimestamp)
 				.withState(botState)
+				.withCurrentState(currentBotState)
 				.withFilteredState(filterState)
-				.withBufferedTrajState(trackedState)
-				.withTrackingQuality(sync.getTrajTrackingQuality())
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
 				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
 				.build();
-	}
-
-
-	private boolean botCollidingWithOtherBot(final Map<BotID, BotState> filteredBotStates, final BotState trajState)
-	{
-		return filteredBotStates.values().stream()
-				.filter(b -> !b.getBotID().equals(trajState.getBotID()))
-				.anyMatch(s -> s.getPos().distanceTo(trajState.getPos()) < Geometry.getBotRadius() * 2 + 10);
 	}
 
 
@@ -219,7 +222,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		Map<BotID, FilteredVisionBot> filteredVisionBotMap = getFilteredBots(filteredVisionBots);
 
 		Map<BotID, ITrackedBot> trackedBots = robotInfo.stream()
-				.map(r -> createTrackedBot(r, filteredBotStates, filteredBotStates.get(r.getBotId()),
+				.map(r -> createTrackedBot(r, filteredBotStates.get(r.getBotId()),
 						internalBotStates.get(r.getBotId()),
 						filteredVisionBotMap.get(r.getBotId())))
 				.filter(Objects::nonNull)
@@ -302,7 +305,7 @@ public class WorldInfoCollector extends AWorldPredictor
 			ciGameControllerConnector.process(swf, referee.flushChanges()).forEach(referee::onNewRefereeMessage);
 		}
 
-		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos());
+		GameState gameState = gameStateCalculator.getNextGameState(latestRefereeMsg, ball.getPos(), lastWFTimestamp);
 
 		WorldFrameWrapper wfw = new WorldFrameWrapper(swf, latestRefereeMsg, gameState);
 		Safe.forEach(consumers, c -> c.onNewWorldFrame(wfw));
@@ -463,7 +466,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		ballContactCalculator = new BallContactCalculator();
 		currentBallDetector = new CurrentBallDetector();
 		camFrameShapeMapProducer = new CamFrameShapeMapProducer();
-		botStateFromTraj.clear();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
 		lastKickEvent = null;

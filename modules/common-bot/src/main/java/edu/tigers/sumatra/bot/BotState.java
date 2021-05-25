@@ -17,14 +17,14 @@ public class BotState extends State
 
 
 	@SuppressWarnings("unused") // berkeley
-	private BotState()
+	protected BotState()
 	{
 		super();
 		botID = BotID.noBot();
 	}
 
 
-	private BotState(final BotID botID, final State state)
+	protected BotState(final BotID botID, final State state)
 	{
 		super(state.getPose(), state.getVel3());
 		this.botID = botID;
@@ -34,6 +34,12 @@ public class BotState extends State
 	public static BotState of(final BotID botID, final State state)
 	{
 		return new BotState(botID, state);
+	}
+
+
+	public static BotState zero()
+	{
+		return BotState.of(BotID.noBot(), State.of(Pose.zero(), Vector3f.zero()));
 	}
 
 

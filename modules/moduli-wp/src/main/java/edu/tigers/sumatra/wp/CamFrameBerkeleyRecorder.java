@@ -10,6 +10,7 @@ import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.persistence.IBerkeleyRecorder;
 import edu.tigers.sumatra.wp.data.BerkeleyCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,12 +23,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * Berkeley storage for cam frames
  */
+@Log4j2
 public class CamFrameBerkeleyRecorder implements IBerkeleyRecorder
 {
+	private static final int MAX_BUFFER_SIZE = 1000;
 	private final Queue<Map<Integer, ExtendedCamDetectionFrame>> camFramesQueue = new ConcurrentLinkedQueue<>();
 	private final Map<Integer, ExtendedCamDetectionFrame> camFrameMap = new HashMap<>();
 	private final CamFrameObserver camObserver = new CamFrameObserver();
 	private final BerkeleyDb db;
+	private boolean droppingFrames = false;
 
 
 	/**
@@ -77,7 +81,19 @@ public class CamFrameBerkeleyRecorder implements IBerkeleyRecorder
 		{
 			camFrameMap.put(frame.getCameraId(), frame);
 			camFrameMap.values().removeIf(f -> (frame.gettCapture() - f.gettCapture()) / 1e9 > 0.2);
-			camFramesQueue.add(new HashMap<>(camFrameMap));
+
+			if (camFramesQueue.size() > MAX_BUFFER_SIZE)
+			{
+				if (!droppingFrames)
+				{
+					log.warn("CamFrame buffer is full. Dropping frames!");
+					droppingFrames = true;
+				}
+			} else
+			{
+				camFramesQueue.add(new HashMap<>(camFrameMap));
+				droppingFrames = false;
+			}
 		}
 	}
 }

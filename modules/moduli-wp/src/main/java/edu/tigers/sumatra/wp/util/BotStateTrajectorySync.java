@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -12,6 +12,7 @@ import edu.tigers.sumatra.filter.DataSync;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
+import edu.tigers.sumatra.wp.data.DelayedBotState;
 import edu.tigers.sumatra.wp.data.TrajTrackingQuality;
 import lombok.Getter;
 
@@ -23,8 +24,8 @@ public class BotStateTrajectorySync
 	@Configurable(defValue = "0.2", comment = "Time horizon [s] that is buffered (requires Moduli-reload)")
 	private static double horizon = 0.2;
 
-	@Configurable(defValue = "0.5", comment = "Max time [s] that robot can be off the trajectory before a reset")
-	private static double maxTimeOffTrajectory = 0.5;
+	@Configurable(defValue = "0.2", comment = "Max time [s] that robot can be off the trajectory before a reset")
+	private static double maxTimeOffTrajectory = 0.2;
 
 	@Configurable(defValue = "0.03", comment = "Max time difference [s] between trajectory and measured state")
 	private static double maxDt = 0.03;
@@ -59,9 +60,9 @@ public class BotStateTrajectorySync
 	}
 
 
-	public State updateState(final long timestamp, final double feedbackDelay, final BotState state)
+	public State updateState(final long timestamp, final DelayedBotState state)
 	{
-		var trackedState = getState(timestamp, feedbackDelay).orElse(null);
+		var trackedState = getState(timestamp, state.getDelay()).orElse(null);
 		if (trackedState == null || lastTimestamp == 0)
 		{
 			trajTrackingQuality = new TrajTrackingQuality();
@@ -95,9 +96,21 @@ public class BotStateTrajectorySync
 	}
 
 
+	public Optional<Long> getLatestTimestamp()
+	{
+		return buffer.getLatest().map(DataSync.DataStore::getTimestamp);
+	}
+
+
 	public void reset()
 	{
 		buffer.reset();
+	}
+
+
+	public boolean isOnTrack()
+	{
+		return buffer.getLatest().isPresent();
 	}
 
 

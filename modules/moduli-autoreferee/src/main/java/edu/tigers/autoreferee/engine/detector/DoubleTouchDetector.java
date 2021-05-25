@@ -45,11 +45,9 @@ import java.util.Set;
  */
 public class DoubleTouchDetector extends AGameEventDetector
 {
-	private static final double MIN_BALL_MOVE_DISTANCE = 50.0;
 	private static final Set<EGameState> ACTIVE_STATES = Collections.unmodifiableSet(EnumSet.of(
 			EGameState.KICKOFF, EGameState.DIRECT_FREE, EGameState.INDIRECT_FREE, EGameState.RUNNING));
 	
-	private boolean ballMoved;
 	private BotID kickerID = null;
 	private IVector2 initialBallPos;
 	
@@ -64,7 +62,6 @@ public class DoubleTouchDetector extends AGameEventDetector
 	@Override
 	protected void doPrepare()
 	{
-		ballMoved = false;
 		kickerID = null;
 		initialBallPos = getBall().getPos();
 		
@@ -79,12 +76,11 @@ public class DoubleTouchDetector extends AGameEventDetector
 	@Override
 	public Optional<IGameEvent> doUpdate()
 	{
-		if (!ballMoved)
+		if (!frame.getGameState().isRunning())
 		{
 			frame.getShapes().get(EAutoRefShapesLayer.ENGINE)
 					.add(new DrawableLine(Lines.segmentFromPoints(initialBallPos, getBall().getPos()), Color.RED));
 			kickerID = frame.getBotsTouchingBall().stream().findFirst().map(BotPosition::getBotID).orElse(kickerID);
-			ballMoved = initialBallPos.distanceTo(getBall().getPos()) > MIN_BALL_MOVE_DISTANCE;
 			return Optional.empty();
 		}
 		

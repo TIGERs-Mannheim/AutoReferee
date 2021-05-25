@@ -1,10 +1,9 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
 
-import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
@@ -12,6 +11,7 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.trajectory.StubTrajectory;
+import edu.tigers.sumatra.wp.data.DelayedBotState;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,7 +47,7 @@ public class BotStateTrajectorySyncTest
 	private Optional<State> updateState(IVector3 pos, long timestamp)
 	{
 		c.add(StubTrajectory.vector3Static(pos), timestamp);
-		return Optional.ofNullable(
-				c.updateState(timestamp, 1e-9, BotState.of(BotID.createBotId(0, ETeamColor.YELLOW), State.zero())));
+		DelayedBotState state = DelayedBotState.of(BotID.createBotId(0, ETeamColor.YELLOW), State.zero(), 1e-9);
+		return Optional.ofNullable(c.updateState(timestamp, state));
 	}
 }
