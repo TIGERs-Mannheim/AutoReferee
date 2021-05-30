@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source;
 
@@ -49,7 +49,9 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 	}
 
 
-	/** Constructor */
+	/**
+	 * Constructor
+	 */
 	public NetworkRefereeReceiver()
 	{
 		super(ERefereeMessageSource.NETWORK);
@@ -96,19 +98,21 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 				break;
 			}
 
-			refBoxAddress = packet.getAddress();
-			final ByteArrayInputStream packetIn = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
-
-			SslGcRefereeMessage.Referee sslRefereeMsg;
-			try
+			if (packet.getLength() > 0)
 			{
-				sslRefereeMsg = SslGcRefereeMessage.Referee.parseFrom(packetIn);
+				refBoxAddress = packet.getAddress();
 
-				// Notify the receipt of a new RefereeMessage to any other observers
-				notifyNewRefereeMessage(sslRefereeMsg);
-			} catch (IOException err)
-			{
-				log.error("Could not read referee message ", err);
+				try
+				{
+					var packetIn = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
+					var sslRefereeMsg = SslGcRefereeMessage.Referee.parseFrom(packetIn);
+
+					// Notify the receipt of a new RefereeMessage to any other observers
+					notifyNewRefereeMessage(sslRefereeMsg);
+				} catch (IOException err)
+				{
+					log.error("Could not read referee message", err);
+				}
 			}
 		}
 

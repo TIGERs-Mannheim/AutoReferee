@@ -123,6 +123,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	static
 	{
 		ConfigRegistration.registerClass("wp", WorldInfoCollector.class);
+		String env = SumatraModel.getInstance().getEnvironment();
+		ConfigRegistration.applySpezi("wp", env);
 		ConfigRegistration.registerConfigurableCallback("wp", new IConfigObserver()
 		{
 			@Override

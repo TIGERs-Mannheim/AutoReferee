@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.ids;
@@ -16,8 +16,8 @@ import lombok.Getter;
 @Getter
 public enum EAiTeam
 {
-	BLUE(ETeamColor.BLUE),
 	YELLOW(ETeamColor.YELLOW),
+	BLUE(ETeamColor.BLUE),
 
 	;
 

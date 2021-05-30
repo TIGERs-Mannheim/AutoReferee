@@ -35,45 +35,52 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 {
 	@Configurable(defValue = "2.0", comment = "The time [s] that a robot is allowed to stay within the forbidden area")
 	private static double violationTime = 2.0;
-	
+
 	private final List<Violator> violators = new ArrayList<>();
-	
-	
+
+
 	public BallPlacementInterferenceDetector()
 	{
 		super(EGameEventDetectorType.BALL_PLACEMENT_INTERFERENCE, EGameState.BALL_PLACEMENT);
 	}
-	
-	
+
+
 	@Override
 	public void doReset()
 	{
 		violators.clear();
 	}
-	
-	
+
+
 	@Override
 	protected Optional<IGameEvent> doUpdate()
 	{
+		if (!frame.getWorldFrame().getBall().isOnCam(0.2))
+		{
+			// Can not see the ball
+			violators.clear();
+			return Optional.empty();
+		}
+
 		Set<BotID> violatingBots = violatingBots();
 		violators.removeIf(b -> !violatingBots.contains(b.getBotId()));
 		violatingBots.stream().filter(this::isNewViolator)
 				.forEach(botID -> violators.add(new Violator(botID, frame.getTimestamp())));
-		
+
 		return violators.stream()
 				.filter(this::keepsViolating)
 				.filter(Violator::isUnpunished)
 				.findAny()
 				.map(this::createEvent);
 	}
-	
-	
+
+
 	private boolean isNewViolator(BotID id)
 	{
 		return violators.stream().noneMatch(e -> e.getBotId() == id);
 	}
-	
-	
+
+
 	private Set<BotID> violatingBots()
 	{
 		IVector2 ballPos = frame.getWorldFrame().getBall().getPos();
@@ -90,16 +97,16 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 				.map(ITrackedBot::getBotId)
 				.collect(Collectors.toSet());
 	}
-	
-	
+
+
 	private IGameEvent createEvent(Violator violator)
 	{
 		violator.punish();
 		return new BotInterferedPlacement(violator.getBotId(),
 				frame.getWorldFrame().getBot(violator.getBotId()).getPos());
 	}
-	
-	
+
+
 	private boolean keepsViolating(Violator violator)
 	{
 		return (frame.getTimestamp() - violator.getStartTimestamp()) / 1e9 > violationTime;
@@ -125,26 +132,26 @@ public class BallPlacementInterferenceDetector extends AGameEventDetector
 			this.startTimestamp = startTimestamp;
 			this.punished = PunishedStatus.UNPUNISHED;
 		}
-		
-		
+
+
 		public BotID getBotId()
 		{
 			return botId;
 		}
-		
-		
+
+
 		public long getStartTimestamp()
 		{
 			return startTimestamp;
 		}
-		
-		
+
+
 		public boolean isUnpunished()
 		{
 			return punished == PunishedStatus.UNPUNISHED;
 		}
-		
-		
+
+
 		public void punish()
 		{
 			this.punished = PunishedStatus.PUNISHED;

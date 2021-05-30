@@ -60,7 +60,7 @@ public class BallSpeedingDetector extends AGameEventDetector
 		BallKickFitState lastKickFitState = frame.getPreviousFrame().getWorldFrame().getKickFitState().get();
 		double kickSpeed = lastKickFitState.getKickVel().getLength() / 1000.;
 		if (isKickTooFast(kickSpeed)
-				&& kickEstimateIsReady(currentKickEvent))
+				&& kickEstimateIsReady(currentKickEvent, lastKickFitState))
 		{
 			lastReportedKickEvent = currentKickEvent;
 			IGameEvent violation;
@@ -94,11 +94,12 @@ public class BallSpeedingDetector extends AGameEventDetector
 	}
 
 
-	private boolean kickEstimateIsReady(final IKickEvent currentKickEvent)
+	private boolean kickEstimateIsReady(final IKickEvent currentKickEvent, BallKickFitState lastKickFitState)
 	{
 		double kickEstimateAge = (frame.getTimestamp() - currentKickEvent.getTimestamp()) / 1e9;
+		double kickFitEstimateAge = (frame.getTimestamp() - lastKickFitState.getKickTimestamp()) / 1e9;
 		boolean kickEstimateIsReady = kickEstimateAge > maxWaitingTime;
-		boolean kickEstimateAged = kickEstimateAge > minWaitingTime;
+		boolean kickEstimateAged = kickFitEstimateAge > minWaitingTime;
 
 
 		// either time is up, or ball has left the field, or ball touched another bot
