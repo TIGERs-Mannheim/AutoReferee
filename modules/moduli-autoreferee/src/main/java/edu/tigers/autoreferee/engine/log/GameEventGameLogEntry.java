@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.log;
 
-import java.awt.Color;
-
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
+
+import java.awt.Color;
 
 
 public abstract class GameEventGameLogEntry extends GameLogEntry
@@ -28,7 +28,7 @@ public abstract class GameEventGameLogEntry extends GameLogEntry
 	@Override
 	public String workGameLogEntry()
 	{
-		return gameEvent.getType().name() + " - " + gameEvent.getDescription();
+		return gameEvent.getType().name() + " - " + gameEvent.getDescription() + " reported by " + gameEvent.getOrigins();
 	}
 
 

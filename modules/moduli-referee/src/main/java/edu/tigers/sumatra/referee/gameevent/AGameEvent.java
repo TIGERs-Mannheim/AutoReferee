@@ -16,29 +16,36 @@ import edu.tigers.sumatra.referee.proto.SslGcGeometry;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 
-@Persistent
+
+@Persistent(version = 1)
 public abstract class AGameEvent implements IGameEvent
 {
 	private final EGameEvent type;
+	private final List<String> origins;
 
 
 	@SuppressWarnings("unsued") // used by berkeley
 	protected AGameEvent()
 	{
 		type = null;
+		origins = List.of();
 	}
 
 
 	protected AGameEvent(final EGameEvent type)
 	{
 		this.type = type;
+		this.origins = List.of();
 	}
 
 
 	protected AGameEvent(final SslGcGameEvent.GameEvent gameEvent)
 	{
 		this.type = EGameEvent.fromProto(gameEvent.getType());
+		this.origins = new ArrayList<>(gameEvent.getOriginList());
 	}
 
 
@@ -46,6 +53,13 @@ public abstract class AGameEvent implements IGameEvent
 	public EGameEvent getType()
 	{
 		return type;
+	}
+
+
+	@Override
+	public List<String> getOrigins()
+	{
+		return origins;
 	}
 
 

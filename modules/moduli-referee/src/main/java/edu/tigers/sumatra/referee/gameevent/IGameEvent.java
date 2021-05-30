@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.gameevent;
 
 
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
+
+import java.util.List;
 
 
 /**
@@ -35,4 +37,9 @@ public interface IGameEvent
 
 
 	String getDescription();
+
+	/**
+	 * @return the list of origins of this game event
+	 */
+	List<String> getOrigins();
 }
