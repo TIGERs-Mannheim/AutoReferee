@@ -20,7 +20,10 @@ public enum EAutoRefShapesLayer implements IShapeLayer
 	ALLOWED_DISTANCES("Allowed Distances", "AutoReferee", true),
 	VIOLATED_DISTANCES("Violated Distances", "AutoReferee", true),
 	MODE("AutoRef Mode", "AutoReferee", true),
-	PUSHING("Pushing Detector", "AutoReferee", true);
+	PUSHING("Pushing Detector", "AutoReferee", true),
+	PASS_DETECTION("Pass Detection", "AutoReferee", true),
+	
+	;
 
 	private final String id;
 	private final String name;
