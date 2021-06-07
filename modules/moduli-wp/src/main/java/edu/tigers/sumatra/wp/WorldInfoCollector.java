@@ -9,6 +9,7 @@ import com.github.g3force.configurable.Configurable;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.bot.State;
@@ -24,7 +25,9 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.RecordManager;
 import edu.tigers.sumatra.referee.IRefereeObserver;
@@ -41,6 +44,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.IKickEvent;
+import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.wp.data.BallContact;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.DelayedBotState;
@@ -104,22 +108,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	)
 	private static double robotFeedbackDelay = 0.0;
 
-	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
-	private GameStateCalculator gameStateCalculator;
-	private WorldFrameVisualization worldFrameVisualization;
-	private BallContactCalculator ballContactCalculator;
-	private CurrentBallDetector currentBallDetector;
-	private CamFrameShapeMapProducer camFrameShapeMapProducer;
-	private AVisionFilter visionFilter;
-	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
-	private Referee referee;
-	private CiGameControllerConnector ciGameControllerConnector;
-
-	private long lastWFTimestamp;
-	private RefereeMsg latestRefereeMsg;
-	private IKickEvent lastKickEvent;
-	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
-
 	static
 	{
 		ConfigRegistration.registerClass("wp", WorldInfoCollector.class);
@@ -135,6 +123,20 @@ public class WorldInfoCollector extends AWorldPredictor
 			}
 		});
 	}
+
+	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
+	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
+	private GameStateCalculator gameStateCalculator;
+	private WorldFrameVisualization worldFrameVisualization;
+	private BallContactCalculator ballContactCalculator;
+	private CurrentBallDetector currentBallDetector;
+	private CamFrameShapeMapProducer camFrameShapeMapProducer;
+	private AVisionFilter visionFilter;
+	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
+	private Referee referee;
+	private CiGameControllerConnector ciGameControllerConnector;
+	private long lastWFTimestamp;
+	private RefereeMsg latestRefereeMsg;
 
 
 	private Map<BotID, BotState> getFilteredBotStates(final Collection<FilteredVisionBot> visionBots)
@@ -248,15 +250,20 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private IKickEvent getKickEvent(final FilteredVisionFrame filteredVisionFrame)
 	{
-		final Optional<IKickEvent> kickEvent = filteredVisionFrame.getKickEvent();
-		if (kickEvent.isPresent())
+		if (filteredVisionFrame.getKick().isEmpty())
 		{
-			lastKickEvent = kickEvent.get();
-		} else if (ballBuffer.getData().stream().allMatch(b -> b.getVel().getLength2() < 0.1))
-		{
-			lastKickEvent = null;
+			return null;
 		}
-		return lastKickEvent;
+
+		var kick = filteredVisionFrame.getKick().get();
+
+		return KickEvent.builder()
+				.kickingBot(kick.getKickingBot())
+				.kickingBotPosition(kick.getKickingBotPosition())
+				.position(kick.getBallTrajectory().getInitialPos().getXYVector())
+				.botDirection(kick.getKickingBotOrientation())
+				.timestamp(kick.getKickTimestamp())
+				.build();
 	}
 
 
@@ -273,11 +280,14 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private BallKickFitState getKickFitState(final FilteredVisionFrame filteredVisionFrame)
 	{
-		return filteredVisionFrame.getKickFitState()
-				.map(f -> f.getTrajectory(filteredVisionFrame.getTimestamp()))
-				.map(t -> new BallKickFitState(t.getKickPos(), t.getKickVel(), t.getKickTimestamp()))
-				.orElse(null);
+		if (filteredVisionFrame.getKick().isEmpty())
+		{
+			return null;
+		}
 
+		var kick = filteredVisionFrame.getKick().get();
+		return new BallKickFitState(kick.getBallTrajectory().getInitialPos().getXYVector(),
+				kick.getBallTrajectory().getInitialVel(), kick.getKickTimestamp());
 	}
 
 
@@ -328,10 +338,11 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		return FilteredVisionBall.builder()
 				.withTimestamp(lastWFTimestamp)
-				.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+				.withBallState(BallState.builder()
 						.withPos(Vector3.fromXYZ(1500, 500, 0))
-						.withVel(Vector3.from2d(Vector2.fromXY(-1500, -900).scaleToNew(2000), 0))
-						.withAcc(Vector3.zero())
+						.withVel(Vector2.fromXY(-1500, -900).scaleToNew(2000).getXYZVector())
+						.withAcc(Vector3f.ZERO_VECTOR)
+						.withSpin(Vector2f.ZERO_VECTOR)
 						.build())
 				.withLastVisibleTimestamp(lastWFTimestamp)
 				.build();
@@ -470,7 +481,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		camFrameShapeMapProducer = new CamFrameShapeMapProducer();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
-		lastKickEvent = null;
 	}
 
 

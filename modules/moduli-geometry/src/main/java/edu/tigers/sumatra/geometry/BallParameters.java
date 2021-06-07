@@ -40,6 +40,13 @@ public class BallParameters
 	private double kSwitch = 0.64;
 
 	@Configurable(
+			comment = "Ball inertia distribution between 0.4 (massive sphere) and 0.66 (hollow sphere)",
+			defValue = "0.5",
+			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
+	)
+	private double inertiaDistribution = 0.5;
+
+	@Configurable(
 			comment = "Fixed velocity where the ball starts to roll [mm/s]",
 			defValue = "2000.0",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -177,6 +177,7 @@ public class KickDetector implements IKickDetector
 					.kickingBot(bot.getBotID())
 					.position(balls.get(0).getCamPos())
 					.botDirection(bot.getOrientation())
+					.kickingBotPosition(bot.getPos())
 					.timestamp(balls.get(0).getTimestamp())
 					.recordsSinceKick(balls)
 					.isEarlyDetection(false)
@@ -191,6 +192,7 @@ public class KickDetector implements IKickDetector
 						.kickingBot(bot.getBotID())
 						.position(backtrack.get().getSecond())
 						.botDirection(bot.getOrientation())
+						.kickingBotPosition(bot.getPos())
 						.timestamp(backtrack.get().getFirst())
 						.recordsSinceKick(balls)
 						.isEarlyDetection(false)

@@ -42,5 +42,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.assertj:assertj-core:3.19.0'
 
-    runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:2.9.0.0:${osClassifier}"
+    runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:2.10.2.0:${osClassifier}"
 }

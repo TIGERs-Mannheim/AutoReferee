@@ -1,13 +1,19 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators.chip;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import edu.tigers.sumatra.ball.trajectory.BallFactory;
+import edu.tigers.sumatra.cam.data.CamBall;
+import edu.tigers.sumatra.cam.data.CamCalibration;
+import edu.tigers.sumatra.geometry.BallParameters;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.vision.data.KickSolverResult;
+import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
+import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -19,17 +25,10 @@ import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.MersenneTwister;
 
-import edu.tigers.sumatra.cam.data.CamBall;
-import edu.tigers.sumatra.cam.data.CamCalibration;
-import edu.tigers.sumatra.geometry.BallParameters;
-import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.vision.data.ChipBallTrajectory;
-import edu.tigers.sumatra.vision.data.KickSolverResult;
-import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
-import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -110,14 +109,17 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 				result[3], result[4], result[5]));
 	}
 
+
 	private class ChipBallModel implements MultivariateFunction
 	{
 		private final List<CamBall> records;
+		private final edu.tigers.sumatra.ball.BallParameters ballParams;
 
 
 		public ChipBallModel(final List<CamBall> records)
 		{
 			this.records = records;
+			ballParams = Geometry.getBallFactory().getBallParams();
 		}
 
 
@@ -128,15 +130,20 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 			double dampXYFirst = point[3];
 			double dampXYOthers = point[4];
 			double dampZ = point[5];
-			double accRoll = Geometry.getBallParameters().getAccRoll();
 
-			ChipBallTrajectory traj = new ChipBallTrajectory(kickPosition, kickVel, kickTimestamp,
-					dampXYFirst, dampXYOthers, dampZ, accRoll);
+			var params = ballParams.toBuilder()
+					.withChipDampingXYFirstHop(dampXYFirst)
+					.withChipDampingXYOtherHops(dampXYOthers)
+					.withChipDampingZ(dampZ)
+					.build();
+
+			var traj = new BallFactory(params)
+					.createTrajectoryFromKickedBallWithoutSpin(kickPosition, kickVel);
 
 			double error = 0;
 			for (CamBall ball : records)
 			{
-				IVector3 trajPos = traj.getStateAtTimestamp(ball.gettCapture()).getPos();
+				IVector3 trajPos = traj.getMilliStateAtTime((ball.gettCapture() - kickTimestamp) * 1e-9).getPos();
 				IVector2 ground = trajPos.projectToGroundNew(getCameraPosition(ball.getCameraId()));
 
 				error += ball.getFlatPos().distanceTo(ground);
@@ -246,11 +253,9 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		@Override
 		public String toString()
 		{
-			final StringBuilder builder = new StringBuilder();
-			builder.append("kickVel: " + kickVel + System.lineSeparator());
-			builder.append("dampXY: " + dampingXYFirstHop + ", " + dampingXYOtherHops + System.lineSeparator());
-			builder.append("dampZ: " + dampingZ);
-			return builder.toString();
+			return "kickVel: " + kickVel + System.lineSeparator()
+					+ "dampXY: " + dampingXYFirstHop + ", " + dampingXYOtherHops + System.lineSeparator()
+					+ "dampZ: " + dampingZ;
 		}
 	}
 }

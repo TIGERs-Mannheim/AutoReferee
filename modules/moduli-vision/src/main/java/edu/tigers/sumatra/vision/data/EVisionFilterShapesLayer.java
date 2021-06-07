@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -20,7 +20,6 @@ public enum EVisionFilterShapesLayer implements IShapeLayer
 	ROBOT_QUALITY_INSPECTOR("Robot Quality Inspector"),
 	BALL_TRACKER_SHAPES_IMPORTANT("Ball Trackers"),
 	BALL_TRACKER_SHAPES("Ball Trackers Debug", false, EShapeLayerPersistenceType.NEVER_PERSIST),
-	VISION_FRAME("Vision frame"),
 
 	;
 

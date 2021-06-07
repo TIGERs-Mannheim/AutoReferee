@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -116,6 +116,7 @@ public class EarlyKickDetector implements IKickDetector
 				.kickingBot(kickingBot.getBotID())
 				.position(kickBall.getCamPos())
 				.botDirection(kickingBot.getOrientation())
+				.kickingBotPosition(kickingBot.getPos())
 				.timestamp(kickBall.getTimestamp())
 				.isEarlyDetection(true)
 				.recordsSinceKick(allBalls)

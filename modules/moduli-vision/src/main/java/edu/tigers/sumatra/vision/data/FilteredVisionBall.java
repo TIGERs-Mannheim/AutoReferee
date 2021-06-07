@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
 
+import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.data.collector.IExportable;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import lombok.Builder;
 import lombok.NonNull;
@@ -27,7 +30,7 @@ public class FilteredVisionBall implements IExportable
 	@NonNull
 	Long timestamp;
 	@NonNull
-	BallTrajectoryState ballTrajectoryState;
+	BallState ballState;
 	@NonNull
 	Long lastVisibleTimestamp;
 
@@ -39,7 +42,7 @@ public class FilteredVisionBall implements IExportable
 	 */
 	public IVector3 getPos()
 	{
-		return ballTrajectoryState.getPos();
+		return ballState.getPos();
 	}
 
 
@@ -50,7 +53,7 @@ public class FilteredVisionBall implements IExportable
 	 */
 	public IVector3 getVel()
 	{
-		return ballTrajectoryState.getVel();
+		return ballState.getVel();
 	}
 
 
@@ -61,13 +64,7 @@ public class FilteredVisionBall implements IExportable
 	 */
 	public IVector3 getAcc()
 	{
-		return ballTrajectoryState.getAcc();
-	}
-
-
-	public boolean isChipped()
-	{
-		return ballTrajectoryState.isChipped();
+		return ballState.getAcc();
 	}
 
 
@@ -77,15 +74,9 @@ public class FilteredVisionBall implements IExportable
 	}
 
 
-	public double getVSwitch()
+	public IVector2 getSpin()
 	{
-		return ballTrajectoryState.getVSwitchToRoll();
-	}
-
-
-	public double getSpin()
-	{
-		return ballTrajectoryState.getSpin();
+		return ballState.getSpin();
 	}
 
 
@@ -104,11 +95,11 @@ public class FilteredVisionBall implements IExportable
 		}
 
 		long dt = timestampFuture - timestampNow;
-		var state = ballTrajectoryState.getTrajectory(timestampNow).getStateAtTimestamp(timestampFuture);
 
 		return FilteredVisionBall.builder()
 				.withTimestamp(timestampFuture)
-				.withBallTrajectoryState(state)
+				.withBallState(
+						Geometry.getBallFactory().createTrajectoryFromState(ballState).getMilliStateAtTime(dt * 1e-9))
 				.withLastVisibleTimestamp(getLastVisibleTimestamp() + dt)
 				.build();
 	}
@@ -123,8 +114,6 @@ public class FilteredVisionBall implements IExportable
 		numbers.addAll(getVel().multiplyNew(1e-3).getNumberList());
 		numbers.addAll(getAcc().multiplyNew(1e-3).getNumberList());
 		numbers.add(lastVisibleTimestamp);
-		numbers.add(getVSwitch());
-		numbers.add(isChipped() ? 1 : 0);
 		return numbers;
 	}
 
@@ -133,6 +122,6 @@ public class FilteredVisionBall implements IExportable
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x", "acc_y", "acc_z",
-				"lastVisibleTimestamp", "vSwitchToRoll", "chipped");
+				"lastVisibleTimestamp");
 	}
 }

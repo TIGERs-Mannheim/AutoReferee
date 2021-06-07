@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -12,12 +13,15 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.BallFilterPreprocessor.BallFilterPreprocessorOutput;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.EBallState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
+import edu.tigers.sumatra.vision.data.FilteredVisionKick;
+import edu.tigers.sumatra.vision.data.KickEvent;
+import edu.tigers.sumatra.vision.kick.estimators.KickFitResult;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 import lombok.Value;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -37,6 +41,7 @@ public class BallFilter
 	private IVector2 ballPosHint;
 	private IVector3 lastKnownPosition = Vector3f.ZERO_VECTOR;
 	private CircularFifoQueue<MergedBall> mergedBallHistory = new CircularFifoQueue<>(50);
+	private KickEvent lastKickEvent;
 
 	@Configurable(defValue = "false", comment = "Always use merged ball velocity instead of kick model velocity.")
 	private static boolean alwaysUseMergedBallVelocity = false;
@@ -74,19 +79,19 @@ public class BallFilter
 		{
 			FilteredVisionBall ball = FilteredVisionBall.builder()
 					.withTimestamp(timestamp)
-					.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
-							.withPos(Vector3.from2d(ballPosHint, 0))
+					.withBallState(BallState.builder()
+							.withPos(ballPosHint.getXYZVector())
 							.withVel(Vector3f.ZERO_VECTOR)
 							.withAcc(Vector3f.ZERO_VECTOR)
-							.withChipped(false)
-							.withVSwitchToRoll(0)
+							.withSpin(Vector2f.ZERO_VECTOR)
 							.build())
 					.withLastVisibleTimestamp(timestamp)
 					.build();
 
 			ballPosHint = null;
+			lastKickEvent = null;
 
-			return new BallFilterOutput(ball, ball.getPos(), preInput);
+			return new BallFilterOutput(ball, null, ball.getPos(), preInput);
 		}
 
 		// returned last output if there is no valid ball at all
@@ -94,17 +99,18 @@ public class BallFilter
 		{
 			FilteredVisionBall ball = FilteredVisionBall.builder()
 					.withTimestamp(timestamp)
-					.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
+					.withBallState(BallState.builder()
 							.withPos(lastFilteredBall.getPos())
 							.withVel(Vector3f.ZERO_VECTOR)
 							.withAcc(Vector3f.ZERO_VECTOR)
-							.withChipped(false)
-							.withVSwitchToRoll(0)
+							.withSpin(Vector2f.ZERO_VECTOR)
 							.build())
 					.withLastVisibleTimestamp(lastFilteredBall.getLastVisibleTimestamp())
 					.build();
 
-			return new BallFilterOutput(ball, lastFilteredBall.getPos(), preInput);
+			lastKickEvent = null;
+
+			return new BallFilterOutput(ball, null, lastFilteredBall.getPos(), preInput);
 		}
 
 		MergedBall mergedBall = preInput.getMergedBall().get();
@@ -117,24 +123,26 @@ public class BallFilter
 			mergedBallHistory.add(mergedBall);
 		}
 
-		Optional<BallTrajectoryState> optKickFitState = preInput.getKickFitState();
+		Optional<KickFitResult> optBestKickFitResult = preInput.getBestKickFitResult();
+		lastKickEvent = preInput.getKickEvent().orElse(lastKickEvent);
 
 		IVector3 pos;
 		IVector3 vel;
 		IVector3 acc;
-		double vSwitch;
+		IVector2 spin;
 
-		if (optKickFitState.isPresent())
+		if (optBestKickFitResult.isPresent())
 		{
-			BallTrajectoryState kickFitState = optKickFitState.get();
-			acc = kickFitState.getAcc();
-			vel = kickFitState.getVel();
-			vSwitch = kickFitState.getVSwitchToRoll();
+			KickFitResult kickFitResult = optBestKickFitResult.get();
+			BallState stateNow = kickFitResult.getState(timestamp);
+			vel = stateNow.getVel();
+			acc = stateNow.getAcc();
+			spin = stateNow.getSpin();
 
-			if (kickFitState.isChipped())
+			if (stateNow.isChipped())
 			{
 				ballState = EBallState.AIRBORNE;
-				pos = kickFitState.getPos();
+				pos = stateNow.getPos();
 				lastKnownPosition = pos;
 			} else
 			{
@@ -149,25 +157,43 @@ public class BallFilter
 		} else
 		{
 			ballState = EBallState.ROLLING;
+			lastKickEvent = null;
 			pos = Vector3.from2d(mergedBall.getCamPos(), 0);
 			vel = Vector3.from2d(mergedBall.getFiltVel(), 0);
 			acc = Vector3.from2d(mergedBall.getFiltVel().scaleToNew(-Geometry.getBallParameters().getAccRoll()), 0);
-			vSwitch = vel.getLength2();
+			spin = mergedBall.getFiltVel().multiplyNew(1.0 / Geometry.getBallRadius());
+		}
+
+		BallState combinedBallState = BallState.builder()
+				.withPos(pos)
+				.withVel(vel)
+				.withAcc(acc)
+				.withSpin(spin)
+				.build();
+
+		FilteredVisionKick filteredKick = null;
+
+		if (optBestKickFitResult.isPresent() && lastKickEvent != null)
+		{
+			KickFitResult kickFitResult = optBestKickFitResult.get();
+
+			filteredKick = FilteredVisionKick.builder()
+					.withKickTimestamp(kickFitResult.getKickTimestamp())
+					.withKickingBot(lastKickEvent.getKickingBot())
+					.withKickingBotPosition(lastKickEvent.getKickingBotPosition())
+					.withKickingBotOrientation(lastKickEvent.getBotDirection())
+					.withNumBallDetectionsSinceKick(kickFitResult.getGroundProjection().size())
+					.withBallTrajectory(kickFitResult.getTrajectory())
+					.build();
 		}
 
 		FilteredVisionBall filteredBall = FilteredVisionBall.builder()
 				.withTimestamp(timestamp)
-				.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
-						.withPos(pos)
-						.withVel(vel)
-						.withAcc(acc)
-						.withChipped(ballState == EBallState.AIRBORNE)
-						.withVSwitchToRoll(vSwitch)
-						.build())
+				.withBallState(combinedBallState)
 				.withLastVisibleTimestamp(lastVisibleTimestamp)
 				.build();
 
-		return new BallFilterOutput(filteredBall, lastKnownPosition, preInput);
+		return new BallFilterOutput(filteredBall, filteredKick, lastKnownPosition, preInput);
 	}
 
 
@@ -199,6 +225,7 @@ public class BallFilter
 	public static class BallFilterOutput
 	{
 		FilteredVisionBall filteredBall;
+		FilteredVisionKick filteredKick;
 		IVector3 lastKnownPosition;
 		BallFilterPreprocessorOutput preprocessorOutput;
 	}

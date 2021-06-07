@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.ball.BallState;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
@@ -19,8 +21,6 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
-import edu.tigers.sumatra.vision.data.ChipBallTrajectory;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
@@ -65,8 +65,9 @@ public class ChipKickEstimator implements IKickEstimator
 
 	private boolean doFirstHopFit = true;
 
-	private ChipBallTrajectory currentTraj;
+	private IBallTrajectory currentTraj;
 	private KickFitResult fitResult = null;
+	private long kickTimestamp;
 	private double avgDistLatest10;
 	private int failures;
 
@@ -102,6 +103,7 @@ public class ChipKickEstimator implements IKickEstimator
 	{
 		this.camCalib = camCalib;
 		kickEventTimestamp = event.getTimestamp();
+		kickTimestamp = event.getTimestamp();
 
 		solverLin3 = new ChipKickSolverLin3Offset(event.getPosition(), event.getTimestamp(), camCalib);
 		solverLin5 = new ChipKickSolverLin5Offset(event.getPosition(), event.getTimestamp(), camCalib);
@@ -138,8 +140,10 @@ public class ChipKickEstimator implements IKickEstimator
 		IVector2 kickBotDir = Vector2.fromAngle(event.getBotDirection());
 		IVector3 kickVel = Vector3.from2d(kickBotDir.scaleToNew(kickVelXY * kickSpeed), kickVelZ * kickSpeed);
 
-		currentTraj = new ChipBallTrajectory(event.getPosition(), kickVel, event.getTimestamp());
-		fitResult = new KickFitResult(new ArrayList<>(), 0, currentTraj);
+		currentTraj = Geometry.getBallFactory()
+				.createTrajectoryFromKickedBallWithoutSpin(event.getPosition(), kickVel);
+		kickTimestamp = event.getTimestamp();
+		fitResult = new KickFitResult(new ArrayList<>(), 0, currentTraj, kickTimestamp);
 
 		usesPriorKnowledge = true;
 	}
@@ -164,7 +168,7 @@ public class ChipKickEstimator implements IKickEstimator
 		{
 			if (usesPriorKnowledge)
 			{
-				computeFiteResult();
+				computeFitResult();
 			}
 
 			return;
@@ -182,7 +186,7 @@ public class ChipKickEstimator implements IKickEstimator
 
 		IVector2 kickPos = optSolverResult.get().getKickPosition();
 		IVector3 kickVel = optSolverResult.get().getKickVelocity();
-		long kickTimestamp = optSolverResult.get().getKickTimestamp();
+		kickTimestamp = optSolverResult.get().getKickTimestamp();
 
 		if (doFirstHopFit)
 		{
@@ -198,16 +202,17 @@ public class ChipKickEstimator implements IKickEstimator
 			}
 		}
 
-		currentTraj = new ChipBallTrajectory(kickPos, kickVel, kickTimestamp);
+		currentTraj = Geometry.getBallFactory()
+				.createTrajectoryFromKickedBallWithoutSpin(kickPos, kickVel);
 
-		computeFiteResult();
+		computeFitResult();
 	}
 
 
-	private void computeFiteResult()
+	private void computeFitResult()
 	{
 		List<IVector2> modelPoints = records.stream()
-				.map(r -> currentTraj.getStateAtTimestamp(r.gettCapture()).getPos()
+				.map(r -> currentTraj.getMilliStateAtTime((r.gettCapture() - kickTimestamp) * 1e-9).getPos()
 						.projectToGroundNew(getCameraPosition(r.getCameraId())))
 				.collect(Collectors.toList());
 
@@ -223,7 +228,7 @@ public class ChipKickEstimator implements IKickEstimator
 		}
 
 		// save the fit result
-		fitResult = new KickFitResult(modelPoints, avgDist, currentTraj);
+		fitResult = new KickFitResult(modelPoints, avgDist, currentTraj, kickTimestamp);
 	}
 
 
@@ -324,13 +329,24 @@ public class ChipKickEstimator implements IKickEstimator
 			return true;
 		}
 
-		BallTrajectoryState state = fitResult.getState(timestamp);
+		return isBallStateInvalid(mergedRobots, timestamp);
+	}
+
+
+	private boolean isBallStateInvalid(List<FilteredVisionBot> mergedRobots, long timestamp)
+	{
+		BallState state = fitResult.getState(timestamp);
 		IVector2 posNow = state.getPos().getXYVector();
 		double minDistToRobot = mergedRobots.stream()
 				.mapToDouble(r -> r.getPos().distanceTo(posNow))
 				.min().orElse(Double.MAX_VALUE);
 
 		if ((minDistToRobot < Geometry.getBotRadius()) && !state.isChipped())
+		{
+			return true;
+		}
+
+		if (state.getVel().getLength() < 1.0 && records.size() > maxNumberOfRecords / 2)
 		{
 			return true;
 		}
@@ -411,12 +427,12 @@ public class ChipKickEstimator implements IKickEstimator
 			shapes.add(kick);
 
 			DrawableLine speed = new DrawableLine(Line.fromDirection(
-					fit.getKickPos(), fit.getKickVel().getXYVector().multiplyNew(0.1)), Color.CYAN);
+					fit.getKickPos(), fit.getKickVel().getXYVector().multiplyNew(100)), Color.CYAN);
 			speed.setStrokeWidth(10);
 			shapes.add(speed);
 
 			DrawableAnnotation err = new DrawableAnnotation(fit.getKickPos(),
-					String.format(Locale.ENGLISH, "%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().getLength()));
+					String.format(Locale.ENGLISH, "%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().getLength() * 1000));
 			err.withOffset(Vector2.fromX(80));
 			err.setColor(Color.CYAN);
 			shapes.add(err);

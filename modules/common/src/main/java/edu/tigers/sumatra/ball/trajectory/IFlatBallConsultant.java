@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.wp.ball.trajectory;
+package edu.tigers.sumatra.ball.trajectory;
 
 
 import org.apache.commons.lang.NotImplementedException;
@@ -11,7 +11,7 @@ import org.apache.commons.lang.NotImplementedException;
 /**
  * Consultant for straight kicked balls.
  */
-public interface IStraightBallConsultant extends IBallConsultant
+public interface IFlatBallConsultant extends IBallConsultant
 {
 	/**
 	 * Get the initial velocity such that the ball has the given velocity after given time

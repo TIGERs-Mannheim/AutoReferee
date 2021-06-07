@@ -1,12 +1,15 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.wp.ball.trajectory.flat;
+package edu.tigers.sumatra.ball.trajectory.flat;
 
+import edu.tigers.sumatra.ball.BallParameters;
+import edu.tigers.sumatra.ball.trajectory.IFlatBallConsultant;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.wp.ball.trajectory.IStraightBallConsultant;
+import lombok.Value;
+import lombok.With;
 
 import static edu.tigers.sumatra.math.SumatraMath.sqrt;
 import static java.lang.Math.max;
@@ -16,21 +19,11 @@ import static java.lang.Math.pow;
 /**
  * @author ArneS <arne.sachtler@dlr.de>
  */
-public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
+@Value
+public class FlatBallConsultant implements IFlatBallConsultant
 {
-
-	private final TwoPhaseDynamicVelParameters parameters;
-
-
-	/**
-	 * Create a new consultant for the dynamic vel ball model
-	 *
-	 * @param parameters
-	 */
-	public TwoPhaseDynamicVelConsultant(final TwoPhaseDynamicVelParameters parameters)
-	{
-		this.parameters = parameters;
-	}
+	@With
+	BallParameters parameters;
 
 
 	@Override
@@ -38,14 +31,14 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 	{
 		// assume endVel is in sliding phase
 		double initialVel = endVel - 1e-3 * parameters.getAccSlide() * time;
-		double timeSwitchUnderAssumption = (initialVel * parameters.getKSwitch() - initialVel)
+		double timeSwitchUnderAssumption = (initialVel * getKSwitch() - initialVel)
 				/ (1e-3 * parameters.getAccSlide());
 		if (timeSwitchUnderAssumption < time)
 		{
 			initialVel = (1e-3 * parameters.getAccSlide() * endVel
 					- 1e-3 * parameters.getAccRoll() * 1e-3 * parameters.getAccSlide() * time)
-					/ (1e-3 * (parameters.getAccSlide() - parameters.getAccRoll()) * parameters.getKSwitch()
-							+ 1e-3 * parameters.getAccRoll());
+					/ (1e-3 * (parameters.getAccSlide() - parameters.getAccRoll()) * getKSwitch()
+					+ 1e-3 * parameters.getAccRoll());
 		}
 		return initialVel;
 	}
@@ -55,17 +48,17 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 	public double getInitVelForDist(final double distance, final double endVel)
 	{
 		double initialVel = sqrt(pow(endVel, 2) - 2e-6 * parameters.getAccSlide() * distance);
-		double switchVel = initialVel * parameters.getKSwitch();
+		double switchVel = initialVel * getKSwitch();
 		if (switchVel > endVel)
 		{
 			double root1 = (1e-3 * parameters.getAccSlide() * pow(endVel, 2))
-					/ (1e-3 * parameters.getAccSlide() * pow(parameters.getKSwitch(), 2)
-							- 1e-3 * parameters.getAccRoll() * pow(parameters.getKSwitch(), 2)
-							+ 1e-3 * parameters.getAccRoll());
+					/ (1e-3 * parameters.getAccSlide() * pow(getKSwitch(), 2)
+					- 1e-3 * parameters.getAccRoll() * pow(getKSwitch(), 2)
+					+ 1e-3 * parameters.getAccRoll());
 			double root2 = (2e-9 * parameters.getAccRoll() * parameters.getAccSlide() * distance)
-					/ (1e-3 * parameters.getAccSlide() * pow(parameters.getKSwitch(), 2)
-							- 1e-3 * parameters.getAccRoll() * pow(parameters.getKSwitch(), 2)
-							+ 1e-3 * parameters.getAccRoll());
+					/ (1e-3 * parameters.getAccSlide() * pow(getKSwitch(), 2)
+					- 1e-3 * parameters.getAccRoll() * pow(getKSwitch(), 2)
+					+ 1e-3 * parameters.getAccRoll());
 			initialVel = sqrt(root1 - root2);
 		}
 		return initialVel;
@@ -75,8 +68,9 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 	@Override
 	public double getTimeForKick(final double distance, final double kickVel)
 	{
-		return TwoPhaseDynamicVelBallTrajectory
-				.fromKick(Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickVel), parameters)
+		return FlatBallTrajectory
+				.fromKick(parameters, Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickVel),
+						Vector2f.ZERO_VECTOR)
 				.getTimeByDist(distance);
 	}
 
@@ -84,8 +78,9 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 	@Override
 	public double getVelForKickByTime(final double kickSpeed, final double travelTime)
 	{
-		return TwoPhaseDynamicVelBallTrajectory
-				.fromKick(Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickSpeed), parameters)
+		return FlatBallTrajectory
+				.fromKick(parameters, Vector2f.ZERO_VECTOR, Vector2.fromXY(1e3, 0).multiplyNew(kickSpeed),
+						Vector2f.ZERO_VECTOR)
 				.getVelByTime(travelTime)
 				.getLength2();
 	}
@@ -97,7 +92,7 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 		double initialVel;
 		double as = parameters.getAccSlide();
 		double ar = parameters.getAccRoll();
-		double c = parameters.getKSwitch();
+		double c = getKSwitch();
 		double t = time;
 		double s = distance;
 		double det = ((pow(as, 2) - ar * as) * pow(c, 2) + ar * as) * pow(t, 2)
@@ -116,6 +111,12 @@ public class TwoPhaseDynamicVelConsultant implements IStraightBallConsultant
 			initialVel = s / t - .5 * ar * t;
 		}
 		return 1e-3 * initialVel;
+	}
 
+
+	private double getKSwitch()
+	{
+		// this is only valid for zero initial spin!
+		return 1.0 / (1.0 + parameters.getInertiaDistribution());
 	}
 }

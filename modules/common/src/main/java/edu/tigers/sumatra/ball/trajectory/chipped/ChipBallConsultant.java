@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.wp.ball.trajectory.chipped;
+package edu.tigers.sumatra.ball.trajectory.chipped;
 
+import edu.tigers.sumatra.ball.BallParameters;
+import edu.tigers.sumatra.ball.trajectory.IChipBallConsultant;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -10,8 +12,9 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
-import edu.tigers.sumatra.wp.ball.trajectory.IChipBallConsultant;
+import lombok.AllArgsConstructor;
+import lombok.Value;
+import lombok.With;
 import org.apache.commons.lang.Validate;
 
 import java.util.List;
@@ -20,11 +23,14 @@ import java.util.List;
 /**
  * @author AndreR <andre@ryll.cc>
  */
-public class FixedLossPlusRollingConsultant implements IChipBallConsultant
+@Value
+@AllArgsConstructor
+public class ChipBallConsultant implements IChipBallConsultant
 {
-	private double chipAngle = AngleMath.deg2rad(45);
+	double chipAngle;
 
-	private final FixedLossPlusRollingParameters params;
+	@With
+	BallParameters params;
 
 
 	/**
@@ -32,9 +38,10 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	 *
 	 * @param params
 	 */
-	public FixedLossPlusRollingConsultant(final FixedLossPlusRollingParameters params)
+	public ChipBallConsultant(final BallParameters params)
 	{
 		this.params = params;
+		chipAngle = AngleMath.deg2rad(45);
 	}
 
 
@@ -59,8 +66,8 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 			final double absMaxVel)
 	{
 		IVector3 kickVel = speedToVel(0, absMaxVel * 1000);
-		List<IVector2> touchdowns = BallFactory
-				.createTrajectoryFromChipKick(Vector2f.ZERO_VECTOR, kickVel)
+		List<IVector2> touchdowns = ChipBallTrajectory
+				.fromKick(params, Vector2f.ZERO_VECTOR, kickVel, Vector2f.ZERO_VECTOR)
 				.getTouchdownLocations();
 		if (!touchdowns.isEmpty())
 		{
@@ -77,10 +84,9 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 
 
 	@Override
-	public FixedLossPlusRollingConsultant withChipAngle(final double chipAngle)
+	public ChipBallConsultant withChipAngle(final double chipAngle)
 	{
-		this.chipAngle = AngleMath.deg2rad(chipAngle);
-		return this;
+		return new ChipBallConsultant(AngleMath.deg2rad(chipAngle), params);
 	}
 
 
@@ -174,7 +180,8 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	{
 		IVector2 xyVect = absoluteKickVelToVector(kickSpeed * 1000);
 		IVector3 kickVel = Vector3.fromXYZ(0, xyVect.x(), xyVect.y());
-		return BallFactory.createTrajectoryFromChipKick(Vector2.zero(), kickVel).getTimeByDist(distance);
+		return ChipBallTrajectory.fromKick(params, Vector2f.ZERO_VECTOR, kickVel, Vector2f.ZERO_VECTOR)
+				.getTimeByDist(distance);
 	}
 
 
@@ -183,7 +190,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	{
 		IVector2 xyVect = absoluteKickVelToVector(kickSpeed * 1000);
 		IVector3 kickVel = Vector3.fromXYZ(0, xyVect.x(), xyVect.y());
-		var chipTraj = BallFactory.createTrajectoryFromChipKick(Vector2.zero(), kickVel);
+		var chipTraj = ChipBallTrajectory.fromKick(params, Vector2f.ZERO_VECTOR, kickVel, Vector2f.ZERO_VECTOR);
 		double time = chipTraj.getTimeByDist(distance);
 		return chipTraj.getVelByTime(time).getLength2();
 	}
@@ -194,7 +201,7 @@ public class FixedLossPlusRollingConsultant implements IChipBallConsultant
 	{
 		var kickSpeedXy = 1e3 * kickSpeed / Math.sqrt(2);
 		var kickVel = Vector3.fromXYZ(0, kickSpeedXy, kickSpeedXy);
-		return FixedLossPlusRollingBallTrajectory.fromKick(Vector2f.ZERO_VECTOR, kickVel,
-				0, new FixedLossPlusRollingParameters()).getVelByTime(travelTime).getLength2();
+		return ChipBallTrajectory.fromKick(params, Vector2f.ZERO_VECTOR, kickVel, Vector2f.ZERO_VECTOR)
+				.getVelByTime(travelTime).getLength2();
 	}
 }

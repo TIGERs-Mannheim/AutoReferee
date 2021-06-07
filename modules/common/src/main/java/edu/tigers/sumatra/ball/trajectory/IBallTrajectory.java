@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.wp.ball.trajectory;
+package edu.tigers.sumatra.ball.trajectory;
 
+import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.planarcurve.IPlanarCurveProvider;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 
 import java.util.List;
 
@@ -21,39 +21,69 @@ import java.util.List;
 public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCurveProvider
 {
 	/**
+	 * Get initial position in [mm].
+	 *
+	 * @return
+	 */
+	IVector3 getInitialPos();
+
+	/**
+	 * Get initial velocity in [m/s].
+	 *
+	 * @return
+	 */
+	IVector3 getInitialVel();
+
+	/**
+	 * Get initial spin in [rad/s].
+	 *
+	 * @return
+	 */
+	IVector2 getInitialSpin();
+
+	/**
+	 * Get the state at the specified time in [s] after initial state in milli-units.
+	 *
+	 * @param time in [s]
+	 * @return
+	 */
+	BallState getMilliStateAtTime(final double time);
+
+
+	/**
 	 * Get the position for a given time
 	 *
 	 * @param time in [s]
-	 * @return the position after <code>time</code> seconds
+	 * @return the position after <code>time</code> seconds in [mm]
 	 */
-	IVector getPosByTime(double time);
+	IVector3 getPosByTime(double time);
 
 
 	/**
 	 * Get the velocity for a given time
 	 *
 	 * @param time in [s]
-	 * @return the velocity after <code>time</code> seconds
+	 * @return the velocity after <code>time</code> seconds in [m/s]
 	 */
-	IVector getVelByTime(double time);
+	IVector3 getVelByTime(double time);
 
 
 	/**
 	 * Get the acceleration for a given time
 	 *
 	 * @param time in [s]
-	 * @return the acceleration after <code>time</code> seconds
+	 * @return the acceleration after <code>time</code> seconds in [m/s^2]
 	 */
-	IVector getAccByTime(double time);
+	IVector3 getAccByTime(double time);
 
 
 	/**
 	 * Get ball spin for a given time.
 	 *
 	 * @param time in [s]
-	 * @return ball spin, forward/topspin is positive, backspin is negative
+	 * @return ball spin in [rad/s], positive spin corresponds to positive linear velocity
 	 */
-	double getSpinByTime(double time);
+	IVector2 getSpinByTime(double time);
 
 
 	/**
@@ -61,14 +91,15 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * If <code>targetVelocity</code> is larger than the current velocity, the current position will be returned.
 	 *
 	 * @param targetVelocity in [m/s]
-	 * @return the position when the ball's velocity is smaller than or equal to the targetVelocity for the first time.
+	 * @return the position in [mm] when the ball's velocity is smaller than or equal to the targetVelocity for the first time.
 	 */
-	IVector getPosByVel(double targetVelocity);
+	IVector3 getPosByVel(double targetVelocity);
 
 
 	/**
 	 * Get the required time for the ball to travel the given distance.<br>
 	 * If the distance can not be achieved, the result will be Infinity.
+	 * If the ball trajectory is curved, the distance is measured from the initial location, not along the path.
 	 *
 	 * @param travelDistance in [mm]
 	 * @return the time in [s] that is need to travel the distance, Inf if the ball stops before reaching the distance.
@@ -102,7 +133,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * This method assumes that the position is on the ball traveling line!
 	 *
 	 * @param targetPosition in [mm]
-	 * @return the future velocity of the ball when reaching given position, or 0 if it can not be reached
+	 * @return the future velocity in [m/s] of the ball when reaching given position, or 0 if it can not be reached
 	 */
 	double getAbsVelByPos(IVector2 targetPosition);
 
@@ -128,7 +159,7 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 
 
 	/**
-	 * Get the velocity in given time.
+	 * Get the absolute velocity over ground (2D) in given time.
 	 *
 	 * @param time in [s]
 	 * @return the velocity in [m/s] after given time.
@@ -149,19 +180,21 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * True, if the ball is rolling on the ground.
 	 *
 	 * @param time [s]
-	 * @return true, if ballis rolling
+	 * @return true, if ball is rolling
 	 */
 	boolean isRollingByTime(final double time);
 
 
 	/**
-	 * @return a halfLine from current ball pos to ball end pos
+	 * @return a halfLine from current ball pos to ball end pos,
+	 * note that this may not be the actual travel line for curved shots
 	 */
 	IHalfLine getTravelLine();
 
 
 	/**
-	 * @return a line from current ball pos to ball end pos
+	 * @return a line from current ball pos to ball end pos,
+	 * note that this may not be the actual travel line for curved shots
 	 */
 	ILineSegment getTravelLineSegment();
 
@@ -188,17 +221,11 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	List<IVector2> getTouchdownLocations();
 
 	/**
-	 * Get the state at the specified time in milli-units.
+	 * Return a new trajectory where the initialPos is adjusted so that the position after time equals posNow.
 	 *
+	 * @param posNow
 	 * @param time
 	 * @return
 	 */
-	BallTrajectoryState getMilliStateAtTime(final double time);
-
-
-	IVector getKickPos();
-
-
-	double getTKickToNow();
-
+	IBallTrajectory withAdjustedInitialPos(final IVector3 posNow, final double time);
 }

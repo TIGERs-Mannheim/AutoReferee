@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
 
+import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.drawable.ShapeMap;
-import edu.tigers.sumatra.math.vector.Vector3f;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
@@ -32,8 +32,7 @@ public class FilteredVisionFrame
 	List<FilteredVisionBot> bots;
 	@NonNull
 	ShapeMap shapeMap;
-	IKickEvent kickEvent;
-	BallTrajectoryState kickFitState;
+	FilteredVisionKick kick;
 
 
 	/**
@@ -45,11 +44,7 @@ public class FilteredVisionFrame
 	{
 		FilteredVisionBall b = FilteredVisionBall.builder()
 				.withTimestamp(0L)
-				.withBallTrajectoryState(edu.tigers.sumatra.vision.data.BallTrajectoryState.builder()
-						.withPos(Vector3f.ZERO_VECTOR)
-						.withVel(Vector3f.ZERO_VECTOR)
-						.withAcc(Vector3f.ZERO_VECTOR)
-						.build())
+				.withBallState(new BallState())
 				.withLastVisibleTimestamp(0L)
 				.build();
 
@@ -63,14 +58,8 @@ public class FilteredVisionFrame
 	}
 
 
-	public Optional<IKickEvent> getKickEvent()
+	public Optional<FilteredVisionKick> getKick()
 	{
-		return Optional.ofNullable(kickEvent);
-	}
-
-
-	public Optional<BallTrajectoryState> getKickFitState()
-	{
-		return Optional.ofNullable(kickFitState);
+		return Optional.ofNullable(kick);
 	}
 }

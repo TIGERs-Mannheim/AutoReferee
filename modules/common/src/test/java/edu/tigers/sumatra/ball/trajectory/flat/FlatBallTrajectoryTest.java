@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.wp.ball.trajectory.flat;
+package edu.tigers.sumatra.ball.trajectory.flat;
 
+import edu.tigers.sumatra.ball.BallParameters;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -11,7 +13,6 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectoryFactory;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.trajectory.PlanarCurveFactory;
-import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author AndreR <andre@ryll.cc>
  */
-public class TwoPhaseDynamicVelBallTrajectoryTest
+public class FlatBallTrajectoryTest
 {
 	private final BangBangTrajectoryFactory trajectoryFactory = new BangBangTrajectoryFactory();
 	private final PlanarCurveFactory planarCurveFactory = new PlanarCurveFactory();
@@ -30,17 +31,26 @@ public class TwoPhaseDynamicVelBallTrajectoryTest
 	private static IVector2 kickPos = Vector2.fromXY(0, 0);
 	private static IVector2 kickVel = Vector2.fromXY(8000, 0);
 
-	private TwoPhaseDynamicVelParameters params;
+	private BallParameters params;
 	private IBallTrajectory trajectory;
 
 
 	@Before
 	public void setup()
 	{
-		params = new TwoPhaseDynamicVelParameters(-3600, -400, 0.62);
+		params = BallParameters.builder()
+				.withBallRadius(21.5)
+				.withAccSlide(-3600)
+				.withAccRoll(-400)
+				.withInertiaDistribution(0.61)
+				.withChipDampingXYFirstHop(0.75)
+				.withChipDampingXYOtherHops(0.95)
+				.withChipDampingZ(0.5)
+				.withMinHopHeight(10)
+				.withMaxInterceptableHeight(150)
+				.build();
 
-		trajectory = TwoPhaseDynamicVelBallTrajectory.fromKick(kickPos.getXYVector(), kickVel, params);
-		// trajectory = TwoPhaseDynamicVelBallTrajectory.fromState(posNow, velNow, vSwitch, params);
+		trajectory = FlatBallTrajectory.fromKick(params, kickPos, kickVel, Vector2f.ZERO_VECTOR);
 	}
 
 
@@ -50,7 +60,7 @@ public class TwoPhaseDynamicVelBallTrajectoryTest
 		// first test with a trajectory created from kick
 		IVector2 kickPos = Vector2.fromXY(27, 6);
 		IVector2 kickVel = Vector2.fromXY(1809.768, -1078.481);
-		IBallTrajectory traj = TwoPhaseDynamicVelBallTrajectory.fromKick(kickPos.getXYVector(), kickVel, params);
+		IBallTrajectory traj = FlatBallTrajectory.fromKick(params, kickPos, kickVel, Vector2f.ZERO_VECTOR);
 
 		IVector2 closestDest = Vector2.fromXY(1678.56, -978.201);
 
@@ -61,8 +71,9 @@ public class TwoPhaseDynamicVelBallTrajectoryTest
 		double t = 1.52;
 		IVector2 posNow = traj.getPosByTime(t).getXYVector();
 		IVector2 velNow = traj.getVelByTime(t).multiplyNew(1e3).getXYVector();
+		IVector2 spinNow = traj.getSpinByTime(t);
 
-		traj = TwoPhaseDynamicVelBallTrajectory.fromState(posNow, velNow, 1306.183, params);
+		traj = FlatBallTrajectory.fromState(params, posNow, velNow, spinNow);
 
 		time = traj.getTimeByPos(closestDest);
 		assertTrue(time >= 0);

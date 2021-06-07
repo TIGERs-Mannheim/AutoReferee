@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision.data;
@@ -9,7 +9,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class KickEvent implements IKickEvent
 {
 	BotID kickingBot;
+	IVector2 kickingBotPosition;
 	IVector2 position;
 	double botDirection;
 	long timestamp;
@@ -43,7 +44,7 @@ public class KickEvent implements IKickEvent
 	@SuppressWarnings("unused")
 	private KickEvent()
 	{
-		this(BotID.noBot(), Vector2.zero(), 0.0, 0, Collections.emptyList(), false);
+		this(BotID.noBot(), Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR, 0.0, 0, Collections.emptyList(), false);
 	}
 
 
@@ -52,6 +53,7 @@ public class KickEvent implements IKickEvent
 	{
 		return toBuilder()
 				.position(position.multiplyNew(-1))
+				.kickingBotPosition(kickingBotPosition.multiplyNew(-1))
 				.botDirection(botDirection + AngleMath.DEG_180_IN_RAD)
 				.build();
 	}

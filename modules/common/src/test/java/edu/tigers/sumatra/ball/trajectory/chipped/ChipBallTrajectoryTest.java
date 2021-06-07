@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.wp.ball.trajectory.chipped;
+package edu.tigers.sumatra.ball.trajectory.chipped;
 
+import edu.tigers.sumatra.ball.BallParameters;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
@@ -13,7 +15,6 @@ import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectoryFactory;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.trajectory.PlanarCurveFactory;
-import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,24 +25,32 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author AndreR <andre@ryll.cc>
  */
-public class FixedLossPlusRollingBallTrajectoryTest
+public class ChipBallTrajectoryTest
 {
-	private final BangBangTrajectoryFactory trajectoryFactory = new BangBangTrajectoryFactory();
-	private final PlanarCurveFactory planarCurveFactory = new PlanarCurveFactory();
-
 	private static IVector3 kickPos = Vector3.fromXYZ(0, 0, 0);
 	private static IVector3 kickVel = Vector3.fromXYZ(3000, 0, 3000);
-
-	private FixedLossPlusRollingParameters params;
+	private final BangBangTrajectoryFactory trajectoryFactory = new BangBangTrajectoryFactory();
+	private final PlanarCurveFactory planarCurveFactory = new PlanarCurveFactory();
+	private BallParameters params;
 	private IBallTrajectory trajectory;
 
 
 	@Before
 	public void setup()
 	{
-		params = new FixedLossPlusRollingParameters(0.75, 0.95, 0.6, -400.0, 10, 150);
+		params = BallParameters.builder()
+				.withBallRadius(21.5)
+				.withAccSlide(-3600)
+				.withAccRoll(-400)
+				.withInertiaDistribution(0.667)
+				.withChipDampingXYFirstHop(0.75)
+				.withChipDampingXYOtherHops(0.95)
+				.withChipDampingZ(0.6)
+				.withMinHopHeight(10)
+				.withMaxInterceptableHeight(150)
+				.build();
 
-		trajectory = FixedLossPlusRollingBallTrajectory.fromKick(kickPos.getXYVector(), kickVel, 0, params);
+		trajectory = ChipBallTrajectory.fromKick(params, kickPos.getXYVector(), kickVel, Vector2f.ZERO_VECTOR);
 	}
 
 
@@ -124,8 +133,8 @@ public class FixedLossPlusRollingBallTrajectoryTest
 		{
 			IVector3 posNow = traj.getPosByTime(tStep).getXYZVector();
 			IVector3 velNow = traj.getVelByTime(tStep).multiplyNew(1000.0).getXYZVector();
-			double spin = traj.getSpinByTime(tStep);
-			traj = FixedLossPlusRollingBallTrajectory.fromState(posNow, velNow, spin, params);
+			IVector2 spin = traj.getSpinByTime(tStep);
+			traj = ChipBallTrajectory.fromState(params, posNow, velNow, spin);
 
 			IVector finalPosNew = traj.getPosByVel(0);
 

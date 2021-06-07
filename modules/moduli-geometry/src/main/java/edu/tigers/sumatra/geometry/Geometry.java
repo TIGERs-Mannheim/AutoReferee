@@ -8,6 +8,7 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
+import edu.tigers.sumatra.ball.trajectory.BallFactory;
 import edu.tigers.sumatra.cam.data.CamFieldArc;
 import edu.tigers.sumatra.cam.data.CamFieldLine;
 import edu.tigers.sumatra.cam.data.CamFieldSize;
@@ -174,6 +175,7 @@ public class Geometry
 	private final IRectangle ourHalf;
 	private final IRectangle theirHalf;
 	private final List<ILineSegment> touchLines;
+	private final BallFactory ballFactory;
 
 	private CamGeometry lastCamGeometry;
 
@@ -233,6 +235,20 @@ public class Geometry
 		lastCamGeometry = new CamGeometry(new HashMap<>(),
 				new CamFieldSize(MessagesRobocupSslGeometry.SSL_GeometryFieldSize.getDefaultInstance()),
 				MessagesRobocupSslGeometry.SSL_GeometryModels.getDefaultInstance());
+
+		var params = edu.tigers.sumatra.ball.BallParameters.builder()
+				.withBallRadius(getBallRadius())
+				.withAccSlide(ballParameters.getAccSlide())
+				.withAccRoll(ballParameters.getAccRoll())
+				.withInertiaDistribution(ballParameters.getInertiaDistribution())
+				.withChipDampingXYFirstHop(ballParameters.getChipDampingXYFirstHop())
+				.withChipDampingXYOtherHops(ballParameters.getChipDampingXYOtherHops())
+				.withChipDampingZ(ballParameters.getChipDampingZ())
+				.withMinHopHeight(ballParameters.getMinHopHeight())
+				.withMaxInterceptableHeight(ballParameters.getMaxInterceptableHeight())
+				.build();
+
+		ballFactory = new BallFactory(params);
 	}
 
 
@@ -649,6 +665,12 @@ public class Geometry
 	public static BallParameters getBallParameters()
 	{
 		return ballParameters;
+	}
+
+
+	public static BallFactory getBallFactory()
+	{
+		return instance.ballFactory;
 	}
 
 

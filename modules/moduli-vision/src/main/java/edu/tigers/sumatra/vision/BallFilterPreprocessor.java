@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
@@ -15,13 +15,10 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.Line;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3f;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
 import edu.tigers.sumatra.vision.data.KickEvent;
-import edu.tigers.sumatra.vision.data.StraightBallTrajectory;
 import edu.tigers.sumatra.vision.kick.detectors.EarlyKickDetector;
 import edu.tigers.sumatra.vision.kick.detectors.KickDetector;
 import edu.tigers.sumatra.vision.kick.estimators.ChipKickEstimator;
@@ -32,6 +29,7 @@ import edu.tigers.sumatra.vision.kick.estimators.KickFitResult;
 import edu.tigers.sumatra.vision.kick.estimators.StraightKickEstimator;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,10 +94,10 @@ public class BallFilterPreprocessor
 	{
 		MergedBall optMergedBall = ballTrackerMerger.process(ballTrackers, timestamp, lastFilteredBall);
 		KickEvent optKickEvent = kickDetectors.process(optMergedBall, mergedRobots);
-		BallTrajectoryState optKickFitState = kickEstimators.process(optKickEvent,
+		KickFitResult optBestKickFitResult = kickEstimators.process(optKickEvent,
 				optMergedBall, mergedRobots, robotInfos, timestamp);
 
-		return new BallFilterPreprocessorOutput(optMergedBall, optKickEvent, optKickFitState);
+		return new BallFilterPreprocessorOutput(optMergedBall, optKickEvent, optBestKickFitResult);
 	}
 
 
@@ -174,7 +172,7 @@ public class BallFilterPreprocessor
 		}
 
 
-		private BallTrajectoryState process(final KickEvent kickEvent, final MergedBall ball,
+		private KickFitResult process(final KickEvent kickEvent, final MergedBall ball,
 				final List<FilteredVisionBot> mergedRobots, final Map<BotID, RobotInfo> robotInfos,
 				final long timestamp)
 		{
@@ -212,7 +210,7 @@ public class BallFilterPreprocessor
 			updateEstimators(kickEvent, robotInfos, timestamp);
 
 			// get best kick fit state
-			return getBestKickFitState(timestamp);
+			return getBestKickFitResult(timestamp);
 		}
 
 
@@ -241,7 +239,7 @@ public class BallFilterPreprocessor
 					&& chipEstimator.getFitResult().isPresent()
 					&& chipEstimator.getFitResult().get().getState(timestamp).isChipped())
 			{
-				log.debug("Ignoring kick event due to chipped ball state");
+				log.debug("Ignoring kick event due to airborne ball state");
 
 				// get best kick fit state
 				return;
@@ -305,7 +303,7 @@ public class BallFilterPreprocessor
 		}
 
 
-		private BallTrajectoryState getBestKickFitState(final long timestamp)
+		private KickFitResult getBestKickFitResult(final long timestamp)
 		{
 			Optional<IKickEstimator> bestEstimator = estimators.stream()
 					.filter(k -> k.getFitResult().isPresent())
@@ -336,11 +334,12 @@ public class BallFilterPreprocessor
 					estimators
 							.removeIf(k -> k.getFitResult()
 									.orElse(new KickFitResult(null, 0,
-											new StraightBallTrajectory(Vector2f.ZERO_VECTOR, Vector3f.ZERO_VECTOR, 0)))
+											Geometry.getBallFactory()
+													.createTrajectoryFromBallAtRest(Vector2f.ZERO_VECTOR), timestamp))
 									.getAvgDistance() > bestKickFitResult.getAvgDistance());
 				}
 
-				return bestKickFitResult.getState(timestamp);
+				return bestKickFitResult;
 			}
 
 			return null;
@@ -460,7 +459,7 @@ public class BallFilterPreprocessor
 
 			lastSearchPositions.clear();
 			List<BallTracker> primaryTrackers;
-			if (lastFilteredBall.isChipped() && !Geometry.getLastCamGeometry().getCalibrations().isEmpty())
+			if (lastFilteredBall.getBallState().isChipped() && !Geometry.getLastCamGeometry().getCalibrations().isEmpty())
 			{
 				// if the ball is airborne we project its position to the ground from all cameras and use these locations as
 				// search point
@@ -541,25 +540,12 @@ public class BallFilterPreprocessor
 	 *
 	 * @author AndreR <andre@ryll.cc>
 	 */
+	@RequiredArgsConstructor
 	public static class BallFilterPreprocessorOutput
 	{
 		private final MergedBall mergedBall;
 		private final KickEvent kickEvent;
-		private final BallTrajectoryState kickFitState;
-
-
-		/**
-		 * @param optMergedBall
-		 * @param optKickEvent
-		 * @param optKickFitState
-		 */
-		public BallFilterPreprocessorOutput(final MergedBall optMergedBall, final KickEvent optKickEvent,
-				final BallTrajectoryState optKickFitState)
-		{
-			mergedBall = optMergedBall;
-			kickEvent = optKickEvent;
-			kickFitState = optKickFitState;
-		}
+		private final KickFitResult bestKickFitResult;
 
 
 		public Optional<MergedBall> getMergedBall()
@@ -574,9 +560,9 @@ public class BallFilterPreprocessor
 		}
 
 
-		public Optional<BallTrajectoryState> getKickFitState()
+		public Optional<KickFitResult> getBestKickFitResult()
 		{
-			return Optional.ofNullable(kickFitState);
+			return Optional.ofNullable(bestKickFitResult);
 		}
 	}
 }

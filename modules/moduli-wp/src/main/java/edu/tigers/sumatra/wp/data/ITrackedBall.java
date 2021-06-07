@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
+import edu.tigers.sumatra.ball.BallState;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
+import edu.tigers.sumatra.ball.trajectory.IChipBallConsultant;
+import edu.tigers.sumatra.ball.trajectory.IFlatBallConsultant;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
-import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
-import edu.tigers.sumatra.wp.ball.trajectory.IChipBallConsultant;
-import edu.tigers.sumatra.wp.ball.trajectory.IStraightBallConsultant;
 
 
 /**
@@ -89,7 +89,7 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 	/**
 	 * @return the current ball state
 	 */
-	BallTrajectoryState getState();
+	BallState getState();
 
 
 	/**
@@ -101,7 +101,7 @@ public interface ITrackedBall extends ITrackedObject, IExportable
 	/**
 	 * @return the consultant for straight balls
 	 */
-	IStraightBallConsultant getStraightConsultant();
+	IFlatBallConsultant getStraightConsultant();
 
 
 	/**

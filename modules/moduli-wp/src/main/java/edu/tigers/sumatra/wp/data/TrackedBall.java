@@ -1,30 +1,26 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
 
 import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.ball.BallState;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
+import edu.tigers.sumatra.ball.trajectory.IChipBallConsultant;
+import edu.tigers.sumatra.ball.trajectory.IFlatBallConsultant;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BallID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
-import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
-import edu.tigers.sumatra.wp.ball.trajectory.IBallTrajectory;
-import edu.tigers.sumatra.wp.ball.trajectory.IChipBallConsultant;
-import edu.tigers.sumatra.wp.ball.trajectory.IStraightBallConsultant;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static edu.tigers.sumatra.vision.data.BallTrajectoryState.builder;
 
 
 /**
@@ -34,14 +30,14 @@ import static edu.tigers.sumatra.vision.data.BallTrajectoryState.builder;
 public class TrackedBall implements ITrackedBall
 {
 	private final long timestamp;
-	private final BallTrajectoryState state;
+	private final BallState state;
 	private final long lastVisibleTimestamp;
 
 	// cache some fields on demand to increase performance
 	private transient IVector2 pos;
 	private transient IVector2 vel;
 	private transient IBallTrajectory ballTrajectory;
-	private transient IStraightBallConsultant straightBallConsultant;
+	private transient IFlatBallConsultant straightBallConsultant;
 	private transient IChipBallConsultant chipBallConsultant;
 
 
@@ -50,7 +46,7 @@ public class TrackedBall implements ITrackedBall
 	 */
 	private TrackedBall()
 	{
-		state = new BallTrajectoryState();
+		state = new BallState();
 		lastVisibleTimestamp = 0;
 		timestamp = 0;
 	}
@@ -61,13 +57,11 @@ public class TrackedBall implements ITrackedBall
 	 * @param state
 	 * @param lastVisibleTimestamp
 	 */
-	private TrackedBall(final long timestamp, final BallTrajectoryState state, final long lastVisibleTimestamp)
+	private TrackedBall(final long timestamp, final BallState state, final long lastVisibleTimestamp)
 	{
 		this.timestamp = timestamp;
 		this.state = state;
 		this.lastVisibleTimestamp = lastVisibleTimestamp;
-
-		Validate.isTrue(Double.isFinite(state.getVSwitchToRoll()) && (state.getVSwitchToRoll() >= 0));
 	}
 
 
@@ -81,14 +75,14 @@ public class TrackedBall implements ITrackedBall
 
 
 	/**
-	 * Create a tracked ball from a BallTrajectoryState.<br>
+	 * Create a tracked ball from a BallState.<br>
 	 * The last visible timestamp is set to <code>timestamp</code> and therefore always visible.
 	 *
 	 * @param timestamp [ns]
 	 * @param state     State in milli units.
 	 * @return
 	 */
-	public static TrackedBall fromTrajectoryStateVisible(final long timestamp, final BallTrajectoryState state)
+	public static TrackedBall fromBallStateVisible(final long timestamp, final BallState state)
 	{
 		return new TrackedBall(timestamp, state, timestamp);
 	}
@@ -103,15 +97,7 @@ public class TrackedBall implements ITrackedBall
 	 */
 	public static TrackedBall fromFilteredVisionBall(final long timestamp, final FilteredVisionBall ball)
 	{
-		BallTrajectoryState state = builder()
-				.withPos(ball.getPos())
-				.withVel(ball.getVel())
-				.withAcc(ball.getAcc())
-				.withVSwitchToRoll(ball.getVSwitch())
-				.withChipped(ball.isChipped())
-				.withSpin(ball.getSpin())
-				.build();
-		return new TrackedBall(timestamp, state, ball.getLastVisibleTimestamp());
+		return new TrackedBall(timestamp, ball.getBallState(), ball.getLastVisibleTimestamp());
 	}
 
 
@@ -127,7 +113,7 @@ public class TrackedBall implements ITrackedBall
 	{
 		if (ballTrajectory == null)
 		{
-			ballTrajectory = BallFactory.createTrajectory(state);
+			ballTrajectory = Geometry.getBallFactory().createTrajectoryFromState(state);
 		}
 		return ballTrajectory;
 	}
@@ -228,11 +214,11 @@ public class TrackedBall implements ITrackedBall
 
 
 	@Override
-	public IStraightBallConsultant getStraightConsultant()
+	public IFlatBallConsultant getStraightConsultant()
 	{
 		if (straightBallConsultant == null)
 		{
-			straightBallConsultant = BallFactory.createStraightConsultant();
+			straightBallConsultant = Geometry.getBallFactory().createFlatConsultant();
 		}
 		return straightBallConsultant;
 	}
@@ -243,7 +229,7 @@ public class TrackedBall implements ITrackedBall
 	{
 		if (chipBallConsultant == null)
 		{
-			chipBallConsultant = BallFactory.createChipConsultant();
+			chipBallConsultant = Geometry.getBallFactory().createChipConsultant();
 		}
 		return chipBallConsultant;
 	}
@@ -264,7 +250,7 @@ public class TrackedBall implements ITrackedBall
 
 
 	@Override
-	public BallTrajectoryState getState()
+	public BallState getState()
 	{
 		return state;
 	}
@@ -287,7 +273,6 @@ public class TrackedBall implements ITrackedBall
 		numbers.addAll(getVel3().getNumberList());
 		numbers.addAll(getAcc3().getNumberList());
 		numbers.add(lastVisibleTimestamp);
-		numbers.add(state.getVSwitchToRoll());
 		numbers.add(state.isChipped() ? 1 : 0);
 		return numbers;
 	}
@@ -297,7 +282,7 @@ public class TrackedBall implements ITrackedBall
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x", "acc_y", "acc_z",
-				"lastVisibleTimestamp", "vSwitchToRoll", "chipped");
+				"lastVisibleTimestamp", "chipped");
 	}
 
 

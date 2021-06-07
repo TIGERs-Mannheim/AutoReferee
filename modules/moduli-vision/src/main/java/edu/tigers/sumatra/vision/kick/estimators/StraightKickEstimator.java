@@ -1,28 +1,11 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.QRDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-import org.apache.commons.math3.linear.SingularMatrixException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-
+import edu.tigers.sumatra.ball.trajectory.flat.FlatBallTrajectory;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -37,10 +20,25 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
-import edu.tigers.sumatra.vision.data.StraightBallTrajectory;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverLin3;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverNonLin3Direct;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverNonLinIdentDirect;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DecompositionSolver;
+import org.apache.commons.math3.linear.QRDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.SingularMatrixException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 /**
@@ -161,7 +159,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 	private Optional<KickFitResult> generateFitResult(final Optional<KickSolverResult> result)
 	{
-		if (!result.isPresent())
+		if (result.isEmpty())
 		{
 			return Optional.empty();
 		}
@@ -172,12 +170,12 @@ public class StraightKickEstimator implements IKickEstimator
 		IVector3 kickVel = result.get().getKickVelocity();
 		long tZero = result.get().getKickTimestamp();
 
-		StraightBallTrajectory traj = new StraightBallTrajectory(kickPos, kickVel, tZero);
+		var traj = Geometry.getBallFactory().createTrajectoryFromKickedBallWithoutSpin(kickPos, kickVel);
 
 		double error = 0;
 		for (CamBall ball : records)
 		{
-			IVector2 modelPos = traj.getStateAtTimestamp(ball.gettCapture()).getPos().getXYVector();
+			IVector2 modelPos = traj.getMilliStateAtTime((ball.gettCapture() - tZero) * 1e-9).getPos().getXYVector();
 			ground.add(modelPos);
 
 			error += modelPos.distanceTo(ball.getFlatPos());
@@ -185,7 +183,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		error /= records.size();
 
-		return Optional.of(new KickFitResult(ground, error, traj));
+		return Optional.of(new KickFitResult(ground, error, traj, tZero));
 	}
 
 
@@ -280,10 +278,7 @@ public class StraightKickEstimator implements IKickEstimator
 		{
 			IVector2 firstDir = fitResult.getKickVel().getXYVector().normalizeNew();
 			IVector2 lastDir = lastLine.get().directionVector().normalizeNew();
-			if (firstDir.angleToAbs(lastDir).orElse(0.0) > AngleMath.deg2rad(maxDirectionError))
-			{
-				return true;
-			}
+			return firstDir.angleToAbs(lastDir).orElse(0.0) > AngleMath.deg2rad(maxDirectionError);
 		}
 
 		return false;
@@ -353,13 +348,20 @@ public class StraightKickEstimator implements IKickEstimator
 			DrawableCircle kickPos = new DrawableCircle(fit.getKickPos(), 30, Color.RED);
 			shapes.add(kickPos);
 
+			if (fit.getTrajectory() instanceof FlatBallTrajectory)
+			{
+				DrawableCircle switchPos = new DrawableCircle(
+						((FlatBallTrajectory) fit.getTrajectory()).getPosSwitch().getXYVector(), 30, Color.MAGENTA);
+				shapes.add(switchPos);
+			}
+
 			DrawableLine speed = new DrawableLine(Line.fromDirection(
-					fit.getKickPos(), fit.getKickVel().getXYVector().multiplyNew(0.1)), Color.RED);
+					fit.getKickPos(), fit.getKickVel().getXYVector().multiplyNew(100)), Color.RED);
 			speed.setStrokeWidth(10);
 			shapes.add(speed);
 
 			DrawableAnnotation err = new DrawableAnnotation(fit.getKickPos(),
-					String.format("%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().getLength2()));
+					String.format("%.2f (%.1f)", fit.getAvgDistance(), fit.getKickVel().getLength2() * 1000));
 			err.withOffset(Vector2.fromXY(80, 40));
 			err.setColor(Color.RED);
 			shapes.add(err);

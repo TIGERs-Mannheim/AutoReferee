@@ -10,9 +10,7 @@ import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
-import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableCircle;
-import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.ids.BotID;
@@ -31,7 +29,6 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
-import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
@@ -73,9 +70,9 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private Map<Integer, CamFilter> cams = new ConcurrentHashMap<>();
 	private FilteredVisionFrame lastFrame = FilteredVisionFrame.createEmptyFrame();
-	private KickEvent lastKickEvent;
 	private BallFilterOutput lastBallFilterOutput = new BallFilterOutput(
 			lastFrame.getBall(),
+			null,
 			lastFrame.getBall().getPos(),
 			new BallFilterPreprocessorOutput(null, null, null)
 	);
@@ -119,8 +116,7 @@ public class VisionFilterImpl extends AVisionFilter
 				.withTimestamp(timestampFuture)
 				.withBall(frame.getBall().extrapolate(timestampNow, timestampFuture))
 				.withBots(extrapolatedBots)
-				.withKickEvent(frame.getKickEvent().orElse(null))
-				.withKickFitState(frame.getKickFitState().orElse(null))
+				.withKick(frame.getKick().orElse(null))
 				.withShapeMap(frame.getShapeMap())
 				.build();
 	}
@@ -208,8 +204,7 @@ public class VisionFilterImpl extends AVisionFilter
 				.withTimestamp(timestamp)
 				.withBall(ball)
 				.withBots(filteredRobots)
-				.withKickEvent(lastKickEvent)
-				.withKickFitState(lastBallFilterOutput.getPreprocessorOutput().getKickFitState().orElse(null))
+				.withKick(lastBallFilterOutput.getFilteredKick())
 				.withShapeMap(new ShapeMap())
 				.build();
 
@@ -231,24 +226,8 @@ public class VisionFilterImpl extends AVisionFilter
 				.addAll(getBallTrackerShapes(timestamp));
 		frame.getShapeMap().get(EVisionFilterShapesLayer.ROBOT_QUALITY_INSPECTOR)
 				.addAll(getRobotQualityInspectorShapes(mergedRobots));
-		frame.getShapeMap().get(EVisionFilterShapesLayer.VISION_FRAME)
-				.addAll(getVisionFrameShapes(frame));
 
 		return frame;
-	}
-
-
-	private Collection<? extends IDrawableShape> getVisionFrameShapes(FilteredVisionFrame frame)
-	{
-		List<IDrawableShape> shapes = new ArrayList<>();
-		frame.getKickEvent().ifPresent(event -> shapes
-				.add(new DrawablePoint(event.getPosition(), Color.red)
-						.withSize(50)));
-
-		frame.getKickFitState().ifPresent(state -> shapes
-				.add(new DrawableArrow(state.getPos().getXYVector(), state.getVel().getXYVector())
-						.setColor(Color.magenta)));
-		return shapes;
 	}
 
 
@@ -287,8 +266,6 @@ public class VisionFilterImpl extends AVisionFilter
 
 		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(lastBall, allTrackers,
 				mergedRobots, getRobotInfoMap(), timestamp);
-
-		lastKickEvent = preOutput.getKickEvent().orElse(null);
 
 		lastBallFilterOutput = ballFilter.update(preOutput, lastBall, timestamp);
 

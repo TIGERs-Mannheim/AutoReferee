@@ -9,6 +9,7 @@ import edu.tigers.sumatra.clock.ThreadUtil;
 import edu.tigers.sumatra.drawable.IShapeLayer;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
+import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -25,7 +26,6 @@ import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
-import edu.tigers.sumatra.wp.ball.trajectory.BallFactory;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.extern.log4j.Log4j2;
@@ -96,7 +96,8 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		double kickSpeed = lastWorldFrameWrapper.getSimpleWorldFrame().getBall().getChipConsultant()
 				.getInitVelForDistAtTouchdown(dist, numTouchdown);
 		IVector2 ballPos = lastWorldFrameWrapper.getSimpleWorldFrame().getBall().getPos();
-		return BallFactory.createChipConsultant().speedToVel(posIn.subtractNew(ballPos).getAngle(), kickSpeed);
+		return Geometry.getBallFactory().createChipConsultant()
+				.speedToVel(posIn.subtractNew(ballPos).getAngle(), kickSpeed);
 	}
 
 
@@ -134,7 +135,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		{
 			if (alt)
 			{
-				vel = BallFactory.createChipConsultant()
+				vel = Geometry.getBallFactory().createChipConsultant()
 						.speedToVel(posIn.subtractNew(ballPos).getAngle(), RuleConstraints.getMaxBallSpeed() - 0.001);
 			} else
 			{

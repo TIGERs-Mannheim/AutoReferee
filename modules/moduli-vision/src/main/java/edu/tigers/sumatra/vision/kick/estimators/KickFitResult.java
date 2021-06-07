@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators;
 
+import edu.tigers.sumatra.ball.BallState;
+import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.vision.data.ABallTrajectory;
-import edu.tigers.sumatra.vision.data.BallTrajectoryState;
 import lombok.Value;
 
 import java.util.List;
@@ -20,7 +20,8 @@ public class KickFitResult
 {
 	List<IVector2> groundProjection;
 	double avgDistance;
-	ABallTrajectory trajectory;
+	IBallTrajectory trajectory;
+	long kickTimestamp;
 
 
 	/**
@@ -28,7 +29,7 @@ public class KickFitResult
 	 */
 	public IVector2 getKickPos()
 	{
-		return trajectory.getKickPos();
+		return trajectory.getInitialPos().getXYVector();
 	}
 
 
@@ -37,16 +38,7 @@ public class KickFitResult
 	 */
 	public IVector3 getKickVel()
 	{
-		return trajectory.getKickVel();
-	}
-
-
-	/**
-	 * @return
-	 */
-	public long getKickTimestamp()
-	{
-		return trajectory.getKickTimestamp();
+		return trajectory.getInitialVel();
 	}
 
 
@@ -56,8 +48,8 @@ public class KickFitResult
 	 * @param timestamp
 	 * @return
 	 */
-	public BallTrajectoryState getState(final long timestamp)
+	public BallState getState(final long timestamp)
 	{
-		return trajectory.getStateAtTimestamp(timestamp);
+		return trajectory.getMilliStateAtTime((timestamp - kickTimestamp) * 1e-9);
 	}
 }

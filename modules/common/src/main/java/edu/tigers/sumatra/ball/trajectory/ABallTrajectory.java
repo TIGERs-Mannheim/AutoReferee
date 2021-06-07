@@ -1,14 +1,19 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.wp.ball.trajectory;
+package edu.tigers.sumatra.ball.trajectory;
 
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.ball.BallParameters;
 import edu.tigers.sumatra.math.line.v2.IHalfLine;
 import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.line.v2.Lines;
-import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.math.vector.Vector3f;
+import lombok.Getter;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +22,48 @@ import java.util.List;
 /**
  * Common base implementation for ball trajectories.
  */
+@Persistent
 public abstract class ABallTrajectory implements IBallTrajectory
 {
+	/**
+	 * Parameters for this trajectory.
+	 */
+	@Getter
+	protected BallParameters parameters;
+
+
+	/**
+	 * Initial position in [mm].
+	 */
+	@Getter
+	protected IVector3 initialPos;
+
+
+	/**
+	 * Kick velocity in [mm/s].
+	 */
+	protected IVector3 initialVel;
+
+
+	/**
+	 * Kick spin in [rad/s].
+	 */
+	@Getter
+	protected IVector2 initialSpin;
+
+
+	/**
+	 * Create an empty default state. Required for {@link Persistent}.
+	 */
+	protected ABallTrajectory()
+	{
+		parameters = BallParameters.builder().build();
+		initialPos = Vector3f.ZERO_VECTOR;
+		initialVel = Vector3f.ZERO_VECTOR;
+		initialSpin = Vector2f.ZERO_VECTOR;
+	}
+
+
 	/**
 	 * Get the time when the ball comes to rest.
 	 *
@@ -49,39 +94,46 @@ public abstract class ABallTrajectory implements IBallTrajectory
 
 
 	@Override
-	public IVector getPosByTime(final double time)
+	public IVector3 getInitialVel()
 	{
-		return getMilliStateAtTime(getTKickToNow() + time).getPos();
+		return initialVel.multiplyNew(0.001);
 	}
 
 
 	@Override
-	public IVector getVelByTime(final double time)
+	public IVector3 getPosByTime(final double time)
 	{
-		return getMilliStateAtTime(getTKickToNow() + time).getVel().multiplyNew(0.001);
+		return getMilliStateAtTime(time).getPos();
 	}
 
 
 	@Override
-	public IVector getAccByTime(final double time)
+	public IVector3 getVelByTime(final double time)
 	{
-		return getMilliStateAtTime(getTKickToNow() + time).getAcc().multiplyNew(0.001);
+		return getMilliStateAtTime(time).getVel().multiplyNew(0.001);
 	}
 
 
 	@Override
-	public double getSpinByTime(final double time)
+	public IVector3 getAccByTime(final double time)
 	{
-		return getMilliStateAtTime(getTKickToNow() + time).getSpin();
+		return getMilliStateAtTime(time).getAcc().multiplyNew(0.001);
 	}
 
 
 	@Override
-	public IVector getPosByVel(final double targetVelocity)
+	public IVector2 getSpinByTime(final double time)
+	{
+		return getMilliStateAtTime(time).getSpin();
+	}
+
+
+	@Override
+	public IVector3 getPosByVel(final double targetVelocity)
 	{
 		if (getAbsVelByTime(0) < targetVelocity)
 		{
-			return getPosByTime(0);
+			return initialPos;
 		}
 
 		double time = getTimeByVel(targetVelocity);
@@ -92,15 +144,14 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	@Override
 	public double getTimeByDist(final double travelDistance)
 	{
-		double distToNow = getKickPos().getXYVector().distanceTo(getPosByTime(0).getXYVector());
-		return getTimeByDistanceInMillimeters(travelDistance + distToNow) - getTKickToNow();
+		return getTimeByDistanceInMillimeters(travelDistance);
 	}
 
 
 	@Override
 	public double getTimeByVel(final double targetVelocity)
 	{
-		return getTimeByVelocityInMillimetersPerSec(targetVelocity * 1000.0) - getTKickToNow();
+		return getTimeByVelocityInMillimetersPerSec(targetVelocity * 1000.0);
 	}
 
 
@@ -115,58 +166,58 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	@Override
 	public double getAbsVelByPos(final IVector2 targetPosition)
 	{
-		return getAbsVelByDist(getPosByTime(0).getXYVector().distanceTo(targetPosition));
+		return getAbsVelByDist(initialPos.getXYVector().distanceTo(targetPosition));
 	}
 
 
 	@Override
 	public double getTimeByPos(final IVector2 targetPosition)
 	{
-		return getTimeByDist(getPosByTime(0).getXYVector().distanceTo(targetPosition));
+		return getTimeByDist(initialPos.getXYVector().distanceTo(targetPosition));
 	}
 
 
 	@Override
 	public double getDistByTime(final double time)
 	{
-		return getPosByTime(0).getXYVector().distanceTo(getPosByTime(time).getXYVector());
+		return initialPos.getXYVector().distanceTo(getPosByTime(time).getXYVector());
 	}
 
 
 	@Override
 	public double getAbsVelByTime(final double time)
 	{
-		return getMilliStateAtTime(getTKickToNow() + time).getVel().getLength2() * 0.001;
+		return getMilliStateAtTime(time).getVel().getLength2() * 0.001;
 	}
 
 
 	@Override
 	public boolean isInterceptableByTime(final double time)
 	{
-		return getPosByTime(time).getXYZVector().z() < 150;
+		return getPosByTime(time).getXYZVector().z() < parameters.getMaxInterceptableHeight();
 	}
 
 
 	@Override
 	public boolean isRollingByTime(final double time)
 	{
-		return getPosByTime(time).getXYZVector().z() < 10;
+		return getPosByTime(time).getXYZVector().z() < parameters.getMinHopHeight();
 	}
 
 
 	@Override
 	public IHalfLine getTravelLine()
 	{
-		IVector2 finalPos = getPosByTime(getTimeAtRest() - getTKickToNow()).getXYVector();
-		return Lines.halfLineFromPoints(getPosByTime(0).getXYVector(), finalPos);
+		IVector2 finalPos = getPosByTime(getTimeAtRest()).getXYVector();
+		return Lines.halfLineFromPoints(initialPos.getXYVector(), finalPos);
 	}
 
 
 	@Override
 	public ILineSegment getTravelLineSegment()
 	{
-		IVector2 finalPos = getPosByTime(getTimeAtRest() - getTKickToNow()).getXYVector();
-		return Lines.segmentFromPoints(getPosByTime(0).getXYVector(), finalPos);
+		IVector2 finalPos = getPosByTime(getTimeAtRest()).getXYVector();
+		return Lines.segmentFromPoints(initialPos.getXYVector(), finalPos);
 	}
 
 

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.wp.ball.trajectory.chipped;
+package edu.tigers.sumatra.ball.trajectory.chipped;
 
+import edu.tigers.sumatra.ball.BallParameters;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.math.vector.Vector3f;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,17 +17,28 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author AndreR <andre@ryll.cc>
  */
-public class FixedLossPlusRollingConsultantTest
+public class ChipBallConsultantTest
 {
-	private FixedLossPlusRollingParameters params;
-	private FixedLossPlusRollingConsultant consultant;
+	private BallParameters params;
+	private ChipBallConsultant consultant;
 
 
 	@Before
 	public void setup()
 	{
-		params = new FixedLossPlusRollingParameters(0.75, 0.95, 0.6, -400.0, 10, 150);
-		consultant = new FixedLossPlusRollingConsultant(params);
+		params = BallParameters.builder()
+				.withBallRadius(21.5)
+				.withAccSlide(-3600)
+				.withAccRoll(-400)
+				.withInertiaDistribution(0.667)
+				.withChipDampingXYFirstHop(0.75)
+				.withChipDampingXYOtherHops(0.95)
+				.withChipDampingZ(0.6)
+				.withMinHopHeight(10)
+				.withMaxInterceptableHeight(150)
+				.build();
+
+		consultant = new ChipBallConsultant(params);
 	}
 
 
@@ -40,8 +52,9 @@ public class FixedLossPlusRollingConsultantTest
 				double kickVel = consultant.getInitVelForDistAtTouchdown(distance, numTouchdown) * 1000;
 				IVector2 kickVector = consultant.absoluteKickVelToVector(kickVel);
 
-				FixedLossPlusRollingBallTrajectory traj = new FixedLossPlusRollingBallTrajectory(Vector3f.ZERO_VECTOR,
-						Vector3.fromXYZ(kickVector.x(), 0, kickVector.y()), 0, 0, params);
+				ChipBallTrajectory traj = ChipBallTrajectory
+						.fromKick(params, Vector2f.ZERO_VECTOR, Vector3.fromXYZ(kickVector.x(), 0, kickVector.y()),
+								Vector2f.ZERO_VECTOR);
 
 				if (traj.getTouchdownLocations().size() > numTouchdown)
 				{
