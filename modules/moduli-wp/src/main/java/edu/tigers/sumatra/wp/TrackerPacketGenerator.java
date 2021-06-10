@@ -70,7 +70,7 @@ public class TrackerPacketGenerator
 		final SslVisionDetectionTracked.KickedBall.Builder kickedBall = SslVisionDetectionTracked.KickedBall
 				.newBuilder()
 				.setPos(buildVector2(ballKickFitState.getKickPos().multiplyNew(1e-3)))
-				.setVel(buildVector3(ballKickFitState.getKickVel().multiplyNew(1e-3)))
+				.setVel(buildVector3(ballKickFitState.getKickVel()))
 				.setStartTimestamp(buildTimestamp(ballKickFitState.getKickTimestamp()))
 				.setStopTimestamp(buildTimestamp(stopTimestamp))
 				.setStopPos(buildVector2(stopPos.multiplyNew(1e-3)));

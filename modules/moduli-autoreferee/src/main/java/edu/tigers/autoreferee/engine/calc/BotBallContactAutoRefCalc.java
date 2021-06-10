@@ -40,7 +40,8 @@ public class BotBallContactAutoRefCalc implements IAutoRefereeCalc
 
 		if (currentlyTouchingBots.isEmpty())
 		{
-			var newKickEvent = frame.getWorldFrame().getKickEvent().filter(k -> !k.equals(lastKickEvent));
+			var newKickEvent = frame.getWorldFrame().getKickEvent()
+					.filter(k -> lastKickEvent == null || k.getTimestamp() != lastKickEvent.getTimestamp());
 			lastBotTouchedBall = newKickEvent
 					.map(k -> new BotPosition(k.getTimestamp(), k.getPosition(), k.getKickingBot()))
 					.map(List::of)

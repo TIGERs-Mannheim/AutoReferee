@@ -71,7 +71,7 @@ public class RefereeVisCalc implements IWpCalc
 
 		double ballSpeed = wfw.getSimpleWorldFrame().getBall().getVel3().getLength();
 		double initBallSpeed = wfw.getSimpleWorldFrame().getKickFitState()
-				.map(BallKickFitState::getAbsoluteKickSpeed).orElse(0.0) / 1000.0;
+				.map(BallKickFitState::getAbsoluteKickSpeed).orElse(0.0);
 		double ballHeight = wfw.getSimpleWorldFrame().getBall().getPos3().z();
 		String ballVelStr = "Ball vel: " + dfBallVel.format(ballSpeed) + "| "
 				+ dfBallVel.format(initBallSpeed) + "; height: " + dfBallVel.format(ballHeight);

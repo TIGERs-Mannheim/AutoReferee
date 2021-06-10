@@ -57,6 +57,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	private Pass lastPass;
 	private IKickEvent lastConsumedKickEvent;
 
+
 	@Override
 	public void process(AutoRefFrame frame)
 	{
@@ -143,7 +144,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 
 		var direction = target.subtractNew(source).getAngle();
 		var directionChange = getDirectionChange(direction);
-		var initialBallSpeed = lastKickFitState.getAbsoluteKickSpeed() / 1000;
+		var initialBallSpeed = lastKickFitState.getAbsoluteKickSpeed();
 		var valid = (directionChange == null || directionChange > minDirectionChange)
 				&& distance > minDistance
 				&& initialBallSpeed <= RuleConstraints.getMaxBallSpeed();
@@ -176,7 +177,8 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 
 	private boolean passFinished(AutoRefFrame frame)
 	{
-		if (lastKickEvent == null || lastKickEvent.equals(lastConsumedKickEvent))
+		if (lastKickEvent == null ||
+				(lastConsumedKickEvent != null && lastKickEvent.getTimestamp() == lastConsumedKickEvent.getTimestamp()))
 		{
 			return false;
 		}
@@ -193,7 +195,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 			// kick event reset - ball might be received and stopped by receiver
 			return true;
 		}
-		if (!newKickEvent.equals(lastKickEvent))
+		if (newKickEvent.getTimestamp() != lastKickEvent.getTimestamp())
 		{
 			// kick event changed
 			return true;

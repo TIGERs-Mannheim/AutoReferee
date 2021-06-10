@@ -27,7 +27,7 @@ public class BallKickFitState implements IMirrorable<BallKickFitState>
 	IVector2 kickPos;
 
 	/**
-	 * Kick velocity [mm/s]
+	 * Kick velocity [m/s]
 	 */
 	IVector3 kickVel;
 
