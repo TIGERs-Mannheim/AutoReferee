@@ -5,16 +5,16 @@
 package edu.tigers.sumatra.network;
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.NoRouteToHostException;
+import java.net.SocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,17 +22,13 @@ import java.util.stream.Collectors;
 
 
 /**
- * This class is an {@link ITransmitter} implementation capable of sending some {@code byte[]}-data via UDP to a
- * multicast-group.
+ * Transmit data to a multicast group on one or more network interfaces.
  */
 @Log4j2
-public class MulticastUDPTransmitter implements ITransmitter<byte[]>
+public class MulticastUDPTransmitter implements AutoCloseable
 {
-	private final int targetPort;
-	private final InetAddress targetAddr;
-
-	private final List<MulticastSocket> sockets = new ArrayList<>();
-	private boolean lastSendFailed = false;
+	private final List<TargetSocket> sockets = new ArrayList<>();
+	private final SocketAddress targetAddr;
 
 
 	/**
@@ -41,8 +37,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	 */
 	public MulticastUDPTransmitter(final String targetAddr, final int targetPort)
 	{
-		this.targetPort = targetPort;
-		this.targetAddr = addressByName(targetAddr);
+		this.targetAddr = new InetSocketAddress(targetAddr, targetPort);
 	}
 
 
@@ -61,11 +56,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 
 	public void connectToAllInterfaces()
 	{
-		var networkInterfaces = getNetworkInterfaces();
-		for (var nif : networkInterfaces)
-		{
-			connectTo(nif);
-		}
+		getNetworkInterfaces().forEach(this::connectTo);
 	}
 
 
@@ -97,7 +88,7 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 				@SuppressWarnings("squid:S2095") // closing resources: can not close resource here
 				var socket = new MulticastSocket();
 				socket.setNetworkInterface(nif);
-				sockets.add(socket);
+				sockets.add(new TargetSocket(socket));
 			}
 		} catch (IOException e)
 		{
@@ -106,65 +97,46 @@ public class MulticastUDPTransmitter implements ITransmitter<byte[]>
 	}
 
 
-	private InetAddress addressByName(final String targetAddr)
+	public synchronized void send(final byte[] data)
 	{
-		try
-		{
-			return InetAddress.getByName(targetAddr);
-		} catch (UnknownHostException err)
-		{
-			log.error("The Host could not be found!", err);
-		}
-		return null;
-	}
+		DatagramPacket tempPacket = new DatagramPacket(data, data.length, targetAddr);
 
-
-	@Override
-	public synchronized boolean send(final byte[] data)
-	{
-		if (sockets.isEmpty())
+		for (var targetSocket : sockets)
 		{
-			if (!lastSendFailed)
-			{
-				log.warn("Transmitter is not ready to send!");
-				lastSendFailed = true;
-			}
-			return false;
-		}
-
-		DatagramPacket tempPacket = new DatagramPacket(data, data.length, targetAddr, targetPort);
-
-		for (var socket : sockets)
-		{
-			// Receive _outside_ the synchronized state, to prevent blocking of the state
 			try
 			{
-				socket.send(tempPacket); // DatagramPacket is sent...
-				lastSendFailed = false;
-			} catch (NoRouteToHostException nrh)
-			{
-				log.warn("No route to host: '" + targetAddr + "'. Dropping packet...", nrh);
+				targetSocket.socket.send(tempPacket);
+				targetSocket.lastSendFailed = false;
 			} catch (IOException err)
 			{
-				if (!lastSendFailed)
+				if (!targetSocket.lastSendFailed)
 				{
-					log.warn("Error while sending data to: '" + targetAddr + ":" + targetPort + "'. "
-							+ "If you are not in any network, multicast is not supported by default. "
-							+ "On Linux, you can enable multicast on the loopback interface by executing following commands as root: "
-							+ "route add -net 224.0.0.0 netmask 240.0.0.0 dev lo && ifconfig lo multicast", err);
-					lastSendFailed = true;
+					log.warn("Error while sending data to '{}'", targetAddr, err);
+					targetSocket.lastSendFailed = true;
 				}
 			}
 		}
-
-		return !lastSendFailed;
 	}
 
 
 	@Override
 	public synchronized void close()
 	{
-		sockets.forEach(MulticastSocket::close);
+		sockets.forEach(TargetSocket::close);
 		sockets.clear();
+	}
+
+
+	@RequiredArgsConstructor
+	private static class TargetSocket
+	{
+		private final MulticastSocket socket;
+		private boolean lastSendFailed;
+
+
+		private void close()
+		{
+			socket.close();
+		}
 	}
 }

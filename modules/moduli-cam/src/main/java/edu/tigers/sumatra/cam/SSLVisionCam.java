@@ -69,11 +69,11 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 		if (nif == null)
 		{
 			log.debug("No nif for vision-cam specified, will try all.");
-			receiver = new MulticastUDPReceiver(port, address);
+			receiver = new MulticastUDPReceiver(address, port);
 		} else
 		{
 			log.debug("Chose nif for vision-cam: " + nif.getDisplayName());
-			receiver = new MulticastUDPReceiver(port, address, nif);
+			receiver = new MulticastUDPReceiver(address, port, nif);
 		}
 		receiver.addObserver(this);
 
@@ -161,7 +161,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 
 
 	@Override
-	public void onInterfaceTimedOut()
+	public void onSocketTimedOut()
 	{
 		notifyVisionLost();
 	}
@@ -178,7 +178,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 		if (receiver != null)
 		{
 			expectIOE = true;
-			receiver.cleanup();
+			receiver.close();
 			receiver = null;
 		}
 	}

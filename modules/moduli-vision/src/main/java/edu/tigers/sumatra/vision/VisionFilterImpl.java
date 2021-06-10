@@ -40,8 +40,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -54,6 +56,8 @@ import java.util.stream.Collectors;
 public class VisionFilterImpl extends AVisionFilter
 		implements IViewportArchitect, IBallModelIdentificationObserver
 {
+	private static final int CAM_FRAME_BUFFER_SIZE = 10;
+
 	@Configurable(defValue = "0.0125", comment = "Publish frequency (requires restart)")
 	private static double publishDt = 0.0125;
 
@@ -77,7 +81,9 @@ public class VisionFilterImpl extends AVisionFilter
 			new BallFilterPreprocessorOutput(null, null, null)
 	);
 
-	private ScheduledExecutorService publisherExecutor;
+	private ScheduledExecutorService scheduledExecutorService;
+	private final BlockingDeque<CamDetectionFrame> camDetectionFrameQueue = new LinkedBlockingDeque<>(
+			CAM_FRAME_BUFFER_SIZE);
 
 
 	private void publish()
@@ -130,10 +136,37 @@ public class VisionFilterImpl extends AVisionFilter
 			// skip negative timestamps. They can produce unexpected behavior
 			return;
 		}
-		processCamDetectionFrame(camDetectionFrame);
-		if (publisherExecutor == null)
+		if (scheduledExecutorService == null)
 		{
+			processCamDetectionFrame(camDetectionFrame);
 			publish();
+		} else
+		{
+			if (camDetectionFrameQueue.size() >= CAM_FRAME_BUFFER_SIZE)
+			{
+				camDetectionFrameQueue.pollLast();
+			}
+			camDetectionFrameQueue.addFirst(camDetectionFrame);
+		}
+	}
+
+
+	private void processCamFrameQueue()
+	{
+		Thread.currentThread().setName("VisionFilter Processor");
+		while (!scheduledExecutorService.isShutdown())
+		{
+			try
+			{
+				var camFrame = camDetectionFrameQueue.pollLast(15, TimeUnit.MILLISECONDS);
+				if (camFrame != null)
+				{
+					processCamDetectionFrame(camFrame);
+				}
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 
@@ -317,9 +350,10 @@ public class VisionFilterImpl extends AVisionFilter
 
 		if (useThreads)
 		{
-			publisherExecutor = Executors
-					.newSingleThreadScheduledExecutor(new NamedThreadFactory("VisionFilter Publisher"));
-			publisherExecutor
+			scheduledExecutorService = Executors
+					.newScheduledThreadPool(2, new NamedThreadFactory("VisionFilter Publisher"));
+			scheduledExecutorService.execute(this::processCamFrameQueue);
+			scheduledExecutorService
 					.scheduleAtFixedRate(() -> Safe.run(this::publish), 0, (long) (publishDt * 1e9), TimeUnit.NANOSECONDS);
 			log.info("Using threaded VisionFilter");
 		}
@@ -330,10 +364,11 @@ public class VisionFilterImpl extends AVisionFilter
 	protected void stop()
 	{
 		super.stop();
-		if (publisherExecutor != null)
+		if (scheduledExecutorService != null)
 		{
-			publisherExecutor.shutdown();
-			publisherExecutor = null;
+			scheduledExecutorService.shutdown();
+			scheduledExecutorService = null;
+			camDetectionFrameQueue.clear();
 		}
 		cams.clear();
 		viewportArchitect.removeObserver(this);
