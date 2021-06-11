@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.validators;
 
@@ -29,8 +29,8 @@ public class DistanceValidator implements IKickValidator
 	@Configurable(defValue = "130.0", comment = "First sample must be closer, all others further away than this")
 	private static double	thresholdDist1			= 130.0;
 
-	@Configurable(defValue = "150.0", comment = "First sample must be closer, all others further away than this (alternative)")
-	private static double	thresholdDist2			= 150.0;
+	@Configurable(defValue = "170.0", comment = "First sample must be closer, all others further away than this (alternative)")
+	private static double	thresholdDist2			= 170.0;
 
 	static
 	{

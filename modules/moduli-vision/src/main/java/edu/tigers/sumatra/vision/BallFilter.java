@@ -178,7 +178,8 @@ public class BallFilter
 			KickFitResult kickFitResult = optBestKickFitResult.get();
 
 			filteredKick = FilteredVisionKick.builder()
-					.withKickTimestamp(kickFitResult.getKickTimestamp())
+					.withKickTimestamp(lastKickEvent.getTimestamp())
+					.withTrajectoryStartTime(kickFitResult.getKickTimestamp())
 					.withKickingBot(lastKickEvent.getKickingBot())
 					.withKickingBotPosition(lastKickEvent.getKickingBotPosition())
 					.withKickingBotOrientation(lastKickEvent.getBotDirection())

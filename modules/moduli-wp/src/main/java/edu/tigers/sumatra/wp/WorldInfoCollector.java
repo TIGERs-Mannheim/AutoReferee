@@ -287,7 +287,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		var kick = filteredVisionFrame.getKick().get();
 		return new BallKickFitState(kick.getBallTrajectory().getInitialPos().getXYVector(),
-				kick.getBallTrajectory().getInitialVel(), kick.getKickTimestamp());
+				kick.getBallTrajectory().getInitialVel(), kick.getTrajectoryStartTime());
 	}
 
 

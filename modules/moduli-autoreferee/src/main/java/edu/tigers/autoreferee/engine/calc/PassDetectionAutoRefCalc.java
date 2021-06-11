@@ -56,6 +56,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	private int passId;
 	private Pass lastPass;
 	private IKickEvent lastConsumedKickEvent;
+	private int numValidPasses;
 
 
 	@Override
@@ -63,12 +64,18 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	{
 		if (!enabled || !frame.getGameState().isRunning())
 		{
+			if (numValidPasses > 0)
+			{
+				log.info("Detected {} valid passes.", numValidPasses);
+			}
+
 			passId = 0;
 			lastKickEvent = null;
 			lastKickFitState = null;
 			ballVel.clear();
 			lastPass = null;
 			lastPasses.clear();
+			numValidPasses = 0;
 			return;
 		}
 
@@ -83,6 +90,10 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 				}
 				lastPasses.add(pass);
 				log.info("Detected pass: {}", lastPass);
+				if (pass.isValid())
+				{
+					numValidPasses++;
+				}
 			});
 		}
 
@@ -145,11 +156,9 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 		var direction = target.subtractNew(source).getAngle();
 		var directionChange = getDirectionChange(direction);
 		var initialBallSpeed = lastKickFitState.getAbsoluteKickSpeed();
-		var valid = (directionChange == null || directionChange > minDirectionChange)
-				&& distance > minDistance
-				&& initialBallSpeed <= RuleConstraints.getMaxBallSpeed();
+		var valid = isValid(distance, receiver, directionChange, initialBallSpeed);
 		return Optional.of(Pass.builder()
-				.id(passId++)
+				.id(++passId)
 				.timestamp(lastKickEvent.getTimestamp())
 				.distance(distance)
 				.direction(direction)
@@ -165,6 +174,18 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	}
 
 
+	private boolean isValid(double distance, BotID receiver, Double directionChange, double initialBallSpeed)
+	{
+		if (directionChange != null && directionChange < minDirectionChange)
+		{
+			return false;
+		}
+		return distance >= minDistance
+				&& initialBallSpeed <= RuleConstraints.getMaxBallSpeed()
+				&& getLastShooter() != receiver;
+	}
+
+
 	private Double getDirectionChange(double direction)
 	{
 		if (lastPass != null)
@@ -172,6 +193,16 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 			return AngleMath.diffAbs(direction, lastPass.getDirection() + AngleMath.DEG_180_IN_RAD);
 		}
 		return null;
+	}
+
+
+	private BotID getLastShooter()
+	{
+		if (lastPass != null)
+		{
+			return lastPass.getShooter();
+		}
+		return BotID.noBot();
 	}
 
 

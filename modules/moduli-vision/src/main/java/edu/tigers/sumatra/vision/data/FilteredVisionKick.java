@@ -16,6 +16,7 @@ import lombok.Value;
 public class FilteredVisionKick
 {
 	long kickTimestamp;
+	long trajectoryStartTime;
 
 	BotID kickingBot;
 	IVector2 kickingBotPosition;
