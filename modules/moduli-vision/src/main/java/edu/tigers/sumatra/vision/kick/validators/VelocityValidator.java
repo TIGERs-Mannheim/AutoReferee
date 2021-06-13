@@ -44,9 +44,10 @@ public class VelocityValidator implements IKickValidator
 		Map<Integer, List<MergedBall>> groupedBalls = balls.stream()
 				.collect(Collectors.groupingBy((final MergedBall b) -> b.getLatestCamBall().get().getCameraId()));
 
+		int validSamples = 0;
+
 		for (List<MergedBall> group : groupedBalls.values())
 		{
-			int validSamples = 0;
 			for (int i = 1; i < group.size(); i++)
 			{
 				CamBall bPrev = group.get(i - 1).getLatestCamBall().orElseThrow(IllegalStateException::new);
