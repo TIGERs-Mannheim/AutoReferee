@@ -64,6 +64,11 @@ public class DrawablePlanarCurve extends ADrawableWithStroke
 				points.add(pos);
 				vLast = vel;
 			}
+
+			if (t > stepSize * 1000)
+			{
+				break;
+			}
 		}
 
 		points.add(curve.getState(curve.getTEnd()).getPos());

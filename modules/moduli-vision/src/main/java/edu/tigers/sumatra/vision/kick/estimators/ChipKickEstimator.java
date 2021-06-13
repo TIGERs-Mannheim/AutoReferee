@@ -143,7 +143,7 @@ public class ChipKickEstimator implements IKickEstimator
 		currentTraj = Geometry.getBallFactory()
 				.createTrajectoryFromKickedBallWithoutSpin(event.getPosition(), kickVel);
 		kickTimestamp = event.getTimestamp();
-		fitResult = new KickFitResult(new ArrayList<>(), 0, currentTraj, kickTimestamp);
+		fitResult = new KickFitResult(new ArrayList<>(), 0, currentTraj, kickTimestamp, "");
 
 		usesPriorKnowledge = true;
 	}
@@ -168,7 +168,7 @@ public class ChipKickEstimator implements IKickEstimator
 		{
 			if (usesPriorKnowledge)
 			{
-				computeFitResult();
+				computeFitResult("prior");
 			}
 
 			return;
@@ -205,11 +205,11 @@ public class ChipKickEstimator implements IKickEstimator
 		currentTraj = Geometry.getBallFactory()
 				.createTrajectoryFromKickedBallWithoutSpin(kickPos, kickVel);
 
-		computeFitResult();
+		computeFitResult(optSolverResult.get().getSolverName());
 	}
 
 
-	private void computeFitResult()
+	private void computeFitResult(String solverName)
 	{
 		List<IVector2> modelPoints = records.stream()
 				.map(r -> currentTraj.getMilliStateAtTime((r.gettCapture() - kickTimestamp) * 1e-9).getPos()
@@ -228,7 +228,7 @@ public class ChipKickEstimator implements IKickEstimator
 		}
 
 		// save the fit result
-		fitResult = new KickFitResult(modelPoints, avgDist, currentTraj, kickTimestamp);
+		fitResult = new KickFitResult(modelPoints, avgDist, currentTraj, kickTimestamp, solverName);
 	}
 
 
@@ -356,16 +356,18 @@ public class ChipKickEstimator implements IKickEstimator
 
 
 	@Override
-	public Optional<IBallModelIdentResult> getModelIdentResult()
+	public List<IBallModelIdentResult> getModelIdentResult()
 	{
+		List<IBallModelIdentResult> result = new ArrayList<>();
+
 		if (allRecords.size() < 20)
 		{
-			return Optional.empty();
+			return result;
 		}
 
 		if (solverNonLin == null)
 		{
-			return Optional.empty();
+			return result;
 		}
 
 		long timeAfterKick = allRecords.get(0).gettCapture() + 500_000_000;
@@ -380,11 +382,13 @@ public class ChipKickEstimator implements IKickEstimator
 		ChipKickSolverNonLinIdentDirect identSolver = new ChipKickSolverNonLinIdentDirect(
 				solverNonLin.getKickPosition(), solverNonLin.getKickTimestamp(), camCalib, fitResult.getKickVel());
 
-		Optional<IBallModelIdentResult> result = identSolver.identModel(usedRecords);
-		if (result.isPresent())
+		Optional<IBallModelIdentResult> chipResult = identSolver.identModel(usedRecords);
+		if (chipResult.isPresent())
 		{
+			result.add(chipResult.get());
+
 			final String lineSeparator = System.lineSeparator();
-			log.info("Chip Model:{}{}", lineSeparator, result.get());
+			log.info("Chip Model:{}{}", lineSeparator, chipResult.get());
 		} else
 		{
 			log.info("Chip model identification failed.");

@@ -143,6 +143,13 @@ public class FlatBallTrajectory extends ABallTrajectory
 
 
 	@Override
+	public IBallTrajectory withBallParameters(BallParameters ballParameters)
+	{
+		return new FlatBallTrajectory(ballParameters, initialPos.getXYVector(), initialVel.getXYVector(), initialSpin);
+	}
+
+
+	@Override
 	public ABallTrajectory mirrored()
 	{
 		IVector2 pos = initialPos.getXYVector().multiplyNew(-1);

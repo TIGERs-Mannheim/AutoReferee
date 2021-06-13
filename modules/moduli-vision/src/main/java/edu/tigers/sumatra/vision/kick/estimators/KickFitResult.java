@@ -7,6 +7,8 @@ import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.ball.trajectory.IBallTrajectory;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
@@ -16,12 +18,15 @@ import java.util.List;
  * Result of a fitted kick.
  */
 @Value
+@Builder(setterPrefix = "with", toBuilder = true)
+@AllArgsConstructor
 public class KickFitResult
 {
 	List<IVector2> groundProjection;
 	double avgDistance;
 	IBallTrajectory trajectory;
 	long kickTimestamp;
+	String solverName;
 
 
 	/**

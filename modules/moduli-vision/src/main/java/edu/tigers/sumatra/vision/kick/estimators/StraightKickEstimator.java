@@ -14,12 +14,16 @@ import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
+import edu.tigers.sumatra.vision.kick.estimators.straight.FlatKickSolverNonLin3Factor;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverLin3;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverNonLin3Direct;
 import edu.tigers.sumatra.vision.kick.estimators.straight.StraightKickSolverNonLinIdentDirect;
@@ -35,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -54,10 +59,13 @@ public class StraightKickEstimator implements IKickEstimator
 
 	private final StraightKickSolverLin3 solverSliding;
 	private final StraightKickSolverNonLin3Direct solverFull;
+	private final FlatKickSolverNonLin3Factor solverFlatFull;
 
 	private Optional<Line> fitLastLine = Optional.empty();
 
 	private KickFitResult fitResult = null;
+
+	private List<KickFitResult> activeSolvers = new ArrayList<>();
 
 	@Configurable(comment = "Max fitting error until this estimator is dropped [mm]", defValue = "100.0")
 	private static double maxFittingError = 100.0;
@@ -79,7 +87,7 @@ public class StraightKickEstimator implements IKickEstimator
 	 *
 	 * @param event Initial kick event from detector.
 	 */
-	public StraightKickEstimator(final KickEvent event)
+	public StraightKickEstimator(final KickEvent event, Collection<FilteredVisionBall> filteredBalls)
 	{
 		List<CamBall> camBalls = event.getRecordsSinceKick().stream()
 				.map(r -> r.getLatestCamBall().get())
@@ -92,6 +100,9 @@ public class StraightKickEstimator implements IKickEstimator
 			camBalls.remove(0);
 		}
 
+		var ballStateAtKick = filteredBalls.stream()
+				.min(Comparator.comparingLong(b -> Math.abs(b.getTimestamp() - event.getTimestamp())));
+
 		records.addAll(camBalls);
 		allRecords.addAll(camBalls);
 
@@ -99,6 +110,8 @@ public class StraightKickEstimator implements IKickEstimator
 
 		solverSliding = new StraightKickSolverLin3();
 		solverFull = new StraightKickSolverNonLin3Direct(event.getPosition(), avgKickVel);
+		solverFlatFull = new FlatKickSolverNonLin3Factor(
+				Pose.from(event.getKickingBotPosition(), event.getBotDirection()), ballStateAtKick);
 
 		runSolvers();
 	}
@@ -148,6 +161,13 @@ public class StraightKickEstimator implements IKickEstimator
 
 		results.add(generateFitResult(solverSliding.solve(records)));
 		results.add(generateFitResult(solverFull.solve(records)));
+		results.add(generateFitResult(solverFlatFull.solve(records))
+				.map(k -> k.toBuilder().withAvgDistance(k.getAvgDistance() * 0.25).build()));
+
+		activeSolvers = results.stream()
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
 
 		fitResult = results.stream()
 				.filter(Optional::isPresent)
@@ -170,7 +190,9 @@ public class StraightKickEstimator implements IKickEstimator
 		IVector3 kickVel = result.get().getKickVelocity();
 		long tZero = result.get().getKickTimestamp();
 
-		var traj = Geometry.getBallFactory().createTrajectoryFromKickedBallWithoutSpin(kickPos, kickVel);
+		var traj = Geometry.getBallFactory()
+				.createTrajectoryFromKickedBall(kickPos, kickVel, result.get().getKickSpin().orElse(
+						Vector2f.ZERO_VECTOR));
 
 		double error = 0;
 		for (CamBall ball : records)
@@ -183,7 +205,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		error /= records.size();
 
-		return Optional.of(new KickFitResult(ground, error, traj, tZero));
+		return Optional.of(new KickFitResult(ground, error, traj, tZero, result.get().getSolverName()));
 	}
 
 
@@ -233,11 +255,13 @@ public class StraightKickEstimator implements IKickEstimator
 
 
 	@Override
-	public Optional<IBallModelIdentResult> getModelIdentResult()
+	public List<IBallModelIdentResult> getModelIdentResult()
 	{
+		List<IBallModelIdentResult> result = new ArrayList<>();
+
 		if (allRecords.size() < 20)
 		{
-			return Optional.empty();
+			return result;
 		}
 
 		long timeAfterKick = allRecords.get(0).gettCapture() + 500_000_000;
@@ -251,14 +275,27 @@ public class StraightKickEstimator implements IKickEstimator
 		// solve to estimate all parameters
 		StraightKickSolverNonLinIdentDirect identSolver = new StraightKickSolverNonLinIdentDirect();
 
-		Optional<IBallModelIdentResult> result = identSolver.identModel(usedRecords);
-		if (result.isPresent())
+		Optional<IBallModelIdentResult> straightResult = identSolver.identModel(usedRecords);
+		if (straightResult.isPresent())
 		{
+			result.add(straightResult.get());
+
 			final String lineSeparator = System.lineSeparator();
-			log.info("Straight Model:{}{}", lineSeparator, result.get());
+			log.info("Straight Model:{}{}", lineSeparator, straightResult.get());
 		} else
 		{
 			log.info("Straight model identification failed.");
+		}
+
+		// check redirect identification
+		var redirectResult = solverFlatFull.identModel(usedRecords);
+
+		if (redirectResult.isPresent())
+		{
+			result.add(redirectResult.get());
+
+			final String lineSeparator = System.lineSeparator();
+			log.info("Redirect Model:{}{}", lineSeparator, redirectResult.get());
 		}
 
 		return result;
@@ -365,6 +402,20 @@ public class StraightKickEstimator implements IKickEstimator
 			err.withOffset(Vector2.fromXY(80, 40));
 			err.setColor(Color.RED);
 			shapes.add(err);
+
+			double solverOffsetY = 0;
+			for (var result : activeSolvers)
+			{
+				DrawableAnnotation solver = new DrawableAnnotation(fit.getKickPos(),
+						String.format("%s: %.2f", result.getSolverName(), result.getAvgDistance()));
+				solver.withOffset(Vector2.fromXY(200, 100 + solverOffsetY));
+				solver.setColor(Color.MAGENTA);
+				solver.setStrokeWidth(2);
+				solver.withFontHeight(30);
+				shapes.add(solver);
+
+				solverOffsetY += 30;
+			}
 		}
 
 		if (fitLastLine.isPresent())

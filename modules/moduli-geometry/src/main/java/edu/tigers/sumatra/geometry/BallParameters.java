@@ -47,6 +47,13 @@ public class BallParameters
 	private double inertiaDistribution = 0.5;
 
 	@Configurable(
+			comment = "Amount of spin transferred during a redirect.",
+			defValue = "0.75",
+			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
+	)
+	private double redirectSpinFactor = 0.75;
+
+	@Configurable(
 			comment = "Fixed velocity where the ball starts to roll [mm/s]",
 			defValue = "2000.0",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }

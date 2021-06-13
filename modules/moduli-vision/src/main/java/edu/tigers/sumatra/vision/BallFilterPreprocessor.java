@@ -95,7 +95,7 @@ public class BallFilterPreprocessor
 		MergedBall optMergedBall = ballTrackerMerger.process(ballTrackers, timestamp, lastFilteredBall);
 		KickEvent optKickEvent = kickDetectors.process(optMergedBall, mergedRobots);
 		KickFitResult optBestKickFitResult = kickEstimators.process(optKickEvent,
-				optMergedBall, mergedRobots, robotInfos, timestamp);
+				optMergedBall, mergedRobots, robotInfos, timestamp, lastFilteredBall);
 
 		return new BallFilterPreprocessorOutput(optMergedBall, optKickEvent, optBestKickFitResult);
 	}
@@ -157,6 +157,7 @@ public class BallFilterPreprocessor
 		private IKickEstimator lastBestEstimator;
 		private long lastKickTimestamp = 0;
 		private CircularFifoQueue<KickEvent> kickEventHistory = new CircularFifoQueue<>(10);
+		private CircularFifoQueue<FilteredVisionBall> filteredBallHistory = new CircularFifoQueue<>(20);
 
 
 		private KickEstimators()
@@ -174,8 +175,10 @@ public class BallFilterPreprocessor
 
 		private KickFitResult process(final KickEvent kickEvent, final MergedBall ball,
 				final List<FilteredVisionBot> mergedRobots, final Map<BotID, RobotInfo> robotInfos,
-				final long timestamp)
+				final long timestamp, final FilteredVisionBall lastFilteredBall)
 		{
+			filteredBallHistory.add(lastFilteredBall);
+
 			if ((ball != null) && ball.getLatestCamBall().isPresent())
 			{
 				// add cam ball to all estimators
@@ -188,7 +191,7 @@ public class BallFilterPreprocessor
 				estimators.stream()
 						.filter(e -> e.isDone(mergedRobots, timestamp))
 						.map(IKickEstimator::getModelIdentResult)
-						.flatMap(Optional::stream)
+						.flatMap(List::stream)
 						.forEach(this::notifyBallModelIdentificationResult);
 			}
 			if (lastBestEstimator != null && lastBestEstimator.isDone(mergedRobots, timestamp))
@@ -269,7 +272,7 @@ public class BallFilterPreprocessor
 
 			if (flatEstimator == null)
 			{
-				flatEstimator = new StraightKickEstimator(kickEvent);
+				flatEstimator = new StraightKickEstimator(kickEvent, filteredBallHistory);
 
 				log.debug("Spawned flat estimator");
 			}
@@ -284,7 +287,7 @@ public class BallFilterPreprocessor
 						(lastBestEstimator.getFitResult().get().getKickPos().distanceTo(kickEvent.getPosition()) > 500.0))
 				{
 					// large angle deviation or some distance away from last kick, spawn new estimator
-					flatEstimator = new StraightKickEstimator(kickEvent);
+					flatEstimator = new StraightKickEstimator(kickEvent, filteredBallHistory);
 					log.debug("Spawned flat estimator due to angle/pos deviation");
 				} else
 				{
@@ -335,7 +338,7 @@ public class BallFilterPreprocessor
 							.removeIf(k -> k.getFitResult()
 									.orElse(new KickFitResult(null, 0,
 											Geometry.getBallFactory()
-													.createTrajectoryFromBallAtRest(Vector2f.ZERO_VECTOR), timestamp))
+													.createTrajectoryFromBallAtRest(Vector2f.ZERO_VECTOR), timestamp, ""))
 									.getAvgDistance() > bestKickFitResult.getAvgDistance());
 				}
 
@@ -380,6 +383,9 @@ public class BallFilterPreprocessor
 		private void reset()
 		{
 			estimators.clear();
+			kickEventHistory.clear();
+			filteredBallHistory.clear();
+			lastBestEstimator = null;
 		}
 	}
 

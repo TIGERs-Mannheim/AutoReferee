@@ -94,16 +94,16 @@ public class StraightKickSolverNonLin3Direct implements IKickSolver
 			{
 				sum[i] /= points.length;
 			}
-			
+
 			result = sum;
 		}
-		
+
 		initialGuess = result;
-		
+
 		IVector2 kickPos = Vector2.fromXY(result[0], result[1]);
 		IVector3 kickVel = dir.scaleToNew(result[2]).getXYZVector();
-		
-		return Optional.of(new KickSolverResult(kickPos, kickVel, tZero));
+
+		return Optional.of(new KickSolverResult(kickPos, kickVel, tZero, getClass().getSimpleName()));
 	}
 	
 	private static class StraightBallModel implements MultivariateFunction

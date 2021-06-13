@@ -126,6 +126,13 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 
 	@Override
+	public IBallTrajectory withBallParameters(BallParameters ballParameters)
+	{
+		return new ChipBallTrajectory(ballParameters, initialPos, initialVel, initialSpin, tInAir, kickPos, kickVel);
+	}
+
+
+	@Override
 	public BallState getMilliStateAtTime(final double time)
 	{
 		if (time < 0)

@@ -71,7 +71,7 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 	{
 		Optional<IBallModelIdentResult> result = identModel(records);
 		return result.map(iBallModelIdentResult -> new KickSolverResult(kickPosition,
-				iBallModelIdentResult.getKickVelocity(), kickTimestamp));
+				iBallModelIdentResult.getKickVelocity(), kickTimestamp, getClass().getSimpleName()));
 	}
 
 

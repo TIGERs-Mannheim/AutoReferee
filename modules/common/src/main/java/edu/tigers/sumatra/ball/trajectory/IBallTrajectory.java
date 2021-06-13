@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.ball.trajectory;
 
+import edu.tigers.sumatra.ball.BallParameters;
 import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.line.v2.IHalfLine;
@@ -20,6 +21,13 @@ import java.util.List;
  */
 public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCurveProvider
 {
+	/**
+	 * Get ball parameters for this trajectory.
+	 *
+	 * @return
+	 */
+	BallParameters getParameters();
+
 	/**
 	 * Get initial position in [mm].
 	 *
@@ -228,4 +236,12 @@ public interface IBallTrajectory extends IMirrorable<IBallTrajectory>, IPlanarCu
 	 * @return
 	 */
 	IBallTrajectory withAdjustedInitialPos(final IVector3 posNow, final double time);
+
+	/**
+	 * Return a new trajectory with new ball parameters.
+	 *
+	 * @param ballParameters
+	 * @return
+	 */
+	IBallTrajectory withBallParameters(final BallParameters ballParameters);
 }

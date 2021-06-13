@@ -79,19 +79,19 @@ public class ChipKickSolverNonLin3Direct extends AChipKickSolver
 					sum[i] += pair.getPointRef()[i];
 				}
 			}
-			
+
 			for (int i = 0; i < 3; i++)
 			{
 				sum[i] /= points.length;
 			}
-			
+
 			kickVelArray = sum;
 		}
-		
+
 		// kick off speed, 3D!
 		IVector3 kickVelEst = Vector3.fromArray(kickVelArray);
-		
-		return Optional.of(new KickSolverResult(kickPosition, kickVelEst, kickTimestamp));
+
+		return Optional.of(new KickSolverResult(kickPosition, kickVelEst, kickTimestamp, getClass().getSimpleName()));
 	}
 	
 	private class ChipBallModel implements MultivariateFunction
