@@ -39,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -87,7 +86,7 @@ public class StraightKickEstimator implements IKickEstimator
 	 *
 	 * @param event Initial kick event from detector.
 	 */
-	public StraightKickEstimator(final KickEvent event, Collection<FilteredVisionBall> filteredBalls)
+	public StraightKickEstimator(final KickEvent event, List<FilteredVisionBall> filteredBalls)
 	{
 		List<CamBall> camBalls = event.getRecordsSinceKick().stream()
 				.map(r -> r.getLatestCamBall().get())
@@ -100,8 +99,7 @@ public class StraightKickEstimator implements IKickEstimator
 			camBalls.remove(0);
 		}
 
-		var ballStateAtKick = filteredBalls.stream()
-				.min(Comparator.comparingLong(b -> Math.abs(b.getTimestamp() - event.getTimestamp())));
+		var ballStateAtKick = getBallStateAtKick(event, filteredBalls);
 
 		records.addAll(camBalls);
 		allRecords.addAll(camBalls);
@@ -123,6 +121,39 @@ public class StraightKickEstimator implements IKickEstimator
 	public static void touch()
 	{
 		// Invoke static constructor
+	}
+
+
+	private Optional<FilteredVisionBall> getBallStateAtKick(final KickEvent event,
+			final List<FilteredVisionBall> filteredBalls)
+	{
+		// go through balls backward in time until one is found with a plausible inbound state
+		for (int i = filteredBalls.size() - 1; i > 1; i--)
+		{
+			FilteredVisionBall last = filteredBalls.get(i);
+			FilteredVisionBall prev = filteredBalls.get(i - 1);
+
+			// travel direction away from kicking robot, this cannot be the inbound ball state
+			boolean travelDirectionAwayFromKicker =
+					last.getVel().getXYVector().angleToAbs(Vector2.fromAngle(event.getBotDirection())).orElse(0.0)
+							< AngleMath.PI_HALF;
+
+			// The previous ball has at least a 25% greater velocity than the current one.
+			// This is too much for normal ball deceleration, it probably hit the kicking bot already
+			boolean rapidlyDeceleratingBall = prev.getVel().getLength2() > last.getVel().getLength2() * 1.25;
+
+			// If ball speed is increasing this state is already past the kick
+			boolean increasingBallSpeed = prev.getVel().getLength2() < last.getVel().getLength2();
+
+			if (travelDirectionAwayFromKicker || rapidlyDeceleratingBall || increasingBallSpeed)
+			{
+				continue;
+			}
+
+			return Optional.of(last);
+		}
+
+		return Optional.empty();
 	}
 
 

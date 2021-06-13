@@ -12,6 +12,7 @@ import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
 import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
@@ -51,8 +52,7 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 
 	public FlatKickSolverNonLin3Factor(final Pose kickingBotPose, final Optional<FilteredVisionBall> ballStateAtKick)
 	{
-		initialSpin = ballStateAtKick.map(FilteredVisionBall::getSpin).orElse(
-				Vector2.fromAngleLength(kickingBotPose.getOrientation() + Math.PI, 8000.0 / Geometry.getBallRadius()));
+		initialSpin = ballStateAtKick.map(FilteredVisionBall::getSpin).orElse(Vector2f.ZERO_VECTOR);
 		kickBotOrient = kickingBotPose.getOrientation();
 	}
 

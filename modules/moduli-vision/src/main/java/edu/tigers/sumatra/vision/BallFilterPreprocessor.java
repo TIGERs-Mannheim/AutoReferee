@@ -272,7 +272,8 @@ public class BallFilterPreprocessor
 
 			if (flatEstimator == null)
 			{
-				flatEstimator = new StraightKickEstimator(kickEvent, filteredBallHistory);
+				flatEstimator = new StraightKickEstimator(kickEvent,
+						filteredBallHistory.stream().collect(Collectors.toList()));
 
 				log.debug("Spawned flat estimator");
 			}
@@ -287,7 +288,8 @@ public class BallFilterPreprocessor
 						(lastBestEstimator.getFitResult().get().getKickPos().distanceTo(kickEvent.getPosition()) > 500.0))
 				{
 					// large angle deviation or some distance away from last kick, spawn new estimator
-					flatEstimator = new StraightKickEstimator(kickEvent, filteredBallHistory);
+					flatEstimator = new StraightKickEstimator(kickEvent,
+							filteredBallHistory.stream().collect(Collectors.toList()));
 					log.debug("Spawned flat estimator due to angle/pos deviation");
 				} else
 				{

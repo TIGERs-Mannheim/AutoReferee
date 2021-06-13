@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.validators;
 
@@ -46,7 +46,7 @@ public class VelocityValidator implements IKickValidator
 
 		for (List<MergedBall> group : groupedBalls.values())
 		{
-			boolean valid = true;
+			int validSamples = 0;
 			for (int i = 1; i < group.size(); i++)
 			{
 				CamBall bPrev = group.get(i - 1).getLatestCamBall().orElseThrow(IllegalStateException::new);
@@ -63,13 +63,13 @@ public class VelocityValidator implements IKickValidator
 
 				double vel = prev.distanceTo(now) / ((tNow - tPrev) * 1e-9);
 
-				if (vel < minVelocity)
+				if (vel > minVelocity)
 				{
-					valid = false;
+					validSamples++;
 				}
 			}
 
-			if (valid)
+			if (validSamples >= 2)
 			{
 				return true;
 			}
