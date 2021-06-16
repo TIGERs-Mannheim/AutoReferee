@@ -33,7 +33,7 @@ public class GameStateCalculator
 	}
 
 	private IVector2 ballPosOnPrepare = null;
-	private final TimestampTimer ballMovedTimer = new TimestampTimer(0.1);
+	private final TimestampTimer ballMovedTimer = new TimestampTimer(0.03);
 	private long lastRefMsgCounter = -1;
 	private GameState lastGameState = GameState.empty().build();
 	private Command lastRefCmd = Command.STOP;
