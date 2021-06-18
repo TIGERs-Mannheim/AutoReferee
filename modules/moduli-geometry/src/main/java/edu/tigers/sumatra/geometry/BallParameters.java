@@ -48,15 +48,15 @@ public class BallParameters
 
 	@Configurable(
 			comment = "Amount of spin transferred during a redirect.",
-			defValue = "0.8",
-			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
+			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" },
+			defValueSpezis = { "0.8", "0.35", "0.35", "0.35", "0.35", "0.35", "0.8" }
 	)
 	private double redirectSpinFactor = 0.8;
 
 	@Configurable(
 			comment = "Restitution coefficient for redirected balls from a bot.",
-			defValue = "0.2",
-			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
+			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" },
+			defValueSpezis = { "0.2", "0.55", "0.55", "0.55", "0.55", "0.55", "0.2" }
 	)
 	private double redirectRestitutionCoefficient = 0.2;
 
