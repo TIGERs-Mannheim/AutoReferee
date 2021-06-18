@@ -18,6 +18,7 @@ import edu.tigers.sumatra.vision.data.KickSolverResult;
 import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import edu.tigers.sumatra.vision.kick.estimators.IKickSolver;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.apache.commons.math3.analysis.MultivariateFunction;
@@ -266,6 +267,7 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 	}
 
 	@RequiredArgsConstructor
+	@Getter
 	public static class RedirectModelIdentResult implements IBallModelIdentResult
 	{
 		private final IVector3 kickVel;
@@ -334,6 +336,18 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 					+ "spinFactor: " + spinFactor + System.lineSeparator()
 					+ "in: " + Vector2.fromAngleLength(inAngle, inVel) + System.lineSeparator()
 					+ "out: " + Vector2.fromAngleLength(outAngle, outVel) + System.lineSeparator();
+		}
+
+
+		public IVector2 getInVelocity()
+		{
+			return Vector2.fromAngleLength(inAngle, inVel);
+		}
+
+
+		public IVector2 getOutVelocity()
+		{
+			return Vector2.fromAngleLength(outAngle, outVel);
 		}
 	}
 }
