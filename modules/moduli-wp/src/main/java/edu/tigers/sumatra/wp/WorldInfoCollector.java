@@ -164,7 +164,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.collect(Collectors.toMap(
-						BotState::getBotID,
+						BotState::getBotId,
 						Function.identity()));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
@@ -45,6 +45,12 @@ public class DrawableArrow extends ADrawable
 	{
 		this(position, direction, color);
 		this.arrowSize = arrowSize;
+	}
+
+
+	public static DrawableArrow fromPositions(IVector2 source, IVector2 target)
+	{
+		return new DrawableArrow(source, target.subtractNew(source));
 	}
 
 
