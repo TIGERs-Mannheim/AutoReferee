@@ -473,6 +473,12 @@ public class GameState
 	}
 
 
+	public boolean isFreeKickForUs()
+	{
+		return isFreeKick() && isGameStateForUs();
+	}
+
+
 	/**
 	 * @return true if this is an INDIRECT_FREE for them.
 	 */

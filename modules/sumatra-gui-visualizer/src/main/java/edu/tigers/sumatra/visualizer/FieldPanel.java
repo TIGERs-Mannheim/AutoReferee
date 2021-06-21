@@ -514,7 +514,7 @@ public class FieldPanel extends JPanel implements IDrawableTool
 	private void paintCoordinates(final Graphics2D g, final ETeamColor teamColor,
 			final int width, final int height, final boolean inverted)
 	{
-		int fontSize = ScalingUtil.getFontSize(EFontSize.SMALL);
+		int fontSize = ScalingUtil.getFontSize(EFontSize.LARGE);
 
 		g.setStroke(new BasicStroke());
 		g.setFont(new Font("", Font.PLAIN, fontSize));

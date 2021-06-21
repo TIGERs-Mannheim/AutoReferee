@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -85,7 +85,9 @@ public class WorldFrame extends SimpleWorldFrame
 				.filter(bot -> bot.getBotId().getTeamColor() == aiTeam.getTeamColor().opposite())
 				.filter(bot -> Geometry.getFieldWBorders().isPointInShape(bot.getPos()))
 				.map(bot -> {
-					RobotInfo info = RobotInfo.stub(bot.getBotId(), bot.getTimestamp());
+					RobotInfo info = RobotInfo.stubBuilder(bot.getBotId(), bot.getTimestamp())
+							.withBotParams(bot.getRobotInfo().getBotParams())
+							.build();
 					return TrackedBot.newCopyBuilder(bot)
 							.withBotInfo(info)
 							.withState(bot.getFilteredState().orElse(bot.getBotState()))
