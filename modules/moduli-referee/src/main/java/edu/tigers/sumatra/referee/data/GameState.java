@@ -422,6 +422,14 @@ public class GameState
 	/**
 	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
 	 */
+	public boolean isKickoffForUs()
+	{
+		return state == EGameState.KICKOFF && isGameStateForUs();
+	}
+
+	/**
+	 * @return true if the current state is KICKOFF or PREPARE_KICKOFF
+	 */
 	public boolean isKickoffOrPrepareKickoff()
 	{
 		return (state == EGameState.KICKOFF) || (state == EGameState.PREPARE_KICKOFF);
