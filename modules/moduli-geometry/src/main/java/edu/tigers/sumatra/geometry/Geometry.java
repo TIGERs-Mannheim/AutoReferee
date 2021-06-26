@@ -365,7 +365,6 @@ public class Geometry
 			} else
 			{
 				penaltyAreaDepth = fieldHalfLength - leftDist;
-				distanceToPenaltyMark = penaltyAreaDepth;
 			}
 		} else
 		{
