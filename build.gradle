@@ -112,5 +112,5 @@ githubRelease {
     owner "TIGERs-Mannheim"
     repo.set("AutoReferee")
     releaseAssets distZip
-    tagName.set("version-${versionDetails.lastTag}")
+    tagName { "version-${versionDetails.lastTag}" }
 }
