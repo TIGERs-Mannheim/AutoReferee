@@ -20,7 +20,6 @@ import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.util.GlobalShortcuts;
-import edu.tigers.sumatra.util.GlobalShortcuts.EShortcut;
 import edu.tigers.sumatra.views.ASumatraViewPresenter;
 import edu.tigers.sumatra.views.ISumatraView;
 import edu.tigers.sumatra.vision.AVisionFilter;
@@ -31,8 +30,10 @@ import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.Validate;
 
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -278,7 +279,7 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		wp.removeObserver(this);
 
-		GlobalShortcuts.unregisterAll(EShortcut.RESET_FIELD);
+		GlobalShortcuts.removeAllForComponent(panel);
 	}
 
 
@@ -287,8 +288,12 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 		AWorldPredictor wp = SumatraModel.getInstance().getModule(AWorldPredictor.class);
 		wp.addObserver(this);
 
-		GlobalShortcuts.register(EShortcut.RESET_FIELD,
-				() -> panel.getFieldPanel().onOptionChanged(EVisualizerOptions.RESET_FIELD, true));
+		GlobalShortcuts.add(
+				"Reset field",
+				panel,
+				() -> panel.getFieldPanel().onOptionChanged(EVisualizerOptions.RESET_FIELD, true),
+				KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)
+		);
 	}
 
 
@@ -370,15 +375,12 @@ public class VisualizerPresenter extends ASumatraViewPresenter implements IRobot
 	}
 
 
-
 	@Override
 	public void onClearWorldFrame()
 	{
 		lastWorldFrameWrapper = null;
 		panel.getRobotsPanel().clearView();
 	}
-
-
 
 
 	/**
