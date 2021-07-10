@@ -210,16 +210,12 @@ public class LogfileVisionCam extends ACam implements Runnable
 	@Override
 	public void run()
 	{
-		SSLGameLogReader currentLog = null;
 
 		while (!Thread.interrupted())
 		{
 			// take new logfile if we have one
-			if (newLogfile != null)
-			{
-				currentLog = newLogfile;
-				newLogfile = null;
-			}
+			SSLGameLogReader currentLog = newLogfile;
+			newLogfile = null;
 
 			// no log to play? nothing to do!
 			if (currentLog == null)
@@ -232,16 +228,12 @@ public class LogfileVisionCam extends ACam implements Runnable
 					Thread.currentThread().interrupt();
 					return;
 				}
-
-				continue;
+			} else
+			{
+				playLog(currentLog);
+				log.info("Replay finished");
+				notifyVisionLost();
 			}
-
-			// play the logfile
-			playLog(currentLog);
-
-			log.info("Replay finished");
-
-			notifyVisionLost();
 		}
 	}
 

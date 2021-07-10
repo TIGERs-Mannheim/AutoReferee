@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.presenter.replay;
@@ -284,6 +284,7 @@ public class ReplayPresenter extends AMainPresenter
 		snapshotController.onCopySnapshot();
 	}
 
+
 	/**
 	 * This thread will update the field periodically according to the speed
 	 *
@@ -331,9 +332,13 @@ public class ReplayPresenter extends AMainPresenter
 			if (playing)
 			{
 				replayCurTime += ((System.nanoTime() - replayLastTime) * speed);
-				if ((getCurrentTime() > recEndTime) || (replayCurTime < 0))
+				if (replayCurTime < 0)
 				{
 					replayCurTime = 0;
+				}
+				if (getCurrentTime() > recEndTime)
+				{
+					replayCurTime = recEndTime;
 				}
 			}
 			replayLastTime = System.nanoTime();
