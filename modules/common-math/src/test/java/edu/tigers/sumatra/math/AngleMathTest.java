@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math;
@@ -68,12 +68,11 @@ public class AngleMathTest
 	@Test
 	public void testRotateAngle()
 	{
-		assertThat(AngleMath.rotateAngle(-1, 2, AngleMath.ERotationDirection.CCW_ROTATION)).isEqualTo(1);
-		assertThat(AngleMath.rotateAngle(1, 2, AngleMath.ERotationDirection.CW_ROTATION)).isEqualTo(-1);
-		assertThat(AngleMath.rotateAngle(0, 42, AngleMath.ERotationDirection.NO_ROTATION)).isEqualTo(0);
-		assertThat(AngleMath.rotateAngle(15 * AngleMath.PI_TWO, 42, AngleMath.ERotationDirection.NO_ROTATION))
-				.isEqualTo(0);
-		assertThat(AngleMath.rotateAngle(-1, 2 + 10 * AngleMath.PI_TWO, AngleMath.ERotationDirection.CCW_ROTATION))
+		assertThat(AngleMath.rotateAngle(-1, 2, ERotationDirection.COUNTER_CLOCKWISE)).isEqualTo(1);
+		assertThat(AngleMath.rotateAngle(1, 2, ERotationDirection.CLOCKWISE)).isEqualTo(-1);
+		assertThat(AngleMath.rotateAngle(0, 42, ERotationDirection.NONE)).isZero();
+		assertThat(AngleMath.rotateAngle(15 * AngleMath.PI_TWO, 42, ERotationDirection.NONE)).isZero();
+		assertThat(AngleMath.rotateAngle(-1, 2 + 10 * AngleMath.PI_TWO, ERotationDirection.COUNTER_CLOCKWISE))
 				.isEqualTo(1);
 	}
 
@@ -81,15 +80,15 @@ public class AngleMathTest
 	@Test
 	public void testRotationDirection()
 	{
-		assertThat(AngleMath.rotationDirection(-1, 1)).isEqualTo(AngleMath.ERotationDirection.CCW_ROTATION);
-		assertThat(AngleMath.rotationDirection(1, -1)).isEqualTo(AngleMath.ERotationDirection.CW_ROTATION);
-		assertThat(AngleMath.rotationDirection(1, 1)).isEqualTo(AngleMath.ERotationDirection.NO_ROTATION);
+		assertThat(AngleMath.rotationDirection(-1, 1)).isEqualTo(ERotationDirection.COUNTER_CLOCKWISE);
+		assertThat(AngleMath.rotationDirection(1, -1)).isEqualTo(ERotationDirection.CLOCKWISE);
+		assertThat(AngleMath.rotationDirection(1, 1)).isEqualTo(ERotationDirection.NONE);
 		assertThat(AngleMath.rotationDirection(-1 + 10 * AngleMath.PI_TWO, 1 + 10 * AngleMath.PI_TWO))
-				.isEqualTo(AngleMath.ERotationDirection.CCW_ROTATION);
+				.isEqualTo(ERotationDirection.COUNTER_CLOCKWISE);
 		assertThat(AngleMath.rotationDirection(1 + 10 * AngleMath.PI_TWO, -1))
-				.isEqualTo(AngleMath.ERotationDirection.CW_ROTATION);
+				.isEqualTo(ERotationDirection.CLOCKWISE);
 		assertThat(AngleMath.rotationDirection(15 * AngleMath.PI_TWO, 10 * AngleMath.PI_TWO))
-				.isEqualTo(AngleMath.ERotationDirection.NO_ROTATION);
+				.isEqualTo(ERotationDirection.NONE);
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math;
@@ -71,11 +71,13 @@ public final class AngleMath
 	public static double rotateAngle(final double angleStart, final double angleAmount,
 			final ERotationDirection rotationDirection)
 	{
-		return normalizeAngle(
-				rotationDirection == ERotationDirection.NO_ROTATION ? angleStart :
-						rotationDirection == ERotationDirection.CCW_ROTATION ?
-								angleStart + angleAmount :
-								angleStart - angleAmount
+		if (rotationDirection == ERotationDirection.NONE)
+		{
+			return normalizeAngle(angleStart);
+		}
+		return normalizeAngle(rotationDirection == ERotationDirection.COUNTER_CLOCKWISE ?
+				angleStart + angleAmount :
+				angleStart - angleAmount
 		);
 	}
 
@@ -85,22 +87,14 @@ public final class AngleMath
 		final var difference = AngleMath.difference(angleEnd, angleStart);
 		if (Math.abs(difference) < 1e-6)
 		{
-			return ERotationDirection.NO_ROTATION;
+			return ERotationDirection.NONE;
 		} else if (difference < 0)
 		{
-			return ERotationDirection.CW_ROTATION;
+			return ERotationDirection.CLOCKWISE;
 		} else
 		{
-			return ERotationDirection.CCW_ROTATION;
+			return ERotationDirection.COUNTER_CLOCKWISE;
 		}
-	}
-
-
-	public enum ERotationDirection
-	{
-		NO_ROTATION,
-		CW_ROTATION,
-		CCW_ROTATION
 	}
 
 
