@@ -36,5 +36,5 @@ task runBangBangTrajectoryBenchmark(type: JavaExec) {
     group = "Execution"
     description = "Run BangBangTrajectoryBenchmark"
     classpath = sourceSets.test.runtimeClasspath
-    main = "edu.tigers.sumatra.trajectory.BangBangTrajectoryBenchmark"
+    mainClass.set("edu.tigers.sumatra.trajectory.BangBangTrajectoryBenchmark")
 }
