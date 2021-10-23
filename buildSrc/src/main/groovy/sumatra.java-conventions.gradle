@@ -7,6 +7,7 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'ca.cutterslade.analyze'
+    id 'sumatra.version-conventions'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -49,12 +50,20 @@ jacocoTestReport {
                     exclude: ['**/proto/**/*'])
         }))
     }
-
-    dependsOn(test)
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.20"
-    compileOnly "org.projectlombok:lombok:1.18.20"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.20"
+    annotationProcessor "org.projectlombok:lombok:1.18.22"
+    compileOnly "org.projectlombok:lombok:1.18.22"
+    permitUnusedDeclared "org.projectlombok:lombok:1.18.22"
+}
+
+analyzeClassesDependencies {
+    // Set to false until up-to-date check works again (bug in plugin)
+    logDependencyInformationToFiles = false
+}
+
+analyzeTestClassesDependencies {
+    // Set to false until up-to-date check works again (bug in plugin)
+    logDependencyInformationToFiles = false
 }
