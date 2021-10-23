@@ -7,9 +7,11 @@ plugins {
     id 'application'
 
     id 'com.palantir.git-version' version '0.12.3'
-    id 'ca.cutterslade.analyze' version '1.6.0'
-    id 'com.google.cloud.tools.jib' version '3.0.0'
+    id 'ca.cutterslade.analyze' version '1.8.1'
+    id 'com.google.cloud.tools.jib' version '3.1.4'
     id "com.github.breadmoirai.github-release" version "2.2.12"
+    id 'com.github.ben-manes.versions' version '0.39.0'
+    id 'se.patrikerdes.use-latest-versions' version '0.2.17'
 }
 
 ext.versionDetails = versionDetails(prefix: "version/")

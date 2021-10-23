@@ -2,15 +2,6 @@
  * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
  */
 
-pluginManagement {
-    repositories {
-        maven {
-            url "https://nexus.tigers-mannheim.de/content/groups/public/"
-        }
-        gradlePluginPortal()
-    }
-}
-
 rootProject.name = 'autoReferee'
 
 include(':autoreferee-gui')
