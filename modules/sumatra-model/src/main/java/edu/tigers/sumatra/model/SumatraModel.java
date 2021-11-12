@@ -8,6 +8,7 @@ import edu.tigers.moduli.Moduli;
 import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -58,6 +59,8 @@ public final class SumatraModel extends Moduli
 
 	private boolean simulation = false;
 	private String environment = "";
+	@Getter
+	private String geometry = "";
 
 
 	/**
@@ -158,6 +161,7 @@ public final class SumatraModel extends Moduli
 	{
 		simulation = getGlobalConfiguration().getBoolean("simulation", false);
 		environment = getGlobalConfiguration().getString("environment");
+		geometry = getGlobalConfiguration().getString("geometry", "DIV_A");
 	}
 
 

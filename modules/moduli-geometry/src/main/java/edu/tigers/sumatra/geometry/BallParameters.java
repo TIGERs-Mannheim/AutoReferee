@@ -61,13 +61,6 @@ public class BallParameters
 	private double redirectRestitutionCoefficient = 0.2;
 
 	@Configurable(
-			comment = "Fixed velocity where the ball starts to roll [mm/s]",
-			defValue = "2000.0",
-			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
-	)
-	private double vSwitch = 2000.0;
-
-	@Configurable(
 			comment = "Chip kick velocity damping factor in XY direction for the first hop",
 			defValue = "0.75",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" }
