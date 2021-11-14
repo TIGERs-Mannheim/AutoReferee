@@ -8,6 +8,7 @@
     <globalConfiguration>
         <environment>ROBOCUP</environment>
         <simulation>true</simulation>
+        <geometry>DIV_A</geometry>
     </globalConfiguration>
 
     <module id="edu.tigers.sumatra.cam.ACam">
