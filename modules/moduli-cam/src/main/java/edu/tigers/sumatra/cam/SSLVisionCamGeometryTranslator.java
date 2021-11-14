@@ -244,8 +244,12 @@ public class SSLVisionCamGeometryTranslator
 
 	private double uniqueLengthFromSegments(List<CamFieldLine> lines, Set<SSL_FieldShapeType> penaltyStretchTypes)
 	{
+		var penaltyStretchTypeNames = penaltyStretchTypes.stream()
+				.map(SSL_FieldShapeType::name)
+				.collect(Collectors.toUnmodifiableSet());
+
 		List<CamFieldLine> penaltyStretches = lines.stream()
-				.filter(l -> penaltyStretchTypes.contains(l.getType()))
+				.filter(l -> penaltyStretchTypes.contains(l.getType()) || penaltyStretchTypeNames.contains(l.getName()))
 				.collect(Collectors.toUnmodifiableList());
 
 		if (penaltyStretches.size() != penaltyStretchTypes.size())
