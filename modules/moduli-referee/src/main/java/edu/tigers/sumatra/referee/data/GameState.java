@@ -273,6 +273,7 @@ public class GameState
 				case INDIRECT_FREE:
 				case DIRECT_FREE:
 				case PREPARE_PENALTY:
+				case KICKOFF:
 					return true;
 				default:
 					break;
