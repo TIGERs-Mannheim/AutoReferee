@@ -6,12 +6,12 @@ plugins {
     id 'sumatra.java-conventions'
     id 'application'
 
-    id 'com.palantir.git-version' version '0.12.3'
-    id 'ca.cutterslade.analyze' version '1.8.1'
-    id 'com.google.cloud.tools.jib' version '3.1.4'
+    id 'com.palantir.git-version' version '0.13.0'
+    id 'ca.cutterslade.analyze' version '1.8.3'
+    id 'com.google.cloud.tools.jib' version '3.2.0'
     id "com.github.breadmoirai.github-release" version "2.2.12"
-    id 'com.github.ben-manes.versions' version '0.39.0'
-    id 'se.patrikerdes.use-latest-versions' version '0.2.17'
+    id 'com.github.ben-manes.versions' version '0.41.0'
+    id 'se.patrikerdes.use-latest-versions' version '0.2.18'
 }
 
 ext.versionDetails = versionDetails(prefix: "version/")
@@ -39,15 +39,15 @@ dependencies {
     runtimeOnly project(':moduli-wp')
     runtimeOnly project(':moduli-referee')
 
-    implementation 'com.github.TIGERs-Mannheim:moduli:2.2'
+    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
     implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.12.1'
-    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.12.1'
-    runtimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.12.1'
-    runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.25'
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
+    runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.33'
 
-    implementation 'commons-cli:commons-cli:1.4'
+    implementation 'commons-cli:commons-cli:1.5.0'
 }
 
 application {
