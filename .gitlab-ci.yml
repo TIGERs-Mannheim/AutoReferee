@@ -6,7 +6,7 @@ build:
 
 test:
   script:
-    - "apt update && apt install git-lfs"
+    - "apt-get -y update && apt-get -y install git-lfs"
     - "git lfs install"
     - "git clone https://gitlab.com/robocup-small-size/autoref-tests.git modules/moduli-autoreferee/autoref-tests"
     - "(cd modules/moduli-autoreferee/autoref-tests && git lfs pull)"
