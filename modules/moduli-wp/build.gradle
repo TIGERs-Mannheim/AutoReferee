@@ -26,13 +26,13 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'commons-configuration:commons-configuration:1.10'
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.14.1'
+    implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
 
     implementation 'com.sleepycat:je:18.3.12'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
-    api 'com.google.protobuf:protobuf-java:3.19.0'
+    api 'com.google.protobuf:protobuf-java:3.19.3'
     implementation 'commons-codec:commons-codec:1.15'
 
-    testImplementation 'org.assertj:assertj-core:3.21.0'
+    testImplementation 'org.assertj:assertj-core:3.22.0'
     testImplementation 'junit:junit:4.13.2'
 }
