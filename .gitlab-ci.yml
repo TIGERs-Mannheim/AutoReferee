@@ -1,15 +1,10 @@
-stages:
-  - build
+image: azul/zulu-openjdk:17
 
 build:
-  stage: build
-  image: openjdk:17
   script:
     - './build.sh'
 
 test:
-  stage: build
-  image: openjdk:17
   script:
     - "apt update && apt install git-lfs"
     - "git lfs install"
