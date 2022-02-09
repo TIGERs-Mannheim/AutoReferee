@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee;
 
@@ -18,11 +18,12 @@ public enum EAutoRefShapesLayer implements IShapeLayer
 	LAST_BALL_CONTACT_EXT("Ball Contact ext", "AutoReferee", false),
 	BALL_LEFT_FIELD("Ball Left Field", "AutoReferee", true),
 	ALLOWED_DISTANCES("Allowed Distances", "AutoReferee", true),
+	ALLOWED_DRIBBLING_DISTANCE("Allowed Dribbling Distances", "AutoReferee", true),
 	VIOLATED_DISTANCES("Violated Distances", "AutoReferee", true),
 	MODE("AutoRef Mode", "AutoReferee", true),
 	PUSHING("Pushing Detector", "AutoReferee", true),
 	PASS_DETECTION("Pass Detection", "AutoReferee", true),
-	
+
 	;
 
 	private final String id;
@@ -38,33 +39,33 @@ public enum EAutoRefShapesLayer implements IShapeLayer
 		this.visible = visible;
 		id = EAutoRefShapesLayer.class.getCanonicalName() + name();
 	}
-	
-	
+
+
 	@Override
 	public String getCategory()
 	{
 		return category;
 	}
-	
-	
+
+
 	@Override
 	public String getLayerName()
 	{
 		return name;
 	}
-	
-	
+
+
 	@Override
 	public String getId()
 	{
 		return id;
 	}
-	
-	
+
+
 	@Override
 	public boolean isVisibleByDefault()
 	{
 		return visible;
 	}
-	
+
 }
