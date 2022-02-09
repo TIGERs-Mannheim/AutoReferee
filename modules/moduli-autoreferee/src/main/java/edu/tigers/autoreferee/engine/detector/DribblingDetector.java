@@ -64,8 +64,7 @@ public class DribblingDetector extends AGameEventDetector
 				.min(Map.Entry.comparingByValue())
 				.map(Map.Entry::getKey);
 
-		violatingBot.ifPresent(currentContacts::remove);
-		return violatingBot.map(botId -> new BotDribbledBallTooFar(botId, currentContacts.get(botId), ballPos));
+		return violatingBot.map(botId -> new BotDribbledBallTooFar(botId, currentContacts.remove(botId), ballPos));
 	}
 
 
