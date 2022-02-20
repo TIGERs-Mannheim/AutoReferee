@@ -3,9 +3,9 @@
  */
 
 plugins {
-    id 'sumatra.java-conventions'
+    id 'sumatra.java'
     id 'java-library'
-    id 'sumatra.protobuf-conventions'
+    id 'sumatra.protobuf'
 }
 
 sourceSets {
@@ -37,7 +37,7 @@ dependencies {
     implementation 'commons-lang:commons-lang:2.6'
 
     implementation 'com.sleepycat:je:18.3.12'
-    implementation 'com.google.protobuf:protobuf-java:3.19.3'
+    implementation 'com.google.protobuf:protobuf-java:3.19.4'
 
 
     integrationTestImplementation project(':common')
@@ -49,16 +49,17 @@ dependencies {
     integrationTestImplementation project(':moduli-record')
 
     integrationTestImplementation 'junit:junit:4.13.2'
+    integrationTestRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.8.2'
     integrationTestImplementation 'org.assertj:assertj-core:3.22.0'
-    integrationTestImplementation 'com.google.protobuf:protobuf-java:3.19.3'
-    integrationTestImplementation 'com.google.protobuf:protobuf-java-util:3.19.3'
+    integrationTestImplementation 'com.google.protobuf:protobuf-java:3.19.4'
+    integrationTestImplementation 'com.google.protobuf:protobuf-java-util:3.19.4'
 
     integrationTestImplementation 'com.github.g3force:configurable:3.0'
 
     integrationTestImplementation 'org.apache.logging.log4j:log4j-api:2.17.1'
     integrationTestRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
     integrationTestRuntimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
-    integrationTestRuntimeOnly 'org.slf4j:slf4j-log4j12:1.7.33'
+    integrationTestRuntimeOnly 'org.slf4j:slf4j-log4j12:1.7.36'
 
     integrationTestAnnotationProcessor "org.projectlombok:lombok:1.18.22"
     integrationTestImplementation "org.projectlombok:lombok:1.18.22"
@@ -77,9 +78,4 @@ task integrationTest(type: Test) {
     // set a task input that changes every second -> the task will be rerun every time it is executed
     // inspired by: https://blog.gradle.org/stop-rerunning-tests
     inputs.property "integration.date", System.currentTimeSeconds()
-}
-
-analyzeIntegrationTestClassesDependencies {
-    // Set to false until up-to-date check works again (bug in plugin)
-    logDependencyInformationToFiles = false
 }

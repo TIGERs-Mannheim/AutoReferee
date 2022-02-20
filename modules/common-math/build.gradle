@@ -3,12 +3,14 @@
  */
 
 plugins {
-    id 'sumatra.java-conventions'
+    id 'sumatra.java'
+    id 'sumatra.test'
+    id 'sumatra.test.spock'
     id 'java-library'
 }
 
 dependencies {
-    implementation 'com.github.g3force:String2ValueConverter:2.2'
+    implementation 'com.github.g3force:String2ValueConverter:2.2.1'
 
     implementation 'org.apache.commons:commons-math3:3.6.1'
     implementation 'commons-lang:commons-lang:2.6'
@@ -19,9 +21,7 @@ dependencies {
     api 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'net.jafama:jafama:2.3.2'
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.assertj:assertj-core:3.22.0'
-    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.8.2'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.9'
 
     testImplementation 'com.google.guava:guava:31.0.1-jre'
 
