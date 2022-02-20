@@ -46,7 +46,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
     runtimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
-    runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.33'
+    runtimeOnly 'org.slf4j:slf4j-log4j12:1.7.36'
 
     implementation 'commons-cli:commons-cli:1.5.0'
 }
