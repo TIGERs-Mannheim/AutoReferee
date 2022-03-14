@@ -72,8 +72,8 @@ jib {
         tags = [rootProject.version]
     }
     from {
-        // gcr.io/distroless/java:11
-        image = "gcr.io/distroless/java@sha256:9d4092ba5e1c9dc4d1490fdead1dd7ea5c64e635b729fee11a6af55f51b337f8"
+        // gcr.io/distroless/java17
+        image = "gcr.io/distroless/java17@sha256:91f381a50e6889fb96feee76b108689bf090709730d65ee6463da8c3e3c1f191"
     }
     extraDirectories {
         paths {
