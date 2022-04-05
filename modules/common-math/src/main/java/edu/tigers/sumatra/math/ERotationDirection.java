@@ -8,5 +8,19 @@ public enum ERotationDirection
 {
 	NONE,
 	CLOCKWISE,
-	COUNTER_CLOCKWISE
+	COUNTER_CLOCKWISE;
+
+
+	public ERotationDirection opposite()
+	{
+		switch (this)
+		{
+			case CLOCKWISE:
+				return COUNTER_CLOCKWISE;
+			case COUNTER_CLOCKWISE:
+				return CLOCKWISE;
+			default:
+				return NONE;
+		}
+	}
 }
