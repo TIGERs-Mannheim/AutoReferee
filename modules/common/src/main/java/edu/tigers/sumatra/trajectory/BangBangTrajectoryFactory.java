@@ -10,6 +10,7 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import org.apache.commons.lang.Validate;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 
 public final class BangBangTrajectoryFactory
@@ -34,7 +35,7 @@ public final class BangBangTrajectoryFactory
 		final var startToTarget = s1.subtractNew(s0).turn(-rotation);
 		final var v0Rotated = v0.turnNew(-rotation);
 
-		final Function<Float, Float> alphaFn = alpha -> alpha + (((float) AngleMath.PI_HALF - alpha) * 0.5f);
+		final UnaryOperator<Float> alphaFn = alpha -> alpha + (((float) AngleMath.PI_HALF - alpha) * 0.5f);
 		BangBangTrajectory2D child = new BangBangTrajectory2D().generate(
 				Vector2f.ZERO_VECTOR,
 				startToTarget,
@@ -63,6 +64,18 @@ public final class BangBangTrajectoryFactory
 				(float) acc,
 				SYNC_ACCURACY,
 				Function.identity());
+	}
+
+
+	public ITrajectory<Double> single(
+			final double initialPos,
+			final double finalPos,
+			final double initialVel,
+			final double maxVel,
+			final double maxAcc
+	)
+	{
+		return singleDim(initialPos, finalPos, initialVel, maxVel, maxAcc);
 	}
 
 

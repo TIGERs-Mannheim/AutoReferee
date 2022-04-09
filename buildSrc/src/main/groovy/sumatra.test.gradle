@@ -5,6 +5,7 @@ plugins {
 dependencies {
     // Support old junit4 syntax for now
     testImplementation 'junit:junit:4.13.2'
+    permitTestUnusedDeclared 'junit:junit:4.13.2'
     // Support junit 5
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     permitTestUnusedDeclared 'org.junit.jupiter:junit-jupiter:5.8.2'
