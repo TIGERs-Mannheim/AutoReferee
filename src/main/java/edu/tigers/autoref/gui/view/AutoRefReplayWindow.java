@@ -12,7 +12,6 @@ public class AutoRefReplayWindow extends ReplayWindow
 {
 	public AutoRefReplayWindow()
 	{
-		super();
 		addView(new VisualizerView());
 	}
 }

@@ -3,19 +3,10 @@
  */
 package edu.tigers.autoref.gui.view;
 
-import java.awt.event.KeyEvent;
-import java.nio.file.Path;
-
-import javax.swing.ImageIcon;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.WindowConstants;
-
 import edu.tigers.autoref.AutoRefReplayPresenter;
 import edu.tigers.autoref.view.ballspeed.BallSpeedView;
 import edu.tigers.autoref.view.gamelog.GameLogView;
 import edu.tigers.autoref.view.main.AutoRefView;
-import edu.tigers.autoref.view.visualizer.VisualizerAutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
 import edu.tigers.sumatra.model.SumatraModel;
@@ -23,8 +14,17 @@ import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.sumatra.presenter.referee.RefereeView;
 import edu.tigers.sumatra.view.replay.ReplayLoadMenu;
+import edu.tigers.sumatra.visualizer.VisualizerView;
 import net.infonode.docking.RootWindow;
 import net.infonode.docking.properties.RootWindowProperties;
+
+import javax.swing.ImageIcon;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.WindowConstants;
+import java.awt.event.KeyEvent;
+import java.io.Serial;
+import java.nio.file.Path;
 
 
 /**
@@ -32,7 +32,7 @@ import net.infonode.docking.properties.RootWindowProperties;
  */
 public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IReplayLoadMenuObserver
 {
-
+	@Serial
 	private static final long serialVersionUID = 8459059861313702417L;
 
 	private final ReplayLoadMenu replayMenu = new ReplayLoadMenu();
@@ -56,7 +56,7 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 		autoRefView.ensureInitialized();
 
 		addView(new LogView(true));
-		addView(new VisualizerAutoRefView());
+		addView(new VisualizerView());
 		addView(new ConfigEditorView());
 		addView(autoRefView);
 		addView(gameLogView);
