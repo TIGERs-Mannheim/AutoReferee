@@ -10,7 +10,7 @@ plugins {
 dependencies {
     implementation project(':sumatra-gamelog')
     implementation project(':sumatra-model')
-    implementation project(':moduli-cam')
+    api project(':moduli-cam')
     implementation project(':moduli-referee')
 
     implementation 'com.github.TIGERs-Mannheim:moduli:4.1'

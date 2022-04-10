@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.autoreferee.module;
 
@@ -112,18 +112,12 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		{
 			engine.stop();
 			engine.removeObserver(callback);
-			switch (mode)
-			{
-				case OFF:
-					engine = new AutoRefEngine(activeDetectors);
-					break;
-				case ACTIVE:
-					engine = new ActiveAutoRefEngine(activeDetectors);
-					break;
-				case PASSIVE:
-					engine = new PassiveAutoRefEngine(activeDetectors);
-					break;
-			}
+			engine = switch (mode)
+					{
+						case OFF -> new AutoRefEngine(activeDetectors);
+						case ACTIVE -> new ActiveAutoRefEngine(activeDetectors);
+						case PASSIVE -> new PassiveAutoRefEngine(activeDetectors);
+					};
 			this.mode = mode;
 			engine.addObserver(callback);
 			engine.start();
@@ -132,6 +126,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 
 
 	@Override
+	@SuppressWarnings("java:S1181") // catching throwables here intentionally
 	public void run()
 	{
 		while (!executorService.isShutdown())

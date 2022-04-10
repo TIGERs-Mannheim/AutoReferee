@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.view.replay;
@@ -9,6 +9,7 @@ import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.sumatra.presenter.replay.ReplayControlView;
 import edu.tigers.sumatra.util.ShortcutsDialog;
+import edu.tigers.sumatra.visualizer.VisualizerView;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -30,6 +31,7 @@ public class ReplayWindow extends AMainFrame
 		addView(new LogView(false));
 		addView(new ReplayControlView());
 		addView(new GameLogView());
+		addView(new VisualizerView());
 
 		updateViewMenu();
 

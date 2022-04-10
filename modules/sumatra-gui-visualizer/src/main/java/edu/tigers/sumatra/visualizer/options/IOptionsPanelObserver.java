@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.visualizer;
+package edu.tigers.sumatra.visualizer.options;
 
 /**
  * FieldPanel observer interface.
- * 
- * @author AndreR
  */
 public interface IOptionsPanelObserver
 {
@@ -15,8 +13,8 @@ public interface IOptionsPanelObserver
 	 * @param isSelected
 	 */
 	void onCheckboxClick(String string, boolean isSelected);
-	
-	
+
+
 	/**
 	 * @param option
 	 * @param state

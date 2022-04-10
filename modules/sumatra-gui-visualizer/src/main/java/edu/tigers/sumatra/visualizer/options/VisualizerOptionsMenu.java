@@ -1,12 +1,14 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.visualizer;
+package edu.tigers.sumatra.visualizer.options;
 
 import edu.tigers.sumatra.drawable.IShapeLayer;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.visualizer.field.recorder.EMediaOption;
+import edu.tigers.sumatra.visualizer.field.recorder.IMediaRecorderListener;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -36,7 +38,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 	private final Map<String, JMenu> parentMenus = new HashMap<>();
 	private final List<JCheckBoxMenuItem> checkBoxes = new ArrayList<>();
 	private final Set<IShapeLayer> knownShapeLayers = new HashSet<>();
-	private final CheckboxListener checkboxListener;
+	private final transient CheckboxListener checkboxListener;
 	private final List<String> fixedMenuEntries = new ArrayList<>();
 
 	private final JMenu pSources;
@@ -47,7 +49,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 	private JCheckBoxMenuItem normalizeFieldBtn = new JCheckBoxMenuItem("Follow visualizer motion");
 	private JMenuItem recordVideoStart = new JMenuItem("Start recording video");
 	private JMenuItem recordVideoStop = new JMenuItem("Stop recording video");
-	private IMediaRecorderListener mediaRecordingListener;
+	private transient IMediaRecorderListener mediaRecordingListener;
 
 
 	/**
@@ -164,12 +166,11 @@ public class VisualizerOptionsMenu extends JMenuBar
 		if (missesMenuItem(source.getName(), SOURCE_PREFIX))
 		{
 			String category = source.getCategories().stream().findFirst().orElse("general");
-			if (!pSourcesSub.containsKey(category))
-			{
+			pSourcesSub.computeIfAbsent(category, c -> {
 				final JMenu catMenu = new JMenu(category);
-				pSourcesSub.put(category, catMenu);
 				pSources.add(catMenu);
-			}
+				return catMenu;
+			});
 
 			checkBoxes.add(
 					createCheckBox(source.getName(), SOURCE_PREFIX + source.getName(), true, pSourcesSub.get(category)));
@@ -222,7 +223,8 @@ public class VisualizerOptionsMenu extends JMenuBar
 		{
 			parent = new JMenu(shapeLayer.getCategory());
 			parentMenus.put(shapeLayer.getCategory(), parent);
-			while(getMenuCount() > fixedMenuEntries.size()) {
+			while (getMenuCount() > fixedMenuEntries.size())
+			{
 				remove(fixedMenuEntries.size());
 			}
 			parentMenus.entrySet().stream()
@@ -250,7 +252,7 @@ public class VisualizerOptionsMenu extends JMenuBar
 		insertMenuItem(name, parent, checkbox);
 
 		String value = SumatraModel.getInstance().getUserProperty(
-				OptionsPanelPresenter.class.getCanonicalName() + "." + checkbox.getActionCommand());
+				VisualizerOptionsPresenter.class.getCanonicalName() + "." + checkbox.getActionCommand());
 		if (value == null)
 		{
 			checkbox.setSelected(visible);
@@ -273,11 +275,10 @@ public class VisualizerOptionsMenu extends JMenuBar
 		for (int i = 0; i < parent.getItemCount(); i++)
 		{
 			final JMenuItem item = parent.getItem(i);
-			if (!(item instanceof JCheckBoxMenuItem))
+			if (!(item instanceof JCheckBoxMenuItem checkBoxMenuItem))
 			{
 				continue;
 			}
-			JCheckBoxMenuItem checkBoxMenuItem = (JCheckBoxMenuItem) item;
 			if (checkBoxMenuItem.getText() != null && item.getText().compareToIgnoreCase(name) >= 0)
 			{
 				parent.insert(checkbox, i);

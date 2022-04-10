@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.view.replay;
@@ -8,7 +8,6 @@ import edu.tigers.sumatra.referee.gameevent.EGameEvent;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.ImageScaler;
-import edu.tigers.sumatra.views.ISumatraView;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -34,6 +33,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.Serial;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -46,8 +46,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * This panel holds the control elements for the replay window
  */
-public class ReplayControlPanel extends JPanel implements IReplayPositionObserver, ISumatraView
+public class ReplayControlPanel extends JPanel implements IReplayPositionObserver
 {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static final long SKIP_TIME = 500;
