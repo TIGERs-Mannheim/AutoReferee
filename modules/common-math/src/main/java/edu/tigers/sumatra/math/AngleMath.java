@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math;
@@ -95,6 +95,18 @@ public final class AngleMath
 		{
 			return ERotationDirection.COUNTER_CLOCKWISE;
 		}
+	}
+
+
+	public static int compareAngle(final double angle1, final double angle2)
+	{
+		final var rotDirection = AngleMath.rotationDirection(angle1, angle2);
+		return switch (rotDirection)
+				{
+					case NONE -> 0;
+					case CLOCKWISE -> 1;
+					case COUNTER_CLOCKWISE -> -1;
+				};
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math;
@@ -89,6 +89,18 @@ public class AngleMathTest
 				.isEqualTo(ERotationDirection.CLOCKWISE);
 		assertThat(AngleMath.rotationDirection(15 * AngleMath.PI_TWO, 10 * AngleMath.PI_TWO))
 				.isEqualTo(ERotationDirection.NONE);
+	}
+
+
+	@Test
+	public void testCompareAngle()
+	{
+		assertThat(AngleMath.compareAngle(AngleMath.deg2rad(-45), AngleMath.deg2rad(45))).isEqualTo(-1);
+		assertThat(AngleMath.compareAngle(AngleMath.deg2rad(45), AngleMath.deg2rad(-45))).isEqualTo(1);
+		assertThat(AngleMath.compareAngle(AngleMath.deg2rad(-135), AngleMath.deg2rad(135))).isEqualTo(1);
+		assertThat(AngleMath.compareAngle(AngleMath.deg2rad(135), AngleMath.deg2rad(-135))).isEqualTo(-1);
+		assertThat(AngleMath.compareAngle(0, 1e-7)).isZero();
+		assertThat(AngleMath.compareAngle(0, -1e-7)).isZero();
 	}
 
 

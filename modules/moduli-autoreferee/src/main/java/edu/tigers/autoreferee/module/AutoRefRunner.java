@@ -90,6 +90,10 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 	{
 		// switch off engine first
 		changeMode(EAutoRefMode.OFF);
+		// deregister from WP frames
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
+		// clear auto ref shape map
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyRemoveSourceFromShapeMap(AUTO_REF);
 		try
 		{
 			executorService.shutdown();
@@ -99,10 +103,8 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			log.error("Interrupted while awaiting termination", e);
 			Thread.currentThread().interrupt();
 		}
-		// deregister from WP frames
-		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
-		// clear auto ref shape map
-		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyRemoveSourceFromShapeMap(AUTO_REF);
+		// Remove any remaining frames
+		consumableFrames.pollLast();
 	}
 
 
