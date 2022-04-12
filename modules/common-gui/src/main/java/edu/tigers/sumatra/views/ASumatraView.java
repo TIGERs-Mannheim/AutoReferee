@@ -63,6 +63,13 @@ public abstract class ASumatraView
 	}
 
 
+	public final ISumatraViewPresenter getPresenter()
+	{
+		ensureInitialized();
+		return presenter;
+	}
+
+
 	/**
 	 * @return the view
 	 */
