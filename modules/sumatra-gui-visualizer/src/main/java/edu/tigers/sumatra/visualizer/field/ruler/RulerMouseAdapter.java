@@ -31,7 +31,7 @@ public class RulerMouseAdapter extends MouseAdapter
 	@Override
 	public void mouseDragged(final MouseEvent e)
 	{
-		if (SwingUtilities.isLeftMouseButton(e) && (e.isControlDown() || e.isAltDown()))
+		if (SwingUtilities.isLeftMouseButton(e) && (e.isControlDown() || e.isAltDown()) && dragPointStart != null)
 		{
 			IVector2 guiPos = fieldPanel.getFieldPos(e.getX(), e.getY());
 			IVector2 dragPointEnd = fieldPanel.transformToGlobalCoordinates(guiPos);

@@ -40,5 +40,5 @@ dependencies {
     api 'com.google.protobuf:protobuf-java:3.19.4'
     implementation 'com.sleepycat:je:18.3.12'
 
-    runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:2.15.2.0:${osClassifier}"
+    runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:2.15.4.0:${osClassifier}"
 }
