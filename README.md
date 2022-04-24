@@ -1,6 +1,6 @@
 # TIGERs Mannheim AutoReferee
 
-Homepage: https://tigers-mannheim.de  
+Homepage: https://www.tigers-mannheim.de  
 Mail: info@tigers-mannheim.de
 
 This is the AutoReferee implementation of TIGERs Mannheim. It is based on Sumatra, our AI framework.
@@ -53,10 +53,12 @@ The chart will show three lines:
 All configuration options are available via the **Cfg** tab. The **Cfg** tab itself contains multiple tabs to modify parameters of different parts of the application. You can then make the necessary modifications and **Apply** them. To make the changes persistent, press **Save** to write them to disk. Press **Reload** to reread all currently applied values.
 
 ### Vision port
-The application will try to receive vision frames from **224.5.23.2:10006** by default. If you want to change this behavior navigate to the **user** section and select `edu.tigers.sumatra->cam->SSLVisionCam`.
+The application will try to receive vision frames from **224.5.23.2:10006** by default.
+You can change the default address and port in [config/moduli/moduli.xml](config/moduli/moduli.xml).
 
 ## Referee port
-The application will try to receive referee messages from **224.5.23.1:10003** by default. The port can be changed in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+The application will try to receive referee messages from **224.5.23.1:10003** by default.
+You can change the default address and port in [config/moduli/moduli.xml](config/moduli/moduli.xml).
 
 ### AutoRef detectors
 The behavior of the autoRef can be altered through the **autoreferee** config section. It contains parameters for the
@@ -65,10 +67,11 @@ detectors.
 ### Rule constraints and geometry
 Parameters defined by the rules can be found under **ruleConst**. 
 
-Default geometry parameters can be found under **geom**. Most of them are overwritten on the first received geometry package from
-ssl-vision.  
+Default geometry parameters are read from [config/geometry/DIV_A.txt](config/geometry/DIV_A.txt).
+The file that is read can be changed in [config/moduli/moduli.xml](config/moduli/moduli.xml).
 
 ## Activating the build-in ssl-game-controller
-The autoRef ships with the official ssl-game-controller. To activate it, change `gameController` to true in [config/moduli/moduli.xml](config/moduli/moduli.xml). The autoRef will internally launch the game-controller and connect to its websocket API
-to be able to send some basic commands through the **Ref** view. This view also contains a button to launch the full
-game-controller UI.
+The autoRef ships with the official ssl-game-controller. To activate it, change `gameController` to true in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+The autoRef will internally launch the game-controller and connect to its websocket API
+to be able to send some basic commands through the **Ref** view.
+This view also contains a button to launch the full game-controller UI.
