@@ -13,6 +13,8 @@ All dependencies will be downloaded automatically, so you need an internet conne
  * no limitations on OS known
 
 ## Build
+First, make sure you have cloned the GIT repository. The ZIP-file from GitHub does not work, as the build relies on Git tags.
+
 Run `./build.sh` or `./build.bat`, depending on your system platform.
 
 ## Run
