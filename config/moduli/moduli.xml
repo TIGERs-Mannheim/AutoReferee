@@ -15,7 +15,7 @@
         <implementation>edu.tigers.sumatra.cam.SSLVisionCam</implementation>
 
         <properties>
-            <port>10002</port>
+            <port>10006</port>
             <address>224.5.23.2</address>
         </properties>
     </module>
