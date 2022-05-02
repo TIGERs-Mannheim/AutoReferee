@@ -88,6 +88,7 @@ public class ReplayPresenter extends AMainPresenter
 		replayControllers.add(new ReplayAutoRefReCalcController(wFrameObservers, getMainFrame().getViews()));
 
 		snapshotController = new SnapshotController(getMainFrame());
+		snapshotController.setSaveMoveDestinations(true);
 
 		replayControlPresenter.getViewPanel().addObserver(this);
 		addPositionObserver(replayControlPresenter.getViewPanel());

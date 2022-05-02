@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.trajectory;
@@ -9,7 +9,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import org.apache.commons.lang.Validate;
 
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 
@@ -63,7 +62,7 @@ public final class BangBangTrajectoryFactory
 				(float) vmax,
 				(float) acc,
 				SYNC_ACCURACY,
-				Function.identity());
+				f -> f);
 	}
 
 
