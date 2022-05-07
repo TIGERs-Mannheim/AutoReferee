@@ -155,7 +155,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/copy.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onCopySnapshot),
 				KeyEvent.VK_C,
-				InputEvent.CTRL_DOWN_MASK
+				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK
 		);
 
 		JMenuBar menuBar = new JMenuBar();
