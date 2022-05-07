@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -64,8 +64,8 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -231,7 +231,7 @@ public class WorldInfoCollector extends AWorldPredictor
 						filteredVisionBotMap.get(r.getBotId())))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
-		return new IdentityHashMap<>(trackedBots);
+		return new HashMap<>(trackedBots);
 	}
 
 
@@ -255,7 +255,7 @@ public class WorldInfoCollector extends AWorldPredictor
 			return null;
 		}
 
-		var kick = filteredVisionFrame.getKick().get();
+		var kick = filteredVisionFrame.getKick().orElseThrow();
 
 		return KickEvent.builder()
 				.kickingBot(kick.getKickingBot())
@@ -285,7 +285,7 @@ public class WorldInfoCollector extends AWorldPredictor
 			return null;
 		}
 
-		var kick = filteredVisionFrame.getKick().get();
+		var kick = filteredVisionFrame.getKick().orElseThrow();
 		return new BallKickFitState(kick.getBallTrajectory().getInitialPos().getXYVector(),
 				kick.getBallTrajectory().getInitialVel(), kick.getTrajectoryStartTime());
 	}
