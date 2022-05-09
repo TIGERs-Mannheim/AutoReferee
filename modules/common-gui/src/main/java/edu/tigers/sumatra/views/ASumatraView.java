@@ -43,7 +43,9 @@ public abstract class ASumatraView
 			getView().setComponent(presenter.getViewPanel());
 			if (mode == EViewMode.NORMAL)
 			{
-				ModuliStateAdapter.getInstance().addObserver(presenter);
+				ModuliStateAdapter stateAdapter = ModuliStateAdapter.getInstance();
+				presenter.getChildPresenters().forEach(stateAdapter::addObserver);
+				stateAdapter.addObserver(presenter);
 			}
 			log.trace("Presenter created for view {}", type.getTitle());
 		}

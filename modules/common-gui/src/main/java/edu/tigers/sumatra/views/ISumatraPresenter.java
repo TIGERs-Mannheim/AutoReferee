@@ -31,7 +31,6 @@ public interface ISumatraPresenter extends IModuliStateObserver
 	 */
 	default void onStartModuli()
 	{
-		getChildPresenters().forEach(ISumatraPresenter::onStartModuli);
 	}
 
 
@@ -40,7 +39,6 @@ public interface ISumatraPresenter extends IModuliStateObserver
 	 */
 	default void onStopModuli()
 	{
-		getChildPresenters().forEach(ISumatraPresenter::onStopModuli);
 	}
 
 
@@ -49,7 +47,6 @@ public interface ISumatraPresenter extends IModuliStateObserver
 	 */
 	default void onStart()
 	{
-		getChildPresenters().forEach(ISumatraPresenter::onStart);
 	}
 
 	/**
@@ -57,7 +54,6 @@ public interface ISumatraPresenter extends IModuliStateObserver
 	 */
 	default void onStop()
 	{
-		getChildPresenters().forEach(ISumatraPresenter::onStop);
 	}
 
 	/**
