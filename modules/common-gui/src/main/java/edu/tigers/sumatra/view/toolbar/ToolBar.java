@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.view.toolbar;
 
@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ToolBar
 {
 	private final List<IToolbarObserver> observers = new CopyOnWriteArrayList<>();
-	private final JButton btnRecSave = new JButton();
+	private final JToggleButton btnRecSave = new JToggleButton();
 
 	@Getter
 	private final JToolBar jToolBar = new JToolBar();
@@ -48,7 +48,6 @@ public class ToolBar
 		log.trace("Create toolbar");
 
 		var btnEmergency = new JButton();
-		btnEmergency.setForeground(Color.red);
 		btnEmergency.addActionListener(actionEvent -> notifyEmergencyStop());
 		btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/stop-emergency.png"));
 		btnEmergency.setToolTipText("Emergency stop [Esc]");
@@ -57,14 +56,16 @@ public class ToolBar
 
 		btnRecSave.addActionListener(actionEvent -> toggleRecord());
 		btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/record.png"));
+		btnRecSave.setSelectedIcon(ImageScaler.scaleDefaultButtonImageIcon("/recordActive.gif"));
 		btnRecSave.setToolTipText("Start/Stop recording");
 		btnRecSave.setBorder(BorderFactory.createEmptyBorder());
 		btnRecSave.setBackground(new Color(0, 0, 0, 1));
 
 		var btnTournament = new JToggleButton();
 		btnTournament.addActionListener(this::toggleTournamentMode);
+		btnTournament.setSelectedIcon(ImageScaler.scaleDefaultButtonImageIcon("/tournament_color.png"));
 		btnTournament.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/tournament_bw.png"));
-		btnTournament.setToolTipText("Tournament mode (off)");
+		btnTournament.setToolTipText("Tournament mode");
 		btnTournament.setBorder(BorderFactory.createEmptyBorder());
 		btnTournament.setBackground(new Color(0, 0, 0, 1));
 		btnTournament.setContentAreaFilled(false);
@@ -123,15 +124,7 @@ public class ToolBar
 	 */
 	public void setRecordingEnabled(final boolean recording)
 	{
-		if (recording)
-		{
-			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/recordActive.gif"));
-		} else
-		{
-			btnRecSave.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/record.png"));
-		}
-
-		jToolBar.repaint();
+		btnRecSave.setSelected(recording);
 	}
 
 
@@ -145,16 +138,6 @@ public class ToolBar
 	{
 		JToggleButton btn = (JToggleButton) e.getSource();
 		SumatraModel.getInstance().setProductive(btn.isSelected());
-		if (btn.isSelected())
-		{
-			btn.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/tournament_color.png"));
-			btn.setToolTipText("Tournament mode (on)");
-		} else
-		{
-			btn.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/tournament_bw.png"));
-			btn.setToolTipText("Tournament mode (off)");
-		}
-		jToolBar.repaint();
 	}
 
 

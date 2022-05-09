@@ -17,9 +17,8 @@ import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Set;
 import java.util.concurrent.BlockingDeque;
@@ -32,11 +31,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * Start the autoRef in a new thread and run an engine respective to the {@link EAutoRefMode}.
  */
+@Log4j2
 public class AutoRefRunner implements Runnable, IWorldFrameObserver
 {
-	private static final Logger log = LogManager.getLogger(AutoRefRunner.class);
-
 	private static final String AUTO_REF = "AutoRef";
+	private static final ShapeMapSource SHAPE_MAP_SOURCE = ShapeMapSource.of(AUTO_REF);
 
 	private final BlockingDeque<WorldFrameWrapper> consumableFrames = new LinkedBlockingDeque<>(1);
 	private final Set<EGameEventDetectorType> activeDetectors = EGameEventDetectorType.valuesEnabledByDefault();
@@ -93,7 +92,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 		// deregister from WP frames
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
 		// clear auto ref shape map
-		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyRemoveSourceFromShapeMap(AUTO_REF);
+		SumatraModel.getInstance().getModule(AWorldPredictor.class).notifyRemoveSourceFromShapeMap(SHAPE_MAP_SOURCE);
 		try
 		{
 			executorService.shutdown();
@@ -162,7 +161,7 @@ public class AutoRefRunner implements Runnable, IWorldFrameObserver
 			}
 		}
 		SumatraModel.getInstance().getModule(AWorldPredictor.class)
-				.notifyNewShapeMap(frame.getTimestamp(), currentFrame.getShapes(), ShapeMapSource.of(AUTO_REF));
+				.notifyNewShapeMap(frame.getTimestamp(), currentFrame.getShapes(), SHAPE_MAP_SOURCE);
 	}
 
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.visualizer.field.ruler;
+package edu.tigers.sumatra.visualizer.field.components;
 
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableLine;
@@ -15,12 +15,12 @@ import java.awt.Graphics2D;
 import java.util.List;
 
 
-public class Ruler implements IDrawableShape
+public class DrawableRuler implements IDrawableShape
 {
 	private final List<IDrawableShape> shapes;
 
 
-	public Ruler(IVector2 start, IVector2 end)
+	public DrawableRuler(IVector2 start, IVector2 end)
 	{
 		IVector2 start2End = end.subtractNew(start);
 		shapes = List.of(

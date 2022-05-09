@@ -2,29 +2,30 @@
  * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.visualizer.field.ruler;
+package edu.tigers.sumatra.visualizer.field.components;
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.visualizer.field.FieldPanel;
+import edu.tigers.sumatra.visualizer.field.callbacks.MousePointTransformer;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.function.Consumer;
 
 
 @RequiredArgsConstructor
 public class RulerMouseAdapter extends MouseAdapter
 {
-	private final FieldPanel fieldPanel;
+	private final MousePointTransformer mousePointTransformer;
+	private final Consumer<DrawableRuler> rulerConsumer;
 	private IVector2 dragPointStart;
 
 
 	@Override
 	public void mousePressed(final MouseEvent e)
 	{
-		IVector2 guiPos = fieldPanel.getFieldPos(e.getX(), e.getY());
-		dragPointStart = fieldPanel.transformToGlobalCoordinates(guiPos);
+		dragPointStart = mousePointTransformer.toGlobal(e.getX(), e.getY());
 	}
 
 
@@ -33,9 +34,8 @@ public class RulerMouseAdapter extends MouseAdapter
 	{
 		if (SwingUtilities.isLeftMouseButton(e) && (e.isControlDown() || e.isAltDown()) && dragPointStart != null)
 		{
-			IVector2 guiPos = fieldPanel.getFieldPos(e.getX(), e.getY());
-			IVector2 dragPointEnd = fieldPanel.transformToGlobalCoordinates(guiPos);
-			fieldPanel.setRuler(new Ruler(dragPointStart, dragPointEnd));
+			IVector2 dragPointEnd = mousePointTransformer.toGlobal(e.getX(), e.getY());
+			rulerConsumer.accept(new DrawableRuler(dragPointStart, dragPointEnd));
 		}
 	}
 
@@ -44,6 +44,6 @@ public class RulerMouseAdapter extends MouseAdapter
 	public void mouseReleased(final MouseEvent e)
 	{
 		dragPointStart = null;
-		fieldPanel.setRuler(null);
+		rulerConsumer.accept(null);
 	}
 }

@@ -33,7 +33,7 @@ public class ConfigEditorPresenter
 	@Override
 	public void onNewConfigClient(final String newClient)
 	{
-		viewPanel.addConfigModel(newClient, this);
+		SwingUtilities.invokeLater(() -> viewPanel.addConfigModel(newClient, this));
 	}
 
 

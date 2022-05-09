@@ -24,6 +24,8 @@ import java.util.List;
 
 public class ReplayAutoRefReCalcController implements IReplayController
 {
+	private static final ShapeMapSource SHAPE_MAP_SOURCE = ShapeMapSource.of("AutoRef",
+			ShapeMapSource.of("Recalculated"));
 	private final AutoRefFramePreprocessor refPreprocessor = new AutoRefFramePreprocessor();
 	private final PassiveAutoRefEngine autoRefEngine = new PassiveAutoRefEngine(
 			EnumSet.allOf(EGameEventDetectorType.class));
@@ -77,8 +79,7 @@ public class ReplayAutoRefReCalcController implements IReplayController
 
 		for (IWorldFrameObserver o : wFrameObservers)
 		{
-			o.onNewShapeMap(refFrame.getTimestamp(), refFrame.getShapes(),
-					ShapeMapSource.of("Recalculated AutoRef", "Recalculated"));
+			o.onNewShapeMap(refFrame.getTimestamp(), refFrame.getShapes(), SHAPE_MAP_SOURCE);
 		}
 		lastAutoRefFrame = refFrame;
 	}
@@ -100,10 +101,7 @@ public class ReplayAutoRefReCalcController implements IReplayController
 
 			if (!active)
 			{
-				for (IWorldFrameObserver o : wFrameObservers)
-				{
-					o.onRemoveSourceFromShapeMap("Recalculated AutoRef");
-				}
+				wFrameObservers.forEach(o -> o.onRemoveSourceFromShapeMap(SHAPE_MAP_SOURCE));
 			}
 		}
 	}

@@ -2,7 +2,7 @@
  * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.visualizer.field.interaction;
+package edu.tigers.sumatra.visualizer.field.components;
 
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;

@@ -2,9 +2,8 @@
  * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.visualizer.field.interaction;
+package edu.tigers.sumatra.visualizer.field.components;
 
-import edu.tigers.sumatra.visualizer.field.FieldPanel;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.SwingUtilities;
@@ -15,7 +14,7 @@ import java.awt.event.MouseEvent;
 @RequiredArgsConstructor
 public class DragMouseAdapter extends MouseAdapter
 {
-	private final FieldPanel fieldPanel;
+	private final DragMouseHandler dragMouseHandler;
 	private int mousePressedY = 0;
 	private int mousePressedX = 0;
 
@@ -35,9 +34,16 @@ public class DragMouseAdapter extends MouseAdapter
 		{
 			final int dy = e.getY() - mousePressedY;
 			final int dx = e.getX() - mousePressedX;
-			fieldPanel.dragField(dx, dy);
+			dragMouseHandler.drag(dx, dy);
 			mousePressedY += dy;
 			mousePressedX += dx;
 		}
+	}
+
+
+	@FunctionalInterface
+	public interface DragMouseHandler
+	{
+		void drag(int dx, int dy);
 	}
 }

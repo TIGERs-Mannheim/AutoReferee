@@ -18,9 +18,9 @@ dependencies {
 
     implementation 'org.apache.logging.log4j:log4j-api:2.17.1'
 
-    implementation 'com.miglayout:miglayout-swing:11.0'
-
     implementation 'io.humble:humble-video-noarch:0.3.0'
+    implementation 'com.jidesoft:jide-oss:2.4.8'
+    implementation 'commons-lang:commons-lang:2.6'
 
     runtimeOnly 'io.humble:humble-video-all:0.3.0'
 }

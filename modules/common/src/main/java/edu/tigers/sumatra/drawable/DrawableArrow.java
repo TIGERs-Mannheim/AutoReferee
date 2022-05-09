@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
@@ -62,7 +62,7 @@ public class DrawableArrow extends ADrawable
 		IVector2 guiDestination = tool.transformToGuiCoordinates(position.addNew(direction), invert);
 
 		drawArrow(g, (int) guiPosition.x(), (int) guiPosition.y(), (int) guiDestination.x(), (int) guiDestination.y(),
-				tool.scaleXLength(arrowSize));
+				tool.scaleGlobalToGui(arrowSize));
 
 	}
 

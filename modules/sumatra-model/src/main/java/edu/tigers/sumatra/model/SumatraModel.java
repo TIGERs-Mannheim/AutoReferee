@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
@@ -83,6 +83,8 @@ public final class SumatraModel extends Moduli
 		return INSTANCE;
 	}
 
+
+	@SuppressWarnings("java:S1181") // catching Throwables intentionally here
 	public void startUp(final String moduliConfig)
 	{
 		try
@@ -99,6 +101,7 @@ public final class SumatraModel extends Moduli
 			log.error("Could not start Sumatra.", e);
 		}
 	}
+
 
 	/**
 	 * Load application properties in two steps
@@ -247,6 +250,12 @@ public final class SumatraModel extends Moduli
 	}
 
 
+	public String setUserProperty(Class<?> type, String key, Object value)
+	{
+		return setUserProperty(type.getCanonicalName() + "." + key, String.valueOf(value));
+	}
+
+
 	/**
 	 * Calls {@link Properties#getProperty(String)}
 	 *
@@ -256,6 +265,19 @@ public final class SumatraModel extends Moduli
 	public String getUserProperty(final String key)
 	{
 		return userSettings.getProperty(key);
+	}
+
+
+	/**
+	 * Calls {@link Properties#getProperty(String)}
+	 *
+	 * @param type
+	 * @param key
+	 * @return The String associated with the given key
+	 */
+	public String getUserProperty(Class<?> type, String key)
+	{
+		return userSettings.getProperty(type.getCanonicalName() + "." + key);
 	}
 
 
@@ -274,6 +296,57 @@ public final class SumatraModel extends Moduli
 			return def;
 		}
 		return val;
+	}
+
+
+	/**
+	 * Calls {@link Properties#getProperty(String)}
+	 *
+	 * @param type
+	 * @param key
+	 * @param def
+	 * @return The String associated with the given key
+	 */
+	public String getUserProperty(Class<?> type, String key, String def)
+	{
+		return getUserProperty(type.getCanonicalName() + "." + key, def);
+	}
+
+
+	/**
+	 * Calls {@link Properties#getProperty(String)} and parses value to boolean
+	 *
+	 * @param key
+	 * @param def
+	 * @return The boolean associated with the given key
+	 */
+	public boolean getUserProperty(String key, boolean def)
+	{
+		String val = getUserProperty(key);
+		if (val == null)
+		{
+			return def;
+		}
+		return Boolean.parseBoolean(val);
+	}
+
+
+	/**
+	 * Calls {@link Properties#getProperty(String)} and parses value to boolean
+	 *
+	 * @param type
+	 * @param key
+	 * @param def
+	 * @return The boolean associated with the given key
+	 */
+	public boolean getUserProperty(Class<?> type, String key, boolean def)
+	{
+		String val = getUserProperty(type, key);
+		if (val == null)
+		{
+			return def;
+		}
+		return Boolean.parseBoolean(val);
 	}
 
 
@@ -302,7 +375,7 @@ public final class SumatraModel extends Moduli
 	/**
 	 * @return if we are in productive (match) mode
 	 */
-	public final boolean isProductive()
+	public boolean isProductive()
 	{
 		return productive;
 	}

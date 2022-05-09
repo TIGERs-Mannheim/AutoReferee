@@ -103,7 +103,7 @@ public class DrawableTrajectoryPath implements IDrawableShape
 		g.setColor(color);
 		if (stroke == null)
 		{
-			stroke = new BasicStroke(tool.scaleXLength(10));
+			stroke = new BasicStroke(tool.scaleGlobalToGui(10));
 		}
 		g.setStroke(stroke);
 

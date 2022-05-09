@@ -48,7 +48,7 @@ public class VideoExporter
 	private boolean running = true;
 
 
-	public VideoExporter(Path filePath, int width, int height) throws IOException
+	public VideoExporter(Path filePath, int width, int height)
 	{
 		this.filePath = filePath;
 		Rational framerate = Rational.make(1, FPS);
@@ -65,6 +65,17 @@ public class VideoExporter
 		encoder.setFlag(Coder.Flag.FLAG_GLOBAL_HEADER, format.getFlag(ContainerFormat.Flag.GLOBAL_HEADER));
 		encoder.open(null, null);
 
+		picture = MediaPicture.make(
+				encoder.getWidth(),
+				encoder.getHeight(),
+				PIXEL_FORMAT
+		);
+		picture.setTimeBase(framerate);
+	}
+
+
+	public void start() throws IOException
+	{
 		muxer.addNewStream(encoder);
 
 		try
@@ -75,13 +86,6 @@ public class VideoExporter
 			Thread.currentThread().interrupt();
 			throw new IOException("Interrupted while opening muxer", e);
 		}
-
-		picture = MediaPicture.make(
-				encoder.getWidth(),
-				encoder.getHeight(),
-				PIXEL_FORMAT
-		);
-		picture.setTimeBase(framerate);
 
 		maxFramesInBufferHyst.setOnUpperCallback(this::notifySlowVideoProcessing);
 

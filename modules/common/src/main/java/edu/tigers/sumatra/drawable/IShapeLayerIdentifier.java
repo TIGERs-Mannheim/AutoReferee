@@ -1,35 +1,42 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.drawable;
 
 import edu.tigers.sumatra.drawable.ShapeMap.EShapeLayerPersistenceType;
 
+import java.util.List;
+
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Shape layer interface.
  */
-public interface IShapeLayer
+public interface IShapeLayerIdentifier
 {
 	/**
 	 * @return
 	 */
 	String getCategory();
-	
-	
+
+	default List<String> getCategories()
+	{
+		return List.of(getCategory());
+	}
+
+
 	/**
 	 * @return
 	 */
 	String getLayerName();
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	String getId();
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -37,8 +44,8 @@ public interface IShapeLayer
 	{
 		return EShapeLayerPersistenceType.ALWAYS_PERSIST;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
@@ -46,8 +53,8 @@ public interface IShapeLayer
 	{
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * With a low order id, the layer will be drawn before higher order ids.
 	 *

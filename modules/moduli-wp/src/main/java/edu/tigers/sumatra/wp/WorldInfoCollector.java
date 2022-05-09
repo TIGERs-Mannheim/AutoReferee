@@ -82,6 +82,10 @@ import java.util.stream.Collectors;
 public class WorldInfoCollector extends AWorldPredictor
 		implements IRefereeObserver, IVisionFilterObserver, ICamFrameObserver
 {
+	private static final ShapeMapSource WP_SHAPE_MAP_SOURCE = ShapeMapSource.of("World Frame");
+	private static final ShapeMapSource VISION_SHAPE_MAP_SOURCE = ShapeMapSource.of("Vision");
+	private static final ShapeMapSource VISION_FILTER_SHAPE_MAP_SOURCE = ShapeMapSource.of("Vision Filter");
+
 	@Configurable(
 			comment = "Add a faked ball. Set pos,vel,acc in code.",
 			defValue = "false"
@@ -271,10 +275,10 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		ShapeMap wfShapeMap = new ShapeMap();
 		worldFrameVisualization.process(wfw, wfShapeMap);
-		notifyNewShapeMap(lastWFTimestamp, wfShapeMap, ShapeMapSource.of("World Frame"));
+		notifyNewShapeMap(lastWFTimestamp, wfShapeMap, WP_SHAPE_MAP_SOURCE);
 
 		ShapeMap visionShapeMap = camFrameShapeMapProducer.createShapeMap();
-		notifyNewShapeMap(lastWFTimestamp, visionShapeMap, ShapeMapSource.of("Vision"));
+		notifyNewShapeMap(lastWFTimestamp, visionShapeMap, VISION_SHAPE_MAP_SOURCE);
 	}
 
 
@@ -503,7 +507,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	public void onNewFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
 		processFilteredVisionFrame(filteredVisionFrame);
-		notifyNewShapeMap(lastWFTimestamp, filteredVisionFrame.getShapeMap(), ShapeMapSource.of("Vision Filter"));
+		notifyNewShapeMap(lastWFTimestamp, filteredVisionFrame.getShapeMap(), VISION_FILTER_SHAPE_MAP_SOURCE);
 	}
 
 
