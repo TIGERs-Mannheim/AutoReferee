@@ -366,7 +366,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		registerToCamModule();
 		registerToRecordManagerModule();
 
-		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isProductive());
+		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isTournamentMode());
 	}
 
 

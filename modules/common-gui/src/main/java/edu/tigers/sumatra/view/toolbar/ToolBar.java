@@ -137,7 +137,7 @@ public class ToolBar
 	private void toggleTournamentMode(ActionEvent e)
 	{
 		JToggleButton btn = (JToggleButton) e.getSource();
-		SumatraModel.getInstance().setProductive(btn.isSelected());
+		SumatraModel.getInstance().setTournamentMode(btn.isSelected());
 	}
 
 

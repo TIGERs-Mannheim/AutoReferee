@@ -9,6 +9,7 @@ import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -54,8 +55,9 @@ public final class SumatraModel extends Moduli
 	// Application Properties
 	private static final String CONFIG_SETTINGS_PATH = "./config/";
 
-
-	private boolean productive = false;
+	@Getter
+	@Setter
+	private boolean tournamentMode;
 
 	private boolean simulation = false;
 	private String environment = "";
@@ -96,7 +98,7 @@ public final class SumatraModel extends Moduli
 			SumatraModel.getInstance().setCurrentModuliConfig(moduliConfig);
 			loadModulesOfConfig(getCurrentModuliConfig());
 			startModules();
-		} catch (Throwable e)
+		} catch (Exception e)
 		{
 			log.error("Could not start Sumatra.", e);
 		}
@@ -358,26 +360,6 @@ public final class SumatraModel extends Moduli
 	public static String getVersion()
 	{
 		return VERSION;
-	}
-
-
-	/**
-	 * Set if application should run in productive mode
-	 *
-	 * @param productive
-	 */
-	public void setProductive(final boolean productive)
-	{
-		this.productive = productive;
-	}
-
-
-	/**
-	 * @return if we are in productive (match) mode
-	 */
-	public boolean isProductive()
-	{
-		return productive;
 	}
 
 
