@@ -10,6 +10,9 @@ import edu.tigers.sumatra.math.vector.Vector3;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Three dimensional trajectory.
@@ -70,5 +73,14 @@ public class TrajectoryXyw implements ITrajectory<IVector3>
 	public TrajectoryXyw mirrored()
 	{
 		return new TrajectoryXyw(trajXy.mirrored(), trajW.mirrored());
+	}
+
+
+	@Override
+	public List<Double> getTimeSections()
+	{
+		var list = new ArrayList<>(trajXy.getTimeSections());
+		list.addAll(trajW.getTimeSections());
+		return list;
 	}
 }

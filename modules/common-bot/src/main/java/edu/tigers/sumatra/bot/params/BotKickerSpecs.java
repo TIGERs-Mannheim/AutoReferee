@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.bot.params;
 
@@ -19,4 +19,6 @@ public class BotKickerSpecs implements IBotKickerSpecs
 	private double maxAbsoluteStraightVelocity = 8.0;
 	private double maxDribbleSpeed = 10000;
 	private double dribbleSpeedGain = 1;
+	private double maxDribbleBallAcceleration = 5.0;
+	private double maxRetainingBallAngle = 0.75;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.bot.params;
 
@@ -35,4 +35,14 @@ public interface IBotKickerSpecs
 	 * @return gain factor to apply to dribble speed from skill
 	 */
 	double getDribbleSpeedGain();
+
+	/**
+	 * @return Maximum acceleration the dribbler can put on the ball.
+	 */
+	double getMaxDribbleBallAcceleration();
+
+	/**
+	 * @return Angle from robot negative Y axis (aka back) where a ball can be kept at dribbler [rad].
+	 */
+	double getMaxRetainingBallAngle();
 }
