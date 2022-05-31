@@ -5,6 +5,7 @@
 plugins {
     id 'sumatra.java'
     id 'sumatra.test'
+    id 'sumatra.test.spock'
     id 'java-library'
 }
 

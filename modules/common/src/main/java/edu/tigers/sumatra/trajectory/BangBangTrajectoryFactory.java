@@ -15,7 +15,9 @@ import java.util.function.UnaryOperator;
 public final class BangBangTrajectoryFactory
 {
 	private static final double MAX_VEL_TOLERANCE = 0.2;
-	private static final float SYNC_ACCURACY = 1e-3f;
+	static final float SYNC_ACCURACY = 1e-3f;
+	static final UnaryOperator<Float> ALPHA_FN_ASYNC = alpha -> alpha + (((float) AngleMath.PI_HALF - alpha)
+			* 0.5f);
 
 
 	public BangBangTrajectory2DAsync async(
@@ -34,7 +36,6 @@ public final class BangBangTrajectoryFactory
 		final var startToTarget = s1.subtractNew(s0).turn(-rotation);
 		final var v0Rotated = v0.turnNew(-rotation);
 
-		final UnaryOperator<Float> alphaFn = alpha -> alpha + (((float) AngleMath.PI_HALF - alpha) * 0.5f);
 		BangBangTrajectory2D child = new BangBangTrajectory2D().generate(
 				Vector2f.ZERO_VECTOR,
 				startToTarget,
@@ -42,7 +43,8 @@ public final class BangBangTrajectoryFactory
 				(float) vmax,
 				(float) acc,
 				SYNC_ACCURACY,
-				alphaFn);
+				ALPHA_FN_ASYNC
+		);
 		return new BangBangTrajectory2DAsync(child, s0, rotation);
 	}
 
@@ -62,7 +64,8 @@ public final class BangBangTrajectoryFactory
 				(float) vmax,
 				(float) acc,
 				SYNC_ACCURACY,
-				f -> f);
+				f -> f
+		);
 	}
 
 
