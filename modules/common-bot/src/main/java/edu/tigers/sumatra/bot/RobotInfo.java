@@ -33,8 +33,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final float kickSpeed;
 	private final boolean chip;
 	private final boolean armed;
-	private final float battery;
-	private final float kickerVoltage;
+	private final float batteryRelative;
+	private final float kickerLevelRelative;
 	private final float dribbleRpm;
 	private final int hardwareId;
 	private final BotState internalState;
@@ -61,8 +61,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		kickSpeed = builder.kickSpeed;
 		chip = builder.chip;
 		armed = builder.armed;
-		battery = builder.battery;
-		kickerVoltage = builder.kickerVoltage;
+		batteryRelative = builder.batteryRelative;
+		kickerLevelRelative = builder.kickerLevelRelative;
 		dribbleRpm = builder.dribbleRpm;
 		hardwareId = builder.hardwareId;
 		internalState = builder.internalState;
@@ -84,7 +84,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	/**
 	 * Create a stub with default data
 	 *
-	 * @param botId the botId is still required
+	 * @param botId     the botId is still required
 	 * @param timestamp the timestamp of this information
 	 * @return new bot info
 	 */
@@ -97,7 +97,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	/**
 	 * Create a stub with default data
 	 *
-	 * @param botId the botId is still required
+	 * @param botId     the botId is still required
 	 * @param timestamp the timestamp of this information
 	 * @return new stub builder
 	 */
@@ -113,8 +113,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withKickSpeed(0)
 				.withChip(false)
 				.withArmed(false)
-				.withBattery(0)
-				.withKickerVoltage(0)
+				.withBatteryRelative(0)
+				.withKickerLevelRelative(0)
 				.withDribbleRpm(0)
 				.withHardwareId(255)
 				.withInternalState(null)
@@ -140,8 +140,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.kickSpeed = copy.kickSpeed;
 		builder.chip = copy.chip;
 		builder.armed = copy.armed;
-		builder.battery = copy.battery;
-		builder.kickerVoltage = copy.kickerVoltage;
+		builder.batteryRelative = copy.batteryRelative;
+		builder.kickerLevelRelative = copy.kickerLevelRelative;
 		builder.dribbleRpm = copy.dribbleRpm;
 		builder.hardwareId = copy.hardwareId;
 		builder.internalState = copy.internalState;
@@ -174,6 +174,12 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			builder.withTrajectory(trajectory.mirrored());
 		}
 		return builder.build();
+	}
+
+
+	public boolean isConnected()
+	{
+		return type != EBotType.UNKNOWN;
 	}
 
 
@@ -243,15 +249,15 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 
 
-	public float getBattery()
+	public float getBatteryRelative()
 	{
-		return battery;
+		return batteryRelative;
 	}
 
 
-	public float getKickerVoltage()
+	public float getKickerLevelRelative()
 	{
-		return kickerVoltage;
+		return kickerLevelRelative;
 	}
 
 
@@ -284,6 +290,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		return Optional.ofNullable(internalState);
 	}
 
+
 	/**
 	 * {@code RobotInfo} builder static inner class.
 	 */
@@ -298,8 +305,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private Float kickSpeed;
 		private Boolean chip;
 		private Boolean armed;
-		private Float battery;
-		private Float kickerVoltage;
+		private Float batteryRelative;
+		private Float kickerLevelRelative;
 		private Float dribbleRpm;
 		private int hardwareId;
 		private BotState internalState;
@@ -461,28 +468,28 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 
 
 		/**
-		 * Sets the {@code battery} and returns a reference to this Builder so that the methods can be chained together.
+		 * Sets the {@code batteryRelative} and returns a reference to this Builder so that the methods can be chained together.
 		 *
-		 * @param val the {@code battery} to set
+		 * @param val the {@code batteryRelative} to set
 		 * @return a reference to this Builder
 		 */
-		public Builder withBattery(final double val)
+		public Builder withBatteryRelative(final double val)
 		{
-			battery = (float) val;
+			batteryRelative = (float) val;
 			return this;
 		}
 
 
 		/**
-		 * Sets the {@code kickerVoltage} and returns a reference to this Builder so that the methods can be chained
+		 * Sets the {@code kickerLevelRelative} and returns a reference to this Builder so that the methods can be chained
 		 * together.
 		 *
-		 * @param val the {@code kickerVoltage} to set
+		 * @param val the {@code kickerLevelRelative} to set
 		 * @return a reference to this Builder
 		 */
-		public Builder withKickerVoltage(final double val)
+		public Builder withKickerLevelRelative(final double val)
 		{
-			kickerVoltage = (float) val;
+			kickerLevelRelative = (float) val;
 			return this;
 		}
 
@@ -559,8 +566,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 			Validate.notNull(kickSpeed);
 			Validate.notNull(chip);
 			Validate.notNull(armed);
-			Validate.notNull(battery);
-			Validate.notNull(kickerVoltage);
+			Validate.notNull(batteryRelative);
+			Validate.notNull(kickerLevelRelative);
 			Validate.notNull(dribbleRpm);
 			return new RobotInfo(this);
 		}
