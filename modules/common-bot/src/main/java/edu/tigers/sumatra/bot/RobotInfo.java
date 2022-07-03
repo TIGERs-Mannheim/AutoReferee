@@ -41,6 +41,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final boolean isBarrierInterrupted;
 	private final IBotParams botParams;
 	private final boolean isOk;
+	private final boolean isAvailableToAi;
 
 
 	@SuppressWarnings("unused")
@@ -69,6 +70,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		isBarrierInterrupted = builder.barrierInterrupted;
 		botParams = builder.botParams;
 		isOk = builder.isOk;
+		isAvailableToAi = builder.isAvailableToAi;
 	}
 
 
@@ -120,7 +122,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withInternalState(null)
 				.withBarrierInterrupted(false)
 				.withBotParams(new BotParams())
-				.withOk(true);
+				.withOk(true)
+				.withAvailableToAi(true);
 	}
 
 
@@ -148,6 +151,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.barrierInterrupted = copy.isBarrierInterrupted;
 		builder.botParams = copy.botParams;
 		builder.isOk = copy.isOk;
+		builder.isAvailableToAi = copy.isAvailableToAi;
 		return builder;
 	}
 
@@ -279,6 +283,12 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 
 
+	public boolean isAvailableToAi()
+	{
+		return isAvailableToAi;
+	}
+
+
 	public boolean isBarrierInterrupted()
 	{
 		return isBarrierInterrupted;
@@ -313,6 +323,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private boolean barrierInterrupted;
 		private IBotParams botParams;
 		private boolean isOk = true;
+		private boolean isAvailableToAi;
 
 
 		private Builder()
@@ -342,6 +353,13 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		public Builder withOk(final boolean ok)
 		{
 			isOk = ok;
+			return this;
+		}
+
+
+		public Builder withAvailableToAi(final boolean val)
+		{
+			this.isAvailableToAi = val;
 			return this;
 		}
 

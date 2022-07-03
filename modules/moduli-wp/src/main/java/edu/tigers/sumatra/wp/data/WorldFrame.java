@@ -94,6 +94,7 @@ public class WorldFrame extends SimpleWorldFrame
 		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
 				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor()))
 				.filter(bot -> bot.getRobotInfo().isConnected())
+				.filter(bot -> bot.getRobotInfo().isAvailableToAi())
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return Collections.unmodifiableMap(visible);
 	}
