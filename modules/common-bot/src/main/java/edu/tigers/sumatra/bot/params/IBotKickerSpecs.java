@@ -5,7 +5,7 @@ package edu.tigers.sumatra.bot.params;
 
 
 /**
- * Specs for the robot kicker-dribbler unit.
+ * Specs for the robot kicker unit.
  */
 public interface IBotKickerSpecs
 {
@@ -25,24 +25,4 @@ public interface IBotKickerSpecs
 	 * @return the maxAbsoluteStraightVelocity
 	 */
 	double getMaxAbsoluteStraightVelocity();
-
-	/**
-	 * @return max dribble speed to apply on robot
-	 */
-	double getMaxDribbleSpeed();
-
-	/**
-	 * @return gain factor to apply to dribble speed from skill
-	 */
-	double getDribbleSpeedGain();
-
-	/**
-	 * @return Maximum acceleration the dribbler can put on the ball.
-	 */
-	double getMaxDribbleBallAcceleration();
-
-	/**
-	 * @return Angle from robot negative Y axis (aka back) where a ball can be kept at dribbler [rad].
-	 */
-	double getMaxRetainingBallAngle();
 }
