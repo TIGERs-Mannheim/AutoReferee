@@ -20,6 +20,7 @@ import org.apache.commons.lang.Validate;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -177,5 +178,19 @@ public final class Quadrilateral implements IQuadrilateral
 			intersection.ifPresent(intersections::add);
 		}
 		return intersections;
+	}
+
+
+	@Override
+	public IVector2 nearestPointInside(IVector2 point)
+	{
+		if (isPointInShape(point))
+		{
+			return point;
+		}
+		return getEdges().stream()
+				.map(e -> e.nearestPointOnLineSegment(point))
+				.min(Comparator.comparingDouble(point::distanceTo))
+				.orElseThrow();
 	}
 }
