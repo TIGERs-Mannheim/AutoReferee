@@ -1,14 +1,8 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
@@ -21,6 +15,11 @@ import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -73,7 +72,7 @@ public class PenaltyArea implements IPenaltyArea
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.distinct()
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -85,7 +84,7 @@ public class PenaltyArea implements IPenaltyArea
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.distinct()
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -97,7 +96,7 @@ public class PenaltyArea implements IPenaltyArea
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.distinct()
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -174,12 +173,12 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public IVector2 nearestPointOutside(final IVector2 point)
 	{
-		if (getRectangle().isPointInShape(point))
+		if (isPointInShapeOrBehind(point))
 		{
 			return point.nearestTo(
 					getEdges().stream()
 							.map(e -> e.closestPointOnLine(point))
-							.collect(Collectors.toList()));
+							.toList());
 		}
 		return point;
 	}

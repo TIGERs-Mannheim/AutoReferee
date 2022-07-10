@@ -44,7 +44,7 @@ public class DrawableTube extends ADrawableWithStroke
 	/**
 	 * @param tube
 	 */
-	public DrawableTube(final Tube tube)
+	public DrawableTube(final ITube tube)
 	{
 		this.tube = tube;
 	}

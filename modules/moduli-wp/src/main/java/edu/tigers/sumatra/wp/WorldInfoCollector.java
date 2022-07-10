@@ -328,6 +328,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		Safe.forEach(observers, c -> c.onNewWorldFrame(wfw));
 
 		visualize(wfw);
+		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isTournamentMode());
 	}
 
 
@@ -365,8 +366,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		registerToRefereeModule();
 		registerToCamModule();
 		registerToRecordManagerModule();
-
-		ShapeMap.setPersistDebugShapes(!SumatraModel.getInstance().isTournamentMode());
 	}
 
 

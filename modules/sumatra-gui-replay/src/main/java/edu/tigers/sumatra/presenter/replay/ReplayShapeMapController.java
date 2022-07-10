@@ -24,8 +24,7 @@ public class ReplayShapeMapController implements IReplayController
 		BerkeleyShapeMapFrame shapeMapFrame = db.get(BerkeleyShapeMapFrame.class, sumatraTimestampNs);
 		if (shapeMapFrame != null)
 		{
-			shapeMapFrame.getShapeMaps().forEach((source, shapeMap) -> wFrameObservers
-					.forEach(o -> o.onNewShapeMap(sumatraTimestampNs, shapeMap, source)));
+			wFrameObservers.forEach(o -> o.onReplaceShapeMaps(shapeMapFrame.getShapeMaps()));
 		}
 	}
 }

@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-
-import org.junit.Test;
 
 import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 
 /**
@@ -36,54 +35,54 @@ public class PenaltyAreaTest
 	{
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(center, goalCenter)))
-						.as("Does not intersect front border center")
-						.containsExactly(penBorderCenter);
+				.as("Does not intersect front border center")
+				.containsExactly(penBorderCenter);
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromY(100), goalCenter.addNew(Vector2.fromY(100)))))
-						.as("Does not intersect front border positive y")
-						.containsExactly(Vector2.fromXY(borderX, 100));
+				.as("Does not intersect front border positive y")
+				.containsExactly(Vector2.fromXY(borderX, 100));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromY(-100), goalCenter.addNew(Vector2.fromY(-100)))))
-						.as("Does not intersect front border negative y")
-						.containsExactly(Vector2.fromXY(borderX, -100));
+				.as("Does not intersect front border negative y")
+				.containsExactly(Vector2.fromXY(borderX, -100));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromY(100), goalCenter.addNew(Vector2.fromXY(10, 100)))))
-						.as("Does not does not intersect goal line")
-						.containsExactly(Vector2.fromXY(borderX, 100));
+				.as("Does not does not intersect goal line")
+				.containsExactly(Vector2.fromXY(borderX, 100));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromXY(goalX + depth / 2, length), Vector2.fromXY(goalX + depth / 2, 0))))
-						.as("Does not intersect positive side border")
-						.containsExactly(Vector2.fromXY(goalX + depth / 2, length / 2));
+				.as("Does not intersect positive side border")
+				.containsExactly(Vector2.fromXY(goalX + depth / 2, length / 2));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromXY(goalX + depth / 2, -length), Vector2.fromXY(goalX + depth / 2, 0))))
-						.as("Does not intersect negative side border")
-						.containsExactly(Vector2.fromXY(goalX + depth / 2, -length / 2));
+				.as("Does not intersect negative side border")
+				.containsExactly(Vector2.fromXY(goalX + depth / 2, -length / 2));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromXY(goalX + depth * 2, length), goalCenter)))
-						.as("Does not intersect positive upper corner")
-						.containsExactly(Vector2.fromXY(goalX + depth, length / 2));
+				.as("Does not intersect positive upper corner")
+				.containsExactly(Vector2.fromXY(goalX + depth, length / 2));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(Vector2.fromXY(goalX + depth * 2, -length), goalCenter)))
-						.as("Does not intersect negative upper corner")
-						.containsExactly(Vector2.fromXY(goalX + depth, -length / 2));
+				.as("Does not intersect negative upper corner")
+				.containsExactly(Vector2.fromXY(goalX + depth, -length / 2));
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(center, Vector2.fromX(-100))))
-						.as("Intersection when line segment outside")
-						.isEmpty();
+				.as("Intersection when line segment outside")
+				.isEmpty();
 
 		assertThat(penaltyArea.lineIntersections(
 				Lines.segmentFromPoints(goalCenter.addNew(Vector2.fromXY(-100, length)),
 						goalCenter.addNew(Vector2.fromXY(100, -100)))))
-								.as("Intersection when line segment crosses goal line only")
-								.isEmpty();
+				.as("Intersection when line segment crosses goal line only")
+				.isEmpty();
 	}
 
 
@@ -197,9 +196,9 @@ public class PenaltyAreaTest
 				.as("Point inside should be outside")
 				.isEqualTo(Vector2.fromXY(borderX, -1));
 
-		assertThat(penaltyArea.nearestPointOutside(Vector2.fromXY(goalX - 1, 0)))
+		assertThat(penaltyArea.nearestPointOutside(Vector2.fromXY(goalX - 1, length / 2 + 1)))
 				.as("Point outside should be outside")
-				.isEqualTo(Vector2.fromXY(goalX - 1, 0));
+				.isEqualTo(Vector2.fromXY(goalX - 1, length / 2 + 1));
 	}
 
 
@@ -248,16 +247,16 @@ public class PenaltyAreaTest
 		assertThat(penaltyArea.intersectionArea(
 				Vector2.fromXY(goalX + depth / 2, -length / 2),
 				Vector2.fromXY(goalX + depth / 2, length / 2)))
-						.isCloseTo(depth / 2 * length * 1e-6, within(1e-6));
+				.isCloseTo(depth / 2 * length * 1e-6, within(1e-6));
 		// intersections on both sides
 		assertThat(penaltyArea.intersectionArea(
 				Vector2.fromXY(goalX + depth * 0.5, -length / 2),
 				Vector2.fromXY(goalX + depth * 0.8, length / 2)))
-						.isCloseTo(((depth * 0.2) * length + (depth * 0.3) * length * 0.5) * 1e-6, within(1e-6));
+				.isCloseTo(((depth * 0.2) * length + (depth * 0.3) * length * 0.5) * 1e-6, within(1e-6));
 		// intersection on front line
 		assertThat(penaltyArea.intersectionArea(
 				Vector2.fromXY(goalX + depth * 0.5, -length / 2),
 				Vector2.fromXY(goalX + depth, 0)))
-						.isCloseTo((depth * 0.5) * (length * 0.5) * 0.5 * 1e-6, within(1e-6));
+				.isCloseTo((depth * 0.5) * (length * 0.5) * 0.5 * 1e-6, within(1e-6));
 	}
 }

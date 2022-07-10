@@ -50,7 +50,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 
 	private final Set<String> showSources = new ConcurrentSkipListSet<>();
 	@Getter
-	private final Map<ShapeMapSource, ShapeMap> shapeMaps = new ConcurrentHashMap<>();
+	private Map<ShapeMapSource, ShapeMap> shapeMaps = new ConcurrentHashMap<>();
 	private final Map<String, Boolean> shapeVisibilityMap = new ConcurrentHashMap<>();
 
 	@Getter
@@ -109,6 +109,15 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	public void onNewShapeMap(final long timestamp, final ShapeMap shapeMap, final ShapeMapSource source)
 	{
 		shapeMaps.put(source, shapeMap);
+	}
+
+
+	@Override
+	public void onReplaceShapeMaps(Map<ShapeMapSource, ShapeMap> map)
+	{
+		var newShapeMaps = new ConcurrentHashMap<>(map);
+		newShapeMaps.put(PANEL_SHAPE_MAP_SOURCE, panelShapeMap);
+		shapeMaps = newShapeMaps;
 	}
 
 

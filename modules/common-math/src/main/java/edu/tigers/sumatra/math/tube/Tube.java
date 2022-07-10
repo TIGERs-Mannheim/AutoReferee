@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.tube;
@@ -145,7 +145,7 @@ public class Tube implements ITube
 			return point;
 		}
 		IVector2 leadPoint = lineSegment.closestPointOnLine(point);
-		return LineMath.stepAlongLine(leadPoint, point, radius - 1);
+		return LineMath.stepAlongLine(leadPoint, point, radius);
 	}
 
 
@@ -187,5 +187,12 @@ public class Tube implements ITube
 	public ITube withMargin(final double margin)
 	{
 		return new Tube(lineSegment, radius + margin);
+	}
+
+
+	@Override
+	public double distanceTo(IVector2 point)
+	{
+		return lineSegment.distanceTo(point) - radius;
 	}
 }

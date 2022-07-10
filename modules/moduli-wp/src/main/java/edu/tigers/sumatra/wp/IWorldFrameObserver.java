@@ -8,6 +8,8 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
+import java.util.Map;
+
 
 /**
  * @author Gero
@@ -53,8 +55,8 @@ public interface IWorldFrameObserver
 	 * Update the shape map with given identifier
 	 *
 	 * @param timestamp
-	 * @param shapeMap the new shape map
-	 * @param source the source identifier for this shape map that should be replaced
+	 * @param shapeMap  the new shape map
+	 * @param source    the source identifier for this shape map that should be replaced
 	 */
 	default void onNewShapeMap(final long timestamp, ShapeMap shapeMap, ShapeMapSource source)
 	{
@@ -67,6 +69,11 @@ public interface IWorldFrameObserver
 	 * @param source
 	 */
 	default void onRemoveSourceFromShapeMap(ShapeMapSource source)
+	{
+	}
+
+
+	default void onReplaceShapeMaps(Map<ShapeMapSource, ShapeMap> map)
 	{
 	}
 }

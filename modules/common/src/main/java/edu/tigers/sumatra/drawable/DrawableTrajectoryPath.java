@@ -10,10 +10,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +20,12 @@ import java.util.List;
  * Drawable trajectory path. Uses sampled points on a bang bang trajectory.
  */
 @Persistent
-public class DrawableTrajectoryPath implements IDrawableShape
+public class DrawableTrajectoryPath extends ADrawableWithStroke
 {
 	private static final double PRECISION = 0.1;
 	private static final double STEP_SIZE = 0.2;
 
-	private Color color = Color.black;
 	private final List<IVector2> points = new ArrayList<>();
-	private transient Stroke stroke;
 
 
 	@SuppressWarnings("unused")
@@ -39,23 +34,8 @@ public class DrawableTrajectoryPath implements IDrawableShape
 	}
 
 
-	/**
-	 * @param trajXY
-	 */
-	public DrawableTrajectoryPath(final ITrajectory<? extends IVector> trajXY)
+	public DrawableTrajectoryPath(ITrajectory<? extends IVector> trajXY)
 	{
-		this(trajXY, Color.black);
-	}
-
-
-	/**
-	 * @param trajXY
-	 * @param color
-	 */
-	public DrawableTrajectoryPath(final ITrajectory<? extends IVector> trajXY, final Color color)
-	{
-		this.color = color;
-
 		IVector2 vLast = null;
 
 		IVector2 first = trajXY.getPositionMM(0).getXYVector();
@@ -100,12 +80,7 @@ public class DrawableTrajectoryPath implements IDrawableShape
 	@Override
 	public void paintShape(final Graphics2D g, final IDrawableTool tool, final boolean invert)
 	{
-		g.setColor(color);
-		if (stroke == null)
-		{
-			stroke = new BasicStroke(tool.scaleGlobalToGui(10));
-		}
-		g.setStroke(stroke);
+		super.paintShape(g, tool, invert);
 
 		final GeneralPath drawPath = new GeneralPath();
 		IVector2 pLast = points.get(0);
