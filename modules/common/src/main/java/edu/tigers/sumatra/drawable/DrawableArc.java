@@ -86,7 +86,7 @@ public class DrawableArc extends Arc implements IDrawableShape
 	}
 
 
-	public void setArcType(final int arcType)
+	public DrawableArc setArcType(final int arcType)
 	{
 		if (arcType >= Arc2D.OPEN && arcType <= Arc2D.PIE)
 		{
@@ -95,6 +95,7 @@ public class DrawableArc extends Arc implements IDrawableShape
 		{
 			throw new IllegalArgumentException("invalid type for Arc: " + arcType);
 		}
+		return this;
 	}
 
 }
