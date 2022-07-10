@@ -171,6 +171,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	@Override
 	public void onStop()
 	{
+		saveVisibility();
 		if (updateThread != null)
 		{
 			updateThread.interrupt();
@@ -242,7 +243,6 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	private void onSelectionChanged(TreeSelectionEvent treeSelectionEvent)
 	{
 		updateVisibility();
-		saveVisibility();
 	}
 
 
