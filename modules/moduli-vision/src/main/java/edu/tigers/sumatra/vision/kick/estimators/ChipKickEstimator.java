@@ -380,7 +380,8 @@ public class ChipKickEstimator implements IKickEstimator
 
 		// solve to estimate all parameters
 		ChipKickSolverNonLinIdentDirect identSolver = new ChipKickSolverNonLinIdentDirect(
-				solverNonLin.getKickPosition(), solverNonLin.getKickTimestamp(), camCalib, fitResult.getKickVel());
+				solverNonLin.getKickPosition(), solverNonLin.getKickTimestamp(), camCalib,
+				fitResult.getKickVel().multiplyNew(1000));
 
 		Optional<IBallModelIdentResult> chipResult = identSolver.identModel(usedRecords);
 		if (chipResult.isPresent())
