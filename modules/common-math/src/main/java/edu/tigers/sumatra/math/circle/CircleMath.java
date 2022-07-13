@@ -15,6 +15,7 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.v2.ILine;
 import edu.tigers.sumatra.math.line.v2.ILineBase;
+import edu.tigers.sumatra.math.line.v2.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -23,25 +24,25 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 /**
  * Circle related calculations.
  * Please consider using the methods from {@link ICircle} instead of these static methods!
- * 
+ *
  * @author nicolai.ommer
  */
 public final class CircleMath
 {
-	
+
 	@SuppressWarnings("unused")
 	private CircleMath()
 	{
 	}
-	
-	
+
+
 	/**
 	 * Get the intersection points of the two tangential lines that cross the external points.
 	 *
-	 * @see <a href="https://de.wikipedia.org/wiki/Kreistangente">Kreistangente</a>
-	 * @param circle a circle
+	 * @param circle        a circle
 	 * @param externalPoint some point
 	 * @return two tangential intersections: [right, left]
+	 * @see <a href="https://de.wikipedia.org/wiki/Kreistangente">Kreistangente</a>
 	 */
 	public static List<IVector2> tangentialIntersections(final ICircle circle, final IVector2 externalPoint)
 	{
@@ -49,26 +50,26 @@ public final class CircleMath
 		double d = Math.max(circle.radius(), dir.getLength2());
 		double alpha = SumatraMath.acos(circle.radius() / d);
 		double beta = dir.getAngle();
-		
+
 		List<IVector2> points = new ArrayList<>(2);
 		points.add(Vector2.fromAngleLength(beta + alpha, circle.radius()).add(circle.center()));
 		points.add(Vector2.fromAngleLength(beta - alpha, circle.radius()).add(circle.center()));
 		return points;
 	}
-	
-	
+
+
 	/**
 	 * Get the intersection points of the shape and a line
 	 *
-	 * @see <a href="http://mathworld.wolfram.com/Circle-LineIntersection.html">Mathmatical Theory</a>
 	 * @param circle a circle
-	 * @param line some line
+	 * @param line   some line
 	 * @return all intersection points
+	 * @see <a href="http://mathworld.wolfram.com/Circle-LineIntersection.html">Mathmatical Theory</a>
 	 */
 	private static List<IVector2> lineIntersectionsInternal(ICircular circle, final ILine line)
 	{
 		final List<IVector2> result = new ArrayList<>();
-		
+
 		if (line.directionVector().isZeroVector())
 		{
 			if (abs(line.supportVector().distanceTo(circle.center()) - circle.radius()) < 1e-4)
@@ -77,20 +78,20 @@ public final class CircleMath
 			}
 			return result;
 		}
-		
+
 		final double dx = line.directionVector().x();
 		final double dy = line.directionVector().y();
 		final double dr = line.directionVector().getLength2();
 		final Vector2 newSupport = line.supportVector().subtractNew(circle.center());
 		final double det = (newSupport.x() * (newSupport.y() + dy)) - ((newSupport.x() + dx) * newSupport.y());
-		
+
 		final double inRoot = (circle.radius() * circle.radius() * dr * dr) - (det * det);
-		
+
 		if (inRoot < 0)
 		{
 			return result;
 		}
-		
+
 		if (SumatraMath.isZero(inRoot))
 		{
 			final Vector2 temp = Vector2.fromXY(
@@ -98,13 +99,13 @@ public final class CircleMath
 					(-det * dx) / (dr * dr));
 			// because of moved coordinate system (newSupport):
 			temp.add(circle.center());
-			
+
 			result.add(temp);
-			
+
 			return result;
 		}
 		final double sqRoot = SumatraMath.sqrt(inRoot);
-		
+
 		final Vector2 temp1 = Vector2.fromXY(
 				((det * dy) + (dx * sqRoot)) / (dr * dr),
 				((-det * dx) + (dy * sqRoot)) / (dr * dr));
@@ -114,19 +115,19 @@ public final class CircleMath
 		// because of moved coordinate system (newSupport):
 		temp1.add(circle.center());
 		temp2.add(circle.center());
-		
+
 		result.add(temp1);
 		result.add(temp2);
 		result.removeIf(p -> !circle.isPointInShape(p, 1e-6));
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * Get intersection points between circle and line segment
 	 *
 	 * @param circle the circle
-	 * @param line the line segment
+	 * @param line   the line segment
 	 * @return all intersection points
 	 */
 	public static List<IVector2> lineIntersections(final ICircular circle, final ILineBase line)
@@ -136,8 +137,8 @@ public final class CircleMath
 				.filter(line::isPointOnLine)
 				.collect(Collectors.toList());
 	}
-	
-	
+
+
 	public static List<IVector2> circleIntersections(final ICircle firstCircle, final ICircle secondCircle)
 	{
 		double distBetweenCircles = firstCircle.center().distanceTo(secondCircle.center());
@@ -150,34 +151,34 @@ public final class CircleMath
 		{
 			return Collections.emptyList();
 		}
-		
-		
+
+
 		double a = (firstRadius2 - secondRadius2 + distBetweenCircles2) / (2 * distBetweenCircles);
 		double h = Math.sqrt(firstRadius2 - a * a);
-		
-		
+
+
 		IVector2 direction = secondCircle.center().subtractNew(firstCircle.center()).scaleTo(a);
 		IVector2 heightVector = direction.getNormalVector().scaleTo(h);
-		
+
 		List<IVector2> intersections = new ArrayList<>();
 		intersections.add(firstCircle.center().addNew(direction).add(heightVector));
 		intersections.add(firstCircle.center().addNew(direction).add(heightVector.multiplyNew(-1)));
 		return intersections;
 	}
-	
-	
+
+
 	/**
 	 * Calculate the nearest point outside the circle
-	 * 
+	 *
 	 * @param circle a circle
-	 * @param point a point inside or outside
+	 * @param point  a point inside or outside
 	 * @return the nearest point outside, if point is inside. The point else.
 	 */
 	public static IVector2 nearestPointOutsideCircle(final ICircular circle, final IVector2 point)
 	{
 		final Vector2 direction = point.subtractNew(circle.center());
 		final double factor = circle.radius() / direction.getLength2();
-		
+
 		if (Double.isFinite(factor))
 		{
 			if (factor <= 1)
@@ -190,13 +191,24 @@ public final class CircleMath
 		}
 		return point.addNew(Vector2f.fromXY(circle.radius(), 0));
 	}
-	
-	
+
+
+	public static IVector2 nearestPointInsideCircle(final ICircular circle, final IVector2 point)
+	{
+		if (circle.isPointInShape(point))
+		{
+			return point;
+		}
+		IVector2 pointToCircle = circle.center().subtractNew(point);
+		return point.addNew(pointToCircle.scaleToNew(pointToCircle.getLength() - circle.radius()));
+	}
+
+
 	/**
 	 * Check if given point is within the circle
-	 * 
+	 *
 	 * @param circle a circle
-	 * @param point a point
+	 * @param point  a point
 	 * @param margin some margin
 	 * @return true, if point is in circle+margin
 	 */
@@ -204,13 +216,13 @@ public final class CircleMath
 	{
 		return point.distanceToSqr(circle.center()) <= SumatraMath.square(circle.radius() + margin);
 	}
-	
-	
+
+
 	/**
 	 * Check if a given point is within an arc
-	 * 
-	 * @param arc an arc
-	 * @param point some point
+	 *
+	 * @param arc    an arc
+	 * @param point  some point
 	 * @param margin some margin
 	 * @return true, if the point is within the arc
 	 */
@@ -224,16 +236,16 @@ public final class CircleMath
 		{
 			return true;
 		}
-		
+
 		IVector2 dir = point.subtractNew(arc.center());
 		double a = dir.getAngle();
 		double b = AngleMath.normalizeAngle(arc.getStartAngle() + (arc.getRotation() / 2.0));
 		return abs(AngleMath.difference(a, b)) < (abs(arc.getRotation()) / 2.0);
 	}
-	
-	
+
+
 	/**
-	 * @param arc an arc
+	 * @param arc   an arc
 	 * @param point a point
 	 * @return nearest point outside the arc
 	 */
@@ -246,16 +258,46 @@ public final class CircleMath
 		}
 		return point;
 	}
-	
-	
+
+
+	public static IVector2 nearestPointOnArcLine(final IArc arc, final IVector2 point)
+	{
+		IVector2 center = arc.center();
+		IVector2 centerToPoint = point.subtractNew(center);
+		IVector2 startPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle()).scaleToNew(arc.radius()));
+		IVector2 endPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle() + arc.getRotation()).scaleToNew(arc.radius()));
+		if (centerToPoint.isZeroVector())
+		{
+			return startPoint;
+		}
+		var halfLine = Lines.halfLineFromDirection(center, centerToPoint);
+		var intersections = arc.lineIntersections(halfLine);
+
+		if (intersections.isEmpty())
+		{
+			// only consider corners
+			if (startPoint.distanceTo(point) < endPoint.distanceTo(point))
+			{
+				return startPoint;
+			}
+			return endPoint;
+		} else if (intersections.size() == 1)
+		{
+			return intersections.get(0);
+		}
+		throw new IllegalArgumentException(
+				"More than one intersection between half line starting from within a circle, this is impossible");
+	}
+
+
 	/**
 	 * calculates a point on a circle defined by center and current vectors
 	 * performs a projection (rotation) of {@link IVector2}<br>
 	 * Note: Consider using {@link edu.tigers.sumatra.math.vector.AVector2#turnNew(double)}
 	 *
 	 * @param current point on circle
-	 * @param center of circle
-	 * @param angle of rotation in radians
+	 * @param center  of circle
+	 * @param angle   of rotation in radians
 	 * @return projected point
 	 * @see edu.tigers.sumatra.math.vector.AVector2#turnNew(double)
 	 */
