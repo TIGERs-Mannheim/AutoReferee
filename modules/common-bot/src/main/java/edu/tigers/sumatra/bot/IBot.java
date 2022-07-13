@@ -40,6 +40,10 @@ public interface IBot
 	 */
 	double getKickerLevel();
 
+	/**
+	 * @return
+	 */
+	double getDribblerCurrent();
 
 	/**
 	 * The absolute maximum kicker level possible for the bot (not the currently set max cap!)

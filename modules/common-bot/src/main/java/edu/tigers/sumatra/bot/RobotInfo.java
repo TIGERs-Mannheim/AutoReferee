@@ -42,6 +42,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final IBotParams botParams;
 	private final boolean isOk;
 	private final boolean isAvailableToAi;
+	private final EDribbleTractionState dribbleTraction;
 
 
 	@SuppressWarnings("unused")
@@ -71,6 +72,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		botParams = builder.botParams;
 		isOk = builder.isOk;
 		isAvailableToAi = builder.isAvailableToAi;
+		dribbleTraction = builder.dribbleTraction;
 	}
 
 
@@ -123,6 +125,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 				.withBarrierInterrupted(false)
 				.withBotParams(new BotParams())
 				.withOk(true)
+				.withDribbleTraction(EDribbleTractionState.NONE_OR_LIGHT)
 				.withAvailableToAi(true);
 	}
 
@@ -152,6 +155,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		builder.botParams = copy.botParams;
 		builder.isOk = copy.isOk;
 		builder.isAvailableToAi = copy.isAvailableToAi;
+		builder.dribbleTraction = copy.dribbleTraction;
 		return builder;
 	}
 
@@ -301,6 +305,12 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 
 
+	public EDribbleTractionState getDribbleTraction()
+	{
+		return dribbleTraction;
+	}
+
+
 	/**
 	 * {@code RobotInfo} builder static inner class.
 	 */
@@ -324,6 +334,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		private IBotParams botParams;
 		private boolean isOk = true;
 		private boolean isAvailableToAi;
+		private EDribbleTractionState dribbleTraction;
 
 
 		private Builder()
@@ -400,6 +411,20 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		public Builder withRobotMode(final ERobotMode val)
 		{
 			robotMode = val;
+			return this;
+		}
+
+
+		/**
+		 * Sets the {@code dribbleTrajction} and returns a reference to this Builder so that the methods can be chained
+		 * together.
+		 *
+		 * @param state dribbler current
+		 * @return this Builder
+		 */
+		public Builder withDribbleTraction(final EDribbleTractionState state)
+		{
+			dribbleTraction = state;
 			return this;
 		}
 
