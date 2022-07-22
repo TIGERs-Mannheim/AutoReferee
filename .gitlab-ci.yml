@@ -2,6 +2,7 @@ image: azul/zulu-openjdk:17
 
 build:
   script:
+    - "apt-get -y update && apt-get -y install unzip"
     - './build.sh'
 
 test:
