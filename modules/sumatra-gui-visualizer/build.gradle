@@ -24,5 +24,7 @@ dependencies {
     implementation 'com.jidesoft:jide-oss:2.4.8'
     implementation 'commons-lang:commons-lang:2.6'
 
-    runtimeOnly 'io.humble:humble-video-all:0.3.0'
+    if (!project.property("compactBuild").toBoolean()) {
+        runtimeOnly 'io.humble:humble-video-all:0.3.0'
+    }
 }
