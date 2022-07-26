@@ -115,7 +115,10 @@ public class GameStateCalculator
 			case PENALTY_SHOOTOUT -> builder.withPenaltyShootout(true);
 			default ->
 			{
-				// ignore stage
+				if (lastGameState.getState() == EGameState.BREAK || lastGameState.getState() == EGameState.POST_GAME)
+				{
+					builder.withState(EGameState.HALT).withForTeam(ETeamColor.NEUTRAL);
+				}
 			}
 		}
 	}
