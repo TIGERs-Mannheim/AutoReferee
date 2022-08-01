@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -29,6 +29,7 @@ public class BotStateTrajectorySyncTest
 	public void before()
 	{
 		c = new BotStateTrajectorySync();
+		c.setEnabled(true);
 	}
 
 

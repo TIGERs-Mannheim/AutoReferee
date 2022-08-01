@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
@@ -15,6 +15,7 @@ import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.wp.data.DelayedBotState;
 import edu.tigers.sumatra.wp.data.TrajTrackingQuality;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Optional;
 
@@ -33,8 +34,8 @@ public class BotStateTrajectorySync
 	@Configurable(defValue = "1.0", comment = "Min velocity [m/s] to consider for calculating maxDiff on trajectory")
 	private static double minVel = 1.0;
 
-	@Configurable(defValue = "true", comment = "Prefer the state of the current trajectory that the bot executes")
-	private static boolean enabled = true;
+	@Configurable(defValue = "false", comment = "Prefer the state of the current trajectory that the bot executes")
+	private static boolean enabledByDefault = false;
 
 	static
 	{
@@ -46,6 +47,9 @@ public class BotStateTrajectorySync
 
 	@Getter
 	private TrajTrackingQuality trajTrackingQuality = new TrajTrackingQuality();
+
+	@Setter
+	private boolean enabled = enabledByDefault;
 
 
 	public void add(final ITrajectory<IVector3> traj, final long timestamp)
