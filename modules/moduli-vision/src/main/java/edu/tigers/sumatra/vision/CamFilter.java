@@ -45,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -118,6 +119,8 @@ public class CamFilter
 
 	@Configurable(defValue = "false", comment = "Adjust frame times based on estimated frame rate and frame number")
 	private static boolean adjustTCapture = false;
+
+	private final Map<BotID, Long> lastBarrierInterruptedMap = new HashMap<>();
 
 	static
 	{
@@ -306,11 +309,19 @@ public class CamFilter
 				continue;
 			}
 
+			if (r.isBarrierInterrupted())
+			{
+				lastBarrierInterruptedMap.put(r.getBotId(), r.getTimestamp());
+			}
+
+			boolean barrierInterrupted =
+					(timestamp - lastBarrierInterruptedMap.getOrDefault(r.getBotId(), 0L)) / 1e9 < 0.5;
+
 			IVector2 ballAtDribblerPos = tracker.getPosition(timestamp)
 					.addNew(Vector2.fromAngle(tracker.getOrientation(timestamp))
 							.scaleTo(r.getCenter2DribblerDist() + Geometry.getBallRadius()));
 
-			if ((ballAtDribblerPos.distanceTo(lastKnownBallPosition) < maxVirtualBallDistance) && r.isBarrierInterrupted())
+			if ((ballAtDribblerPos.distanceTo(lastKnownBallPosition) < maxVirtualBallDistance) && barrierInterrupted)
 			{
 				CamBall camBall = new CamBall(0, 0, Vector3.from2d(ballAtDribblerPos, 0), Vector2f.ZERO_VECTOR,
 						timestamp, camId, frameId);

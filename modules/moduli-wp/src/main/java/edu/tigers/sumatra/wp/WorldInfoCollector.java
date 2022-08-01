@@ -100,7 +100,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	@Configurable(
 			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
-			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.06", "0.06", "0.03" },
+			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.09", "0.06", "0.03" },
 			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision"
 	)
 	private static double visionFeedbackDelay = 0.06;
