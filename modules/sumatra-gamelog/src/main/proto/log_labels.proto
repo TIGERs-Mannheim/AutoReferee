@@ -31,6 +31,8 @@ message PassingLabel {
   uint32 passer_id = 4;
   Team passer_team = 5;
   uint32 receiver_id = 6;
+  uint64 start_timestamp = 7;
+  uint64 end_timestamp = 8;
 }
 
 message GoalShotLabel {

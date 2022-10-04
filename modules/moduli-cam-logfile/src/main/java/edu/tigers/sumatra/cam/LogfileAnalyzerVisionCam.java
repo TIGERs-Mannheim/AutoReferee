@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.cam;
@@ -40,16 +40,11 @@ public class LogfileAnalyzerVisionCam extends ACam
 	public void playLog(SSLGameLogReader logReader, LogfileAnalyzerConsumer consumer)
 	{
 		int amountFrames = logReader.getPackets().size();
-		long groupId = 0;
 		for (int currentFrame = 0; currentFrame < amountFrames; currentFrame++)
 		{
 			SSLGameLogReader.SSLGameLogfileEntry e = logReader.getPackets().get(currentFrame);
 
-			if (groupId < e.getFrameId())
-			{
-				consumer.process(e.getFrameId());
-				groupId = e.getFrameId();
-			}
+			consumer.process(currentFrame);
 
 			if (e.getVisionPacket().isPresent())
 			{
