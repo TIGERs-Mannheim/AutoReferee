@@ -8,7 +8,9 @@ import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.referee.Referee;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -39,9 +41,11 @@ public final class AutoReferee
 
 		ifHasOption("h", () -> printHelp(options));
 		ifNotHasOption("hl", () -> SwingUtilities.invokeLater(AutoReferee::startUi));
-		  
+		ifHasOption("va", () -> setVisionAddress(cmd.getOptionValue("va")));
+		ifHasOption("ra", () -> setRefereeAddress(cmd.getOptionValue("ra")));
+
 		start();
-		
+
 		ifHasOption("a", AutoReferee::activateAutoRef);
 	}
 
@@ -83,6 +87,8 @@ public final class AutoReferee
 		options.addOption("hl", "headless", false, "run without a UI");
 		options.addOption("a", "active", false, "Start autoRef in active mode");
 		options.addOption("w", "window", true, "Set window size (example: 1920x1080)");
+		options.addOption("va", "visionAddress", true, "address:port for vision");
+		options.addOption("ra", "refereeAddress", true, "address:port for GC");
 		return options;
 	}
 
@@ -112,6 +118,26 @@ public final class AutoReferee
 	{
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class)
 				.ifPresent(a -> a.changeMode(EAutoRefMode.ACTIVE));
+	}
+
+
+	private static void setVisionAddress(String fullAddress)
+	{
+		String[] parts = fullAddress.split(":");
+		String address = parts[0];
+		Integer port = parts.length > 1 ? Integer.valueOf(parts[1]) : null;
+		SSLVisionCam.setCustomAddress(address);
+		SSLVisionCam.setCustomPort(port);
+	}
+
+
+	private static void setRefereeAddress(String fullAddress)
+	{
+		String[] parts = fullAddress.split(":");
+		String address = parts[0];
+		Integer port = parts.length > 1 ? Integer.valueOf(parts[1]) : null;
+		Referee.setCustomAddress(address);
+		Referee.setCustomPort(port);
 	}
 
 
