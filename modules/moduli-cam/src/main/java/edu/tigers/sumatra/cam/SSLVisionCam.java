@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -13,6 +13,7 @@ import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
 import edu.tigers.sumatra.network.IReceiverObserver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +35,22 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	private static final int BUFFER_SIZE = 10000;
 	private final byte[] bufferArr = new byte[BUFFER_SIZE];
 
+	@Configurable(comment = "Custom vision port that overwrites the value from moduli")
+	@Setter
+	private static Integer customPort;
+
+	@Configurable(comment = "Custom vision address that overwrites the value from moduli")
+	@Setter
+	private static String customAddress;
+
+	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
+	private static String network = "";
+
+	static
+	{
+		ConfigRegistration.registerClass("user", SSLVisionCam.class);
+	}
+
 	private Thread cam;
 	private MulticastUDPReceiver receiver;
 	private boolean expectIOE = false;
@@ -44,21 +61,12 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
 
 
-	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
-	private static String network = "";
-
-
-	static
-	{
-		ConfigRegistration.registerClass("user", SSLVisionCam.class);
-	}
-
 	@Override
 	public void initModule() throws InitModuleException
 	{
 		super.initModule();
-		port = getSubnodeConfiguration().getInt("port", 10006);
-		address = getSubnodeConfiguration().getString("address", "224.5.23.2");
+		port = customPort != null ? customPort : getSubnodeConfiguration().getInt("port", 10006);
+		address = customAddress != null ? customAddress : getSubnodeConfiguration().getString("address", "224.5.23.2");
 	}
 
 

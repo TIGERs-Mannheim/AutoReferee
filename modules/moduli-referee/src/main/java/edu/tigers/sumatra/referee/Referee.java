@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.proto.SslGcApi;
@@ -12,6 +14,7 @@ import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.File;
@@ -30,6 +33,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Referee extends AReferee
 {
 	private static final int DEFAULT_GC_UI_PORT = 50543;
+
+	@Configurable(comment = "Custom referee port that overwrites the value from moduli")
+	@Setter
+	private static Integer customPort;
+
+	@Configurable(comment = "Custom referee address that overwrites the value from moduli")
+	@Setter
+	private static String customAddress;
+
+	static
+	{
+		ConfigRegistration.registerClass("user", Referee.class);
+	}
+
+
 	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
 			ERefereeMessageSource.class);
 
@@ -53,8 +71,8 @@ public class Referee extends AReferee
 		ERefereeMessageSource activeSource = ERefereeMessageSource
 				.valueOf(getSubnodeConfiguration().getString("source", ERefereeMessageSource.NETWORK.name()));
 		boolean useGameController = getSubnodeConfiguration().getBoolean("gameController", false);
-		int port = getPort();
-		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(port);
+		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setPort(getPort());
+		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setAddress(getAddress());
 
 		source = msgSources.get(activeSource);
 
@@ -72,7 +90,13 @@ public class Referee extends AReferee
 
 	private int getPort()
 	{
-		return getSubnodeConfiguration().getInt("port", 10003);
+		return customPort != null ? customPort : getSubnodeConfiguration().getInt("port", 10003);
+	}
+
+
+	private String getAddress()
+	{
+		return customAddress != null ? customAddress : getSubnodeConfiguration().getString("address", "224.5.23.1");
 	}
 
 
@@ -81,7 +105,7 @@ public class Referee extends AReferee
 		var port = getSubnodeConfiguration().getInt("gc-ui-port", DEFAULT_GC_UI_PORT);
 		var timeAcquisitionMode = source.getType() == ERefereeMessageSource.CI ? "ci" : "system";
 		var publishRefereeMessages = getSubnodeConfiguration().getBoolean("publishRefereeMessages", false);
-		var publishAddress = publishRefereeMessages ? "224.5.23.1:" + getPort() : "";
+		var publishAddress = publishRefereeMessages ? getAddress() + ":" + getPort() : "";
 		sslGameControllerProcess = new SslGameControllerProcess(port, publishAddress, timeAcquisitionMode);
 
 		File stateStoreFile = new File("build/state-store.json.stream");
