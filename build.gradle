@@ -114,6 +114,7 @@ distributions {
 githubRelease {
     token System.getenv("GITHUB_TOKEN") ?: ""
     owner "TIGERs-Mannheim"
+    targetCommitish.set("master")
     repo.set("AutoReferee")
     releaseAssets distZip
     tagName { "version/${versionDetails.lastTag}" }
