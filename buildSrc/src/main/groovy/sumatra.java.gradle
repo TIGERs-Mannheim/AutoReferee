@@ -11,9 +11,6 @@ plugins {
     id 'sumatra.versions'
 }
 
-java.targetCompatibility = JavaVersion.VERSION_17
-java.sourceCompatibility = JavaVersion.VERSION_17
-
 repositories {
     maven {
         url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
@@ -34,4 +31,15 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.22"
     compileOnly "org.projectlombok:lombok:1.18.22"
     permitUnusedDeclared "org.projectlombok:lombok:1.18.22"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+        // Do not specify a specific vendor for now.
+        // In the future, we would prefer JvmVendorSpec.GRAAL_VM,
+        // but the current Gradle version does not yet support downloading the Graal VM automatically.
+        // Only ADOPTIUM is automically downloaded currently (and will be, when there is no other JDK 17 detected)
+        // vendor = JvmVendorSpec.GRAAL_VM
+    }
 }
