@@ -72,7 +72,7 @@ public class CiGameControllerConnector
 	{
 		log.trace("Connecting");
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 50; i++)
 		{
 			// Allow the GC to come up
 			ThreadUtil.parkNanosSafe(TimeUnit.MILLISECONDS.toNanos(200));

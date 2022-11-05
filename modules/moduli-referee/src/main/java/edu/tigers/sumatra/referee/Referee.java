@@ -16,6 +16,7 @@ import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class Referee extends AReferee
 
 	@Configurable(comment = "Custom referee port that overwrites the value from moduli")
 	@Setter
-	private static Integer customPort;
+	private static int customPort;
 
 	@Configurable(comment = "Custom referee address that overwrites the value from moduli")
 	@Setter
@@ -90,13 +91,15 @@ public class Referee extends AReferee
 
 	private int getPort()
 	{
-		return customPort != null ? customPort : getSubnodeConfiguration().getInt("port", 10003);
+		return customPort > 0 ? customPort : getSubnodeConfiguration().getInt("port", 10003);
 	}
 
 
 	private String getAddress()
 	{
-		return customAddress != null ? customAddress : getSubnodeConfiguration().getString("address", "224.5.23.1");
+		return StringUtils.isNotBlank(customAddress) ?
+				customAddress :
+				getSubnodeConfiguration().getString("address", "224.5.23.1");
 	}
 
 

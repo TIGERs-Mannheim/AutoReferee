@@ -15,6 +15,7 @@ import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 
 	@Configurable(comment = "Custom vision port that overwrites the value from moduli")
 	@Setter
-	private static Integer customPort;
+	private static int customPort;
 
 	@Configurable(comment = "Custom vision address that overwrites the value from moduli")
 	@Setter
@@ -65,8 +66,10 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	public void initModule() throws InitModuleException
 	{
 		super.initModule();
-		port = customPort != null ? customPort : getSubnodeConfiguration().getInt("port", 10006);
-		address = customAddress != null ? customAddress : getSubnodeConfiguration().getString("address", "224.5.23.2");
+		port = customPort > 0 ? customPort : getSubnodeConfiguration().getInt("port", 10006);
+		address = StringUtils.isNotBlank(customAddress) ?
+				customAddress :
+				getSubnodeConfiguration().getString("address", "224.5.23.2");
 	}
 
 
