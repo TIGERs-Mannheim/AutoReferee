@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee;
 
+import edu.tigers.sumatra.process.ProcessKiller;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
@@ -31,6 +32,8 @@ public class SslGameControllerProcess implements Runnable
 	private static final Path BINARY_DIR = Paths.get("data");
 	private static final File BINARY_FILE = BINARY_DIR.resolve(BINARY_NAME).toFile();
 
+	private final ProcessKiller processKiller = new ProcessKiller();
+
 	@Getter
 	private final int gcUiPort;
 	private final String publishAddress;
@@ -48,6 +51,18 @@ public class SslGameControllerProcess implements Runnable
 	}
 
 
+	public void killAllRunningProcesses()
+	{
+		try
+		{
+			processKiller.killProcess(BINARY_NAME);
+		} catch (IOException e)
+		{
+			log.error("Failed to kill running GC processes", e);
+		}
+	}
+
+
 	@Override
 	public void run()
 	{
@@ -59,7 +74,6 @@ public class SslGameControllerProcess implements Runnable
 		}
 
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
-
 
 		Path engineConfig = Path.of("config", "engine.yaml");
 		Path engineConfigDefault = Path.of("config", "engine-default.yaml");
@@ -132,7 +146,7 @@ public class SslGameControllerProcess implements Runnable
 				return false;
 			}
 		}
-		
+
 		File binaryDir = BINARY_DIR.toFile();
 		if (binaryDir.mkdirs())
 		{

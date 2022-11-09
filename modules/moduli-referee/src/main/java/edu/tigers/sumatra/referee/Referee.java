@@ -110,6 +110,7 @@ public class Referee extends AReferee
 		var publishRefereeMessages = getSubnodeConfiguration().getBoolean("publishRefereeMessages", false);
 		var publishAddress = publishRefereeMessages ? getAddress() + ":" + getPort() : "";
 		sslGameControllerProcess = new SslGameControllerProcess(port, publishAddress, timeAcquisitionMode);
+		sslGameControllerProcess.killAllRunningProcesses();
 
 		File stateStoreFile = new File("build/state-store.json.stream");
 		if (stateStoreFile.getParentFile().mkdirs())
