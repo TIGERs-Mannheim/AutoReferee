@@ -178,8 +178,14 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public IVector2 getBotKickerPosByTime(final double t)
 	{
-
 		return BotShape.getKickerCenterPos(getPosByTime(t), getOrientation(), getCenter2DribblerDist());
+	}
+
+
+	@Override
+	public IVector2 getBotKickerPosByTime(double t, double margin)
+	{
+		return BotShape.getKickerCenterPos(getPosByTime(t), getOrientation(), getCenter2DribblerDist() + margin);
 	}
 
 
