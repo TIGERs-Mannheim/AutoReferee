@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
@@ -183,6 +183,13 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
+	/**
+	 * Get last ball contact.
+	 *
+	 * @param robotInfo
+	 * @param pose      the pose of the robot, ideally that of vision (not predicted)
+	 * @return
+	 */
 	private BallContact getLastBallContact(final RobotInfo robotInfo, final Pose pose)
 	{
 		return ballContactCalculator.ballContact(robotInfo, pose, robotInfo.getCenter2DribblerDist());
@@ -206,6 +213,7 @@ public class WorldInfoCollector extends AWorldPredictor
 			return null;
 		}
 		var currentBotState = selectRobotState(filterState, internalState);
+		var visionBotState = Optional.ofNullable(filterState).orElse(internalState);
 		var botState = robotInfo.getTrajectory().map(this::trajectoryToState).orElse(currentBotState);
 
 		return TrackedBot.newBuilder()
@@ -215,7 +223,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withCurrentState(currentBotState)
 				.withFilteredState(filterState)
 				.withBotInfo(robotInfo)
-				.withLastBallContact(getLastBallContact(robotInfo, botState.getPose()))
+				.withLastBallContact(getLastBallContact(robotInfo, visionBotState.getPose()))
 				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
 				.build();
 	}
