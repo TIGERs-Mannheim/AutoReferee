@@ -1,7 +1,7 @@
 name: Perform Release
 
 on:
-  create:
+  push:
     tags:
       - version/*
 
