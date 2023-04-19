@@ -74,7 +74,7 @@ jib {
     }
     from {
         // gcr.io/distroless/java17
-        image = "gcr.io/distroless/java17@sha256:91f381a50e6889fb96feee76b108689bf090709730d65ee6463da8c3e3c1f191"
+        image = "gcr.io/distroless/java17@sha256:901215ab3ae619500f184668461cf901830e7a9707f8f9c016d9c08d8060db5a"
     }
     extraDirectories {
         paths {
