@@ -22,6 +22,12 @@ Run `./run.sh` or `run.bat`, depending on your system platform.
 
 You can pass `-h` to get the available arguments.
 
+You may be able to run it through docker as well:
+
+```shell
+docker run --net host  -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY tigersmannheim/auto-referee-vnc
+```
+
 ## IntelliJ
 IntelliJ reads the Gradle configuration and can use Gradle to perform the build.
 Make sure to configure Gradle for build and tests under Build, Execution, Deployment -> Build Tools -> Gradle.
