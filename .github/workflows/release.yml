@@ -30,9 +30,9 @@ jobs:
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: |
           tag=${GITHUB_REF#refs/tags/version/*}
-          docker build --pull -t "registry.hub.docker.com/tigersmannheim/auto-referee-vnc:$tag" src/main/docker-vnc
+          docker build --pull -t "tigersmannheim/auto-referee-vnc:$tag" src/main/docker-vnc
           docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
-          docker push "registry.hub.docker.com/tigersmannheim/auto-referee-vnc:$tag"
+          docker push "tigersmannheim/auto-referee-vnc:$tag"
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
