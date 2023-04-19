@@ -17,8 +17,15 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - name: Publish to Docker Hub
+      - name: Publish auto-referee to Docker Hub
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: ./gradlew jib
+      - name: Publish auto-referee-vnc to Docker Hub
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        run: |
+          docker build --pull -t registry.hub.docker.com/tigersmannheim/auto-referee-vnc:latest src/main/docker-vnc
+          docker push registry.hub.docker.com/tigersmannheim/auto-referee-vnc:latest

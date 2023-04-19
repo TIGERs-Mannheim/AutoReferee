@@ -1,9 +1,9 @@
 # This image adds a VNC server on top of the base image (which is build with Jib)
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
-        openjdk-11-jre \
+        openjdk-17-jre \
         # virtual display and VNC server
         x11vnc xvfb && \
         apt-get clean -y
@@ -16,5 +16,5 @@ EXPOSE 5900
 USER default
 WORKDIR /home/default
 COPY --from=registry.hub.docker.com/tigersmannheim/auto-referee:latest /app /app
-COPY --from=registry.hub.docker.com/tigersmannheim/auto-referee:latest /config /home/default/config
+COPY --from=registry.hub.docker.com/tigersmannheim/auto-referee:latest --chown=default /config /home/default/config
 ENTRYPOINT ["/docker-entry.sh"]
