@@ -88,6 +88,10 @@ jib {
             }
         }
     }
+    container.jvmFlags = [
+            '-Djava.net.preferIPv4Stack=true',
+            '-Dsun.java2d.d3d=false',
+    ]
 }
 
 run.workingDir = rootProject.projectDir

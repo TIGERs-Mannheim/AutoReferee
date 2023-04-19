@@ -17,7 +17,7 @@ if [[ "$1" == "vnc" ]]; then
 
   cat <<EOF >>~/.xinitrc
 #!/bin/sh
-exec java -cp "/app/resources:/app/classes:/app/libs/*" "edu.tigers.autoref.AutoReferee" -w "${VNC_GEOMETRY}" "${args[@]}" > /tmp/out.log
+exec java -Djava.net.preferIPv4Stack=true -Dsun.java2d.d3d=false -cp @/app/jib-classpath-file @/app/jib-main-class-file -w "${VNC_GEOMETRY}" "${args[@]}" > /tmp/out.log
 EOF
   chmod 700 ~/.xinitrc
 
@@ -27,5 +27,5 @@ EOF
   export X11VNC_CREATE_GEOM="${VNC_GEOMETRY}"
   exec x11vnc -forever -usepw -display WAIT:cmd=FINDCREATEDISPLAY-Xvfb
 else
-  exec java -cp "/app/resources:/app/classes:/app/libs/*" "edu.tigers.autoref.AutoReferee" "${args[@]}"
+  exec java -Djava.net.preferIPv4Stack=true -Dsun.java2d.d3d=false -cp @/app/jib-classpath-file @/app/jib-main-class-file "${args[@]}"
 fi
