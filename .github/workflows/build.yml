@@ -2,7 +2,7 @@ name: Build and push to docker
 
 on:
   push:
-    branches: [ pipeline ]
+    branches: [ master ]
 
 jobs:
   build:
