@@ -1,4 +1,6 @@
-# This image adds a VNC server on top of the base image (which is build with Jib)
+ARG base_version=latest
+FROM registry.hub.docker.com/tigersmannheim/auto-referee:$base_version as jib
+
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -15,6 +17,6 @@ RUN chmod 775 /docker-entry.sh
 EXPOSE 5900
 USER default
 WORKDIR /home/default
-COPY --from=registry.hub.docker.com/tigersmannheim/auto-referee:latest /app /app
-COPY --from=registry.hub.docker.com/tigersmannheim/auto-referee:latest --chown=default /config /home/default/config
+COPY --from=jib /app /app
+COPY --from=jib --chown=default /config /home/default/config
 ENTRYPOINT ["/docker-entry.sh"]
