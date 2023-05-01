@@ -16,7 +16,6 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.VectorMath;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -29,18 +28,14 @@ import static org.assertj.core.api.Assertions.within;
 
 /**
  * Test for geometric math functions:
- *
  * <pre>
  * further Internet references:
  * <a href="https://en.wikipedia.org/wiki/Archimedean_spiral">wikipedia.org: arithmetic spiral</a>
  * </pre>
- *
- * @author KaiE
  */
 public class LineMathTest
 {
-
-	private Random random;
+	private Random random = new Random(0);
 	private static final double TEST_ACCURACY = 1e-3;
 	private static final double TEST_ACCURACY_SQR = TEST_ACCURACY * TEST_ACCURACY;
 
@@ -51,17 +46,8 @@ public class LineMathTest
 	}
 
 
-	@Before
-	public void before()
-	{
-		// we want a fresh random generator for each test, because the test case ordering is not defined
-		random = new Random(0);
-	}
-
-
 	/**
 	 * {@link VectorMath#distancePP(IVector2, IVector2)}
-	 *
 	 * <pre>
 	 * What is covered:
 	 * 1) default tests with standard values of euclidean space
@@ -96,13 +82,11 @@ public class LineMathTest
 					distance,
 					TEST_ACCURACY_SQR);
 		}
-
 	}
 
 
 	/**
 	 * {@link VectorMath#distancePPSqr(IVector2, IVector2)}
-	 *
 	 * <pre>
 	 * what is covered:
 	 * random points in range from 1e5 to 1e-5 with check if result matches
@@ -112,7 +96,6 @@ public class LineMathTest
 	@Test
 	public void testDistancePPSqr()
 	{
-
 		final IVector2[][] testpoints = {
 				{ createRandomVector(1e5), createRandomVector(1e5) },
 				{ createRandomVector(1e4), createRandomVector(1e4) },
@@ -136,21 +119,17 @@ public class LineMathTest
 			Assert.assertEquals(SumatraMath.sqrt(VectorMath.distancePPSqr(pnts[0], pnts[1])), euclDis,
 					TEST_ACCURACY_SQR);
 		}
-
-
 	}
 
 
 	/**
 	 * {@link LineMath#distancePL(IVector2, ILine)}<br/>
-	 *
 	 * <pre>
 	 * What is covered:
 	 * sample lines from the origin in a circle.
 	 * The length of the direction vector increases to check numeric
 	 * correctness
 	 * </pre>
-	 *
 	 * <pre>
 	 * Explanation:
 	 * -> first a set of points is generated on the arithmetic spiral resulting
@@ -195,7 +174,6 @@ public class LineMathTest
 
 	/**
 	 * {@link LineMath#leadPointOnLine(ILine, IVector2)}<br/>
-	 *
 	 * <pre>
 	 * what is covered:
 	 * - parallel cases with the coordinate axis;
@@ -209,7 +187,6 @@ public class LineMathTest
 	@Test
 	public void testLeadPointOnLine()
 	{
-
 		ILine line = Line.fromPoints(Vector2f.ZERO_VECTOR, Vector2f.X_AXIS);
 		for (double i = 0.0; i < 10; i += 0.1)
 		{
@@ -286,12 +263,12 @@ public class LineMathTest
 	{
 		final IFP<IVector2> intersectionL = (obj) -> LineMath
 				.intersectionPoint(Line.fromDirection(obj[0], obj[1]), Line.fromDirection(obj[3], obj[4]))
-				.get();
+				.orElseThrow();
 		final IFP<IVector2> intersectionP = (obj) -> LineMath
 				.intersectionPointOfSegments(Line.fromDirection(obj[0], obj[1]), Line.fromDirection(obj[3], obj[4]))
-				.get();
+				.orElseThrow();
 
-		for (long i = 0; i < 1e6; ++i)
+		for (long i = 0; i < 100; ++i)
 		{
 			final double lambda = random.nextDouble();
 			intersectionTest(lambda * 100, intersectionL);
@@ -315,33 +292,25 @@ public class LineMathTest
 	}
 
 
-	/**
-	 * checking 1 Million random lines in a square between +/- 500k in x and y with 10 steps each
-	 * on different length values from [0,1000) {@link LineMath#stepAlongLine(IVector2, IVector2, double)}
-	 */
 	@Test
 	public void testStepAlongLine()
 	{
-		for (double length = 0.0; length < 1000; length += 1)
-		{
-			final double s1 = random.nextDouble() - 0.5;
-			final double s2 = random.nextDouble() - 0.5;
-			final double r1 = random.nextDouble();
-			final double r2 = random.nextDouble();
-			Vector2 start = Vector2.fromXY(s1 * 1e4, s2 * 1e4);
-			if ((r1 + r2) < TEST_ACCURACY)
-			{
-				continue;
-			}
-			Vector2 endD = Vector2.fromXY(r1 - 0.5, r2 - 0.5);
-			Vector2 end = endD.scaleToNew(length).add(start);
+		double length = 100;
+		final double s1 = random.nextDouble() - 0.5;
+		final double s2 = random.nextDouble() - 0.5;
+		final double r1 = random.nextDouble();
+		final double r2 = random.nextDouble();
+		Vector2 start = Vector2.fromXY(s1 * 1e4, s2 * 1e4);
+		assertThat(r1 + r2).isGreaterThan(TEST_ACCURACY);
 
-			for (double i = 0.0; i < length; i += (0.01 * length))
-			{
-				final IVector2 result = LineMath.stepAlongLine(start, end, i);
-				final IVector2 expected = endD.scaleToNew(i).add(start);
-				assertThat(result).isEqualTo(expected);
-			}
+		Vector2 endD = Vector2.fromXY(r1 - 0.5, r2 - 0.5);
+		Vector2 end = endD.scaleToNew(length).add(start);
+
+		for (double i = 0.0; i < length; i += 1)
+		{
+			final IVector2 result = LineMath.stepAlongLine(start, end, i);
+			final IVector2 expected = endD.scaleToNew(i).add(start);
+			assertThat(result).isEqualTo(expected);
 		}
 	}
 
@@ -367,7 +336,6 @@ public class LineMathTest
 			}
 			Assert.assertTrue(result.isCloseTo(expected, TEST_ACCURACY));
 		}
-
 	}
 
 

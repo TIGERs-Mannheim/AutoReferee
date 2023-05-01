@@ -23,23 +23,19 @@ repositories {
     }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.22"
-    compileOnly "org.projectlombok:lombok:1.18.22"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.22"
+    annotationProcessor "org.projectlombok:lombok:1.18.26"
+    compileOnly "org.projectlombok:lombok:1.18.26"
+    permitUnusedDeclared "org.projectlombok:lombok:1.18.26"
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
-        // Do not specify a specific vendor for now.
-        // In the future, we would prefer JvmVendorSpec.GRAAL_VM,
-        // but the current Gradle version does not yet support downloading the Graal VM automatically.
-        // Only ADOPTIUM is automically downloaded currently (and will be, when there is no other JDK 17 detected)
-        // vendor = JvmVendorSpec.GRAAL_VM
+        vendor = JvmVendorSpec.GRAAL_VM
     }
 }

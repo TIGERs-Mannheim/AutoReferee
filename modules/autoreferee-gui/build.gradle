@@ -21,6 +21,6 @@ dependencies {
     implementation 'com.github.g3force:configurable:3.0'
 
     implementation 'commons-lang:commons-lang:2.6'
-    implementation 'com.miglayout:miglayout-swing:11.0'
+    implementation 'com.miglayout:miglayout-swing:11.1'
     implementation 'net.sf.jchart2d:jchart2d:3.3.2'
 }
