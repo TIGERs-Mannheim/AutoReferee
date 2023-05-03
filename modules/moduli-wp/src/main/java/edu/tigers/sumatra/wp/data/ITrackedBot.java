@@ -163,12 +163,6 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 
 
 	/**
-	 * @return the current robot state (internal or filtered)
-	 */
-	DelayedBotState getCurrentState();
-
-
-	/**
 	 * @return the current robot state as reported by the vision filter
 	 */
 	Optional<State> getFilteredState();

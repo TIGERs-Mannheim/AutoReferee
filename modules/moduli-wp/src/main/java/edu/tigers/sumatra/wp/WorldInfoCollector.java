@@ -12,7 +12,6 @@ import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
-import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamBall;
@@ -23,7 +22,6 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.pose.Pose;
-import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
@@ -36,7 +34,6 @@ import edu.tigers.sumatra.referee.data.GameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
-import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.util.Safe;
 import edu.tigers.sumatra.vision.AVisionFilter;
 import edu.tigers.sumatra.vision.IVisionFilterObserver;
@@ -47,7 +44,6 @@ import edu.tigers.sumatra.vision.data.IKickEvent;
 import edu.tigers.sumatra.vision.data.KickEvent;
 import edu.tigers.sumatra.wp.data.BallContact;
 import edu.tigers.sumatra.wp.data.BallKickFitState;
-import edu.tigers.sumatra.wp.data.DelayedBotState;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
@@ -97,20 +93,6 @@ public class WorldInfoCollector extends AWorldPredictor
 			defValue = "true"
 	)
 	private static boolean preferRobotFeedback = true;
-
-	@Configurable(
-			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
-			defValueSpezis = { "0.06", "0.0", "0.06", "0.06", "0.09", "0.06", "0.03" },
-			comment = "Delay [s] from giving a robot command to receiving the reaction on this command from vision"
-	)
-	private static double visionFeedbackDelay = 0.06;
-
-	@Configurable(
-			spezis = { "NICOLAI", "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "SIMULATOR" },
-			defValueSpezis = { "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0125" },
-			comment = "Delay [s] between path planning trajectory state and robot feedback state"
-	)
-	private static double robotFeedbackDelay = 0.0;
 
 	static
 	{
@@ -173,13 +155,13 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private DelayedBotState selectRobotState(BotState filterState, BotState internalState)
+	private BotState selectRobotState(BotState filterState, BotState internalState)
 	{
 		if ((internalState != null && preferRobotFeedback) || filterState == null)
 		{
-			return DelayedBotState.fromBotState(internalState, robotFeedbackDelay);
+			return internalState;
 		}
-		return DelayedBotState.fromBotState(filterState, visionFeedbackDelay);
+		return filterState;
 	}
 
 
@@ -196,12 +178,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private State trajectoryToState(final ITrajectory<IVector3> traj)
-	{
-		return State.of(Pose.from(traj.getPositionMM(0.0)), traj.getVelocity(0.0));
-	}
-
-
 	private TrackedBot createTrackedBot(
 			RobotInfo robotInfo,
 			BotState filterState,
@@ -214,13 +190,11 @@ public class WorldInfoCollector extends AWorldPredictor
 		}
 		var currentBotState = selectRobotState(filterState, internalState);
 		var visionBotState = Optional.ofNullable(filterState).orElse(internalState);
-		var botState = robotInfo.getTrajectory().map(this::trajectoryToState).orElse(currentBotState);
 
 		return TrackedBot.newBuilder()
 				.withBotId(robotInfo.getBotId())
 				.withTimestamp(lastWFTimestamp)
-				.withState(botState)
-				.withCurrentState(currentBotState)
+				.withState(currentBotState)
 				.withFilteredState(filterState)
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, visionBotState.getPose()))
