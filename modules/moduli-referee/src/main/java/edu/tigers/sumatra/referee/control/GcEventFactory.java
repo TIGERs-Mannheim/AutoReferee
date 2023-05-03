@@ -1,14 +1,17 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.control;
 
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.proto.SslGcApi;
 import edu.tigers.sumatra.referee.proto.SslGcChange;
 import edu.tigers.sumatra.referee.proto.SslGcCommon;
+import edu.tigers.sumatra.referee.proto.SslGcEngine;
 import edu.tigers.sumatra.referee.proto.SslGcGeometry;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.proto.SslGcState;
@@ -28,13 +31,17 @@ public final class GcEventFactory
 	static
 	{
 		commandMap.put(SslGcRefereeMessage.Referee.Command.HALT,
-				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.HALT).build());
+				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.HALT).setForTeam(SslGcCommon.Team.UNKNOWN)
+						.build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.STOP,
-				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.STOP).build());
+				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.STOP).setForTeam(SslGcCommon.Team.UNKNOWN)
+						.build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.NORMAL_START,
-				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.NORMAL_START).build());
+				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.NORMAL_START)
+						.setForTeam(SslGcCommon.Team.UNKNOWN).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.FORCE_START,
-				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.FORCE_START).build());
+				SslGcState.Command.newBuilder().setType(SslGcState.Command.Type.FORCE_START)
+						.setForTeam(SslGcCommon.Team.UNKNOWN).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.PREPARE_KICKOFF_YELLOW, SslGcState.Command.newBuilder()
 				.setType(SslGcState.Command.Type.KICKOFF).setForTeam(SslGcCommon.Team.YELLOW).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.PREPARE_KICKOFF_BLUE, SslGcState.Command.newBuilder()
@@ -47,10 +54,6 @@ public final class GcEventFactory
 				.setType(SslGcState.Command.Type.DIRECT).setForTeam(SslGcCommon.Team.YELLOW).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.DIRECT_FREE_BLUE, SslGcState.Command.newBuilder()
 				.setType(SslGcState.Command.Type.DIRECT).setForTeam(SslGcCommon.Team.BLUE).build());
-		commandMap.put(SslGcRefereeMessage.Referee.Command.INDIRECT_FREE_YELLOW, SslGcState.Command.newBuilder()
-				.setType(SslGcState.Command.Type.INDIRECT).setForTeam(SslGcCommon.Team.YELLOW).build());
-		commandMap.put(SslGcRefereeMessage.Referee.Command.INDIRECT_FREE_BLUE, SslGcState.Command.newBuilder()
-				.setType(SslGcState.Command.Type.INDIRECT).setForTeam(SslGcCommon.Team.BLUE).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.TIMEOUT_YELLOW, SslGcState.Command.newBuilder()
 				.setType(SslGcState.Command.Type.TIMEOUT).setForTeam(SslGcCommon.Team.YELLOW).build());
 		commandMap.put(SslGcRefereeMessage.Referee.Command.TIMEOUT_BLUE, SslGcState.Command.newBuilder()
@@ -74,16 +77,12 @@ public final class GcEventFactory
 
 	public static SslGcCommon.Team map(ETeamColor teamColor)
 	{
-		switch (teamColor)
+		return switch (teamColor)
 		{
-			case YELLOW:
-				return SslGcCommon.Team.YELLOW;
-			case BLUE:
-				return SslGcCommon.Team.BLUE;
-			case NEUTRAL:
-			default:
-				return SslGcCommon.Team.UNKNOWN;
-		}
+			case YELLOW -> SslGcCommon.Team.YELLOW;
+			case BLUE -> SslGcCommon.Team.BLUE;
+			default -> SslGcCommon.Team.UNKNOWN;
+		};
 	}
 
 
@@ -91,7 +90,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setNewCommand(SslGcChange.NewCommand.newBuilder()
+						.setNewCommandChange(SslGcChange.Change.NewCommand.newBuilder()
 								.setCommand(map(command))
 								.build())
 						.build())
@@ -103,7 +102,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setNewCommand(SslGcChange.NewCommand.newBuilder()
+						.setNewCommandChange(SslGcChange.Change.NewCommand.newBuilder()
 								.setCommand(SslGcState.Command.newBuilder()
 										.setType(type)
 										.setForTeam(map(teamColor))
@@ -148,9 +147,9 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setUpdateTeamState(SslGcChange.UpdateTeamState.newBuilder()
+						.setUpdateTeamStateChange(SslGcChange.Change.UpdateTeamState.newBuilder()
 								.setForTeam(map(teamColor))
-								.setGoals(goals)
+								.setGoals(Int32Value.of(goals))
 								.build())
 						.build())
 				.build();
@@ -161,9 +160,9 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setUpdateTeamState(SslGcChange.UpdateTeamState.newBuilder()
+						.setUpdateTeamStateChange(SslGcChange.Change.UpdateTeamState.newBuilder()
 								.setForTeam(map(teamColor))
-								.setGoalkeeper(id)
+								.setGoalkeeper(Int32Value.of(id))
 								.build())
 						.build())
 				.build();
@@ -174,9 +173,9 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setUpdateTeamState(SslGcChange.UpdateTeamState.newBuilder()
+						.setUpdateTeamStateChange(SslGcChange.Change.UpdateTeamState.newBuilder()
 								.setForTeam(map(teamColor))
-								.setTeamName(name)
+								.setTeamName(StringValue.of(name))
 								.build())
 						.build())
 				.build();
@@ -187,7 +186,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setSetBallPlacementPos(SslGcChange.SetBallPlacementPos.newBuilder()
+						.setSetBallPlacementPosChange(SslGcChange.Change.SetBallPlacementPos.newBuilder()
 								.setPos(map(location))
 								.build())
 						.build())
@@ -205,7 +204,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setChangeStage(SslGcChange.ChangeStage.newBuilder()
+						.setChangeStageChange(SslGcChange.Change.ChangeStage.newBuilder()
 								.setNewStage(stage)
 								.build())
 						.build())
@@ -217,7 +216,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setChangeStage(SslGcChange.ChangeStage.newBuilder()
+						.setChangeStageChange(SslGcChange.Change.ChangeStage.newBuilder()
 								.setNewStage(SslGcRefereeMessage.Referee.Stage.POST_GAME)
 								.build())
 						.build())
@@ -229,7 +228,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setAddYellowCard(SslGcChange.AddYellowCard.newBuilder()
+						.setAddYellowCardChange(SslGcChange.Change.AddYellowCard.newBuilder()
 								.setForTeam(map(teamColor))
 								.build())
 						.build())
@@ -241,7 +240,7 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setChange(SslGcChange.Change.newBuilder()
-						.setAddRedCard(SslGcChange.AddRedCard.newBuilder()
+						.setAddRedCardChange(SslGcChange.Change.AddRedCard.newBuilder()
 								.setForTeam(map(teamColor))
 								.build())
 						.build())
@@ -260,8 +259,9 @@ public final class GcEventFactory
 	public static SslGcApi.Input triggerContinue()
 	{
 		return SslGcApi.Input.newBuilder()
-				.setChange(SslGcChange.Change.newBuilder()
-						.setContinue(SslGcChange.Continue.newBuilder().build())
+				.setContinueAction(SslGcEngine.ContinueAction.newBuilder()
+						.setType(SslGcEngine.ContinueAction.Type.RESUME_FROM_HALT)
+						.setForTeam(SslGcCommon.Team.UNKNOWN)
 						.build())
 				.build();
 	}
