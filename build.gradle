@@ -3,25 +3,17 @@
  */
 
 plugins {
-    id 'sumatra.java'
-    id 'application'
-
     id 'com.palantir.git-version' version '3.0.0'
-    id 'ca.cutterslade.analyze' version '1.9.1'
-    id 'com.google.cloud.tools.jib' version '3.3.1'
     id "com.github.breadmoirai.github-release" version "2.4.1"
-    id 'com.github.ben-manes.versions' version '0.46.0'
-    id 'se.patrikerdes.use-latest-versions' version '0.2.18'
-    id "com.google.protobuf" version "0.9.3" apply(false)
+    id 'idea'
+
+    id 'sumatra.java'
+    id 'sumatra.jib'
+    id 'sumatra.application'
 }
 
 ext.versionDetails = versionDetails(prefix: "version/")
 version gitVersion(prefix: "version/")
-
-tasks.named('wrapper').configure {
-    // Use the 'all' distributable when upgrading the Gradle wrapper
-    distributionType = Wrapper.DistributionType.ALL
-}
 
 dependencies {
     implementation project(':autoreferee-gui')
@@ -54,13 +46,6 @@ dependencies {
 
 application {
     mainClass.set('edu.tigers.autoref.AutoReferee')
-    applicationDefaultJvmArgs = [
-            '-Xms64m',
-            '-Xmx2G',
-            '-server',
-            '-Dsun.java2d.d3d=false',
-            '-Djava.net.preferIPv4Stack=true',
-    ]
 }
 
 jib {
@@ -70,11 +55,6 @@ jib {
             username = System.getenv("DOCKER_HUB_USERNAME") ?: ""
             password = System.getenv("DOCKER_HUB_PASSWORD") ?: ""
         }
-        tags = [rootProject.version]
-    }
-    from {
-        // gcr.io/distroless/java17
-        image = "gcr.io/distroless/java17@sha256:901215ab3ae619500f184668461cf901830e7a9707f8f9c016d9c08d8060db5a"
     }
     extraDirectories {
         paths {
@@ -88,22 +68,7 @@ jib {
             }
         }
     }
-    container.jvmFlags = [
-            '-Djava.net.preferIPv4Stack=true',
-            '-Dsun.java2d.d3d=false',
-    ]
 }
-
-run.workingDir = rootProject.projectDir
-
-// set version here to avoid overriding the project version.
-// version is set to null to skip it completely in the artifact names
-// Thus, it is guaranteed that old artifacts are always overwritten.
-distZip.archiveVersion.convention(null)
-jar.archiveVersion.convention(null)
-
-// disable tar distribution to avoid redundant artifacts
-distTar.enabled = false
 
 distributions {
     main {

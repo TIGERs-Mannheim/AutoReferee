@@ -39,3 +39,5 @@ java {
         vendor = JvmVendorSpec.GRAAL_VM
     }
 }
+
+jar.archiveVersion.convention(null)
