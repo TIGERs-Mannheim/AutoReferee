@@ -1,8 +1,8 @@
 time-acquisition-mode: ci
 network:
-  publish-address:
+  publish-address: ""
   # set a network IP to only publish to that network - else messages will be published to all network interfaces
-  publish-nif:
+  publish-nif: ""
   vision-address: 224.5.23.2:11006
   tracker-address: 224.5.23.2:11010
   skip-interfaces: [ ]
