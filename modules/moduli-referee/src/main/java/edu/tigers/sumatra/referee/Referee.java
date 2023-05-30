@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee;
 
@@ -179,7 +179,7 @@ public class Referee extends AReferee
 	@Override
 	public void sendGameControllerEvent(final SslGcApi.Input event)
 	{
-		if (sslGameControllerProcess != null)
+		if (getActiveSource().getType() == ERefereeMessageSource.CI)
 		{
 			changeQueue.add(event);
 		}
