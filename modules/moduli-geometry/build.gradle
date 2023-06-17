@@ -20,7 +20,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
 
     implementation 'commons-lang:commons-lang:2.6'
-    implementation 'com.google.protobuf:protobuf-java:3.22.3'
+    implementation 'com.google.protobuf:protobuf-java:3.23.2'
 
     implementation 'com.sleepycat:je:18.3.12'
 }

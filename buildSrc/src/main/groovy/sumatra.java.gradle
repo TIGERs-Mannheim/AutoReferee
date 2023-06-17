@@ -28,15 +28,14 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.26"
-    compileOnly "org.projectlombok:lombok:1.18.26"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.26"
+    annotationProcessor "org.projectlombok:lombok:1.18.28"
+    compileOnly "org.projectlombok:lombok:1.18.28"
+    permitUnusedDeclared "org.projectlombok:lombok:1.18.28"
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
-        vendor = JvmVendorSpec.GRAAL_VM
     }
 }
 

@@ -17,6 +17,6 @@ dependencies {
 
     implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
 
-    api 'com.google.protobuf:protobuf-java:3.22.3'
-    implementation 'com.google.guava:guava:31.1-jre'
+    api 'com.google.protobuf:protobuf-java:3.23.2'
+    implementation 'com.google.guava:guava:32.0.1-jre'
 }

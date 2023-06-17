@@ -8,7 +8,7 @@ plugins {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.22.3'
+        artifact = 'com.google.protobuf:protoc:3.23.2'
     }
     // See: https://github.com/protocolbuffers/protobuf/issues/7271
     generateProtoTasks {
