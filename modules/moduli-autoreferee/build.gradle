@@ -58,8 +58,6 @@ dependencies {
 
     integrationTestImplementation 'org.apache.logging.log4j:log4j-api:2.20.0'
     integrationTestRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.20.0'
-    integrationTestRuntimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.20.0'
-    integrationTestRuntimeOnly 'org.slf4j:slf4j-log4j12:2.0.7'
 
     integrationTestAnnotationProcessor "org.projectlombok:lombok:1.18.28"
     integrationTestImplementation "org.projectlombok:lombok:1.18.28"
