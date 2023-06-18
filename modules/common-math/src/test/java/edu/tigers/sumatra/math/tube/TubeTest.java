@@ -4,15 +4,13 @@
 
 package edu.tigers.sumatra.math.tube;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
 import org.junit.Assert;
 import org.junit.Test;
 
-import edu.tigers.sumatra.math.line.Line;
-import edu.tigers.sumatra.math.line.v2.Lines;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class TubeTest
@@ -70,24 +68,24 @@ public class TubeTest
 		IVector2 p7 = Vector2.fromXY(-10, -10);
 		IVector2 p8 = Vector2.fromXY(1000, 10);
 
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p1, p2)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p2, p3)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p1, p5)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p4, p3)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p6, p7)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p6, p8)));
-		Assert.assertTrue(tube.isIntersectingWithLine(Line.fromPoints(p1, p8)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p1, p2)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p2, p3)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p1, p5)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p4, p3)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p6, p7)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p6, p8)));
+		Assert.assertTrue(tube.isIntersectingWithLine(Lines.lineFromPoints(p1, p8)));
 
-		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p1, p2)));
-		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p1, p5)));
-		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p6, p7)));
-		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p6, p8)));
+		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p1, p2)));
+		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p1, p5)));
+		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p6, p7)));
+		Assert.assertTrue(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p6, p8)));
 
-		Assert.assertFalse(tube.isIntersectingWithLine(Line.fromPoints(p1, p3)));
-		Assert.assertFalse(tube.isIntersectingWithLine(Line.fromPoints(p5, p4)));
+		Assert.assertFalse(tube.isIntersectingWithLine(Lines.lineFromPoints(p1, p3)));
+		Assert.assertFalse(tube.isIntersectingWithLine(Lines.lineFromPoints(p5, p4)));
 
-		Assert.assertFalse(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p1, p3)));
-		Assert.assertFalse(tubeZeroLength.isIntersectingWithLine(Line.fromPoints(p8, p3)));
+		Assert.assertFalse(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p1, p3)));
+		Assert.assertFalse(tubeZeroLength.isIntersectingWithLine(Lines.lineFromPoints(p8, p3)));
 	}
 
 

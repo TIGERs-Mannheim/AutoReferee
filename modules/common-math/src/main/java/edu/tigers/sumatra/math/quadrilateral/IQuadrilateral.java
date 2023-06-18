@@ -4,12 +4,12 @@
 
 package edu.tigers.sumatra.math.quadrilateral;
 
-import java.util.List;
-
 import edu.tigers.sumatra.math.I2DShape;
-import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.triangle.ITriangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+
+import java.util.List;
 
 
 /**
@@ -27,10 +27,10 @@ public interface IQuadrilateral extends I2DShape
 	 * @return a list of all corners in clockwise order, starting with
 	 */
 	List<IVector2> getCorners();
-	
-	
+
+
 	/**
 	 * @return all 4 edges of this quadrilateral
 	 */
-	List<ILine> getEdges();
+	List<ILineSegment> getEdges();
 }

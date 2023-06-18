@@ -4,15 +4,15 @@
 
 package edu.tigers.sumatra.geometry;
 
-import java.util.Arrays;
-import java.util.List;
-
 import edu.tigers.sumatra.ids.ETeamColor;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.VectorDistanceComparator;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 /**

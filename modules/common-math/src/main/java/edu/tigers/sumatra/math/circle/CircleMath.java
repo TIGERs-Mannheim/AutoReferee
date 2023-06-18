@@ -4,21 +4,20 @@
 
 package edu.tigers.sumatra.math.circle;
 
-import static java.lang.Math.abs;
+import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.v2.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineBase;
-import edu.tigers.sumatra.math.line.v2.Lines;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
+import static java.lang.Math.abs;
 
 
 /**
@@ -135,7 +134,7 @@ public final class CircleMath
 		return lineIntersectionsInternal(circle, line.toLine())
 				.stream()
 				.filter(line::isPointOnLine)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -265,7 +264,8 @@ public final class CircleMath
 		IVector2 center = arc.center();
 		IVector2 centerToPoint = point.subtractNew(center);
 		IVector2 startPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle()).scaleToNew(arc.radius()));
-		IVector2 endPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle() + arc.getRotation()).scaleToNew(arc.radius()));
+		IVector2 endPoint = arc.center()
+				.addNew(Vector2.fromAngle(arc.getStartAngle() + arc.getRotation()).scaleToNew(arc.radius()));
 		if (centerToPoint.isZeroVector())
 		{
 			return startPoint;

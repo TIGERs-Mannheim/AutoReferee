@@ -7,10 +7,9 @@ package edu.tigers.sumatra.geometry;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.v2.IHalfLine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -65,34 +64,10 @@ public class PenaltyArea implements IPenaltyArea
 
 
 	@Override
-	public List<IVector2> lineIntersections(final edu.tigers.sumatra.math.line.v2.ILine line)
+	public List<IVector2> lineIntersections(ILineBase line)
 	{
 		return getEdges().stream()
-				.map(edge -> edge.intersectLine(line))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.distinct()
-				.toList();
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final ILineSegment line)
-	{
-		return getEdges().stream()
-				.map(edge -> edge.intersectSegment(line))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.distinct()
-				.toList();
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final IHalfLine line)
-	{
-		return getEdges().stream()
-				.map(edge -> edge.intersectHalfLine(line))
+				.map(line::intersect)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.distinct()
@@ -115,13 +90,6 @@ public class PenaltyArea implements IPenaltyArea
 		edges.add(Lines.segmentFromPoints(p2, p3));
 		edges.add(Lines.segmentFromPoints(p3, p4));
 		return edges;
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final ILine line)
-	{
-		return lineIntersections(Lines.lineFromLegacyLine(line));
 	}
 
 
@@ -181,13 +149,6 @@ public class PenaltyArea implements IPenaltyArea
 							.toList());
 		}
 		return point;
-	}
-
-
-	@Override
-	public boolean isIntersectingWithLine(final ILine line)
-	{
-		return !lineIntersections(line).isEmpty();
 	}
 
 

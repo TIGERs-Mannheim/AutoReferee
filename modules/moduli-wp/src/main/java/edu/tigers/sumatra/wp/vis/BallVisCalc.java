@@ -17,7 +17,7 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.wp.data.ITrackedBall;

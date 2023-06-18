@@ -4,9 +4,9 @@
 
 package edu.tigers.sumatra.geometry;
 
-import edu.tigers.sumatra.math.line.v2.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.triangle.TriangleMath;

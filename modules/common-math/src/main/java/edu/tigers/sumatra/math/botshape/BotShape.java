@@ -5,10 +5,9 @@ package edu.tigers.sumatra.math.botshape;
 
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.LineMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -27,34 +26,6 @@ public class BotShape implements IBotShape
 	private final double radius;
 	private final double center2Dribbler;
 	private final double orientation;
-
-
-	@Override
-	public IBotShape mirror()
-	{
-		return new BotShape(position.multiplyNew(-1), radius, center2Dribbler, orientation + AngleMath.PI);
-	}
-
-
-	@Override
-	public double radius()
-	{
-		return radius;
-	}
-
-
-	@Override
-	public IVector2 center()
-	{
-		return position;
-	}
-
-
-	@Override
-	public IVector2 getKickerCenterPos()
-	{
-		return getKickerCenterPos(position, orientation, center2Dribbler);
-	}
 
 
 	/**
@@ -103,6 +74,34 @@ public class BotShape implements IBotShape
 
 
 	@Override
+	public IBotShape mirror()
+	{
+		return new BotShape(position.multiplyNew(-1), radius, center2Dribbler, orientation + AngleMath.PI);
+	}
+
+
+	@Override
+	public double radius()
+	{
+		return radius;
+	}
+
+
+	@Override
+	public IVector2 center()
+	{
+		return position;
+	}
+
+
+	@Override
+	public IVector2 getKickerCenterPos()
+	{
+		return getKickerCenterPos(position, orientation, center2Dribbler);
+	}
+
+
+	@Override
 	public ILineSegment getKickerLine()
 	{
 		double orient2CornerAngle = SumatraMath.acos(center2Dribbler / radius);
@@ -124,9 +123,8 @@ public class BotShape implements IBotShape
 	@Override
 	public boolean isPointInKickerZone(final IVector2 point, final double zoneLength, final double zoneWidth)
 	{
-		Line orientLine = Line.fromDirection(position, Vector2.fromAngle(orientation));
-
-		Vector2 leadPoint = orientLine.leadPointOf(point);
+		var orientLine = Lines.halfLineFromDirection(position, Vector2.fromAngle(orientation));
+		var leadPoint = orientLine.closestPointOnLine(point);
 
 		if (!orientLine.isPointInFront(leadPoint))
 		{
@@ -155,7 +153,7 @@ public class BotShape implements IBotShape
 		}
 		if (isPointInKickerZone(point, 0))
 		{
-			return Lines.segmentFromPoints(center(), point).intersectSegment(getKickerLine()).orElse(point);
+			return Lines.segmentFromPoints(center(), point).intersect(getKickerLine()).orElse(point);
 		}
 		return LineMath.stepAlongLine(center(), point, radius);
 	}

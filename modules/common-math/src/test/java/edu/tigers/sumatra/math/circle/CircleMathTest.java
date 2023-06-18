@@ -4,19 +4,17 @@
 
 package edu.tigers.sumatra.math.circle;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.assertj.core.api.Assertions;
-import org.assertj.core.data.Offset;
-import org.junit.Test;
-
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.line.v2.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class CircleMathTest
@@ -27,24 +25,24 @@ public class CircleMathTest
 		ICircle circle = Circle.createCircle(Vector2.fromXY(1000, 500), 300);
 
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, 500)).get(0)
-				.distanceTo(Vector2.fromXY(1300, 500)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(1300, 500))).isLessThan(1e-3);
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, 500)).get(1)
-				.distanceTo(Vector2.fromXY(1300, 500)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(1300, 500))).isLessThan(1e-3);
 
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(200, 300)).get(0)
-				.distanceTo(Vector2.fromXY(961.892, 202.43)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(961.892, 202.43))).isLessThan(1e-3);
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(200, 300)).get(1)
-				.distanceTo(Vector2.fromXY(826.343, 744.629)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(826.343, 744.629))).isLessThan(1e-3);
 
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, -200)).get(0)
-				.distanceTo(Vector2.fromXY(1271.052, 371.429)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(1271.052, 371.429))).isLessThan(1e-3);
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, -200)).get(1)
-				.distanceTo(Vector2.fromXY(728.948, 371.429)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(728.948, 371.429))).isLessThan(1e-3);
 
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, 800)).get(0)
-				.distanceTo(Vector2.fromXY(1000, 800)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(1000, 800))).isLessThan(1e-3);
 		assertThat(CircleMath.tangentialIntersections(circle, Vector2.fromXY(1000, 800)).get(1)
-				.distanceTo(Vector2.fromXY(1000, 800)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(1000, 800))).isLessThan(1e-3);
 	}
 
 
@@ -117,10 +115,8 @@ public class CircleMathTest
 				.isEqualTo(origin.addNew(Vector2.fromXY(0, -radius)));
 		assertThat(CircleMath.nearestPointOutsideCircle(circle, origin.addNew(Vector2.fromXY(0, 0))))
 				.isEqualTo(origin.addNew(Vector2.fromXY(radius, 0)));
-		assertThat(
-				(CircleMath.nearestPointOutsideCircle(circle, origin.addNew(Vector2.fromXY(100, 100)))
-						.subtractNew(origin.addNew(Vector2.fromAngle(Math.PI / 4).multiply(radius)))).getLength() < 1e-3)
-				.isTrue();
+		assertThat((CircleMath.nearestPointOutsideCircle(circle, origin.addNew(Vector2.fromXY(100, 100)))
+				.subtractNew(origin.addNew(Vector2.fromAngle(Math.PI / 4).multiply(radius)))).getLength()).isLessThan(1e-3);
 	}
 
 
@@ -330,13 +326,13 @@ public class CircleMathTest
 		IVector2 center = Vector2.fromXY(100, 100);
 
 		assertThat(CircleMath.stepAlongCircle(Vector2.fromXY(300, 100), center, Math.PI / 2)
-				.distanceTo(Vector2.fromXY(100, 300)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(100, 300))).isLessThan(1e-3);
 
 		assertThat(CircleMath.stepAlongCircle(Vector2.fromXY(200, 200), center, Math.PI)
-				.distanceTo(Vector2.fromXY(0, 0)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(0, 0))).isLessThan(1e-3);
 
 		assertThat(CircleMath.stepAlongCircle(Vector2.fromXY(100, 100), center, Math.PI)
-				.distanceTo(Vector2.fromXY(100, 100)) < 1e-3).isTrue();
+				.distanceTo(Vector2.fromXY(100, 100))).isLessThan(1e-3);
 	}
 
 
@@ -347,7 +343,8 @@ public class CircleMathTest
 		var nearestPoint = CircleMath.nearestPointOnArcLine(arc, Vector2.fromXY(100, 100));
 
 		IVector2 startPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle()).scaleToNew(arc.radius()));
-		IVector2 endPoint = arc.center().addNew(Vector2.fromAngle(arc.getStartAngle() + arc.getRotation()).scaleToNew(arc.radius()));
+		IVector2 endPoint = arc.center()
+				.addNew(Vector2.fromAngle(arc.getStartAngle() + arc.getRotation()).scaleToNew(arc.radius()));
 		assertThat(nearestPoint).isEqualTo(startPoint);
 
 		nearestPoint = CircleMath.nearestPointOnArcLine(arc, Vector2.fromXY(0, 0));

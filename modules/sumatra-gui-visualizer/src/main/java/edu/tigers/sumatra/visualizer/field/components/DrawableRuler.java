@@ -13,7 +13,8 @@ import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.IDrawableTool;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
@@ -36,7 +37,7 @@ public class DrawableRuler implements IDrawableShape
 	}
 
 	private final IDrawableShape shape;
-	private final Line rulerLine;
+	private final ILineSegment rulerLine;
 	private final String lineDescription;
 
 
@@ -45,7 +46,7 @@ public class DrawableRuler implements IDrawableShape
 		IVector2 start2End = end.subtractNew(start);
 		lineDescription = String.format(" %.1f / %.1f %nlength: %.1f / angle: %.2f / %.1f°", start2End.x(), start2End.y(),
 				start2End.getLength2(), start2End.getAngle(), AngleMath.rad2deg(start2End.getAngle()));
-		rulerLine = Line.fromPoints(start, end);
+		rulerLine = Lines.segmentFromPoints(start, end);
 		shape = new DrawableLine(rulerLine);
 	}
 

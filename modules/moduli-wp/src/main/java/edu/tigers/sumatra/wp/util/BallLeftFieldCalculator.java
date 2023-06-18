@@ -8,8 +8,7 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.geometry.Goal;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
@@ -91,7 +90,7 @@ public class BallLeftFieldCalculator
 			ballInsideField = postBallPosInsideField;
 			if (!postBallPosInsideField && stateChanged)
 			{
-				ILine line = Line.fromPoints(postPos.getPos(), prePos.getPos());
+				var line = Lines.lineFromPoints(postPos.getPos(), prePos.getPos());
 				IVector2 pos = postPos.getPos().nearestToOpt(Geometry.getField().lineIntersections(line))
 						.orElse(postPos.getPos());
 				double height = (postPos.getPos3().z() + prePos.getPos3().z()) / 2.0;

@@ -4,18 +4,18 @@
 
 package edu.tigers.sumatra.math.triangle;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import edu.tigers.sumatra.math.circle.CircleMath;
+import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import org.junit.Test;
 
 import java.util.List;
 
-import org.junit.Test;
-
-import edu.tigers.sumatra.math.circle.CircleMath;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -26,7 +26,7 @@ public class TriangleTest
 
 	/**
 	 * Test method for
-	 * {@link Triangle#lineIntersections(ILine)}
+	 * {@link Triangle#lineIntersections(ILineBase)}
 	 */
 	@Test
 	public void testLineIntersections()
@@ -37,18 +37,18 @@ public class TriangleTest
 		Triangle triangle = Triangle.fromCorners(a, b, c);
 		
 		// Intersecting lines
-		ILine line1 = edu.tigers.sumatra.math.line.Line.fromPoints(Vector2.fromXY(1, 1), Vector2.fromXY(2, 2));
+		ILine line1 = Lines.lineFromPoints(Vector2.fromXY(1, 1), Vector2.fromXY(2, 2));
 		assertThat(triangle.lineIntersections(line1)).hasSize(3);
 		
 		// Intersecting lines
-		ILine line4 = edu.tigers.sumatra.math.line.Line.fromPoints(Vector2.fromXY(0, 500), Vector2.fromXY(500, 500));
+		ILine line4 = Lines.lineFromPoints(Vector2.fromXY(0, 500), Vector2.fromXY(500, 500));
 		assertThat(triangle.lineIntersections(line4)).hasSize(2);
 		
 		// Non Intersecting lines
-		ILine line2 = edu.tigers.sumatra.math.line.Line.fromPoints(Vector2.fromXY(-1, 0), Vector2.fromXY(-1, 0));
+		ILine line2 = Lines.lineFromPoints(Vector2.fromXY(-1, 0), Vector2.fromXY(-1, 0));
 		assertThat(triangle.lineIntersections(line2)).isEmpty();
-		
-		ILine line3 = edu.tigers.sumatra.math.line.Line.fromPoints(Vector2.fromXY(0, -1), Vector2.fromXY(1, -1));
+
+		ILine line3 = Lines.lineFromPoints(Vector2.fromXY(0, -1), Vector2.fromXY(1, -1));
 		assertThat(triangle.lineIntersections(line3)).isEmpty();
 		
 		

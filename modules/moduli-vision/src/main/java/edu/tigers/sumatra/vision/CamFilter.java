@@ -21,7 +21,7 @@ import edu.tigers.sumatra.filter.FirstOrderMultiSampleEstimator;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -554,13 +554,13 @@ public class CamFilter
 
 		// Draw camera origin cross
 		DrawableLine xLine = new DrawableLine(
-				Line.fromPoints(pos.subtractNew(Vector2.fromX(100)), pos.addNew(Vector2.fromX(100))));
+				Lines.segmentFromPoints(pos.subtractNew(Vector2.fromX(100)), pos.addNew(Vector2.fromX(100))));
 		xLine.setStrokeWidth(20);
 		xLine.setColor(Color.CYAN);
 		shapes.add(xLine);
 
 		DrawableLine yLine = new DrawableLine(
-				Line.fromPoints(pos.subtractNew(Vector2.fromY(100)), pos.addNew(Vector2.fromY(100))));
+				Lines.segmentFromPoints(pos.subtractNew(Vector2.fromY(100)), pos.addNew(Vector2.fromY(100))));
 		yLine.setStrokeWidth(20);
 		yLine.setColor(Color.CYAN);
 		shapes.add(yLine);

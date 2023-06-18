@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2009 - 2018, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.math.line.v2;
-
-import java.util.Optional;
+package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.vector.IEuclideanDistance;
 import edu.tigers.sumatra.math.vector.IVector2;
+
+import java.util.Optional;
 
 
 /**
@@ -33,14 +33,6 @@ public interface ILineBase extends IEuclideanDistance
 	 * @return {@code true} if the line instance is properly defined, {@code false} otherwise
 	 */
 	boolean isValid();
-
-
-	/**
-	 * Creates a legacy line to use old functions
-	 *
-	 * @return a new legacy line with same bias and slope
-	 */
-	edu.tigers.sumatra.math.line.Line toLegacyLine();
 
 
 	/**
@@ -160,7 +152,6 @@ public interface ILineBase extends IEuclideanDistance
 	 */
 	ILine toLine();
 
-
 	/**
 	 * Intersect this line instance with the specified unbounded {@code line} and return the intersection vector.
 	 *
@@ -169,7 +160,7 @@ public interface ILineBase extends IEuclideanDistance
 	 * valid, the lines are parallel or this line instance is not unbounded and the intersection would be
 	 * located outside the range.
 	 */
-	Optional<IVector2> intersectLine(ILine line);
+	Optional<IVector2> intersect(ILine line);
 
 
 	/**
@@ -179,7 +170,7 @@ public interface ILineBase extends IEuclideanDistance
 	 * @return The intersection point of both lines r an empty {@link Optional} if at least one of the two lines is not
 	 * valid, the lines are parallel or the intersection point was located outside their bounds.
 	 */
-	Optional<IVector2> intersectHalfLine(IHalfLine halfLine);
+	Optional<IVector2> intersect(IHalfLine halfLine);
 
 
 	/**
@@ -189,7 +180,7 @@ public interface ILineBase extends IEuclideanDistance
 	 * @return The intersection point of both lines r an empty {@link Optional} if at least one of the two lines is not
 	 * valid, the lines are parallel or the intersection point was located outside their bounds.
 	 */
-	Optional<IVector2> intersectSegment(ILineSegment segment);
+	Optional<IVector2> intersect(ILineSegment segment);
 
 
 	/**

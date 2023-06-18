@@ -8,10 +8,10 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.LineMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import lombok.EqualsAndHashCode;
@@ -150,7 +150,7 @@ public class Tube implements ITube
 
 
 	@Override
-	public List<IVector2> lineIntersections(final ILine line)
+	public List<IVector2> lineIntersections(final ILineBase line)
 	{
 		if (lineSegment.getLength() <= 0)
 		{
@@ -174,12 +174,12 @@ public class Tube implements ITube
 
 		IVector2 start1 = startCenter().addNew(lineSegment.directionVector().getNormalVector().scaleTo(radius));
 		IVector2 end1 = endCenter().addNew(lineSegment.directionVector().getNormalVector().scaleTo(radius));
-		Lines.segmentFromPoints(start1, end1).intersectLine(line.v2()).ifPresent(intersections::add);
+		line.intersect(Lines.segmentFromPoints(start1, end1)).ifPresent(intersections::add);
 		IVector2 start2 = startCenter().addNew(lineSegment.directionVector().getNormalVector().scaleTo(-radius));
 		IVector2 end2 = endCenter().addNew(lineSegment.directionVector().getNormalVector().scaleTo(-radius));
-		Lines.segmentFromPoints(start2, end2).intersectLine(line.v2()).ifPresent(intersections::add);
+		line.intersect(Lines.segmentFromPoints(start2, end2)).ifPresent(intersections::add);
 
-		return intersections.stream().distinct().collect(Collectors.toList());
+		return intersections.stream().distinct().toList();
 	}
 
 

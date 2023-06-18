@@ -4,7 +4,7 @@
 package edu.tigers.sumatra.planarcurve;
 
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.v2.ILineBase;
+import edu.tigers.sumatra.math.line.ILineBase;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import org.apache.commons.lang.Validate;
@@ -352,7 +352,7 @@ public class PlanarCurve
 
 		List<IVector2> intersections = new ArrayList<>();
 
-		for (var line : rect.getEdgesAsSegments())
+		for (var line : rect.getEdges())
 		{
 			intersections.addAll(getIntersectionsWithLine(line));
 		}

@@ -4,69 +4,67 @@
 
 package edu.tigers.sumatra.math.polygon;
 
+import edu.tigers.sumatra.math.I2DShape;
+import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.vector.IVector2;
+import lombok.Value;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang.NotImplementedException;
-
-import edu.tigers.sumatra.math.I2DShape;
-import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.Line;
-import edu.tigers.sumatra.math.line.LineMath;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.VectorMath;
 
 
 /**
  * @author KaiE
  */
+@Value
 public class Polygon implements I2DShape
 {
-	
-	private final IVector2[]		points;
-	private final IVector2			centroid;
-	private static final double	ACCURACY	= 1e-3;
+
+	private static final double ACCURACY = 1e-3;
 	private static final double SQRT2 = SumatraMath.sqrt(2);
-	
-	
+	List<IVector2> points;
+	IVector2 centroid;
+
+
 	/**
 	 * @param polyPoints
 	 * @param centroid
 	 */
-	public Polygon(final Collection<IVector2> polyPoints, final IVector2 centroid)
+	public Polygon(Collection<IVector2> polyPoints, IVector2 centroid)
 	{
-		points = polyPoints.toArray(new IVector2[polyPoints.size()]);
+		this.points = List.copyOf(polyPoints);
 		this.centroid = centroid;
 	}
-	
-	
+
+
 	private IVector2 getMarginPoint(final IVector2 point, final double margin)
 	{
 		return point.subtractNew(centroid).scaleTo(SQRT2 * margin).add(point);
 	}
-	
+
+
 	/**
 	 * @see <a href="http://alienryderflex.com/polygon">web-reference site for implementation</a>
 	 */
 	@Override
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
-		int j = points.length - 1;
-		boolean oddNodes = false;
-		
-		for (int i = 0; i < points.length; i++)
+		var j = points.size() - 1;
+		var oddNodes = false;
+
+		for (int i = 0; i < points.size(); i++)
 		{
-			final double x = point.x();
-			final double y = point.y();
-			final IVector2 a = getMarginPoint(points[i], margin + ACCURACY);
-			final IVector2 b = getMarginPoint(points[j], margin + ACCURACY);
-			
-			final boolean yCheckAB = (a.y() < y) && (b.y() >= y);
-			final boolean yCheckBA = (b.y() < y) && (a.y() >= y);
-			final boolean xCheck = (a.x() <= x) || (b.x() <= x);
+			var x = point.x();
+			var y = point.y();
+			var a = getMarginPoint(points.get(i), margin + ACCURACY);
+			var b = getMarginPoint(points.get(j), margin + ACCURACY);
+
+			var yCheckAB = (a.y() < y) && (b.y() >= y);
+			var yCheckBA = (b.y() < y) && (a.y() >= y);
+			var xCheck = (a.x() <= x) || (b.x() <= x);
 			if (yCheckBA || (yCheckAB && xCheck))
 			{
 				oddNodes ^= ((a.x() + (((y - a.y()) / (b.y() - a.y())) * (b.x() - a.x()))) < x);
@@ -74,70 +72,40 @@ public class Polygon implements I2DShape
 			j = i;
 		}
 		return oddNodes;
-		
-		
+
+
 	}
-	
-	
+
+
 	@Override
-	public boolean isIntersectingWithLine(final ILine line)
+	public IVector2 nearestPointOnCircumference(IVector2 point, double margin)
 	{
-		return lineIntersections(line).isEmpty();
-	}
-	
-	
-	@Override
-	public IVector2 nearestPointOutside(final IVector2 point)
-	{
-		return nearestPointOutside(point, 0);
-	}
-	
-	
-	@Override
-	public IVector2 nearestPointInside(final IVector2 point)
-	{
-		throw new NotImplementedException();
-	}
-	
-	
-	/**
-	 * nearest point with margin
-	 * 
-	 * @param point
-	 * @param margin
-	 * @return
-	 */
-	public IVector2 nearestPointOutside(final IVector2 point, final double margin)
-	{
-		if (!isPointInShape(point, margin))
+		var best = point;
+		var minDist = Double.MAX_VALUE;
+
+		for (int i = 0; i < points.size(); ++i)
 		{
-			return point;
-		}
-		
-		IVector2 best = point;
-		double minDist = Double.MAX_VALUE;
-		
-		for (int i = 0; i < points.length; ++i)
-		{
-			final IVector2 nPoint = LineMath.leadPointOnLine(Line.fromPoints(
-					getMarginPoint(points[i], margin),
-					getMarginPoint(points[(i + 1) % points.length], margin)), point);
-			final double dist = VectorMath.distancePPSqr(nPoint, point);
-			
+			var edge = Lines.segmentFromPoints(
+					getMarginPoint(points.get(i), margin),
+					getMarginPoint(points.get((i + 1) % points.size()), margin)
+			);
+			var nPoint = edge.closestPointOnLine(point);
+			var dist = nPoint.distanceToSqr(point);
+
 			if (minDist > dist)
 			{
 				minDist = dist;
 				best = nPoint;
 			}
 		}
-		
+
 		return best;
 	}
-	
-	
+
+
 	/**
 	 * nearest point with line hint
-	 * 
+	 *
 	 * @param point
 	 * @param p2bl
 	 * @param margin
@@ -149,53 +117,53 @@ public class Polygon implements I2DShape
 		{
 			return point;
 		}
-		
+
 		if (point.isCloseTo(p2bl, ACCURACY))
 		{
 			return nearestPointOutside(point, margin);
 		}
-		
-		List<IVector2> intersections = lineIntersections(Line.fromPoints(point, p2bl), margin);
+
+		List<IVector2> intersections = lineIntersections(Lines.lineFromPoints(point, p2bl), margin);
 		if (intersections.isEmpty())
 		{
 			return point;
 		}
 		return point.nearestTo(intersections);
-		
+
 	}
-	
-	
+
+
 	@Override
-	public List<IVector2> lineIntersections(final ILine line)
+	public List<IVector2> lineIntersections(ILineBase line)
 	{
 		return lineIntersections(line, 0);
 	}
-	
-	
+
+
 	/**
 	 * intersections with polygon deformed by margin
-	 * 
+	 *
 	 * @param line
 	 * @param margin
 	 * @return
 	 */
-	public List<IVector2> lineIntersections(final ILine line, final double margin)
+	public List<IVector2> lineIntersections(final ILineBase line, final double margin)
 	{
 		List<IVector2> result = new ArrayList<>();
-		for (int i = 0; i < points.length; ++i)
+		for (int i = 0; i < points.size(); ++i)
 		{
-			final IVector2 curr = getMarginPoint(points[i], margin);
-			final IVector2 next = getMarginPoint(points[(i + 1) % points.length], margin);
-			final ILine path = Line.fromPoints(curr, next);
-			final Optional<IVector2> intersection = LineMath.intersectionPointWithSegment(line, path);
-			
+			var curr = getMarginPoint(points.get(i), margin);
+			var next = getMarginPoint(points.get((i + 1) % points.size()), margin);
+			var path = Lines.segmentFromPoints(curr, next);
+			var intersection = line.intersect(path);
+
 			if (intersection.isPresent() && !intersection.get().isCloseTo(curr, ACCURACY))
 			{
 				result.add(intersection.get());
 			}
-			
+
 		}
 		return result;
 	}
-	
+
 }

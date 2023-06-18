@@ -4,15 +4,13 @@
 
 package edu.tigers.sumatra.math.rectangle;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
+import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 
 /**

@@ -6,8 +6,8 @@ package edu.tigers.sumatra.drawable;
 
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.tube.ITube;
 import edu.tigers.sumatra.math.tube.Tube;
 import edu.tigers.sumatra.math.vector.IVector2;

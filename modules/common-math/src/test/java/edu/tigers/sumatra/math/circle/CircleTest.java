@@ -4,7 +4,8 @@
 
 package edu.tigers.sumatra.math.circle;
 
-import edu.tigers.sumatra.math.line.Line;
+import edu.tigers.sumatra.math.line.ILine;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -44,16 +45,16 @@ public class CircleTest
 	{
 		// Test true
 		ICircle circle = Circle.createCircle(Vector2.fromXY(1, 1), 1);
-		Line line = Line.fromDirection(Vector2.fromXY(0, 0), Vector2.fromXY(1, 1));
-		Assert.assertTrue(circle.isIntersectingWithLine(line));
+		ILine line1 = Lines.lineFromDirection(Vector2.fromXY(0, 0), Vector2.fromXY(1, 1));
+		Assert.assertTrue(circle.isIntersectingWithLine(line1));
 
 		// Test true2
-		Line line3 = Line.fromDirection(Vector2.fromXY(-1, 1), Vector2.fromXY(1, 0));
-		Assert.assertTrue(circle.isIntersectingWithLine(line3));
+		ILine line2 = Lines.lineFromDirection(Vector2.fromXY(-1, 1), Vector2.fromXY(1, 0));
+		Assert.assertTrue(circle.isIntersectingWithLine(line2));
 
 		// Test false
-		Line line2 = Line.fromDirection(Vector2f.ZERO_VECTOR, Vector2.fromXY(-1, 1));
-		Assert.assertFalse(circle.isIntersectingWithLine(line2));
+		ILine line3 = Lines.lineFromDirection(Vector2f.ZERO_VECTOR, Vector2.fromXY(-1, 1));
+		Assert.assertFalse(circle.isIntersectingWithLine(line3));
 	}
 
 
@@ -67,11 +68,11 @@ public class CircleTest
 	{
 		// Test 1
 		ICircle circle = Circle.createCircle(Vector2.fromXY(1, 1), 1);
-		Line line = Line.fromDirection(Vector2f.ZERO_VECTOR, Vector2.fromXY(-1, 1));
-		Assert.assertEquals(0, circle.lineIntersections(line).size());
+		ILine line1 = Lines.lineFromDirection(Vector2f.ZERO_VECTOR, Vector2.fromXY(-1, 1));
+		Assert.assertEquals(0, circle.lineIntersections(line1).size());
 
 		// Test 2
-		Line line2 = Line.fromDirection(Vector2.fromXY(-1, 1), Vector2.fromXY(1, 0));
+		ILine line2 = Lines.lineFromDirection(Vector2.fromXY(-1, 1), Vector2.fromXY(1, 0));
 		List<IVector2> result = circle.lineIntersections(line2);
 		Assert.assertTrue(
 				(result.get(0).x() == 2) && (result.get(0).y() == 1) && (result.get(1).x() == 0) && (result.get(1).y()

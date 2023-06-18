@@ -6,9 +6,6 @@ package edu.tigers.sumatra.geometry;
 
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.v2.IHalfLine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 
@@ -27,52 +24,6 @@ public interface IPenaltyArea extends I2DShape
 	 * @return true, if inside or behind
 	 */
 	boolean isPointInShapeOrBehind(IVector2 point);
-
-
-	/**
-	 * <p>
-	 * Find the line intersections on the outer curve. The goal line is not considered.
-	 * </p>
-	 *
-	 * @param line some unbounded line
-	 * @return all intersections. This can be zero to two intersections.
-	 */
-	List<IVector2> lineIntersections(edu.tigers.sumatra.math.line.v2.ILine line);
-
-
-	/**
-	 * <p>
-	 * Find the line intersections on the outer curve. The goal line is not considered.
-	 * </p>
-	 *
-	 * @param line some line segment
-	 * @return all intersections. This can be zero to two intersections.
-	 */
-	List<IVector2> lineIntersections(ILineSegment line);
-
-
-	/**
-	 * <p>
-	 * Find the line intersections on the outer curve. The goal line is not considered.
-	 * </p>
-	 *
-	 * @param line some half line
-	 * @return all intersections. This can be zero to two intersections.
-	 */
-	List<IVector2> lineIntersections(IHalfLine line);
-
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Find the line intersections on the outer curve. The goal line is not considered.
-	 * </p>
-	 *
-	 * @param line some legacy line (treated as a segment)
-	 * @return all intersections. This can be zero to two intersections.
-	 */
-	@Override
-	List<IVector2> lineIntersections(final ILine line);
 
 
 	/**
@@ -159,7 +110,7 @@ public interface IPenaltyArea extends I2DShape
 	 * If the line segment crosses the goal line, the area will be 0.
 	 *
 	 * @param from first point
-	 * @param to second point
+	 * @param to   second point
 	 * @return the area in m^2
 	 */
 	default double intersectionArea(final IVector2 from, final IVector2 to)

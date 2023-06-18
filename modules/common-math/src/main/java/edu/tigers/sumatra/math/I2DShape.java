@@ -4,14 +4,11 @@
 
 package edu.tigers.sumatra.math;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.vector.IVector2;
 import org.apache.commons.lang.NotImplementedException;
 
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.v2.ILineBase;
-import edu.tigers.sumatra.math.vector.IVector2;
+import java.util.List;
 
 
 /**
@@ -28,7 +25,7 @@ public interface I2DShape
 	 * @param point
 	 * @return true if inside (borders included!!)
 	 */
-	default boolean isPointInShape(final IVector2 point)
+	default boolean isPointInShape(IVector2 point)
 	{
 		return isPointInShape(point, 0.0);
 	}
@@ -57,9 +54,27 @@ public interface I2DShape
 	 */
 	default IVector2 nearestPointOutside(IVector2 point)
 	{
-		throw new NotImplementedException();
+		return nearestPointOutside(point, 0.0);
 	}
 
+	/**
+	 * Returns the nearest point outside a shape to a given point inside the shape.
+	 * If the given point is outside the shape, return the point.
+	 *
+	 * @param point  some point in- or outside
+	 * @param margin margin to expand or shrink the shape
+	 * @return the nearest point outside, if point is inside, else the point itself
+	 */
+	default IVector2 nearestPointOutside(IVector2 point, double margin)
+	{
+		if (!isPointInShape(point, margin))
+		{
+			return point;
+		} else
+		{
+			return nearestPointOnCircumference(point, margin);
+		}
+	}
 
 	/**
 	 * Returns the nearest point inside a shape to a given point outside the shape.
@@ -68,19 +83,36 @@ public interface I2DShape
 	 * @param point some point in- or outside
 	 * @return the nearest point inside, if point is outside, else the point itself
 	 */
-	default IVector2 nearestPointInside(final IVector2 point)
+	default IVector2 nearestPointInside(IVector2 point)
 	{
-		throw new NotImplementedException();
+		return nearestPointInside(point, 0.0);
 	}
 
-
 	/**
-	 * Get the intersection points of the shape and line
+	 * Returns the nearest point inside a shape to a given point outside the shape.
+	 * If the given point is inside the shape, return the point.
 	 *
-	 * @param line some line
-	 * @return all intersection points
+	 * @param point  some point in- or outside
+	 * @param margin margin to expand or shrink the shape
+	 * @return the nearest point inside, if point is outside, else the point itself
 	 */
-	default List<IVector2> lineIntersections(ILine line)
+	default IVector2 nearestPointInside(IVector2 point, double margin)
+	{
+		if (isPointInShape(point, margin))
+		{
+			return point;
+		} else
+		{
+			return nearestPointOnCircumference(point, margin);
+		}
+	}
+
+	default IVector2 nearestPointOnCircumference(IVector2 point)
+	{
+		return nearestPointOnCircumference(point, 0.0);
+	}
+
+	default IVector2 nearestPointOnCircumference(IVector2 point, double margin)
 	{
 		throw new NotImplementedException();
 	}
@@ -94,21 +126,7 @@ public interface I2DShape
 	 */
 	default List<IVector2> lineIntersections(ILineBase line)
 	{
-		return lineIntersections(line.toLegacyLine()).stream()
-				.filter(line::isPointOnLine)
-				.collect(Collectors.toList());
-	}
-
-
-	/**
-	 * Check if the shape is intersecting with given line
-	 *
-	 * @param line the line to check
-	 * @return true, if there is an intersection
-	 */
-	default boolean isIntersectingWithLine(ILine line)
-	{
-		return !lineIntersections(line).isEmpty();
+		throw new NotImplementedException();
 	}
 
 

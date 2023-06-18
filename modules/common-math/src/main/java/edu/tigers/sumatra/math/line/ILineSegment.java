@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.sumatra.math.line.v2;
+package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.vector.IVector2;
 

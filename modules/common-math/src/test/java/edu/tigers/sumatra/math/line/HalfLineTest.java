@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math.line.v2;
+package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -34,7 +34,7 @@ public class HalfLineTest extends AbstractLineTest
 
 		IHalfLine halfLine = HalfLine.fromDirection(supportVector, directionVector);
 		assertThat(halfLine.supportVector()).isEqualTo(supportVector);
-		assertThat(halfLine.supportVector() != supportVector).isTrue();
+		assertThat(halfLine.supportVector()).isNotSameAs(supportVector);
 		assertThat(halfLine.directionVector().isParallelTo(directionVector)).isTrue();
 
 		IHalfLine zeroLine = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
@@ -64,10 +64,10 @@ public class HalfLineTest extends AbstractLineTest
 		IHalfLine copy = original.copy();
 
 		assertThat(original.supportVector()).isEqualTo(copy.supportVector());
-		assertThat(original.supportVector() == copy.supportVector()).isFalse();
+		assertThat(original.supportVector()).isNotSameAs(copy.supportVector());
 
 		assertThat(original.directionVector()).isEqualTo(copy.directionVector());
-		assertThat(original.directionVector() == copy.directionVector()).isFalse();
+		assertThat(original.directionVector()).isNotSameAs(copy.directionVector());
 	}
 
 
@@ -118,8 +118,9 @@ public class HalfLineTest extends AbstractLineTest
 
 		IHalfLine halfLine = HalfLine.fromDirection(sV, dV);
 
-		assertThat(halfLine).isEqualTo(halfLine);
-		assertThat(halfLine.hashCode()).isEqualTo(halfLine.hashCode());
+		assertThat(halfLine)
+				.isEqualTo(halfLine)
+				.hasSameHashCodeAs(halfLine);
 
 		IHalfLine other = HalfLine.fromDirection(sV, dV.multiplyNew(-1.0d));
 		assertThat(halfLine).isNotEqualTo(other);
@@ -137,9 +138,10 @@ public class HalfLineTest extends AbstractLineTest
 		IHalfLine invalidLineACopy = HalfLine.fromDirection(sV, Vector2f.ZERO_VECTOR);
 		IHalfLine invalidLineB = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
 
-		assertThat(properLine).isNotEqualTo(invalidLineA);
-		assertThat(invalidLineA).isNotEqualTo(invalidLineB);
-		assertThat(invalidLineA).isEqualTo(invalidLineACopy);
+		assertThat(invalidLineA)
+				.isNotEqualTo(properLine)
+				.isNotEqualTo(invalidLineB)
+				.isEqualTo(invalidLineACopy);
 	}
 
 
@@ -211,8 +213,8 @@ public class HalfLineTest extends AbstractLineTest
 
 			IHalfLine lineB = HalfLine.fromDirection(sV, dV.turnToNew(radAngle));
 
-			Optional<IVector2> intersection = lineA.intersectHalfLine(lineB);
-			Optional<IVector2> inverseIntersection = lineB.intersectHalfLine(lineA);
+			Optional<IVector2> intersection = lineA.intersect(lineB);
+			Optional<IVector2> inverseIntersection = lineB.intersect(lineA);
 			assertThat(intersection).isEqualTo(inverseIntersection);
 
 			if (degAngle < 270)
@@ -222,7 +224,7 @@ public class HalfLineTest extends AbstractLineTest
 			{
 				IVector2 expected = Vector2.fromXY(SumatraMath.tan(radAngle - Math.PI * 3 / 2), 0);
 				assertThat(intersection).isPresent();
-				assertThat(intersection.get()).isEqualTo(expected);
+				assertThat(intersection).contains(expected);
 			}
 		}
 	}
@@ -235,13 +237,13 @@ public class HalfLineTest extends AbstractLineTest
 
 		IHalfLine invalidLineA = HalfLine.fromDirection(Vector2.fromXY(10, 25), Vector2f.ZERO_VECTOR);
 		IHalfLine invalidLineB = HalfLine.fromDirection(Vector2.fromXY(20, 11), Vector2f.ZERO_VECTOR);
-		Optional<IVector2> intersection = validLine.intersectHalfLine(invalidLineA);
+		Optional<IVector2> intersection = validLine.intersect(invalidLineA);
 		assertThat(intersection).isNotPresent();
 
-		intersection = invalidLineA.intersectHalfLine(invalidLineB);
+		intersection = invalidLineA.intersect(invalidLineB);
 		assertThat(intersection).isNotPresent();
 
-		intersection = invalidLineA.intersectHalfLine(invalidLineA);
+		intersection = invalidLineA.intersect(invalidLineA);
 		assertThat(intersection).isNotPresent();
 	}
 

@@ -18,8 +18,8 @@ import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.AngleMath;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.network.MulticastUDPTransmitter;
@@ -164,17 +164,14 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 		field.addFieldLines(penAreaLineStretchRight);
 
 		Geometry.getPenaltyAreaOur().getRectangle().getEdges().stream()
-				.map(Lines::segmentFromLine)
 				.map(l -> createLineSegment("", l))
 				.forEach(field::addFieldLines);
 
 		Geometry.getPenaltyAreaTheir().getRectangle().getEdges().stream()
-				.map(Lines::segmentFromLine)
 				.map(l -> createLineSegment("", l))
 				.forEach(field::addFieldLines);
 
 		Geometry.getField().getEdges().stream()
-				.map(Lines::segmentFromLine)
 				.map(l -> createLineSegment("", l))
 				.forEach(field::addFieldLines);
 		field.addFieldLines(createLineSegment("HalfwayLine",

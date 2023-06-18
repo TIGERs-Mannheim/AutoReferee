@@ -3,7 +3,7 @@
  */
 package edu.tigers.sumatra.planarcurve;
 
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -205,7 +205,7 @@ public class PlanarCurveTest
 			{
 				double minDistTraj = planarCurveFactory.getPlanarCurve(traj1).getMinimumDistanceToPoint(inter);
 				assertThat(minDistTraj).isCloseTo(0.0, within(1e-3));
-				assertThat(line.distanceTo(inter) <= 1e-3).isTrue();
+				assertThat(line.distanceTo(inter)).isLessThan(1e-3);
 			}
 		}
 	}

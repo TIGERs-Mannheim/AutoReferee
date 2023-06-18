@@ -4,28 +4,23 @@
 
 package edu.tigers.sumatra.math.rectangle;
 
+import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector2f;
+import org.json.simple.JSONObject;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
-
-import edu.tigers.sumatra.math.line.v2.IHalfLine;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
-import org.json.simple.JSONObject;
-
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.Line;
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 
 /**
@@ -205,7 +200,7 @@ abstract class ARectangle implements IRectangle
 		{
 			return point;
 		}
-		return point.nearestToOpt(lineIntersections(Line.fromPoints(point, pointToBuildLine)))
+		return point.nearestToOpt(lineIntersections(Lines.lineFromPoints(point, pointToBuildLine)))
 				.orElse(point);
 	}
 
@@ -220,23 +215,7 @@ abstract class ARectangle implements IRectangle
 
 
 	@Override
-	public List<ILine> getEdges()
-	{
-		List<ILine> lines = new ArrayList<>(4);
-		List<IVector2> corners = getCorners();
-
-		for (int i = 0; i < 4; i++)
-		{
-			int j = (i + 1) % 4;
-			lines.add(Line.fromPoints(corners.get(i), corners.get(j)));
-		}
-
-		return lines;
-	}
-
-
-	@Override
-	public List<ILineSegment> getEdgesAsSegments()
+	public List<ILineSegment> getEdges()
 	{
 		List<ILineSegment> lines = new ArrayList<>(4);
 		List<IVector2> corners = getCorners();
@@ -252,52 +231,14 @@ abstract class ARectangle implements IRectangle
 
 
 	@Override
-	public List<IVector2> lineIntersections(final edu.tigers.sumatra.math.line.v2.ILine line)
+	public List<IVector2> lineIntersections(final ILineBase line)
 	{
-		return getEdgesAsSegments().stream()
-				.map(edge -> edge.intersectLine(line))
+		return getEdges().stream()
+				.map(line::intersect)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
 				.distinct()
-				.collect(Collectors.toList());
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final ILineSegment line)
-	{
-		return getEdgesAsSegments().stream()
-				.map(edge -> edge.intersectSegment(line))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final IHalfLine line)
-	{
-		return getEdgesAsSegments().stream()
-				.map(edge -> edge.intersectHalfLine(line))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.distinct()
-				.collect(Collectors.toList());
-	}
-
-
-	@Override
-	public List<IVector2> lineIntersections(final ILine line)
-	{
-		return lineIntersections(Lines.lineFromLegacyLine(line));
-	}
-
-
-	@Override
-	public boolean isIntersectingWithLine(final ILine line)
-	{
-		return !lineIntersections(line).isEmpty();
+				.toList();
 	}
 
 

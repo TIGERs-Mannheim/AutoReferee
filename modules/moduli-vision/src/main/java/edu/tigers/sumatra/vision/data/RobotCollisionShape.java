@@ -3,11 +3,6 @@
  */
 package edu.tigers.sumatra.vision.data;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang.Validate;
-
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.BotMath;
@@ -15,11 +10,15 @@ import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
+import org.apache.commons.lang.Validate;
+
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -86,7 +85,7 @@ public class RobotCollisionShape
 		
 		ILineSegment ballVelLine = Lines.segmentFromOffset(ballPos, ballVelUsed.multiplyNew(-1.0).scaleTo(radius * 5.0));
 		
-		Optional<IVector2> frontIntersect = frontLine.intersectSegment(ballVelLine);
+		Optional<IVector2> frontIntersect = frontLine.intersect(ballVelLine);
 		
 		if (frontIntersect.isPresent())
 		{

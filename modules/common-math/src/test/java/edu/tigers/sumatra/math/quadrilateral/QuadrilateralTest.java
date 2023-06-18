@@ -5,8 +5,8 @@
 package edu.tigers.sumatra.math.quadrilateral;
 
 import com.google.common.collect.Collections2;
-import edu.tigers.sumatra.math.line.v2.ILineSegment;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -98,12 +98,12 @@ public class QuadrilateralTest
 		// test no intersections
 		line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-0.99, -0.99), Vector2.fromXY(0.99, 0.99));
 		intersections = quadrilateral.lineIntersections(line1Intersection);
-		assertThat(intersections).hasSize(0);
+		assertThat(intersections).isEmpty();
 
 		// test no intersections 2
 		line1Intersection = Lines.segmentFromPoints(Vector2.fromXY(-3, 5), Vector2.fromXY(3, 5));
 		intersections = quadrilateral.lineIntersections(line1Intersection);
-		assertThat(intersections).hasSize(0);
+		assertThat(intersections).isEmpty();
 	}
 
 

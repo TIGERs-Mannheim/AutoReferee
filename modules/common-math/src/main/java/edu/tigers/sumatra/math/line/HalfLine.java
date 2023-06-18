@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math.line.v2;
+package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -109,14 +109,14 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 
 
 	@Override
-	public Optional<IVector2> intersectLine(final ILine line)
+	public Optional<IVector2> intersect(final ILine line)
 	{
-		return line.intersectHalfLine(this);
+		return line.intersect(this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersectHalfLine(final IHalfLine other)
+	public Optional<IVector2> intersect(final IHalfLine other)
 	{
 		if (this.isValid() && other.isValid())
 		{
@@ -127,7 +127,7 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 
 
 	@Override
-	public Optional<IVector2> intersectSegment(final ILineSegment segment)
+	public Optional<IVector2> intersect(final ILineSegment segment)
 	{
 		if (this.isValid() && segment.isValid())
 		{
@@ -154,6 +154,6 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 	@Override
 	public String toString()
 	{
-		return "Line(" + supportVector() + " + s * " + directionVector() + ")";
+		return "HalfLine(" + supportVector() + " + s * " + directionVector() + ")";
 	}
 }

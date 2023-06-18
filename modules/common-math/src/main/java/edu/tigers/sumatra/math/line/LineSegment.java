@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math.line.v2;
+package edu.tigers.sumatra.math.line;
 
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -182,21 +182,21 @@ final class LineSegment extends ALine implements ILineSegment
 
 
 	@Override
-	public Optional<IVector2> intersectLine(final ILine line)
+	public Optional<IVector2> intersect(final ILine line)
 	{
-		return line.intersectSegment(this);
+		return line.intersect(this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersectHalfLine(final IHalfLine halfLine)
+	public Optional<IVector2> intersect(final IHalfLine halfLine)
 	{
-		return halfLine.intersectSegment(this);
+		return halfLine.intersect(this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersectSegment(final ILineSegment other)
+	public Optional<IVector2> intersect(final ILineSegment other)
 	{
 		if (isValid() && other.isValid())
 		{
@@ -250,7 +250,7 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public double distanceTo(final ILineSegment line)
 	{
-		if (intersectSegment(line).isPresent())
+		if (intersect(line).isPresent())
 		{
 			return 0;
 		}

@@ -12,7 +12,7 @@ import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.line.v2.Lines;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.AttackerTooCloseToDefenseArea;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
