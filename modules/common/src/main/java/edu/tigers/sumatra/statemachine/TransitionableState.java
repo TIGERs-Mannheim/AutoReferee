@@ -5,7 +5,7 @@
 package edu.tigers.sumatra.statemachine;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,25 +13,29 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 
+@Log4j2
 @RequiredArgsConstructor
-public abstract class TransitionableState<T extends IState> extends AState
+public abstract class TransitionableState extends AState
 {
-	private final Consumer<T> nextStateConsumer;
+	private final Consumer<IState> nextStateConsumer;
 	private final List<Transition> transitions = new ArrayList<>();
 
-	@Setter
-	private boolean deactivateTransitions = false;
 
-
-	public final void addTransition(BooleanSupplier evaluation, T nextState)
+	public final void addTransition(Transition transition)
 	{
-		transitions.add(new Transition(evaluation, nextState));
+		transitions.add(transition);
 	}
 
 
-	public final void addTransition(BooleanSupplier evaluation1, BooleanSupplier evaluation2, T nextState)
+	public final void addTransition(BooleanSupplier evaluation, IState nextState)
 	{
-		transitions.add(new Transition(() -> evaluation1.getAsBoolean() && evaluation2.getAsBoolean(), nextState));
+		transitions.add(new Transition(evaluation.toString(), evaluation, nextState));
+	}
+
+
+	public final void addTransition(String name, BooleanSupplier evaluation, IState nextState)
+	{
+		transitions.add(new Transition(name, evaluation, nextState));
 	}
 
 
@@ -77,25 +81,18 @@ public abstract class TransitionableState<T extends IState> extends AState
 	public final void doUpdate()
 	{
 		beforeUpdate();
-		if (!deactivateTransitions)
+		for (Transition transition : transitions)
 		{
-			for (var transition : transitions)
+			if (transition.getEvaluation().getAsBoolean())
 			{
-				if (transition.evaluation.getAsBoolean())
-				{
-					nextStateConsumer.accept(transition.nextState);
-					return;
-				}
+				log.trace(
+						"Switch state from {} to {} for '{}'",
+						this, transition.getNextState(), transition.getName()
+				);
+				nextStateConsumer.accept(transition.getNextState());
+				return;
 			}
 		}
 		onUpdate();
-	}
-
-
-	@RequiredArgsConstructor
-	private class Transition
-	{
-		final BooleanSupplier evaluation;
-		final T nextState;
 	}
 }
