@@ -57,7 +57,7 @@ dependencies {
     integrationTestImplementation 'com.github.g3force:configurable:3.0'
 
     integrationTestImplementation 'org.apache.logging.log4j:log4j-api:2.20.0'
-    integrationTestRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.20.0'
+    integrationTestImplementation 'org.apache.logging.log4j:log4j-core:2.20.0'
 
     integrationTestAnnotationProcessor "org.projectlombok:lombok:1.18.28"
     integrationTestImplementation "org.projectlombok:lombok:1.18.28"
@@ -72,4 +72,6 @@ tasks.register('integrationTest', Test) {
 
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
+
+    inputs.dir(file('config'))
 }

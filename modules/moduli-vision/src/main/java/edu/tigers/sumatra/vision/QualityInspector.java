@@ -269,7 +269,6 @@ public class QualityInspector
 
 		List<Double> camHeights = cams.stream()
 				.map(c -> c.getCameraPosition().z())
-				.sorted(Double::compare)
 				.toList();
 
 		double median = StatisticsMath.median(camHeights);

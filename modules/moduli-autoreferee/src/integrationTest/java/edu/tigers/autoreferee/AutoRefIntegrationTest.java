@@ -14,6 +14,7 @@ import edu.tigers.sumatra.cam.LogfileAnalyzerVisionCam;
 import edu.tigers.sumatra.gamelog.SSLGameLogReader;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.log.LogEventWatcher;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.BerkeleyAccessor;
 import edu.tigers.sumatra.persistence.BerkeleyAsyncRecorder;
@@ -32,6 +33,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.message.Message;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,13 +66,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AutoRefIntegrationTest
 {
 	private static final String MODULI_CONFIG = "integration_test.xml";
-	private static final String TEST_CASE_DIR = "autoref-tests";
+	private static final String TEST_CASE_DIR = "config/autoref-tests";
 
 	private static SimilarityChecker similarityChecker;
 
 	private final String name;
 	private final TestCase testCase;
 	private BerkeleyAsyncRecorder recorder;
+	private final LogEventWatcher logEventWatcher = new LogEventWatcher(Level.WARN, Level.ERROR);
 	private boolean testCaseSucceeded;
 
 
@@ -95,9 +100,11 @@ public class AutoRefIntegrationTest
 	@Before
 	public void before()
 	{
+		logEventWatcher.clear();
+		logEventWatcher.start();
+
 		SumatraModel.getInstance().startModules();
 		SumatraModel.getInstance().getModule(AutoRefModule.class).changeMode(EAutoRefMode.PASSIVE);
-
 
 		BerkeleyDb db = BerkeleyDb.withCustomLocation(Paths.get("../../" + BerkeleyDb.getDefaultBasePath(),
 				BerkeleyDb.getDefaultName() + "_" + name));
@@ -117,6 +124,7 @@ public class AutoRefIntegrationTest
 	@After
 	public void after()
 	{
+		logEventWatcher.stop();
 		recorder.stop();
 		recorder.awaitStop();
 		if (!testCaseSucceeded)
@@ -156,6 +164,8 @@ public class AutoRefIntegrationTest
 			visionCam.playLog(logReader, frameId -> {
 			});
 
+			assertNoWarningsOrErrors();
+
 			if (gameEvents.isEmpty() && desiredGameEvent != null)
 			{
 				Assert.fail("Expected game event: " + desiredGameEvent);
@@ -176,7 +186,6 @@ public class AutoRefIntegrationTest
 					break;
 				}
 			}
-
 			testCaseSucceeded = true;
 		} finally
 		{
@@ -227,6 +236,18 @@ public class AutoRefIntegrationTest
 				.logfileLocation(logfileLocation)
 				.desiredEvent(desiredEventBuilder.build())
 				.build();
+	}
+
+	protected void assertNoWarningsOrErrors()
+	{
+		assertThat(logEventWatcher.getEvents(Level.ERROR).stream()
+				.map(LogEvent::getMessage)
+				.map(Message::getFormattedMessage)
+				.toList()).isEmpty();
+		assertThat(logEventWatcher.getEvents(Level.WARN).stream()
+				.map(LogEvent::getMessage)
+				.map(Message::getFormattedMessage)
+				.toList()).isEmpty();
 	}
 
 
