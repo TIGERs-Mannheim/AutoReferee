@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee;
@@ -238,7 +238,8 @@ public class AutoRefIntegrationTest
 				.build();
 	}
 
-	protected void assertNoWarningsOrErrors()
+
+	private void assertNoWarningsOrErrors()
 	{
 		assertThat(logEventWatcher.getEvents(Level.ERROR).stream()
 				.map(LogEvent::getMessage)
@@ -247,7 +248,23 @@ public class AutoRefIntegrationTest
 		assertThat(logEventWatcher.getEvents(Level.WARN).stream()
 				.map(LogEvent::getMessage)
 				.map(Message::getFormattedMessage)
+				.filter(this::notMissingCamFrame)
+				.filter(this::notMissingKickEvent)
 				.toList()).isEmpty();
+	}
+
+
+	private boolean notMissingCamFrame(String message)
+	{
+		// Missing cam frames is sort-of expected in some test cases
+		return !message.contains("Non-consecutive cam frame");
+	}
+
+
+	private boolean notMissingKickEvent(String message)
+	{
+		// Bug: https://gitlab.tigers-mannheim.de/main/Sumatra/-/issues/1859
+		return !message.contains("Goal detected, but no kick event found");
 	}
 
 

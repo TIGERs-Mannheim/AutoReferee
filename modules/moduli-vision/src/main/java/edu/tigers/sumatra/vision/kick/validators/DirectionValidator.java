@@ -146,7 +146,7 @@ public class DirectionValidator implements IKickValidator
 				ILine front = Lines.lineFromDirection(kickerCenter,
 						Vector2.fromAngle(bot.getOrientation() + AngleMath.PI_HALF));
 
-				kickPos = front.intersect(line.get());
+				kickPos = front.intersect(line.get().toLine());
 				bestGroup = group;
 			}
 		}
