@@ -18,7 +18,6 @@ import edu.tigers.sumatra.math.vector.Vector3;
 import org.apache.commons.lang.Validate;
 
 import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -85,9 +84,9 @@ public class RobotCollisionShape
 		
 		ILineSegment ballVelLine = Lines.segmentFromOffset(ballPos, ballVelUsed.multiplyNew(-1.0).scaleTo(radius * 5.0));
 		
-		Optional<IVector2> frontIntersect = frontLine.intersect(ballVelLine);
+		var frontIntersect = frontLine.intersect(ballVelLine);
 		
-		if (frontIntersect.isPresent())
+		if (!frontIntersect.isEmpty())
 		{
 			double collisionAngle = Vector2.fromAngle(orient).multiply(-1.0).angleTo(ballVelUsed).orElse(Math.PI);
 			double collisionAngleAbs = Math.abs(collisionAngle);
@@ -96,7 +95,7 @@ public class RobotCollisionShape
 				// ball is rolling away from robot => no real front collision with reflection
 				return new CollisionResult(ECollisionLocation.CIRCLE, null);
 			}
-			
+
 			double outVelAbs = ballVelUsed.getLength2()
 					- (ballVelUsed.getLength2() * SumatraMath.cos(collisionAngleAbs) * maxFrontLoss);
 			
@@ -107,7 +106,7 @@ public class RobotCollisionShape
 		}
 		
 		ICircle botCircle = Circle.createCircle(pos, radius + ballRadius);
-		List<IVector2> intersect = botCircle.lineIntersections(ballVelLine);
+		List<IVector2> intersect = botCircle.intersectPerimeterPath(ballVelLine);
 		
 		if (!intersect.isEmpty())
 		{

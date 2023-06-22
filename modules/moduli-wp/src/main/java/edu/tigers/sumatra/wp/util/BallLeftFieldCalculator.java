@@ -59,7 +59,7 @@ public class BallLeftFieldCalculator
 
 		for (Goal goal : Geometry.getGoals())
 		{
-			if (goal.getLineSegment().isPointOnLine(lastBallLeftFieldPosition.getPos()))
+			if (goal.getLineSegment().isPointOnPath(lastBallLeftFieldPosition.getPos()))
 			{
 				return overGoal ? BallLeftFieldPosition.EBallLeftFieldType.GOAL_OVER
 						: BallLeftFieldPosition.EBallLeftFieldType.GOAL;
@@ -91,7 +91,7 @@ public class BallLeftFieldCalculator
 			if (!postBallPosInsideField && stateChanged)
 			{
 				var line = Lines.lineFromPoints(postPos.getPos(), prePos.getPos());
-				IVector2 pos = postPos.getPos().nearestToOpt(Geometry.getField().lineIntersections(line))
+				IVector2 pos = postPos.getPos().nearestToOpt(Geometry.getField().intersectPerimeterPath(line))
 						.orElse(postPos.getPos());
 				double height = (postPos.getPos3().z() + prePos.getPos3().z()) / 2.0;
 				lastBallLeftFieldPosition = new TimedPosition(postPos.getTimestamp(), Vector3.from2d(pos, height));

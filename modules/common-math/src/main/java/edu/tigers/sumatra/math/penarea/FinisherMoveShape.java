@@ -103,7 +103,7 @@ public class FinisherMoveShape
 				&& distLineLeft < distArcRight
 				&& distLineLeft < distLineRight)
 		{
-			return lineLeft.closestPointOnLine(pos).distanceTo(lineLeft.getStart());
+			return lineLeft.closestPointOnPath(pos).distanceTo(lineLeft.getPathStart());
 		}
 
 		if (distArcLeft < distLineLeft
@@ -115,7 +115,7 @@ public class FinisherMoveShape
 			IVector2 pointOnArcToCenter = leftArc.center().subtractNew(pointOnArc);
 
 			IVector2 arcStart = CircleMath.stepAlongCircle(
-					lineLeft.getEnd(),
+					lineLeft.getPathEnd(),
 					leftArc.center(),
 					0);
 			IVector2 arcStartToCenter = leftArc.center().subtractNew(arcStart);
@@ -130,7 +130,7 @@ public class FinisherMoveShape
 				&& distLineBottom < distArcRight
 				&& distLineBottom < distLineLeft)
 		{
-			return lengthSide + lengthOfArc + lineBottom.closestPointOnLine(pos).distanceTo(lineBottom.getStart());
+			return lengthSide + lengthOfArc + lineBottom.closestPointOnPath(pos).distanceTo(lineBottom.getPathStart());
 		}
 
 		if (distArcRight < distLineLeft
@@ -142,7 +142,7 @@ public class FinisherMoveShape
 			IVector2 pointOnArcToCenter = rightArc.center().subtractNew(pointOnArc);
 
 			IVector2 arcStart = CircleMath.stepAlongCircle(
-					lineRight.getStart(),
+					lineRight.getPathStart(),
 					rightArc.center(),
 					0);
 			IVector2 arcStartToCenter = rightArc.center().subtractNew(arcStart);
@@ -158,7 +158,7 @@ public class FinisherMoveShape
 				&& distLineRight < distLineLeft)
 		{
 			return lengthSide + lengthBottom + lengthOfArc * 2 +
-					lineRight.closestPointOnLine(pos).distanceTo(lineRight.getStart());
+					lineRight.closestPointOnPath(pos).distanceTo(lineRight.getPathStart());
 		}
 
 		return 0;
@@ -167,7 +167,7 @@ public class FinisherMoveShape
 
 	public IRectangle getBoundingRectangle()
 	{
-		return Rectangle.fromPoints(lineLeft.getStart(), lineRight.getStart().addNew(Vector2.fromX(-leftArc.radius())));
+		return Rectangle.fromPoints(lineLeft.getPathStart(), lineRight.getPathStart().addNew(Vector2.fromX(-leftArc.radius())));
 	}
 
 
@@ -180,19 +180,19 @@ public class FinisherMoveShape
 		IVector2 position;
 		position = switch (getSection(step))
 				{
-					case LEFT_SIDE -> lineLeft.stepAlongLine(Math.max(0, step));
+					case LEFT_SIDE -> lineLeft.stepAlongPath(Math.max(0, step));
 					case LEFT_ARC -> CircleMath.stepAlongCircle(
-							lineLeft.getEnd(),
+							lineLeft.getPathEnd(),
 							leftArc.center(),
 							SumatraMath.relative(step - lengthSide, 0, lengthOfArc) * AngleMath.PI_HALF);
-					case BOTTOM_LINE -> lineBottom.stepAlongLine(step - lengthSide - lengthOfArc);
+					case BOTTOM_LINE -> lineBottom.stepAlongPath(step - lengthSide - lengthOfArc);
 					case RIGHT_ARC -> CircleMath.stepAlongCircle(
-							lineBottom.getEnd(),
+							lineBottom.getPathEnd(),
 							rightArc.center(),
 							SumatraMath.relative(step - lengthSide - lengthOfArc - lengthBottom, 0, lengthOfArc)
 									* AngleMath.PI_HALF
 					);
-					case RIGHT_SIDE -> lineRight.stepAlongLine(step - lengthSide - lengthOfArc - lengthBottom - lengthOfArc);
+					case RIGHT_SIDE -> lineRight.stepAlongPath(step - lengthSide - lengthOfArc - lengthBottom - lengthOfArc);
 				};
 		return position;
 	}
@@ -235,9 +235,9 @@ public class FinisherMoveShape
 
 		return CircleMath.isPointInArc(getLeftArc(), point, 0) ||
 				CircleMath.isPointInArc(getRightArc(), point, 0) ||
-				Quadrilateral.fromCorners(lineRight.getStart(), lineBottom.getEnd(), lineBottom.getStart(),
-						lineLeft.getEnd()).isPointInShape(point) ||
-				Quadrilateral.fromCorners(lineLeft.getStart(), lineLeft.getEnd(), lineRight.getStart(), lineRight.getEnd())
+				Quadrilateral.fromCorners(lineRight.getPathStart(), lineBottom.getPathEnd(), lineBottom.getPathStart(),
+						lineLeft.getPathEnd()).isPointInShape(point) ||
+				Quadrilateral.fromCorners(lineLeft.getPathStart(), lineLeft.getPathEnd(), lineRight.getPathStart(), lineRight.getPathEnd())
 						.isPointInShape(point);
 	}
 }

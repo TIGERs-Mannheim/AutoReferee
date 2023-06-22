@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.math.line;
 
+import edu.tigers.sumatra.math.IPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -11,8 +12,6 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -100,12 +99,12 @@ public class HalfLineTest extends AbstractLineTest
 				expectedDistance = Math.abs(distanceLinePoint);
 			}
 
-			IVector2 actualClosestPoint = halfLine.closestPointOnLine(point);
+			IVector2 actualClosestPoint = halfLine.closestPointOnPath(point);
 			double actualDistance = halfLine.distanceTo(point);
 			assertThat(actualClosestPoint).isEqualTo(expectedClosestPoint);
 			assertThat(actualDistance).isCloseTo(expectedDistance, within(ACCURACY));
 
-			assertThat(invalidLine.closestPointOnLine(point)).isEqualTo(lineSV);
+			assertThat(invalidLine.closestPointOnPath(point)).isEqualTo(lineSV);
 		}
 	}
 
@@ -150,7 +149,7 @@ public class HalfLineTest extends AbstractLineTest
 	{
 		EqualsVerifier.forClass(HalfLine.class)
 				.suppress(Warning.NULL_FIELDS)
-				.withIgnoredFields("isValid")
+				.withIgnoredFields("valid")
 				.withPrefabValues(IVector2.class, Vector2.fromXY(Math.PI, Math.E), Vector2.fromXY(-21, 42))
 				.verify();
 	}
@@ -201,78 +200,30 @@ public class HalfLineTest extends AbstractLineTest
 
 
 	@Test
-	public void testIntersectHalfLine()
-	{
-		IHalfLine lineA = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2f.X_AXIS);
-
-		IVector2 sV = Vector2.fromXY(0, 1);
-		IVector2 dV = Vector2f.X_AXIS;
-		for (int degAngle = 0; degAngle < 360; degAngle++)
-		{
-			double radAngle = Math.toRadians(degAngle);
-
-			IHalfLine lineB = HalfLine.fromDirection(sV, dV.turnToNew(radAngle));
-
-			Optional<IVector2> intersection = lineA.intersect(lineB);
-			Optional<IVector2> inverseIntersection = lineB.intersect(lineA);
-			assertThat(intersection).isEqualTo(inverseIntersection);
-
-			if (degAngle < 270)
-			{
-				assertThat(intersection).isNotPresent();
-			} else
-			{
-				IVector2 expected = Vector2.fromXY(SumatraMath.tan(radAngle - Math.PI * 3 / 2), 0);
-				assertThat(intersection).isPresent();
-				assertThat(intersection).contains(expected);
-			}
-		}
-	}
-
-
-	@Test
-	public void testIntersectHalfLineWithInvalid()
-	{
-		IHalfLine validLine = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2f.X_AXIS);
-
-		IHalfLine invalidLineA = HalfLine.fromDirection(Vector2.fromXY(10, 25), Vector2f.ZERO_VECTOR);
-		IHalfLine invalidLineB = HalfLine.fromDirection(Vector2.fromXY(20, 11), Vector2f.ZERO_VECTOR);
-		Optional<IVector2> intersection = validLine.intersect(invalidLineA);
-		assertThat(intersection).isNotPresent();
-
-		intersection = invalidLineA.intersect(invalidLineB);
-		assertThat(intersection).isNotPresent();
-
-		intersection = invalidLineA.intersect(invalidLineA);
-		assertThat(intersection).isNotPresent();
-	}
-
-
-	@Test
 	public void testIsPointOnLine()
 	{
 		IHalfLine halfLine = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2.fromXY(3, 0));
 
 		IVector2 point = Vector2.fromXY(-10, 0);
-		assertThat(halfLine.isPointOnLine(point)).isFalse();
+		assertThat(halfLine.isPointOnPath(point)).isFalse();
 
-		point = Vector2.fromXY(-ALine.LINE_MARGIN * 4, 0);
-		assertThat(halfLine.isPointOnLine(point)).isFalse();
+		point = Vector2.fromXY(-IPath.LINE_MARGIN * 4, 0);
+		assertThat(halfLine.isPointOnPath(point)).isFalse();
 
-		point = Vector2.fromXY(1, ALine.LINE_MARGIN * 4);
-		assertThat(halfLine.isPointOnLine(point)).isFalse();
+		point = Vector2.fromXY(1, IPath.LINE_MARGIN * 4);
+		assertThat(halfLine.isPointOnPath(point)).isFalse();
 
 		point = Vector2.fromXY(1, 0);
-		assertThat(halfLine.isPointOnLine(point)).isTrue();
+		assertThat(halfLine.isPointOnPath(point)).isTrue();
 
-		point = Vector2.fromXY(1, ALine.LINE_MARGIN / 4);
-		assertThat(halfLine.isPointOnLine(point)).isTrue();
+		point = Vector2.fromXY(1, IPath.LINE_MARGIN / 4);
+		assertThat(halfLine.isPointOnPath(point)).isTrue();
 
-		point = Vector2.fromXY(3 + ALine.LINE_MARGIN * 4, 0);
-		assertThat(halfLine.isPointOnLine(point)).isTrue();
+		point = Vector2.fromXY(3 + IPath.LINE_MARGIN * 4, 0);
+		assertThat(halfLine.isPointOnPath(point)).isTrue();
 
 		point = Vector2.fromXY(Double.MAX_VALUE / 2.0d, 0);
-		assertThat(halfLine.isPointOnLine(point)).isTrue();
+		assertThat(halfLine.isPointOnPath(point)).isTrue();
 
 
 	}
@@ -283,9 +234,9 @@ public class HalfLineTest extends AbstractLineTest
 	{
 		IHalfLine invalidLine = HalfLine.fromDirection(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
 
-		assertThat(invalidLine.isPointOnLine(Vector2f.ZERO_VECTOR)).isTrue();
-		assertThat(invalidLine.isPointOnLine(Vector2.fromXY(1, 2))).isFalse();
-		assertThat(invalidLine.isPointOnLine(Vector2.fromXY(2, 3))).isFalse();
+		assertThat(invalidLine.isPointOnPath(Vector2f.ZERO_VECTOR)).isTrue();
+		assertThat(invalidLine.isPointOnPath(Vector2.fromXY(1, 2))).isFalse();
+		assertThat(invalidLine.isPointOnPath(Vector2.fromXY(2, 3))).isFalse();
 	}
 
 
@@ -344,4 +295,35 @@ public class HalfLineTest extends AbstractLineTest
 	{
 		doTestIsParallelTo(lineConstructor);
 	}
+
+
+	@Test
+	public void testClosestPointOnPath()
+	{
+		var halfLine = Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromX(1));
+
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(-0.0001, 0))).isEqualTo(Vector2.zero());
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(0, 0))).isEqualTo(Vector2.zero());
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(2, 1))).isEqualTo(Vector2.fromX(2));
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(2, 0))).isEqualTo(Vector2.fromX(2));
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(2, -1))).isEqualTo(Vector2.fromX(2));
+		assertThat(halfLine.closestPointOnPath(Vector2.fromXY(358382, -1))).isEqualTo(Vector2.fromX(358382));
+	}
+
+
+	@Test
+	public void testIsPointOnPath()
+	{
+		var halfLine = Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromX(1));
+
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(-0.0001, 0))).isFalse();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(0, 0))).isTrue();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, 1))).isFalse();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, 0.0001))).isFalse();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, 0))).isTrue();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, -0.0001))).isFalse();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, -1))).isFalse();
+		assertThat(halfLine.isPointOnPath(Vector2.fromXY(358382, -1))).isFalse();
+	}
+
 }

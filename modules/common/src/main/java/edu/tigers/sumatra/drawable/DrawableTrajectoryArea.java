@@ -76,8 +76,8 @@ public class DrawableTrajectoryArea extends ADrawableWithStroke
 		for (ILineSegment line : lines)
 		{
 			GeneralPath drawPathLine = new GeneralPath();
-			IVector2 start = tool.transformToGuiCoordinates(line.getStart(), invert);
-			IVector2 end = tool.transformToGuiCoordinates(line.getEnd(), invert);
+			IVector2 start = tool.transformToGuiCoordinates(line.getPathStart(), invert);
+			IVector2 end = tool.transformToGuiCoordinates(line.getPathEnd(), invert);
 			drawPathLine.moveTo(start.x(), start.y());
 			drawPathLine.lineTo(end.x(), end.y());
 			g.draw(drawPathLine);

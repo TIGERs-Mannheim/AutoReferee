@@ -21,8 +21,8 @@ public interface IQuadrilateral extends I2DShape
 	 * @return the underlying two triangles
 	 */
 	List<ITriangle> getTriangles();
-	
-	
+
+
 	/**
 	 * @return a list of all corners in clockwise order, starting with
 	 */
@@ -33,4 +33,13 @@ public interface IQuadrilateral extends I2DShape
 	 * @return all 4 edges of this quadrilateral
 	 */
 	List<ILineSegment> getEdges();
+
+	/**
+	 * Create a new quadrilateral with a given margin in each direction
+	 *
+	 * @param margin a positive or negative margin
+	 * @return a new quadrilateral
+	 */
+	@Override
+	IQuadrilateral withMargin(double margin);
 }

@@ -110,7 +110,7 @@ public class DrawableRuler implements IDrawableShape
 	{
 		shape.setStrokeWidth(factorStrokeStrength / tool.getScale()).paintShape(g, tool, invert);
 		int fontHeight = (int) (factorFontHeight / tool.getScale());
-		List<DrawableAnnotation> annotations = findBestAnnotationPlacement(rulerLine.getStart(), rulerLine.getEnd(),
+		List<DrawableAnnotation> annotations = findBestAnnotationPlacement(rulerLine.getPathStart(), rulerLine.getPathEnd(),
 				getFieldRotation(tool.getFieldTurn()), fontHeight);
 		annotations.forEach(a -> a.withFontHeight(fontHeight).paintShape(g, tool, invert));
 	}

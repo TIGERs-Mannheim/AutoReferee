@@ -129,7 +129,7 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 		IPenaltyArea opponentPenArea = NGeometry.getPenaltyArea(curKickerColor.opposite());
 		IPenaltyArea ownPenArea = NGeometry.getPenaltyArea(curKickerColor);
 
-		if (opponentPenArea.isPointInShape(curKicker.getPos(), getPartialTouchMargin()))
+		if (opponentPenArea.withMargin(getPartialTouchMargin()).isPointInShape(curKicker.getPos()))
 		{
 			/*
 			 * Attacker touched the ball while being located partially/fully inside the opponent's penalty area
@@ -143,7 +143,7 @@ public class BotInDefenseAreaDetector extends AGameEventDetector
 		}
 		if (curKickerId != frame.getRefereeMsg().getKeeperBotID(curKickerColor)
 				&& !defenderIsPushed(curKickerId, curKicker.getPos())
-				&& ownPenArea.isPointInShape(curKicker.getPos(), -Geometry.getBotRadius()))
+				&& ownPenArea.withMargin(-Geometry.getBotRadius()).isPointInShape(curKicker.getPos()))
 		{
 			/*
 			 * Multiple Defender:

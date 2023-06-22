@@ -50,7 +50,7 @@ public class InFrontValidator implements IKickValidator
 
 		for (MergedBall b : balls)
 		{
-			IVector2 leadPoint = orientLine.toLine().closestPointOnLine(b.getCamPos());
+			IVector2 leadPoint = orientLine.toLine().closestPointOnPath(b.getCamPos());
 
 			if (!orientLine.isPointInFront(leadPoint))
 			{

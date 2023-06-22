@@ -152,6 +152,6 @@ public final class NGeometry
 	 */
 	public static boolean posInsidePenaltyArea(final IVector2 pos, final double margin)
 	{
-		return getPenaltyAreas().stream().anyMatch(penArea -> penArea.isPointInShape(pos, margin));
+		return getPenaltyAreas().stream().anyMatch(penArea -> penArea.withMargin(margin).isPointInShape(pos));
 	}
 }

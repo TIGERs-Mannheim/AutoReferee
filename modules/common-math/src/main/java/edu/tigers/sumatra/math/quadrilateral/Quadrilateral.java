@@ -5,9 +5,10 @@
 package edu.tigers.sumatra.math.quadrilateral;
 
 import com.sleepycat.persist.model.Persistent;
-import edu.tigers.sumatra.math.line.ILineBase;
+import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.polygon.PolygonBuilder;
 import edu.tigers.sumatra.math.triangle.ITriangle;
 import edu.tigers.sumatra.math.triangle.Triangle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -129,19 +130,21 @@ public final class Quadrilateral implements IQuadrilateral
 
 
 	@Override
-	public boolean isPointInShape(final IVector2 point, final double margin)
-	{
-		return getTriangles().stream().anyMatch(t -> t.isPointInShape(point, margin));
-	}
-
-
-	@Override
 	public List<ITriangle> getTriangles()
 	{
 		List<ITriangle> triangles = new ArrayList<>(2);
 		triangles.add(Triangle.fromCorners(corners.get(0), corners.get(1), corners.get(2)));
 		triangles.add(Triangle.fromCorners(corners.get(3), corners.get(0), corners.get(2)));
 		return triangles;
+	}
+
+
+	@Override
+	public IQuadrilateral withMargin(double margin)
+	{
+		var builder = new PolygonBuilder();
+		getCorners().forEach(builder::addPoint);
+		return new Quadrilateral(builder.build().withMargin(margin).getPoints());
 	}
 
 
@@ -158,23 +161,9 @@ public final class Quadrilateral implements IQuadrilateral
 
 
 	@Override
-	public List<IVector2> lineIntersections(final ILineBase line)
+	public List<IBoundedPath> getPerimeterPath()
 	{
-		IVector2 a = corners.get(0);
-		IVector2 b = corners.get(1);
-		IVector2 c = corners.get(2);
-		IVector2 d = corners.get(3);
-		ILineSegment ab = Lines.segmentFromPoints(a, b);
-		ILineSegment bc = Lines.segmentFromPoints(b, c);
-		ILineSegment cd = Lines.segmentFromPoints(c, d);
-		ILineSegment da = Lines.segmentFromPoints(d, a);
-		ILineSegment[] lines = new ILineSegment[] { ab, bc, cd, da };
-		List<IVector2> intersections = new ArrayList<>();
-		for (ILineSegment segment : lines)
-		{
-			line.intersect(segment).ifPresent(intersections::add);
-		}
-		return intersections;
+		return getEdges().stream().map(IBoundedPath.class::cast).toList();
 	}
 
 
@@ -186,7 +175,7 @@ public final class Quadrilateral implements IQuadrilateral
 			return point;
 		}
 		return getEdges().stream()
-				.map(e -> e.closestPointOnLine(point))
+				.map(e -> e.closestPointOnPath(point))
 				.min(Comparator.comparingDouble(point::distanceTo))
 				.orElseThrow();
 	}

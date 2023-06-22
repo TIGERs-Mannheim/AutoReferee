@@ -6,8 +6,8 @@ package edu.tigers.sumatra.geometry;
 
 import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.IDrawableShape;
+import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.ILineBase;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
@@ -18,7 +18,6 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -63,18 +62,6 @@ public class PenaltyArea implements IPenaltyArea
 	}
 
 
-	@Override
-	public List<IVector2> lineIntersections(ILineBase line)
-	{
-		return getEdges().stream()
-				.map(line::intersect)
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.distinct()
-				.toList();
-	}
-
-
 	private List<ILineSegment> getEdges()
 	{
 		List<ILineSegment> edges = new ArrayList<>();
@@ -94,6 +81,20 @@ public class PenaltyArea implements IPenaltyArea
 
 
 	@Override
+	public List<IBoundedPath> getPerimeterPath()
+	{
+		return getEdges().stream().map(IBoundedPath.class::cast).toList();
+	}
+
+
+	@Override
+	public double getPerimeterLength()
+	{
+		return length + 2 * depth;
+	}
+
+
+	@Override
 	@SuppressWarnings("squid:S1244") // equality check intended
 	public IVector2 projectPointOnToPenaltyAreaBorder(final IVector2 point)
 	{
@@ -105,7 +106,7 @@ public class PenaltyArea implements IPenaltyArea
 			}
 			return getGoalCenter().addNew(Vector2.fromY(Math.signum(point.y()) * getLength() / 2));
 		}
-		return point.nearestToOpt(lineIntersections(Lines.lineFromPoints(point, getGoalCenter())))
+		return point.nearestToOpt(intersectPerimeterPath(Lines.lineFromPoints(point, getGoalCenter())))
 				.orElseGet(() -> getGoalCenter().addNew(Vector2.fromX(getDepth())));
 	}
 
@@ -114,13 +115,6 @@ public class PenaltyArea implements IPenaltyArea
 	public boolean isPointInShape(final IVector2 point)
 	{
 		return getRectangle().isPointInShape(point);
-	}
-
-
-	@Override
-	public boolean isPointInShape(final IVector2 point, final double margin)
-	{
-		return withMargin(margin).isPointInShape(point);
 	}
 
 
@@ -145,7 +139,7 @@ public class PenaltyArea implements IPenaltyArea
 		{
 			return point.nearestTo(
 					getEdges().stream()
-							.map(e -> e.closestPointOnLine(point))
+							.map(e -> e.closestPointOnPath(point))
 							.toList());
 		}
 		return point;
@@ -234,7 +228,7 @@ public class PenaltyArea implements IPenaltyArea
 
 		ILineSegment line = Lines.segmentFromPoints(
 				rectangle.nearestPointOutside(from), rectangle.nearestPointOutside(to));
-		List<IVector2> intersections = rectangle.lineIntersections(line);
+		List<IVector2> intersections = rectangle.intersectPerimeterPath(line);
 		if (intersections.size() != 2)
 		{
 			return 0;

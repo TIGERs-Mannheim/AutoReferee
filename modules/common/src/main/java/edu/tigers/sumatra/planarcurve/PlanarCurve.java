@@ -283,7 +283,7 @@ public class PlanarCurve
 		{
 			double tDuration = part.getFirst().getDuration();
 
-			List<Double> roots = minDistanceRoots(part.getFirst(), part.getSecond());
+			List<Double> roots = new ArrayList<>(minDistanceRoots(part.getFirst(), part.getSecond()));
 			roots.add(tDuration);
 
 			double dist = roots.stream().filter(r -> (r > 0) && (r <= (tDuration)))

@@ -4,15 +4,19 @@
 package edu.tigers.sumatra.math.botshape;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.IBoundedPath;
+import edu.tigers.sumatra.math.IPath;
 import edu.tigers.sumatra.math.SumatraMath;
+import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.line.ILineSegment;
-import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 
 /**
@@ -53,7 +57,7 @@ public class BotShape implements IBotShape
 	public static IVector2 getKickerCenterPos(final Pose pose,
 			final double center2Dribbler)
 	{
-		return pose.getPos().addNew(Vector2.fromAngle(pose.getOrientation()).scaleTo(center2Dribbler));
+		return getKickerCenterPos(pose.getPos(), pose.getOrientation(), center2Dribbler);
 	}
 
 
@@ -124,7 +128,7 @@ public class BotShape implements IBotShape
 	public boolean isPointInKickerZone(final IVector2 point, final double zoneLength, final double zoneWidth)
 	{
 		var orientLine = Lines.halfLineFromDirection(position, Vector2.fromAngle(orientation));
-		var leadPoint = orientLine.closestPointOnLine(point);
+		var leadPoint = orientLine.toLine().closestPointOnPath(point);
 
 		if (!orientLine.isPointInFront(leadPoint))
 		{
@@ -141,21 +145,6 @@ public class BotShape implements IBotShape
 		double distPointToLeadPoint = point.distanceTo(leadPoint);
 
 		return distPointToLeadPoint <= (zoneWidth * 0.5);
-	}
-
-
-	@Override
-	public IVector2 nearestPointOutside(final IVector2 point)
-	{
-		if (!isPointInShape(point))
-		{
-			return point;
-		}
-		if (isPointInKickerZone(point, 0))
-		{
-			return Lines.segmentFromPoints(center(), point).intersect(getKickerLine()).orElse(point);
-		}
-		return LineMath.stepAlongLine(center(), point, radius);
 	}
 
 
@@ -184,20 +173,28 @@ public class BotShape implements IBotShape
 	@Override
 	public boolean isPointInShape(final IVector2 point)
 	{
-		if (position.distanceTo(point) > radius)
+		if (position.distanceTo(point) > radius + IPath.LINE_MARGIN)
 		{
 			return false;
 		}
 		// check if point is not in front of kicker.
 		// Use radius as kickerZone as maximum value here (in case of center2Dribbler==0)
-		return !isPointInKickerZone(point, radius);
+		return !isPointInKickerZone(point, radius) || getKickerLine().isPointOnPath(point);
 	}
 
 
 	@Override
-	public boolean isPointInShape(final IVector2 point, final double margin)
+	public List<IBoundedPath> getPerimeterPath()
 	{
-		return withMargin(margin).isPointInShape(point);
+		double r = radius;
+		double alpha = SumatraMath.acos(center2Dribbler / r);
+		double startAngleRad = orientation + alpha;
+		double angleExtent = AngleMath.PI_TWO - 2 * alpha;
+
+		return List.of(
+				Arc.createArc(position, radius, startAngleRad, angleExtent),
+				getKickerLine()
+		);
 	}
 
 

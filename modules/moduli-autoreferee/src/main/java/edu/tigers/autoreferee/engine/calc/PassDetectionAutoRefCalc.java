@@ -239,7 +239,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 					pass.getTarget().subtractNew(pass.getSource()),
 					pass.isValid() ? Color.green : Color.red
 			));
-			var center = Lines.segmentFromPoints(pass.getSource(), pass.getTarget()).getCenter();
+			var center = Lines.segmentFromPoints(pass.getSource(), pass.getTarget()).getPathCenter();
 			shapes.add(new DrawableAnnotation(
 					center,
 					String.format(

@@ -4,6 +4,12 @@
 
 package edu.tigers.sumatra.math.line;
 
+import edu.tigers.sumatra.math.circle.IArc;
+import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.ellipse.IEllipse;
+import edu.tigers.sumatra.math.intersections.IIntersections;
+import edu.tigers.sumatra.math.intersections.ISingleIntersection;
+import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
@@ -17,92 +23,76 @@ import java.util.Optional;
  */
 final class Line extends AUnboundedLine implements ILine
 {
-	
+
 	private Line(final IVector2 supportVector, final IVector2 directionVector)
 	{
 		super(supportVector, directionVector);
 	}
-	
-	
+
+
 	/**
 	 * Creates supportPointA new line instance which runs through the two specified points {@code supportPointA} and
 	 * {@code supportPointB}. The direction vector of the created line points from {@code supportPointA} to
 	 * {@code supportPointB}.
 	 *
-	 * @param supportPointA
-	 *           The first point to define the line
-	 * @param supportPointB
-	 *           The seconds point to define the line
-	 * @return
-	 * 			A new line instance which runs through both points
-	 * @throws IllegalArgumentException
-	 *            If the support points are identical, i.e. {@code supportPointA.equals(supportPointB}
+	 * @param supportPointA The first point to define the line
+	 * @param supportPointB The seconds point to define the line
+	 * @return A new line instance which runs through both points
+	 * @throws IllegalArgumentException If the support points are identical, i.e. {@code supportPointA.equals(supportPointB}
 	 */
 	public static ILine fromPoints(final IVector2 supportPointA, final IVector2 supportPointB)
 	{
 		return createNewFromVectorCopy(supportPointA, supportPointB.subtractNew(supportPointA));
 	}
-	
-	
+
+
 	/**
 	 * Creates a new line instance which uses the specified {@code supportVector} and {@code directionVector}.
 	 *
-	 * @param supportVector
-	 *           The support vector to use for the line
-	 * @param directionVector
-	 *           The direction vector to use for the line
-	 * @return
-	 * 			A new line instance which is defined by the two parameters
-	 * @throws IllegalArgumentException
-	 *            If the {@code directionVector} has a length of zero. Please perform a check in your code before you
-	 *            call this method!
+	 * @param supportVector   The support vector to use for the line
+	 * @param directionVector The direction vector to use for the line
+	 * @return A new line instance which is defined by the two parameters
+	 * @throws IllegalArgumentException If the {@code directionVector} has a length of zero. Please perform a check in your code before you
+	 *                                  call this method!
 	 */
 	public static ILine fromDirection(final IVector2 supportVector, final IVector2 directionVector)
 	{
 		return createNewFromVectorCopy(supportVector, directionVector);
 	}
-	
-	
+
+
 	/**
 	 * Creates a new instance with the supplied support and direction vector. The direction vector is normalized.
-	 * 
-	 * @param supportVector
-	 *           Line support vector
-	 * @param directionVector
-	 *           Line direction vector
-	 * @return
-	 * 			A new line instance
-	 * @throws IllegalArgumentException
-	 *            If the {@code directionVector} has a length of zero. Please perform a check in your code before you
-	 *            call this method!
+	 *
+	 * @param supportVector   Line support vector
+	 * @param directionVector Line direction vector
+	 * @return A new line instance
+	 * @throws IllegalArgumentException If the {@code directionVector} has a length of zero. Please perform a check in your code before you
+	 *                                  call this method!
 	 */
-	static ILine createNewFromVectorCopy(final IVector2 supportVector, final IVector2 directionVector)
+	private static ILine createNewFromVectorCopy(final IVector2 supportVector, final IVector2 directionVector)
 	{
 		Vector2 sV = Vector2.copy(supportVector);
 		Vector2 dV = directionVector.normalizeNew();
-		
+
 		if (!dV.isZeroVector() && dV.getAngle() < 0.0d)
 		{
 			dV.multiply(-1.0d);
 		}
-		
+
 		return new Line(sV, dV);
 	}
-	
-	
+
+
 	/**
 	 * Creates a new instance with the supplied support and direction vector. The provided vectors are not copied. The
 	 * direction vector is expected to be normalized.
 	 *
-	 * @param supportVector
-	 *           Line support vector
-	 * @param directionVector
-	 *           Line direction vector, normalized
-	 * @return
-	 * 			A new line instance
-	 * @throws IllegalArgumentException
-	 *            If the {@code directionVector} has a length of zero. Please perform a check in your code before you
-	 *            call this method!
+	 * @param supportVector   Line support vector
+	 * @param directionVector Line direction vector, normalized
+	 * @return A new line instance
+	 * @throws IllegalArgumentException If the {@code directionVector} has a length of zero. Please perform a check in your code before you
+	 *                                  call this method!
 	 */
 	static ILine createNewWithoutCopy(final IVector2 supportVector, final IVector2 directionVector)
 	{
@@ -111,29 +101,29 @@ final class Line extends AUnboundedLine implements ILine
 		{
 			dV = dV.multiplyNew(-1.0d);
 		}
-		
+
 		return new Line(supportVector, dV);
 	}
-	
-	
+
+
 	private static boolean equalsForInvalid(final ILine a, final ILine b)
 	{
 		return !a.isValid() && !b.isValid() && a.supportVector().equals(b.supportVector());
 	}
-	
-	
+
+
 	private static boolean equalsForValid(final ILine a, final ILine b)
 	{
 		if (!a.directionVector().equals(b.directionVector()))
 		{
 			return false;
 		}
-		
+
 		IVector2 supportVectorDifference = b.supportVector().subtractNew(a.supportVector());
 		return supportVectorDifference.isParallelTo(a.directionVector());
 	}
-	
-	
+
+
 	@Override
 	public ILine copy()
 	{
@@ -141,10 +131,10 @@ final class Line extends AUnboundedLine implements ILine
 		IVector2 directionVector = directionVector();
 		return createNewFromVectorCopy(supportVector, directionVector);
 	}
-	
-	
+
+
 	@Override
-	public final boolean equals(final Object other)
+	public boolean equals(final Object other)
 	{
 		if (this == other)
 		{
@@ -161,10 +151,10 @@ final class Line extends AUnboundedLine implements ILine
 		}
 		return equalsForInvalid(this, that);
 	}
-	
-	
+
+
 	@Override
-	public final int hashCode()
+	public int hashCode()
 	{
 		/*
 		 * This is not an optimal solution as it does not consider the support vector for hash code creation. The issue
@@ -176,29 +166,29 @@ final class Line extends AUnboundedLine implements ILine
 		 */
 		return directionVector().hashCode();
 	}
-	
-	
+
+
 	@Override
 	public Optional<Double> getYIntercept()
 	{
 		return LineMath.getYIntercept(this);
 	}
-	
-	
+
+
 	@Override
 	public Optional<Double> getXValue(final double y)
 	{
 		return LineMath.getXValue(this, y);
 	}
-	
-	
+
+
 	@Override
 	public Optional<Double> getYValue(final double x)
 	{
 		return LineMath.getYValue(this, x);
 	}
-	
-	
+
+
 	@Override
 	public ILine getOrthogonalLine()
 	{
@@ -206,10 +196,10 @@ final class Line extends AUnboundedLine implements ILine
 		IVector2 dV = directionVector().turnNew(Math.PI / 2);
 		return createNewFromVectorCopy(sV, dV);
 	}
-	
-	
+
+
 	@Override
-	public IVector2 closestPointOnLine(final IVector2 point)
+	public IVector2 closestPointOnPath(final IVector2 point)
 	{
 		if (!isValid())
 		{
@@ -217,48 +207,57 @@ final class Line extends AUnboundedLine implements ILine
 		}
 		return LineMath.closestPointOnLine(this, point);
 	}
-	
-	
+
+
 	@Override
 	public ILine toLine()
 	{
 		return this;
 	}
-	
-	
+
+
 	@Override
-	public Optional<IVector2> intersect(final ILine other)
+	public ISingleIntersection intersect(final ILine other)
 	{
-		if (this.isValid() && other.isValid())
-		{
-			return LineMath.intersectionPointOfLines(this, other);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectLineAndLine(this, other);
 	}
-	
-	
+
+
 	@Override
-	public Optional<IVector2> intersect(final IHalfLine halfLine)
+	public ISingleIntersection intersect(final IHalfLine halfLine)
 	{
-		if (this.isValid() && halfLine.isValid())
-		{
-			return LineMath.intersectionPointOfLineAndHalfLine(this, halfLine);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectLineAndHalfLine(this, halfLine);
 	}
-	
-	
+
+
 	@Override
-	public Optional<IVector2> intersect(final ILineSegment segment)
+	public ISingleIntersection intersect(final ILineSegment segment)
 	{
-		if (this.isValid() && segment.isValid())
-		{
-			return LineMath.intersectionPointOfLineAndSegment(this, segment);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectLineAndLineSegment(this, segment);
 	}
-	
-	
+
+
+	@Override
+	public IIntersections intersect(ICircle circle)
+	{
+		return PathIntersectionMath.intersectLineAndCircle(this, circle);
+	}
+
+
+	@Override
+	public IIntersections intersect(IArc arc)
+	{
+		return PathIntersectionMath.intersectLineAndArc(this, arc);
+	}
+
+
+	@Override
+	public IIntersections intersect(IEllipse ellipse)
+	{
+		return PathIntersectionMath.intersectLineAndEllipse(this, ellipse);
+	}
+
+
 	@Override
 	public String toString()
 	{

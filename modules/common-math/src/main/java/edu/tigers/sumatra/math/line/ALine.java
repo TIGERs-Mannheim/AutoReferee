@@ -5,7 +5,6 @@
 package edu.tigers.sumatra.math.line;
 
 import com.sleepycat.persist.model.Persistent;
-import edu.tigers.sumatra.math.vector.IVector2;
 
 import java.util.Optional;
 
@@ -18,7 +17,6 @@ import java.util.Optional;
 @Persistent
 abstract class ALine implements ILineBase
 {
-	static final double LINE_MARGIN = 1e-6;
 
 
 	@Override
@@ -55,29 +53,5 @@ abstract class ALine implements ILineBase
 		return isValid()
 				&& other.isValid()
 				&& directionVector().isParallelTo(other.directionVector());
-	}
-
-
-	@Override
-	public boolean isPointOnLine(final IVector2 point)
-	{
-		IVector2 closestPointOnLine = closestPointOnLine(point);
-		return point.distanceTo(closestPointOnLine) <= LINE_MARGIN;
-	}
-
-
-	@Override
-	public double distanceTo(final IVector2 point)
-	{
-		IVector2 closestPointOnLine = closestPointOnLine(point);
-		return point.distanceTo(closestPointOnLine);
-	}
-
-
-	@Override
-	public double distanceToSqr(final IVector2 point)
-	{
-		IVector2 closestPointOnLine = closestPointOnLine(point);
-		return point.distanceToSqr(closestPointOnLine);
 	}
 }

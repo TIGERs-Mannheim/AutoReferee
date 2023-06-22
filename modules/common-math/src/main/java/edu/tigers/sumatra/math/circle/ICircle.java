@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.math.circle;
 
+import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.vector.IEuclideanDistance;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Circle interface.
  */
-public interface ICircle extends ICircular, IEuclideanDistance
+public interface ICircle extends ICircular, IEuclideanDistance, IBoundedPath
 {
 	/**
 	 * Get the intersection points of the two tangential lines that cross the external points.

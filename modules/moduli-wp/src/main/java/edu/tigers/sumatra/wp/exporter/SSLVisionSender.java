@@ -214,11 +214,11 @@ public class SSLVisionSender extends AModule implements IWorldFrameObserver
 	{
 		SSL_FieldLineSegment.Builder lineSegment = SSL_FieldLineSegment.newBuilder();
 		Vector2f.Builder pr1 = Vector2f.newBuilder();
-		pr1.setX((float) line.getStart().x());
-		pr1.setY((float) line.getStart().y());
+		pr1.setX((float) line.getPathStart().x());
+		pr1.setY((float) line.getPathStart().y());
 		Vector2f.Builder pr2 = Vector2f.newBuilder();
-		pr2.setX((float) line.getEnd().x());
-		pr2.setY((float) line.getEnd().y());
+		pr2.setX((float) line.getPathEnd().x());
+		pr2.setY((float) line.getPathEnd().y());
 		lineSegment.setP1(pr1);
 		lineSegment.setP2(pr2);
 		lineSegment.setThickness(10);

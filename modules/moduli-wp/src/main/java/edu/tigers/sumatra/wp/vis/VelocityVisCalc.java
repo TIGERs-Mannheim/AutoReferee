@@ -48,7 +48,7 @@ public class VelocityVisCalc implements IWpCalc
 				DrawableLine line = new DrawableLine(velLine, Color.cyan);
 				line.setStrokeWidth(20);
 				shapes.add(line);
-				final DrawableAnnotation annotation = new DrawableAnnotation(velLine.getEnd(),
+				final DrawableAnnotation annotation = new DrawableAnnotation(velLine.getPathEnd(),
 						df.format(bot.getVel().getLength2()));
 				annotation.setColor(Color.cyan);
 				shapes.add(annotation);

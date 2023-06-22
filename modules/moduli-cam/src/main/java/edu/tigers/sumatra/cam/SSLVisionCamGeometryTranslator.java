@@ -134,8 +134,8 @@ public class SSLVisionCamGeometryTranslator
 
 	private SSL_FieldLineSegment toProtobuf(CamFieldLine lineSegment)
 	{
-		IVector2 p1 = lineSegment.getLine().getStart();
-		IVector2 p2 = lineSegment.getLine().getEnd();
+		IVector2 p1 = lineSegment.getLine().getPathStart();
+		IVector2 p2 = lineSegment.getLine().getPathEnd();
 		return SSL_FieldLineSegment.newBuilder()
 				.setName(lineSegment.getName())
 				.setThickness((float) lineSegment.getThickness())

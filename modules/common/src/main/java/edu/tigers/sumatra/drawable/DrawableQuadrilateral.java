@@ -62,8 +62,8 @@ public class DrawableQuadrilateral extends ADrawableWithStroke
 		assert quadrilateral != null;
 		for (ILineSegment line : quadrilateral.getEdges())
 		{
-			final IVector2 lineStart = tool.transformToGuiCoordinates(line.getStart(), invert);
-			final IVector2 lineEnd = tool.transformToGuiCoordinates(line.getEnd(), invert);
+			final IVector2 lineStart = tool.transformToGuiCoordinates(line.getPathStart(), invert);
+			final IVector2 lineEnd = tool.transformToGuiCoordinates(line.getPathEnd(), invert);
 			g.drawLine((int) lineStart.x(), (int) lineStart.y(), (int) lineEnd.x(), (int) lineEnd.y());
 		}
 		if (fill)

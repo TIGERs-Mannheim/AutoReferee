@@ -91,7 +91,7 @@ public class Rectangle extends ARectangle
 	 */
 	public static Rectangle fromLineSegment(final ILineSegment lineSegment)
 	{
-		return fromPoints(lineSegment.getStart(), lineSegment.getEnd());
+		return fromPoints(lineSegment.getPathStart(), lineSegment.getPathEnd());
 	}
 	
 	
@@ -184,13 +184,11 @@ public class Rectangle extends ARectangle
 			return false;
 		}
 		
-		if (!(o instanceof ARectangle))
+		if (!(o instanceof ARectangle rectangle))
 		{
 			return false;
 		}
-		
-		final ARectangle rectangle = (ARectangle) o;
-		
+
 		return SumatraMath.isEqual(xExtent, rectangle.xExtent())
 				&& SumatraMath.isEqual(yExtent, rectangle.yExtent())
 				&& center.equals(rectangle.center());

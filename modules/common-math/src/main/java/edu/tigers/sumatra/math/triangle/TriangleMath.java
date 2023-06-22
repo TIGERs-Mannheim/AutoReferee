@@ -10,7 +10,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
 import java.util.List;
-import java.util.Optional;
 
 
 /**
@@ -102,9 +101,9 @@ public final class TriangleMath
 		ILine caLine = Lines.lineFromDirection(caNewSV, ca);
 		ILine abLine = Lines.lineFromDirection(abNewSV, ab);
 		ILine bcLine = Lines.lineFromDirection(bcNewSV, bc);
-		Optional<IVector2> newA = caLine.intersect(abLine);
-		Optional<IVector2> newB = abLine.intersect(bcLine);
-		Optional<IVector2> newC = bcLine.intersect(caLine);
+		var newA = caLine.intersect(abLine).asOptional();
+		var newB = abLine.intersect(bcLine).asOptional();
+		var newC = bcLine.intersect(caLine).asOptional();
 
 		if (newA.isPresent() && newB.isPresent() && newC.isPresent())
 		{

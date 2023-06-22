@@ -25,7 +25,7 @@ public class PolygonBuilder
 	 * @param point
 	 * @throws IllegalArgumentException when the new point would cause an intersection (destroy the polygon)
 	 */
-	public void addPoint(final IVector2 point)
+	public PolygonBuilder addPoint(final IVector2 point)
 	{
 		for (int i = 0; i < (points.size() - 1); ++i)
 		{
@@ -34,13 +34,13 @@ public class PolygonBuilder
 			var p1 = points.get(i);
 			var p2 = points.get(i + 1);
 			var edge = Lines.segmentFromPoints(p1, p2);
-			var fPoint = edge.intersect(Lines.segmentFromPoints(point, startPoint));
+			var fPoint = edge.intersect(Lines.segmentFromPoints(point, startPoint)).asOptional();
 
 			if (fPoint.isPresent() && !startPoint.isCloseTo(fPoint.get(), 0.001))
 			{
 				throw new IllegalArgumentException("polygon is damaged by point " + point);
 			}
-			var lPoint = edge.intersect(Lines.segmentFromPoints(point, lastPoint));
+			var lPoint = edge.intersect(Lines.segmentFromPoints(point, lastPoint)).asOptional();
 
 			if (lPoint.isPresent() && !lastPoint.isCloseTo(lPoint.get(), 0.001))
 			{
@@ -48,6 +48,7 @@ public class PolygonBuilder
 			}
 		}
 		points.add(point);
+		return this;
 	}
 
 

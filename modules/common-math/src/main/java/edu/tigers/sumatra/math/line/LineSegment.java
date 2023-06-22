@@ -5,12 +5,18 @@
 package edu.tigers.sumatra.math.line;
 
 import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.circle.IArc;
+import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.ellipse.IEllipse;
+import edu.tigers.sumatra.math.intersections.IIntersections;
+import edu.tigers.sumatra.math.intersections.ISingleIntersection;
+import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 
 /**
@@ -23,6 +29,7 @@ final class LineSegment extends ALine implements ILineSegment
 {
 	private final Vector2f start;
 	private final Vector2f end;
+	private final boolean valid;
 
 	/**
 	 * this field is calculated on demand
@@ -38,6 +45,7 @@ final class LineSegment extends ALine implements ILineSegment
 	{
 		start = Vector2f.ZERO_VECTOR;
 		end = Vector2f.ZERO_VECTOR;
+		valid = false;
 	}
 
 
@@ -45,6 +53,7 @@ final class LineSegment extends ALine implements ILineSegment
 	{
 		this.start = Vector2f.copy(start);
 		this.end = Vector2f.copy(end);
+		valid = !start.equals(end);
 	}
 
 
@@ -83,53 +92,51 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public boolean isValid()
 	{
-		return !start.equals(end);
+		return valid;
 	}
 
 
 	@Override
-	public final boolean equals(final Object other)
+	public boolean equals(final Object other)
 	{
 		if (this == other)
 		{
 			return true;
 		}
-		if (!(other instanceof ILineSegment))
+		if (!(other instanceof ILineSegment that))
 		{
 			return false;
 		}
 
-		final ILineSegment that = (ILineSegment) other;
-
-		return getStart().equals(that.getStart()) && getEnd().equals(that.getEnd());
+		return getPathStart().equals(that.getPathStart()) && getPathEnd().equals(that.getPathEnd());
 	}
 
 
 	@Override
-	public final int hashCode()
+	public int hashCode()
 	{
-		int result = getStart().hashCode();
-		result = (31 * result) + getEnd().hashCode();
+		int result = getPathStart().hashCode();
+		result = (31 * result) + getPathEnd().hashCode();
 		return result;
 	}
 
 
 	@Override
-	public IVector2 getStart()
+	public IVector2 getPathStart()
 	{
 		return start;
 	}
 
 
 	@Override
-	public IVector2 getEnd()
+	public IVector2 getPathEnd()
 	{
 		return end;
 	}
 
 
 	@Override
-	public IVector2 getCenter()
+	public IVector2 getPathCenter()
 	{
 		return start.addNew(directionVector().multiplyNew(0.5));
 	}
@@ -154,7 +161,7 @@ final class LineSegment extends ALine implements ILineSegment
 
 
 	@Override
-	public IVector2 closestPointOnLine(final IVector2 point)
+	public IVector2 closestPointOnPath(final IVector2 point)
 	{
 		return LineMath.closestPointOnLineSegment(this, point);
 	}
@@ -163,65 +170,82 @@ final class LineSegment extends ALine implements ILineSegment
 	@Override
 	public ILine toLine()
 	{
-		return Line.createNewWithoutCopy(getStart(), directionVector());
+		return Line.createNewWithoutCopy(getPathStart(), directionVector());
 	}
 
 
 	@Override
 	public IHalfLine toHalfLine()
 	{
-		return HalfLine.createNewWithoutCopy(getStart(), directionVector());
+		return HalfLine.createNewWithoutCopy(getPathStart(), directionVector());
 	}
 
 
 	@Override
 	public ILineSegment copy()
 	{
-		return fromPoints(getStart(), getEnd());
+		return fromPoints(getPathStart(), getPathEnd());
 	}
 
 
 	@Override
-	public Optional<IVector2> intersect(final ILine line)
+	public ISingleIntersection intersect(final ILine line)
 	{
-		return line.intersect(this);
+		return PathIntersectionMath.intersectLineAndLineSegment(line, this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersect(final IHalfLine halfLine)
+	public ISingleIntersection intersect(final IHalfLine halfLine)
 	{
-		return halfLine.intersect(this);
+		return PathIntersectionMath.intersectHalfLineAndLineSegment(halfLine, this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersect(final ILineSegment other)
+	public ISingleIntersection intersect(final ILineSegment other)
 	{
-		if (isValid() && other.isValid())
-		{
-			return LineMath.intersectionPointOfSegments(this, other);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectLineSegmentAndLineSegment(this, other);
 	}
 
 
 	@Override
-	public IVector2 stepAlongLine(final double stepSize)
+	public IIntersections intersect(ICircle circle)
+	{
+		return PathIntersectionMath.intersectLineSegmentAndCircle(this, circle);
+	}
+
+
+	@Override
+	public IIntersections intersect(IArc arc)
+	{
+		return PathIntersectionMath.intersectLineSegmentAndArc(this, arc);
+	}
+
+
+	@Override
+	public IIntersections intersect(IEllipse ellipse)
+	{
+		return PathIntersectionMath.intersectLineSegmentAndEllipse(this, ellipse);
+	}
+
+
+	@Override
+	public IVector2 stepAlongPath(final double stepSize)
 	{
 		if (!isValid())
 		{
-			return getStart();
+			return getPathStart();
 		}
-		return LineMath.stepAlongLine(getStart(), getEnd(), stepSize);
+		return LineMath.stepAlongLine(getPathStart(), getPathEnd(), stepSize);
 	}
 
 
 	@Override
 	public ILineSegment withMargin(final double margin)
 	{
-		IVector2 newStart = LineMath.stepAlongLine(getStart(), getEnd(), -margin);
-		IVector2 newEnd = LineMath.stepAlongLine(getEnd(), getStart(), -margin);
+		IVector2 newStart = LineMath.stepAlongLine(getPathStart(), getPathEnd(), -margin);
+		IVector2 newEnd = LineMath.stepAlongLine(getPathEnd(), getPathStart(), -margin);
 		return Lines.segmentFromPoints(newStart, newEnd);
 	}
 
@@ -240,9 +264,9 @@ final class LineSegment extends ALine implements ILineSegment
 		double len = getLength();
 		for (double step = 0; step < len; step += stepSize)
 		{
-			steps.add(stepAlongLine(step));
+			steps.add(stepAlongPath(step));
 		}
-		steps.add(stepAlongLine(len));
+		steps.add(stepAlongPath(len));
 		return steps;
 	}
 
@@ -254,11 +278,11 @@ final class LineSegment extends ALine implements ILineSegment
 		{
 			return 0;
 		}
-		return Math.sqrt(List.of(
-				line.distanceToSqr(this.getStart()),
-				line.distanceToSqr(this.getEnd()),
-				this.distanceToSqr(line.getStart()),
-				this.distanceToSqr(line.getEnd())
-		).stream().mapToDouble(d -> d).min().orElseThrow());
+		return Math.sqrt(Stream.of(
+				line.distanceToSqr(this.getPathStart()),
+				line.distanceToSqr(this.getPathEnd()),
+				this.distanceToSqr(line.getPathStart()),
+				this.distanceToSqr(line.getPathEnd())
+		).mapToDouble(d -> d).min().orElseThrow());
 	}
 }

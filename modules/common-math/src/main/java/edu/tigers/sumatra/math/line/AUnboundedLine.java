@@ -19,15 +19,15 @@ abstract class AUnboundedLine extends ALine
 	private final Vector2f supportVector;
 	private final Vector2f directionVector;
 	
-	private final boolean isValid;
+	private final boolean valid;
 	
 	
 	AUnboundedLine(final IVector2 supportVector, final IVector2 directionVector)
 	{
 		this.supportVector = Vector2f.copy(supportVector);
 		this.directionVector = Vector2f.copy(directionVector);
-		
-		isValid = !directionVector.isZeroVector();
+
+		valid = !directionVector.isZeroVector();
 	}
 	
 	
@@ -48,6 +48,6 @@ abstract class AUnboundedLine extends ALine
 	@Override
 	public boolean isValid()
 	{
-		return isValid;
+		return valid;
 	}
 }

@@ -129,15 +129,6 @@ public interface IRectangle extends I2DShape, IJsonString
 	IRectangle withMarginXy(double xMargin, double yMargin);
 
 	/**
-	 * @param point  some point
-	 * @param margin a positive or negative margin
-	 * @return nearest point inside rectangle with margin
-	 * @note rather use {@link IRectangle#withMargin(double)}
-	 */
-	@Override
-	IVector2 nearestPointInside(final IVector2 point, double margin);
-
-	/**
 	 * Get the nearest point inside the rectangle, if point is outside.<br>
 	 * Use pointToBuildLine to move the point to the rectangle border
 	 *

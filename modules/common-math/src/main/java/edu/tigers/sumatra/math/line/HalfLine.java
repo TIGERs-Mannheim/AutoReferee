@@ -4,10 +4,14 @@
 
 package edu.tigers.sumatra.math.line;
 
+import edu.tigers.sumatra.math.circle.IArc;
+import edu.tigers.sumatra.math.circle.ICircle;
+import edu.tigers.sumatra.math.ellipse.IEllipse;
+import edu.tigers.sumatra.math.intersections.IIntersections;
+import edu.tigers.sumatra.math.intersections.ISingleIntersection;
+import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-
-import java.util.Optional;
 
 
 /**
@@ -61,11 +65,13 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 	public boolean equals(final Object other)
 	{
 		if (this == other)
+		{
 			return true;
-		if (!(other instanceof IHalfLine))
+		}
+		if (!(other instanceof IHalfLine that))
+		{
 			return false;
-
-		final IHalfLine that = (IHalfLine) other;
+		}
 
 		return this.supportVector().equals(that.supportVector())
 				&& this.directionVector().equals(that.directionVector());
@@ -82,7 +88,7 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 
 
 	@Override
-	public IVector2 closestPointOnLine(final IVector2 point)
+	public IVector2 closestPointOnPath(final IVector2 point)
 	{
 		if (!isValid())
 		{
@@ -109,31 +115,44 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 
 
 	@Override
-	public Optional<IVector2> intersect(final ILine line)
+	public ISingleIntersection intersect(final ILine line)
 	{
-		return line.intersect(this);
+		return PathIntersectionMath.intersectLineAndHalfLine(line, this);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersect(final IHalfLine other)
+	public ISingleIntersection intersect(final IHalfLine other)
 	{
-		if (this.isValid() && other.isValid())
-		{
-			return LineMath.intersectionPointOfHalfLines(this, other);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectHalfLineAndHalfLine(this, other);
 	}
 
 
 	@Override
-	public Optional<IVector2> intersect(final ILineSegment segment)
+	public ISingleIntersection intersect(final ILineSegment segment)
 	{
-		if (this.isValid() && segment.isValid())
-		{
-			return LineMath.intersectionPointOfHalfLineAndSegment(this, segment);
-		}
-		return Optional.empty();
+		return PathIntersectionMath.intersectHalfLineAndLineSegment(this, segment);
+	}
+
+
+	@Override
+	public IIntersections intersect(ICircle circle)
+	{
+		return PathIntersectionMath.intersectHalfLineAndCircle(this, circle);
+	}
+
+
+	@Override
+	public IIntersections intersect(IArc arc)
+	{
+		return PathIntersectionMath.intersectHalfLineAndArc(this, arc);
+	}
+
+
+	@Override
+	public IIntersections intersect(IEllipse ellipse)
+	{
+		return PathIntersectionMath.intersectHalfLineAndEllipse(this, ellipse);
 	}
 
 

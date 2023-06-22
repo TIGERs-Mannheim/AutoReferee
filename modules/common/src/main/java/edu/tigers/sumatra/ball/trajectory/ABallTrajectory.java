@@ -246,7 +246,7 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	public IVector2 closestPointTo(IVector2 point)
 	{
 		var closestPointsToIdealPos = getTravelLinesRolling().stream()
-				.map(line -> line.closestPointOnLine(point))
+				.map(line -> line.closestPointOnPath(point))
 				.toList();
 		return point.nearestTo(closestPointsToIdealPos);
 	}

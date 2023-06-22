@@ -90,7 +90,8 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 	private boolean isInOpponentPenaltyArea(ITrackedBot bot)
 	{
 		return NGeometry.getPenaltyArea(bot.getTeamColor().opposite())
-				.isPointInShape(bot.getPos(), requiredMargin);
+				.withMargin(requiredMargin)
+				.isPointInShape(bot.getPos());
 	}
 
 
@@ -120,7 +121,7 @@ public class AttackerToDefenseAreaDistanceDetector extends AGameEventDetector
 				// push in direction of penalty area
 				.map(b -> Lines.halfLineFromPoints(b.getPos(), attacker.getPos()))
 				// find intersection that show that defenders pushes towards penArea
-				.map(defenderPenaltyArea::lineIntersections)
+				.map(defenderPenaltyArea::intersectPerimeterPath)
 				.flatMap(List::stream)
 				.findAny()
 				// if any intersection is present, some defender pushes the attacker

@@ -5,6 +5,10 @@
 package edu.tigers.sumatra.math.rectangle;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.IBoundedPath;
+import edu.tigers.sumatra.math.circle.Arc;
+import edu.tigers.sumatra.math.circle.Circle;
+import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
@@ -16,6 +20,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 
 /**
@@ -124,21 +129,62 @@ public class RectangleTest
 
 		rect = Rectangle.fromCenter(Vector2.zero(), 4, 4);
 
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, 0), 2)).isEqualTo(Vector2.fromXY(0, 0));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(5, 4), 2)).isEqualTo(Vector2.fromXY(4, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(-5, 4), 2)).isEqualTo(Vector2.fromXY(-4, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, 5), 2)).isEqualTo(Vector2.fromXY(0, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, -5), 2)).isEqualTo(Vector2.fromXY(0, -4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(4, 4), 2)).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(0, 0))).isEqualTo(Vector2.fromXY(0, 0));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(5, 4))).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(-5, 4))).isEqualTo(Vector2.fromXY(-4, 4));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(0, 5))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(0, -5))).isEqualTo(Vector2.fromXY(0, -4));
+		assertThat(rect.withMargin(2).nearestPointInside(Vector2.fromXY(4, 4))).isEqualTo(Vector2.fromXY(4, 4));
 
 		rect = Rectangle.fromCenter(Vector2.zero(), 10, 10);
 
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, 0), -1)).isEqualTo(Vector2.fromXY(0, 0));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(5, 4), -1)).isEqualTo(Vector2.fromXY(4, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(-5, 4), -1)).isEqualTo(Vector2.fromXY(-4, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, 5), -1)).isEqualTo(Vector2.fromXY(0, 4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(0, -5), -1)).isEqualTo(Vector2.fromXY(0, -4));
-		assertThat(rect.nearestPointInside(Vector2.fromXY(4, 4), -1)).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(0, 0))).isEqualTo(Vector2.fromXY(0, 0));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(5, 4))).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(-5, 4))).isEqualTo(Vector2.fromXY(-4, 4));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(0, 5))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(0, -5))).isEqualTo(Vector2.fromXY(0, -4));
+		assertThat(rect.withMargin(-1).nearestPointInside(Vector2.fromXY(4, 4))).isEqualTo(Vector2.fromXY(4, 4));
+	}
+
+
+	@Test
+	public void testNearestPointOnPerimeterPath()
+	{
+		IRectangle rect = Rectangle.fromCenter(Vector2.zero(), 8, 8);
+
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(0, 0))).isEqualTo(Vector2.fromXY(4, 0));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(1, 0))).isEqualTo(Vector2.fromXY(4, 0));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(-1, 0))).isEqualTo(Vector2.fromXY(-4, 0));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(0, 1))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(0, -1))).isEqualTo(Vector2.fromXY(0, -4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(-1, 1))).isEqualTo(Vector2.fromXY(-4, 1));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(5, 4))).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(-5, 4))).isEqualTo(Vector2.fromXY(-4, 4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(0, 5))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(0, -5))).isEqualTo(Vector2.fromXY(0, -4));
+		assertThat(rect.nearestPointOnPerimeterPath(Vector2.fromXY(4, 4))).isEqualTo(Vector2.fromXY(4, 4));
+
+		rect = Rectangle.fromCenter(Vector2.zero(), 4, 4);
+
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(0, 0))).isEqualTo(Vector2.fromXY(4, 0));
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(5, 4))).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(-5, 4))).isEqualTo(
+				Vector2.fromXY(-4, 4));
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(0, 5))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(0, -5))).isEqualTo(
+				Vector2.fromXY(0, -4));
+		assertThat(rect.withMargin(2).nearestPointOnPerimeterPath(Vector2.fromXY(4, 4))).isEqualTo(Vector2.fromXY(4, 4));
+
+		rect = Rectangle.fromCenter(Vector2.zero(), 10, 10);
+
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(0, 0))).isEqualTo(Vector2.fromXY(4, 0));
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(5, 4))).isEqualTo(Vector2.fromXY(4, 4));
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(-5, 4))).isEqualTo(
+				Vector2.fromXY(-4, 4));
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(0, 5))).isEqualTo(Vector2.fromXY(0, 4));
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(0, -5))).isEqualTo(
+				Vector2.fromXY(0, -4));
+		assertThat(rect.withMargin(-1).nearestPointOnPerimeterPath(Vector2.fromXY(4, 4))).isEqualTo(Vector2.fromXY(4, 4));
 	}
 
 
@@ -198,10 +244,10 @@ public class RectangleTest
 		assertThat(rect.isPointInShape(Vector2.fromXY(-21, -21))).isTrue();
 		assertThat(rect.isPointInShape(Vector2.fromXY(-21, 0))).isTrue();
 		assertThat(rect.isPointInShape(Vector2.fromXY(0, -21))).isTrue();
-		assertThat(rect.isPointInShape(Vector2.fromXY(22, 22), 1)).isTrue();
-		assertThat(rect.isPointInShape(Vector2.fromXY(20, 0), -1)).isTrue();
-		assertThat(rect.isPointInShape(Vector2.fromXY(24, 24), 2)).isFalse();
-		assertThat(rect.isPointInShape(Vector2.fromXY(20, 0), -2)).isFalse();
+		assertThat(rect.withMargin(1).isPointInShape(Vector2.fromXY(22, 22))).isTrue();
+		assertThat(rect.withMargin(-1).isPointInShape(Vector2.fromXY(20, 0))).isTrue();
+		assertThat(rect.withMargin(2).isPointInShape(Vector2.fromXY(24, 24))).isFalse();
+		assertThat(rect.withMargin(-2).isPointInShape(Vector2.fromXY(20, 0))).isFalse();
 	}
 
 
@@ -210,52 +256,61 @@ public class RectangleTest
 	{
 		Rectangle rect = Rectangle.fromCenter(Vector2.zero(), 42, 42);
 
-		assertThat(rect.lineIntersections(
+		assertThat(rect.intersectPerimeterPath(
 				Lines.lineFromDirection(Vector2.zero(), Vector2.fromX(1)))).containsExactlyInAnyOrder(
 				Vector2.fromX(21), Vector2.fromX(-21));
-		assertThat(rect.lineIntersections(
+		assertThat(rect.intersectPerimeterPath(
 				Lines.lineFromDirection(Vector2.zero(), Vector2.fromY(1)))).containsExactlyInAnyOrder(
 				Vector2.fromXY(0, 21), Vector2.fromXY(0, -21));
-		assertThat(rect.lineIntersections(
+		assertThat(rect.intersectPerimeterPath(
 				Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(1, 1)))).containsExactlyInAnyOrder(
 				Vector2.fromXY(21, 21), Vector2.fromXY(-21, -21));
 
-		assertThat(rect.lineIntersections(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(1, 0))))
+		assertThat(rect.intersectPerimeterPath(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(1, 0))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 0), Vector2.fromXY(-21, 0));
-		assertThat(rect.lineIntersections(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(0, 1))))
+		assertThat(rect.intersectPerimeterPath(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(0, 1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(0, 21), Vector2.fromXY(0, -21));
-		assertThat(rect.lineIntersections(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(1, 1))))
+		assertThat(rect.intersectPerimeterPath(Lines.lineFromDirection(Vector2.zero(), Vector2.fromXY(1, 1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 21), Vector2.fromXY(-21, -21));
 
-		assertThat(rect.lineIntersections(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(1, 0))))
+		assertThat(rect.intersectPerimeterPath(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(1, 0))))
 				.containsExactly(Vector2.fromXY(21, 0));
-		assertThat(rect.lineIntersections(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(0, -1))))
+		assertThat(rect.intersectPerimeterPath(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(0, -1))))
 				.containsExactly(Vector2.fromXY(0, -21));
-		assertThat(rect.lineIntersections(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(1, 1))))
+		assertThat(rect.intersectPerimeterPath(Lines.halfLineFromDirection(Vector2.zero(), Vector2.fromXY(1, 1))))
 				.containsExactly(Vector2.fromXY(21, 21));
-		assertThat(rect.lineIntersections(Lines.halfLineFromDirection(Vector2.fromXY(21.1, 0), Vector2.fromXY(-1, 0))))
+		assertThat(
+				rect.intersectPerimeterPath(Lines.halfLineFromDirection(Vector2.fromXY(21.1, 0), Vector2.fromXY(-1, 0))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 0), Vector2.fromXY(-21, 0));
-		assertThat(rect.lineIntersections(Lines.halfLineFromDirection(Vector2.fromXY(0, -21.1), Vector2.fromXY(0, 1))))
+		assertThat(
+				rect.intersectPerimeterPath(Lines.halfLineFromDirection(Vector2.fromXY(0, -21.1), Vector2.fromXY(0, 1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(0, 21), Vector2.fromXY(0, -21));
 		assertThat(
-				rect.lineIntersections(Lines.halfLineFromDirection(Vector2.fromXY(21.1, 21.1), Vector2.fromXY(-1, -1))))
+				rect.intersectPerimeterPath(
+						Lines.halfLineFromDirection(Vector2.fromXY(21.1, 21.1), Vector2.fromXY(-1, -1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 21), Vector2.fromXY(-21, -21));
 
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(21.1, 0))))
+		assertThat(rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(21.1, 0))))
 				.containsExactly(Vector2.fromXY(21, 0));
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(0, -21.1))))
+		assertThat(rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(0, -21.1))))
 				.containsExactly(Vector2.fromXY(0, -21));
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(21.1, 21.1))))
+		assertThat(rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(21.1, 21.1))))
 				.containsExactly(Vector2.fromXY(21, 21));
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(20.9, 0)))).isEmpty();
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(0, -20.9)))).isEmpty();
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(20.9, 20.9)))).isEmpty();
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.fromXY(-21.1, 0), Vector2.fromXY(21.1, 0))))
+		assertThat(
+				rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(20.9, 0)))).isEmpty();
+		assertThat(
+				rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(0, -20.9)))).isEmpty();
+		assertThat(
+				rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.zero(), Vector2.fromXY(20.9, 20.9)))).isEmpty();
+		assertThat(
+				rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.fromXY(-21.1, 0), Vector2.fromXY(21.1, 0))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 0), Vector2.fromXY(-21, 0));
-		assertThat(rect.lineIntersections(Lines.segmentFromPoints(Vector2.fromXY(0, 21.1), Vector2.fromXY(0, -21.1))))
+		assertThat(
+				rect.intersectPerimeterPath(Lines.segmentFromPoints(Vector2.fromXY(0, 21.1), Vector2.fromXY(0, -21.1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(0, 21), Vector2.fromXY(0, -21));
 		assertThat(
-				rect.lineIntersections(Lines.segmentFromPoints(Vector2.fromXY(-21.1, -21.1), Vector2.fromXY(21.1, 21.1))))
+				rect.intersectPerimeterPath(
+						Lines.segmentFromPoints(Vector2.fromXY(-21.1, -21.1), Vector2.fromXY(21.1, 21.1))))
 				.containsExactlyInAnyOrder(Vector2.fromXY(21, 21), Vector2.fromXY(-21, -21));
 
 
@@ -269,14 +324,14 @@ public class RectangleTest
 
 		// Starting at topLeft, going counter clockwise.
 		List<ILineSegment> edges = rect.getEdges();
-		assertThat(edges.stream().map(ILineSegment::getStart))
+		assertThat(edges.stream().map(ILineSegment::getPathStart))
 				.containsExactlyInAnyOrder(
 						Vector2.fromXY(21, 21),
 						Vector2.fromXY(21, -21),
 						Vector2.fromXY(-21, -21),
 						Vector2.fromXY(-21, 21));
 
-		assertThat(edges.stream().map(ILineSegment::getEnd))
+		assertThat(edges.stream().map(ILineSegment::getPathEnd))
 				.containsExactlyInAnyOrder(
 						Vector2.fromXY(21, 21),
 						Vector2.fromXY(21, -21),
@@ -299,25 +354,25 @@ public class RectangleTest
 		Rectangle rect = Rectangle.fromCenter(Vector2.zero(), 2, 42);
 
 		ILine line = Lines.lineFromDirection(Vector2.zero(), Vector2.fromX(1));
-		assertThat(rect.isIntersectingWithLine(line)).isTrue();
+		assertThat(rect.isIntersectingWithPath(line)).isTrue();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(1, 1), Vector2.fromX(1));
-		assertThat(rect.isIntersectingWithLine(line)).isTrue();
+		assertThat(rect.isIntersectingWithPath(line)).isTrue();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(1, 1), Vector2.fromY(1));
-		assertThat(rect.isIntersectingWithLine(line)).isTrue();
+		assertThat(rect.isIntersectingWithPath(line)).isTrue();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(2, 1), Vector2.fromY(1));
-		assertThat(rect.isIntersectingWithLine(line)).isFalse();
+		assertThat(rect.isIntersectingWithPath(line)).isFalse();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(2, 1), Vector2.fromX(1));
-		assertThat(rect.isIntersectingWithLine(line)).isTrue();
+		assertThat(rect.isIntersectingWithPath(line)).isTrue();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(0, 21), Vector2.fromX(1));
-		assertThat(rect.isIntersectingWithLine(line)).isTrue();
+		assertThat(rect.isIntersectingWithPath(line)).isTrue();
 
 		line = Lines.lineFromDirection(Vector2.fromXY(0, 21.1), Vector2.fromX(1));
-		assertThat(rect.isIntersectingWithLine(line)).isFalse();
+		assertThat(rect.isIntersectingWithPath(line)).isFalse();
 	}
 
 
@@ -332,5 +387,101 @@ public class RectangleTest
 		assertThat(rect.nearestPointInside(Vector2.fromXY(2, 0), Vector2.fromXY(0.5, 0))).isEqualTo(Vector2.fromXY(1, 0));
 		assertThat(rect.nearestPointInside(Vector2.fromXY(2, 1), Vector2.fromXY(0, 1))).isEqualTo(Vector2.fromXY(1, 1));
 		assertThat(rect.nearestPointInside(Vector2.fromXY(0, 5), Vector2.fromXY(0, -10))).isEqualTo(Vector2.fromXY(0, 3));
+	}
+
+
+	@Test
+	public void testGetPerimeterPath()
+	{
+		Rectangle rect = Rectangle.fromCenter(Vector2.zero(), 2, 6);
+		var corners = List.of(
+				Vector2.fromXY(1, 3),
+				Vector2.fromXY(-1, 3),
+				Vector2.fromXY(1, -3),
+				Vector2.fromXY(-1, -3)
+		);
+		assertThat(rect.getPerimeterPath()).hasSize(4);
+		for (var corner : corners)
+		{
+			assertThat(rect.getPerimeterPath()).anyMatch(
+					sect -> sect.getPathStart().equals(corner)
+			);
+			assertThat(rect.getPerimeterPath()).anyMatch(
+					sect -> sect.getPathEnd().equals(corner)
+			);
+		}
+	}
+
+
+	@Test
+	public void testPerimeterPathOrder()
+	{
+		var perimeter = Rectangle.fromCenter(Vector2.zero(), 2, 6).getPerimeterPath();
+		IBoundedPath lastPath = null;
+		for (var p : perimeter)
+		{
+			if (lastPath != null)
+			{
+				assertThat(p.getPathStart()).isEqualTo(p.getPathStart());
+			}
+			lastPath = p;
+		}
+	}
+
+
+	@Test
+	public void testGetPerimeterLength()
+	{
+		Rectangle rect = Rectangle.fromCenter(Vector2.zero(), 2, 6);
+		assertThat(rect.getPerimeterLength()).isCloseTo(16, within(1e-6));
+	}
+
+
+	@Test
+	public void testIntersectPerimeterPathCircle()
+	{
+		// Data generated with GeoGebra
+		var rect = Rectangle.fromCenter(Vector2.zero(), 4, 2);
+		var circle = Circle.createCircle(Vector2.fromXY(2, 2), 2);
+		assertThat(rect.intersectPerimeterPath(circle)).containsExactlyInAnyOrder(
+				Vector2.fromX(2),
+				Vector2.fromXY(0.26795, 1)
+		);
+	}
+
+
+	@Test
+	public void testIntersectPerimeterPathArc()
+	{
+		// Data generated with GeoGebra
+		var rect = Rectangle.fromCenter(Vector2.zero(), 4, 2);
+		var arc = Arc.createArc(Vector2.fromXY(2, 2), 2, 0, -AngleMath.PI);
+		assertThat(rect.intersectPerimeterPath(arc)).containsExactlyInAnyOrder(
+				Vector2.fromX(2),
+				Vector2.fromXY(0.26795, 1)
+		);
+		arc = Arc.createArc(Vector2.fromXY(2, 2), 2, -3 * AngleMath.PI_QUART, -AngleMath.PI_QUART);
+		assertThat(rect.intersectPerimeterPath(arc)).containsExactlyInAnyOrder(
+				Vector2.fromXY(0.26795, 1)
+		);
+		arc = Arc.createArc(Vector2.fromXY(2, 2), 2, -3 * AngleMath.PI_QUART, AngleMath.PI_QUART);
+		assertThat(rect.intersectPerimeterPath(arc)).containsExactlyInAnyOrder(
+				Vector2.fromX(2)
+		);
+		arc = Arc.createArc(Vector2.fromXY(2, 2), 2, -3 * AngleMath.PI_QUART, -0.1);
+		assertThat(rect.intersectPerimeterPath(arc)).isEmpty();
+	}
+
+
+	@Test
+	public void testIntersectPerimeterPathEllipse()
+	{
+		// Data generated with GeoGebra
+		var rect = Rectangle.fromCenter(Vector2.zero(), 4, 2);
+		var ellipse = Ellipse.createEllipse(Vector2.fromXY(-2, 2), 1.5811388301, 1.5);
+		assertThat(rect.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
+				Vector2.fromXY(-2, 0.5),
+				Vector2.fromXY(-0.82149, 1)
+		);
 	}
 }

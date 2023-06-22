@@ -134,7 +134,7 @@ public class Goal
 	 */
 	public boolean isPointInShape(final IVector2 point, final double margin)
 	{
-		return rectangle.isPointInShape(point, margin);
+		return rectangle.withMargin(margin).isPointInShape(point);
 	}
 
 

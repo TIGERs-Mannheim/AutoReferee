@@ -4,18 +4,14 @@
 
 package edu.tigers.sumatra.math.ellipse;
 
-import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.line.IHalfLine;
-import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.ILineBase;
-import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.VectorMath;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -75,8 +71,8 @@ public final class EllipseMath
 			// ensure that we cross the ellipse border
 			final IVector2 tmpP2 = LineMath.stepAlongLine(tmpP1, ellipse.center(), -ellipse.getDiameterMax());
 
-			final List<IVector2> intsPts = lineIntersections(ellipse, Lines.segmentFromPoints(ellipse.center(),
-					transformToTurned(ellipse, tmpP2)));
+			final List<IVector2> intsPts = PathIntersectionMath.intersectLineSegmentAndEllipse(
+					Lines.segmentFromPoints(ellipse.center(), transformToTurned(ellipse, tmpP2)), ellipse).asList();
 			if (intsPts.size() != 1)
 			{
 				throw new IllegalStateException("Only one intersection point expected, but " + intsPts.size() + " found");
@@ -113,70 +109,20 @@ public final class EllipseMath
 	}
 
 
-	/**
-	 * Main method for getting intersecting points.
-	 * Will calc the intersecting points between the two points
-	 *
-	 * @param ellipse an ellipse
-	 * @param line    a line
-	 * @return intersection points
-	 */
-	public static List<IVector2> lineIntersections(final IEllipse ellipse, final ILineBase line)
+	public static IVector2 nearestPointOnEllipseLine(Ellipse ellipse, IVector2 point)
 	{
-		final boolean endlessPositive;
-		final boolean endlessNegative;
-		if (line instanceof ILine)
+		if (point.isCloseTo(ellipse.center()))
 		{
-			endlessPositive = true;
-			endlessNegative = true;
-		} else if (line instanceof IHalfLine)
-		{
-			endlessPositive = true;
-			endlessNegative = false;
-		} else if (line instanceof ILineSegment)
-		{
-			endlessPositive = false;
-			endlessNegative = false;
-		} else
-		{
-			throw new IllegalArgumentException();
-		}
-		final List<IVector2> result = new ArrayList<>(2);
-
-		final IVector2 p0 = ellipse.center();
-		final IVector2 p1 = transformToNotTurned(ellipse, line.supportVector());
-		final IVector2 p2 = transformToNotTurned(ellipse, line.supportVector().addNew(line.directionVector()));
-
-		// using double to avoid inaccurate results. (its fast enough)
-		final double rrx = ellipse.getRadiusX() * ellipse.getRadiusX();
-		final double rry = ellipse.getRadiusY() * ellipse.getRadiusY();
-		final double x21 = p2.x() - p1.x();
-		final double y21 = p2.y() - p1.y();
-		final double x10 = p1.x() - p0.x();
-		final double y10 = p1.y() - p0.y();
-		final double a = ((x21 * x21) / rrx) + ((y21 * y21) / rry);
-		final double b = ((x21 * x10) / rrx) + ((y21 * y10) / rry);
-		final double c = ((x10 * x10) / rrx) + ((y10 * y10) / rry);
-		final double d = (b * b) - (a * (c - 1));
-
-		if (d >= 0)
-		{
-			final double e = SumatraMath.sqrt(d);
-			final double u1 = (-b - e) / a;
-			final double u2 = (-b + e) / a;
-			if (((0 <= u1 || endlessNegative) && (u1 <= 1 || endlessPositive)))
+			if (ellipse.getRadiusX() <= ellipse.getRadiusY())
 			{
-				final IVector2 tmpP = Vector2f.fromXY(p1.x() + (x21 * u1), p1.y() + (y21 * u1));
-				result.add(transformToTurned(ellipse, tmpP));
+				ellipse.center().addNew(Vector2.fromX(ellipse.getRadiusX()).turn(ellipse.getTurnAngle()));
 			}
-			if (((0 <= u2 || endlessNegative) && (u2 <= 1 || endlessPositive)))
-			{
-				final IVector2 tmpP = Vector2f.fromXY(p1.x() + (x21 * u2), p1.y() + (y21 * u2));
-				result.add(transformToTurned(ellipse, tmpP));
-			}
+			return ellipse.center().addNew(Vector2.fromY(ellipse.getRadiusY()).turn(ellipse.getTurnAngle()));
 		}
-
-		return result;
+		var halfLine = Lines.halfLineFromPoints(ellipse.center(), point);
+		return ellipse.intersectPerimeterPath(halfLine).stream().findAny()
+				.orElseThrow(() -> new IllegalArgumentException(
+						"Not exactly one intersection between half line starting from within a circle, this is impossible"));
 	}
 
 

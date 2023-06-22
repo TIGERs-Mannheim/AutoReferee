@@ -5,8 +5,8 @@
 package edu.tigers.sumatra.math.triangle;
 
 import com.sleepycat.persist.model.Persistent;
+import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.line.ILine;
-import edu.tigers.sumatra.math.line.ILineBase;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -15,7 +15,6 @@ import org.apache.commons.lang.Validate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static edu.tigers.sumatra.math.SumatraMath.sqrt;
 
@@ -90,8 +89,8 @@ public final class Triangle implements ITriangle
 		ILine ac = Lines.lineFromPoints(a, c);
 		ILine nb2nc = Lines.lineFromDirection(x, Vector2f.fromXY(x.y() - a.y(), a.x() - x.x()));
 
-		Optional<IVector2> nb = ab.intersect(nb2nc);
-		Optional<IVector2> nc = ac.intersect(nb2nc);
+		var nb = ab.intersect(nb2nc).asOptional();
+		var nc = ac.intersect(nb2nc).asOptional();
 
 		if (nb.isPresent() && nc.isPresent())
 		{
@@ -178,48 +177,12 @@ public final class Triangle implements ITriangle
 
 
 	@Override
-	public List<IVector2> lineIntersections(final ILineBase line)
+	public List<IBoundedPath> getPerimeterPath()
 	{
 		ILineSegment ab = Lines.segmentFromPoints(a, b);
 		ILineSegment bc = Lines.segmentFromPoints(b, c);
-		ILineSegment ac = Lines.segmentFromPoints(a, c);
-		ILineSegment[] lines = new ILineSegment[] { ab, ac, bc };
-		List<IVector2> intersections = new ArrayList<>();
-		for (ILineSegment segment : lines)
-		{
-			line.intersect(segment).ifPresent(intersections::add);
-		}
-		return intersections;
-	}
-
-
-	@Override
-	public IVector2 nearestPointOnCircumference(IVector2 point, double margin)
-	{
-		return TriangleMath.withMargin(this, margin).nearestPointOnCircumference(point);
-	}
-
-
-	@Override
-	public IVector2 nearestPointOnCircumference(IVector2 point)
-	{
-		ILineSegment ab = Lines.segmentFromPoints(a, b);
-		ILineSegment bc = Lines.segmentFromPoints(b, c);
-		ILineSegment ac = Lines.segmentFromPoints(a, c);
-		ILineSegment[] lines = new ILineSegment[] { ab, ac, bc };
-		var minDist = Double.MAX_VALUE;
-		IVector2 best = null;
-		for (var line : lines)
-		{
-			var candidate = line.closestPointOnLine(point);
-			var dist = candidate.distanceToSqr(point);
-			if (dist < minDist)
-			{
-				minDist = dist;
-				best = candidate;
-			}
-		}
-		return best;
+		ILineSegment ca = Lines.segmentFromPoints(c, a);
+		return List.of(ab, bc, ca);
 	}
 
 
@@ -227,13 +190,6 @@ public final class Triangle implements ITriangle
 	public boolean isPointInShape(final IVector2 point)
 	{
 		return TriangleMath.isPointInShape(this, point);
-	}
-
-
-	@Override
-	public boolean isPointInShape(final IVector2 point, final double margin)
-	{
-		return TriangleMath.withMargin(this, margin).isPointInShape(point);
 	}
 
 
