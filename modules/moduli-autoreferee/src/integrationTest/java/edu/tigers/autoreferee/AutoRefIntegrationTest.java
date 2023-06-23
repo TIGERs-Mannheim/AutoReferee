@@ -10,8 +10,8 @@ import com.google.protobuf.util.JsonFormat;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.sumatra.autoreferee.proto.DesiredEventDescription;
-import edu.tigers.sumatra.cam.LogfileAnalyzerVisionCam;
-import edu.tigers.sumatra.gamelog.SSLGameLogReader;
+import edu.tigers.sumatra.gamelog.GameLogPlayer;
+import edu.tigers.sumatra.gamelog.GameLogReader;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.log.LogEventWatcher;
@@ -141,9 +141,9 @@ public class AutoRefIntegrationTest
 	public void runTestCase()
 	{
 		log.info("Start running test case {}", testCase.getName());
-		SSLGameLogReader logReader = new SSLGameLogReader();
+		GameLogReader logReader = new GameLogReader();
 		logReader.loadFileBlocking(testCase.getLogfileLocation().toAbsolutePath().toString());
-		assertThat(logReader.getPackets()).isNotEmpty();
+		assertThat(logReader.getMessages()).isNotEmpty();
 
 		var desiredEvent = testCase.getDesiredEvent();
 		var expectedEventProto = desiredEvent.hasExpectedEvent()
@@ -160,9 +160,8 @@ public class AutoRefIntegrationTest
 
 		try
 		{
-			var visionCam = SumatraModel.getInstance().getModule(LogfileAnalyzerVisionCam.class);
-			visionCam.playLog(logReader, frameId -> {
-			});
+			var visionCam = SumatraModel.getInstance().getModule(GameLogPlayer.class);
+			visionCam.playlogFast(logReader);
 
 			assertNoWarningsOrErrors();
 

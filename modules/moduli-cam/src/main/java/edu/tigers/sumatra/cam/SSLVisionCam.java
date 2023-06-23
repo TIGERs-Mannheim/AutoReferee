@@ -10,6 +10,11 @@ import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
+import edu.tigers.sumatra.clock.NanoTime;
+import edu.tigers.sumatra.gamelog.EMessageType;
+import edu.tigers.sumatra.gamelog.GameLogMessage;
+import edu.tigers.sumatra.gamelog.GameLogRecorder;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.network.IReceiverObserver;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
@@ -61,6 +66,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 
 	private final SSLVisionCamGeometryTranslator geometryTranslator = new SSLVisionCamGeometryTranslator();
 
+	private GameLogRecorder gameLogRecorder;
+
 
 	@Override
 	public void initModule() throws InitModuleException
@@ -87,6 +94,8 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			receiver = new MulticastUDPReceiver(address, port, nif);
 		}
 		receiver.addObserver(this);
+
+		gameLogRecorder = SumatraModel.getInstance().getModuleOpt(GameLogRecorder.class).orElse(null);
 
 		cam = new Thread(this, "SSLVisionCam");
 		cam.start();
@@ -138,21 +147,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 					continue;
 				}
 
-				// start with sending out the detection. It is most time critical
-				if (sslPacket.hasDetection())
-				{
-					notifyNewCameraFrame(sslPacket.getDetection());
-				}
-
-				if (sslPacket.hasGeometry())
-				{
-					final CamGeometry geometry = geometryTranslator.fromProtobuf(sslPacket.getGeometry());
-
-					notifyNewCameraCalibration(geometry);
-				}
-
-				notifyNewVisionPacket(sslPacket);
-
+				publishData(sslPacket);
 			} catch (final IOException err)
 			{
 				if (!expectIOE)
@@ -168,6 +163,30 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 
 		// Cleanup
 		expectIOE = true;
+	}
+
+
+	private void publishData(final SSL_WrapperPacket sslPacket)
+	{
+		// start with sending out the detection. It is most time critical
+		if (sslPacket.hasDetection())
+		{
+			notifyNewCameraFrame(sslPacket.getDetection());
+		}
+
+		if (sslPacket.hasGeometry())
+		{
+			final CamGeometry geometry = geometryTranslator.fromProtobuf(sslPacket.getGeometry());
+
+			notifyNewCameraCalibration(geometry);
+		}
+
+		notifyNewVisionPacket(sslPacket);
+
+		if(gameLogRecorder != null)
+		{
+			gameLogRecorder.writeMessage(new GameLogMessage(NanoTime.getTimestampNow(), EMessageType.SSL_VISION_2014, sslPacket.toByteArray()));
+		}
 	}
 
 

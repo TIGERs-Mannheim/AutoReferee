@@ -5,7 +5,14 @@ package edu.tigers.sumatra.referee;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.clock.NanoTime;
+import edu.tigers.sumatra.gamelog.EMessageType;
+import edu.tigers.sumatra.gamelog.GameLogMessage;
+import edu.tigers.sumatra.gamelog.GameLogPlayer;
+import edu.tigers.sumatra.gamelog.GameLogPlayerObserver;
+import edu.tigers.sumatra.gamelog.GameLogRecorder;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.proto.SslGcApi;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
@@ -14,6 +21,7 @@ import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
 import edu.tigers.sumatra.referee.source.DirectRefereeMsgForwarder;
 import edu.tigers.sumatra.referee.source.ERefereeMessageSource;
 import edu.tigers.sumatra.referee.source.NetworkRefereeReceiver;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
@@ -57,6 +65,10 @@ public class Referee extends AReferee
 	private boolean internalGameControlledActive = false;
 	private List<SslGcApi.Input> changeQueue = new CopyOnWriteArrayList<>();
 
+	private GameLogRecorder gameLogRecorder;
+	private GameLogPlayer gameLogPlayer;
+	private GameLogForwarder gameLogForwarder;
+
 
 	public Referee()
 	{
@@ -76,6 +88,15 @@ public class Referee extends AReferee
 		((NetworkRefereeReceiver) msgSources.get(ERefereeMessageSource.NETWORK)).setAddress(getAddress());
 
 		source = msgSources.get(activeSource);
+
+		gameLogPlayer = SumatraModel.getInstance().getModuleOpt(GameLogPlayer.class).orElse(null);
+		gameLogRecorder = SumatraModel.getInstance().getModuleOpt(GameLogRecorder.class).orElse(null);
+
+		if(activeSource == ERefereeMessageSource.INTERNAL_FORWARDER && gameLogPlayer != null)
+		{
+			gameLogForwarder = new GameLogForwarder((DirectRefereeMsgForwarder) source);
+			gameLogPlayer.addObserver(gameLogForwarder);
+		}
 
 		if (useGameController)
 		{
@@ -163,6 +184,11 @@ public class Referee extends AReferee
 	@Override
 	public void stopModule()
 	{
+		if(gameLogForwarder != null)
+		{
+			gameLogPlayer.removeObserver(gameLogForwarder);
+		}
+
 		source.stop();
 		source.removeObserver(this);
 		stopGameController();
@@ -173,6 +199,11 @@ public class Referee extends AReferee
 	public void onNewRefereeMessage(final SslGcRefereeMessage.Referee msg)
 	{
 		notifyNewRefereeMsg(msg);
+
+		if(gameLogRecorder != null)
+		{
+			gameLogRecorder.writeMessage(new GameLogMessage(NanoTime.getTimestampNow(), EMessageType.SSL_REFBOX_2013, msg.toByteArray()));
+		}
 	}
 
 
@@ -212,5 +243,34 @@ public class Referee extends AReferee
 		var currentQueue = changeQueue;
 		changeQueue = new CopyOnWriteArrayList<>();
 		return currentQueue;
+	}
+
+	@RequiredArgsConstructor
+	private static class GameLogForwarder implements GameLogPlayerObserver
+	{
+		private final DirectRefereeMsgForwarder forwarder;
+
+		@Override
+		public void onNewGameLogMessage(GameLogMessage message, int index)
+		{
+			if(message.getType() != EMessageType.SSL_REFBOX_2013)
+				return;
+
+			try
+			{
+				var sslReferee = SslGcRefereeMessage.Referee.parseFrom(message.getData());
+				forwarder.send(sslReferee);
+			} catch (Exception err)
+			{
+				log.error("Invalid SSL_REFBOX_2013 package.", err);
+			}
+		}
+
+
+		@Override
+		public void onGameLogTimeJump()
+		{
+			// No action required.
+		}
 	}
 }

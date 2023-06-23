@@ -29,6 +29,8 @@ dependencies {
     implementation project(':common')
     implementation project(':common-math')
     implementation project(':moduli-geometry')
+    implementation project(':moduli-gamelog')
+    implementation project(':sumatra-model')
 
     implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
     implementation 'com.github.g3force:configurable:3.0'

@@ -12,27 +12,27 @@ public enum EMessageType
 	BLANK(0),
 	/** try to guess message type by parsing the data */
 	UNKNOWN(1),
-	/** */
 	SSL_VISION_2010(2),
-	/** */
 	SSL_REFBOX_2013(3),
-	/** */
-	SSL_VISION_2014(4);
-	
+	SSL_VISION_2014(4),
+	SSL_VISION_TRACKER_2020(5),
+	SSL_INDEX_2021(6),
+
+	/** BaseStationACommand sent by Sumatra */
+	TIGERS_BASE_STATION_CMD_SENT(1000),
+	/** BaseStationACommand received by Sumatra */
+	TIGERS_BASE_STATION_CMD_RECEIVED(1001),
+	;
+
 	private final int id;
 	
 	
-	/**
-	 */
 	EMessageType(final int id)
 	{
 		this.id = id;
 	}
 	
 	
-	/**
-	 * @return
-	 */
 	public int getId()
 	{
 		return id;

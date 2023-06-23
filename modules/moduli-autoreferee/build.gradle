@@ -62,8 +62,7 @@ dependencies {
     integrationTestAnnotationProcessor "org.projectlombok:lombok:1.18.28"
     integrationTestImplementation "org.projectlombok:lombok:1.18.28"
 
-    integrationTestImplementation project(':sumatra-gamelog')
-    integrationTestImplementation project(':moduli-cam-logfile')
+    integrationTestImplementation project(':moduli-gamelog')
 }
 
 tasks.register('integrationTest', Test) {
