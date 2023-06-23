@@ -51,7 +51,7 @@ game:
   challenge-flags: 3
   emergency-stop-grace-period: 10s
   normal:
-    half-duration: 5m
+    half-duration: 35m # The GC will not auto continue if halftime is over, this is a quick fix. Longer times are not possible due to int overflow in the protobuf communication
     half-time-duration: 5m
     timeout-duration: 5m
     timeouts: 4
