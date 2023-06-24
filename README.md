@@ -83,3 +83,9 @@ The autoRef ships with the official ssl-game-controller. To activate it, change 
 The autoRef will internally launch the game-controller and connect to its websocket API
 to be able to send some basic commands through the **Ref** view.
 This view also contains a button to launch the full game-controller UI.
+
+Note: The embedded GC is not included by default. You should prefer to use the latest available version. If you want to use the embedded GC, start the autoRef with:
+
+```shell
+./gradlew :run -PcompactBuild=false
+```
