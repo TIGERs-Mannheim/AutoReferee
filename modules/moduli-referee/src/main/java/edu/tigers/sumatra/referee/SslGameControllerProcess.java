@@ -6,10 +6,14 @@ package edu.tigers.sumatra.referee;
 
 import edu.tigers.sumatra.process.ProcessKiller;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +21,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +45,9 @@ public class SslGameControllerProcess implements Runnable
 	private final String publishAddress;
 	private final String timeAcquisitionMode;
 	private final Thread shutdownHook = new Thread(this::stop);
+
+	@Setter
+	private boolean useSystemBinary = false;
 
 	private Process process = null;
 
@@ -132,6 +141,17 @@ public class SslGameControllerProcess implements Runnable
 	}
 
 
+	private Optional<File> findBinaryInPath()
+	{
+		return Arrays.stream(System.getenv("PATH").split("[:;]"))
+				.map(Path::of)
+				.map(p -> p.resolve(BINARY_NAME).toFile())
+				.filter(File::exists)
+				.findFirst();
+	}
+
+
+	@SneakyThrows
 	private boolean setupBinary()
 	{
 		if (BINARY_FILE.exists())
@@ -152,7 +172,7 @@ public class SslGameControllerProcess implements Runnable
 		{
 			log.info("Binary dir created: {}", binaryDir);
 		}
-		if (!writeResourceToFile(BINARY_NAME, BINARY_FILE))
+		if (!writeResourceToFile(BINARY_FILE))
 		{
 			return false;
 		}
@@ -166,14 +186,33 @@ public class SslGameControllerProcess implements Runnable
 	}
 
 
-	private static boolean writeResourceToFile(String resourcePath, File targetFile)
+	private InputStream getBinaryInputStream()
 	{
-		try
+		if (useSystemBinary)
 		{
-			InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(resourcePath);
+			return findBinaryInPath().map(file -> {
+				log.debug("Using system-installed ssl-game-controller: {}", file);
+				try
+				{
+					return new FileInputStream(file);
+				} catch (FileNotFoundException e)
+				{
+					log.warn("Could not find ssl-game-controller binary: {}", file);
+					return null;
+				}
+			}).orElse(null);
+		}
+		return ClassLoader.getSystemClassLoader().getResourceAsStream(BINARY_NAME);
+	}
+
+
+	private boolean writeResourceToFile(File targetFile)
+	{
+		try (InputStream in = getBinaryInputStream())
+		{
 			if (in == null)
 			{
-				log.warn("Could not find {} in classpath", resourcePath);
+				log.warn("Could not find binary");
 				return false;
 			}
 

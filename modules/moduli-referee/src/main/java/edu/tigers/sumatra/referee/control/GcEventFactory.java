@@ -12,6 +12,7 @@ import edu.tigers.sumatra.referee.proto.SslGcApi;
 import edu.tigers.sumatra.referee.proto.SslGcChange;
 import edu.tigers.sumatra.referee.proto.SslGcCommon;
 import edu.tigers.sumatra.referee.proto.SslGcEngine;
+import edu.tigers.sumatra.referee.proto.SslGcEngineConfig;
 import edu.tigers.sumatra.referee.proto.SslGcGeometry;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.proto.SslGcState;
@@ -252,6 +253,16 @@ public final class GcEventFactory
 	{
 		return SslGcApi.Input.newBuilder()
 				.setResetMatch(true)
+				.build();
+	}
+
+
+	public static SslGcApi.Input autoContinue(boolean enabled)
+	{
+		return SslGcApi.Input.newBuilder()
+				.setConfigDelta(SslGcEngineConfig.Config.newBuilder()
+						.setAutoContinue(enabled)
+						.build())
 				.build();
 	}
 

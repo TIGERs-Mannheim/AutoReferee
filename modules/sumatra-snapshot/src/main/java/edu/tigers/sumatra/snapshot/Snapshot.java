@@ -40,6 +40,8 @@ public class Snapshot
 	SnapObject ball;
 	SslGcRefereeMessage.Referee.Command command;
 	SslGcRefereeMessage.Referee.Stage stage;
+	@Builder.Default
+	boolean autoContinue = true;
 	IVector2 placementPos;
 	@Singular
 	Map<BotID, IVector3> moveDestinations;

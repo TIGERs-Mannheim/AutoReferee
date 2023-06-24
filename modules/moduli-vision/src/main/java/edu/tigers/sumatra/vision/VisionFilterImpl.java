@@ -6,6 +6,8 @@ package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamGeometry;
@@ -19,6 +21,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.thread.NamedThreadFactory;
 import edu.tigers.sumatra.util.Safe;
 import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
@@ -263,13 +266,9 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private List<FilteredVisionBot> mergeRobots(final Collection<CamFilter> camFilters, final long timestamp)
 	{
-		// just get all RobotTracker in one list
-		List<RobotTracker> allTrackers = camFilters.stream()
+		Map<BotID, List<RobotTracker>> trackersById = camFilters.stream()
 				.flatMap(f -> f.getValidRobots().values().stream())
-				.collect(Collectors.toList());
-
-		// group trackers by BotID
-		Map<BotID, List<RobotTracker>> trackersById = allTrackers.stream()
+				// group trackers by BotID
 				.collect(Collectors.groupingBy(RobotTracker::getBotId));
 
 		List<FilteredVisionBot> mergedBots = new ArrayList<>();
@@ -336,9 +335,10 @@ public class VisionFilterImpl extends AVisionFilter
 
 
 	@Override
-	protected void start()
+	public void startModule() throws StartModuleException
 	{
-		super.start();
+		super.startModule();
+		SumatraModel.getInstance().getModule(ACam.class).addObserver(this);
 
 		viewportArchitect.addObserver(this);
 		ballFilterPreprocessor.addObserver(this);
@@ -358,9 +358,10 @@ public class VisionFilterImpl extends AVisionFilter
 
 
 	@Override
-	protected void stop()
+	public void stopModule()
 	{
-		super.stop();
+		super.stopModule();
+		SumatraModel.getInstance().getModule(ACam.class).removeObserver(this);
 		if (scheduledExecutorService != null)
 		{
 			scheduledExecutorService.shutdown();

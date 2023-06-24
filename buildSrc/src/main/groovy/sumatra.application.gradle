@@ -5,7 +5,6 @@ plugins {
 application {
     applicationDefaultJvmArgs = [
             '-server',
-            '-Xnoclassgc',
             '-Dsun.java2d.d3d=false',
             '-Djava.net.preferIPv4Stack=true',
     ]

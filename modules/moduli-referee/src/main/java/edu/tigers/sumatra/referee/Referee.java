@@ -129,8 +129,10 @@ public class Referee extends AReferee
 		var port = getSubnodeConfiguration().getInt("gc-ui-port", DEFAULT_GC_UI_PORT);
 		var timeAcquisitionMode = source.getType() == ERefereeMessageSource.CI ? "ci" : "system";
 		var publishRefereeMessages = getSubnodeConfiguration().getBoolean("publishRefereeMessages", false);
+		var useSystemBinary = getSubnodeConfiguration().getBoolean("useSystemBinary", false);
 		var publishAddress = publishRefereeMessages ? getAddress() + ":" + getPort() : "";
 		sslGameControllerProcess = new SslGameControllerProcess(port, publishAddress, timeAcquisitionMode);
+		sslGameControllerProcess.setUseSystemBinary(useSystemBinary);
 		sslGameControllerProcess.killAllRunningProcesses();
 
 		File stateStoreFile = new File("build/state-store.json.stream");
@@ -166,12 +168,20 @@ public class Referee extends AReferee
 	}
 
 
-	@Override
-	public void initGameController()
+	private void initGameController()
 	{
+		sendGameControllerEvent(GcEventFactory.triggerResetMatch());
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
 		sendGameControllerEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
+	}
+
+
+	@Override
+	public void resetGameController()
+	{
+		sendGameControllerEvent(GcEventFactory.triggerResetMatch());
+		initGameController();
 	}
 
 

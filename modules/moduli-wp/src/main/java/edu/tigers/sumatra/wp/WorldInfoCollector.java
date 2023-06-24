@@ -112,11 +112,11 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
 	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
-	private GameStateCalculator gameStateCalculator;
-	private WorldFrameVisualization worldFrameVisualization;
-	private BallContactCalculator ballContactCalculator;
-	private CurrentBallDetector currentBallDetector;
-	private CamFrameShapeMapProducer camFrameShapeMapProducer;
+	private final GameStateCalculator gameStateCalculator = new GameStateCalculator();
+	private final WorldFrameVisualization worldFrameVisualization = new WorldFrameVisualization();
+	private final BallContactCalculator ballContactCalculator = new BallContactCalculator();
+	private final CurrentBallDetector currentBallDetector = new CurrentBallDetector();
+	private final CamFrameShapeMapProducer camFrameShapeMapProducer = new CamFrameShapeMapProducer();
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	private Referee referee;
@@ -459,13 +459,22 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Override
 	public void reset()
 	{
-		gameStateCalculator = new GameStateCalculator();
-		worldFrameVisualization = new WorldFrameVisualization();
-		ballContactCalculator = new BallContactCalculator();
-		currentBallDetector = new CurrentBallDetector();
-		camFrameShapeMapProducer = new CamFrameShapeMapProducer();
+		observers.forEach(IWorldFrameObserver::onClearCamDetectionFrame);
+
+		gameStateCalculator.reset();
+		worldFrameVisualization.reset();
+		currentBallDetector.reset();
+		camFrameShapeMapProducer.reset();
+		ballContactCalculator.reset();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
+	}
+
+
+	@Override
+	public void onClearCamFrame()
+	{
+		reset();
 	}
 
 
@@ -521,19 +530,6 @@ public class WorldInfoCollector extends AWorldPredictor
 		ExtendedCamDetectionFrame eFrame = new ExtendedCamDetectionFrame(camDetectionFrame, ball);
 		observers.forEach(o -> o.onNewCamDetectionFrame(eFrame));
 		camFrameShapeMapProducer.updateCamFrameShapes(eFrame);
-	}
-
-
-	@Override
-	public void onClearCamFrame()
-	{
-		observers.forEach(IWorldFrameObserver::onClearCamDetectionFrame);
-		lastWFTimestamp = 0;
-		currentBallDetector.reset();
-		camFrameShapeMapProducer.reset();
-		gameStateCalculator.reset();
-		worldFrameVisualization.reset();
-		latestRefereeMsg = new RefereeMsg();
 	}
 
 

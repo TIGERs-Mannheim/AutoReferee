@@ -5,7 +5,6 @@
 plugins {
     id 'java'
     id 'groovy' // apply to all due to issues when only applying to some projects
-    id 'jacoco'
     id 'idea'
     id 'ca.cutterslade.analyze'
     id 'sumatra.versions'
