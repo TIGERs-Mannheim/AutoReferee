@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class PenaltyArea implements IPenaltyArea
 {
-	private final double goalCenterX;
 	private final double length;
 	private final double depth;
 
@@ -42,14 +41,13 @@ public class PenaltyArea implements IPenaltyArea
 	 */
 	public PenaltyArea(final IVector2 goalCenter, final double depth, final double length)
 	{
-		this.goalCenterX = goalCenter.x();
 		this.length = length;
 		this.depth = depth;
+		this.goalCenter = goalCenter;
 
-		double centerOffset = Math.signum(goalCenterX) * depth / -2.;
-		IVector2 center = Vector2.fromX(goalCenterX + centerOffset);
+		double centerOffset = Math.signum(goalCenter.x()) * depth / -2.;
+		IVector2 center = Vector2.fromX(goalCenter.x() + centerOffset);
 		rectangle = Rectangle.fromCenter(center, depth, length);
-		this.goalCenter = Vector2.fromX(goalCenterX);
 	}
 
 
@@ -172,14 +170,16 @@ public class PenaltyArea implements IPenaltyArea
 	@Override
 	public IVector2 getNegCorner()
 	{
-		return getRectangle().getCorner(IRectangle.ECorner.BOTTOM_LEFT);
+		var corner = goalCenter.x() > 0 ? IRectangle.ECorner.BOTTOM_LEFT : IRectangle.ECorner.BOTTOM_RIGHT;
+		return getRectangle().getCorner(corner);
 	}
 
 
 	@Override
 	public IVector2 getPosCorner()
 	{
-		return getRectangle().getCorner(IRectangle.ECorner.TOP_LEFT);
+		var corner = goalCenter.x() > 0 ? IRectangle.ECorner.TOP_LEFT : IRectangle.ECorner.TOP_RIGHT;
+		return getRectangle().getCorner(corner);
 	}
 
 
@@ -236,12 +236,12 @@ public class PenaltyArea implements IPenaltyArea
 		IVector2 p1 = intersections.get(0);
 		IVector2 p2 = intersections.get(1);
 
-		if (SumatraMath.isEqual(p1.x(), goalCenterX) || SumatraMath.isEqual(p2.x(), goalCenterX))
+		if (SumatraMath.isEqual(p1.x(), goalCenter.x()) || SumatraMath.isEqual(p2.x(), goalCenter.x()))
 		{
 			return depth * length * 1e-6;
 		}
 
-		double frontX = goalCenterX - Math.signum(goalCenterX) * depth;
+		double frontX = goalCenter.x() - Math.signum(goalCenter.x()) * depth;
 		double dp1 = Math.abs(frontX - p1.x());
 		double dp2 = Math.abs(frontX - p2.x());
 		double dMin = Math.min(dp1, dp2);
