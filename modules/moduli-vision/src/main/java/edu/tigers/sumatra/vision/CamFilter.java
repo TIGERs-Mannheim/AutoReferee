@@ -385,7 +385,7 @@ public class CamFilter
 			// check if there are other robots very close by, could be a false vision detection then
 			// we filter out the robot with the cam bots id before to allow trackers at the same location
 			long numCloseTrackers = mergedRobots.stream()
-					.filter(m -> m.getBotID() != r.getBotId())
+					.filter(m -> !m.getBotID().equals(r.getBotId()))
 					.filter(m -> m.getPos().distanceTo(r.getPos()) < (Geometry.getBotRadius() * 1.5)).count();
 
 			if (numCloseTrackers > 0)
