@@ -41,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Log4j2
 public class Referee extends AReferee
 {
-	private static final int DEFAULT_GC_UI_PORT = 50543;
+	private static final int DEFAULT_GC_UI_PORT = 11000;
 
 	@Configurable(comment = "Custom referee port that overwrites the value from moduli")
 	@Setter
