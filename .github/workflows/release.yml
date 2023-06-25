@@ -21,7 +21,9 @@ jobs:
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        run: ./gradlew jib -Pversion=$tag
+        run: |
+          tag=${GITHUB_REF#refs/tags/version/*}
+          ./gradlew jib -Pversion=$tag
       - name: Publish auto-referee-vnc to Docker Hub
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -34,4 +36,6 @@ jobs:
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew githubRelease -Pversion=$tag
+        run: |
+          tag=${GITHUB_REF#refs/tags/version/*}
+          ./gradlew githubRelease -Pversion=$tag
