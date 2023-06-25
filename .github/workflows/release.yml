@@ -12,10 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Get GIT tags
-        run: git fetch --tags origin
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
@@ -25,7 +21,7 @@ jobs:
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
-        run: ./gradlew jib
+        run: ./gradlew jib -Pversion=$tag
       - name: Publish auto-referee-vnc to Docker Hub
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -38,4 +34,4 @@ jobs:
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew githubRelease
+        run: ./gradlew githubRelease -Pversion=$tag

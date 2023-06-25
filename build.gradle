@@ -3,7 +3,6 @@
  */
 
 plugins {
-    id 'com.palantir.git-version' version '3.0.0'
     id "com.github.breadmoirai.github-release" version "2.4.1"
     id 'idea'
 
@@ -11,9 +10,6 @@ plugins {
     id 'sumatra.jib'
     id 'sumatra.application'
 }
-
-ext.versionDetails = versionDetails(prefix: "version/")
-version gitVersion(prefix: "version/")
 
 dependencies {
     implementation project(':autoreferee-gui')
@@ -86,5 +82,5 @@ githubRelease {
     targetCommitish.set("master")
     repo.set("AutoReferee")
     releaseAssets distZip
-    tagName { "version/${versionDetails.lastTag}" }
+    tagName.set(project.version.toString())
 }
