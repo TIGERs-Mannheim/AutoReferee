@@ -11,6 +11,7 @@ import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.Referee;
+import edu.tigers.sumatra.wp.exporter.VisionTrackerSender;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -43,6 +44,7 @@ public final class AutoReferee
 		ifNotHasOption("hl", () -> SwingUtilities.invokeLater(AutoReferee::startUi));
 		ifHasOption("va", () -> setVisionAddress(cmd.getOptionValue("va")));
 		ifHasOption("ra", () -> setRefereeAddress(cmd.getOptionValue("ra")));
+		ifHasOption("ta", () -> setTrackerAddress(cmd.getOptionValue("ta")));
 
 		start();
 
@@ -89,6 +91,7 @@ public final class AutoReferee
 		options.addOption("w", "window", true, "Set window size (example: 1920x1080)");
 		options.addOption("va", "visionAddress", true, "address:port for vision");
 		options.addOption("ra", "refereeAddress", true, "address:port for GC");
+		options.addOption("ta", "trackerAddress", true, "address:port for tracker");
 		return options;
 	}
 
@@ -120,14 +123,18 @@ public final class AutoReferee
 				.ifPresent(a -> a.changeMode(EAutoRefMode.ACTIVE));
 	}
 
-
 	private static void setVisionAddress(String fullAddress)
 	{
 		String[] parts = fullAddress.split(":");
 		String address = parts[0];
-		Integer port = parts.length > 1 ? Integer.valueOf(parts[1]) : null;
-		SSLVisionCam.setCustomAddress(address);
-		SSLVisionCam.setCustomPort(port);
+		if (!address.isBlank())
+		{
+			SSLVisionCam.setCustomAddress(address);
+		}
+		if (parts.length > 1)
+		{
+			SSLVisionCam.setCustomPort(Integer.parseInt(parts[1]));
+		}
 	}
 
 
@@ -135,9 +142,29 @@ public final class AutoReferee
 	{
 		String[] parts = fullAddress.split(":");
 		String address = parts[0];
-		Integer port = parts.length > 1 ? Integer.valueOf(parts[1]) : null;
-		Referee.setCustomAddress(address);
-		Referee.setCustomPort(port);
+		if (!address.isBlank())
+		{
+			Referee.setCustomAddress(address);
+		}
+		if (parts.length > 1)
+		{
+			Referee.setCustomPort(Integer.parseInt(parts[1]));
+		}
+	}
+
+
+	private static void setTrackerAddress(String fullAddress)
+	{
+		String[] parts = fullAddress.split(":");
+		String address = parts[0];
+		if (!address.isBlank())
+		{
+			VisionTrackerSender.setCustomAddress(address);
+		}
+		if (parts.length > 1)
+		{
+			VisionTrackerSender.setCustomPort(Integer.parseInt(parts[1]));
+		}
 	}
 
 

@@ -31,7 +31,7 @@ dependencies {
     implementation project(':moduli-autoreferee')
     implementation project(':moduli-cam')
     implementation project(':moduli-referee')
-    runtimeOnly project(':moduli-wp')
+    implementation project(':moduli-wp')
 
     implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
     implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
