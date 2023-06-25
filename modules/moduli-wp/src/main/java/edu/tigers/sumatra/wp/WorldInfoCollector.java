@@ -459,6 +459,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Override
 	public void reset()
 	{
+		log.debug("Resetting world info collector");
 		observers.forEach(IWorldFrameObserver::onClearCamDetectionFrame);
 
 		gameStateCalculator.reset();

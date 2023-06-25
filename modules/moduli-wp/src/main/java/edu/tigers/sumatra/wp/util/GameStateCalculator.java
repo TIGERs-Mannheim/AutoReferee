@@ -79,7 +79,7 @@ public class GameStateCalculator
 
 		if (refereeMsg.getCmdCounter() != lastRefMsgCounter)
 		{
-			log.debug("New command: {}", refereeMsg.getCommand());
+			log.debug("Referee message with new command: {}", refereeMsg);
 			lastRefMsgCounter = refereeMsg.getCmdCounter();
 			processCommand(refereeMsg.getCommand(), lastRefCmd, builder);
 			storeBallPosition(refereeMsg.getCommand(), ballPos);
@@ -87,18 +87,12 @@ public class GameStateCalculator
 		}
 
 		processNextCommand(refereeMsg.getNextCommand(), refereeMsg.getCommand(), builder);
-		builder.withBallPlacementPosition(refereeMsg.getBallPlacementPosNeutral());
 		processStage(refereeMsg.getStage(), builder);
 		processBallMovement(ballPos, builder, timestamp);
 		processActionTimeRemaining(builder, refereeMsg.getCurrentActionTimeRemaining());
 
-		if ((refereeMsg.getCommand() == Command.BALL_PLACEMENT_BLUE
-				|| refereeMsg.getCommand() == Command.BALL_PLACEMENT_YELLOW)
-				&& refereeMsg.getBallPlacementPosNeutral() == null)
-		{
-			// just to avoid NPEs
-			builder.withBallPlacementPosition(Vector2.zero());
-		}
+		var placementPos = Optional.ofNullable(refereeMsg.getBallPlacementPosNeutral()).orElse(Vector2.zero());
+		builder.withBallPlacementPosition(placementPos);
 
 		// we build this with NEUTRAL ourTeam because we don't know our team yet
 		return builder.withOurTeam(ETeamColor.NEUTRAL).build();

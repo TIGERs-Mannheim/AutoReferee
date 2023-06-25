@@ -170,7 +170,6 @@ public class Referee extends AReferee
 
 	private void initGameController()
 	{
-		sendGameControllerEvent(GcEventFactory.triggerResetMatch());
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
 		sendGameControllerEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
@@ -180,6 +179,7 @@ public class Referee extends AReferee
 	@Override
 	public void resetGameController()
 	{
+		log.debug("Resetting game controller");
 		sendGameControllerEvent(GcEventFactory.triggerResetMatch());
 		initGameController();
 	}
