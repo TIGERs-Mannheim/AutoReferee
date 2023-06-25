@@ -12,7 +12,6 @@ dependencies {
     implementation project(':common-gui')
     implementation project(':sumatra-model')
     implementation project(':moduli-autoreferee')
-    implementation project(':moduli-record')
     implementation project(':moduli-referee')
     implementation project(':moduli-wp')
     implementation project(':moduli-geometry')

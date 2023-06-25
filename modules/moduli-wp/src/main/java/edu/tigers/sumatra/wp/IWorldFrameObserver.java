@@ -8,8 +8,6 @@ import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
-import java.util.Map;
-
 
 /**
  * @author Gero
@@ -69,11 +67,6 @@ public interface IWorldFrameObserver
 	 * @param source
 	 */
 	default void onRemoveSourceFromShapeMap(ShapeMapSource source)
-	{
-	}
-
-
-	default void onReplaceShapeMaps(Map<ShapeMapSource, ShapeMap> map)
 	{
 	}
 }

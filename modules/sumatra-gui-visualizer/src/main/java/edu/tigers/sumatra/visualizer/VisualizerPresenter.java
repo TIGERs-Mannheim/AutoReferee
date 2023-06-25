@@ -250,7 +250,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	{
 		shapeSelectionModel.getSources().forEach((source, node) -> {
 			boolean visible = isSelected(node);
-			fieldPresenter.setSourceVisibility(source.getName(), visible);
+			fieldPresenter.setSourceVisibility(source, visible);
 		});
 
 		shapeSelectionModel.getLayers().forEach((layer, node) -> {
