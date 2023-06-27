@@ -74,6 +74,7 @@ public class VisionFilterImpl extends AVisionFilter
 	private final QualityInspector qualityInspector = new QualityInspector();
 	private final ViewportArchitect viewportArchitect = new ViewportArchitect();
 	private final RobotQualityInspector robotQualityInspector = new RobotQualityInspector();
+	private final VirtualBallProducer virtualBallProducer = new VirtualBallProducer();
 
 	private Map<Integer, CamFilter> cams = new ConcurrentHashMap<>();
 	private FilteredVisionFrame lastFrame = FilteredVisionFrame.createEmptyFrame();
@@ -96,6 +97,7 @@ public class VisionFilterImpl extends AVisionFilter
 			lastFrame = constructFilteredVisionFrame(lastFrame);
 			var extrapolatedFrame = extrapolateFilteredFrame(lastFrame, lastFrame.getTimestamp());
 			publishFilteredVisionFrame(extrapolatedFrame);
+			virtualBallProducer.update(extrapolatedFrame, getRobotInfoMap(), cams.values());
 		} catch (Throwable e)
 		{
 			log.error("Uncaught exception while publishing vision filter frames", e);
@@ -166,6 +168,9 @@ public class VisionFilterImpl extends AVisionFilter
 			} catch (InterruptedException e)
 			{
 				Thread.currentThread().interrupt();
+			} catch(Exception e)
+			{
+				log.error("Uncaught exception while processing cam frame", e);
 			}
 		}
 	}
@@ -187,11 +192,8 @@ public class VisionFilterImpl extends AVisionFilter
 		// update robot infos on all camera filters
 		camFilter.setRobotInfoMap(getRobotInfoMap());
 
-		// set latest ball info on all camera filters (to generate virtual balls from barrier info)
-		camFilter.setBallInfo(lastBallFilterOutput);
-
 		// update camera filter with new detection frame
-		camFilter.update(camDetectionFrame, lastFrame);
+		camFilter.update(camDetectionFrame, lastFrame, virtualBallProducer.getVirtualBalls());
 
 		// update robot quality inspector
 		camDetectionFrame.getRobots().forEach(robotQualityInspector::addDetection);
@@ -259,6 +261,8 @@ public class VisionFilterImpl extends AVisionFilter
 				.addAll(getBallTrackerShapes(timestamp));
 		frame.getShapeMap().get(EVisionFilterShapesLayer.ROBOT_QUALITY_INSPECTOR)
 				.addAll(getRobotQualityInspectorShapes(mergedRobots));
+		frame.getShapeMap().get(EVisionFilterShapesLayer.VIRTUAL_BALL_SHAPES)
+				.addAll(getVirtualBallShapes());
 
 		return frame;
 	}
@@ -469,6 +473,25 @@ public class VisionFilterImpl extends AVisionFilter
 		}
 
 		shapes.addAll(ballFilter.getShapes());
+
+		return shapes;
+	}
+
+	private List<IDrawableShape> getVirtualBallShapes()
+	{
+		List<IDrawableShape> shapes = new ArrayList<>();
+
+		boolean virtualBallUsed = !virtualBallProducer.getVirtualBalls().isEmpty();
+		if(virtualBallUsed)
+		{
+			DrawableAnnotation virtHint = new DrawableAnnotation(lastBallFilterOutput.getFilteredBall().getPos().getXYVector(), "VIRTUAL", true);
+			virtHint.setColor(Color.ORANGE);
+			virtHint.withOffset(Vector2.fromY(40));
+			virtHint.withFontHeight(30);
+			shapes.add(virtHint);
+		}
+
+		shapes.addAll(virtualBallProducer.getVirtualBallShapes());
 
 		return shapes;
 	}

@@ -28,12 +28,11 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.vision.BallFilter.BallFilterOutput;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape;
+import edu.tigers.sumatra.vision.data.VirtualBall;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
 import lombok.Getter;
@@ -45,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,9 +74,6 @@ public class CamFilter
 	private Optional<IRectangle> fieldRect = Optional.empty();
 	private Optional<IRectangle> viewport = Optional.empty();
 
-	private IVector2 lastKnownBallPosition = Vector2f.ZERO_VECTOR;
-	private long lastBallVisibleTimestamp = 0;
-
 	private final Map<BotID, RobotTracker> robots = new ConcurrentHashMap<>();
 
 	private final List<BallTracker> balls = Collections.synchronizedList(new ArrayList<>());
@@ -87,20 +82,17 @@ public class CamFilter
 
 	private Queue<CamBall> ballHistory = QueueUtils.synchronizedQueue(new CircularFifoQueue<>(100));
 
+	@Getter
+	private long lastBallOnCamTimestamp = 0;
+
 	@Configurable(defValue = "1.0", comment = "Time in [s] after an invisible ball is removed")
 	private static double invisibleLifetimeBall = 1.0;
 
 	@Configurable(defValue = "2.0", comment = "Time in [s] after an invisible robot is removed")
 	private static double invisibleLifetimeRobot = 2.0;
 
-	@Configurable(defValue = "0.05", comment = "Time in [s] after which virtual balls are generated from robot info (barrier)")
-	private static double delayToVirtualBalls = 0.05;
-
 	@Configurable(defValue = "10", comment = "Maximum number of ball trackers")
 	private static int maxBallTrackers = 10;
-
-	@Configurable(defValue = "1000.0", comment = "Max. distance to last know ball location to create virtual balls")
-	private static double maxVirtualBallDistance = 1000.0;
 
 	@Configurable(defValue = "true", comment = "Restrict viewport to minimize overlap (from CameraArchitect).")
 	private static boolean restrictViewport = true;
@@ -119,8 +111,6 @@ public class CamFilter
 
 	@Configurable(defValue = "false", comment = "Adjust frame times based on estimated frame rate and frame number")
 	private static boolean adjustTCapture = false;
-
-	private final Map<BotID, Long> lastBarrierInterruptedMap = new HashMap<>();
 
 	static
 	{
@@ -146,13 +136,13 @@ public class CamFilter
 	 * @param frame
 	 * @param lastFilteredFrame
 	 */
-	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame)
+	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame, final List<VirtualBall> virtualBalls)
 	{
 		checkForNonConsecutiveFrames(frame);
 		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
 
 		processRobots(adjustedFrame, lastFilteredFrame.getBots());
-		processBalls(adjustedFrame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots());
+		processBalls(adjustedFrame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots(), virtualBalls);
 
 		timestamp = adjustedFrame.gettCapture();
 	}
@@ -201,23 +191,9 @@ public class CamFilter
 	}
 
 
-	/**
-	 * Set ball info from BallFilter.
-	 *
-	 * @param ballFilterOutput
-	 */
-	public void setBallInfo(final BallFilterOutput ballFilterOutput)
-	{
-		lastKnownBallPosition = ballFilterOutput.getLastKnownPosition().getXYVector();
-		lastBallVisibleTimestamp = ballFilterOutput.getFilteredBall().getLastVisibleTimestamp();
-	}
-
-
 	private void reset()
 	{
 		frameIntervalFilter.reset();
-		lastKnownBallPosition = Vector2f.ZERO_VECTOR;
-		lastBallVisibleTimestamp = 0;
 		robots.clear();
 		balls.clear();
 		ballHistory.clear();
@@ -289,47 +265,6 @@ public class CamFilter
 		}
 
 		return shapes;
-	}
-
-
-	private List<CamBall> getVirtualBalls(final long timestamp, final long frameId)
-	{
-		List<CamBall> virtualBalls = new ArrayList<>();
-
-		if (((timestamp - lastBallVisibleTimestamp) * 1e-9) < delayToVirtualBalls)
-		{
-			return virtualBalls;
-		}
-
-		for (RobotInfo r : robotInfoMap.values())
-		{
-			RobotTracker tracker = robots.get(r.getBotId());
-			if (tracker == null)
-			{
-				continue;
-			}
-
-			if (r.isBarrierInterrupted())
-			{
-				lastBarrierInterruptedMap.put(r.getBotId(), r.getTimestamp());
-			}
-
-			boolean barrierInterrupted =
-					(timestamp - lastBarrierInterruptedMap.getOrDefault(r.getBotId(), 0L)) / 1e9 < 0.5;
-
-			IVector2 ballAtDribblerPos = tracker.getPosition(timestamp)
-					.addNew(Vector2.fromAngle(tracker.getOrientation(timestamp))
-							.scaleTo(r.getCenter2DribblerDist() + Geometry.getBallRadius()));
-
-			if ((ballAtDribblerPos.distanceTo(lastKnownBallPosition) < maxVirtualBallDistance) && barrierInterrupted)
-			{
-				CamBall camBall = new CamBall(0, 0, Vector3.from2d(ballAtDribblerPos, 0), Vector2f.ZERO_VECTOR,
-						timestamp, camId, frameId);
-				virtualBalls.add(camBall);
-			}
-		}
-
-		return virtualBalls;
 	}
 
 
@@ -430,7 +365,7 @@ public class CamFilter
 
 
 	private void processBalls(final CamDetectionFrame frame, final FilteredVisionBall ball,
-			final List<FilteredVisionBot> mergedRobots)
+			final List<FilteredVisionBot> mergedRobots, final List<VirtualBall> virtualBalls)
 	{
 		// remove trackers of balls that have not been visible for some time
 		balls.removeIf(e -> ((frame.gettCapture() - e.getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeBall);
@@ -446,11 +381,15 @@ public class CamFilter
 			b.predict(frame.gettCapture(), colShapes, ball.getPos().z() > maxHeightForCollision);
 		}
 
+		if(!frame.getBalls().isEmpty())
+			lastBallOnCamTimestamp = timestamp;
+
 		List<CamBall> camBalls = new ArrayList<>(frame.getBalls());
-		if (frame.getBalls().isEmpty())
-		{
-			camBalls.addAll(getVirtualBalls(frame.gettCapture(), frame.getFrameNumber()));
-		}
+
+		var mappedBalls = virtualBalls.stream()
+				.map(b -> b.toCamBall(camId, frame.getFrameNumber()))
+				.toList();
+		camBalls.addAll(mappedBalls);
 
 		// iterate over all balls on the camera
 		for (CamBall b : camBalls)
