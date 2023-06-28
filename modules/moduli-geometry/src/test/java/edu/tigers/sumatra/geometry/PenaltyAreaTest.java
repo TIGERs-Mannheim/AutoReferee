@@ -8,7 +8,6 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -465,17 +464,5 @@ public class PenaltyAreaTest
 		);
 		arc = Arc.createArc(Vector2.fromXY(-400, -400), 400, 3 * AngleMath.PI_QUART, 0.5 * AngleMath.PI_QUART);
 		assertThat(penaltyArea.intersectPerimeterPath(arc)).isEmpty();
-	}
-
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		// Data generated with GeoGebra
-		var ellipse = Ellipse.createEllipse(Vector2.fromXY(-400, 500), 400, 500);
-		assertThat(penaltyArea.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
-				Vector2.fromXY(-600, 66.98730),
-				Vector2.fromXY(-791.91836, 400)
-		);
 	}
 }

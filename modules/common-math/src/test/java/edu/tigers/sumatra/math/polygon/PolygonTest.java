@@ -9,7 +9,6 @@ import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -309,18 +308,6 @@ public class PolygonTest
 		);
 		arc = Arc.createArc(Vector2.fromY(2), 2, -AngleMath.PI_HALF, -AngleMath.PI_QUART);
 		assertThat(polygon.intersectPerimeterPath(arc)).isEmpty();
-	}
-
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		var polygon = buildPolygon();
-		var ellipse = Ellipse.createEllipse(Vector2.fromY(1.25), 1, 1.25);
-		assertThat(polygon.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
-				Vector2.fromXY(-0.92843, 1.71438),
-				Vector2.fromXY(0.20871, 2.47247)
-		);
 	}
 }
 

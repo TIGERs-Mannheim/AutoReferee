@@ -8,7 +8,6 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.line.IHalfLine;
@@ -222,13 +221,6 @@ public class Arc implements IArc
 	public IIntersections intersect(IArc other)
 	{
 		return PathIntersectionMath.intersectArcAndArc(this, other);
-	}
-
-
-	@Override
-	public IIntersections intersect(IEllipse ellipse)
-	{
-		return PathIntersectionMath.intersectArcAndEllipse(this, ellipse);
 	}
 
 

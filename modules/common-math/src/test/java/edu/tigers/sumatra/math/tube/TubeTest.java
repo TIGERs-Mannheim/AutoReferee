@@ -8,18 +8,15 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import org.apache.commons.lang.NotImplementedException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
 
@@ -312,13 +309,4 @@ public class TubeTest
 		);
 	}
 
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		var tube = buildTube();
-		var ellipse = Ellipse.createEllipse(Vector2.zero(), 2, 3);
-		assertThatThrownBy(() -> tube.intersectPerimeterPath(ellipse)).isOfAnyClassIn(NotImplementedException.class);
-
-	}
 }

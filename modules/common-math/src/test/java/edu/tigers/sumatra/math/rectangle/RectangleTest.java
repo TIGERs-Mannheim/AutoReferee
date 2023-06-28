@@ -8,7 +8,6 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
@@ -470,18 +469,5 @@ public class RectangleTest
 		);
 		arc = Arc.createArc(Vector2.fromXY(2, 2), 2, -3 * AngleMath.PI_QUART, -0.1);
 		assertThat(rect.intersectPerimeterPath(arc)).isEmpty();
-	}
-
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		// Data generated with GeoGebra
-		var rect = Rectangle.fromCenter(Vector2.zero(), 4, 2);
-		var ellipse = Ellipse.createEllipse(Vector2.fromXY(-2, 2), 1.5811388301, 1.5);
-		assertThat(rect.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
-				Vector2.fromXY(-2, 0.5),
-				Vector2.fromXY(-0.82149, 1)
-		);
 	}
 }

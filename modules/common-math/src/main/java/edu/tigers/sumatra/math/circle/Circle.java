@@ -8,18 +8,14 @@ import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
 import edu.tigers.sumatra.math.line.IHalfLine;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DecompositionSolver;
@@ -355,13 +351,6 @@ public class Circle implements ICircle
 
 
 	@Override
-	public IIntersections intersect(IEllipse ellipse)
-	{
-		return PathIntersectionMath.intersectCircleAndEllipse(this, ellipse);
-	}
-
-
-	@Override
 	public IVector2 closestPointOnPath(IVector2 point)
 	{
 		return CircleMath.nearestPointOnCircleLine(this, point);
@@ -386,26 +375,6 @@ public class Circle implements ICircle
 	public List<IVector2> tangentialIntersections(final IVector2 externalPoint)
 	{
 		return CircleMath.tangentialIntersections(this, externalPoint);
-	}
-
-
-	@Override
-	public IEllipse projectToGround(final IVector3 origin, final double height)
-	{
-		if (origin.z() <= height)
-		{
-			throw new IllegalArgumentException("origin.z() must be above height");
-		}
-
-		IVector2 newCenter = Vector3.from2d(center(), height).projectToGroundNew(origin);
-
-		double dist = center().distanceTo(origin.getXYVector());
-
-		IVector2 projected = Vector3.fromXYZ(dist + radius(), radius(), height)
-				.projectToGroundNew(Vector3.fromXYZ(0, 0, origin.z()));
-
-		return Ellipse.createTurned(newCenter, projected.x() - dist, projected.y(),
-				origin.getXYVector().subtractNew(newCenter).getAngle());
 	}
 
 

@@ -6,7 +6,6 @@ package edu.tigers.sumatra.math;
 
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.line.IHalfLine;
 import edu.tigers.sumatra.math.line.ILine;
@@ -183,21 +182,6 @@ public interface I2DShape
 				.toList();
 	}
 
-	/**
-	 * Get the intersection points of the shape and the ellipse
-	 *
-	 * @param ellipse some ellipse
-	 * @return all intersection points
-	 */
-	default List<IVector2> intersectPerimeterPath(IEllipse ellipse)
-	{
-
-		return getPerimeterPath().stream()
-				.map(path -> path.intersect(ellipse))
-				.flatMap(IIntersections::stream)
-				.filter(VectorDistinctStreamFilter.byIsCloseTo())
-				.toList();
-	}
 
 	/**
 	 * Get the intersection points of the shape and the path
@@ -222,10 +206,6 @@ public interface I2DShape
 		} else if (path instanceof IArc arc)
 		{
 			return intersectPerimeterPath(arc);
-		}
-		if (path instanceof IEllipse ellipse)
-		{
-			return intersectPerimeterPath(ellipse);
 		}
 		throw new NotImplementedException();
 	}

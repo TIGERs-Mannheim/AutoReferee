@@ -7,7 +7,6 @@ package edu.tigers.sumatra.math.line;
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.intersections.ISingleIntersection;
 import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
@@ -220,13 +219,6 @@ final class LineSegment extends ALine implements ILineSegment
 	public IIntersections intersect(IArc arc)
 	{
 		return PathIntersectionMath.intersectLineSegmentAndArc(this, arc);
-	}
-
-
-	@Override
-	public IIntersections intersect(IEllipse ellipse)
-	{
-		return PathIntersectionMath.intersectLineSegmentAndEllipse(this, ellipse);
 	}
 
 

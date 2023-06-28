@@ -14,13 +14,11 @@ import edu.tigers.sumatra.cam.data.CamFieldSize;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableCircle;
-import edu.tigers.sumatra.drawable.DrawableEllipse;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.filter.FirstOrderMultiSampleEstimator;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
@@ -558,17 +556,6 @@ public class CamFilter
 			age.withOffset(Vector2.fromXY(150, (camId * 45.0) - 100.0));
 			age.setColor(Color.GREEN);
 			shapes.add(age);
-
-			final Optional<IVector3> cameraPosition = getCameraPosition();
-			if (cameraPosition.isPresent() && (cameraPosition.get().z() > 120.0))
-			{
-				DrawableEllipse shadow = new DrawableEllipse(
-						Circle.createCircle(pos, 90).projectToGround(cameraPosition.get(), 120),
-						Color.BLACK);
-				shadow.setFill(false);
-				shadow.setStrokeWidth(5);
-				shapes.add(shadow);
-			}
 		}
 
 		return shapes;

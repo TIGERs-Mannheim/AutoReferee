@@ -10,7 +10,6 @@ import edu.tigers.sumatra.math.IPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.CircleMath;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineBase;
 import edu.tigers.sumatra.math.line.ILineSegment;
@@ -330,20 +329,6 @@ public class TriangleTest
 		arc = Arc.createArc(Vector2.fromXY(1, 2), 2, 0, -3 * AngleMath.PI_QUART);
 		assertThat(triangle.intersectPerimeterPath(arc)).containsExactlyInAnyOrder(
 				Vector2.fromXY(1, 0)
-		);
-	}
-
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		var triangle = buildTriangle();
-		var ellipse = Ellipse.createEllipse(Vector2.fromXY(-0.5, 1), 2.5, 2);
-		assertThat(triangle.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
-				Vector2.fromXY(-0.03491, 2.96509),
-				Vector2.fromXY(1, 2.6),
-				Vector2.fromXY(1, -0.6),
-				Vector2.fromXY(0.65847, -0.77231)
 		);
 	}
 }

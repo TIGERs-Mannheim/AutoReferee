@@ -6,7 +6,6 @@ package edu.tigers.sumatra.math;
 
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.line.IHalfLine;
 import edu.tigers.sumatra.math.line.ILine;
@@ -92,14 +91,6 @@ public interface IPath extends IEuclideanDistance
 	 */
 	IIntersections intersect(IArc arc);
 
-	/**
-	 * Intersect this path instance with the specified line {@code segment} and return the intersection point.
-	 *
-	 * @param ellipse The ellipse for which to calculate an intersection with this instance
-	 * @return The intersection point of both lines r an empty {@link Optional} if at least one of the two lines is not
-	 * valid, the lines are parallel or the intersection point was located outside their bounds.
-	 */
-	IIntersections intersect(IEllipse ellipse);
 
 	/**
 	 * Returns a point on the path which is located closest to the specified point. For an unbounded line this is always

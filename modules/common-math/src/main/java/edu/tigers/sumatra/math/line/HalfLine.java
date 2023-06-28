@@ -6,7 +6,6 @@ package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.intersections.ISingleIntersection;
 import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
@@ -146,13 +145,6 @@ final class HalfLine extends AUnboundedLine implements IHalfLine
 	public IIntersections intersect(IArc arc)
 	{
 		return PathIntersectionMath.intersectHalfLineAndArc(this, arc);
-	}
-
-
-	@Override
-	public IIntersections intersect(IEllipse ellipse)
-	{
-		return PathIntersectionMath.intersectHalfLineAndEllipse(this, ellipse);
 	}
 
 

@@ -6,7 +6,6 @@ package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.intersections.IIntersections;
 import edu.tigers.sumatra.math.intersections.ISingleIntersection;
 import edu.tigers.sumatra.math.intersections.PathIntersectionMath;
@@ -248,13 +247,6 @@ final class Line extends AUnboundedLine implements ILine
 	public IIntersections intersect(IArc arc)
 	{
 		return PathIntersectionMath.intersectLineAndArc(this, arc);
-	}
-
-
-	@Override
-	public IIntersections intersect(IEllipse ellipse)
-	{
-		return PathIntersectionMath.intersectLineAndEllipse(this, ellipse);
 	}
 
 

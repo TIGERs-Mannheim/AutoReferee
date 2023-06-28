@@ -9,7 +9,6 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
-import edu.tigers.sumatra.math.ellipse.Ellipse;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.polygon.PolygonBuilder;
@@ -323,19 +322,6 @@ public class QuadrilateralTest
 		);
 		arc = Arc.createArc(Vector2.fromY(1), 2, 0, AngleMath.PI_HALF);
 		assertThat(quad.intersectPerimeterPath(arc)).isEmpty();
-	}
-
-
-	@Test
-	public void testIntersectPerimeterPathEllipse()
-	{
-		var quad = buildQuadrilateral();
-		var ellipse = Ellipse.createEllipse(Vector2.fromX(0.75), 1.25, 1);
-		assertThat(quad.intersectPerimeterPath(ellipse)).containsExactlyInAnyOrder(
-				Vector2.fromXY(2, 0),
-				Vector2.fromXY(1.02439, 0.97561),
-				Vector2.fromXY(1.02439, -0.97561)
-		);
 	}
 }
 

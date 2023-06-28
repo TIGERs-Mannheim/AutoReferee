@@ -6,11 +6,9 @@ package edu.tigers.sumatra.math.intersections;
 
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
-import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.circle.ICircular;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.line.IHalfLine;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineBase;
@@ -18,9 +16,7 @@ import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.VectorDistinctStreamFilter;
-import org.apache.commons.lang.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,16 +117,6 @@ public class PathIntersectionMath
 	}
 
 
-	public static IIntersections intersectLineAndEllipse(ILine line, IEllipse ellipse)
-	{
-		if (!line.isValid() || !ellipse.isValid())
-		{
-			return Intersections.of();
-		}
-		return Intersections.of(ellipseLineIntersectionsInternal(ellipse, line, true, true));
-	}
-
-
 	public static ISingleIntersection intersectHalfLineAndHalfLine(IHalfLine halfLine1, IHalfLine halfLine2)
 	{
 		if (!halfLine1.isValid() || !halfLine2.isValid())
@@ -198,16 +184,6 @@ public class PathIntersectionMath
 			return Intersections.of();
 		}
 		return Intersections.of(circularLineIntersections(arc, halfLine, false, false, Double.MAX_VALUE));
-	}
-
-
-	public static IIntersections intersectHalfLineAndEllipse(IHalfLine halfLine, IEllipse ellipse)
-	{
-		if (!halfLine.isValid() || !ellipse.isValid())
-		{
-			return Intersections.of();
-		}
-		return Intersections.of(ellipseLineIntersectionsInternal(ellipse, halfLine, true, false));
 	}
 
 
@@ -279,22 +255,6 @@ public class PathIntersectionMath
 	}
 
 
-	public static IIntersections intersectLineSegmentAndEllipse(ILineSegment segment, IEllipse ellipse)
-	{
-		if (!ellipse.isValid())
-		{
-			return Intersections.of();
-		}
-		if (!segment.isValid())
-		{
-			return ellipse.isPointOnPath(segment.supportVector()) ?
-					Intersections.of(segment.supportVector()) :
-					Intersections.of();
-		}
-		return Intersections.of(ellipseLineIntersectionsInternal(ellipse, segment, false, false));
-	}
-
-
 	public static IIntersections intersectCircleAndCircle(ICircle circle1, ICircle circle2)
 	{
 		if (!circle1.isValid() || !circle2.isValid())
@@ -315,21 +275,6 @@ public class PathIntersectionMath
 	}
 
 
-	public static IIntersections intersectCircleAndEllipse(ICircle circle, IEllipse ellipse)
-	{
-		if (!circle.isValid() || !ellipse.isValid())
-		{
-			return Intersections.of();
-		}
-		if (SumatraMath.isEqual(ellipse.getRadiusX(), ellipse.getRadiusY()))
-		{
-			return Intersections.of(
-					circleCircleIntersections(Circle.createCircle(ellipse.center(), ellipse.getRadiusX()), circle));
-		}
-		return Intersections.of(circularEllipseIntersection(circle, true));
-	}
-
-
 	public static IIntersections intersectArcAndArc(IArc arc1, IArc arc2)
 	{
 		if (!arc1.isValid() || !arc2.isValid())
@@ -337,31 +282,6 @@ public class PathIntersectionMath
 			return Intersections.of();
 		}
 		return Intersections.of(circularCircularIntersections(arc1, arc2, false, false));
-	}
-
-
-	public static IIntersections intersectArcAndEllipse(IArc arc, IEllipse ellipse)
-	{
-		if (!arc.isValid() || !ellipse.isValid())
-		{
-			return Intersections.of();
-		}
-		if (SumatraMath.isEqual(ellipse.getRadiusX(), ellipse.getRadiusY()))
-		{
-			var circle = Circle.createCircle(ellipse.center(), ellipse.getRadiusX());
-			return Intersections.of(circularCircularIntersections(circle, arc, true, false));
-		}
-		return Intersections.of(circularEllipseIntersection(arc, false));
-	}
-
-
-	public static IIntersections intersectEllipseAndEllipse(IEllipse ellipse1, IEllipse ellipse2)
-	{
-		if (!ellipse1.isValid() || !ellipse2.isValid())
-		{
-			return Intersections.of();
-		}
-		return Intersections.of(ellipseEllipseIntersections());
 	}
 
 
@@ -664,93 +584,5 @@ public class PathIntersectionMath
 				Vector2.fromXY(rx + h * dy / d, ry - h * dx / d),
 				Vector2.fromXY(rx - h * dy / d, ry + h * dx / d)
 		);
-	}
-
-
-	private static List<IVector2> ellipseLineIntersectionsInternal(IEllipse ellipse, ILineBase line,
-			boolean endlessPositive, boolean endlessNegative)
-	{
-
-		final List<IVector2> result = new ArrayList<>(2);
-
-		final IVector2 p0 = ellipse.center();
-		final IVector2 p1 = transformToNotTurned(ellipse, line.supportVector());
-		final IVector2 p2 = transformToNotTurned(ellipse, line.supportVector().addNew(line.directionVector()));
-
-		// using double to avoid inaccurate results. (its fast enough)
-		final double rrx = ellipse.getRadiusX() * ellipse.getRadiusX();
-		final double rry = ellipse.getRadiusY() * ellipse.getRadiusY();
-		final double x21 = p2.x() - p1.x();
-		final double y21 = p2.y() - p1.y();
-		final double x10 = p1.x() - p0.x();
-		final double y10 = p1.y() - p0.y();
-		final double a = ((x21 * x21) / rrx) + ((y21 * y21) / rry);
-		final double b = ((x21 * x10) / rrx) + ((y21 * y10) / rry);
-		final double c = ((x10 * x10) / rrx) + ((y10 * y10) / rry);
-		final double d = (b * b) - (a * (c - 1));
-
-		if (d >= 0)
-		{
-			final double e = SumatraMath.sqrt(d);
-			final double u1 = (-b - e) / a;
-			final double u2 = (-b + e) / a;
-			if (((0 <= u1 || endlessNegative) && (u1 <= 1 || endlessPositive)))
-			{
-				final IVector2 tmpP = Vector2f.fromXY(p1.x() + (x21 * u1), p1.y() + (y21 * u1));
-				result.add(transformToTurned(ellipse, tmpP));
-			}
-			if (((0 <= u2 || endlessNegative) && (u2 <= 1 || endlessPositive)))
-			{
-				final IVector2 tmpP = Vector2f.fromXY(p1.x() + (x21 * u2), p1.y() + (y21 * u2));
-				result.add(transformToTurned(ellipse, tmpP));
-			}
-		}
-
-		return result;
-	}
-
-
-	/**
-	 * Transform a point that is not turned with the turnAngle of the ellipse
-	 * to a turned point
-	 *
-	 * @param point
-	 * @return
-	 */
-	private static IVector2 transformToTurned(final IEllipse ellipse, final IVector2 point)
-	{
-		return point.subtractNew(ellipse.center()).turn(ellipse.getTurnAngle()).add(ellipse.center());
-	}
-
-
-	/**
-	 * Transform a turned point (normal incoming point actually) to a non turned
-	 * point (needed by some calculations, that do not consider turnAngle
-	 *
-	 * @param point
-	 * @return
-	 */
-	private static IVector2 transformToNotTurned(final IEllipse ellipse, final IVector2 point)
-	{
-		return point.subtractNew(ellipse.center()).turn(-ellipse.getTurnAngle()).add(ellipse.center());
-	}
-
-
-	private static List<IVector2> circularEllipseIntersection(ICircular circular, boolean ignoreAngle)
-	{
-		return ellipseEllipseIntersections().stream()
-				.filter(p -> ignoreAngle || isCirclePointOnCircular(circular, p))
-				.toList();
-	}
-
-
-	/**
-	 * <a href="https://gist.github.com/drawable/92792f59b6ff8869d8b1">Approach</a>
-	 *
-	 * @return
-	 */
-	private static List<IVector2> ellipseEllipseIntersections()
-	{
-		throw new NotImplementedException();
 	}
 }

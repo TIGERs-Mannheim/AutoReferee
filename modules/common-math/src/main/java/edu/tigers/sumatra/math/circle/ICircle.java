@@ -5,10 +5,8 @@
 package edu.tigers.sumatra.math.circle;
 
 import edu.tigers.sumatra.math.IBoundedPath;
-import edu.tigers.sumatra.math.ellipse.IEllipse;
 import edu.tigers.sumatra.math.vector.IEuclideanDistance;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.IVector3;
 
 import java.util.List;
 
@@ -25,16 +23,6 @@ public interface ICircle extends ICircular, IEuclideanDistance, IBoundedPath
 	 * @return two tangential intersections
 	 */
 	List<IVector2> tangentialIntersections(final IVector2 externalPoint);
-
-
-	/**
-	 * Project <i>this</i> to ground assuming it is at <i>height</i> height and the projection origin is <i>origin</i>.
-	 *
-	 * @param origin Projection origin
-	 * @param height Height of the circle before projection.
-	 * @return Projected circle => ellipse
-	 */
-	IEllipse projectToGround(final IVector3 origin, final double height);
 
 	@Override
 	ICircle withMargin(final double margin);
