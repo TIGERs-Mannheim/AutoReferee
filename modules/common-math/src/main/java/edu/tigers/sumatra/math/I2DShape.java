@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.math;
 
+import edu.tigers.sumatra.math.boundary.IShapeBoundary;
+import edu.tigers.sumatra.math.boundary.ShapeBoundary;
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.intersections.IIntersections;
@@ -52,6 +54,7 @@ public interface I2DShape
 	 * @return the list of IPath instances
 	 */
 	List<IBoundedPath> getPerimeterPath();
+
 
 	/**
 	 * Calculate the length of the perimeter path
@@ -235,5 +238,15 @@ public interface I2DShape
 	default boolean isIntersectingWithPath(IPath path)
 	{
 		return !intersectPerimeterPath(path).isEmpty();
+	}
+
+	/**
+	 * Create a {@link ShapeBoundary} object that can be used to sort positions along the boundary of the shape
+	 *
+	 * @return {@link ShapeBoundary} the shape boundary instance describing this shape
+	 */
+	default IShapeBoundary getShapeBoundary()
+	{
+		return new ShapeBoundary(this);
 	}
 }

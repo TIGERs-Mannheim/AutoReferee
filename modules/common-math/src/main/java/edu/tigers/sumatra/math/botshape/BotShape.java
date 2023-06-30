@@ -188,8 +188,8 @@ public class BotShape implements IBotShape
 	{
 		double r = radius;
 		double alpha = SumatraMath.acos(center2Dribbler / r);
-		double startAngleRad = orientation + alpha;
-		double angleExtent = AngleMath.PI_TWO - 2 * alpha;
+		double startAngleRad = orientation - alpha;
+		double angleExtent = 2 * alpha - AngleMath.PI_TWO;
 
 		return List.of(
 				Arc.createArc(position, radius, startAngleRad, angleExtent),

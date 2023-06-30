@@ -48,15 +48,6 @@ public class Circle implements ICircle
 
 
 	/**
-	 * @param circle a circle
-	 */
-	protected Circle(final ICircle circle)
-	{
-		this(circle.center(), circle.radius());
-	}
-
-
-	/**
 	 * Defines a circle by a radius and a center.
 	 * Radius must not be negative or zero!
 	 *
@@ -64,7 +55,7 @@ public class Circle implements ICircle
 	 * @param radius
 	 * @throws IllegalArgumentException if the radius is not real positive
 	 */
-	protected Circle(final IVector2 center, final double radius)
+	private Circle(IVector2 center, double radius)
 	{
 		if (radius < 0)
 		{
@@ -433,5 +424,19 @@ public class Circle implements ICircle
 	{
 		var angle = AngleMath.normalizeAngle(stepSize / getLength() * AngleMath.PI_TWO);
 		return center.addNew(Vector2.fromX(radius).turn(angle));
+	}
+
+
+	@Override
+	public double distanceFromStart(IVector2 pointOnPath)
+	{
+		var anglePointOnPath = Vector2.fromPoints(center, pointOnPath).getAngle();
+		if (anglePointOnPath < 0)
+		{
+			return (AngleMath.PI_TWO + anglePointOnPath) * radius;
+		} else
+		{
+			return anglePointOnPath * radius;
+		}
 	}
 }

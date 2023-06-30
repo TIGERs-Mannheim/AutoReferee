@@ -5,6 +5,8 @@
 package edu.tigers.sumatra.math.circle;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
+import edu.tigers.sumatra.math.IBoundedPathComplianceChecker;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -274,6 +276,22 @@ public class ArcTest
 		assertThat(arc.stepAlongPath(4 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
 		assertThat(arc.stepAlongPath(8 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
 		assertThat(arc.stepAlongPath(100 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		var arcs = List.of(
+				Arc.createArc(Vector2f.ZERO_VECTOR, 1, 0, AngleMath.PI),
+				Arc.createArc(Vector2f.ZERO_VECTOR, 0.5, 0, AngleMath.PI),
+				Arc.createArc(Vector2f.ZERO_VECTOR, 1, 0, AngleMath.PI_HALF)
+		);
+		for (var arc : arcs)
+		{
+			IBoundedPathComplianceChecker.checkCompliance(arc, false);
+			I2DShapeComplianceChecker.checkCompliance(arc, true);
+		}
 	}
 }
 

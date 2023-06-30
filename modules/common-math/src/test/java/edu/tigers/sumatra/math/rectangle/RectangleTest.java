@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.rectangle;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -469,5 +470,12 @@ public class RectangleTest
 		);
 		arc = Arc.createArc(Vector2.fromXY(2, 2), 2, -3 * AngleMath.PI_QUART, -0.1);
 		assertThat(rect.intersectPerimeterPath(arc)).isEmpty();
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(Rectangle.fromCenter(Vector2.zero(), 4, 2), true);
 	}
 }

@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.botshape;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.IArc;
@@ -284,5 +285,13 @@ public class BotShapeTest
 		);
 		path = Arc.createArc(Vector2.fromXY(0.1, 0.1), 0.1, 0, -AngleMath.PI_QUART);
 		assertThat(botShapeAtCenter.intersectPerimeterPath(path)).isEmpty();
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(botShape, true);
+		I2DShapeComplianceChecker.checkCompliance(botShapeAtCenter, true);
 	}
 }

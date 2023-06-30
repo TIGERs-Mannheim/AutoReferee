@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.polygon;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Arc;
@@ -308,6 +309,13 @@ public class PolygonTest
 		);
 		arc = Arc.createArc(Vector2.fromY(2), 2, -AngleMath.PI_HALF, -AngleMath.PI_QUART);
 		assertThat(polygon.intersectPerimeterPath(arc)).isEmpty();
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(buildPolygon(), true);
 	}
 }
 

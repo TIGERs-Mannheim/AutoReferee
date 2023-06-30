@@ -5,7 +5,9 @@
 package edu.tigers.sumatra.math.circle;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
+import edu.tigers.sumatra.math.IBoundedPathComplianceChecker;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -466,5 +468,21 @@ public class CircleTest
 		assertThat(circle.stepAlongPath(4 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
 		assertThat(circle.stepAlongPath(8 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
 		assertThat(circle.stepAlongPath(100 * AngleMath.PI_HALF)).isEqualTo(Vector2.fromX(1));
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		var circles = List.of(
+				Circle.createCircle(Vector2f.ZERO_VECTOR, 1),
+				Circle.createCircle(Vector2f.ZERO_VECTOR, 0.5),
+				Circle.createCircle(Vector2.fromXY(10, 3), 7)
+		);
+		for (var circle : circles)
+		{
+			IBoundedPathComplianceChecker.checkCompliance(circle, true);
+			I2DShapeComplianceChecker.checkCompliance(circle, true);
+		}
 	}
 }

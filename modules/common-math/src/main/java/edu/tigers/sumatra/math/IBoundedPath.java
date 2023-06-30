@@ -54,4 +54,13 @@ public interface IBoundedPath extends IPath
 	 */
 	IVector2 stepAlongPath(double stepSize);
 
+
+	/**
+	 * Get the distance between the start of the path till {@code pointOnPath}
+	 * Note no checks will be made to ensure {@code pointOnPath} is actually on the path
+	 *
+	 * @param pointOnPath
+	 * @return
+	 */
+	double distanceFromStart(IVector2 pointOnPath);
 }

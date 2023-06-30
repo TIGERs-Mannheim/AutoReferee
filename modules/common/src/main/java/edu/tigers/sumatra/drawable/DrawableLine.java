@@ -86,9 +86,8 @@ public class DrawableLine extends ADrawableWithStroke
 		super.paintShape(g, tool, invert);
 
 		// draw line
-		final IVector2 lineStart = tool.transformToGuiCoordinates(line.supportVector(), invert);
-		final IVector2 lineEnd = tool.transformToGuiCoordinates(line.directionVector().addNew(line.supportVector()),
-				invert);
+		final IVector2 lineStart = tool.transformToGuiCoordinates(line.getPathStart(), invert);
+		final IVector2 lineEnd = tool.transformToGuiCoordinates(line.getPathEnd(), invert);
 		g.drawLine((int) lineStart.x(), (int) lineStart.y(), (int) lineEnd.x(), (int) lineEnd.y());
 	}
 }

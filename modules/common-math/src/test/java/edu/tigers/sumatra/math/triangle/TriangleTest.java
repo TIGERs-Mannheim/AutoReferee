@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.triangle;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.IPath;
 import edu.tigers.sumatra.math.circle.Arc;
@@ -330,5 +331,12 @@ public class TriangleTest
 		assertThat(triangle.intersectPerimeterPath(arc)).containsExactlyInAnyOrder(
 				Vector2.fromXY(1, 0)
 		);
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(buildTriangle(), true);
 	}
 }

@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.math.line;
 
+import edu.tigers.sumatra.math.IBoundedPathComplianceChecker;
 import edu.tigers.sumatra.math.IPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -476,5 +477,17 @@ public class LineSegmentTest extends AbstractLineTest
 		assertThat(segment.stepAlongPath(0)).isEqualTo(Vector2.fromXY(-1, -1));
 		assertThat(segment.stepAlongPath(SumatraMath.sqrt(2))).isEqualTo(Vector2.zero());
 		assertThat(segment.stepAlongPath(SumatraMath.sqrt(8))).isEqualTo(Vector2.fromXY(1, 1));
+	}
+
+
+	@Test
+	public void checkCompliance()
+	{
+		var segment = Lines.segmentFromPoints(Vector2.fromXY(-1, -1), Vector2.fromXY(1, 1));
+		IBoundedPathComplianceChecker.checkCompliance(segment, false);
+		segment = Lines.segmentFromPoints(Vector2.fromXY(-1, -1), Vector2.fromXY(1, 1));
+		IBoundedPathComplianceChecker.checkCompliance(segment, false);
+		segment = Lines.segmentFromOffset(Vector2.zero(), Vector2.fromX(1));
+		IBoundedPathComplianceChecker.checkCompliance(segment, false);
 	}
 }

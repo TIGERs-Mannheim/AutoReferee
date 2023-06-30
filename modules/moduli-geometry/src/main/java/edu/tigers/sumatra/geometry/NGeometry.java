@@ -6,6 +6,7 @@ package edu.tigers.sumatra.geometry;
 
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.penaltyarea.IPenaltyArea;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;

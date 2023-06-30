@@ -8,7 +8,10 @@ import edu.tigers.sumatra.math.IBoundedPath;
 
 
 /**
- * An arc is a pizza peace of a circle.
+ * An arc is a pizza peace of a circle (circle segment).
+ * <p>
+ * The 2D shape interface describes the whole circle segment,
+ * while the bounded path interface only describes the partial circle circumference
  */
 public interface IArc extends ICircular, IBoundedPath
 {

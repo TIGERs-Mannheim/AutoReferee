@@ -1,15 +1,12 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.geometry;
+package edu.tigers.sumatra.math.penaltyarea;
 
-import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
-
-import java.util.List;
 
 
 /**
@@ -68,6 +65,14 @@ public interface IPenaltyArea extends I2DShape
 	@Override
 	IPenaltyArea withMargin(double margin);
 
+	/**
+	 * Create a new Penalty Area of the same type with rounded corners.
+	 *
+	 * @param radius a positive radius for the rounded corners
+	 * @return a new shape with rounded corner
+	 */
+	IPenaltyArea withRoundedCorners(double radius);
+
 
 	/**
 	 * Projects a point on the penalty area using the line from the given point to the goal center
@@ -76,12 +81,6 @@ public interface IPenaltyArea extends I2DShape
 	 * @return the projected point
 	 */
 	IVector2 projectPointOnToPenaltyAreaBorder(IVector2 point);
-
-
-	/**
-	 * @return the drawable shapes to draw this penalty area
-	 */
-	List<IDrawableShape> getDrawableShapes();
 
 
 	/**
@@ -102,19 +101,4 @@ public interface IPenaltyArea extends I2DShape
 	 * @return
 	 */
 	double distanceToNearestPointOutside(final IVector2 pos);
-
-
-	/**
-	 * Calculate the area that is cut off with the given points.
-	 * From and to build a line segment. The area of the penalty area facing outwards is returned.
-	 * If the line segment crosses the goal line, the area will be 0.
-	 *
-	 * @param from first point
-	 * @param to   second point
-	 * @return the area in m^2
-	 */
-	default double intersectionArea(final IVector2 from, final IVector2 to)
-	{
-		throw new UnsupportedOperationException();
-	}
 }

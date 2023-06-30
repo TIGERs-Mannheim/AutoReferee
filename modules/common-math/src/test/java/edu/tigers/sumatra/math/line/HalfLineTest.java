@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.line;
 
 import edu.tigers.sumatra.math.IPath;
+import edu.tigers.sumatra.math.IPathComplianceChecker;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -12,6 +13,8 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -325,5 +328,24 @@ public class HalfLineTest extends AbstractLineTest
 		assertThat(halfLine.isPointOnPath(Vector2.fromXY(2, -1))).isFalse();
 		assertThat(halfLine.isPointOnPath(Vector2.fromXY(358382, -1))).isFalse();
 	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		var lines = List.of(
+				Lines.halfLineFromPoints(Vector2.fromXY(1, 2), Vector2.fromXY(6, 3)),
+				Lines.halfLineFromPoints(Vector2.fromXY(1, 2), Vector2.fromXY(3, 6)),
+				Lines.halfLineFromPoints(Vector2.zero(), Vector2.fromXY(1, 0)),
+				Lines.halfLineFromPoints(Vector2.zero(), Vector2.fromXY(-1, 0)),
+				Lines.halfLineFromPoints(Vector2.zero(), Vector2.fromXY(0, 1)),
+				Lines.halfLineFromPoints(Vector2.zero(), Vector2.fromXY(0, -1))
+		);
+		for (var line : lines)
+		{
+			IPathComplianceChecker.checkCompliance(line);
+		}
+	}
+
 
 }

@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.geometry;
+package edu.tigers.sumatra.math.penaltyarea;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -246,27 +247,6 @@ public class PenaltyAreaTest
 
 
 	@Test
-	public void testIntersectionArea()
-	{
-		// cut half way
-		assertThat(penaltyArea.intersectionArea(
-				Vector2.fromXY(goalX + depth / 2, -length / 2),
-				Vector2.fromXY(goalX + depth / 2, length / 2)))
-				.isCloseTo(depth / 2 * length * 1e-6, within(1e-6));
-		// intersections on both sides
-		assertThat(penaltyArea.intersectionArea(
-				Vector2.fromXY(goalX + depth * 0.5, -length / 2),
-				Vector2.fromXY(goalX + depth * 0.8, length / 2)))
-				.isCloseTo(((depth * 0.2) * length + (depth * 0.3) * length * 0.5) * 1e-6, within(1e-6));
-		// intersection on front line
-		assertThat(penaltyArea.intersectionArea(
-				Vector2.fromXY(goalX + depth * 0.5, -length / 2),
-				Vector2.fromXY(goalX + depth, 0)))
-				.isCloseTo((depth * 0.5) * (length * 0.5) * 0.5 * 1e-6, within(1e-6));
-	}
-
-
-	@Test
 	public void testIsPointInShape()
 	{
 		assertThat(penaltyArea.isPointInShape(Vector2.fromXY(goalX - 1, 0))).isFalse();
@@ -306,9 +286,9 @@ public class PenaltyAreaTest
 		var c = Vector2.fromXY(borderX, -length / 2);
 		var d = Vector2.fromXY(goalX, -length / 2);
 		assertThat(perimeter).containsExactlyInAnyOrder(
-				Lines.segmentFromPoints(d, c),
-				Lines.segmentFromPoints(c, b),
-				Lines.segmentFromPoints(b, a)
+				Lines.segmentFromPoints(a, b),
+				Lines.segmentFromPoints(b, c),
+				Lines.segmentFromPoints(c, d)
 		);
 	}
 
@@ -464,5 +444,12 @@ public class PenaltyAreaTest
 		);
 		arc = Arc.createArc(Vector2.fromXY(-400, -400), 400, 3 * AngleMath.PI_QUART, 0.5 * AngleMath.PI_QUART);
 		assertThat(penaltyArea.intersectPerimeterPath(arc)).isEmpty();
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(penaltyArea, false);
 	}
 }

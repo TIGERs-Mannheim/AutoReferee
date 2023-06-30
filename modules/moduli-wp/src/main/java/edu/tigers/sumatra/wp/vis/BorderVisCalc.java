@@ -8,6 +8,7 @@ import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableFieldBackground;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.DrawableRectangle;
+import edu.tigers.sumatra.drawable.DrawableShapeBoundary;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -51,8 +52,8 @@ public class BorderVisCalc implements IWpCalc
 						Vector2.fromXY(Geometry.getFieldLength() / 4, Geometry.getFieldWidth() / 2.0)),
 				Color.WHITE));
 
-		shapes.addAll(Geometry.getPenaltyAreaOur().getDrawableShapes());
-		shapes.addAll(Geometry.getPenaltyAreaTheir().getDrawableShapes());
+		shapes.add(new DrawableShapeBoundary(Geometry.getPenaltyAreaOur(), Color.WHITE));
+		shapes.add(new DrawableShapeBoundary(Geometry.getPenaltyAreaTheir(), Color.WHITE));
 
 		Color ourColor = wfw.getRefereeMsg().getNegativeHalfTeam() == ETeamColor.BLUE ? Color.blue : Color.yellow;
 		drawGoal(Geometry.getGoalOur(), shapes, ourColor);

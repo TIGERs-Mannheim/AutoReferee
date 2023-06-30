@@ -6,6 +6,7 @@ package edu.tigers.sumatra.math.quadrilateral;
 
 import com.google.common.collect.Collections2;
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -322,6 +323,13 @@ public class QuadrilateralTest
 		);
 		arc = Arc.createArc(Vector2.fromY(1), 2, 0, AngleMath.PI_HALF);
 		assertThat(quad.intersectPerimeterPath(arc)).isEmpty();
+	}
+
+
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(buildQuadrilateral(), true);
 	}
 }
 

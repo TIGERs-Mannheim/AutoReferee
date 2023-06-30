@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.math.tube;
 
 import edu.tigers.sumatra.math.AngleMath;
+import edu.tigers.sumatra.math.I2DShapeComplianceChecker;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
 import edu.tigers.sumatra.math.circle.Circle;
@@ -309,4 +310,9 @@ public class TubeTest
 		);
 	}
 
+	@Test
+	public void testCompliance()
+	{
+		I2DShapeComplianceChecker.checkCompliance(buildTube(), true);
+	}
 }

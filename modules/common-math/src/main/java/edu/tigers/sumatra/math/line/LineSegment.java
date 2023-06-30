@@ -277,4 +277,11 @@ final class LineSegment extends ALine implements ILineSegment
 				this.distanceToSqr(line.getPathEnd())
 		).mapToDouble(d -> d).min().orElseThrow());
 	}
+
+
+	@Override
+	public double distanceFromStart(IVector2 pointOnPath)
+	{
+		return pointOnPath.distanceTo(getPathStart());
+	}
 }

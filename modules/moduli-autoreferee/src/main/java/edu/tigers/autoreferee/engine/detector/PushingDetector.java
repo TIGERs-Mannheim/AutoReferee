@@ -6,9 +6,9 @@ import edu.tigers.autoreferee.generic.BotPosition;
 import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableTube;
 import edu.tigers.sumatra.geometry.Geometry;
-import edu.tigers.sumatra.geometry.IPenaltyArea;
 import edu.tigers.sumatra.geometry.NGeometry;
 import edu.tigers.sumatra.ids.ETeamColor;
+import edu.tigers.sumatra.math.penaltyarea.IPenaltyArea;
 import edu.tigers.sumatra.math.tube.Tube;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -107,7 +107,7 @@ public class PushingDetector extends AGameEventDetector
 	{
 		return latestRobotPairs.stream()
 				.map(this::pushedDistance)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -125,7 +125,7 @@ public class PushingDetector extends AGameEventDetector
 		final List<ITrackedBot> botsTouchingBall = frame.getBotsTouchingBall().stream()
 				.map(BotPosition::getBotID)
 				.map(id -> frame.getWorldFrame().getBot(id))
-				.collect(Collectors.toList());
+				.toList();
 		return botsTouchingBall.stream()
 				.map(bot -> touching(bot, botsTouchingBall))
 				.flatMap(Collection::stream).collect(Collectors.toSet());
@@ -149,7 +149,7 @@ public class PushingDetector extends AGameEventDetector
 		return ballTouchingBots.stream()
 				.filter(b -> !b.getBotId().equals(bot.getBotId()))
 				.map(b -> new RobotPair(b, bot))
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -220,7 +220,7 @@ public class PushingDetector extends AGameEventDetector
 				.filter(b -> bot.getTeamColor() != b.getTeamColor())
 				.filter(b -> touching(bot, b))
 				.map(b -> new RobotPair(bot, b))
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 

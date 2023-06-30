@@ -33,6 +33,9 @@ public class Arc implements IArc
 	private final double radius;
 
 
+	/**
+	 * Used by berkely
+	 */
 	@SuppressWarnings("unused")
 	protected Arc()
 	{
@@ -282,5 +285,13 @@ public class Arc implements IArc
 	{
 		var angle = AngleMath.normalizeAngle(startAngle + (stepSize / getLength() * rotation));
 		return center.addNew(Vector2.fromX(radius).turn(angle));
+	}
+
+
+	@Override
+	public double distanceFromStart(IVector2 pointOnPath)
+	{
+		var anglePointOnPath = Vector2.fromPoints(center, pointOnPath).getAngle();
+		return AngleMath.diffAbs(startAngle, anglePointOnPath) * radius;
 	}
 }
