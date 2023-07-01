@@ -16,7 +16,6 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import lombok.Value;
-import org.apache.commons.lang.Validate;
 
 import java.util.List;
 
@@ -111,9 +110,6 @@ public class RobotCollisionShape
 			
 			return new CollisionResult(ECollisionLocation.CIRCLE, outVel);
 		}
-		
-		// this should actually not happen
-		Validate.isTrue(false);
 		
 		return new CollisionResult(ECollisionLocation.NONE, null);
 	}
