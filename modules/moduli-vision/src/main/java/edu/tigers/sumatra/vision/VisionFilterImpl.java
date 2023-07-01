@@ -402,6 +402,7 @@ public class VisionFilterImpl extends AVisionFilter
 		super.onClearCamFrame();
 		cams.clear();
 		ballFilterPreprocessor.clear();
+		robotQualityInspector.reset();
 		lastFrame = FilteredVisionFrame.createEmptyFrame();
 	}
 

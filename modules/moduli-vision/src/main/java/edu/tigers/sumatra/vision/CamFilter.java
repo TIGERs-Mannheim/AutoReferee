@@ -258,7 +258,7 @@ public class CamFilter
 				botRadius = Geometry.getBotRadius();
 			}
 
-			shapes.add(new RobotCollisionShape(bot.getPos(), bot.getOrientation(), botRadius, center2Drib,
+			shapes.add(new RobotCollisionShape(bot.getPos(), bot.getOrientation(), bot.getVel().multiplyNew(1e3), botRadius, center2Drib,
 					maxBallBotHullLoss, maxBallBotFrontLoss));
 		}
 

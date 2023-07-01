@@ -6,6 +6,7 @@ package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.bot.BotBallState;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.bot.State;
 import edu.tigers.sumatra.drawable.DrawableCircle;
@@ -14,7 +15,11 @@ import edu.tigers.sumatra.drawable.DrawableTube;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.BotMath;
+import edu.tigers.sumatra.math.botshape.BotShape;
 import edu.tigers.sumatra.math.line.LineMath;
+import edu.tigers.sumatra.math.line.Lines;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.tube.ITube;
 import edu.tigers.sumatra.math.tube.Tube;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -22,11 +27,9 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
-import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.VirtualBall;
-import edu.tigers.sumatra.vision.data.VirtualBallCandidate;
 import lombok.Getter;
 
 import java.awt.Color;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -52,11 +56,15 @@ public class VirtualBallProducer
 
 	private List<ITube> shadows = new ArrayList<>();
 
-	@Configurable(defValue = "1000.0", comment = "Max. distance to last know ball location to create virtual balls")
-	private static double maxDistanceToLastKnownPos = 1000.0;
+	private final Map<BotID, TreeMap<Long, Pose>> robotInfoPoseHistory = new HashMap<>();
 
-	@Configurable(defValue = "500.0", comment = "Max. distance of ball to observing robot")
-	private static double maxDistanceToObserver = 500.0;
+	private long lastFrameId = 0;
+
+	@Configurable(defValue = "750.0", comment = "Max. distance to last know ball location to create virtual balls")
+	private static double maxDistanceToLastKnownPos = 750.0;
+
+	@Configurable(defValue = "300.0", comment = "Max. distance of ball to observing robot")
+	private static double maxDistanceToObserver = 300.0;
 
 	@Configurable(defValue = "0.05", comment = "Time in [s] after which virtual balls are generated from robot info")
 	private static double delayToVirtualBalls = 0.05;
@@ -73,8 +81,11 @@ public class VirtualBallProducer
 	@Configurable(defValue = "false", comment = "Always add virtual balls, even if there are balls detected by vision.")
 	private static boolean alwaysAddVirtualBalls = false;
 
-	@Configurable(defValue = "0.5", comment = "How long to treat barrier as interrupted after loosing contact in [s]. Only applies if not on bot cam")
-	private static double keepBarrierInterruptedTime = 0.5;
+	@Configurable(defValue = "true", comment = "If any barrier is interrupted, drop all non-barrier virtual balls.")
+	private static boolean preferBarrier = true;
+
+	@Configurable(defValue = "0.05", comment = "How long to treat barrier as interrupted after loosing contact in [s]. Only applies if not on bot cam")
+	private static double keepBarrierInterruptedTime = 0.05;
 
 	static
 	{
@@ -86,13 +97,21 @@ public class VirtualBallProducer
 	{
 		long timestamp = frame.getTimestamp();
 
+		if (Math.abs(frame.getId() - lastFrameId) > 10)
+			reset();
+
 		virtualBalls.clear();
+
+		lastFrameId = frame.getId();
 		lastKnownBallPosition = frame.getBall().getPos().getXYVector();
+
+		robotInfoMap.values().forEach(this::updateRobotInfoHistory);
 
 		shadows = frame.getBots().stream()
 				.flatMap(bot -> cams.stream()
 						.filter(cam -> cam.getValidRobots().containsKey(bot.getBotID()))
-						.map(cam -> computeBotShadow(cam.getCameraPosition().orElse(null), bot, robotInfoMap.get(bot.getBotID())))
+						.map(cam -> computeBotShadow(cam.getCameraPosition().orElse(null), bot,
+								robotInfoMap.get(bot.getBotID())))
 						.flatMap(Optional::stream))
 				.toList();
 
@@ -102,25 +121,91 @@ public class VirtualBallProducer
 		if (ballsVisibleOnCam && !alwaysAddVirtualBalls)
 			return;
 
-		var ballCandidates = frame.getBots().stream()
-				.map(b -> getBallCandidate(timestamp, b, robotInfoMap.get(b.getBotID())))
+		var ballCandidates = robotInfoMap.values().stream()
+				.map(i -> getBallCandidate(timestamp, i))
 				.flatMap(Optional::stream)
 				.filter(this::isCandidateValid)
+				.filter(c -> Geometry.getFieldWBorders().isPointInShape(c.getPosition().getXYVector()))
+				.filter(c -> isInLineOfSight(c, frame, robotInfoMap))
 				.toList();
 
-		if (ballCandidates.isEmpty())
-			return;
+		var candidatesFromBarrier = ballCandidates.stream()
+				.filter(VirtualBall::isFromBarrier)
+				.toList();
 
-		var meanPos = ballCandidates.stream().map(VirtualBallCandidate::getBallPosition)
-				.reduce(Vector3f.zero(), IVector3::addNew)
-				.multiplyNew(1.0 / ballCandidates.size());
-
-		virtualBalls.add(new VirtualBall(timestamp, meanPos, ballCandidates));
+		if (preferBarrier && !candidatesFromBarrier.isEmpty())
+			virtualBalls.addAll(candidatesFromBarrier);
+		else
+			virtualBalls.addAll(ballCandidates);
 	}
+
+
+	private void reset()
+	{
+		lastBarrierInterruptedMap.clear();
+		robotInfoPoseHistory.clear();
+	}
+
+
+	private boolean isInLineOfSight(final VirtualBall ball, final FilteredVisionFrame frame,
+			final Map<BotID, RobotInfo> robotInfoMap)
+	{
+		var line = Lines.segmentFromPoints(ball.getObservedFromPosition(), ball.getPosition().getXYVector());
+		for (var robot : frame.getBots())
+		{
+			var info = robotInfoMap.get(robot.getBotID());
+			if (info == null || robot.getBotID() == ball.getObservingBot())
+				continue;
+
+			IVector2 pos = info.getInternalState().map(State::getPos).orElse(robot.getPos());
+			double botRadius = info.getBotParams().getDimensions().getDiameter() / 2 + Geometry.getBallRadius();
+			if (line.distanceTo(pos) < botRadius && pos.distanceTo(line.getPathStart()) > botRadius
+					&& pos.distanceTo(line.getPathEnd()) > botRadius)
+				return false;
+		}
+
+		return true;
+	}
+
+
+	private void updateRobotInfoHistory(final RobotInfo info)
+	{
+		var timePoseMap = robotInfoPoseHistory.computeIfAbsent(info.getBotId(), k -> new TreeMap<>());
+		info.getInternalState().ifPresent(s -> timePoseMap.put(info.getTimestamp(), s.getPose()));
+		while (!timePoseMap.isEmpty() && timePoseMap.firstKey() < info.getTimestamp() - 1e9)
+		{
+			timePoseMap.remove(timePoseMap.firstKey());
+		}
+
+		if (info.isBarrierInterrupted())
+		{
+			lastBarrierInterruptedMap.put(info.getBotId(), info.getTimestamp());
+		}
+	}
+
+
+	private Optional<Pose> getRobotPoseAtTimestamp(final BotID botID, long timestamp)
+	{
+		var timePoseMap = robotInfoPoseHistory.get(botID);
+
+		if (timePoseMap == null || timestamp < timePoseMap.firstKey() || timestamp > timePoseMap.lastKey())
+			return Optional.empty();
+
+		var floorEntry = timePoseMap.floorEntry(timestamp);
+		var ceilingEntry = timePoseMap.ceilingEntry(timestamp);
+		long timespan = ceilingEntry.getKey() - floorEntry.getKey();
+		if (timespan <= 0)
+			return Optional.of(floorEntry.getValue());
+
+		double fraction = (timestamp - floorEntry.getKey()) / (double) timespan;
+
+		return Optional.of(floorEntry.getValue().interpolate(ceilingEntry.getValue(), fraction));
+	}
+
 
 	private Optional<ITube> computeBotShadow(IVector3 cameraPos, FilteredVisionBot bot, RobotInfo info)
 	{
-		if(cameraPos == null || cameraPos.z() <= 150)
+		if (cameraPos == null || cameraPos.z() <= 150)
 			return Optional.empty();
 
 		IVector2 botPos = Optional.ofNullable(info)
@@ -141,11 +226,11 @@ public class VirtualBallProducer
 	}
 
 
-	private boolean isCandidateValid(VirtualBallCandidate candidate)
+	private boolean isCandidateValid(VirtualBall candidate)
 	{
-		boolean isInShadow = shadows.stream().anyMatch(s -> s.isPointInShape(candidate.getBallPosition().getXYVector()));
-		boolean isCloseToObserver = candidate.getBallPosition().getXYVector().distanceTo(candidate.getObservedFromPosition().getXYVector()) < maxDistanceToObserver;
-		boolean isCloseToLastKnownPosition = lastKnownBallPosition.distanceTo(candidate.getBallPosition().getXYVector()) < maxDistanceToLastKnownPos;
+		boolean isInShadow = shadows.stream().anyMatch(s -> s.isPointInShape(candidate.getPosition().getXYVector()));
+		boolean isCloseToObserver = candidate.getPosition().getXYVector().distanceTo(candidate.getObservedFromPosition().getXYVector()) < maxDistanceToObserver;
+		boolean isCloseToLastKnownPosition = lastKnownBallPosition.distanceTo(candidate.getPosition().getXYVector()) < maxDistanceToLastKnownPos;
 
 		if (!isCloseToLastKnownPosition)
 			return false;
@@ -154,35 +239,87 @@ public class VirtualBallProducer
 	}
 
 
-	private Optional<VirtualBallCandidate> getBallCandidate(final long timestamp, final FilteredVisionBot bot,
-			final RobotInfo info)
+	private Optional<VirtualBall> getBallCandidate(final long timestamp, final RobotInfo info)
 	{
-		if(info == null)
+		if (info == null)
 			return Optional.empty();
 
-		boolean hasOnboardBallInfo = info.isBarrierInterrupted() || info.getBallState().isPresent();
-		if (!hasOnboardBallInfo)
+		var botState = info.getInternalState();
+		if(botState.isEmpty())
 			return Optional.empty();
 
-		// FilteredVisionBot data is from a past frame, need to extrapolate to current timestamp
-		FilteredVisionBot extrapolatedBot = bot.extrapolate(bot.getTimestamp(), timestamp);
-		IVector2 curBotPos = extrapolatedBot.getPos();
-		double curBotOrient = extrapolatedBot.getOrientation();
+		Pose curBotPose = botState.get().getPose();
+		IVector2 curBotPos = curBotPose.getPos();
+		double curBotOrient = curBotPose.getOrientation();
 
 		IVector2 centerDribblerPos = curBotPos.addNew(Vector2.fromAngle(curBotOrient).scaleTo(info.getCenter2DribblerDist()));
 		IVector2 ballAtDribblerPos = curBotPos.addNew(Vector2.fromAngle(curBotOrient).scaleTo(info.getCenter2DribblerDist() + Geometry.getBallRadius()));
 
-		if (info.isBarrierInterrupted())
-		{
-			lastBarrierInterruptedMap.put(info.getBotId(), info.getTimestamp());
-		}
-
 		boolean barrierInterrupted = Math.abs(timestamp - lastBarrierInterruptedMap.getOrDefault(info.getBotId(), 0L)) / 1e9 < keepBarrierInterruptedTime;
 
-		if (barrierInterrupted && info.getBallState().isEmpty())
-			return Optional.of(new VirtualBallCandidate(bot, centerDribblerPos, Vector3.from2d(ballAtDribblerPos, 0)));
+		var ballState = info.getBallState().orElse(null);
+		if (ballState == null)
+		{
+			if (barrierInterrupted)
+			{
+				var ball = VirtualBall.builder()
+						.withTimestamp(timestamp)
+						.withObservingBot(info.getBotId())
+						.withObservedFromPosition(centerDribblerPos)
+						.withFromBarrier(true)
+						.withPosition(Vector3.from2d(ballAtDribblerPos, 0))
+						.withObservedPosition(Vector3.from2d(ballAtDribblerPos, 0))
+						.build();
 
-		return info.getBallState().map(s -> new VirtualBallCandidate(bot, centerDribblerPos, Vector3.from2d(s.getPos(), 0)));
+				return Optional.of(ball);
+			}
+		} else
+		{
+			return getVirtualBallFromState(timestamp, info, curBotPose, barrierInterrupted, ballState, centerDribblerPos);
+		}
+
+		return Optional.empty();
+	}
+
+
+	private Optional<VirtualBall> getVirtualBallFromState(long timestamp, RobotInfo info, Pose curBotPose,
+			boolean barrierInterrupted, BotBallState ballState, IVector2 centerDribblerPos)
+	{
+		IVector2 ballPos;
+
+		long ballTimestamp = timestamp - (long) (ballState.getAge() * 1e9);
+		var optRobotPose = getRobotPoseAtTimestamp(info.getBotId(), ballTimestamp);
+		if (optRobotPose.isPresent())
+		{
+			IVector2 botToBallLocal = BotMath.convertGlobalBotVector2Local(
+					Vector2.fromPoints(optRobotPose.get().getPos(), ballState.getPos()),
+					optRobotPose.get().getOrientation());
+			ballPos = curBotPose.getPos().addNew(BotMath.convertLocalBotVector2Global(botToBallLocal, curBotPose.getOrientation()));
+		} else
+		{
+			ballPos = ballState.getPos();
+		}
+
+		if (barrierInterrupted)
+		{
+			var botShape = BotShape.fromFullSpecification(curBotPose.getPos(),
+					info.getBotParams().getDimensions().getDiameter() / 2,
+					info.getBotParams().getDimensions().getCenter2DribblerDist(),
+					curBotPose.getOrientation());
+			var frontBallLine = botShape.withMargin(Geometry.getBallRadius()).getKickerLine().withMargin(-Geometry.getBallRadius());
+			ballPos = frontBallLine.closestPointOnPath(ballPos);
+		}
+
+		var ball = VirtualBall.builder()
+				.withTimestamp(timestamp)
+				.withObservingBot(info.getBotId())
+				.withObservedFromPosition(centerDribblerPos)
+				.withFromBarrier(barrierInterrupted)
+				.withPosition(Vector3.from2d(ballPos, 0))
+				.withObservedPosition(Vector3.from2d(ballState.getPos(), 0))
+				.build();
+
+		return Optional.of(ball);
 	}
 
 
@@ -192,20 +329,34 @@ public class VirtualBallProducer
 
 		for (var ball : virtualBalls)
 		{
-			DrawableCircle ballPos = new DrawableCircle(ball.getPosition().getXYVector(), 20, Color.ORANGE.darker());
+			DrawableCircle ballPos = new DrawableCircle(ball.getPosition().getXYVector(), 25, Color.ORANGE.darker());
+			ballPos.setStrokeWidth(5);
 			shapes.add(ballPos);
 
-			for (var candidates : ball.getUsedCandidates())
+			if (ball.isFromBarrier())
 			{
-				DrawableLine toBall = new DrawableLine(candidates.getObservedFromPosition(), candidates.getBallPosition().getXYVector(), Color.GRAY);
-				shapes.add(toBall);
-
-				DrawableCircle ballCandidatePos = new DrawableCircle(candidates.getBallPosition().getXYVector(), 25, Color.GRAY);
-				shapes.add(ballCandidatePos);
+				DrawableLine barrierInfo = new DrawableLine(ball.getPosition().getXYVector().addNew(Vector2.fromX(-35)),
+						ball.getPosition().getXYVector().addNew(Vector2.fromX(35)), Color.ORANGE.darker());
+				barrierInfo.setStrokeWidth(5);
+				shapes.add(barrierInfo);
 			}
+
+			DrawableLine toBall = new DrawableLine(ball.getObservedFromPosition(), ball.getPosition().getXYVector(),
+					Color.GRAY);
+			toBall.setStrokeWidth(2);
+			shapes.add(toBall);
+
+			DrawableCircle ballCandidatePos = new DrawableCircle(ball.getObservedPosition().getXYVector(), 30, Color.GRAY);
+			ballCandidatePos.setStrokeWidth(2);
+			shapes.add(ballCandidatePos);
 		}
 
-		shadows.forEach(s -> shapes.add(new DrawableTube(s, Color.MAGENTA)));
+		for (var shadow : shadows)
+		{
+			DrawableTube tube = new DrawableTube(shadow, Color.BLACK);
+			tube.setStrokeWidth(2);
+			shapes.add(tube);
+		}
 
 		return shapes;
 	}

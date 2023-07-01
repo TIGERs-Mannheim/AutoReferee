@@ -15,6 +15,7 @@ import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
+import lombok.Value;
 import org.apache.commons.lang.Validate;
 
 import java.util.List;
@@ -23,35 +24,16 @@ import java.util.List;
 /**
  * @author AndreR <andre@ryll.cc>
  */
+@Value
 public class RobotCollisionShape
 {
-	private final IVector2 pos;
-	private final double orient;
-	private final double radius;
-	private final double center2Dribbler;
-	private final double maxCircleLoss;
-	private final double maxFrontLoss;
-	
-	
-	/**
-	 * @param pos
-	 * @param orient
-	 * @param radius
-	 * @param center2Dribbler
-	 * @param maxCircleLoss
-	 * @param maxFrontLoss
-	 */
-	public RobotCollisionShape(final IVector2 pos, final double orient, final double radius,
-			final double center2Dribbler, final double maxCircleLoss,
-			final double maxFrontLoss)
-	{
-		this.pos = pos;
-		this.orient = orient;
-		this.radius = radius;
-		this.center2Dribbler = center2Dribbler;
-		this.maxCircleLoss = maxCircleLoss;
-		this.maxFrontLoss = maxFrontLoss;
-	}
+	IVector2 pos;
+	double orient;
+	IVector2 vel;
+	double radius;
+	double center2Dribbler;
+	double maxCircleLoss;
+	double maxFrontLoss;
 	
 	
 	/**
@@ -78,6 +60,8 @@ public class RobotCollisionShape
 			IVector2 outside = botCircle.nearestPointOutside(ballPos);
 			ballVelUsed = ballPos.subtractNew(outside);
 		}
+
+		ballVelUsed = ballVelUsed.subtractNew(vel);
 		
 		ILineSegment frontLine = BotMath.getDribblerFrontLine(Vector3.from2d(pos, orient), radius + ballRadius,
 				center2Dribbler + ballRadius);
@@ -100,7 +84,7 @@ public class RobotCollisionShape
 					- (ballVelUsed.getLength2() * SumatraMath.cos(collisionAngleAbs) * maxFrontLoss);
 			
 			Vector2 outVel = Vector2.fromAngle(orient).multiply(-1.0).turn(-collisionAngle).multiply(-1.0)
-					.scaleTo(outVelAbs);
+					.scaleTo(outVelAbs).add(vel);
 			
 			return new CollisionResult(ECollisionLocation.FRONT, outVel);
 		}
@@ -123,7 +107,7 @@ public class RobotCollisionShape
 					- (ballVelUsed.getLength2() * SumatraMath.cos(collisionAngleAbs) * maxCircleLoss);
 			
 			Vector2 outVel = Vector2.fromPoints(intersectCircle, pos).turn(-collisionAngle).multiply(-1.0)
-					.scaleTo(outVelAbs);
+					.scaleTo(outVelAbs).add(vel);
 			
 			return new CollisionResult(ECollisionLocation.CIRCLE, outVel);
 		}
