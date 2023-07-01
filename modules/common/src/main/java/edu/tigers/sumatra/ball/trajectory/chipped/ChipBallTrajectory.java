@@ -330,7 +330,7 @@ public class ChipBallTrajectory extends ABallTrajectory
 		{
 			timeToDist = 0.0; // numerical issues...
 		}
-		Validate.isTrue(timeToDist >= 0, String.valueOf(timeToDist));
+		Validate.isTrue(timeToDist >= 0, "timeToDist must be >= 0", timeToDist);
 
 		return tNow + timeToDist;
 	}
