@@ -12,8 +12,8 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.PossibleGoal;
-import edu.tigers.sumatra.vision.data.IKickEvent;
 import edu.tigers.sumatra.wp.data.BallLeftFieldPosition;
+import edu.tigers.sumatra.wp.data.KickedBall;
 import edu.tigers.sumatra.wp.data.TimedPosition;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,9 +82,9 @@ public class GoalDetector extends AGameEventDetector
 			return null;
 		}
 
-		final Optional<IKickEvent> kickEvent = frame.getWorldFrame().getKickEvent();
-		final IVector2 kickLocation = kickEvent.map(IKickEvent::getPosition).orElse(null);
-		final BotID kickingBot = kickEvent.map(IKickEvent::getKickingBot).filter(AObjectID::isBot).orElse(null);
+		final var kickEvent = frame.getWorldFrame().getKickedBall();
+		final IVector2 kickLocation = kickEvent.map(KickedBall::getPosition).orElse(null);
+		final BotID kickingBot = kickEvent.map(KickedBall::getKickingBot).filter(AObjectID::isBot).orElse(null);
 
 		warnIfNoKickEventPresent();
 
@@ -94,7 +94,7 @@ public class GoalDetector extends AGameEventDetector
 
 	private void warnIfNoKickEventPresent()
 	{
-		if (frame.getWorldFrame().getKickEvent().isEmpty())
+		if (frame.getWorldFrame().getKickedBall().isEmpty())
 		{
 			log.warn("Goal detected, but no kick event found.");
 		}

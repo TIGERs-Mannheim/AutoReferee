@@ -40,13 +40,12 @@ import edu.tigers.sumatra.vision.IVisionFilterObserver;
 import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
-import edu.tigers.sumatra.vision.data.IKickEvent;
-import edu.tigers.sumatra.vision.data.KickEvent;
+import edu.tigers.sumatra.vision.data.FilteredVisionKick;
 import edu.tigers.sumatra.wp.data.BallContact;
-import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.ExtendedCamDetectionFrame;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.KickedBall;
 import edu.tigers.sumatra.wp.data.SimpleWorldFrame;
 import edu.tigers.sumatra.wp.data.TrackedBall;
 import edu.tigers.sumatra.wp.data.TrackedBot;
@@ -234,25 +233,6 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private IKickEvent getKickEvent(final FilteredVisionFrame filteredVisionFrame)
-	{
-		if (filteredVisionFrame.getKick().isEmpty())
-		{
-			return null;
-		}
-
-		var kick = filteredVisionFrame.getKick().orElseThrow();
-
-		return KickEvent.builder()
-				.kickingBot(kick.getKickingBot())
-				.kickingBotPosition(kick.getKickingBotPosition())
-				.position(kick.getBallTrajectory().getInitialPos().getXYVector())
-				.botDirection(kick.getKickingBotOrientation())
-				.timestamp(kick.getKickTimestamp())
-				.build();
-	}
-
-
 	private void visualize(final WorldFrameWrapper wfw)
 	{
 		ShapeMap wfShapeMap = new ShapeMap();
@@ -264,16 +244,15 @@ public class WorldInfoCollector extends AWorldPredictor
 	}
 
 
-	private BallKickFitState getKickFitState(final FilteredVisionFrame filteredVisionFrame)
+	private KickedBall getKickedBall(FilteredVisionKick kick)
 	{
-		if (filteredVisionFrame.getKick().isEmpty())
-		{
-			return null;
-		}
-
-		var kick = filteredVisionFrame.getKick().orElseThrow();
-		return new BallKickFitState(kick.getBallTrajectory().getInitialPos().getXYVector(),
-				kick.getBallTrajectory().getInitialVel(), kick.getTrajectoryStartTime());
+		return KickedBall.builder()
+				.kickTimestamp(kick.getKickTimestamp())
+				.trajectoryStartTime(kick.getTrajectoryStartTime())
+				.kickingBot(kick.getKickingBot())
+				.kickingBotPose(Pose.from(kick.getKickingBotPosition(), kick.getKickingBotOrientation()))
+				.ballTrajectory(kick.getBallTrajectory())
+				.build();
 	}
 
 
@@ -292,11 +271,11 @@ public class WorldInfoCollector extends AWorldPredictor
 		ITrackedBall ball = getTrackedBall(filteredVisionFrame);
 		ballBuffer.add(ball);
 
-		IKickEvent kickEvent = getKickEvent(filteredVisionFrame);
-		BallKickFitState kickFitState = getKickFitState(filteredVisionFrame);
+		KickedBall kickedBall = filteredVisionFrame.getKick()
+				.map(this::getKickedBall).orElse(null);
 
 		long frameNumber = filteredVisionFrame.getId();
-		SimpleWorldFrame swf = new SimpleWorldFrame(frameNumber, lastWFTimestamp, bots, ball, kickEvent, kickFitState);
+		SimpleWorldFrame swf = new SimpleWorldFrame(frameNumber, lastWFTimestamp, bots, ball, kickedBall);
 
 		if (ciGameControllerConnector != null)
 		{

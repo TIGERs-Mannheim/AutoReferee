@@ -17,9 +17,8 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.vision.data.IKickEvent;
-import edu.tigers.sumatra.wp.data.BallKickFitState;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.KickedBall;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.Color;
@@ -50,12 +49,11 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	}
 
 	private final List<Pass> lastPasses = new ArrayList<>();
-	private IKickEvent lastKickEvent;
-	private BallKickFitState lastKickFitState;
+	private KickedBall lastKickedBall;
 	private List<IVector3> ballVel = new ArrayList<>(5);
 	private int passId;
 	private Pass lastPass;
-	private IKickEvent lastConsumedKickEvent;
+	private KickedBall lastConsumedKickedBall;
 	private int numValidPasses;
 
 
@@ -70,8 +68,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 			}
 
 			passId = 0;
-			lastKickEvent = null;
-			lastKickFitState = null;
+			lastKickedBall = null;
 			ballVel.clear();
 			lastPass = null;
 			lastPasses.clear();
@@ -83,7 +80,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 		{
 			findPass(frame).ifPresent(pass -> {
 				lastPass = pass;
-				lastConsumedKickEvent = lastKickEvent;
+				lastConsumedKickedBall = lastKickedBall;
 				if (lastPasses.size() >= 3)
 				{
 					lastPasses.remove(0);
@@ -104,8 +101,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 
 	private void rememberState(AutoRefFrame frame)
 	{
-		lastKickEvent = frame.getWorldFrame().getKickEvent().orElse(null);
-		lastKickFitState = frame.getWorldFrame().getKickFitState().orElse(lastKickFitState);
+		lastKickedBall = frame.getWorldFrame().getKickedBall().orElse(lastKickedBall);
 		var lastBallSpeed = frame.getWorldFrame().getBall().getVel3();
 		if (ballVel.size() == 5)
 		{
@@ -118,7 +114,7 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	private Optional<Pass> findPass(AutoRefFrame frame)
 	{
 		var target = frame.getWorldFrame().getBall().getPos();
-		var source = lastKickEvent.getPosition();
+		var source = lastKickedBall.getPosition();
 		var distance = source.distanceTo(target);
 		if (distance < 300)
 		{
@@ -137,18 +133,18 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 
 		var direction = target.subtractNew(source).getAngle();
 		var directionChange = getDirectionChange(direction);
-		var initialBallSpeed = lastKickFitState.getAbsoluteKickSpeed();
+		var initialBallSpeed = lastKickedBall.getAbsoluteKickSpeed();
 		var valid = isValid(distance, receiver, directionChange, initialBallSpeed);
 		return Optional.of(Pass.builder()
 				.id(++passId)
-				.timestamp(lastKickEvent.getTimestamp())
+				.timestamp(lastKickedBall.getTimestamp())
 				.distance(distance)
 				.direction(direction)
 				.directionChange(directionChange)
 				.valid(valid)
 				.source(source)
 				.target(target)
-				.shooter(lastKickEvent.getKickingBot())
+				.shooter(lastKickedBall.getKickingBot())
 				.receiver(receiver)
 				.initialBallSpeed(initialBallSpeed)
 				.receivingBallSpeed(ballVel.get(0).getLength())
@@ -190,25 +186,25 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 
 	private boolean passFinished(AutoRefFrame frame)
 	{
-		if (lastKickEvent == null ||
-				(lastConsumedKickEvent != null && lastKickEvent.getTimestamp() == lastConsumedKickEvent.getTimestamp()))
+		if (lastKickedBall == null ||
+				(lastConsumedKickedBall != null && lastKickedBall.getTimestamp() == lastConsumedKickedBall.getTimestamp()))
 		{
 			return false;
 		}
 
-		double kickEventAge = (frame.getTimestamp() - lastKickEvent.getTimestamp()) / 1e9;
+		double kickEventAge = (frame.getTimestamp() - lastKickedBall.getTimestamp()) / 1e9;
 		if (kickEventAge < 0.1)
 		{
 			return false;
 		}
 
-		var newKickEvent = frame.getWorldFrame().getKickEvent().orElse(null);
+		var newKickEvent = frame.getWorldFrame().getKickedBall().orElse(null);
 		if (newKickEvent == null)
 		{
 			// kick event reset - ball might be received and stopped by receiver
 			return true;
 		}
-		if (newKickEvent.getTimestamp() != lastKickEvent.getTimestamp())
+		if (newKickEvent.getTimestamp() != lastKickedBall.getTimestamp())
 		{
 			// kick event changed
 			return true;

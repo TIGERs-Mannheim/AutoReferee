@@ -82,7 +82,7 @@ public class BallVisCalc implements IWpCalc
 			ballCurve.setColor(Color.PINK);
 			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(ballCurve);
 
-			wfw.getSimpleWorldFrame().getKickFitState().ifPresent(state -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
+			wfw.getSimpleWorldFrame().getKickedBall().ifPresent(state -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
 					.add(new DrawableArrow(state.getKickPos(), state.getKickVel().getXYVector().multiplyNew(100))
 							.setColor(Color.magenta)));
 		}
@@ -96,8 +96,8 @@ public class BallVisCalc implements IWpCalc
 			}
 		});
 
-		wfw.getSimpleWorldFrame().getKickEvent().ifPresent(event -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
-				.add(new DrawablePoint(event.getPosition(), Color.red)
+		wfw.getSimpleWorldFrame().getKickedBall().ifPresent(kickedBall -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
+				.add(new DrawablePoint(kickedBall.getKickPos(), Color.red)
 						.withSize(50)));
 	}
 }

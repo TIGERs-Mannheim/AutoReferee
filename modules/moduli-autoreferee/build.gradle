@@ -20,7 +20,6 @@ dependencies {
     implementation project(':common-bot')
     implementation project(':sumatra-model')
     implementation project(':moduli-wp')
-    implementation project(':moduli-vision')
     implementation project(':moduli-geometry')
     implementation project(':moduli-referee')
     implementation project(':moduli-record')
