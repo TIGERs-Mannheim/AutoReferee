@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.calc;
@@ -43,6 +43,9 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	@Configurable(defValue = "1500", comment = "Min pass distance to count a valid pass")
 	private static double minDistance = 1500;
 
+	@Configurable(defValue = "150", comment = "[mm] Min pass hight to count as chip pass")
+	private static double minHeight = 150;
+
 	static
 	{
 		ConfigRegistration.registerClass("autoreferee", PassDetectionAutoRefCalc.class);
@@ -55,6 +58,8 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 	private Pass lastPass;
 	private KickedBall lastConsumedKickedBall;
 	private int numValidPasses;
+	private int numValidChippedPasses;
+	private double height;
 
 
 	@Override
@@ -64,18 +69,20 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 		{
 			if (numValidPasses > 0)
 			{
-				log.info("Detected {} valid passes.", numValidPasses);
+				log.info("Detected {} valid passes including {} valid chipped passes.", numValidPasses,
+						numValidChippedPasses);
 			}
 
 			passId = 0;
+			height = 0;
 			lastKickedBall = null;
 			ballVel.clear();
 			lastPass = null;
 			lastPasses.clear();
 			numValidPasses = 0;
+			numValidChippedPasses = 0;
 			return;
 		}
-
 		if (passFinished(frame))
 		{
 			findPass(frame).ifPresent(pass -> {
@@ -90,12 +97,26 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 				if (pass.isValid())
 				{
 					numValidPasses++;
+					if (pass.getHeight() > minHeight)
+					{
+						numValidChippedPasses++;
+					}
 				}
 			});
+			height = 0;
 		}
-
+		updateMaxHeight(frame.getWorldFrame().getBall().getHeight());
 		rememberState(frame);
 		drawShapes(frame);
+	}
+
+
+	private void updateMaxHeight(double currentHeight)
+	{
+		if (currentHeight > height)
+		{
+			height = currentHeight;
+		}
 	}
 
 
@@ -135,13 +156,16 @@ public class PassDetectionAutoRefCalc implements IAutoRefereeCalc
 		var directionChange = getDirectionChange(direction);
 		var initialBallSpeed = lastKickedBall.getAbsoluteKickSpeed();
 		var valid = isValid(distance, receiver, directionChange, initialBallSpeed);
+		var chipped = height > minHeight;
 		return Optional.of(Pass.builder()
 				.id(++passId)
 				.timestamp(lastKickedBall.getTimestamp())
 				.distance(distance)
+				.height(height)
 				.direction(direction)
 				.directionChange(directionChange)
 				.valid(valid)
+				.chipped(chipped)
 				.source(source)
 				.target(target)
 				.shooter(lastKickedBall.getKickingBot())
