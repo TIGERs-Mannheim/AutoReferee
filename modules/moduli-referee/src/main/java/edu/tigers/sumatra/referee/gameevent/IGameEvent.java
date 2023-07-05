@@ -42,4 +42,6 @@ public interface IGameEvent
 	 * @return the list of origins of this game event
 	 */
 	List<String> getOrigins();
+
+	long getCreatedTimestamp();
 }
