@@ -99,4 +99,13 @@ public interface IChipBallConsultant extends IBallConsultant
 	 * @return
 	 */
 	double getVelForKick(double distance, double kickSpeed);
+
+	/**
+	 * Get the distance at which the target ball speed is reached by a chip kick
+	 *
+	 * @param kickSpeed       in [m/s]
+	 * @param targetBallSpeed in [m/s]
+	 * @return distance in [mm]
+	 */
+	double getDistanceByTargetVel(double kickSpeed, double targetBallSpeed);
 }

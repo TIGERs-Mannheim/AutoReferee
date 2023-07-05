@@ -360,6 +360,12 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 		// ball is below 10mm and assumed to be rolling
 		double v = velNow.getLength2();
+		if (v < velocity)
+		{
+			// Rare edge case: Last jumps dampens it so much, that jump falls below min hop height but also the last jumps
+			// Slows ball enough to slow it down below the wanted velocity
+			return tNow;
+		}
 		double a = parameters.getAccRoll();
 
 		// v = v0 + a*t
