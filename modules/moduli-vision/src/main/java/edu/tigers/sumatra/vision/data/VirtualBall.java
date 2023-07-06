@@ -6,6 +6,7 @@ package edu.tigers.sumatra.vision.data;
 
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -34,6 +35,10 @@ public class VirtualBall
 	 * Which bot reported this virtual ball.
 	 */
 	BotID observingBot;
+	/**
+	 * Where was the reporting bot.
+	 */
+	Pose observingBotPose;
 	/**
 	 * Is this a ball reported from barrier contact?
 	 */
