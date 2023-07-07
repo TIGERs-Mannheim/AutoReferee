@@ -50,7 +50,7 @@ public class BallParameters
 	@Configurable(
 			comment = "Amount of spin transferred during a redirect.",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" },
-			defValueSpezis = { "0.8", "0.21", "0.35", "0.21", "0.35", "0.35", "0.8" }
+			defValueSpezis = { "0.8", "0.4", "0.35", "0.4", "0.35", "0.35", "0.8" }
 	)
 	private double redirectSpinFactor = 0.8;
 
