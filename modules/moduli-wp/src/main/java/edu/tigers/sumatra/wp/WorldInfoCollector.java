@@ -55,6 +55,7 @@ import edu.tigers.sumatra.wp.util.CurrentBallDetector;
 import edu.tigers.sumatra.wp.util.DefaultRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
+import edu.tigers.sumatra.wp.util.MalFunctioningBotCalculator;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
@@ -93,6 +94,12 @@ public class WorldInfoCollector extends AWorldPredictor
 	)
 	private static boolean preferRobotFeedback = true;
 
+	@Configurable(
+			comment = "Use mal functioning check to filter available bots",
+			defValue = "true"
+	)
+	private static boolean checkMalFunction = true;
+
 	static
 	{
 		ConfigRegistration.registerClass("wp", WorldInfoCollector.class);
@@ -113,6 +120,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
 	private final GameStateCalculator gameStateCalculator = new GameStateCalculator();
 	private final WorldFrameVisualization worldFrameVisualization = new WorldFrameVisualization();
+	private final MalFunctioningBotCalculator malFunctioningBotCalculator = new MalFunctioningBotCalculator();
 	private final BallContactCalculator ballContactCalculator = new BallContactCalculator();
 	private final CurrentBallDetector currentBallDetector = new CurrentBallDetector();
 	private final CamFrameShapeMapProducer camFrameShapeMapProducer = new CamFrameShapeMapProducer();
@@ -181,7 +189,8 @@ public class WorldInfoCollector extends AWorldPredictor
 			RobotInfo robotInfo,
 			BotState filterState,
 			BotState internalState,
-			FilteredVisionBot filteredVisionBot)
+			FilteredVisionBot filteredVisionBot,
+			Map<BotID, BotState> botStates)
 	{
 		if (filterState == null && internalState == null)
 		{
@@ -190,6 +199,8 @@ public class WorldInfoCollector extends AWorldPredictor
 		var currentBotState = selectRobotState(filterState, internalState);
 		var visionBotState = Optional.ofNullable(filterState).orElse(internalState);
 
+		boolean malFunctioning = checkMalFunction &&
+				malFunctioningBotCalculator.isMalFunctioning(robotInfo, visionBotState.getPose(), botStates);
 		return TrackedBot.newBuilder()
 				.withBotId(robotInfo.getBotId())
 				.withTimestamp(lastWFTimestamp)
@@ -198,6 +209,7 @@ public class WorldInfoCollector extends AWorldPredictor
 				.withBotInfo(robotInfo)
 				.withLastBallContact(getLastBallContact(robotInfo, visionBotState.getPose()))
 				.withQuality(filteredVisionBot != null ? filteredVisionBot.getQuality() : 0)
+				.withMalFunctioning(malFunctioning)
 				.build();
 	}
 
@@ -213,7 +225,8 @@ public class WorldInfoCollector extends AWorldPredictor
 		Map<BotID, ITrackedBot> trackedBots = robotInfo.stream()
 				.map(r -> createTrackedBot(r, filteredBotStates.get(r.getBotId()),
 						internalBotStates.get(r.getBotId()),
-						filteredVisionBotMap.get(r.getBotId())))
+						filteredVisionBotMap.get(r.getBotId()),
+						filteredBotStates))
 				.filter(Objects::nonNull)
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return new HashMap<>(trackedBots);
@@ -446,6 +459,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		currentBallDetector.reset();
 		camFrameShapeMapProducer.reset();
 		ballContactCalculator.reset();
+		malFunctioningBotCalculator.reset();
 		lastWFTimestamp = 0;
 		latestRefereeMsg = new RefereeMsg();
 	}

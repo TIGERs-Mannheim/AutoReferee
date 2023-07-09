@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.data;
@@ -95,6 +95,7 @@ public class WorldFrame extends SimpleWorldFrame
 				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor()))
 				.filter(bot -> bot.getRobotInfo().isConnected())
 				.filter(bot -> bot.getRobotInfo().isAvailableToAi())
+				.filter(bot -> !bot.isMalFunctioning())
 				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
 		return Collections.unmodifiableMap(visible);
 	}
