@@ -17,6 +17,7 @@ import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Map;
 /**
  * Check if a bot is mal functioning by not moving to its destination (and rotating around itself constantly)
  */
+@Log4j2
 public class MalFunctioningBotCalculator
 {
 	@Configurable(defValue = "5", comment = "[s] Min time without movement to be considered mal functioning")
@@ -60,11 +62,7 @@ public class MalFunctioningBotCalculator
 		}
 		boolean rotating = false;
 		boolean notMoving = false;
-		if (!lastBotStates.containsKey(info.getBotId()))
-		{
-			lastBotStates.put(info.getBotId(),
-					new LastBotState(pose.getPos(), pose.getOrientation(), info.getTimestamp()));
-		} else
+		if (lastBotStates.containsKey(info.getBotId()))
 		{
 			IVector2 pos = pose.getPos();
 			ITrajectory<IVector3> trajectory = info.getTrajectory().orElse(null);
@@ -85,9 +83,16 @@ public class MalFunctioningBotCalculator
 						.anyMatch(botPos -> Lines.segmentFromPoints(pos, dest).distanceTo(botPos) < minPosDiff);
 
 				notMoving = closeBotPositions.size() < 2 && !isBlocked;
+				if (notMoving)
+				{
+					log.warn("{} has not moved in the last {} seconds. It might be mal functioning.", info.getBotId(),
+							(timestamp - lastState.lastMoved) / 1e9);
+				}
 			}
 			rotating = timestamp - lastState.lastFixedOrientation > minTimeNotMoved * 1e9;
 		}
+		lastBotStates.computeIfAbsent(info.getBotId(),
+				botID -> new LastBotState(pose.getPos(), pose.getOrientation(), info.getTimestamp()));
 		return notMoving && (!useRotationCriteria || rotating);
 	}
 
