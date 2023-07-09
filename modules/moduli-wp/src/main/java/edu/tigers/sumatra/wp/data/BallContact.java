@@ -20,7 +20,8 @@ public class BallContact
 	long current;
 	long start;
 	long end;
-	boolean ballContactFromVision;
+	long visionStart;
+	long visionEnd;
 
 
 	@SuppressWarnings("unused")
@@ -29,13 +30,14 @@ public class BallContact
 		current = 0;
 		start = 0;
 		end = 0;
-		ballContactFromVision = false;
+		visionStart = 0;
+		visionEnd = 0;
 	}
 
 
 	public static BallContact def(long timestamp)
 	{
-		return new BallContact(timestamp, (long) -1e9, (long) -1e9, false);
+		return new BallContact(timestamp, (long) -1e9, (long) -1e9, (long) -1e9, (long) -1e9);
 	}
 
 
@@ -51,9 +53,21 @@ public class BallContact
 	}
 
 
+	public boolean hasContactFromVision()
+	{
+		return current == visionEnd;
+	}
+
+
+	public boolean hasNoContactFromVision()
+	{
+		return !hasContactFromVision();
+	}
+
+
 	public boolean hasContactFromVisionOrBarrier()
 	{
-		return hasContact() || isBallContactFromVision();
+		return hasContact() || hasContactFromVision();
 	}
 
 
@@ -67,8 +81,24 @@ public class BallContact
 	}
 
 
+	public double getContactDurationFromVision()
+	{
+		if (hasNoContactFromVision())
+		{
+			return 0;
+		}
+		return (visionEnd - visionStart) * 1e-9;
+	}
+
+
 	public boolean hadContact(double horizon)
 	{
 		return (current - end) * 1e-9 < horizon;
+	}
+
+
+	public boolean hadContactFromVision(double horizon)
+	{
+		return (current - visionEnd) * 1e-9 < horizon;
 	}
 }

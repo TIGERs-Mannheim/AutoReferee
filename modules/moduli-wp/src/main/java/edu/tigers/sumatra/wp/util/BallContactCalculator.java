@@ -26,12 +26,12 @@ public class BallContactCalculator
 {
 	private static final double BALL_POSS_TOLERANCE_HAS = 60;
 	private static final double BALL_POSS_TOLERANCE_GET = 20;
-
-	private IVector2 ballPos;
-
 	private final Map<BotID, Boolean> ballContactLastFrame = new HashMap<>();
 	private final Map<BotID, Long> startBallContactMap = new HashMap<>();
 	private final Map<BotID, Long> endBallContactMap = new HashMap<>();
+	private final Map<BotID, Long> visionStartBallContactMap = new HashMap<>();
+	private final Map<BotID, Long> visionEndBallContactMap = new HashMap<>();
+	private IVector2 ballPos;
 
 
 	public BallContact ballContact(final RobotInfo robotInfo, final Pose pose, final double center2Dribbler)
@@ -47,12 +47,21 @@ public class BallContactCalculator
 		{
 			startBallContactMap.remove(robotInfo.getBotId());
 		}
+		if (ballContactFromVision)
+		{
+			visionStartBallContactMap.putIfAbsent(robotInfo.getBotId(), robotInfo.getTimestamp());
+			visionEndBallContactMap.put(robotInfo.getBotId(), robotInfo.getTimestamp());
+		} else
+		{
+			visionStartBallContactMap.remove(robotInfo.getBotId());
+		}
 
 		return new BallContact(
 				robotInfo.getTimestamp(),
 				startBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9),
 				endBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9),
-				ballContactFromVision
+				visionStartBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9),
+				visionEndBallContactMap.getOrDefault(robotInfo.getBotId(), (long) -1e9)
 		);
 	}
 
@@ -70,7 +79,7 @@ public class BallContactCalculator
 	private boolean hasBallContactFromVision(final RobotInfo robotInfo, final Pose pose, final double center2Dribbler)
 	{
 		double ballPossTolerance;
-		if (ballContactLastFrame.getOrDefault(robotInfo.getBotId(), false))
+		if (Boolean.TRUE.equals(ballContactLastFrame.getOrDefault(robotInfo.getBotId(), false)))
 		{
 			ballPossTolerance = BALL_POSS_TOLERANCE_HAS;
 		} else
@@ -95,5 +104,7 @@ public class BallContactCalculator
 		ballContactLastFrame.clear();
 		startBallContactMap.clear();
 		endBallContactMap.clear();
+		visionStartBallContactMap.clear();
+		visionEndBallContactMap.clear();
 	}
 }
