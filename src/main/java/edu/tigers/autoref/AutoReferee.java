@@ -92,6 +92,7 @@ public final class AutoReferee
 		options.addOption("va", "visionAddress", true, "address:port for vision");
 		options.addOption("ra", "refereeAddress", true, "address:port for GC");
 		options.addOption("ta", "trackerAddress", true, "address:port for tracker");
+		options.addOption("c", "ci", false, "Enable CI mode");
 		return options;
 	}
 
@@ -170,7 +171,8 @@ public final class AutoReferee
 
 	private static void start()
 	{
-		SumatraModel.getInstance().setCurrentModuliConfig("moduli.xml");
+		String config = cmd.hasOption("c") ? "moduli-ci.xml" : "moduli.xml";
+		SumatraModel.getInstance().setCurrentModuliConfig(config);
 		try
 		{
 			SumatraModel.getInstance().loadModulesOfConfigSafe(SumatraModel.getInstance().getCurrentModuliConfig());
