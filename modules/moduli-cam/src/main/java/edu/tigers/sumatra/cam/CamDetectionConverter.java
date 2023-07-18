@@ -7,7 +7,7 @@ package edu.tigers.sumatra.cam;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamRobot;
-import edu.tigers.sumatra.cam.proto.MessagesRobocupSslDetection;
+import edu.tigers.sumatra.cam.proto.SslVisionDetection;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -26,7 +26,7 @@ public class CamDetectionConverter
 
 
 	private static CamRobot convertRobot(
-			final MessagesRobocupSslDetection.SSL_DetectionRobot bot,
+			final SslVisionDetection.SSL_DetectionRobot bot,
 			final ETeamColor color,
 			final long frameId,
 			final int camId,
@@ -49,7 +49,7 @@ public class CamDetectionConverter
 	 * @param detectionFrame SSL vision frame from a single camera
 	 * @return a cam detection frame based on the SSL vision frame
 	 */
-	public CamDetectionFrame convertDetectionFrame(final MessagesRobocupSslDetection.SSL_DetectionFrame detectionFrame)
+	public CamDetectionFrame convertDetectionFrame(final SslVisionDetection.SSL_DetectionFrame detectionFrame)
 	{
 		long localCaptureNs = (long) (detectionFrame.getTCapture() * 1e9);
 		long localSentNs = (long) (detectionFrame.getTSent() * 1e9);
@@ -58,14 +58,14 @@ public class CamDetectionConverter
 		final List<CamRobot> blues = new ArrayList<>();
 		final List<CamRobot> yellows = new ArrayList<>();
 
-		for (final MessagesRobocupSslDetection.SSL_DetectionRobot bot : detectionFrame.getRobotsBlueList())
+		for (final SslVisionDetection.SSL_DetectionRobot bot : detectionFrame.getRobotsBlueList())
 		{
 			blues.add(convertRobot(bot, ETeamColor.BLUE, frameId, detectionFrame.getCameraId(),
 					localCaptureNs));
 		}
 
 		// --- process team Yellow ---
-		for (final MessagesRobocupSslDetection.SSL_DetectionRobot bot : detectionFrame.getRobotsYellowList())
+		for (final SslVisionDetection.SSL_DetectionRobot bot : detectionFrame.getRobotsYellowList())
 		{
 			yellows.add(convertRobot(bot, ETeamColor.YELLOW, frameId,
 					detectionFrame.getCameraId(),
@@ -73,7 +73,7 @@ public class CamDetectionConverter
 		}
 
 		// --- process ball ---
-		for (final MessagesRobocupSslDetection.SSL_DetectionBall ball : detectionFrame.getBallsList())
+		for (final SslVisionDetection.SSL_DetectionBall ball : detectionFrame.getBallsList())
 		{
 			balls.add(convertBall(ball, localCaptureNs, detectionFrame.getCameraId(),
 					frameId));
@@ -87,7 +87,7 @@ public class CamDetectionConverter
 
 
 	private static CamBall convertBall(
-			final MessagesRobocupSslDetection.SSL_DetectionBall ball,
+			final SslVisionDetection.SSL_DetectionBall ball,
 			final long tCapture,
 			final int camId,
 			final long frameId)

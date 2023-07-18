@@ -3,7 +3,7 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry.SSL_GeometryModels;
+import edu.tigers.sumatra.cam.proto.SslVisionGeometry.SSL_GeometryModels;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;

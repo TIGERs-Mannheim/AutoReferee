@@ -11,7 +11,7 @@ import edu.tigers.sumatra.ball.trajectory.BallFactory;
 import edu.tigers.sumatra.cam.SSLVisionCamGeometryTranslator;
 import edu.tigers.sumatra.cam.data.CamFieldSize;
 import edu.tigers.sumatra.cam.data.CamGeometry;
-import edu.tigers.sumatra.cam.proto.MessagesRobocupSslGeometry;
+import edu.tigers.sumatra.cam.proto.SslVisionGeometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
@@ -208,8 +208,8 @@ public class Geometry
 	{
 		Path path = CONFIG_PATH.resolve(id + ".txt");
 		byte[] bytes = Files.readAllBytes(path);
-		MessagesRobocupSslGeometry.SSL_GeometryData data = TextFormat.parse(new String(bytes),
-				MessagesRobocupSslGeometry.SSL_GeometryData.class);
+		SslVisionGeometry.SSL_GeometryData data = TextFormat.parse(new String(bytes),
+				SslVisionGeometry.SSL_GeometryData.class);
 		SSLVisionCamGeometryTranslator translator = new SSLVisionCamGeometryTranslator();
 		return translator.fromProtobuf(data);
 	}

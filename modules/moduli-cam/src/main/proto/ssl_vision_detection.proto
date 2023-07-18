@@ -1,4 +1,5 @@
 syntax = "proto2";
+
 option java_package = "edu.tigers.sumatra.cam.proto";
 
 message SSL_DetectionBall {

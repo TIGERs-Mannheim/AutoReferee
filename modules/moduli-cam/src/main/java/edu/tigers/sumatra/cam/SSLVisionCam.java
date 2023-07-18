@@ -9,7 +9,7 @@ import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.sumatra.cam.data.CamGeometry;
-import edu.tigers.sumatra.cam.proto.MessagesRobocupSslWrapper.SSL_WrapperPacket;
+import edu.tigers.sumatra.cam.proto.SslVisionWrapper.SSL_WrapperPacket;
 import edu.tigers.sumatra.clock.NanoTime;
 import edu.tigers.sumatra.gamelog.EMessageType;
 import edu.tigers.sumatra.gamelog.GameLogMessage;
