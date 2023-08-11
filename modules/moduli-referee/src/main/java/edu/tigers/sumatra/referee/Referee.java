@@ -15,6 +15,7 @@ import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.control.GcEventFactory;
 import edu.tigers.sumatra.referee.proto.SslGcApi;
+import edu.tigers.sumatra.referee.proto.SslGcCommon.Division;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.referee.source.ARefereeMessageSource;
 import edu.tigers.sumatra.referee.source.CiRefereeSyncedReceiver;
@@ -92,7 +93,7 @@ public class Referee extends AReferee
 		gameLogPlayer = SumatraModel.getInstance().getModuleOpt(GameLogPlayer.class).orElse(null);
 		gameLogRecorder = SumatraModel.getInstance().getModuleOpt(GameLogRecorder.class).orElse(null);
 
-		if(activeSource == ERefereeMessageSource.INTERNAL_FORWARDER && gameLogPlayer != null)
+		if (activeSource == ERefereeMessageSource.INTERNAL_FORWARDER && gameLogPlayer != null)
 		{
 			gameLogForwarder = new GameLogForwarder((DirectRefereeMsgForwarder) source);
 			gameLogPlayer.addObserver(gameLogForwarder);
@@ -173,6 +174,8 @@ public class Referee extends AReferee
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.BLUE, "BLUE AI"));
 		sendGameControllerEvent(GcEventFactory.teamName(ETeamColor.YELLOW, "YELLOW AI"));
 		sendGameControllerEvent(GcEventFactory.stage(SslGcRefereeMessage.Referee.Stage.NORMAL_FIRST_HALF));
+		var division = Division.valueOf(getSubnodeConfiguration().getString("division", Division.DIV_A.name()));
+		sendGameControllerEvent(GcEventFactory.division(division));
 	}
 
 
@@ -194,7 +197,7 @@ public class Referee extends AReferee
 	@Override
 	public void stopModule()
 	{
-		if(gameLogForwarder != null)
+		if (gameLogForwarder != null)
 		{
 			gameLogPlayer.removeObserver(gameLogForwarder);
 		}
@@ -210,9 +213,10 @@ public class Referee extends AReferee
 	{
 		notifyNewRefereeMsg(msg);
 
-		if(gameLogRecorder != null)
+		if (gameLogRecorder != null)
 		{
-			gameLogRecorder.writeMessage(new GameLogMessage(NanoTime.getTimestampNow(), EMessageType.SSL_REFBOX_2013, msg.toByteArray()));
+			gameLogRecorder.writeMessage(
+					new GameLogMessage(NanoTime.getTimestampNow(), EMessageType.SSL_REFBOX_2013, msg.toByteArray()));
 		}
 	}
 
@@ -255,15 +259,17 @@ public class Referee extends AReferee
 		return currentQueue;
 	}
 
+
 	@RequiredArgsConstructor
 	private static class GameLogForwarder implements GameLogPlayerObserver
 	{
 		private final DirectRefereeMsgForwarder forwarder;
 
+
 		@Override
 		public void onNewGameLogMessage(GameLogMessage message, int index)
 		{
-			if(message.getType() != EMessageType.SSL_REFBOX_2013)
+			if (message.getType() != EMessageType.SSL_REFBOX_2013)
 				return;
 
 			try
