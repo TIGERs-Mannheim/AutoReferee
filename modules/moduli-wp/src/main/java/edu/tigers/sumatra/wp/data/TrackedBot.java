@@ -387,7 +387,7 @@ public final class TrackedBot implements ITrackedBot
 		numbers.add(filteredState == null ? 0 : 1);
 		numbers.add(robotInfo.getKickSpeed());
 		numbers.add(robotInfo.isChip() ? 1 : 0);
-		numbers.add(robotInfo.getDribbleRpm());
+		numbers.add(robotInfo.getDribbleSpeed());
 		numbers.add(robotInfo.isBarrierInterrupted() ? 1 : 0);
 		numbers.add(tAssembly);
 		numbers.addAll(Vector3.zero().getNumberList()); // buffered_pos
