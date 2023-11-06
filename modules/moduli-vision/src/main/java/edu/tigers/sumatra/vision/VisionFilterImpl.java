@@ -155,7 +155,7 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private void processCamFrameQueue()
 	{
-		while (!scheduledExecutorService.isShutdown())
+		while (scheduledExecutorService != null && !scheduledExecutorService.isShutdown())
 		{
 			try
 			{
