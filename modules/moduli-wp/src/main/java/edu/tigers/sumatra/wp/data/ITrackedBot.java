@@ -50,19 +50,6 @@ public interface ITrackedBot extends ITrackedObject, IExportable
 
 
 	/**
-	 * @return the ballContact
-	 */
-	boolean hasBallContact();
-
-
-	/**
-	 * @param horizon the time horizon in seconds
-	 * @return true, if the ball had ball contact within given horizon
-	 */
-	boolean hadBallContact(double horizon);
-
-
-	/**
 	 * @return the ball contact information
 	 */
 	BallContact getBallContact();

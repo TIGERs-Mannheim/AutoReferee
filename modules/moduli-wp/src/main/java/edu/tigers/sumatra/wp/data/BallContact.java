@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.wp.data;
 
+import com.github.g3force.configurable.ConfigRegistration;
+import com.github.g3force.configurable.Configurable;
 import com.sleepycat.persist.model.Persistent;
 import lombok.AllArgsConstructor;
 import lombok.Value;
@@ -23,6 +25,16 @@ public class BallContact
 	long visionStart;
 	long visionEnd;
 
+	@Configurable(
+			comment = "Time horizon [s] that is used to check if the Bot had ball contact",
+			defValue = "0.2"
+	)
+	private static double recentContactHorizon = 0.2;
+
+	static
+	{
+		ConfigRegistration.registerClass("wp", BallContact.class);
+	}
 
 	@SuppressWarnings("unused")
 	public BallContact()
@@ -91,9 +103,22 @@ public class BallContact
 	}
 
 
+	/**
+	 * @param horizon the time horizon in seconds
+	 * @return true, if the ball had ball contact within given horizon
+	 */
 	public boolean hadContact(double horizon)
 	{
 		return (current - end) * 1e-9 < horizon;
+	}
+
+
+	/**
+	 * @return true, if the ball had contact within the last 0.2 seconds
+	 */
+	public boolean hadRecentContact()
+	{
+		return hadContact(recentContactHorizon);
 	}
 
 

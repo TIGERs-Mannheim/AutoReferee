@@ -302,20 +302,6 @@ public final class TrackedBot implements ITrackedBot
 
 
 	@Override
-	public boolean hasBallContact()
-	{
-		return hadBallContact(0.2);
-	}
-
-
-	@Override
-	public boolean hadBallContact(double horizon)
-	{
-		return ballContact.hadContact(horizon);
-	}
-
-
-	@Override
 	public BallContact getBallContact()
 	{
 		return ballContact;
