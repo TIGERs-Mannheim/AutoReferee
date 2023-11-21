@@ -330,7 +330,7 @@ public class ReplayPresenter extends AMainPresenter
 			updateEndTime();
 			if (playing)
 			{
-				replayCurTime += ((System.nanoTime() - replayLastTime) * speed);
+				replayCurTime += Math.round((System.nanoTime() - replayLastTime) * speed);
 				if (replayCurTime < 0)
 				{
 					replayCurTime = 0;
