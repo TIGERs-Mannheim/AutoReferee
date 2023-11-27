@@ -37,7 +37,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -171,7 +170,6 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	@Override
 	public void onStop()
 	{
-		saveVisibility();
 		if (updateThread != null)
 		{
 			updateThread.interrupt();
@@ -231,7 +229,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		try
 		{
 			HashMap<ShapeMapSource, ShapeMap> shapeMaps = new HashMap<>(fieldPresenter.getShapeMaps());
-			update(shapeMaps);
+			shapeMaps.forEach(this::newShapeMap);
 			fieldPresenter.update();
 		} catch (Exception e)
 		{
@@ -256,22 +254,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		shapeSelectionModel.getLayers().forEach((layer, node) -> {
 			boolean visible = isSelected(node);
 			fieldPresenter.setShapeLayerVisibility(layer.getId(), visible);
-		});
-	}
-
-
-	private void saveVisibility()
-	{
-		shapeSelectionModel.getLayers().forEach((layer, node) -> {
-			boolean visible = isSelected(node);
 			SumatraModel.getInstance().setUserProperty(layer.getId(), String.valueOf(visible));
 		});
-	}
-
-
-	public void update(Map<ShapeMapSource, ShapeMap> shapeMaps)
-	{
-		shapeMaps.forEach(this::newShapeMap);
 	}
 
 
