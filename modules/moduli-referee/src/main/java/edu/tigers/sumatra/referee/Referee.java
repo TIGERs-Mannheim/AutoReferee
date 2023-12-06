@@ -3,8 +3,6 @@
  */
 package edu.tigers.sumatra.referee;
 
-import com.github.g3force.configurable.ConfigRegistration;
-import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.clock.NanoTime;
 import edu.tigers.sumatra.gamelog.EMessageType;
 import edu.tigers.sumatra.gamelog.GameLogMessage;
@@ -44,18 +42,11 @@ public class Referee extends AReferee
 {
 	private static final int DEFAULT_GC_UI_PORT = 11000;
 
-	@Configurable(comment = "Custom referee port that overwrites the value from moduli")
 	@Setter
 	private static int customPort;
 
-	@Configurable(comment = "Custom referee address that overwrites the value from moduli")
 	@Setter
 	private static String customAddress;
-
-	static
-	{
-		ConfigRegistration.registerClass("user", Referee.class);
-	}
 
 
 	private final Map<ERefereeMessageSource, ARefereeMessageSource> msgSources = new EnumMap<>(
