@@ -31,7 +31,7 @@ import java.util.Map;
 public class MalFunctioningBotCalculator
 {
 	@Configurable(defValue = "5", comment = "[s] Min time without movement to be considered mal functioning")
-	private static int minTimeNotMoved = 10;
+	private static int minTimeNotMoved = 5;
 	@Configurable(defValue = "0.1", comment = "[rad] Min orientation change to consider as rotation")
 	private static double minOrientationChange = 0.1;
 	@Configurable(defValue = "50", comment = "[mm] Min position distance to consider as movement")
