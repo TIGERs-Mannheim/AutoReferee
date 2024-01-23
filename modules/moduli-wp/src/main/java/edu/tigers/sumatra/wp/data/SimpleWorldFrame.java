@@ -7,8 +7,11 @@ package edu.tigers.sumatra.wp.data;
 import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.IMirrorable;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.Map;
@@ -29,6 +32,8 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	private final Map<BotID, ITrackedBot> bots;
 	private final ITrackedBall ball;
 	private final KickedBall kickedBall;
+	@Getter(AccessLevel.NONE)
+	@Setter(AccessLevel.NONE)
 	private transient Map<BotID, ITrackedBot> botsReadOnly;
 
 
