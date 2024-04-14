@@ -46,6 +46,6 @@ dependencies {
     implementation 'com.sleepycat:je:18.3.12'
 
     if (!project.property("compactBuild").toBoolean()) {
-        runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:3.10.0.0:${osClassifier}"
+        runtimeOnly "com.github.TIGERs-Mannheim:ssl-game-controller-maven:3.11.0.0:${osClassifier}"
     }
 }
