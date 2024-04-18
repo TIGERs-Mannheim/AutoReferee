@@ -90,11 +90,13 @@ public class BerkeleyDb
 
 
 	/**
+	 * @param teamYellow name of yellow team
+	 * @param teamBlue   name of blue team
 	 * @return a new empty unopened database at the default location
 	 */
-	public static BerkeleyDb withDefaultLocation()
+	public static BerkeleyDb withDefaultLocation(String teamYellow, String teamBlue)
 	{
-		return new BerkeleyDb(Paths.get(getDefaultBasePath(), getDefaultName()));
+		return new BerkeleyDb(Paths.get(getDefaultBasePath(), getDefaultName(teamYellow, teamBlue)));
 	}
 
 
@@ -109,13 +111,16 @@ public class BerkeleyDb
 
 
 	/**
+	 * @param teamYellow name of yellow team
+	 * @param teamBlue   name of blue team
 	 * @return the default name for a new database
 	 */
-	public static String getDefaultName()
+	public static String getDefaultName(String teamYellow, String teamBlue)
 	{
 		SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		dt.setTimeZone(TimeZone.getDefault());
-		return dt.format(new Date());
+		return dt.format(new Date()) + String.format("_%s-vs-%s", teamYellow.replace(" ", "_"),
+				teamBlue.replace(" ", "_"));
 	}
 
 
