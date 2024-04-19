@@ -39,6 +39,8 @@ public class RecordManager extends AModule implements IRefereeObserver
 	private BerkeleyAsyncRecorder recorder = null;
 	private String teamYellow = "";
 	private String teamBlue = "";
+	private String matchType = "";
+	private String matchStage = "";
 
 	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed")
 	private static boolean compressOnClose = false;
@@ -169,6 +171,8 @@ public class RecordManager extends AModule implements IRefereeObserver
 		{
 			teamYellow = refMsg.getYellow().getName();
 			teamBlue = refMsg.getBlue().getName();
+			matchType = refMsg.getMatchType().toString();
+			matchStage = refMsg.getStage().toString().replace("_PRE", "");
 		}
 		if (autoRecord && SumatraModel.getInstance().isTournamentMode() && (refMsg != null)
 				&& refMsg.getCommandCounter() != lastCommandCounter)
@@ -252,18 +256,12 @@ public class RecordManager extends AModule implements IRefereeObserver
 
 	protected void startRecording()
 	{
-		startRecording(teamYellow, teamBlue);
-	}
-
-
-	private void startRecording(String teamYellow, String teamBlue)
-	{
 		if (recorder != null)
 		{
 			log.warn("Start recording requested, but there is still an active recorder. Stopping it.");
 			recorder.stop();
 		}
-		recorder = new BerkeleyAsyncRecorder(newBerkeleyDb(teamYellow, teamBlue));
+		recorder = new BerkeleyAsyncRecorder(newBerkeleyDb());
 		recorder.getDb().getEnv().setCompressOnClose(compressOnClose);
 		onNewBerkeleyRecorder(recorder);
 		recorder.start();
@@ -304,13 +302,11 @@ public class RecordManager extends AModule implements IRefereeObserver
 	/**
 	 * Create a new berkeley database with default accessors attached
 	 *
-	 * @param teamYellow yellow team name
-	 * @param teamBlue   blue team name
 	 * @return a new empty database
 	 */
-	private BerkeleyDb newBerkeleyDb(String teamYellow, String teamBlue)
+	private BerkeleyDb newBerkeleyDb()
 	{
-		BerkeleyDb db = BerkeleyDb.withDefaultLocation(teamYellow, teamBlue);
+		BerkeleyDb db = BerkeleyDb.withDefaultLocation(matchType, matchStage, teamYellow, teamBlue);
 		onNewBerkeleyDb(db);
 		return db;
 	}
