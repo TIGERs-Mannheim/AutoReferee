@@ -37,10 +37,10 @@ public class RecordManager extends AModule implements IRefereeObserver
 	private final List<IBerkeleyRecorderHook> hooks = new CopyOnWriteArrayList<>();
 	private long lastCommandCounter = -1;
 	private BerkeleyAsyncRecorder recorder = null;
-	private String teamYellow = "";
-	private String teamBlue = "";
-	private String matchType = "";
-	private String matchStage = "";
+	protected String teamYellow = "";
+	protected String teamBlue = "";
+	protected String matchType = "";
+	protected String matchStage = "";
 
 	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed")
 	private static boolean compressOnClose = false;
@@ -169,8 +169,8 @@ public class RecordManager extends AModule implements IRefereeObserver
 	{
 		if (refMsg != null && recorder == null)
 		{
-			teamYellow = refMsg.getYellow().getName();
-			teamBlue = refMsg.getBlue().getName();
+			teamYellow = refMsg.getYellow().getName().replace(" ", "_");
+			teamBlue = refMsg.getBlue().getName().replace(" ", "_");
 			matchType = refMsg.getMatchType().toString();
 			matchStage = refMsg.getStage().toString().replace("_PRE", "");
 		}

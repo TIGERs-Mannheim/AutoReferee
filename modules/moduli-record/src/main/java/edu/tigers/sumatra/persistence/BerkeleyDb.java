@@ -113,8 +113,8 @@ public class BerkeleyDb
 
 
 	/**
-	 * @param matchType type of match
-	 * @param stage stage of game
+	 * @param matchType  type of match
+	 * @param stage      stage of game
 	 * @param teamYellow name of yellow team
 	 * @param teamBlue   name of blue team
 	 * @return the default name for a new database
@@ -123,9 +123,7 @@ public class BerkeleyDb
 	{
 		SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		dt.setTimeZone(TimeZone.getDefault());
-		return dt.format(new Date()) + String.format("-%s-%s-%s-vs-%s", matchType, stage,
-				teamYellow.replace(" ", "_"),
-				teamBlue.replace(" ", "_"));
+		return dt.format(new Date()) + String.format("-%s-%s-%s-vs-%s", matchType, stage, teamYellow, teamBlue);
 	}
 
 
