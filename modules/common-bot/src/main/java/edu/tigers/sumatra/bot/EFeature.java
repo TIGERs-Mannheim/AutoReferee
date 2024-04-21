@@ -20,9 +20,9 @@ public enum EFeature
 	/**  */
 	DRIBBLER("Dribbler", 0x0002),
 	/**  */
-	STRAIGHT_KICKER("Straight K.", 0x0004),
+	STRAIGHT_KICKER("StraightK", 0x0004),
 	/**  */
-	CHIP_KICKER("Chip K.", 0x0008),
+	CHIP_KICKER("Chipper", 0x0008),
 	/**  */
 	BARRIER("Barrier", 0x0010),
 	/** */
