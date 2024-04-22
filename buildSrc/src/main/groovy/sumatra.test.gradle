@@ -7,13 +7,14 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     permitTestUnusedDeclared 'junit:junit:4.13.2'
     // Support junit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
-    permitTestUnusedDeclared 'org.junit.jupiter:junit-jupiter:5.9.3'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.9.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    permitTestUnusedDeclared 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Add common test tools
-    testImplementation 'org.assertj:assertj-core:3.24.2'
-    permitTestUnusedDeclared 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'org.assertj:assertj-core:3.25.3'
+    permitTestUnusedDeclared 'org.assertj:assertj-core:3.25.3'
     testImplementation 'org.mockito:mockito-all:1.10.19'
     permitTestUnusedDeclared 'org.mockito:mockito-all:1.10.19'
 }

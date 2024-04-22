@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     // Specific groovy version
-    testImplementation platform('org.apache.groovy:groovy-bom:4.0.12')
+    testImplementation platform('org.apache.groovy:groovy-bom:4.0.21')
 
     testImplementation 'org.apache.groovy:groovy'
     testRuntimeOnly 'org.apache.groovy:groovy-templates'

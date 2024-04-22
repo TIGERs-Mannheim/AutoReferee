@@ -17,7 +17,7 @@ dependencies {
     implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
     implementation 'com.github.g3force:configurable:3.0'
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
 
-    implementation 'com.google.protobuf:protobuf-java:3.23.2'
+    implementation 'com.google.protobuf:protobuf-java:4.26.1'
 }

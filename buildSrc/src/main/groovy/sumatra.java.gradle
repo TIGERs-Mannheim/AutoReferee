@@ -27,14 +27,14 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.28"
-    compileOnly "org.projectlombok:lombok:1.18.28"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.28"
+    annotationProcessor "org.projectlombok:lombok:1.18.32"
+    compileOnly "org.projectlombok:lombok:1.18.32"
+    permitUnusedDeclared "org.projectlombok:lombok:1.18.32"
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
