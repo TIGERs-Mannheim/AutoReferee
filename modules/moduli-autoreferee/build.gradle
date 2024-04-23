@@ -59,7 +59,7 @@ dependencies {
     integrationTestImplementation 'org.apache.logging.log4j:log4j-core:2.23.1'
 
     integrationTestAnnotationProcessor "org.projectlombok:lombok:1.18.32"
-    integrationTestImplementation "org.projectlombok:lombok:1.18.32"
+    integrationTestCompileOnly "org.projectlombok:lombok:1.18.32"
 
     integrationTestImplementation project(':moduli-gamelog')
 }
