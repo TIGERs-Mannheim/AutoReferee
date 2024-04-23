@@ -30,15 +30,13 @@ dependencies {
     implementation project(':moduli-referee')
     implementation project(':moduli-wp')
 
-    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
-    implementation 'com.github.TIGERs-Mannheim:infonode:1.7.0'
+    implementation(libs.com.github.TIGERs.mannheim.moduli)
+    implementation(libs.com.github.TIGERs.mannheim.infonode)
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
-    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.20.0'
-    runtimeOnly 'org.apache.logging.log4j:log4j-1.2-api:2.20.0'
-    runtimeOnly 'org.slf4j:slf4j-log4j12:2.0.7'
+    implementation(libs.org.apache.logging.log4j.log4j.api)
+    runtimeOnly(libs.org.apache.logging.log4j.log4j.core)
 
-    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation(libs.commons.cli)
 }
 
 application {
