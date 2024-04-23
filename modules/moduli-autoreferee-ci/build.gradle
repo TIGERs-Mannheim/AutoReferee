@@ -18,10 +18,10 @@ dependencies {
     implementation project(':moduli-referee')
     implementation project(':moduli-cam')
 
-    implementation 'com.github.TIGERs-Mannheim:moduli:4.1'
+    implementation(libs.com.github.TIGERs.mannheim.moduli)
 
-    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
-    implementation 'commons-configuration:commons-configuration:1.10'
+    implementation(libs.org.apache.logging.log4j.log4j.api)
+    implementation(libs.commons.configuration)
 
-    implementation 'com.google.protobuf:protobuf-java:4.26.1'
+    implementation(libs.com.google.protobuf.protobuf.java)
 }

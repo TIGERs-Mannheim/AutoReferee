@@ -7,7 +7,6 @@ plugins {
     id 'groovy' // apply to all due to issues when only applying to some projects
     id 'idea'
     id 'ca.cutterslade.analyze'
-    id 'sumatra.versions'
 }
 
 repositories {
@@ -27,9 +26,9 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 dependencies {
-    annotationProcessor "org.projectlombok:lombok:1.18.32"
-    compileOnly "org.projectlombok:lombok:1.18.32"
-    permitUnusedDeclared "org.projectlombok:lombok:1.18.32"
+    annotationProcessor(libs.org.projectlombok.lombok)
+    compileOnly(libs.org.projectlombok.lombok)
+    permitUnusedDeclared(libs.org.projectlombok.lombok)
 }
 
 java {
