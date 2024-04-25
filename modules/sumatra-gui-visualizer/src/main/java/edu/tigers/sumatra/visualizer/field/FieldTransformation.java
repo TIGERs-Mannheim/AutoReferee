@@ -45,10 +45,10 @@ public class FieldTransformation implements IDrawableTool
 	{
 		double offset = switch (fieldTurn)
 				{
-					case NORMAL -> AngleMath.PI;
-					case T90 -> -AngleMath.PI_HALF;
-					case T180 -> 0;
-					case T270 -> AngleMath.PI_HALF;
+					case NORMAL -> 0;
+					case T90 -> AngleMath.PI_HALF;
+					case T180 -> AngleMath.PI;
+					case T270 -> -AngleMath.PI_HALF;
 				};
 		return globalAngle + (invert ? AngleMath.PI : 0) + offset;
 	}
@@ -102,10 +102,10 @@ public class FieldTransformation implements IDrawableTool
 		IVector2 turnedPoint = turnPoint(point);
 		return switch (fieldTurn)
 				{
-					case NORMAL -> turnedPoint.addNew(Vector2.fromX(height));
-					case T90 -> turnedPoint;
-					case T180 -> turnedPoint.addNew(Vector2.fromY(width));
-					case T270 -> turnedPoint.addNew(Vector2.fromXY(height, width));
+					case NORMAL -> turnedPoint.addNew(Vector2.fromY(width));
+					case T90 -> turnedPoint.addNew(Vector2.fromXY(height, width));
+					case T180 -> turnedPoint.addNew(Vector2.fromX(height));
+					case T270 -> turnedPoint;
 				};
 	}
 
@@ -125,10 +125,10 @@ public class FieldTransformation implements IDrawableTool
 		IVector2 turnedPoint = turnPoint(point);
 		return switch (fieldTurn)
 				{
-					case NORMAL -> turnedPoint.addNew(Vector2.fromX(height));
-					case T90 -> turnedPoint;
-					case T180 -> turnedPoint.addNew(Vector2.fromY(width));
-					case T270 -> turnedPoint.addNew(Vector2.fromXY(width, height));
+					case NORMAL -> turnedPoint.addNew(Vector2.fromY(width));
+					case T90 -> turnedPoint.addNew(Vector2.fromXY(width, height));
+					case T180 -> turnedPoint.addNew(Vector2.fromX(height));
+					case T270 -> turnedPoint;
 				};
 	}
 
@@ -137,10 +137,10 @@ public class FieldTransformation implements IDrawableTool
 	{
 		return switch (fieldTurn)
 				{
-					case NORMAL -> Vector2.fromXY(-point.x(), point.y());
-					case T90 -> Vector2.fromXY(point.y(), point.x());
-					case T180 -> Vector2.fromXY(point.x(), -point.y());
-					case T270 -> Vector2.fromXY(-point.y(), -point.x());
+					case NORMAL -> Vector2.fromXY(point.x(), -point.y());
+					case T90 -> Vector2.fromXY(-point.y(), -point.x());
+					case T180 -> Vector2.fromXY(-point.x(), point.y());
+					case T270 -> Vector2.fromXY(point.y(), point.x());
 				};
 	}
 
