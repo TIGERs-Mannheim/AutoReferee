@@ -8,7 +8,8 @@ We use Gradle for building the application and IntelliJ as the primary IDE.
 All dependencies will be downloaded automatically, so you need an internet connection for the build.
 
 ## System Requirements
- * Java JDK 17
+ * Java JDK (recent LTS version, exact required version can be
+  found [here](buildSrc/src/main/groovy/sumatra.java.gradle))
  * Internet connection
  * no limitations on OS known
 
