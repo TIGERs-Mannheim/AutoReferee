@@ -66,4 +66,9 @@ public final class EWpShapesLayer
 			.category(FIELD));
 	public static final IShapeLayerIdentifier VISION = F.create(F.layer("Vision")
 			.category(FIELD));
+
+	public static final IShapeLayerIdentifier CAM_OBJECT_FILTER = F.create(F.layer("CamObject Filter")
+			.category(FIELD)
+			.category(BASIC)
+			.visibleByDefault(true));
 }

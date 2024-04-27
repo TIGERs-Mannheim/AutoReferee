@@ -16,7 +16,12 @@ import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
+import edu.tigers.sumatra.cam.data.CamObjectFilterParams;
 import edu.tigers.sumatra.data.TimestampBasedBuffer;
+import edu.tigers.sumatra.drawable.DrawableBorderText;
+import edu.tigers.sumatra.drawable.DrawableRectangle;
+import edu.tigers.sumatra.drawable.EFontSize;
+import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
 import edu.tigers.sumatra.geometry.Geometry;
@@ -56,8 +61,10 @@ import edu.tigers.sumatra.wp.util.DefaultRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.GameStateCalculator;
 import edu.tigers.sumatra.wp.util.IRobotInfoProvider;
 import edu.tigers.sumatra.wp.util.MalFunctioningBotCalculator;
+import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 import lombok.extern.log4j.Log4j2;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -127,6 +134,7 @@ public class WorldInfoCollector extends AWorldPredictor
 	private AVisionFilter visionFilter;
 	private IRobotInfoProvider robotInfoProvider = new DefaultRobotInfoProvider();
 	private Referee referee;
+	private ACam cam;
 	private CiGameControllerConnector ciGameControllerConnector;
 	private long lastWFTimestamp;
 	private RefereeMsg latestRefereeMsg;
@@ -253,7 +261,33 @@ public class WorldInfoCollector extends AWorldPredictor
 		notifyNewShapeMap(lastWFTimestamp, wfShapeMap, WP_SHAPE_MAP_SOURCE);
 
 		ShapeMap visionShapeMap = camFrameShapeMapProducer.createShapeMap();
+		addCamObjectFilterShapes(visionShapeMap);
 		notifyNewShapeMap(lastWFTimestamp, visionShapeMap, VISION_SHAPE_MAP_SOURCE);
+	}
+
+
+	private void addCamObjectFilterShapes(ShapeMap shapeMap)
+	{
+		if (cam == null)
+		{
+			return;
+		}
+		cam.getParams()
+				.ifPresent(p -> shapeMap.get(EWpShapesLayer.CAM_OBJECT_FILTER).addAll(createCamObjectFilterShapes(p)));
+	}
+
+
+	private List<IDrawableShape> createCamObjectFilterShapes(CamObjectFilterParams p)
+	{
+		var rectangle = new DrawableRectangle(p.exclusionRectangle(), Color.red);
+		if (p.excludedCamIds().isEmpty())
+		{
+			return List.of(rectangle);
+		}
+		var camIdStrings = p.excludedCamIds().stream().map(Object::toString).sorted().toList();
+		var cams = new DrawableBorderText(Vector2.fromXY(1, 8), "Excluded cams: " + String.join(", ", camIdStrings))
+				.setFontSize(EFontSize.LARGE).setColor(Color.RED);
+		return List.of(rectangle, cams);
 	}
 
 
@@ -438,13 +472,17 @@ public class WorldInfoCollector extends AWorldPredictor
 
 	private void registerToCamModule()
 	{
-		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(cam -> cam.addObserver(this));
+		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(c -> {
+			this.cam = c;
+			c.addObserver(this);
+		});
 	}
 
 
 	private void unregisterFromCamModule()
 	{
-		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(cam -> cam.removeObserver(this));
+		SumatraModel.getInstance().getModuleOpt(ACam.class).ifPresent(c -> c.removeObserver(this));
+		cam = null;
 	}
 
 
