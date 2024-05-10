@@ -13,14 +13,13 @@ import spock.lang.Specification
 import static org.hamcrest.Matchers.closeTo
 import static spock.util.matcher.HamcrestSupport.expect
 
-class MovingRobotSpec extends Specification {
+class AcceleratingRobotFactorySpec extends Specification {
     BangBangTrajectoryFactory factory = new BangBangTrajectoryFactory()
 
     def "Bot trajectory close to moving horizon after #t s with #botSpeed m/s"(double t, double botSpeed) {
         given:
         double velMax = 3
         double accMax = 4
-        double tMax = 2.0
         double radius = 90
         double opponentBotReactionTime = 0.0
         ITrajectory<IVector2> trajectory = factory.sync(
@@ -30,12 +29,12 @@ class MovingRobotSpec extends Specification {
                 velMax,
                 accMax,
         )
-        MovingRobot movingRobot = MovingRobot.create(
+        IMovingRobot movingRobot = AcceleratingRobotFactory.create(
                 trajectory.getPositionMM(0),
                 trajectory.getVelocity(0),
                 velMax,
-                accMax,
-                tMax,
+                accMax
+                ,
                 radius,
                 opponentBotReactionTime
         )
