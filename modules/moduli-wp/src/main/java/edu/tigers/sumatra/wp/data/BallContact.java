@@ -126,4 +126,14 @@ public class BallContact
 	{
 		return (current - visionEnd) * 1e-9 < horizon;
 	}
+
+
+	/**
+	 * @return true, if the ball had contact within the last 0.2 seconds
+	 */
+	public boolean hadRecentContactFromVision()
+	{
+		return hadContactFromVision(recentContactHorizon);
+	}
+
 }
