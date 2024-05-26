@@ -60,6 +60,13 @@ public abstract class AVector2 extends AVector implements IVector2
 
 
 	@Override
+	public double getLengthSqr()
+	{
+		return x() * x() + y() * y();
+	}
+
+
+	@Override
 	public double getAngle()
 	{
 		return VectorMath.getAngle(this);
