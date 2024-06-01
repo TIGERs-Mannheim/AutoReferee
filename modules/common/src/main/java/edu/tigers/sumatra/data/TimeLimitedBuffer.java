@@ -73,7 +73,7 @@ public class TimeLimitedBuffer<T>
 		}
 		while (data.size() > maxElements)
 		{
-			data.remove(0);
+			data.removeFirst();
 		}
 	}
 
@@ -85,11 +85,11 @@ public class TimeLimitedBuffer<T>
 			// no duration limit
 			return;
 		}
-		long maxTimestamp = data.get(data.size() - 1).timestamp;
+		long maxTimestamp = data.getLast().timestamp;
 		long minTimestamp = maxTimestamp - (long) (maxDuration * 1e9);
-		while (!data.isEmpty() && data.get(0).timestamp < minTimestamp)
+		while (!data.isEmpty() && data.getFirst().timestamp < minTimestamp)
 		{
-			data.remove(0);
+			data.removeFirst();
 		}
 	}
 
@@ -105,9 +105,9 @@ public class TimeLimitedBuffer<T>
 			// no duration limit
 			return;
 		}
-		while (!data.isEmpty() && data.get(0).timestamp < currentTimestamp - (long) (maxDuration * 1e9))
+		while (!data.isEmpty() && data.getFirst().timestamp < currentTimestamp - (long) (maxDuration * 1e9))
 		{
-			data.remove(0);
+			data.removeFirst();
 		}
 	}
 
