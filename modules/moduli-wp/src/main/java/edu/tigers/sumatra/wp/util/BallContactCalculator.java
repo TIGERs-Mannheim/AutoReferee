@@ -87,9 +87,12 @@ public class BallContactCalculator
 			ballPossTolerance = BALL_POSS_TOLERANCE_GET;
 		}
 
-		final IVector2 optimalBallPossPos = BotShape.getKickerCenterPos(pose.getPos(), pose.getOrientation(),
-				center2Dribbler + Geometry.getBallRadius());
-		return optimalBallPossPos.distanceTo(ballPos) < ballPossTolerance;
+		var kickerLine = BotShape.fromFullSpecification(
+				pose.getPos(),
+				robotInfo.getBotParams().getDimensions().getDiameter() / 2,
+				center2Dribbler, pose.getOrientation()
+		).getKickerLine();
+		return kickerLine.distanceTo(ballPos) < ballPossTolerance + Geometry.getBallRadius();
 	}
 
 
