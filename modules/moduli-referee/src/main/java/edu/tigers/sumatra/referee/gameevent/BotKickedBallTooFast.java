@@ -16,7 +16,7 @@ import lombok.Value;
 @Persistent
 @Value
 @EqualsAndHashCode(callSuper = true)
-public class BotKickedBallToFast extends AGameEvent
+public class BotKickedBallTooFast extends AGameEvent
 {
 	ETeamColor team;
 	int bot;
@@ -26,7 +26,7 @@ public class BotKickedBallToFast extends AGameEvent
 
 
 	@SuppressWarnings("unsued") // used by berkeley
-	protected BotKickedBallToFast()
+	protected BotKickedBallTooFast()
 	{
 		team = null;
 		bot = 0;
@@ -41,7 +41,7 @@ public class BotKickedBallToFast extends AGameEvent
 	 *
 	 * @param event a protobuf event
 	 */
-	public BotKickedBallToFast(SslGcGameEvent.GameEvent event)
+	public BotKickedBallTooFast(SslGcGameEvent.GameEvent event)
 	{
 		super(event);
 		this.team = toTeamColor(event.getBotKickedBallTooFast().getByTeam());
@@ -58,7 +58,7 @@ public class BotKickedBallToFast extends AGameEvent
 	 * @param initialBallSpeed [m/s]
 	 * @param kickType
 	 */
-	public BotKickedBallToFast(BotID bot, IVector2 location, double initialBallSpeed, EKickType kickType)
+	public BotKickedBallTooFast(BotID bot, IVector2 location, double initialBallSpeed, EKickType kickType)
 	{
 		super(EGameEvent.BOT_KICKED_BALL_TOO_FAST);
 		this.team = bot.getTeamColor();

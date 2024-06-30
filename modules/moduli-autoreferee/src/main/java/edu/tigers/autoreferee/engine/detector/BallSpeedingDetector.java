@@ -7,7 +7,7 @@ import com.github.g3force.configurable.Configurable;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.referee.data.EGameState;
-import edu.tigers.sumatra.referee.gameevent.BotKickedBallToFast;
+import edu.tigers.sumatra.referee.gameevent.BotKickedBallTooFast;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.wp.data.KickedBall;
 
@@ -123,12 +123,12 @@ public class BallSpeedingDetector extends AGameEventDetector
 
 	private IGameEvent createViolation(BotID violator, double lastSpeedEstimate)
 	{
-		BotKickedBallToFast.EKickType kickType = frame.getPreviousFrame().getWorldFrame().getKickedBall()
+		BotKickedBallTooFast.EKickType kickType = frame.getPreviousFrame().getWorldFrame().getKickedBall()
 				.map(s -> s.getKickVel().z() > 0).orElse(false)
-				? BotKickedBallToFast.EKickType.CHIPPED
-				: BotKickedBallToFast.EKickType.STRAIGHT;
+				? BotKickedBallTooFast.EKickType.CHIPPED
+				: BotKickedBallTooFast.EKickType.STRAIGHT;
 
-		return new BotKickedBallToFast(violator, lastReportedKickEvent.getPosition(), lastSpeedEstimate, kickType);
+		return new BotKickedBallTooFast(violator, lastReportedKickEvent.getPosition(), lastSpeedEstimate, kickType);
 	}
 
 
