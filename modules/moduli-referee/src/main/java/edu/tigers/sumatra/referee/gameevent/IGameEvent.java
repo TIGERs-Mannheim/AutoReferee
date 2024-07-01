@@ -4,6 +4,7 @@
 package edu.tigers.sumatra.referee.gameevent;
 
 
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 
 import java.util.List;
@@ -44,4 +45,9 @@ public interface IGameEvent
 	List<String> getOrigins();
 
 	long getCreatedTimestamp();
+
+	/**
+	 * @return the team that caused the event, it might return neutral if unclear
+	 */
+	ETeamColor getTeam();
 }
