@@ -295,4 +295,12 @@ public abstract class AVector2 extends AVector implements IVector2
 	{
 		return VectorMath.farthestTo(this, Arrays.asList(points));
 	}
+
+
+	@Override
+	public Vector2 projectOntoThis(IVector2 other)
+	{
+		var normalized = normalizeNew();
+		return normalized.multiply(normalized.scalarProduct(other));
+	}
 }
