@@ -108,7 +108,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		);
 
 		viewPanel.getShapeSelectionPanel().getTree().setModel(shapeSelectionModel);
-		viewPanel.getShapeSelectionPanel().getTree().setExpandsSelectedPaths(true);
+		viewPanel.getShapeSelectionPanel().getTree().setDigIn(false);
 		viewPanel.getShapeSelectionPanel().getTree().getCheckBoxTreeSelectionModel()
 				.addTreeSelectionListener(this::onSelectionChanged);
 
