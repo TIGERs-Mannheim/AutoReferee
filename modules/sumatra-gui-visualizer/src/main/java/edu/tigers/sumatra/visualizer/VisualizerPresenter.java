@@ -18,6 +18,7 @@ import edu.tigers.sumatra.visualizer.field.VisualizerFieldPresenter;
 import edu.tigers.sumatra.visualizer.field.components.BallInteractor;
 import edu.tigers.sumatra.visualizer.field.recorder.MediaRecorder;
 import edu.tigers.sumatra.visualizer.options.ShapeSelectionModel;
+import edu.tigers.sumatra.visualizer.options.ShapeTreeCellRenderer;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import lombok.Getter;
@@ -104,13 +105,16 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 				viewPanel.getToolbar().getShapeSelection(),
 				"shapeSelection.visible",
 				true,
-				b -> viewPanel.getShapeSelectionPanel().setVisible(b)
+				this::setShapeSelectionPanelVisibility
 		);
 
 		viewPanel.getShapeSelectionPanel().getTree().setModel(shapeSelectionModel);
 		viewPanel.getShapeSelectionPanel().getTree().setDigIn(false);
 		viewPanel.getShapeSelectionPanel().getTree().getCheckBoxTreeSelectionModel()
 				.addTreeSelectionListener(this::onSelectionChanged);
+		viewPanel.getShapeSelectionPanel().getTree().setCellRenderer(new ShapeTreeCellRenderer());
+		viewPanel.getShapeSelectionPanel().getExpandAll().addActionListener(this::expandAll);
+		viewPanel.getShapeSelectionPanel().getCollapseAll().addActionListener(this::collapseAll);
 
 		viewPanel.getToolbar().getTurnCounterClockwise().addActionListener(a -> fieldPresenter.turnCounterClockwise());
 		viewPanel.getToolbar().getTurnClockwise().addActionListener(a -> fieldPresenter.turnClockwise());
@@ -119,6 +123,18 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		viewPanel.getToolbar().getRecordVideoSelection().addActionListener(this::recordVideoCurrentSelection);
 		viewPanel.getToolbar().getTakeScreenshotFull().addActionListener(this::takeScreenshotFull);
 		viewPanel.getToolbar().getTakeScreenshotSelection().addActionListener(this::takeScreenshotSelection);
+
+		viewPanel.getSplitPane().setDividerLocation(0.8);
+	}
+
+
+	private void setShapeSelectionPanelVisibility(boolean visible)
+	{
+		viewPanel.getShapeSelectionPanel().setVisible(visible);
+		if (visible)
+		{
+			viewPanel.getSplitPane().setDividerLocation(0.8);
+		}
 	}
 
 
@@ -256,6 +272,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 			fieldPresenter.setShapeLayerVisibility(layer.getId(), visible);
 			SumatraModel.getInstance().setUserProperty(layer.getId(), String.valueOf(visible));
 		});
+		viewPanel.getShapeSelectionPanel().getTree().updateUI();
 	}
 
 
@@ -306,6 +323,20 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		var treePath = new TreePath(node.getPath());
 		var checkBoxTreeSelectionModel = viewPanel.getShapeSelectionPanel().getTree().getCheckBoxTreeSelectionModel();
 		SwingUtilities.invokeLater(() -> checkBoxTreeSelectionModel.removeSelectionPath(treePath));
+	}
+
+
+	private void expandAll(ActionEvent e)
+	{
+		var tree = viewPanel.getShapeSelectionPanel().getTree();
+		shapeSelectionModel.getAllNonLeafPaths().forEach(tree::expandPath);
+	}
+
+
+	private void collapseAll(ActionEvent e)
+	{
+		var tree = viewPanel.getShapeSelectionPanel().getTree();
+		shapeSelectionModel.getAllNonLeafPaths().forEach(tree::collapsePath);
 	}
 
 
