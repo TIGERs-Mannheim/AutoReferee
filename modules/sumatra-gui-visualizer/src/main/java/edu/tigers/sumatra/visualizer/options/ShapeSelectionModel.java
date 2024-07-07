@@ -12,8 +12,12 @@ import lombok.extern.log4j.Log4j2;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -87,6 +91,35 @@ public class ShapeSelectionModel extends DefaultTreeModel
 				shapeLayer,
 				name -> addLeaf(parentNode, shapeLayer)
 		));
+	}
+
+
+	private List<TreePath> getAllPaths()
+	{
+		return iterateNode((DefaultMutableTreeNode) root).stream()
+				.sorted(Comparator.comparingInt(TreePath::getPathCount).reversed())
+				.toList();
+	}
+
+
+	public List<TreePath> getAllNonLeafPaths()
+	{
+		return getAllPaths().stream()
+				.filter(p -> !isLeaf(p.getLastPathComponent()))
+				.toList();
+	}
+
+
+	private List<TreePath> iterateNode(DefaultMutableTreeNode node)
+	{
+		var children = node.children();
+		List<TreePath> paths = new ArrayList<>();
+		paths.add(new TreePath(node.getPath()));
+		while (children.hasMoreElements())
+		{
+			paths.addAll(iterateNode((DefaultMutableTreeNode) children.nextElement()));
+		}
+		return paths;
 	}
 
 
