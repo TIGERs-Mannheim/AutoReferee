@@ -9,7 +9,6 @@ import edu.tigers.sumatra.drawable.DrawableArrow;
 import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.DrawablePlanarCurve;
-import edu.tigers.sumatra.drawable.DrawablePoint;
 import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.animated.AnimatedCrosshair;
@@ -82,9 +81,6 @@ public class BallVisCalc implements IWpCalc
 			ballCurve.setColor(Color.PINK);
 			shapeMap.get(EWpShapesLayer.BALL_PREDICTION).add(ballCurve);
 
-			wfw.getSimpleWorldFrame().getKickedBall().ifPresent(state -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
-					.add(new DrawableArrow(state.getKickPos(), state.getKickVel().getXYVector().multiplyNew(100))
-							.setColor(Color.magenta)));
 		}
 
 		ball.getTrajectory().getTravelLinesRolling().forEach(rollLine -> {
@@ -97,7 +93,7 @@ public class BallVisCalc implements IWpCalc
 		});
 
 		wfw.getSimpleWorldFrame().getKickedBall().ifPresent(kickedBall -> shapeMap.get(EWpShapesLayer.BALL_PREDICTION)
-				.add(new DrawablePoint(kickedBall.getKickPos(), Color.red)
-						.withSize(50)));
+				.add(new DrawableArrow(kickedBall.getKickPos(), kickedBall.getKickVel().getXYVector().multiplyNew(100))
+						.setColor(Color.magenta)));
 	}
 }
