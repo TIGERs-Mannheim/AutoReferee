@@ -22,6 +22,7 @@ import edu.tigers.sumatra.visualizer.options.ShapeTreeCellRenderer;
 import edu.tigers.sumatra.wp.AWorldPredictor;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 
@@ -59,6 +60,9 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	private final VisualizerFieldPresenter fieldPresenter = new VisualizerFieldPresenter(
 			viewPanel.getFieldPanel()
 	);
+
+	@Setter
+	private String propertiesPrefix = VisualizerPresenter.class.getCanonicalName() + ".";
 
 	private final BallInteractor ballInteractor = new BallInteractor();
 	private final MediaRecorder mediaRecorder = new MediaRecorder();
@@ -140,10 +144,10 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 	private void connect(JTextField textField, String key, String defValue, Consumer<String> consumer)
 	{
-		String value = SumatraModel.getInstance().getUserProperty(VisualizerPresenter.class, key, defValue);
+		String value = SumatraModel.getInstance().getUserProperty(propertiesPrefix + key, defValue);
 		textField.setText(value);
 		textField.getDocument().addDocumentListener((SimpleDocumentListener) e -> {
-			SumatraModel.getInstance().setUserProperty(VisualizerPresenter.class, key, textField.getText());
+			SumatraModel.getInstance().setUserProperty(propertiesPrefix + key, textField.getText());
 			consumer.accept(textField.getText());
 		});
 		consumer.accept(textField.getText());
@@ -152,11 +156,11 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 	private void connect(AbstractButton button, String key, boolean defValue, Consumer<Boolean> consumer)
 	{
-		boolean value = SumatraModel.getInstance().getUserProperty(VisualizerPresenter.class, key, defValue);
+		boolean value = SumatraModel.getInstance().getUserProperty(propertiesPrefix + key, defValue);
 		button.setSelected(value);
 		button.addActionListener(e -> consumer.accept(button.isSelected()));
 		button.addActionListener(e -> SumatraModel.getInstance()
-				.setUserProperty(VisualizerPresenter.class, key, String.valueOf(button.isSelected())));
+				.setUserProperty(propertiesPrefix + key, String.valueOf(button.isSelected())));
 		consumer.accept(button.isSelected());
 	}
 
@@ -270,7 +274,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		shapeSelectionModel.getLayers().forEach((layer, node) -> {
 			boolean visible = isSelected(node);
 			fieldPresenter.setShapeLayerVisibility(layer.getId(), visible);
-			SumatraModel.getInstance().setUserProperty(layer.getId(), String.valueOf(visible));
+			SumatraModel.getInstance().setUserProperty(propertiesPrefix + layer.getId(), String.valueOf(visible));
 		});
 		viewPanel.getShapeSelectionPanel().getTree().updateUI();
 	}
@@ -296,7 +300,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		if (node.getUserObject() instanceof IShapeLayerIdentifier shapeLayer)
 		{
 			boolean visible = SumatraModel.getInstance().getUserProperty(
-					shapeLayer.getId(),
+					propertiesPrefix + shapeLayer.getId(),
 					shapeLayer.isVisibleByDefault()
 			);
 			if (visible)
