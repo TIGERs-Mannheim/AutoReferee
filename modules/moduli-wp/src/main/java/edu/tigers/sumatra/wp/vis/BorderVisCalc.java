@@ -35,7 +35,7 @@ public class BorderVisCalc implements IWpCalc
 	@Override
 	public void process(final WorldFrameWrapper wfw, final ShapeMap shapeMap)
 	{
-		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS);
+		List<IDrawableShape> shapes = shapeMap.get(EWpShapesLayer.FIELD_LINES_REGULAR);
 
 		var widthHalf = Geometry.getFieldWidth() / 2.0;
 		var lengthHalf = Geometry.getFieldLength() / 2.0;
@@ -48,7 +48,7 @@ public class BorderVisCalc implements IWpCalc
 		drawLine(shapes, new DrawableShapeBoundary(Geometry.getPenaltyAreaOur()));
 		drawLine(shapes, new DrawableShapeBoundary(Geometry.getPenaltyAreaTheir()));
 
-		List<IDrawableShape> additionalShapes = shapeMap.get(EWpShapesLayer.FIELD_BORDERS_ADDITIONAL);
+		List<IDrawableShape> additionalShapes = shapeMap.get(EWpShapesLayer.FIELD_LINES_ADDITIONAL);
 		drawLine(additionalShapes, new DrawableLine(Vector2.fromX(-lengthHalf), Vector2.fromX(lengthHalf)));
 		drawLine(additionalShapes,
 				new DrawableLine(Vector2.fromXY(-lengthQuarter, -widthHalf), Vector2.fromXY(-lengthQuarter, widthHalf)));

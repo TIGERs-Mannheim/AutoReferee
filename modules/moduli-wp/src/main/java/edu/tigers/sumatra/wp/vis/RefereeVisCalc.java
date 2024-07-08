@@ -122,8 +122,8 @@ public class RefereeVisCalc implements IWpCalc
 		txtShapes.add(text(8, 2, proposedGameEvents));
 		txtShapes.add(text(8, 3, getSubstitutionString(msg)));
 
-		shapeMap.get(EWpShapesLayer.REFEREE).addAll(txtShapes);
-		paintShapes(shapeMap.get(EWpShapesLayer.REFEREE), wfw);
+		shapeMap.get(EWpShapesLayer.REFEREE_HEADER).addAll(txtShapes);
+		paintShapes(shapeMap.get(EWpShapesLayer.REFEREE_HEADER), wfw);
 	}
 
 
