@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 @Log4j2
@@ -33,6 +34,7 @@ public class ShapeSelectionModel extends DefaultTreeModel
 	private final Map<ShapeMapSource, DefaultMutableTreeNode> sourceCategories = new HashMap<>();
 	@Getter
 	private final Map<IShapeLayerIdentifier, DefaultMutableTreeNode> layers = new HashMap<>();
+	@Getter
 	private final Map<ShapeCategoryId, DefaultMutableTreeNode> layerCategories = new HashMap<>();
 
 
@@ -94,27 +96,60 @@ public class ShapeSelectionModel extends DefaultTreeModel
 	}
 
 
-	private List<TreePath> getAllPaths()
+	private Stream<DefaultMutableTreeNode> getAllNodes()
 	{
-		return iterateNode((DefaultMutableTreeNode) root).stream()
-				.sorted(Comparator.comparingInt(TreePath::getPathCount).reversed())
-				.toList();
+		return iterateNode((DefaultMutableTreeNode) root).stream();
 	}
 
 
-	public List<TreePath> getAllNonLeafPaths()
+	public Stream<TreePath> getAllNonLeafPaths()
 	{
-		return getAllPaths().stream()
-				.filter(p -> !isLeaf(p.getLastPathComponent()))
-				.toList();
+		return getAllNonLeafNodes()
+				.map(DefaultMutableTreeNode::getPath)
+				.map(TreePath::new);
 	}
 
 
-	private List<TreePath> iterateNode(DefaultMutableTreeNode node)
+	public Stream<DefaultMutableTreeNode> getAllNonLeafNodes()
+	{
+		return getAllNodes()
+				.filter(node -> !node.isLeaf())
+				.sorted(Comparator.comparingInt(node -> -node.getPath().length));
+	}
+
+
+	public Stream<DefaultMutableTreeNode> getAllLayerNodes()
+	{
+		return getAllNodes()
+				.filter(this::isLayer);
+	}
+
+
+	public boolean isSource(DefaultMutableTreeNode node)
+	{
+		return sourcesNode.isNodeDescendant(node);
+	}
+
+
+	public boolean isLayer(DefaultMutableTreeNode node)
+	{
+		return layersNode.isNodeDescendant(node);
+	}
+
+
+	public Stream<DefaultMutableTreeNode> getAllLayerNonLeafNodes()
+	{
+		return getAllNodes()
+				.filter(node -> !node.isLeaf())
+				.filter(this::isLayer);
+	}
+
+
+	private List<DefaultMutableTreeNode> iterateNode(DefaultMutableTreeNode node)
 	{
 		var children = node.children();
-		List<TreePath> paths = new ArrayList<>();
-		paths.add(new TreePath(node.getPath()));
+		List<DefaultMutableTreeNode> paths = new ArrayList<>();
+		paths.add(node);
 		while (children.hasMoreElements())
 		{
 			paths.addAll(iterateNode((DefaultMutableTreeNode) children.nextElement()));

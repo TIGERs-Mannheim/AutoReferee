@@ -353,6 +353,43 @@ public final class SumatraModel extends Moduli
 
 
 	/**
+	 * Calls {@link Properties#getProperty(String)} and parses value to double
+	 *
+	 * @param key
+	 * @param def
+	 * @return The double associated with the given key
+	 */
+	public double getUserProperty(String key, double def)
+	{
+		String val = getUserProperty(key);
+		if (val == null)
+		{
+			return def;
+		}
+		return Double.parseDouble(val);
+	}
+
+
+	/**
+	 * Calls {@link Properties#getProperty(String)} and parses value to double
+	 *
+	 * @param type
+	 * @param key
+	 * @param def
+	 * @return The double associated with the given key
+	 */
+	public double getUserProperty(Class<?> type, String key, double def)
+	{
+		String val = getUserProperty(type, key);
+		if (val == null)
+		{
+			return def;
+		}
+		return Double.parseDouble(val);
+	}
+
+
+	/**
 	 * Sumatra version
 	 *
 	 * @return
