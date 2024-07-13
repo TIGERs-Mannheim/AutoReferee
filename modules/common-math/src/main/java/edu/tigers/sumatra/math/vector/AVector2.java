@@ -303,4 +303,14 @@ public abstract class AVector2 extends AVector implements IVector2
 		var normalized = normalizeNew();
 		return normalized.multiply(normalized.scalarProduct(other));
 	}
+
+
+	@Override
+	public Vector2 addMagnitude(IVector2 offset)
+	{
+		return Vector2.fromXY(
+				SumatraMath.addMagnitude(x(), offset.x()),
+				SumatraMath.addMagnitude(y(), offset.y())
+		);
+	}
 }

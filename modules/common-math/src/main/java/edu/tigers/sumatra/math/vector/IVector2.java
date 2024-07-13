@@ -270,4 +270,12 @@ public interface IVector2 extends IVector, IEuclideanDistance
 	 * @return
 	 */
 	Vector2 projectOntoThis(IVector2 other);
+
+	/**
+	 * Add a magnitude to the absolute of this vector.
+	 *
+	 * @param offset the magnitude to add
+	 * @return the result
+	 */
+	Vector2 addMagnitude(IVector2 offset);
 }
