@@ -535,8 +535,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		int width = parseInt(viewPanel.getToolbar().getCaptureSettingsDialog().getTxtRecordingWidth().getText());
 		int height = parseInt(viewPanel.getToolbar().getCaptureSettingsDialog().getTxtRecordingHeight().getText());
 
-		SumatraModel.getInstance().setUserProperty(VisualizerPresenter.class, "recording.width", width);
-		SumatraModel.getInstance().setUserProperty(VisualizerPresenter.class, "recording.height", height);
+		SumatraModel.getInstance().setUserProperty(VisualizerPresenter.class, "recording.width", String.valueOf(width));
+		SumatraModel.getInstance().setUserProperty(VisualizerPresenter.class, "recording.height", String.valueOf(width));
 
 		mediaRecorder.getFieldPane().setAddBorderOffset(fieldPresenter.getFieldPane().isAddBorderOffset());
 
