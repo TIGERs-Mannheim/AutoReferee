@@ -4,16 +4,27 @@
 
 package edu.tigers.sumatra.config;
 
-import net.miginfocom.swing.MigLayout;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.tree.ConfigurationNode;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.Serial;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /**
@@ -26,11 +37,16 @@ public class ConfigEditorPanel extends JPanel
 
 	private final JTabbedPane tabpane;
 	private final SortedMap<String, EditorView> tabs = new TreeMap<>();
+	private final ConfigEditorSearchBar searchBar = new ConfigEditorSearchBar();
+
+	private String searchTokens = "";
+	private String latestName = "";
+	private HierarchicalConfiguration latestConfig = null;
 
 
 	public ConfigEditorPanel()
 	{
-		setLayout(new MigLayout("fill, wrap 1, inset 0"));
+		setLayout(new BorderLayout());
 
 		tabpane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
 		tabpane.addChangeListener(e -> {
@@ -38,7 +54,11 @@ public class ConfigEditorPanel extends JPanel
 			EditorView ev = (EditorView) c;
 			ev.initialReload();
 		});
-		add(tabpane, "grow");
+
+		searchBar.getTextField().getDocument().addDocumentListener(new SearchBarListener());
+
+		add(searchBar, BorderLayout.NORTH);
+		add(tabpane, BorderLayout.CENTER);
 	}
 
 
@@ -52,8 +72,8 @@ public class ConfigEditorPanel extends JPanel
 		{
 			return;
 		}
-		final EditorView newView = new EditorView(client, client, new HierarchicalConfiguration(),
-				true);
+		final EditorView newView = new EditorView(client, client, new HierarchicalConfiguration()
+		);
 		newView.addObserver(observer);
 
 		String configKey = newView.getConfigKey();
@@ -79,9 +99,126 @@ public class ConfigEditorPanel extends JPanel
 	 * @param name
 	 * @param config
 	 */
-	public void refreshConfigModel(final String name, final HierarchicalConfiguration config)
+	public void refreshConfigModel(String name, HierarchicalConfiguration config)
 	{
-		final EditorView view = tabs.get(name);
-		view.updateModel(config, true);
+		latestName = name;
+		latestConfig = config;
+
+		var view = tabs.get(name);
+		var model = new ConfigXMLTreeTableModel(config);
+
+		if (!searchTokens.isEmpty())
+		{
+			view.updateModel(filterModel(config, model), true);
+		} else
+		{
+			view.updateModel(model, false);
+		}
+	}
+
+
+	private ConfigXMLTreeTableModel filterModel(HierarchicalConfiguration config, ConfigXMLTreeTableModel model)
+	{
+		var filteredConfig = new HierarchicalConfiguration();
+		var filteredRoot = filterConfigNode(config.getRootNode(), model, false).map(FilterResult::node);
+		filteredRoot.ifPresent(filteredConfig::setRootNode);
+		return new ConfigXMLTreeTableModel(filteredConfig);
+	}
+
+
+	private Optional<FilterResult> filterConfigNode(ConfigurationNode originalNode, ConfigXMLTreeTableModel model,
+			boolean someParentIsMatching)
+	{
+		int score = matchingScore(originalNode, model);
+		boolean matching = someParentIsMatching || score >= 85;
+		var newChildren = originalNode.getChildren().stream()
+				.map(node -> filterConfigNode(node, model, someParentIsMatching || matching))
+				.flatMap(Optional::stream)
+				.sorted(Comparator.comparingInt(FilterResult::matchingScore).reversed())
+				.toList();
+
+		if (newChildren.isEmpty() && !matching)
+		{
+			return Optional.empty();
+		}
+
+		var newNode = new HierarchicalConfiguration.Node(originalNode.getName(), originalNode.getValue());
+		newNode.setReference(originalNode.getReference());
+		newChildren.forEach(child -> newNode.addChild(child.node));
+
+		var newAttributes = originalNode.getAttributes().stream()
+				.map(node -> filterConfigNode(node, model, true))
+				.flatMap(Optional::stream)
+				.toList();
+		newAttributes.forEach(attrib -> newNode.addAttribute(attrib.node));
+		return Optional.of(new FilterResult(score, newNode));
+	}
+
+
+	private int matchingScore(ConfigurationNode node, ConfigXMLTreeTableModel model)
+	{
+		var stringsToCheck = Stream.concat(
+				Stream.of(node.getName()),
+				IntStream.range(0, model.getColumnCount())
+						.mapToObj(i -> model.getValueAt(node, i))
+						.filter(Objects::nonNull)
+						.filter(String.class::isInstance)
+						.map(String.class::cast)
+		);
+
+		var description = stringsToCheck
+				.map(s -> s.split(" "))
+				.flatMap(Arrays::stream)
+				.map(String::strip)
+				.filter(s -> !s.isEmpty())
+				.map(String::toLowerCase)
+				.collect(Collectors.joining(" "));
+
+		return FuzzySearch.tokenSetPartialRatio(description, searchTokens);
+	}
+
+
+	private record FilterResult(int matchingScore, ConfigurationNode node)
+	{
+	}
+
+
+	private class SearchBarListener implements DocumentListener
+	{
+
+		@Override
+		public void insertUpdate(DocumentEvent documentEvent)
+		{
+			applySearch();
+		}
+
+
+		@Override
+		public void removeUpdate(DocumentEvent documentEvent)
+		{
+			applySearch();
+		}
+
+
+		@Override
+		public void changedUpdate(DocumentEvent documentEvent)
+		{
+			applySearch();
+		}
+
+
+		private void applySearch()
+		{
+			searchTokens = Arrays.stream(searchBar.getTextField().getText().split(" "))
+					.map(String::toLowerCase)
+					.map(String::strip)
+					.filter(s -> !s.isEmpty())
+					.collect(Collectors.joining(" "));
+			if (latestConfig != null && latestName != null && tabs.get(latestName) != null)
+			{
+				refreshConfigModel(latestName, latestConfig);
+			}
+		}
+
 	}
 }

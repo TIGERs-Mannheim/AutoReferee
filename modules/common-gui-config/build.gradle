@@ -9,10 +9,12 @@ plugins {
 
 dependencies {
     implementation project(':common-gui')
+    implementation project(':sumatra-model')
 
     implementation(libs.com.github.g3force.configurable)
     implementation(libs.com.github.g3force.string2ValueConverter)
 
     implementation(libs.commons.configuration)
-    implementation(libs.com.miglayout.miglayout.swing)
+
+    implementation 'me.xdrop:fuzzywuzzy:1.4.0'
 }

@@ -254,7 +254,7 @@ public final class SumatraModel extends Moduli
 
 	public String setUserProperty(Class<?> type, String key, Object value)
 	{
-		return setUserProperty(type.getCanonicalName() + "." + key, String.valueOf(value));
+		return setUserProperty(type.getCanonicalName() + "." + key, value);
 	}
 
 
