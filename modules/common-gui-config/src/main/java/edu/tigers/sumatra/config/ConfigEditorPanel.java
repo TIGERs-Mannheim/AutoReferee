@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.config;
 
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.tree.ConfigurationNode;
@@ -13,9 +15,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
@@ -122,7 +128,9 @@ public class ConfigEditorPanel extends JPanel
 		var filteredConfig = new HierarchicalConfiguration();
 		var filteredRoot = filterConfigNode(config.getRootNode(), model, false).map(FilterResult::node);
 		filteredRoot.ifPresent(filteredConfig::setRootNode);
-		return new ConfigXMLTreeTableModel(filteredConfig);
+		var filteredModel = new ConfigXMLTreeTableModel(filteredConfig);
+		filteredModel.addTreeModelListener(new TreeChangeForwarder(model, filteredModel));
+		return filteredModel;
 	}
 
 
@@ -220,5 +228,78 @@ public class ConfigEditorPanel extends JPanel
 			}
 		}
 
+	}
+
+	@RequiredArgsConstructor
+	private static class TreeChangeForwarder implements TreeModelListener
+	{
+		@NonNull
+		private final ConfigXMLTreeTableModel originalModel;
+		@NonNull
+		private final ConfigXMLTreeTableModel filteredModel;
+
+
+		@Override
+		public void treeNodesChanged(TreeModelEvent treeModelEvent)
+		{
+			var filteredObj = (ConfigurationNode) treeModelEvent.getTreePath().getLastPathComponent();
+			for (var child : filteredObj.getChildren())
+			{
+				var originalChild = convertPath(treeModelEvent.getTreePath(), child).getLastPathComponent();
+				var value = filteredModel.getValueAt(child, 1);
+				originalModel.setValueAt(value, originalChild, 1);
+			}
+		}
+
+
+		private TreePath convertPath(TreePath oldTreePath, ConfigurationNode interestingChild)
+		{
+			var originalPath = new ArrayList<>(oldTreePath.getPathCount());
+
+			var originalNode = (ConfigurationNode) originalModel.getRoot();
+			@SuppressWarnings("squid:S6204") // Immutable on intention and sonar is too dumb to detect the list changes
+			var oldPath = Arrays.stream(oldTreePath.getPath()).collect(Collectors.toList());
+			// Handle root node manually
+			oldPath.removeFirst();
+			oldPath.addLast(interestingChild);
+			originalPath.addFirst(originalNode);
+
+
+			for (var filteredNodeObj : oldPath)
+			{
+				var filteredNode = (ConfigurationNode) filteredNodeObj;
+				for (var child : originalNode.getChildren())
+				{
+					if (child.getName().equals(filteredNode.getName()))
+					{
+						originalPath.addLast(child);
+						originalNode = child;
+						break;
+					}
+				}
+			}
+			return new TreePath(originalPath.toArray());
+		}
+
+
+		@Override
+		public void treeNodesInserted(TreeModelEvent treeModelEvent)
+		{
+			// Unused
+		}
+
+
+		@Override
+		public void treeNodesRemoved(TreeModelEvent treeModelEvent)
+		{
+			// Unused
+		}
+
+
+		@Override
+		public void treeStructureChanged(TreeModelEvent treeModelEvent)
+		{
+			// Unused
+		}
 	}
 }
