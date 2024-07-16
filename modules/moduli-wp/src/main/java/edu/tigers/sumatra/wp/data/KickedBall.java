@@ -13,6 +13,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 
 
@@ -28,6 +29,7 @@ public class KickedBall implements IMirrorable<KickedBall>
 	BotID kickingBot;
 	Pose kickingBotPose;
 
+	@EqualsAndHashCode.Exclude
 	IBallTrajectory ballTrajectory;
 
 
