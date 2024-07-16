@@ -39,4 +39,16 @@ public class CamGeometry
 				.ballModels(update.getBallModels())
 				.build();
 	}
+
+
+	/**
+	 * Check if ballModels have changed.
+	 *
+	 * @param compare
+	 * @return True if the models are equal
+	 */
+	public boolean equalBallModels(CamGeometry compare)
+	{
+		return ballModels.equals(compare.getBallModels());
+	}
 }

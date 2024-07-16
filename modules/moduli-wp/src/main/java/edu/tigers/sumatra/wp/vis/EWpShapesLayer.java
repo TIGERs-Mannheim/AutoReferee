@@ -63,4 +63,6 @@ public final class EWpShapesLayer
 			F.category(FIELD).category(CAT_BALL).layerName("Highlighter").visibleByDefault(true));
 	public static final IShapeLayerIdentifier BALL_PREDICTION = F.create(
 			F.category(FIELD).category(CAT_BALL).layerName("Prediction"));
+	public static final IShapeLayerIdentifier BALL_MODELS = F.create(
+			F.category(FIELD).category(CAT_BALL).layerName("Models"));
 }
