@@ -27,7 +27,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.StringUtils;
 
 import javax.swing.AbstractButton;
-import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
@@ -40,8 +39,6 @@ import javax.swing.tree.TreePath;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -76,7 +73,6 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	private final Set<Object> defaultVisibilityObtained = new HashSet<>();
 	@Setter
 	private String propertiesPrefix = VisualizerPresenter.class.getCanonicalName() + ".";
-	private final PropertyChangeListener dividerPositionChangeListener = this::dividerLocationChanged;
 	private Thread updateThread;
 	private boolean firstUpdate = true;
 
@@ -148,22 +144,10 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 	private void setShapeSelectionPanelVisibility(boolean visible)
 	{
-		if (!firstUpdate && !visible)
-		{
-			viewPanel.getSplitPane().removePropertyChangeListener(
-					JSplitPane.DIVIDER_LOCATION_PROPERTY,
-					dividerPositionChangeListener
-			);
-		}
 		viewPanel.getShapeSelectionPanel().setVisible(visible);
-		if (!firstUpdate && visible)
+		if (visible)
 		{
-			var prop = SumatraModel.getInstance().getUserProperty(propertiesPrefix + "dividerLocation", 0.8);
-			SwingUtilities.invokeLater(() -> viewPanel.getSplitPane().setDividerLocation(prop));
-			viewPanel.getSplitPane().addPropertyChangeListener(
-					JSplitPane.DIVIDER_LOCATION_PROPERTY,
-					dividerPositionChangeListener
-			);
+			viewPanel.getSplitPane().setDividerLocation(0.8);
 		}
 	}
 
@@ -210,6 +194,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		NamedThreadFactory factory = new NamedThreadFactory("VisualizerUpdater");
 		updateThread = factory.newThread(this::updateLoop);
 		updateThread.start();
+		firstUpdate = true;
 	}
 
 
@@ -234,6 +219,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(ballInteractor);
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(fieldPresenter);
+
+		firstUpdate = true;
 	}
 
 
@@ -285,18 +272,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 		if (firstUpdate)
 		{
 			firstUpdate = false;
-			setShapeSelectionPanelVisibility(getViewPanel().getToolbar().getShapeSelection().isSelected());
+			SwingUtilities.invokeLater(() -> viewPanel.getSplitPane().setDividerLocation(0.8));
 		}
-	}
-
-
-	private void dividerLocationChanged(PropertyChangeEvent event)
-	{
-		var width = viewPanel.getSplitPane().getWidth();
-		var size = viewPanel.getSplitPane().getDividerSize();
-		var loc = viewPanel.getSplitPane().getDividerLocation();
-		var position = loc / (double) (width - size);
-		SumatraModel.getInstance().setUserProperty(propertiesPrefix + "dividerLocation", position);
 	}
 
 
