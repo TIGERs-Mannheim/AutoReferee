@@ -10,10 +10,6 @@ plugins {
 }
 
 repositories {
-    maven {
-        url = 'https://nexus.tigers-mannheim.de/content/groups/public/'
-    }
-
     mavenCentral()
 
     maven {

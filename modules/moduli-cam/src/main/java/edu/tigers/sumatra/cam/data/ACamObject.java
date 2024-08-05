@@ -3,16 +3,16 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -21,62 +21,66 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 @Persistent
 public abstract class ACamObject implements IExportable
 {
-	/** often 1.0, unknown */
+	/**
+	 * often 1.0, unknown
+	 */
 	private final double confidence;
-	
-	/** [pixel], left = 0, top = 0 */
+
+	/**
+	 * [pixel], left = 0, top = 0
+	 */
 	private final IVector2 pixel;
-	
+
 	private final long tCapture;
+	@Getter
+	private final Long tCaptureCamera;
 	private final long tAssembly;
+	@Getter
+	private final long tSent;
 	private final int camId;
 	private final long frameId;
-	
-	
+
+
 	protected ACamObject()
 	{
 		confidence = 0;
 		pixel = Vector2f.ZERO_VECTOR;
 		tCapture = 0;
+		tCaptureCamera = null;
 		tAssembly = 0;
+		tSent = 0;
 		camId = 0;
 		frameId = 0;
 	}
-	
-	
-	/**
-	 * @param confidence
-	 * @param pixel
-	 * @param tCapture
-	 * @param camId
-	 * @param frameId
-	 */
-	public ACamObject(final double confidence, final IVector2 pixel, final long tCapture,
-			final int camId, final long frameId)
+
+
+	protected ACamObject(final double confidence, final IVector2 pixel, final long tCapture, final Long tCaptureCamera,
+			final long tSent, final int camId, final long frameId)
 	{
 		this.confidence = confidence;
 		this.pixel = pixel.copy();
 		this.tCapture = tCapture;
+		this.tCaptureCamera = tCaptureCamera;
 		this.tAssembly = System.nanoTime();
+		this.tSent = tSent;
 		this.camId = camId;
 		this.frameId = frameId;
 	}
-	
-	
-	/**
-	 * @param o
-	 */
-	public ACamObject(final ACamObject o)
+
+
+	protected ACamObject(final ACamObject o)
 	{
 		confidence = o.confidence;
 		pixel = o.pixel.copy();
 		tCapture = o.tCapture;
+		tCaptureCamera = o.tCaptureCamera;
 		tAssembly = o.tAssembly;
+		tSent = o.tSent;
 		camId = o.camId;
 		frameId = o.frameId;
 	}
-	
-	
+
+
 	@Override
 	public List<Number> getNumberList()
 	{
@@ -89,10 +93,15 @@ public abstract class ACamObject implements IExportable
 		numbers.add(getPixel().y());
 		numbers.add(getConfidence());
 		numbers.addAll(getPos().getNumberList());
+		numbers.add(tSent);
+		if (tCaptureCamera != null)
+		{
+			numbers.add(tCaptureCamera);
+		}
 		return numbers;
 	}
-	
-	
+
+
 	@Override
 	public List<String> getHeaders()
 	{
@@ -111,16 +120,21 @@ public abstract class ACamObject implements IExportable
 		{
 			headers.add("pos_z");
 		}
+		headers.add("tSent");
+		if (tCaptureCamera != null)
+		{
+			headers.add("tCaptureCamera");
+		}
 		return headers;
 	}
-	
-	
+
+
 	/**
 	 * @return
 	 */
 	public abstract IVector getPos();
-	
-	
+
+
 	/**
 	 * @return the pixel
 	 */
@@ -128,8 +142,8 @@ public abstract class ACamObject implements IExportable
 	{
 		return pixel;
 	}
-	
-	
+
+
 	/**
 	 * @return the confidence
 	 */
@@ -137,8 +151,8 @@ public abstract class ACamObject implements IExportable
 	{
 		return confidence;
 	}
-	
-	
+
+
 	/**
 	 * @return the timestamp
 	 */
@@ -146,8 +160,8 @@ public abstract class ACamObject implements IExportable
 	{
 		return tCapture;
 	}
-	
-	
+
+
 	/**
 	 * @return the camId
 	 */
@@ -155,8 +169,8 @@ public abstract class ACamObject implements IExportable
 	{
 		return camId;
 	}
-	
-	
+
+
 	/**
 	 * @return the frameId
 	 */
@@ -164,8 +178,8 @@ public abstract class ACamObject implements IExportable
 	{
 		return frameId;
 	}
-	
-	
+
+
 	/**
 	 * @return the tCapture
 	 */
@@ -173,13 +187,22 @@ public abstract class ACamObject implements IExportable
 	{
 		return tCapture;
 	}
-	
-	
+
+
 	/**
 	 * @return the tSent
 	 */
 	public final long gettAssembly()
 	{
 		return tAssembly;
+	}
+
+
+	public long getCameraCaptureTimestamp()
+	{
+		if (tCaptureCamera == null)
+			return tCapture;
+
+		return tCaptureCamera;
 	}
 }
