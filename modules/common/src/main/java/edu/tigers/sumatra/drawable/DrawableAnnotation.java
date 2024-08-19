@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
@@ -20,7 +19,6 @@ import java.awt.Graphics2D;
  * The offset text will thus always appear at the same location regardless
  * of field orientation.
  */
-@Persistent
 public class DrawableAnnotation implements IDrawableShape
 {
 	private final IVector2 center;

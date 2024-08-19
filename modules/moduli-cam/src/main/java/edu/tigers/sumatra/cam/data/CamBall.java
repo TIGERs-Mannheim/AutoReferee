@@ -3,15 +3,13 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -19,7 +17,6 @@ import edu.tigers.sumatra.math.vector.Vector3f;
  *
  * @author Gero
  */
-@Persistent
 public class CamBall extends ACamObject
 {
 	private final int area;

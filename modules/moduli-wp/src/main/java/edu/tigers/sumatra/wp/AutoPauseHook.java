@@ -5,12 +5,12 @@
 package edu.tigers.sumatra.wp;
 
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.persistence.IBerkeleyRecorderHook;
+import edu.tigers.sumatra.persistence.IRecorderHook;
 import edu.tigers.sumatra.persistence.RecordManager;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
-public class BerkeleyAutoPauseHook implements IWorldFrameObserver, IBerkeleyRecorderHook
+public class AutoPauseHook implements IWorldFrameObserver, IRecorderHook
 {
 
 	@Override

@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.persistence;
 
 import edu.tigers.sumatra.model.SumatraModel;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -18,32 +19,34 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
- * Berkeley database
+ * Fury database
  */
 @Log4j2
-public class BerkeleyDb
+public class PersistenceDb
 {
-	private final BerkeleyEnv env = new BerkeleyEnv();
 	private final Path dbPath;
-	private final Map<Class<?>, IBerkeleyAccessor<?>> accessors = new HashMap<>();
 
+	private final Map<Class<?>, PersistenceTable<?>> tables = new HashMap<>();
+
+	@Setter
+	private boolean compressOnClose = false;
 
 	/**
 	 * @param dbPath absolute path to database folder or zip file
 	 */
-	public BerkeleyDb(final Path dbPath)
+	public PersistenceDb(final Path dbPath)
 	{
 		if (dbPath.toString().endsWith(".zip"))
 		{
@@ -60,6 +63,10 @@ public class BerkeleyDb
 		{
 			this.dbPath = dbPath;
 		}
+
+		File folder = this.dbPath.toFile();
+		if(!folder.exists() && !folder.mkdirs())
+			log.warn("Could not create folder for database {}", this.dbPath);
 	}
 
 
@@ -96,9 +103,9 @@ public class BerkeleyDb
 	 * @param teamBlue   name of blue team
 	 * @return a new empty unopened database at the default location
 	 */
-	public static BerkeleyDb withDefaultLocation(String matchType, String stage, String teamYellow, String teamBlue)
+	public static PersistenceDb withDefaultLocation(String matchType, String stage, String teamYellow, String teamBlue)
 	{
-		return new BerkeleyDb(Paths.get(getDefaultBasePath(), getDefaultName(matchType, stage, teamYellow, teamBlue)));
+		return new PersistenceDb(Paths.get(getDefaultBasePath(), getDefaultName(matchType, stage, teamYellow, teamBlue)));
 	}
 
 
@@ -106,9 +113,9 @@ public class BerkeleyDb
 	 * @param customLocation a custom absolute path to a database
 	 * @return a new database handle with a custom name at the default base path
 	 */
-	public static BerkeleyDb withCustomLocation(final Path customLocation)
+	public static PersistenceDb withCustomLocation(final Path customLocation)
 	{
-		return new BerkeleyDb(customLocation);
+		return new PersistenceDb(customLocation);
 	}
 
 
@@ -137,86 +144,34 @@ public class BerkeleyDb
 	}
 
 
-	public <T> void add(Class<T> clazz, IBerkeleyAccessor<T> accessor)
+	public <T extends PersistenceTable.IEntry<T>> void add(Class<T> clazz, EPersistenceKeyType keyType)
 	{
-		accessors.put(clazz, accessor);
-	}
-
-
-	public Set<Class<?>> getAccessorTypes()
-	{
-		return Collections.unmodifiableSet(accessors.keySet());
-	}
-
-
-	public <T> T get(Class<T> clazz, long key)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor == null)
+		try
 		{
-			return null;
-		}
-		return accessor.get(key);
-	}
-
-
-	public <T> List<T> getAll(Class<T> clazz)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor == null)
+			tables.put(clazz, new PersistenceTable<>(clazz, dbPath, keyType));
+		} catch (IOException e)
 		{
-			return Collections.emptyList();
-		}
-		return accessor.load();
-	}
-
-
-	public <T> void forEach(Class<T> clazz, Consumer<T> consumer)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor == null)
-		{
-			return;
-		}
-		accessor.forEach(consumer);
-	}
-
-
-	public <T> long size(Class<T> clazz)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor == null)
-		{
-			return 0;
-		}
-		return accessor.size();
-	}
-
-
-	public <T> void write(Class<T> clazz, Collection<T> elements)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor != null)
-		{
-			accessor.write(elements);
-		}
-	}
-
-
-	public <T> void write(Class<T> clazz, T element)
-	{
-		IBerkeleyAccessor<T> accessor = getAccessor(clazz);
-		if (accessor != null)
-		{
-			accessor.write(element);
+			log.error("Could not add datatype to db", e);
 		}
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private <T> IBerkeleyAccessor<T> getAccessor(Class<T> clazz)
+	public <T extends PersistenceTable.IEntry<T>> PersistenceTable<T> getTable(Class<T> clazz)
 	{
-		return (IBerkeleyAccessor<T>) accessors.get(clazz);
+		return (PersistenceTable<T>) tables.get(clazz);
+	}
+
+
+	public Collection<Class<?>> getTableTypes()
+	{
+		return tables.keySet();
+	}
+
+
+	public void forEachTable(Consumer<PersistenceTable<?>> consumer)
+	{
+		tables.values().forEach(consumer);
 	}
 
 
@@ -243,21 +198,23 @@ public class BerkeleyDb
 
 
 	/**
-	 * Open Database
-	 */
-	public void open()
-	{
-		env.open(dbPath.toFile());
-		accessors.values().forEach(a -> a.open(env.getEntityStore()));
-	}
-
-
-	/**
 	 * Close database
 	 */
 	public void close()
 	{
-		env.close();
+		tables.values().forEach(PersistenceTable::close);
+		tables.clear();
+
+		if (compressOnClose)
+		{
+			try
+			{
+				compress();
+			} catch (IOException e)
+			{
+				log.error("Could not compress the replay during closing", e);
+			}
+		}
 	}
 
 
@@ -268,7 +225,7 @@ public class BerkeleyDb
 	 */
 	public void delete() throws IOException
 	{
-		if (env.isOpen())
+		if (!tables.isEmpty())
 		{
 			throw new IllegalStateException("Database must be closed before deletion.");
 		}
@@ -283,24 +240,37 @@ public class BerkeleyDb
 	 */
 	public void compress() throws IOException
 	{
-		env.compress();
-	}
-
-
-	/**
-	 * @return the env
-	 */
-	public final BerkeleyEnv getEnv()
-	{
-		return env;
+		log.info("Compressing database {}", this.dbPath);
+		//https://stackoverflow.com/a/32052016 CC BY-SA 3.0 by Nikita Koksharov
+		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip")))) {
+			try(Stream<Path> stream = Files.walk(dbPath))
+			{
+				stream
+						.filter(path -> !Files.isDirectory(path))
+						.forEach(path -> {
+							ZipEntry zipEntry = new ZipEntry(dbPath.relativize(path).toString());
+							try {
+								zs.putNextEntry(zipEntry);
+								Files.copy(path, zs);
+								zs.closeEntry();
+							} catch (IOException e) {
+								log.error("Could not compress file {}", path, e);
+							}
+						});
+			} catch (RuntimeException e)
+			{
+				throw new IOException(e);
+			}
+		}
+		log.info("Compressed database {}", this.dbPath);
 	}
 
 
 	public Long getFirstKey()
 	{
-		return accessors.values().stream()
-				.filter(IBerkeleyAccessor::isSumatraTimestampBased)
-				.map(IBerkeleyAccessor::getFirstKey)
+		return tables.values().stream()
+				.filter(PersistenceTable::isSumatraTimestampBased)
+				.map(PersistenceTable::getFirstKey)
 				.filter(Objects::nonNull)
 				.reduce(this::getSmallerKey)
 				.orElse(null);
@@ -309,9 +279,9 @@ public class BerkeleyDb
 
 	public Long getLastKey()
 	{
-		return accessors.values().stream()
-				.filter(IBerkeleyAccessor::isSumatraTimestampBased)
-				.map(IBerkeleyAccessor::getLastKey)
+		return tables.values().stream()
+				.filter(PersistenceTable::isSumatraTimestampBased)
+				.map(PersistenceTable::getLastKey)
 				.filter(Objects::nonNull)
 				.reduce(this::getLargerKey)
 				.orElse(null);
@@ -320,8 +290,8 @@ public class BerkeleyDb
 
 	public Long getNextKey(long tCur)
 	{
-		return accessors.values().stream()
-				.filter(IBerkeleyAccessor::isSumatraTimestampBased)
+		return tables.values().stream()
+				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getNextKey(tCur))
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);
@@ -330,8 +300,8 @@ public class BerkeleyDb
 
 	public Long getPreviousKey(long tCur)
 	{
-		return accessors.values().stream()
-				.filter(IBerkeleyAccessor::isSumatraTimestampBased)
+		return tables.values().stream()
+				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getPreviousKey(tCur))
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);
@@ -340,8 +310,8 @@ public class BerkeleyDb
 
 	public Long getKey(long tCur)
 	{
-		return accessors.values().stream()
-				.filter(IBerkeleyAccessor::isSumatraTimestampBased)
+		return tables.values().stream()
+				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getNearestKey(tCur))
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);

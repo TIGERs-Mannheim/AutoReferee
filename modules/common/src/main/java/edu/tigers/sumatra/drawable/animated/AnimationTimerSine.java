@@ -3,8 +3,6 @@
  */
 package edu.tigers.sumatra.drawable.animated;
 
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 
@@ -14,7 +12,6 @@ import edu.tigers.sumatra.math.SumatraMath;
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class AnimationTimerSine extends AAnimationTimer
 {
 	@SuppressWarnings("unused")

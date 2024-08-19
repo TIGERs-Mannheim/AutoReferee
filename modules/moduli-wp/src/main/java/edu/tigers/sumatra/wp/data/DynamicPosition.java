@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.wp.data;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BallID;
@@ -31,7 +30,6 @@ import java.util.List;
  * It is immutable, so to get the latest value, {@link #update(SimpleWorldFrame)} must be called.
  * This returns an updated instance.
  */
-@Persistent(version = 3)
 @Value
 @Builder(toBuilder = true)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)

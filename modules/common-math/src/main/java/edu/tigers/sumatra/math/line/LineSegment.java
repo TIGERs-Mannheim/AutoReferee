@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.line;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.circle.IArc;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.intersections.IIntersections;
@@ -23,7 +22,6 @@ import java.util.stream.Stream;
  *
  * @author Lukas Magel
  */
-@Persistent
 final class LineSegment extends ALine implements ILineSegment
 {
 	private final Vector2f start;

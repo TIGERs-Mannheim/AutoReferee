@@ -3,7 +3,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.util.ScalingUtil;
@@ -18,7 +17,6 @@ import java.awt.Graphics2D;
 /**
  * Draw text on the borders (detached from the field).
  */
-@Persistent
 @RequiredArgsConstructor
 public class DrawableBorderText extends ADrawable
 {

@@ -3,7 +3,6 @@
  */
 package edu.tigers.sumatra.ball.trajectory.chipped;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ball.BallParameters;
 import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.ball.trajectory.ABallTrajectory;
@@ -13,7 +12,6 @@ import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.math.vector.Vector3f;
 import edu.tigers.sumatra.planarcurve.PlanarCurve;
@@ -28,7 +26,6 @@ import java.util.List;
  * Ball trajectory for chipped kicks. Uses fixed Z damping and one damping in XY for first hop
  * and one damping in XY for all following hops.
  */
-@Persistent
 public class ChipBallTrajectory extends ABallTrajectory
 {
 	private static final double G = 9810;
@@ -36,19 +33,6 @@ public class ChipBallTrajectory extends ABallTrajectory
 	private final double tInAir;
 	private final IVector2 kickPos;
 	private final IVector3 kickVel;
-
-
-	/**
-	 * Create an empty default state. Required for {@link Persistent}.
-	 */
-	private ChipBallTrajectory()
-	{
-		super();
-
-		tInAir = 0;
-		kickPos = Vector2f.ZERO_VECTOR;
-		kickVel = Vector3f.ZERO_VECTOR;
-	}
 
 
 	private ChipBallTrajectory(

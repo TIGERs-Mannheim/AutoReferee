@@ -3,16 +3,12 @@
  */
 package edu.tigers.sumatra.drawable.animated;
 
-import com.sleepycat.persist.model.Persistent;
-
-
 /**
  * This animator returns a varying number between specified min and max.
  * Changing according to the used animation timer.
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class NumberAnimatorMinMax implements INumberAnimator
 {
 	private final double min;

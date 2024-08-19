@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra.persistence;
 
-public interface IBerkeleyRecorderHook
+public interface IRecorderHook
 {
 	default void start()
 	{

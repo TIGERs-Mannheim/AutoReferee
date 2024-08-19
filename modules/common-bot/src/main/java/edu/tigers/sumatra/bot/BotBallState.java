@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.bot;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -22,7 +21,6 @@ import java.util.List;
  */
 @Value
 @AllArgsConstructor
-@Persistent
 public class BotBallState implements IMirrorable<BotBallState>, IExportable
 {
 	/** Position in [mm] in vision coordinates. */

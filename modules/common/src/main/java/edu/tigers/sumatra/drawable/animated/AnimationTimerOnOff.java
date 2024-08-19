@@ -3,15 +3,11 @@
  */
 package edu.tigers.sumatra.drawable.animated;
 
-import com.sleepycat.persist.model.Persistent;
-
-
 /**
  * This timer returns either 0.0 or 1.0.
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class AnimationTimerOnOff extends AAnimationTimer
 {
 	private final double onPercentage;

@@ -17,10 +17,13 @@ dependencies {
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
     implementation(libs.org.apache.logging.log4j.log4j.core)
+    implementation(libs.org.apache.logging.log4j.log4j.slf4j2.impl)
+    permitUnusedDeclared(libs.org.apache.logging.log4j.log4j.slf4j2.impl)
 
     implementation(libs.commons.io)
     implementation(libs.commons.lang)
 
     implementation(libs.net.lingala.zip4j)
-    implementation(libs.com.sleepycat.je)
+
+    implementation(libs.org.apache.fury)
 }

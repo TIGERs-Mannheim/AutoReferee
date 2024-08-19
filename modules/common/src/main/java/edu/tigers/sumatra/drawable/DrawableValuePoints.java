@@ -4,21 +4,18 @@
 
 package edu.tigers.sumatra.drawable;
 
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.ValuePoint;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.ValuePoint;
-
 
 /**
  * @author Chris
  */
-@Persistent
 public class DrawableValuePoints implements IDrawableShape
 {
 	private final List<ValuePoint> points = new ArrayList<>();

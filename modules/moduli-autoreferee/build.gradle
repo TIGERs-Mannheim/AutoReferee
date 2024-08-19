@@ -35,7 +35,6 @@ dependencies {
     implementation(libs.commons.io)
     implementation(libs.commons.lang)
 
-    implementation(libs.com.sleepycat.je)
     implementation(libs.com.google.protobuf.protobuf.java)
 
 

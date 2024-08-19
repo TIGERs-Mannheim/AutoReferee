@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.penaltyarea;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.circle.Arc;
@@ -19,7 +18,6 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import java.util.List;
 
 
-@Persistent
 public class PenaltyAreaRoundedCorners extends APenaltyArea
 {
 	private final double radius;

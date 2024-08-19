@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -17,7 +16,6 @@ import java.awt.Graphics2D;
 /**
  * Drawable of a circle
  */
-@Persistent
 public class DrawableCircle extends ADrawableWithStroke
 {
 	private ICircle circle;

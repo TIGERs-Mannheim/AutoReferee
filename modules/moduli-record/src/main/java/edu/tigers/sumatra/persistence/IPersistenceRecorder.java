@@ -5,9 +5,9 @@
 package edu.tigers.sumatra.persistence;
 
 /**
- * An interface for all berkeley stores
+ * An interface for all persistence stores
  */
-public interface IBerkeleyRecorder
+public interface IPersistenceRecorder
 {
 	/**
 	 * Start recorder

@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.triangle;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.line.ILine;
 import edu.tigers.sumatra.math.line.ILineSegment;
@@ -24,7 +23,6 @@ import static edu.tigers.sumatra.math.SumatraMath.sqrt;
  *
  * @author Malte
  */
-@Persistent
 public final class Triangle implements ITriangle
 {
 	private final IVector2 a;

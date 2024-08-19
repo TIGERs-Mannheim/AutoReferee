@@ -4,28 +4,27 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
+import edu.tigers.sumatra.persistence.PersistenceDb;
+import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
+import edu.tigers.sumatra.presenter.log.LogPresenter;
+import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.ESumatraViewType;
+import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 
-import edu.tigers.sumatra.persistence.BerkeleyDb;
-import edu.tigers.sumatra.persistence.log.BerkeleyLogEvent;
-import edu.tigers.sumatra.presenter.log.LogPresenter;
-import edu.tigers.sumatra.views.ASumatraView;
-import edu.tigers.sumatra.views.ESumatraViewType;
-import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class ReplayLogController implements IReplayController
 {
 	private static final long LOG_BUFFER_BEFORE = 500;
 	private static final long LOG_BUFFER_AFTER = 500;
-	private List<BerkeleyLogEvent> logEventBuffer = null;
+	private List<PersistenceLogEvent> logEventBuffer = null;
 	private List<LogEvent> lastLogEventsPast = new LinkedList<>();
 	private List<LogEvent> lastLogEventsFuture = new LinkedList<>();
 
@@ -45,7 +44,7 @@ public class ReplayLogController implements IReplayController
 
 
 	@Override
-	public void update(final BerkeleyDb db, final WorldFrameWrapper wfw)
+	public void update(final PersistenceDb db, final WorldFrameWrapper wfw)
 	{
 		initLogEventBuffer(db);
 
@@ -90,7 +89,7 @@ public class ReplayLogController implements IReplayController
 			final List<LogEvent> logEventsFuture)
 	{
 		long timeStamp = curTime;
-		for (BerkeleyLogEvent event : logEventBuffer)
+		for (PersistenceLogEvent event : logEventBuffer)
 		{
 			if ((event.getTimestamp() >= (timeStamp - LOG_BUFFER_BEFORE))
 					&& (event.getTimestamp() <= (timeStamp + LOG_BUFFER_AFTER))
@@ -108,13 +107,13 @@ public class ReplayLogController implements IReplayController
 	}
 
 
-	private void initLogEventBuffer(final BerkeleyDb db)
+	private void initLogEventBuffer(final PersistenceDb db)
 	{
 		if (logEventBuffer == null)
 		{
 			if (db != null)
 			{
-				logEventBuffer = db.getAll(BerkeleyLogEvent.class);
+				logEventBuffer = db.getTable(PersistenceLogEvent.class).load();
 			} else
 			{
 				logEventBuffer = new ArrayList<>(0);

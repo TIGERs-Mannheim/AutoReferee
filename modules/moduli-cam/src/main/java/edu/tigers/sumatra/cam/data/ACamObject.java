@@ -3,7 +3,6 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -18,7 +17,6 @@ import java.util.List;
 /**
  * Base class for SSL-Vision camera objects.
  */
-@Persistent
 public abstract class ACamObject implements IExportable
 {
 	/**

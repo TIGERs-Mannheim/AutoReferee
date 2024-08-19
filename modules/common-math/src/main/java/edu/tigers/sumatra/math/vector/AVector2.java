@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.vector;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.SumatraMath;
 
 import java.util.Arrays;
@@ -21,7 +20,6 @@ import java.util.function.Function;
  * @see Vector2
  * @see Vector2f
  */
-@Persistent(version = 1)
 public abstract class AVector2 extends AVector implements IVector2
 {
 	/**

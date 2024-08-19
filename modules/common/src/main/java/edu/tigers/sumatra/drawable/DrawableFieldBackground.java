@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -19,7 +18,6 @@ import static edu.tigers.sumatra.math.rectangle.Rectangle.fromPoints;
 /**
  * The field background with a color that depends on the darkMode flag.
  */
-@Persistent
 @Getter
 public class DrawableFieldBackground implements IDrawableShape
 {

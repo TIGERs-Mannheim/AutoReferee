@@ -3,8 +3,8 @@
  */
 package edu.tigers.sumatra.persistence.log;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
+import edu.tigers.sumatra.persistence.PersistenceTable;
+import lombok.Getter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.JdkMapAdapterStringMap;
@@ -18,14 +18,15 @@ import java.util.Map;
 /**
  * Data object for persisting log events from log4j
  */
-@Entity
-public class BerkeleyLogEvent
+public class PersistenceLogEvent implements PersistenceTable.IEntry<PersistenceLogEvent>
 {
-	@SuppressWarnings("unused")
-	@PrimaryKey(sequence = "ID")
-	private long id;
+	private static long lastId = 0L;
 
-	private final Long timestamp;
+	@Getter
+	private final long key;
+
+	@Getter
+	private final long timestamp;
 	private final String level;
 	private final String thread;
 	private final String clazz;
@@ -33,9 +34,10 @@ public class BerkeleyLogEvent
 	private final Map<String, String> contextData;
 
 
-	@SuppressWarnings("unused") // used by BerkeleyDB
-	private BerkeleyLogEvent()
+	@SuppressWarnings("unused") // used by Fury
+	private PersistenceLogEvent()
 	{
+		key = 0L;
 		timestamp = 0L;
 		level = "TRACE";
 		thread = "";
@@ -45,8 +47,9 @@ public class BerkeleyLogEvent
 	}
 
 
-	public BerkeleyLogEvent(final LogEvent event)
+	public PersistenceLogEvent(final LogEvent event)
 	{
+		key = lastId++;
 		timestamp = event.getTimeMillis();
 		level = event.getLevel().toString();
 		thread = event.getThreadName();
@@ -66,11 +69,5 @@ public class BerkeleyLogEvent
 				.setTimeMillis(timestamp)
 				.setContextData(new JdkMapAdapterStringMap(contextData, true))
 				.build();
-	}
-
-
-	public long getTimestamp()
-	{
-		return timestamp;
 	}
 }

@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 
 
@@ -16,7 +16,7 @@ public interface IReplayController
 	 * @param db current database
 	 * @param sumatraTimestampNs current timestamp
 	 */
-	default void update(final BerkeleyDb db, long sumatraTimestampNs)
+	default void update(final PersistenceDb db, long sumatraTimestampNs)
 	{
 	}
 	
@@ -25,7 +25,7 @@ public interface IReplayController
 	 * @param db
 	 * @param wfw
 	 */
-	default void update(final BerkeleyDb db, WorldFrameWrapper wfw)
+	default void update(final PersistenceDb db, WorldFrameWrapper wfw)
 	{
 	}
 }

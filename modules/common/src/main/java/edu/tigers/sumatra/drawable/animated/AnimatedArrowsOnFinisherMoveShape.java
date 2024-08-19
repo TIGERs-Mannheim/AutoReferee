@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable.animated;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.drawable.IDrawableTool;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.penarea.FinisherMoveShape;
@@ -15,7 +14,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 
-@Persistent
 public class AnimatedArrowsOnFinisherMoveShape extends AAnimatedShape
 {
 
@@ -25,14 +23,6 @@ public class AnimatedArrowsOnFinisherMoveShape extends AAnimatedShape
 	private double stepStart;
 	private double stepEnd;
 	private int transformedArrowSize;
-
-
-	private AnimatedArrowsOnFinisherMoveShape()
-	{
-		// Berkeley
-		shape = null;
-		stepPos = null;
-	}
 
 
 	private AnimatedArrowsOnFinisherMoveShape(FinisherMoveShape shape, double stepStart, double stepStop,

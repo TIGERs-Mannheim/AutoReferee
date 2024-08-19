@@ -3,13 +3,12 @@
  */
 package edu.tigers.sumatra.cam.data;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.sleepycat.persist.model.Persistent;
-import lombok.Getter;
 
 
 /**
@@ -19,7 +18,6 @@ import lombok.Getter;
  *
  * @author Gero
  */
-@Persistent
 public class CamDetectionFrame
 {
 	/**

@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -24,7 +23,6 @@ import java.util.List;
 /**
  * Draw a fancy planar curve :)
  */
-@Persistent
 public class DrawablePlanarCurve extends ADrawableWithStroke
 {
 	private final List<DrawSegment> segments = new ArrayList<>();
@@ -136,7 +134,6 @@ public class DrawablePlanarCurve extends ADrawableWithStroke
 	}
 
 
-	@Persistent
 	@Value
 	@RequiredArgsConstructor
 	protected static class DrawSegment

@@ -4,21 +4,18 @@
 
 package edu.tigers.sumatra.drawable;
 
+import edu.tigers.sumatra.math.vector.IVector2;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sleepycat.persist.model.Persistent;
-
-import edu.tigers.sumatra.math.vector.IVector2;
-
 
 /**
  * Drawable path, consisting of several points.
  */
-@Persistent
 public class DrawablePath extends ADrawableWithStroke
 {
 	private final List<IVector2> path;

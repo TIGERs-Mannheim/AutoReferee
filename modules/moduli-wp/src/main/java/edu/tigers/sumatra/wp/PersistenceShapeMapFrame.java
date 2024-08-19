@@ -4,10 +4,9 @@
 
 package edu.tigers.sumatra.wp;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
+import edu.tigers.sumatra.persistence.PersistenceTable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -16,23 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@Entity(version = 1)
-public class BerkeleyShapeMapFrame
+public class PersistenceShapeMapFrame implements PersistenceTable.IEntry<PersistenceShapeMapFrame>
 {
-	@PrimaryKey
 	private final long timestamp;
 
 	private final Map<ShapeMapSource, ShapeMap> shapeMapsBySource = new HashMap<>();
 
 
 	@SuppressWarnings("unused")
-	private BerkeleyShapeMapFrame()
+	private PersistenceShapeMapFrame()
 	{
 		timestamp = 0;
 	}
 
 
-	public BerkeleyShapeMapFrame(final long timestamp)
+	public PersistenceShapeMapFrame(final long timestamp)
 	{
 		this.timestamp = timestamp;
 	}
@@ -63,5 +60,19 @@ public class BerkeleyShapeMapFrame
 				.append("timestamp", timestamp)
 				.append("shapeMapsBySource", shapeMapsBySource)
 				.toString();
+	}
+
+
+	@Override
+	public long getKey()
+	{
+		return getTimestamp();
+	}
+
+
+	@Override
+	public void merge(PersistenceShapeMapFrame other)
+	{
+		shapeMapsBySource.putAll(other.shapeMapsBySource);
 	}
 }

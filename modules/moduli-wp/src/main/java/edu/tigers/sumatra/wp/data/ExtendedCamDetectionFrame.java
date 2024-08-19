@@ -3,13 +3,11 @@
  */
 package edu.tigers.sumatra.wp.data;
 
-import java.util.List;
-
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.cam.data.CamRobot;
+
+import java.util.List;
 
 
 /**
@@ -17,7 +15,6 @@ import edu.tigers.sumatra.cam.data.CamRobot;
  *
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent
 public class ExtendedCamDetectionFrame extends CamDetectionFrame
 {
 	private final CamBall ball;

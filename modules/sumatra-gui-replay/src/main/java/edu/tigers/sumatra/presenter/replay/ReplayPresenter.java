@@ -7,7 +7,8 @@ package edu.tigers.sumatra.presenter.replay;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.clock.ThreadUtil;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
+import edu.tigers.sumatra.persistence.PersistenceTable;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.data.RefereeMsg;
 import edu.tigers.sumatra.referee.gameevent.EGameEvent;
@@ -52,7 +53,7 @@ public class ReplayPresenter extends AMainPresenter
 	private final SnapshotController snapshotController;
 	private final List<IReplayController> replayControllers = new ArrayList<>();
 	private ReplayControlPresenter replayControlPresenter;
-	private BerkeleyDb db = null;
+	private PersistenceDb db = null;
 	private double speed = 1;
 	private RefreshThread refreshThread;
 
@@ -124,7 +125,7 @@ public class ReplayPresenter extends AMainPresenter
 	 * @param db
 	 * @param startTime start time within recording
 	 */
-	public void start(final BerkeleyDb db, long startTime)
+	public void start(final PersistenceDb db, long startTime)
 	{
 		this.db = db;
 		getMainFrame().setTitle(new File(db.getDbPath()).getName());
@@ -429,13 +430,15 @@ public class ReplayPresenter extends AMainPresenter
 
 		private void skipFrames()
 		{
+			PersistenceTable<WorldFrameWrapper> table = db.getTable(WorldFrameWrapper.class);
 			for (long t = getCurrentTime(); t < recEndTime; t += 250_000_000)
 			{
-				boolean skipStop = !skipStoppedGame || !skipFrameStoppedGame(db.get(WorldFrameWrapper.class, t));
-				boolean command = searchCommand == null || !skipFrameCommand(db.get(WorldFrameWrapper.class, t));
-				boolean gameEvent = searchGameEvent == null || !skipFrameGameEvent(db.get(WorldFrameWrapper.class, t));
-				boolean gameState = searchGameState == null || !skipFrameGameState(db.get(WorldFrameWrapper.class, t));
-				boolean skipPlacement = !skipBallPlacement || !skipFrameBallPlacement(db.get(WorldFrameWrapper.class, t));
+				WorldFrameWrapper wfw = table.get(t);
+				boolean skipStop = !skipStoppedGame || !skipFrameStoppedGame(wfw);
+				boolean command = searchCommand == null || !skipFrameCommand(wfw);
+				boolean gameEvent = searchGameEvent == null || !skipFrameGameEvent(wfw);
+				boolean gameState = searchGameState == null || !skipFrameGameState(wfw);
+				boolean skipPlacement = !skipBallPlacement || !skipFrameBallPlacement(wfw);
 
 				if (skipStop && command && gameEvent && skipPlacement && gameState)
 				{

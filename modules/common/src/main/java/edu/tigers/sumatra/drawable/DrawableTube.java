@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
@@ -24,7 +23,6 @@ import java.util.Optional;
 /**
  * A Tube with a color
  */
-@Persistent(version = 2)
 public class DrawableTube extends ADrawableWithStroke
 {
 	private ITube tube;

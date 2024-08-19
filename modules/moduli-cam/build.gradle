@@ -25,6 +25,5 @@ dependencies {
     implementation(libs.commons.lang)
 
     api(libs.com.google.protobuf.protobuf.java)
-    implementation(libs.com.sleepycat.je)
     implementation(libs.com.googlecode.json.simple)
 }

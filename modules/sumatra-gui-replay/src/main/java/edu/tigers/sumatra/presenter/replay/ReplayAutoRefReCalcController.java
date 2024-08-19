@@ -9,7 +9,7 @@ import edu.tigers.autoreferee.IAutoRefFrame;
 import edu.tigers.autoreferee.engine.PassiveAutoRefEngine;
 import edu.tigers.autoreferee.engine.detector.EGameEventDetectorType;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
@@ -51,7 +51,7 @@ public class ReplayAutoRefReCalcController implements IReplayController
 
 
 	@Override
-	public void update(final BerkeleyDb db, final WorldFrameWrapper wfw)
+	public void update(final PersistenceDb db, final WorldFrameWrapper wfw)
 	{
 		if (!active)
 		{

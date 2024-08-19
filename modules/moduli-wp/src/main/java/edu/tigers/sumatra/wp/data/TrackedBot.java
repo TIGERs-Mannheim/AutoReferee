@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.wp.data;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.MoveConstraints;
 import edu.tigers.sumatra.bot.RobotInfo;
@@ -30,7 +29,6 @@ import java.util.Optional;
 /**
  * A tracked (filtered, predicted) robot.
  */
-@Persistent(version = 2)
 public final class TrackedBot implements ITrackedBot
 {
 	private final long timestamp;

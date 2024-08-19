@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.penarea.FinisherMoveShape;
 import lombok.AllArgsConstructor;
 
@@ -15,15 +14,9 @@ import java.util.List;
 
 
 @AllArgsConstructor
-@Persistent
 public class DrawableFinisherMoveShape extends ADrawable
 {
 	private FinisherMoveShape shape;
-
-	private DrawableFinisherMoveShape()
-	{
-		// Berkeley
-	}
 
 	@Override
 	public void paintShape(Graphics2D g, IDrawableTool tool, boolean invert)

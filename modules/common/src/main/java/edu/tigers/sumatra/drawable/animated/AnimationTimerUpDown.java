@@ -3,15 +3,11 @@
  */
 package edu.tigers.sumatra.drawable.animated;
 
-import com.sleepycat.persist.model.Persistent;
-
-
 /**
  * This timer counts linearly from 0.0 to 1.0 and then back to 0.0.
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class AnimationTimerUpDown extends AAnimationTimer
 {
 	@SuppressWarnings("unused")

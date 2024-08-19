@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.tube;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
@@ -26,7 +25,6 @@ import java.util.List;
 /**
  * Implementation of a {@link ITube}
  */
-@Persistent(version = 1)
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(staticName = "create")

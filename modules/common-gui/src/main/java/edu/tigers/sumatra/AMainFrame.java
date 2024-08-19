@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra;
 
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.views.ASumatraView;
 import edu.tigers.sumatra.views.DummyView;
 import edu.tigers.sumatra.views.ESumatraViewType;
@@ -189,8 +189,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	{
 		try
 		{
-			BerkeleyDb db = new BerkeleyDb(path);
-			db.open();
+			PersistenceDb db = new PersistenceDb(path);
 			db.close();
 			db.compress();
 		} catch (IOException e)

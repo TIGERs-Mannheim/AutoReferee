@@ -4,15 +4,12 @@
 
 package edu.tigers.sumatra.ball.trajectory;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ball.BallParameters;
 import edu.tigers.sumatra.math.line.IHalfLine;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
-import edu.tigers.sumatra.math.vector.Vector2f;
-import edu.tigers.sumatra.math.vector.Vector3f;
 import lombok.Getter;
 
 import java.util.Collections;
@@ -22,7 +19,6 @@ import java.util.List;
 /**
  * Common base implementation for ball trajectories.
  */
-@Persistent
 public abstract class ABallTrajectory implements IBallTrajectory
 {
 	/**
@@ -50,18 +46,6 @@ public abstract class ABallTrajectory implements IBallTrajectory
 	 */
 	@Getter
 	protected IVector2 initialSpin;
-
-
-	/**
-	 * Create an empty default state. Required for {@link Persistent}.
-	 */
-	protected ABallTrajectory()
-	{
-		parameters = BallParameters.builder().build();
-		initialPos = Vector3f.ZERO_VECTOR;
-		initialVel = Vector3f.ZERO_VECTOR;
-		initialSpin = Vector2f.ZERO_VECTOR;
-	}
 
 
 	/**

@@ -5,10 +5,9 @@
 package edu.tigers.sumatra.persistence;
 
 import edu.tigers.sumatra.thread.NamedThreadFactory;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +19,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Record on a separate thread
  */
-public class BerkeleyAsyncRecorder
+@Log4j2
+public class PersistenceAsyncRecorder
 {
-	private static final Logger log = LogManager.getLogger(BerkeleyAsyncRecorder.class.getName());
 
-	private static final int TIME_OFFSET = 100;
+	private static final int TIME_OFFSET = 10;
 
 	private final RecordSaver recordSaver = new RecordSaver();
-	private final BerkeleyDb db;
-	private final List<IBerkeleyRecorder> recorders = new ArrayList<>();
+	private final PersistenceDb db;
+	private final List<IPersistenceRecorder> recorders = new ArrayList<>();
 	private boolean paused = false;
 
 
@@ -37,13 +36,13 @@ public class BerkeleyAsyncRecorder
 	 *
 	 * @param db
 	 */
-	public BerkeleyAsyncRecorder(final BerkeleyDb db)
+	public PersistenceAsyncRecorder(final PersistenceDb db)
 	{
 		this.db = db;
 	}
 
 
-	public void add(IBerkeleyRecorder recorder)
+	public void add(IPersistenceRecorder recorder)
 	{
 		recorders.add(recorder);
 	}
@@ -55,8 +54,7 @@ public class BerkeleyAsyncRecorder
 	public void start()
 	{
 		log.debug("Starting recording");
-		db.open();
-		recorders.forEach(IBerkeleyRecorder::start);
+		recorders.forEach(IPersistenceRecorder::start);
 		log.info("Started recording");
 	}
 
@@ -66,7 +64,7 @@ public class BerkeleyAsyncRecorder
 	 */
 	public void stop()
 	{
-		recorders.forEach(IBerkeleyRecorder::stop);
+		recorders.forEach(IPersistenceRecorder::stop);
 		recordSaver.close();
 	}
 
@@ -78,7 +76,7 @@ public class BerkeleyAsyncRecorder
 	{
 		if (!paused)
 		{
-			recorders.forEach(IBerkeleyRecorder::stop);
+			recorders.forEach(IPersistenceRecorder::stop);
 			paused = true;
 		}
 	}
@@ -91,7 +89,7 @@ public class BerkeleyAsyncRecorder
 	{
 		if (paused)
 		{
-			recorders.forEach(IBerkeleyRecorder::start);
+			recorders.forEach(IPersistenceRecorder::start);
 			paused = false;
 		}
 	}
@@ -113,7 +111,7 @@ public class BerkeleyAsyncRecorder
 	}
 
 
-	public BerkeleyDb getDb()
+	public PersistenceDb getDb()
 	{
 		return db;
 	}
@@ -136,7 +134,7 @@ public class BerkeleyAsyncRecorder
 		{
 			try
 			{
-				recorders.forEach(IBerkeleyRecorder::flush);
+				recorders.forEach(IPersistenceRecorder::flush);
 			} catch (Exception e)
 			{
 				log.error("Unexpected exception while flushing", e);
@@ -152,7 +150,7 @@ public class BerkeleyAsyncRecorder
 			{
 				long duration = (long) ((lastKey - firstKey) / 1e6);
 				String period = DurationFormatUtils.formatDuration(duration, "HH:mm:ss", true);
-				log.info("Stop recording with a period of " + period);
+				log.info("Stop recording with a period of {}", period);
 			}
 		}
 

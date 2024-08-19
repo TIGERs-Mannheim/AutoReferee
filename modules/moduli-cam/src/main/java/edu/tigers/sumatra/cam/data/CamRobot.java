@@ -3,14 +3,12 @@
  */
 package edu.tigers.sumatra.cam.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -21,7 +19,6 @@ import edu.tigers.sumatra.math.vector.Vector2f;
  *
  * @author Gero
  */
-@Persistent
 public class CamRobot extends ACamObject
 {
 	private final BotID botId;

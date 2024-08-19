@@ -123,7 +123,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		});
 	}
 
-	private final BerkeleyAutoPauseHook berkeleyAutoPauseHook = new BerkeleyAutoPauseHook();
+	private final AutoPauseHook autoPauseHook = new AutoPauseHook();
 	private final TimestampBasedBuffer<ITrackedBall> ballBuffer = new TimestampBasedBuffer<>(0.3);
 	private final GameStateCalculator gameStateCalculator = new GameStateCalculator();
 	private final WorldFrameVisualization worldFrameVisualization = new WorldFrameVisualization();
@@ -426,7 +426,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		if (SumatraModel.getInstance().isModuleLoaded(RecordManager.class))
 		{
 			RecordManager recordManager = SumatraModel.getInstance().getModule(RecordManager.class);
-			recordManager.addHook(berkeleyAutoPauseHook);
+			recordManager.addHook(autoPauseHook);
 		}
 	}
 
@@ -436,7 +436,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		if (SumatraModel.getInstance().isModuleLoaded(RecordManager.class))
 		{
 			RecordManager recordManager = SumatraModel.getInstance().getModule(RecordManager.class);
-			recordManager.removeHook(berkeleyAutoPauseHook);
+			recordManager.removeHook(autoPauseHook);
 		}
 	}
 

@@ -3,8 +3,7 @@
  */
 package edu.tigers.sumatra.wp.data;
 
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.PrimaryKey;
+import edu.tigers.sumatra.persistence.PersistenceTable;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -14,21 +13,26 @@ import java.util.Map;
 /**
  * Entity for vision data
  */
-@Entity
 @Data
 @RequiredArgsConstructor
-public class BerkeleyCamDetectionFrame
+public class PersistenceCamDetectionFrame implements PersistenceTable.IEntry<PersistenceCamDetectionFrame>
 {
-	@PrimaryKey
 	private final long timestamp;
 
 	private final Map<Integer, ExtendedCamDetectionFrame> camFrames;
 
 
 	@SuppressWarnings("unused")
-	private BerkeleyCamDetectionFrame()
+	private PersistenceCamDetectionFrame()
 	{
 		timestamp = 0;
 		camFrames = null;
+	}
+
+
+	@Override
+	public long getKey()
+	{
+		return timestamp;
 	}
 }

@@ -5,15 +5,12 @@ package edu.tigers.sumatra.drawable.animated;
 
 import java.awt.Color;
 
-import com.sleepycat.persist.model.Persistent;
-
 
 /**
  * Actually not an animator. Uses a fixed value.
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class ColorAnimatorFixed implements IColorAnimator
 {
 	private final Color color;

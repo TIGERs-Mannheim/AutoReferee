@@ -3,7 +3,6 @@
  */
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.botshape.BotShape;
@@ -20,7 +19,6 @@ import java.awt.geom.Arc2D;
 /**
  * Outline of a bot with orientation
  */
-@Persistent
 public class DrawableBotShape implements IDrawableShape
 {
 	protected final IVector2 pos;

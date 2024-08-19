@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.vision.data;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
@@ -25,7 +24,6 @@ import java.util.Optional;
 /**
  * Describes a Kick Event.
  */
-@Persistent
 @Value
 @Builder(toBuilder = true)
 @AllArgsConstructor

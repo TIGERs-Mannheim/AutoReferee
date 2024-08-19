@@ -5,9 +5,9 @@
 package edu.tigers.sumatra.presenter.replay;
 
 import edu.tigers.sumatra.drawable.ShapeMapSource;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
-import edu.tigers.sumatra.wp.BerkeleyShapeMapFrame;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
+import edu.tigers.sumatra.wp.PersistenceShapeMapFrame;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashSet;
@@ -23,9 +23,9 @@ public class ReplayShapeMapController implements IReplayController
 
 
 	@Override
-	public void update(final BerkeleyDb db, final long sumatraTimestampNs)
+	public void update(final PersistenceDb db, final long sumatraTimestampNs)
 	{
-		BerkeleyShapeMapFrame shapeMapFrame = db.get(BerkeleyShapeMapFrame.class, sumatraTimestampNs);
+		PersistenceShapeMapFrame shapeMapFrame = db.getTable(PersistenceShapeMapFrame.class).get(sumatraTimestampNs);
 		if (shapeMapFrame != null)
 		{
 			var currentSources = shapeMapFrame.getShapeMaps().keySet();

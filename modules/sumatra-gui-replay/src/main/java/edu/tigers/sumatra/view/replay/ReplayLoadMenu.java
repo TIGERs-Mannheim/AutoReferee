@@ -3,6 +3,20 @@
  */
 package edu.tigers.sumatra.view.replay;
 
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.persistence.PersistenceDb;
+import edu.tigers.sumatra.persistence.RecordManager;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,22 +32,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-
-import javax.swing.JFileChooser;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MenuListener;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
-import edu.tigers.sumatra.persistence.RecordManager;
 
 
 /**
@@ -179,7 +177,7 @@ public class ReplayLoadMenu extends JMenu
 	 */
 	public interface IReplayLoadMenuObserver
 	{
-		void onOpenReplay(BerkeleyDb db);
+		void onOpenReplay(PersistenceDb db);
 
 
 		void onCompressReplay(Path path);
@@ -388,8 +386,7 @@ public class ReplayLoadMenu extends JMenu
 				try
 				{
 					@SuppressWarnings("squid:S2095") // DB will be closed automatically later
-					BerkeleyDb db = recordManager.get().newBerkeleyDb(Paths.get(filename));
-					db.open();
+					PersistenceDb db = recordManager.get().newPersistenceDb(Paths.get(filename));
 					observers.forEach(o -> o.onOpenReplay(db));
 				} catch (Exception e)
 				{

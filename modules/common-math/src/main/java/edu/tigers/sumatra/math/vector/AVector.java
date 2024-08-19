@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.vector;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.SumatraMath;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent
 public abstract class AVector implements IVector
 {
 	@Override

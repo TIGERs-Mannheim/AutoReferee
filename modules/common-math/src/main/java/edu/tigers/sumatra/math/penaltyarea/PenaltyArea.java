@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.penaltyarea;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -17,7 +16,6 @@ import java.util.List;
 /**
  * Class representing a rectangular penalty area
  */
-@Persistent
 public class PenaltyArea extends APenaltyArea
 {
 	/**

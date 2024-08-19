@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.penarea;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.Arc;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 
-@Persistent
 public class FinisherMoveShape
 {
 	private double x1;
@@ -43,12 +41,6 @@ public class FinisherMoveShape
 	private IArc leftArc;
 	@Getter
 	private IArc rightArc;
-
-
-	private FinisherMoveShape()
-	{
-		// empty constructor for Berkeley
-	}
 
 
 	public FinisherMoveShape(double x1, double x2, double width, double radius)

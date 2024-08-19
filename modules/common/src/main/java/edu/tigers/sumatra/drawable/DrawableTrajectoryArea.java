@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
@@ -23,7 +22,6 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * Drawable trajectory path. Uses sampled points on a bang bang trajectory.
  */
-@Persistent
 public class DrawableTrajectoryArea extends ADrawableWithStroke
 {
 	private static final double STEP_SIZE = 0.05;

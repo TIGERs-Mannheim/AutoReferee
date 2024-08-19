@@ -43,7 +43,6 @@ dependencies {
     implementation(libs.commons.io)
 
     api(libs.com.google.protobuf.protobuf.java)
-    implementation(libs.com.sleepycat.je)
 
     if (!project.property("compactBuild").toBoolean()) {
         runtimeOnly(variantOf(libs.com.github.TIGERs.mannheim.ssl.game.controller.maven) { classifier(osClassifier) })

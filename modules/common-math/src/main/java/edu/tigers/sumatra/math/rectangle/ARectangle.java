@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.rectangle;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.ICircle;
@@ -27,7 +26,6 @@ import java.util.Random;
  *
  * @author Oliver Steinbrecher <OST1988@aol.com>, MalteM
  */
-@Persistent
 abstract class ARectangle implements IRectangle
 {
 	ARectangle()

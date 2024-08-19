@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ public class ReplayWfwController implements IReplayController
 
 
 	@Override
-	public void update(final BerkeleyDb db, final long sumatraTimestampNs)
+	public void update(final PersistenceDb db, final long sumatraTimestampNs)
 	{
-		WorldFrameWrapper wfw = db.get(WorldFrameWrapper.class, sumatraTimestampNs);
+		WorldFrameWrapper wfw = db.getTable(WorldFrameWrapper.class).get(sumatraTimestampNs);
 		if (wfw != null)
 		{
 			callback.accept(wfw);

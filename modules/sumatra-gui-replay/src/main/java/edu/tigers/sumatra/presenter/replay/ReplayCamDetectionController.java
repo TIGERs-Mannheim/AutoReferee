@@ -4,9 +4,9 @@
 
 package edu.tigers.sumatra.presenter.replay;
 
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
-import edu.tigers.sumatra.wp.data.BerkeleyCamDetectionFrame;
+import edu.tigers.sumatra.wp.data.PersistenceCamDetectionFrame;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public class ReplayCamDetectionController implements IReplayController
 
 
 	@Override
-	public void update(final BerkeleyDb db, final long sumatraTimestampNs)
+	public void update(final PersistenceDb db, final long sumatraTimestampNs)
 	{
-		BerkeleyCamDetectionFrame camFrame = db.get(BerkeleyCamDetectionFrame.class, sumatraTimestampNs);
+		PersistenceCamDetectionFrame camFrame = db.getTable(PersistenceCamDetectionFrame.class).get(sumatraTimestampNs);
 		if (camFrame != null)
 		{
 			for (IWorldFrameObserver vp : wFrameObservers)

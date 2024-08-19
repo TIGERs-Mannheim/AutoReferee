@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -17,7 +16,6 @@ import java.awt.Graphics2D;
 /**
  * This is a Line connected to a color
  */
-@Persistent
 public class DrawableLine extends ADrawableWithStroke
 {
 	private final ILineSegment line;

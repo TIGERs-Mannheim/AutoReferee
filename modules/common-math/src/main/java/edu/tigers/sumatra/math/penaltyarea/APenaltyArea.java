@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.math.penaltyarea;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
@@ -15,7 +14,6 @@ import edu.tigers.sumatra.math.vector.Vector2f;
 import lombok.Getter;
 
 
-@Persistent
 public abstract class APenaltyArea implements IPenaltyArea
 {
 	@Getter

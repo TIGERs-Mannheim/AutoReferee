@@ -4,22 +4,19 @@
 
 package edu.tigers.sumatra.drawable;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-
-import com.sleepycat.persist.model.Persistent;
-
 import edu.tigers.sumatra.math.triangle.ITriangle;
 import edu.tigers.sumatra.math.triangle.Triangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+
 
 /**
  * A Rectangle with a color
  */
-@Persistent
 public class DrawableTriangle extends ADrawableWithStroke
 {
 	private ITriangle triangle;

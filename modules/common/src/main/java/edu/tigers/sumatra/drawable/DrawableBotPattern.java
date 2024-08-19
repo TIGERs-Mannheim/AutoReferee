@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Persistent
 public class DrawableBotPattern extends DrawableBotShape
 {
 	private final BotID botID;

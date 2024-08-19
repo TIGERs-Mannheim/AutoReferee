@@ -16,17 +16,17 @@ import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.log.LogEventWatcher;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.persistence.BerkeleyAccessor;
-import edu.tigers.sumatra.persistence.BerkeleyAsyncRecorder;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
-import edu.tigers.sumatra.persistence.log.BerkeleyLogEvent;
-import edu.tigers.sumatra.persistence.log.BerkeleyLogRecorder;
+import edu.tigers.sumatra.persistence.EPersistenceKeyType;
+import edu.tigers.sumatra.persistence.PersistenceAsyncRecorder;
+import edu.tigers.sumatra.persistence.PersistenceDb;
+import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
+import edu.tigers.sumatra.persistence.log.PersistenceLogRecorder;
 import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.SimilarityChecker;
-import edu.tigers.sumatra.wp.BerkeleyShapeMapFrame;
-import edu.tigers.sumatra.wp.ShapeMapBerkeleyRecorder;
-import edu.tigers.sumatra.wp.WfwBerkeleyRecorder;
+import edu.tigers.sumatra.wp.PersistenceShapeMapFrame;
+import edu.tigers.sumatra.wp.ShapeMapPersistenceRecorder;
+import edu.tigers.sumatra.wp.WfwPersistenceRecorder;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -72,7 +72,7 @@ public class AutoRefIntegrationTest
 
 	private final String name;
 	private final TestCase testCase;
-	private BerkeleyAsyncRecorder recorder;
+	private PersistenceAsyncRecorder recorder;
 	private final LogEventWatcher logEventWatcher = new LogEventWatcher(Level.WARN, Level.ERROR);
 	private boolean testCaseSucceeded;
 
@@ -106,16 +106,16 @@ public class AutoRefIntegrationTest
 		SumatraModel.getInstance().startModules();
 		SumatraModel.getInstance().getModule(AutoRefModule.class).changeMode(EAutoRefMode.PASSIVE);
 
-		BerkeleyDb db = BerkeleyDb.withCustomLocation(Paths.get("../../" + BerkeleyDb.getDefaultBasePath(),
-				BerkeleyDb.getDefaultName("FRIENDLY", "NORMAL_FIRST_HALF","yellow", "blue") + "_" + name));
-		db.add(BerkeleyLogEvent.class, new BerkeleyAccessor<>(BerkeleyLogEvent.class, false));
-		db.add(BerkeleyShapeMapFrame.class, new BerkeleyAccessor<>(BerkeleyShapeMapFrame.class, true));
-		db.add(WorldFrameWrapper.class, new BerkeleyAccessor<>(WorldFrameWrapper.class, true));
+		PersistenceDb db = PersistenceDb.withCustomLocation(Paths.get("../../" + PersistenceDb.getDefaultBasePath(),
+				PersistenceDb.getDefaultName("FRIENDLY", "NORMAL_FIRST_HALF", "yellow", "blue") + "_" + name));
+		db.add(PersistenceLogEvent.class, EPersistenceKeyType.ARBITRARY);
+		db.add(PersistenceShapeMapFrame.class, EPersistenceKeyType.SUMATRA_TIMESTAMP);
+		db.add(WorldFrameWrapper.class, EPersistenceKeyType.SUMATRA_TIMESTAMP);
 
-		recorder = new BerkeleyAsyncRecorder(db);
-		recorder.add(new BerkeleyLogRecorder(db));
-		recorder.add(new WfwBerkeleyRecorder(db));
-		recorder.add(new ShapeMapBerkeleyRecorder(db));
+		recorder = new PersistenceAsyncRecorder(db);
+		recorder.add(new PersistenceLogRecorder(db));
+		recorder.add(new WfwPersistenceRecorder(db));
+		recorder.add(new ShapeMapPersistenceRecorder(db));
 		recorder.start();
 	}
 

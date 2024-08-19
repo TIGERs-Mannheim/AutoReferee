@@ -5,15 +5,12 @@ package edu.tigers.sumatra.drawable.animated;
 
 import java.awt.Color;
 
-import com.sleepycat.persist.model.Persistent;
-
 
 /**
  * Fade between two colors.
  * 
  * @author AndreR <andre@ryll.cc>
  */
-@Persistent
 public class ColorAnimatorMixTwo implements IColorAnimator
 {
 	private final Color colorA;

@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.bot;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.bot.params.BotParams;
 import edu.tigers.sumatra.bot.params.IBotParams;
 import edu.tigers.sumatra.ids.BotID;
@@ -25,7 +24,6 @@ import java.util.Optional;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Persistent(version = 3)
 @Builder(setterPrefix = "with", builderClassName = "Builder", builderMethodName = "newBuilder", toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RobotInfo implements IMirrorable<RobotInfo>

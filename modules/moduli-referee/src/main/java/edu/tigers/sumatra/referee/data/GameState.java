@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.referee.data;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
@@ -18,7 +17,6 @@ import lombok.Value;
 /**
  * The current game state and useful helper methods to query the state.
  */
-@Persistent(version = 1)
 @Value
 @Builder(toBuilder = true, setterPrefix = "with")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

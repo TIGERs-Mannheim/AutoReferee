@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.drawable;
 
-import com.sleepycat.persist.model.Persistent;
 import edu.tigers.sumatra.math.I2DShape;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.boundary.IShapeBoundary;
@@ -20,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@Persistent
 public class DrawableShapeBoundary extends ADrawableWithStroke
 {
 	private final List<IDrawableShape> drawables;
