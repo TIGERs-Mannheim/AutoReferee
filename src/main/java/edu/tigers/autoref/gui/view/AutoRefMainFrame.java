@@ -10,7 +10,7 @@ import edu.tigers.autoref.view.main.AutoRefView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.config.ConfigEditorView;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.presenter.log.LogView;
 import edu.tigers.sumatra.presenter.referee.RefereeView;
 import edu.tigers.sumatra.view.replay.ReplayLoadMenu;
@@ -114,7 +114,7 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 
 
 	@Override
-	public void onOpenReplay(final BerkeleyDb db)
+	public void onOpenReplay(final PersistenceDb db)
 	{
 		new AutoRefReplayPresenter().start(db, 0);
 	}

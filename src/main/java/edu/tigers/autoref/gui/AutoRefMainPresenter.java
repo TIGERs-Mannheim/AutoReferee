@@ -11,8 +11,8 @@ import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.persistence.BerkeleyDb;
 import edu.tigers.sumatra.persistence.IRecordObserver;
+import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.persistence.RecordManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -139,7 +139,7 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 
 
 		@Override
-		public void onViewReplay(final BerkeleyDb persistence, final long startTime)
+		public void onViewReplay(final PersistenceDb persistence, final long startTime)
 		{
 			new AutoRefReplayPresenter().start(persistence, startTime);
 		}
