@@ -4,13 +4,13 @@
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <PatternLayout pattern="%d %p [%t|%c{1}] %m%n"/>
         </Console>
-        <SumatraAppender name="berkeley"/>
+        <SumatraAppender name="persistence"/>
         <SumatraAppender name="logView">
             <PatternLayout pattern="%d %p [%t|%c{1}] %m%n"/>
         </SumatraAppender>
         <Async name="ASYNC">
             <AppenderRef ref="CONSOLE" level="info"/>
-            <AppenderRef ref="berkeley" level="all"/>
+            <AppenderRef ref="persistence" level="all"/>
             <AppenderRef ref="logView" level="all"/>
         </Async>
     </Appenders>
@@ -22,6 +22,10 @@
             <AppenderRef ref="ASYNC"/>
         </Logger>
         <Logger name="log4j.logger.net.java.games" level="warn" additivity="false">
+            <AppenderRef ref="ASYNC"/>
+        </Logger>
+        <Logger name="org.apache.fury" level="warn" additivity="false">
+            <RegexFilter regex="Class registration isn't forced.*" onMatch="DENY" onMismatch="NEUTRAL"/>
             <AppenderRef ref="ASYNC"/>
         </Logger>
     </Loggers>
