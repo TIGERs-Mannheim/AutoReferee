@@ -18,11 +18,5 @@
             <AppenderRef ref="integrationTest"/>
             <AppenderRef ref="persistence"/>
         </Logger>
-        <Logger name="org.apache.fury" level="warn" additivity="false">
-            <RegexFilter regex="Class registration isn't forced.*" onMatch="DENY" onMismatch="NEUTRAL"/>
-            <AppenderRef ref="CONSOLE"/>
-            <AppenderRef ref="integrationTest"/>
-            <AppenderRef ref="persistence"/>
-        </Logger>
     </Loggers>
 </Configuration>
