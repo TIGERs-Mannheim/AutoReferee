@@ -30,8 +30,8 @@ public class WorldFrameWrapper implements PersistenceTable.IEntry<WorldFrameWrap
 	private final transient Map<EAiTeam, WorldFrame> worldFrames = new EnumMap<>(EAiTeam.class);
 	
 	
-	@SuppressWarnings("unused")
-	private WorldFrameWrapper()
+	@SuppressWarnings("unused") // Required (to be public) by Fury for transient field initialization.
+	public WorldFrameWrapper()
 	{
 		timestamp = 0;
 		simpleWorldFrame = null;

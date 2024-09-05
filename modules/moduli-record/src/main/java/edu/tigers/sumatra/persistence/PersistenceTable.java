@@ -7,26 +7,26 @@ package edu.tigers.sumatra.persistence;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.fury.Fury;
-import org.apache.fury.config.CompatibleMode;
 import org.apache.fury.config.Language;
-import org.apache.fury.io.FuryReadableChannel;
 import org.apache.fury.logging.LoggerFactory;
+import org.apache.fury.memory.MemoryBuffer;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
@@ -51,10 +51,10 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 
 	private final Fury fury;
 
-	private final RandomAccessFile db;
-	private final RandomAccessFile indexFile;
+	private final PersistenceIndex index;
 
-	private final TreeMap<Long, List<Long>> index = new TreeMap<>();
+	private final FileOutputStream appendStream;
+	private final FileChannel file;
 
 
 	public PersistenceTable(Class<T> clazz, Path dbPath, EPersistenceKeyType keyType)
@@ -63,27 +63,21 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 		this.keyType = keyType;
 
 		fury = Fury.builder()
-				.withAsyncCompilation(
-						true) // Reduce buffer size requirements by serializing in interpreter mode until the JIT code is generated
-				.withLanguage(Language.JAVA) // No cross-language compatibility required
-				.requireClassRegistration(false) // Allows for serialization of arbitrary classes
-				.withCompatibleMode(CompatibleMode.COMPATIBLE) // Try to preserve compatibility across class changes
+				// Reduce buffer size requirements by serializing in interpreter mode until the JIT code is generated
+				.withAsyncCompilation(true)
+				// No cross-language compatibility required
+				.withLanguage(Language.JAVA)
+				// Allows for serialization of arbitrary classes
+				.requireClassRegistration(false)
 				.build();
 
 		register(new HashSet<>(), clazz);
 
-		this.db = new RandomAccessFile(dbPath.resolve(clazz.getSimpleName() + ".db").toFile(), "rw");
-		this.db.seek(this.db.length());
-		this.indexFile = new RandomAccessFile(dbPath.resolve(clazz.getSimpleName() + ".index").toFile(), "rw");
+		Path dbFile = dbPath.resolve(clazz.getSimpleName() + ".db");
+		this.appendStream = new FileOutputStream(dbFile.toFile(), true);
+		this.file = FileChannel.open(dbFile, StandardOpenOption.READ);
 
-		try
-		{
-			while (indexFile.length() - indexFile.getFilePointer() > 0)
-				index.computeIfAbsent(indexFile.readLong(), key -> new ArrayList<>()).add(indexFile.readLong());
-		} catch (IOException e)
-		{
-			log.error("Could not read index", e);
-		}
+		this.index = new PersistenceIndex(dbPath.resolve(clazz.getSimpleName() + ".index"), file);
 	}
 
 
@@ -126,12 +120,10 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 		try
 		{
 			long id = element.getKey();
-			long startIndex = db.getChannel().position();
+			long startIndex = appendStream.getChannel().position();
 
-			fury.serialize(new FileOutputStream(db.getFD()), element);
-			indexFile.writeLong(id);
-			indexFile.writeLong(startIndex);
-			index.computeIfAbsent(id, key -> new ArrayList<>()).add(startIndex);
+			fury.serialize(appendStream, element);
+			index.append(id, startIndex);
 		} catch (RuntimeException | IOException e)
 		{
 			log.error("Could not write to db", e);
@@ -141,14 +133,16 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 
 	public int size()
 	{
-		return index.size();
+		return index.get().size();
 	}
 
 
 	public void forEach(Consumer<T> consumer)
 	{
-		for (long key : index.navigableKeySet())
+		for (long key : index.get().navigableKeySet())
+		{
 			consumer.accept(get(key));
+		}
 	}
 
 
@@ -163,21 +157,34 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 	@SuppressWarnings("unchecked")
 	public T get(long key)
 	{
+		if (!index.get().containsKey(key))
+		{
+			return null;
+		}
+
 		try
 		{
 			T element = null;
-			for (Long startIndex : index.get(key))
+			for (PersistenceIndex.Range range : index.get().get(key))
 			{
-				db.seek(startIndex);
-				T entry = (T) fury.deserialize(new FuryReadableChannel(db.getChannel()));
+				file.position(range.address());
+				ByteBuffer buf = ByteBuffer.allocate(range.size());
+				file.read(buf);
+				buf.position(0);
+
+				T entry = (T) fury.deserialize(MemoryBuffer.fromByteBuffer(buf));
 				if (element != null)
+				{
 					element.merge(entry);
-				else
+				} else
+				{
 					element = entry;
+				}
 			}
 			return element;
 		} catch (RuntimeException | IOException e)
 		{
+			log.error("Could not read from db", e);
 			return null;
 		}
 	}
@@ -185,32 +192,32 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 
 	public Long getFirstKey()
 	{
-		return noSuchElement(index::firstKey);
+		return noSuchElement(index.get()::firstKey);
 	}
 
 
 	public Long getLastKey()
 	{
-		return noSuchElement(index::lastKey);
+		return noSuchElement(index.get()::lastKey);
 	}
 
 
 	public Long getPreviousKey(long key)
 	{
-		return index.lowerKey(key);
+		return index.get().lowerKey(key);
 	}
 
 
 	public Long getNextKey(long key)
 	{
-		return index.higherKey(key);
+		return index.get().higherKey(key);
 	}
 
 
 	public Long getNearestKey(long key)
 	{
-		Long neighbour = index.floorKey(key);
-		Long ceil = index.ceilingKey(key);
+		Long neighbour = index.get().floorKey(key);
+		Long ceil = index.get().ceilingKey(key);
 		if (ceil != null && (neighbour == null || Math.abs(ceil - key) < Math.abs(neighbour - key)))
 			return ceil;
 
@@ -222,8 +229,9 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 	{
 		try
 		{
-			db.close();
-			indexFile.close();
+			appendStream.close();
+			file.close();
+			index.close();
 		} catch (IOException e)
 		{
 			log.error("Could not close db", e);
@@ -255,6 +263,7 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 
 		default void merge(S other)
 		{
+			log.warn("Entry merge attempted for class {}", getClass().getName());
 		}
 	}
 }

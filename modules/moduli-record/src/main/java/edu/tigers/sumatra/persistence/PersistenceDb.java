@@ -272,7 +272,7 @@ public class PersistenceDb
 				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(PersistenceTable::getFirstKey)
 				.filter(Objects::nonNull)
-				.reduce(this::getSmallerKey)
+				.reduce(Math::min)
 				.orElse(null);
 	}
 
@@ -283,7 +283,7 @@ public class PersistenceDb
 				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(PersistenceTable::getLastKey)
 				.filter(Objects::nonNull)
-				.reduce(this::getLargerKey)
+				.reduce(Math::max)
 				.orElse(null);
 	}
 
@@ -293,6 +293,7 @@ public class PersistenceDb
 		return tables.values().stream()
 				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getNextKey(tCur))
+				.filter(Objects::nonNull)
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);
 	}
@@ -303,6 +304,7 @@ public class PersistenceDb
 		return tables.values().stream()
 				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getPreviousKey(tCur))
+				.filter(Objects::nonNull)
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);
 	}
@@ -313,57 +315,14 @@ public class PersistenceDb
 		return tables.values().stream()
 				.filter(PersistenceTable::isSumatraTimestampBased)
 				.map(s -> s.getNearestKey(tCur))
+				.filter(Objects::nonNull)
 				.reduce((k1, k2) -> getNearestKey(tCur, k1, k2))
 				.orElse(null);
 	}
 
 
-	private Long getLargerKey(final Long k1, final Long k2)
+	private Long getNearestKey(final long key, final long k1, final long k2)
 	{
-		if (k1 == null)
-		{
-			return k2;
-		}
-		if (k2 == null)
-		{
-			return k1;
-		}
-		if (k1 > k2)
-		{
-			return k1;
-		}
-		return k2;
-	}
-
-
-	private Long getSmallerKey(final Long k1, final Long k2)
-	{
-		if (k1 == null)
-		{
-			return k2;
-		}
-		if (k2 == null)
-		{
-			return k1;
-		}
-		if (k1 < k2)
-		{
-			return k1;
-		}
-		return k2;
-	}
-
-
-	private Long getNearestKey(final long key, final Long k1, final Long k2)
-	{
-		if (k1 == null)
-		{
-			return k2;
-		}
-		if (k2 == null)
-		{
-			return k1;
-		}
 		long diff1 = Math.abs(key - k1);
 		long diff2 = Math.abs(key - k2);
 
