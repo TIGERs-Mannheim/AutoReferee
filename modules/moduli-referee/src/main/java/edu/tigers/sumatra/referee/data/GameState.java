@@ -10,6 +10,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.Value;
 
@@ -31,6 +32,7 @@ public class GameState
 	@NonNull
 	ETeamColor ourTeam;
 	boolean penaltyShootout;
+	@Getter(AccessLevel.NONE)
 	IVector2 ballPlacementPosition;
 
 	/**
