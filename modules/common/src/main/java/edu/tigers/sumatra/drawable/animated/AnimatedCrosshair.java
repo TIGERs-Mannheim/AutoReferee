@@ -21,13 +21,6 @@ public class AnimatedCrosshair extends AnimatedCircle
 	private INumberAnimator rotation;
 
 
-	@SuppressWarnings("unused")
-	private AnimatedCrosshair()
-	{
-		super();
-	}
-
-
 	/**
 	 * @param center
 	 * @param radius

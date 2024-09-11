@@ -35,17 +35,6 @@ public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 	private transient Map<BotID, ITrackedBot> botsReadOnly;
 
 
-	@SuppressWarnings("unused")
-	private SimpleWorldFrame()
-	{
-		frameNumber = 0;
-		timestamp = 0;
-		bots = null;
-		ball = null;
-		kickedBall = null;
-	}
-
-
 	/**
 	 * Soft copy
 	 *

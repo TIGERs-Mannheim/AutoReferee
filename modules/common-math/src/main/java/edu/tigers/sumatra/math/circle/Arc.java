@@ -32,19 +32,6 @@ public class Arc implements IArc
 
 
 	/**
-	 * Used by berkely
-	 */
-	@SuppressWarnings("unused")
-	protected Arc()
-	{
-		center = Vector2f.ZERO_VECTOR;
-		radius = 1;
-		startAngle = 0;
-		rotation = 1;
-	}
-
-
-	/**
 	 * @param center
 	 * @param radius
 	 * @param startAngle

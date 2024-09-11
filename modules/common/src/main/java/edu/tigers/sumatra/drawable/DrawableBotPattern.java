@@ -7,7 +7,6 @@ package edu.tigers.sumatra.drawable;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -96,13 +95,6 @@ public class DrawableBotPattern extends DrawableBotShape
 		blobColorLowerRight.add(magenta);
 		blobColorLowerRight.add(green);
 		blobColorLowerRight.add(magenta);
-	}
-
-
-	@SuppressWarnings("unused")
-	private DrawableBotPattern()
-	{
-		this(Vector2f.ZERO_VECTOR, 0, 0, 0, BotID.noBot());
 	}
 
 

@@ -22,13 +22,6 @@ public class PersistenceShapeMapFrame implements PersistenceTable.IEntry<Persist
 	private final Map<ShapeMapSource, ShapeMap> shapeMapsBySource = new HashMap<>();
 
 
-	@SuppressWarnings("unused")
-	private PersistenceShapeMapFrame()
-	{
-		timestamp = 0;
-	}
-
-
 	public PersistenceShapeMapFrame(final long timestamp)
 	{
 		this.timestamp = timestamp;

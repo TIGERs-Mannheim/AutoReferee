@@ -6,6 +6,7 @@ package edu.tigers.sumatra.drawable;
 
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import lombok.RequiredArgsConstructor;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -19,6 +20,7 @@ import java.awt.Graphics2D;
  * The offset text will thus always appear at the same location regardless
  * of field orientation.
  */
+@RequiredArgsConstructor
 public class DrawableAnnotation implements IDrawableShape
 {
 	private final IVector2 center;
@@ -31,62 +33,24 @@ public class DrawableAnnotation implements IDrawableShape
 	private boolean bold = false;
 
 
-	@SuppressWarnings("unused")
-	private DrawableAnnotation()
-	{
-		center = Vector2f.ZERO_VECTOR;
-		text = "";
-	}
-
-
-	/**
-	 * @param center
-	 * @param text
-	 */
-	public DrawableAnnotation(final IVector2 center, final String text)
-	{
-		super();
-		this.center = center;
-		this.text = text;
-	}
-
-
-	/**
-	 * @param center
-	 * @param text
-	 * @param centerHorizontal
-	 */
 	public DrawableAnnotation(final IVector2 center, final String text, final boolean centerHorizontal)
 	{
-		super();
 		this.center = center;
 		this.text = text;
 		centerHorizontally = centerHorizontal;
 	}
 
 
-	/**
-	 * @param center
-	 * @param text
-	 * @param offset
-	 */
 	public DrawableAnnotation(final IVector2 center, final String text, final IVector2 offset)
 	{
-		super();
 		this.center = center;
 		this.text = text;
 		this.offset = offset;
 	}
 
 
-	/**
-	 * @param center
-	 * @param text
-	 * @param color
-	 */
 	public DrawableAnnotation(final IVector2 center, final String text, final Color color)
 	{
-		super();
 		this.center = center;
 		this.text = text;
 		this.color = color;

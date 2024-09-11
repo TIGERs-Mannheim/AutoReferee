@@ -4,6 +4,9 @@
 
 package edu.tigers.sumatra.math;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,18 +14,10 @@ import java.util.List;
 
 /**
  * Utility for statistics math
- *
- * @author nicolai.ommer
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StatisticsMath
 {
-
-	@SuppressWarnings("unused")
-	private StatisticsMath()
-	{
-	}
-
-
 	/**
 	 * Calculate mean value
 	 *

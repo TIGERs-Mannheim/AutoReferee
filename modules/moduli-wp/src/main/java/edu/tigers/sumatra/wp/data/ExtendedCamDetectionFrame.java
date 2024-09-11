@@ -12,20 +12,10 @@ import java.util.List;
 
 /**
  * This frame _might_ contain data from multiple camera frames
- *
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
 public class ExtendedCamDetectionFrame extends CamDetectionFrame
 {
 	private final CamBall ball;
-
-
-	@SuppressWarnings("unused")
-	private ExtendedCamDetectionFrame()
-	{
-		super();
-		ball = null;
-	}
 
 
 	/**

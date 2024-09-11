@@ -22,16 +22,6 @@ public class DrawableWay extends ADrawableWithStroke
 	private final List<IVector2> path;
 
 
-	@SuppressWarnings("unused")
-	private DrawableWay()
-	{
-		path = new ArrayList<>(0);
-	}
-
-
-	/**
-	 * @param path
-	 */
 	public DrawableWay(final Collection<IVector2> path)
 	{
 		// make sure we have a persistent implementation of List

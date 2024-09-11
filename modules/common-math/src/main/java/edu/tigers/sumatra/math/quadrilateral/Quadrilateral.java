@@ -34,12 +34,6 @@ public final class Quadrilateral implements IQuadrilateral
 	private final List<IVector2> corners;
 
 
-	@SuppressWarnings("unused")
-	private Quadrilateral()
-	{
-		this.corners = new ArrayList<>();
-	}
-
 
 	private Quadrilateral(final List<IVector2> corners)
 	{

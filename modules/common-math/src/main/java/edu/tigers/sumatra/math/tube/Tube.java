@@ -13,7 +13,6 @@ import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.LineMath;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -32,17 +31,6 @@ public class Tube implements ITube
 {
 	private final ILineSegment lineSegment;
 	private final double radius;
-
-
-	/**
-	 * for DB only
-	 */
-	@SuppressWarnings("unused")
-	private Tube()
-	{
-		lineSegment = Lines.segmentFromPoints(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
-		radius = 1;
-	}
 
 
 	/**

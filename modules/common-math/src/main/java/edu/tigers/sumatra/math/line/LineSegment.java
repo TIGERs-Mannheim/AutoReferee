@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 
 /**
  * Implementation of the {@link ILineSegment} interface. It provides a factory method to create new instances.
- *
- * @author Lukas Magel
  */
 final class LineSegment extends ALine implements ILineSegment
 {
@@ -32,18 +30,6 @@ final class LineSegment extends ALine implements ILineSegment
 	 * this field is calculated on demand
 	 */
 	private transient IVector2 directionVector;
-
-
-	/**
-	 * Used by berkely
-	 */
-	@SuppressWarnings("unused")
-	private LineSegment()
-	{
-		start = Vector2f.ZERO_VECTOR;
-		end = Vector2f.ZERO_VECTOR;
-		valid = false;
-	}
 
 
 	private LineSegment(final IVector2 start, final IVector2 end)

@@ -23,12 +23,6 @@ public class DrawablePoint extends ADrawable
 	private double pointSize = 25;
 
 
-	@SuppressWarnings("unused")
-	private DrawablePoint()
-	{
-		point = null;
-	}
-
 
 	/**
 	 * @param point the point to draw

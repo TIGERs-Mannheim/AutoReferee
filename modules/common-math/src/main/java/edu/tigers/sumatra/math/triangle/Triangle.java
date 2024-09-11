@@ -20,8 +20,6 @@ import static edu.tigers.sumatra.math.SumatraMath.sqrt;
 
 /**
  * Immutable implementation of {@link ITriangle}.
- *
- * @author Malte
  */
 public final class Triangle implements ITriangle
 {
@@ -29,16 +27,6 @@ public final class Triangle implements ITriangle
 	private final IVector2 b;
 	private final IVector2 c;
 	private final List<IVector2> corners;
-
-
-	@SuppressWarnings("unused")
-	private Triangle()
-	{
-		a = null;
-		b = null;
-		c = null;
-		corners = null;
-	}
 
 
 	/**

@@ -153,14 +153,6 @@ public class ShapeMap
 		boolean inverted = false;
 
 
-		@SuppressWarnings("unused")
-		private ShapeLayer()
-		{
-			identifier = ShapeLayerIdentifier.builder().build();
-			shapes = Collections.emptyList();
-		}
-
-
 		/**
 		 * @param identifier
 		 */

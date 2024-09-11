@@ -23,13 +23,6 @@ public class DrawableQuadrilateral extends ADrawableWithStroke
 	private boolean fill = false;
 
 
-	@SuppressWarnings("unused")
-	private DrawableQuadrilateral()
-	{
-		quadrilateral = null;
-	}
-
-
 	/**
 	 * Create a drawable for a Quadrilateral.
 	 *

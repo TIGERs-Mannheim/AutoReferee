@@ -7,7 +7,6 @@ package edu.tigers.sumatra.drawable;
 import edu.tigers.sumatra.math.circle.Circle;
 import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -20,16 +19,6 @@ public class DrawableCircle extends ADrawableWithStroke
 {
 	private ICircle circle;
 	private boolean fill = false;
-
-
-	/**
-	 * For some reason, ObjectDB wants a no-arg constructor with this class...
-	 */
-	@SuppressWarnings("unused")
-	private DrawableCircle()
-	{
-		circle = Circle.createCircle(Vector2f.ZERO_VECTOR, 1);
-	}
 
 
 	/**

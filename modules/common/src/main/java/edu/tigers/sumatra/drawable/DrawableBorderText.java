@@ -4,7 +4,6 @@
 package edu.tigers.sumatra.drawable;
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.util.ScalingUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -27,14 +26,6 @@ public class DrawableBorderText extends ADrawable
 	@Setter
 	@Accessors(chain = true)
 	private EFontSize fontSize = EFontSize.SMALL;
-
-
-	@SuppressWarnings("unused")
-	private DrawableBorderText()
-	{
-		pos = Vector2f.ZERO_VECTOR;
-		text = "";
-	}
 
 
 	@Override

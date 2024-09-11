@@ -24,16 +24,6 @@ public class DrawableShapeBoundary extends ADrawableWithStroke
 	private final List<IDrawableShape> drawables;
 
 
-	/**
-	 * For db only
-	 */
-	@SuppressWarnings("unused")
-	private DrawableShapeBoundary()
-	{
-		drawables = new ArrayList<>();
-	}
-
-
 	public DrawableShapeBoundary(I2DShape shape, Color color)
 	{
 		drawables = shape.getPerimeterPath().stream().map(this::pathToDrawable)

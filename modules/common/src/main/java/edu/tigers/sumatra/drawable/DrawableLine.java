@@ -7,7 +7,6 @@ package edu.tigers.sumatra.drawable;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -20,12 +19,6 @@ public class DrawableLine extends ADrawableWithStroke
 {
 	private final ILineSegment line;
 
-
-	@SuppressWarnings("unused")
-	private DrawableLine()
-	{
-		line = Lines.segmentFromPoints(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR);
-	}
 
 
 	/**

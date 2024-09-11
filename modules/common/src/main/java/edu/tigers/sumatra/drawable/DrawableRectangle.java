@@ -7,12 +7,9 @@ package edu.tigers.sumatra.drawable;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-
-import static edu.tigers.sumatra.math.rectangle.Rectangle.fromPoints;
 
 
 /**
@@ -22,16 +19,6 @@ public class DrawableRectangle extends ADrawableWithStroke
 {
 	private IRectangle rectangle;
 	private boolean fill = false;
-
-
-	/**
-	 * For db only
-	 */
-	@SuppressWarnings("unused")
-	private DrawableRectangle()
-	{
-		rectangle = fromPoints(Vector2f.ZERO_VECTOR, Vector2.fromXY(1, 1));
-	}
 
 
 	/**

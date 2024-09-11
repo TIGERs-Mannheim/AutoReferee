@@ -10,7 +10,6 @@ import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import lombok.Getter;
 
 
@@ -22,16 +21,6 @@ public abstract class APenaltyArea implements IPenaltyArea
 	protected final IVector2 goalCenter;
 	private final double length;
 	private final double depth;
-
-
-	/**
-	 * Used by berkely
-	 */
-	@SuppressWarnings("unused")
-	private APenaltyArea()
-	{
-		this(Vector2f.ZERO_VECTOR, 1, 2);
-	}
 
 
 	/**

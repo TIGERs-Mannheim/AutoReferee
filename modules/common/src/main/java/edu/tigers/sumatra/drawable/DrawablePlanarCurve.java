@@ -7,7 +7,6 @@ package edu.tigers.sumatra.drawable;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.planarcurve.PlanarCurve;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import lombok.NonNull;
@@ -27,13 +26,6 @@ public class DrawablePlanarCurve extends ADrawableWithStroke
 {
 	private final List<DrawSegment> segments = new ArrayList<>();
 	private final IVector2 start;
-
-
-	@SuppressWarnings("unused")
-	private DrawablePlanarCurve()
-	{
-		start = Vector2.zero();
-	}
 
 
 	/**
@@ -136,17 +128,10 @@ public class DrawablePlanarCurve extends ADrawableWithStroke
 
 	@Value
 	@RequiredArgsConstructor
-	protected static class DrawSegment
+	private static class DrawSegment
 	{
 		IVector2 p1;
 		@NonNull
 		IVector2 p2;
-
-
-		@SuppressWarnings("unused")
-		private DrawSegment()
-		{
-			this(null, Vector2.zero());
-		}
 	}
 }

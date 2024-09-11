@@ -7,7 +7,6 @@ package edu.tigers.sumatra.bot;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.IMirrorable;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 
@@ -28,13 +27,6 @@ public class BotBallState implements IMirrorable<BotBallState>, IExportable
 
 	/** Latency of reported position in [s]. Not including network and Sumatra delays. */
 	double age;
-
-	@SuppressWarnings("unused")
-	private BotBallState()
-	{
-		pos = Vector2.zero();
-		age = 0;
-	}
 
 	@Override
 	public BotBallState mirrored()

@@ -8,10 +8,8 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.tube.ITube;
-import edu.tigers.sumatra.math.tube.Tube;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -27,16 +25,6 @@ public class DrawableTube extends ADrawableWithStroke
 {
 	private ITube tube;
 	private boolean fill;
-
-
-	/**
-	 * for DB only
-	 */
-	@SuppressWarnings("unused")
-	private DrawableTube()
-	{
-		tube = Tube.create(Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR, 1);
-	}
 
 
 	/**

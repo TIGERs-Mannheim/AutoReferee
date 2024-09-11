@@ -22,14 +22,6 @@ public class PersistenceCamDetectionFrame implements PersistenceTable.IEntry<Per
 	private final Map<Integer, ExtendedCamDetectionFrame> camFrames;
 
 
-	@SuppressWarnings("unused")
-	private PersistenceCamDetectionFrame()
-	{
-		timestamp = 0;
-		camFrames = null;
-	}
-
-
 	@Override
 	public long getKey()
 	{

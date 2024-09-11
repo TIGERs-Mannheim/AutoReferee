@@ -13,7 +13,6 @@ import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 
 import java.util.List;
 
@@ -26,16 +25,6 @@ public class PenaltyAreaRoundedCorners extends APenaltyArea
 	private final IRectangle backRectangle;
 	private final IArc negArc; // Negative y for PenAreaOur
 	private final IArc posArc; // Positive y for PenAreaOur
-
-
-	/**
-	 * Used by berkely
-	 */
-	@SuppressWarnings("unused")
-	private PenaltyAreaRoundedCorners()
-	{
-		this(Vector2f.ZERO_VECTOR, 1, 2, 1);
-	}
 
 
 	public PenaltyAreaRoundedCorners(IVector2 goalCenter, double depth, double length, double radius)

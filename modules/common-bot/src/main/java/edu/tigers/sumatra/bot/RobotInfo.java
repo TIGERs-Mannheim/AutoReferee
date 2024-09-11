@@ -71,13 +71,6 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final BotBallState ballState;
 
 
-	@SuppressWarnings("unused")
-	private RobotInfo()
-	{
-		this(BotID.noBot(), 0);
-	}
-
-
 	private RobotInfo(final BotID botId, final long timestamp)
 	{
 		this.botId = botId;

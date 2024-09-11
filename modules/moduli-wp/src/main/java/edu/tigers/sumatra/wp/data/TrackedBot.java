@@ -42,21 +42,6 @@ public final class TrackedBot implements ITrackedBot
 	private final boolean malFunctioning;
 
 
-	@SuppressWarnings("unused")
-	private TrackedBot()
-	{
-		timestamp = 0;
-		botId = BotID.noBot();
-		botState = State.of(Pose.from(Vector3.zero()), Vector3.zero());
-		filteredState = null;
-		ballContact = BallContact.def(timestamp);
-		robotInfo = null;
-		tAssembly = 0;
-		quality = 0;
-		malFunctioning = false;
-	}
-
-
 	private TrackedBot(final Builder builder)
 	{
 		timestamp = builder.timestamp;

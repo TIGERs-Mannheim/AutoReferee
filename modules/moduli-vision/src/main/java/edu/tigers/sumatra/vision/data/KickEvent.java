@@ -9,14 +9,12 @@ import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
 import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
-import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Singular;
 import lombok.Value;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +35,6 @@ public class KickEvent implements IKickEvent
 	@Singular("recordSinceKick")
 	transient List<MergedBall> recordsSinceKick;
 	boolean isEarlyDetection;
-
-
-	@SuppressWarnings("unused")
-	private KickEvent()
-	{
-		this(BotID.noBot(), Vector2f.ZERO_VECTOR, Vector2f.ZERO_VECTOR, 0.0, 0, Collections.emptyList(), false);
-	}
 
 
 	@Override
