@@ -11,18 +11,22 @@ plugins {
 
 def osClassifier = {
     def os = System.getProperty("os.name").toLowerCase()
+    def arch = System.getProperty("os.arch").toLowerCase()
     if (os.contains("windows")) {
         return "windows_amd64"
     } else if (os.contains("linux")) {
-        return "linux_amd64"
+        if (arch == "amd64") {
+            return "linux_amd64"
+        } else if (arch == "aarch64") {
+            return "linux_arm64"
+        }
     } else if (os.contains("mac")) {
-        if (System.getProperty("os.arch") == "aarch64") {
+        if (arch == "aarch64") {
             return "darwin_arm64"
         }
         return "darwin_amd64"
-    } else {
-        throw new IllegalStateException("Unknown operating system: ${os}")
     }
+    throw new IllegalStateException("Unknown operating system '${os}' or architecture '${arch}'")
 }()
 
 dependencies {
