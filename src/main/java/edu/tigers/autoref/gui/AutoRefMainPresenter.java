@@ -3,7 +3,6 @@
  */
 package edu.tigers.autoref.gui;
 
-import edu.tigers.autoref.AutoRefReplayPresenter;
 import edu.tigers.autoref.gui.view.AutoRefMainFrame;
 import edu.tigers.moduli.IModuliStateObserver;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -12,7 +11,6 @@ import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.IRecordObserver;
-import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.persistence.RecordManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +40,7 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 		ModuliStateAdapter.getInstance().addObserver(this);
 		mainFrame.activate();
 
-		Runtime.getRuntime().addShutdownHook(new Thread(this::onExit));
+		Runtime.getRuntime().addShutdownHook(new Thread(this::onClose));
 	}
 
 
@@ -74,9 +72,9 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 
 
 	@Override
-	public void onExit()
+	public void onClose()
 	{
-		super.onExit();
+		super.onClose();
 
 		SumatraModel.getInstance().stopModules();
 		SumatraModel.getInstance().saveUserProperties();
@@ -135,13 +133,6 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 		public void onStartStopRecord(final boolean recording)
 		{
 			// nothing to do here
-		}
-
-
-		@Override
-		public void onViewReplay(final PersistenceDb persistence, final long startTime)
-		{
-			new AutoRefReplayPresenter().start(persistence, startTime);
 		}
 	}
 
