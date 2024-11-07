@@ -44,7 +44,6 @@ public class SslGameControllerProcess implements Runnable
 	private final int gcUiPort;
 	private final String publishAddress;
 	private final String timeAcquisitionMode;
-	private final Thread shutdownHook = new Thread(this::stop);
 
 	@Setter
 	private boolean useSystemBinary = false;
@@ -81,8 +80,6 @@ public class SslGameControllerProcess implements Runnable
 		{
 			return;
 		}
-
-		Runtime.getRuntime().addShutdownHook(shutdownHook);
 
 		Path engineConfig = Path.of("config", "engine.yaml");
 		Path engineConfigDefault = Path.of("config", "engine-default.yaml");
@@ -137,7 +134,6 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("game-controller has returned a non-zero exit code: {}", p.exitValue());
 		}
 		log.debug("game-controller process thread finished");
-		Runtime.getRuntime().removeShutdownHook(shutdownHook);
 	}
 
 
@@ -264,5 +260,6 @@ public class SslGameControllerProcess implements Runnable
 			log.warn("Interrupted while waiting for the process to exit");
 			Thread.currentThread().interrupt();
 		}
+		log.debug("Process stopped");
 	}
 }

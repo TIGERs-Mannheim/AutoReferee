@@ -52,5 +52,10 @@ public interface IMainFrame
 	 * @param name
 	 */
 	void selectLayoutItem(String name);
+
+	/**
+	 * Hook to run some cleanup when the frame is closed.
+	 */
+	void onClose();
 	
 }

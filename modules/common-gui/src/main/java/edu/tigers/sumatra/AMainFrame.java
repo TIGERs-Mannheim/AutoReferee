@@ -206,12 +206,14 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	}
 
 
-	protected void exit()
+	@Override
+	public void onClose()
 	{
 		for (final IMainFrameObserver o : observers)
 		{
-			o.onExit();
+			o.onClose();
 		}
+		log.debug("Closed");
 	}
 
 
@@ -636,7 +638,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		public void windowClosing(final WindowEvent windowEvent)
 		{
 			super.windowClosing(windowEvent);
-			exit();
+			onClose();
 		}
 	}
 

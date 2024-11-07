@@ -134,7 +134,7 @@ public abstract class AMainPresenter implements IMainFrameObserver
 
 
 	@Override
-	public void onExit()
+	public void onClose()
 	{
 		GlobalShortcuts.removeAllForFrame(getMainFrame());
 

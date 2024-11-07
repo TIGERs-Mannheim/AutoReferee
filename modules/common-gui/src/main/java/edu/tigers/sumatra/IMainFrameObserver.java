@@ -34,7 +34,7 @@ public interface IMainFrameObserver
 	/**
 	 *
 	 */
-	void onExit();
+	void onClose();
 
 
 	/**

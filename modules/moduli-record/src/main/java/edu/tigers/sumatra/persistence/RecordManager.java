@@ -18,7 +18,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -330,35 +329,6 @@ public class RecordManager extends AModule implements IRefereeObserver
 	protected void onNewPersistanceRecorder(PersistenceAsyncRecorder recorder)
 	{
 		recorder.add(new PersistenceLogRecorder(recorder.getDb()));
-	}
-
-
-	/**
-	 * Notify UI to view a replay window
-	 *
-	 * @param startTime
-	 */
-	public void notifyViewReplay(long startTime)
-	{
-		String dbPath = getCurrentDbPath();
-		if (dbPath.isEmpty())
-		{
-			log.error("No open DB found.");
-			return;
-		}
-		PersistenceDb db;
-		try
-		{
-			db = newPersistenceDb(Paths.get(dbPath));
-		} catch (Exception e)
-		{
-			log.error("Could not open DB", e);
-			return;
-		}
-		for (IRecordObserver observer : observers)
-		{
-			observer.onViewReplay(db, startTime);
-		}
 	}
 
 

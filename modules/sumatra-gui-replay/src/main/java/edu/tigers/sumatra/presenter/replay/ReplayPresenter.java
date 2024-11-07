@@ -172,11 +172,10 @@ public class ReplayPresenter extends AMainPresenter
 
 
 	@Override
-	public void onExit()
+	public void onClose()
 	{
-		super.onExit();
+		super.onClose();
 		stop();
-		getMainFrame().dispose();
 	}
 
 

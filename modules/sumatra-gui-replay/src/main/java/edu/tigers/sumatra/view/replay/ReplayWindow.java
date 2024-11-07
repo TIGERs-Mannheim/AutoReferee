@@ -13,6 +13,7 @@ import edu.tigers.sumatra.visualizer.VisualizerView;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.WindowConstants;
 import java.awt.event.KeyEvent;
 
 
@@ -27,6 +28,7 @@ public class ReplayWindow extends AMainFrame
 	public ReplayWindow()
 	{
 		setTitle("Replay");
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		addView(new LogView(false));
 		addView(new ReplayControlView());
@@ -41,10 +43,6 @@ public class ReplayWindow extends AMainFrame
 		final JMenuItem shortcutMenuItem = new JMenuItem("Shortcuts");
 		shortcutMenuItem.addActionListener(actionEvent -> new ShortcutsDialog(ReplayWindow.this));
 		replayMenu.add(shortcutMenuItem);
-
-		JMenuItem menuClose = new JMenuItem("Close");
-		menuClose.addActionListener(e -> exit());
-		replayMenu.add(menuClose);
 
 		getJMenuBar().add(replayMenu);
 		addMenuItems();
