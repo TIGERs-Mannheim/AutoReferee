@@ -20,7 +20,7 @@ com-fasterxml-jackson-core-jackson-annotations = { module = "com.fasterxml.jacks
 com-fasterxml-jackson-core-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "com-fasterxml-jackson-core" }
 com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core" }
 com-github-TIGERs-Mannheim-infonode = "com.github.TIGERs-Mannheim:infonode:1.7.0"
-com-github-TIGERs-Mannheim-jinput = "com.github.TIGERs-Mannheim.jinput:jinput:2.0.9.4"
+com-github-TIGERs-Mannheim-jinput = "com.github.TIGERs-Mannheim.jinput:jinput:2.0.10.1"
 com-github-TIGERs-Mannheim-matlabcontrol = "com.github.TIGERs-Mannheim.matlabcontrol:matlabcontrol:4.1.2"
 com-github-TIGERs-Mannheim-moduli = "com.github.TIGERs-Mannheim:moduli:4.1"
 com-github-TIGERs-Mannheim-ssl-game-controller-maven = "com.github.TIGERs-Mannheim:ssl-game-controller-maven:3.12.5.0"

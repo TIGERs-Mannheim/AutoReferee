@@ -283,6 +283,10 @@ public class ConfigXMLTreeTableModel extends ATreeTableModel
 	@Override
 	public Class<?> getColumnClass(final int col)
 	{
+		if (col == -1)
+		{
+			return Object.class;
+		}
 		return CLASSES[col];
 	}
 
