@@ -36,8 +36,8 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -189,7 +189,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 		GlobalShortcuts.add(
 				"Show / hide shape selection", viewPanel, this::toggleShapeSelection,
-				KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, InputEvent.CTRL_DOWN_MASK));
+				KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
 
 		NamedThreadFactory factory = new NamedThreadFactory("VisualizerUpdater");
 		updateThread = factory.newThread(this::updateLoop);
