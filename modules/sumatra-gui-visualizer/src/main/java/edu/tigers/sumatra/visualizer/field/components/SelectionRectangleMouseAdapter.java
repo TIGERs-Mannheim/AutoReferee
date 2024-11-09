@@ -4,6 +4,8 @@
 
 package edu.tigers.sumatra.visualizer.field.components;
 
+import edu.tigers.sumatra.drawable.DrawableRectangle;
+import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.visualizer.field.callbacks.MousePointTransformer;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +17,11 @@ import java.util.function.Consumer;
 
 
 @RequiredArgsConstructor
-public class RulerMouseAdapter extends MouseAdapter
+public class SelectionRectangleMouseAdapter extends MouseAdapter
 {
 	private final MousePointTransformer mousePointTransformer;
-	private final Consumer<DrawableRuler> rulerConsumer;
+	private final Consumer<DrawableRectangle> rectangleConsumer;
+	private final Consumer<Rectangle> selectionBoxConsumer;
 	private IVector2 dragPointStart;
 
 	@Override
@@ -31,11 +34,13 @@ public class RulerMouseAdapter extends MouseAdapter
 	@Override
 	public void mouseDragged(final MouseEvent e)
 	{
-		if (SwingUtilities.isLeftMouseButton(e) && (e.isAltDown()) && dragPointStart != null)
+		if (SwingUtilities.isLeftMouseButton(e) && (e.isControlDown()) && dragPointStart != null)
 		{
 			IVector2 dragPointEnd = mousePointTransformer.toGlobal(e.getX(), e.getY());
-			DrawableRuler ruler = new DrawableRuler(dragPointStart, dragPointEnd);
-			rulerConsumer.accept(ruler);
+			Rectangle rectangle = Rectangle.fromPoints(dragPointStart, dragPointEnd);
+			DrawableRectangle drawableRectangle = new DrawableRectangle(rectangle);
+			rectangleConsumer.accept(drawableRectangle);
+			selectionBoxConsumer.accept(rectangle);
 		}
 	}
 
@@ -44,6 +49,7 @@ public class RulerMouseAdapter extends MouseAdapter
 	public void mouseReleased(final MouseEvent e)
 	{
 		dragPointStart = null;
-		rulerConsumer.accept(null);
+		rectangleConsumer.accept(null);
+		selectionBoxConsumer.accept(null);
 	}
 }

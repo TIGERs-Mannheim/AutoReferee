@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.drawable;
 
 import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 
@@ -108,8 +109,8 @@ public class DrawableBotPattern extends DrawableBotShape
 		super(pos, angle, radius, center2DribblerDist);
 		this.botID = botID;
 
-		setBorderColor(null);
-		setFillColor(Color.black);
+		setBorderColor(botID.getTeamColor() == ETeamColor.YELLOW ? Color.white : Color.black);
+		setFillColor(botID.getTeamColor() == ETeamColor.YELLOW ? Color.darkGray : Color.black);
 		setDrawDirection(false);
 	}
 

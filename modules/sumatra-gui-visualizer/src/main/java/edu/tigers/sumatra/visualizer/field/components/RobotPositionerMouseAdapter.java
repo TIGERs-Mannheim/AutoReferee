@@ -4,6 +4,9 @@
 
 package edu.tigers.sumatra.visualizer.field.components;
 
+import edu.tigers.sumatra.drawable.DrawableLine;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.visualizer.field.callbacks.MousePointTransformer;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +18,11 @@ import java.util.function.Consumer;
 
 
 @RequiredArgsConstructor
-public class RulerMouseAdapter extends MouseAdapter
+public class RobotPositionerMouseAdapter extends MouseAdapter
 {
 	private final MousePointTransformer mousePointTransformer;
-	private final Consumer<DrawableRuler> rulerConsumer;
+	private final Consumer<DrawableLine> drawableLineConsumer;
+	private final Consumer<ILineSegment> lineConsumer;
 	private IVector2 dragPointStart;
 
 	@Override
@@ -31,11 +35,13 @@ public class RulerMouseAdapter extends MouseAdapter
 	@Override
 	public void mouseDragged(final MouseEvent e)
 	{
-		if (SwingUtilities.isLeftMouseButton(e) && (e.isAltDown()) && dragPointStart != null)
+		if (SwingUtilities.isRightMouseButton(e) && (e.isControlDown()) && dragPointStart != null)
 		{
 			IVector2 dragPointEnd = mousePointTransformer.toGlobal(e.getX(), e.getY());
-			DrawableRuler ruler = new DrawableRuler(dragPointStart, dragPointEnd);
-			rulerConsumer.accept(ruler);
+			ILineSegment line = Lines.segmentFromPoints(dragPointStart, dragPointEnd);
+			DrawableLine drawableLine = new DrawableLine(line);
+			drawableLineConsumer.accept(drawableLine);
+			lineConsumer.accept(line);
 		}
 	}
 
@@ -44,6 +50,7 @@ public class RulerMouseAdapter extends MouseAdapter
 	public void mouseReleased(final MouseEvent e)
 	{
 		dragPointStart = null;
-		rulerConsumer.accept(null);
+		drawableLineConsumer.accept(null);
+		lineConsumer.accept(null);
 	}
 }

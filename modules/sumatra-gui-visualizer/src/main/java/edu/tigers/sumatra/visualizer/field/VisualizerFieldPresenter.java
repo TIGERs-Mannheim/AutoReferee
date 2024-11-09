@@ -5,32 +5,48 @@
 package edu.tigers.sumatra.visualizer.field;
 
 import edu.tigers.sumatra.clock.FpsCounter;
+import edu.tigers.sumatra.drawable.DrawableCircle;
 import edu.tigers.sumatra.drawable.DrawableFieldBackground;
+import edu.tigers.sumatra.drawable.DrawableLine;
+import edu.tigers.sumatra.drawable.DrawableRectangle;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.ShapeMap;
 import edu.tigers.sumatra.drawable.ShapeMapSource;
+import edu.tigers.sumatra.geometry.Geometry;
+import edu.tigers.sumatra.ids.BotID;
+import edu.tigers.sumatra.math.circle.Circle;
+import edu.tigers.sumatra.math.line.ILineSegment;
+import edu.tigers.sumatra.math.rectangle.Rectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.views.ISumatraPresenter;
 import edu.tigers.sumatra.visualizer.field.components.CoordinatesMouseAdapter;
 import edu.tigers.sumatra.visualizer.field.components.DragMouseAdapter;
 import edu.tigers.sumatra.visualizer.field.components.DrawableCoordinates;
 import edu.tigers.sumatra.visualizer.field.components.DrawableFps;
 import edu.tigers.sumatra.visualizer.field.components.DrawableRuler;
+import edu.tigers.sumatra.visualizer.field.components.RobotPositionerMouseAdapter;
 import edu.tigers.sumatra.visualizer.field.components.RulerMouseAdapter;
+import edu.tigers.sumatra.visualizer.field.components.SelectionRectangleMouseAdapter;
 import edu.tigers.sumatra.visualizer.field.components.ZoomMouseAdapter;
 import edu.tigers.sumatra.visualizer.field.recorder.DrawableRecordingAnimation;
 import edu.tigers.sumatra.wp.IWorldFrameObserver;
+import edu.tigers.sumatra.wp.data.ITrackedBot;
+import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
+import javax.swing.SwingUtilities;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +74,22 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 
 	@Setter
 	private DrawableRuler drawableRuler = null;
+
+	@Setter
+	private DrawableRectangle drawableSelectionBox = null;
+	@Setter
+	private Rectangle selectionBox = null;
+
+	@Setter
+	private ILineSegment robotPositionerLine = null;
+	@Setter
+	private DrawableLine drawableRobotPositionerLine = null;
+
+	private Map<BotID, ITrackedBot> bots = new HashMap<>();
+
+	@Setter
+	private List<BotID> selectedBots = new ArrayList<>();
+
 	@Setter
 	private List<DrawableCoordinates> coordinates = List.of();
 	private final FpsCounter fpsCounter = new FpsCounter();
@@ -65,10 +97,15 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	@Setter
 	private DrawableRecordingAnimation drawableRecordingAnimation;
 
+	@Setter
+	private ISelectedRobotsChanged selectedRobotsChangedListener;
+
 	@Getter
 	private final List<FieldMouseInteraction> onFieldClicks = new ArrayList<>();
 	@Getter
 	private final List<FieldMouseInteraction> onMouseMoves = new ArrayList<>();
+	@Getter
+	private final List<FieldRobotMoveInteraction> onRobotMove = new ArrayList<>();
 
 	private List<MouseAdapter> mouseAdapters = List.of();
 
@@ -85,7 +122,11 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 				new RulerMouseAdapter(this::getMousePointGlobal, this::setDrawableRuler),
 				new ZoomMouseAdapter(fieldPane::scale),
 				new DragMouseAdapter(fieldPane::drag),
-				new InteractionMouseEvents()
+				new SelectionRectangleMouseAdapter(this::getMousePointGlobal, this::setDrawableSelectionBox,
+						this::setSelectionBox),
+				new InteractionMouseEvents(),
+				new RobotPositionerMouseAdapter(this::getMousePointGlobal, this::setDrawableRobotPositionerLine,
+						this::setRobotPositionerLine)
 		);
 		mouseAdapters.forEach(fieldPanel::addMouseAdapter);
 		fieldPanel.setVisible(true);
@@ -102,6 +143,13 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		fieldPanel.setVisible(false);
 		fieldPanel.setOffImage(null);
 		shapeMaps.clear();
+	}
+
+
+	@Override
+	public void onNewWorldFrame(WorldFrameWrapper wFrameWrapper)
+	{
+		this.bots = wFrameWrapper.getSimpleWorldFrame().getBots();
 	}
 
 
@@ -224,6 +272,54 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		panelShapeMap.get(EFieldPanelShapeLayer.COORDINATES).clear();
 		panelShapeMap.get(EFieldPanelShapeLayer.COORDINATES).addAll(coordinates);
 
+		panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).clear();
+		Optional.ofNullable(drawableSelectionBox)
+				.ifPresent(box -> panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).add(box));
+
+		Optional.ofNullable(drawableRobotPositionerLine)
+				.ifPresent(line -> panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).add(line));
+
+		if (selectionBox != null)
+		{
+			selectedBots.clear();
+			bots.values()
+					.stream()
+					.filter(bot -> selectionBox.isPointInShape(bot.getPos()))
+					.forEach(bot ->
+					{
+						panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).add(new DrawableCircle(
+								Circle.createCircle(bot.getPos(), Geometry.getBotRadius() + 4))
+								.setColor(new Color(255, 180, 0, 255)));
+						selectedBots.add(bot.getBotId());
+					});
+			selectedRobotsChangedListener.selectedRobotsChanged(selectedBots);
+		} else if (bots != null)
+		{
+			bots.values()
+					.stream()
+					.filter(bot -> selectedBots.contains(bot.getBotId()))
+					.forEach(bot -> panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).add(new DrawableCircle(
+							Circle.createCircle(bot.getPos(), Geometry.getBotRadius() + 4))
+							.setColor(new Color(0, 225, 255, 255))));
+		}
+
+		if (robotPositionerLine != null && selectedBots != null && !selectedBots.isEmpty())
+		{
+			int numBots = selectedBots.size();
+			var start = robotPositionerLine.getPathStart();
+			var end = robotPositionerLine.getPathEnd();
+			var startToEnd = end.subtractNew(start);
+
+			double step = getStepSize(startToEnd, numBots);
+			for (int i = 0; i < numBots; i++)
+			{
+				var pos = start.addNew(startToEnd.scaleToNew(step * i));
+				panelShapeMap.get(EFieldPanelShapeLayer.SELECTION).add(new DrawableCircle(
+						Circle.createCircle(pos, Geometry.getBotRadius() + 4))
+						.setColor(new Color(0, 225, 255, 255)));
+			}
+		}
+
 		panelShapeMap.get(EFieldPanelShapeLayer.RULER).clear();
 		Optional.ofNullable(drawableRuler)
 				.ifPresent(ruler -> panelShapeMap.get(EFieldPanelShapeLayer.RULER).add(ruler));
@@ -265,7 +361,35 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		public void mouseClicked(final MouseEvent e)
 		{
 			IVector2 globalPos = getMousePointGlobal(e.getX(), e.getY());
-			onFieldClicks.forEach(c -> c.onInteraction(globalPos, e));
+			if (e.isControlDown())
+			{
+				selectedBots.clear();
+			} else
+			{
+				onFieldClicks.forEach(c -> c.onInteraction(globalPos, e));
+			}
+		}
+
+
+		@Override
+		public void mouseReleased(MouseEvent e)
+		{
+			if (e.isControlDown() && SwingUtilities.isRightMouseButton(e) && robotPositionerLine != null
+					&& selectedBots != null && !selectedBots.isEmpty())
+			{
+				var start = robotPositionerLine.getPathStart();
+				var end = robotPositionerLine.getPathEnd();
+				var startToEnd = end.subtractNew(start);
+				int numBots = selectedBots.size();
+
+				double step = getStepSize(startToEnd, numBots);
+				for (int i = 0; i < numBots; i++)
+				{
+					var pos = start.addNew(startToEnd.scaleToNew(step * i));
+					final BotID botId = selectedBots.get(i);
+					onRobotMove.forEach(c -> c.onInteraction(botId, pos));
+				}
+			}
 		}
 
 
@@ -274,7 +398,27 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		{
 			IVector2 lastMousePoint = getMousePointGlobal(e.getX(), e.getY());
 			onMouseMoves.forEach(c -> c.onInteraction(lastMousePoint, e));
+			update();
 		}
+	}
+
+
+	private static double getStepSize(Vector2 startToEnd, int numBots)
+	{
+		var distance = startToEnd.getLength();
+		double step = distance / 2;
+		if (numBots > 1)
+		{
+			step = distance / (numBots - 1);
+		}
+		return step;
+	}
+
+
+	@FunctionalInterface
+	public interface FieldRobotMoveInteraction
+	{
+		void onInteraction(BotID id, IVector2 pos);
 	}
 
 	@FunctionalInterface

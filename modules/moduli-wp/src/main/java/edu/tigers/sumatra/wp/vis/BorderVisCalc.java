@@ -73,7 +73,7 @@ public class BorderVisCalc implements IWpCalc
 
 	private void drawLine(List<IDrawableShape> list, IDrawableShape newShape)
 	{
-		list.add(newShape.setColor(Color.WHITE).setStrokeWidth(Geometry.getLineWidth()));
+		list.add(newShape.setColor(Color.WHITE).setStrokeWidth(Geometry.getLineWidth() * 2));
 	}
 
 

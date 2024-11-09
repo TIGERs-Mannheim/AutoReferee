@@ -24,4 +24,6 @@ public final class EFieldPanelShapeLayer
 			F.category(PANEL).layerName("Ruler").visibleByDefault(true));
 	public static final IShapeLayerIdentifier RECORDING = F.create(
 			F.category(PANEL).layerName("Recording").visibleByDefault(true));
+	public static final IShapeLayerIdentifier SELECTION = F.create(
+			F.category(PANEL).layerName("Selection").visibleByDefault(true));
 }
