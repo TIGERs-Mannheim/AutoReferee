@@ -398,7 +398,6 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		{
 			IVector2 lastMousePoint = getMousePointGlobal(e.getX(), e.getY());
 			onMouseMoves.forEach(c -> c.onInteraction(lastMousePoint, e));
-			update();
 		}
 	}
 
