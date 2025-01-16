@@ -9,24 +9,23 @@ import edu.tigers.sumatra.math.circle.ICircle;
 import edu.tigers.sumatra.math.tube.ITube;
 import edu.tigers.sumatra.math.tube.Tube;
 import edu.tigers.sumatra.math.vector.IVector2;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class MovingRobotImpl implements IMovingRobot
+@RequiredArgsConstructor
+public abstract class AMovingRobot implements IMovingRobot
 {
 	private final IVector2 pos;
 	private final IVector2 dir;
 	private final double radius;
-	private final double speed;
-	private final MovingOffsetFunction offsetFunction;
+	protected final double speed;
+	protected final double reactionTime;
 
 
 	@Override
 	public ICircle getMovingHorizon(final double tHorizon, double tAdditionalReaction)
 	{
-		var p = offsetFunction.forwardBackwardOffset(tHorizon, tAdditionalReaction);
+		var p = forwardBackwardOffset(tHorizon, tAdditionalReaction);
 
 		double dynamicRadius = Math.abs(p.forward() - p.backward()) / 2;
 		IVector2 center = pos.addNew(dir.multiplyNew(p.backward() + dynamicRadius));
@@ -37,7 +36,7 @@ public class MovingRobotImpl implements IMovingRobot
 	@Override
 	public ITube getMovingHorizonTube(final double tHorizon, double tAdditionalReaction)
 	{
-		var p = offsetFunction.forwardBackwardOffset(tHorizon, tAdditionalReaction);
+		var p = forwardBackwardOffset(tHorizon, tAdditionalReaction);
 
 		return Tube.create(
 				dir.multiplyNew(p.backward()).add(pos),
@@ -60,5 +59,12 @@ public class MovingRobotImpl implements IMovingRobot
 		return speed;
 	}
 
+
+	/**
+	 * @param tHorizon            time horizon in seconds
+	 * @param tAdditionalReaction additional reaction time in seconds
+	 * @return moving offsets
+	 */
+	abstract MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction);
 
 }

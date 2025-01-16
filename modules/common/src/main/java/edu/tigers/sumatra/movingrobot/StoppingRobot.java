@@ -5,66 +5,51 @@
 package edu.tigers.sumatra.movingrobot;
 
 import edu.tigers.sumatra.math.vector.IVector2;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 
 
 /**
- * A factory for robots that stop at the end of the moving horizon.
+ * A moving robot that tries to stop right at the given horizon.
+ * For large horizons, it may accelerate up to the max velocity, as long as it can stop at the given horizon.
  */
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class StoppingRobotFactory
+public class StoppingRobot extends AMovingRobot
 {
-	private final double speed;
-	private final double reactionTime;
 	private final double vLimit;
 	private final double aLimit;
 	private final double brkLimit;
 
 
-	public static IMovingRobot create(
+	StoppingRobot(
 			IVector2 pos,
 			IVector2 vel,
+			double radius,
+			double reactionTime,
 			double vLimit,
 			double aLimit,
-			double brkLimit,
-			double radius,
-			double reactionTime
+			double brkLimit
 	)
 	{
-		double speed = vel.getLength2();
-		var factory = new StoppingRobotFactory(
-				speed,
-				reactionTime,
-				vLimit,
-				aLimit,
-				brkLimit
-		);
-		return new MovingRobotImpl(
-				pos,
-				vel.normalizeNew(),
-				radius,
-				speed,
-				factory::forwardBackwardOffset
-		);
+		super(pos, vel.normalizeNew(), radius, vel.getLength2(), reactionTime);
+		this.vLimit = vLimit;
+		this.aLimit = aLimit;
+		this.brkLimit = brkLimit;
 	}
 
 
-	private MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction)
+	@Override
+	MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction)
 	{
 		double tReaction = Math.min(reactionTime + tAdditionalReaction, tHorizon);
 
 		double t = tHorizon - tReaction;
-		double vCur = speed;
 
 		double distReaction = speed * tReaction;
-		double tBrake = vCur / brkLimit;
+		double tBrake = speed / brkLimit;
 
 		if (tBrake > t)
 		{
 			// can't stop in time, just calculate distance until t
 			double dvAfterT = brkLimit * t;
-			double vAfterT = vCur - dvAfterT;
+			double vAfterT = speed - dvAfterT;
 			double distBrakePartially = vAfterT * t + 0.5 * dvAfterT * t;
 			return new MovingOffsets(
 					(distReaction + distBrakePartially) * 1000,
@@ -72,7 +57,7 @@ public class StoppingRobotFactory
 			);
 		}
 
-		double distBrake = 0.5 * vCur * tBrake;
+		double distBrake = 0.5 * speed * tBrake;
 		return new MovingOffsets(
 				(distReaction + distance(speed, t)) * 1000,
 				(distReaction + distBrake - distance(0, t - tBrake)) * 1000
