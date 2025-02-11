@@ -33,14 +33,11 @@ public class AcceleratingRobot extends AMovingRobot
 
 
 	@Override
-	MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction)
+	MovingOffsets forwardBackwardOffset(double t)
 	{
-		double tReaction = Math.min(reactionTime + tAdditionalReaction, tHorizon);
-
-		double distReaction = speed * tReaction * 1000;
 		return new MovingOffsets(
-				distReaction + trajectoryForward.getPositionMM(tHorizon - tReaction),
-				distReaction + trajectoryBackward.getPositionMM(tHorizon - tReaction)
+				trajectoryForward.getPositionMM(t),
+				trajectoryBackward.getPositionMM(t)
 		);
 	}
 }

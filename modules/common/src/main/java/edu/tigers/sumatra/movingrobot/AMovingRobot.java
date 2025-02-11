@@ -19,13 +19,13 @@ public abstract class AMovingRobot implements IMovingRobot
 	private final IVector2 dir;
 	private final double radius;
 	protected final double speed;
-	protected final double reactionTime;
+	private final double reactionDuration;
 
 
 	@Override
 	public ICircle getMovingHorizon(final double tHorizon, double tAdditionalReaction)
 	{
-		var p = forwardBackwardOffset(tHorizon, tAdditionalReaction);
+		var p = forwardBackwardOffsetWithReaction(tHorizon, tAdditionalReaction);
 
 		double dynamicRadius = Math.abs(p.forward() - p.backward()) / 2;
 		IVector2 center = pos.addNew(dir.multiplyNew(p.backward() + dynamicRadius));
@@ -36,12 +36,26 @@ public abstract class AMovingRobot implements IMovingRobot
 	@Override
 	public ITube getMovingHorizonTube(final double tHorizon, double tAdditionalReaction)
 	{
-		var p = forwardBackwardOffset(tHorizon, tAdditionalReaction);
+		var p = forwardBackwardOffsetWithReaction(tHorizon, tAdditionalReaction);
 
 		return Tube.create(
 				dir.multiplyNew(p.backward()).add(pos),
 				dir.multiplyNew(p.forward()).add(pos),
 				radius
+		);
+	}
+
+
+	private MovingOffsets forwardBackwardOffsetWithReaction(double tHorizon, double additionalReactionDuration)
+	{
+		double tReaction = Math.min(reactionDuration + additionalReactionDuration, tHorizon);
+		double t = Math.max(0, tHorizon - tReaction);
+		double distReaction = speed * tReaction * 1000;
+
+		var offset = forwardBackwardOffset(t);
+		return new MovingOffsets(
+				distReaction + offset.forward(),
+				distReaction + offset.backward()
 		);
 	}
 
@@ -61,10 +75,9 @@ public abstract class AMovingRobot implements IMovingRobot
 
 
 	/**
-	 * @param tHorizon            time horizon in seconds
-	 * @param tAdditionalReaction additional reaction time in seconds
+	 * @param t time horizon in seconds
 	 * @return moving offsets
 	 */
-	abstract MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction);
+	abstract MovingOffsets forwardBackwardOffset(double t);
 
 }

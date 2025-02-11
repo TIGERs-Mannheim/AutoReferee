@@ -9,7 +9,6 @@ import edu.tigers.moduli.listenerVariables.ModulesState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.SwingUtilities;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
@@ -75,11 +74,11 @@ public final class ModuliStateAdapter implements PropertyChangeListener
 			observers.stream().parallel().forEach(o -> {
 				try
 				{
-					log.trace("Notify {}", o.getClass());
-					SwingUtilities.invokeLater(() -> o.onModuliStateChanged(newState));
+					log.trace("Notify {} about new state {}", o.getClass(), newState);
+					o.onModuliStateChanged(newState);
 				} catch (Exception err)
 				{
-					log.error("Exception while changing moduli state in class " + o.getClass().getName(), err);
+					log.error("Exception while changing moduli state in class {}", o.getClass().getName(), err);
 				}
 			});
 		}

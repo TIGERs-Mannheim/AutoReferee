@@ -29,7 +29,7 @@ public class DrawableAnnotation implements IDrawableShape
 	private IVector2 offset = Vector2f.ZERO_VECTOR;
 	private boolean centerHorizontally = false;
 	private Color color = Color.BLACK;
-	private int fontHeight = 50;
+	private double fontHeight = 50;
 	private boolean bold = false;
 
 
@@ -81,24 +81,13 @@ public class DrawableAnnotation implements IDrawableShape
 		double drawingX = transPoint.x() + tool.scaleGlobalToGui(offset.x());
 		double drawingY = transPoint.y() + tool.scaleGlobalToGui(offset.y());
 
-		drawingY += (textHeight / 2) - g.getFontMetrics(font).getDescent();
-
-		if (offset.x() < 0)
-		{
-			drawingX -= maxWidth;
-		}
 
 		if (centerHorizontally)
 		{
-			if (offset.x() < 0)
-			{
-				drawingX += maxWidth / 2;
-			} else
-			{
-				drawingX -= maxWidth / 2;
-			}
+			drawingX += -maxWidth / 2;
 		}
 
+		drawingY += (textHeight / 2) - g.getFontMetrics(font).getDescent();
 		drawingY -= (numLines - 1) * lineHeight;
 
 		for (String txt : lines)
@@ -124,7 +113,7 @@ public class DrawableAnnotation implements IDrawableShape
 	 * @param fontHeight the fontHeight to set in [mm]
 	 * @return
 	 */
-	public final DrawableAnnotation withFontHeight(final int fontHeight)
+	public final DrawableAnnotation withFontHeight(final double fontHeight)
 	{
 		this.fontHeight = fontHeight;
 		return this;

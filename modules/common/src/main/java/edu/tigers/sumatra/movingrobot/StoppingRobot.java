@@ -36,13 +36,8 @@ public class StoppingRobot extends AMovingRobot
 
 
 	@Override
-	MovingOffsets forwardBackwardOffset(double tHorizon, double tAdditionalReaction)
+	MovingOffsets forwardBackwardOffset(double t)
 	{
-		double tReaction = Math.min(reactionTime + tAdditionalReaction, tHorizon);
-
-		double t = tHorizon - tReaction;
-
-		double distReaction = speed * tReaction;
 		double tBrake = speed / brkLimit;
 
 		if (tBrake > t)
@@ -52,15 +47,17 @@ public class StoppingRobot extends AMovingRobot
 			double vAfterT = speed - dvAfterT;
 			double distBrakePartially = vAfterT * t + 0.5 * dvAfterT * t;
 			return new MovingOffsets(
-					(distReaction + distBrakePartially) * 1000,
-					(distReaction + distBrakePartially) * 1000
+					distBrakePartially * 1000,
+					distBrakePartially * 1000
 			);
 		}
 
 		double distBrake = 0.5 * speed * tBrake;
+		double forward = distance(speed, t);
+		double backward = distBrake - distance(0, t - tBrake);
 		return new MovingOffsets(
-				(distReaction + distance(speed, t)) * 1000,
-				(distReaction + distBrake - distance(0, t - tBrake)) * 1000
+				forward * 1000,
+				backward * 1000
 		);
 	}
 
