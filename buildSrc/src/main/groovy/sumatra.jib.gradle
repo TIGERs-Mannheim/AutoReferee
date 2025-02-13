@@ -3,6 +3,9 @@ plugins {
 }
 
 jib {
+    to {
+        tags = [rootProject.version]
+    }
     from {
         image = "ghcr.io/graalvm/jdk-community@sha256:57e5c4cf8536dac4346611691c31ea4828f3ff7bbb0d3695902b234f69ed99b5"
     }
