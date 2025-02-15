@@ -46,6 +46,7 @@ application {
 jib {
     to {
         image = "registry.hub.docker.com/tigersmannheim/auto-referee:latest"
+        tags = [rootProject.version.toString()]
         auth {
             username = System.getenv("DOCKER_HUB_USERNAME") ?: ""
             password = System.getenv("DOCKER_HUB_PASSWORD") ?: ""
