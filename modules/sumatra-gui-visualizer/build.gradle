@@ -23,8 +23,4 @@ dependencies {
     implementation(libs.io.humble.humble.video.noarch)
     implementation(libs.com.jidesoft.jide.oss)
     implementation(libs.commons.lang)
-
-    if (!project.property("compactBuild").toBoolean()) {
-        runtimeOnly(libs.io.humble.humble.video.all)
-    }
 }

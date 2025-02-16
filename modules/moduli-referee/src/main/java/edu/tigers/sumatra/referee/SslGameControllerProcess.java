@@ -137,6 +137,34 @@ public class SslGameControllerProcess implements Runnable
 	}
 
 
+	private String getOsAndArchSuffix()
+	{
+		String os = System.getProperty("os.name").toLowerCase();
+		String arch = System.getProperty("os.arch").toLowerCase();
+		if (os.contains("windows"))
+		{
+			return "windows_amd64";
+		} else if (os.contains("linux"))
+		{
+			if (arch.equalsIgnoreCase("amd64"))
+			{
+				return "linux_amd64";
+			} else if (arch.equalsIgnoreCase("aarch64"))
+			{
+				return "linux_arm64";
+			}
+		} else if (os.contains("mac"))
+		{
+			if (arch.equalsIgnoreCase("aarch64"))
+			{
+				return "darwin_arm64";
+			}
+			return "darwin_amd64";
+		}
+		throw new IllegalStateException("Unknown operating system '${os}' or architecture '${arch}'");
+	}
+
+
 	private Optional<File> findBinaryInPath()
 	{
 		return Arrays.stream(System.getenv("PATH").split("[:;]"))
@@ -198,7 +226,7 @@ public class SslGameControllerProcess implements Runnable
 				}
 			}).orElse(null);
 		}
-		return ClassLoader.getSystemClassLoader().getResourceAsStream(BINARY_NAME);
+		return ClassLoader.getSystemClassLoader().getResourceAsStream(BINARY_NAME + "_" + getOsAndArchSuffix());
 	}
 
 
