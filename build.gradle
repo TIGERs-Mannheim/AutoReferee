@@ -11,6 +11,12 @@ plugins {
     id 'sumatra.application'
 }
 
+def gitDescribe = providers.exec {
+    commandLine("git", "describe", "--tags", "--always", "--first-parent")
+}.standardOutput.asText.map { it.replace("version/", "").trim() }
+
+version = gitDescribe.get()
+
 dependencies {
     implementation project(':autoreferee-gui')
 
@@ -46,7 +52,7 @@ application {
 jib {
     to {
         image = "registry.hub.docker.com/tigersmannheim/auto-referee:latest"
-        tags = [rootProject.version.toString()]
+        tags = [project.version.toString()]
         auth {
             username = System.getenv("DOCKER_HUB_USERNAME") ?: ""
             password = System.getenv("DOCKER_HUB_PASSWORD") ?: ""
