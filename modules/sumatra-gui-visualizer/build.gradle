@@ -16,8 +16,6 @@ dependencies {
     implementation project(':moduli-vision')
     implementation project(':moduli-geometry')
 
-    api(libs.com.github.g3force.configurable)
-
     implementation(libs.org.apache.logging.log4j.log4j.api)
 
     implementation(libs.io.humble.humble.video.noarch)

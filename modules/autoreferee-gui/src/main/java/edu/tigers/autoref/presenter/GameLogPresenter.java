@@ -14,7 +14,7 @@ import edu.tigers.autoreferee.engine.log.RefereeCommandGameLogEntry;
 import edu.tigers.autoreferee.engine.log.RefereeGameEventGameLogEntry;
 import edu.tigers.autoreferee.engine.log.RefereeGameEventProposalGameLogEntry;
 import edu.tigers.autoreferee.module.AutoRefModule;
-import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.moduli.ModulesState;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.data.GameEventProposalGroup;

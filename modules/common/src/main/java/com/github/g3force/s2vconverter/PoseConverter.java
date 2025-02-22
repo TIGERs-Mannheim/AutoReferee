@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math.pose;
+package com.github.g3force.s2vconverter;
 
-import com.github.g3force.s2vconverter.IString2ValueConverter;
+import edu.tigers.sumatra.math.pose.Pose;
 import edu.tigers.sumatra.math.vector.Vector3;
 import lombok.extern.log4j.Log4j2;
 

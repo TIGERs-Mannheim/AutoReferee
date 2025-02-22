@@ -5,7 +5,7 @@
 package edu.tigers.sumatra.views;
 
 import edu.tigers.moduli.IModuliStateObserver;
-import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.moduli.ModulesState;
 
 import java.util.List;
 

@@ -4,10 +4,10 @@
 
 package edu.tigers.sumatra.model;
 
+import edu.tigers.moduli.ModulesState;
 import edu.tigers.moduli.Moduli;
 import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
-import edu.tigers.moduli.listenerVariables.ModulesState;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;

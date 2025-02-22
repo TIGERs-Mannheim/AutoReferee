@@ -4,8 +4,8 @@
 package edu.tigers.sumatra.model;
 
 import edu.tigers.moduli.IModuliStateObserver;
+import edu.tigers.moduli.ModulesState;
 import edu.tigers.moduli.Moduli;
-import edu.tigers.moduli.listenerVariables.ModulesState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

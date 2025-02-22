@@ -1,9 +1,16 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.sumatra.math.vector;
+package com.github.g3force.s2vconverter;
 
+import edu.tigers.sumatra.math.vector.IVector;
+import edu.tigers.sumatra.math.vector.IVector2;
+import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.math.vector.IVectorN;
+import edu.tigers.sumatra.math.vector.Vector2;
+import edu.tigers.sumatra.math.vector.Vector3;
+import edu.tigers.sumatra.math.vector.VectorN;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

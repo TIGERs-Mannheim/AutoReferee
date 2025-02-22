@@ -20,9 +20,7 @@ dependencies {
     implementation project(':moduli-geometry')
     api project(':moduli-record')
 
-    implementation(libs.com.github.TIGERs.mannheim.moduli)
-    implementation(libs.com.github.g3force.string2ValueConverter)
-    api(libs.com.github.g3force.configurable)
+    implementation project(':moduli')
 
     implementation(libs.commons.lang)
     implementation(libs.commons.configuration)

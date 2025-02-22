@@ -13,7 +13,7 @@ dependencies {
     implementation project(':moduli-record')
 
     implementation(libs.com.github.TIGERs.mannheim.infonode)
-    api(libs.com.github.TIGERs.mannheim.moduli)
+    api project(':moduli')
 
     implementation(libs.commons.configuration)
 

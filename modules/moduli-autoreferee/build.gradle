@@ -24,9 +24,7 @@ dependencies {
     implementation project(':moduli-referee')
     implementation project(':moduli-record')
 
-    implementation(libs.com.github.TIGERs.mannheim.moduli)
-    implementation(libs.com.github.g3force.configurable)
-    api(libs.com.github.g3force.instanceables)
+    implementation project(':moduli')
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
 
@@ -51,8 +49,6 @@ dependencies {
     integrationTestImplementation(libs.org.assertj.assertj.core)
     integrationTestImplementation(libs.com.google.protobuf.protobuf.java)
     integrationTestImplementation(libs.com.google.protobuf.protobuf.java.util)
-
-    integrationTestImplementation(libs.com.github.g3force.configurable)
 
     integrationTestImplementation(libs.org.apache.logging.log4j.log4j.api)
     integrationTestImplementation(libs.org.apache.logging.log4j.log4j.core)

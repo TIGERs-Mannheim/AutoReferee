@@ -10,8 +10,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.com.github.g3force.string2ValueConverter)
-
     api(libs.org.apache.commons.commons.math3)
     implementation(libs.commons.lang)
 
