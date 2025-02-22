@@ -29,6 +29,7 @@ dependencies {
     implementation project(':sumatra-gui-replay')
     implementation project(':sumatra-gui-visualizer')
 
+    implementation project(':moduli')
     implementation project(':moduli-record')
     implementation project(':moduli-autoreferee')
     runtimeOnly project(':moduli-autoreferee-ci')
@@ -36,7 +37,6 @@ dependencies {
     implementation project(':moduli-referee')
     implementation project(':moduli-wp')
 
-    implementation(libs.com.github.TIGERs.mannheim.moduli)
     implementation(libs.com.github.TIGERs.mannheim.infonode)
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
