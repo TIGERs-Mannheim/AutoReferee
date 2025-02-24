@@ -18,10 +18,7 @@ import edu.tigers.sumatra.visualizer.VisualizerView;
 import net.infonode.docking.RootWindow;
 import net.infonode.docking.properties.RootWindowProperties;
 
-import javax.swing.ImageIcon;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.Serial;
 import java.nio.file.Path;
@@ -75,9 +72,6 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 	private void fillMenuBar()
 	{
 		JMenu fileMenu = new JMenu("File");
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new Exit());
-		fileMenu.add(exitItem);
 
 		getJMenuBar().add(fileMenu);
 		getJMenuBar().add(replayMenu);
@@ -86,7 +80,6 @@ public class AutoRefMainFrame extends AMainFrame implements ReplayLoadMenu.IRepl
 		 * Adds the menu items for layout and views
 		 */
 		super.addMenuItems();
-
 	}
 
 
