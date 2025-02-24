@@ -23,10 +23,23 @@ Run `./run.sh` or `run.bat`, depending on your system platform.
 
 You can pass `-h` to get the available arguments.
 
-You may be able to run it through docker as well:
+You may be able to run it through docker as well. There are two docker images available:
+ * `tigersmannheim/auto-referee` - The autoReferee without GUI
+ * `tigersmannheim/auto-referee-vnc` - The autoReferee with GUI
+
+To run the autoReferee with GUI, you can use the following command:
 
 ```shell
 docker run --net host  -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=unix$DISPLAY tigersmannheim/auto-referee-vnc
+```
+
+Note, that this will only work on Linux systems with an X server running.
+Alternatively, you can use a VNC client to connect to the container.
+
+The headless version can be run with the following command:
+
+```shell
+docker run --net host tigersmannheim/auto-referee
 ```
 
 ## IntelliJ
