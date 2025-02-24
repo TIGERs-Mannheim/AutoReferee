@@ -120,20 +120,32 @@ public class SslGameControllerProcess implements Runnable
 			Scanner s = new Scanner(gcProcess.getInputStream());
 			inputLoop(s);
 			s.close();
+
+			boolean exited = gcProcess.waitFor(1, TimeUnit.SECONDS);
+			if (!exited)
+			{
+				log.warn("game-controller did not exit after 1 second");
+				gcProcess.destroyForcibly().waitFor(1, TimeUnit.SECONDS);
+			}
+			if (gcProcess.exitValue() != 0
+					// no SIGPIPE
+					&& gcProcess.exitValue() != 141)
+			{
+				log.warn("game-controller has returned a non-zero exit code: {}", gcProcess.exitValue());
+			}
 		} catch (IOException e)
 		{
 			if (!"Stream closed".equals(e.getMessage()))
 			{
 				log.warn("Could not execute ssl-game-controller", e);
 			}
-		}
-		// thread safe local variable
-		Process p = process;
-		if (p != null && !p.isAlive() && p.exitValue() != 0)
+		} catch (InterruptedException e)
 		{
-			log.warn("game-controller has returned a non-zero exit code: {}", p.exitValue());
+			Thread.currentThread().interrupt();
+			log.debug("interrupted while waiting for game-controller to exit", e);
 		}
-		log.debug("game-controller process thread finished");
+
+		log.debug("game-controller exited");
 	}
 
 
@@ -161,7 +173,9 @@ public class SslGameControllerProcess implements Runnable
 			}
 			return "darwin_amd64";
 		}
-		throw new IllegalStateException("Unknown operating system '${os}' or architecture '${arch}'");
+		throw new IllegalStateException(
+				String.format("Unknown operating system '%s' or architecture '%s'", os, arch)
+		);
 	}
 
 
@@ -268,6 +282,7 @@ public class SslGameControllerProcess implements Runnable
 
 	public void stop()
 	{
+		log.debug("Stopping process");
 		Process gcProcess = process;
 		process = null;
 		if (gcProcess == null)

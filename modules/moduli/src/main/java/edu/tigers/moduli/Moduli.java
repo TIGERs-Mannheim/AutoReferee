@@ -9,13 +9,12 @@ import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.DefaultConfigurationNode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedAcyclicGraph;
@@ -36,9 +35,9 @@ import java.util.Optional;
  * Main-class of moduli.
  * It contains the handling of the modules.
  */
+@Log4j2
 public class Moduli
 {
-	private static final Logger log = LogManager.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
 	private final List<AModule> orderedModules = new LinkedList<>();
 	private SubnodeConfiguration globalConfiguration;
@@ -321,6 +320,7 @@ public class Moduli
 			}
 			try
 			{
+				log.trace("Stopping module {}", m);
 				m.stopModule();
 				log.trace("Module {} stopped", m);
 			} catch (Exception err)
@@ -337,6 +337,7 @@ public class Moduli
 		{
 			try
 			{
+				log.trace("Uninitializing module {}", m);
 				m.deinitModule();
 				log.trace("Module {} uninitialized", m);
 			} catch (Exception err)

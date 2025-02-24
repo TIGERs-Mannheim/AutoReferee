@@ -85,7 +85,7 @@ public abstract class AMainPresenter implements IMainFrameObserver
 		mainFrame.saveLayout(filenameWithPath);
 
 		// --- DEBUG msg ---
-		log.debug("Saved layout to: " + filename);
+		log.debug("Saved layout to: {}", filename);
 
 		refreshLayoutItems();
 	}
@@ -104,13 +104,13 @@ public abstract class AMainPresenter implements IMainFrameObserver
 			boolean deleted = file.delete();
 			if (!deleted)
 			{
-				log.error("Could not delete file:" + file);
+				log.error("Could not delete file: {}", file);
 			}
 		}
 
 		refreshLayoutItems();
 
-		log.debug("Deleted layout: " + currentLayout);
+		log.debug("Deleted layout: {}", currentLayout);
 	}
 
 
@@ -122,20 +122,21 @@ public abstract class AMainPresenter implements IMainFrameObserver
 
 		if (!new File(path).exists())
 		{
-			log.warn("Layout file: " + path + " does not exist, falling back to " + getDefaultLayout());
+			log.warn("Layout file: {} does not exist, falling back to {}", path, getDefaultLayout());
 			path = LAYOUT_CONFIG_PATH + getDefaultLayout();
 			setCurrentLayout(getDefaultLayout());
 		}
 
 		mainFrame.loadLayout(path);
 
-		log.trace("Loaded layout: " + path);
+		log.trace("Loaded layout: {}", path);
 	}
 
 
 	@Override
 	public void onClose()
 	{
+		log.trace("Closing {}", this.getClass().getSimpleName());
 		GlobalShortcuts.removeAllForFrame(getMainFrame());
 
 		// ### Persist user settings
@@ -148,6 +149,7 @@ public abstract class AMainPresenter implements IMainFrameObserver
 		saveCurrentLayout();
 		// save last layout for next usage
 		SumatraModel.getInstance().setUserProperty(getLayoutKey(), getLastLayoutFile());
+		log.trace("Closed {}", this.getClass().getSimpleName());
 	}
 
 
@@ -226,7 +228,7 @@ public abstract class AMainPresenter implements IMainFrameObserver
 			y = getInt(appProps, prefix + ".y", 0);
 		}
 		frame.setLocation(x, y);
-		log.trace("Position: " + x + "," + y);
+		log.trace("Position: {},{}", x, y);
 
 		final String strMaximized = appProps.getProperty(prefix + ".maximized", "true");
 		final boolean maximized = Boolean.parseBoolean(strMaximized);
@@ -265,8 +267,8 @@ public abstract class AMainPresenter implements IMainFrameObserver
 	/**
 	 * Read parameter from property file.
 	 *
-	 * @param props , the property file
-	 * @param name , value to read
+	 * @param props        , the property file
+	 * @param name         , value to read
 	 * @param defaultValue
 	 */
 	private int getInt(final Properties props, final String name, final int defaultValue)

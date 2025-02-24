@@ -29,7 +29,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -84,8 +83,6 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 	{
 		setLayout(new BorderLayout());
 		setSize(new Dimension(800, 600));
-		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
 
 		ImageIcon icon = getFrameIcon();
 		if (icon != null)
@@ -93,7 +90,7 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 			setIconImage(icon.getImage());
 		}
 
-		addWindowListener(new Exit());
+		addWindowListener(new WindowListener());
 		rootWindow = createRootWindow();
 		this.add(rootWindow, BorderLayout.CENTER);
 
@@ -213,7 +210,6 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		{
 			o.onClose();
 		}
-		log.debug("Closed");
 	}
 
 
@@ -624,16 +620,9 @@ public abstract class AMainFrame extends JFrame implements IMainFrame
 		}
 	}
 
-	public class Exit extends WindowAdapter implements ActionListener
+
+	public class WindowListener extends WindowAdapter
 	{
-		@Override
-		public void actionPerformed(final ActionEvent e)
-		{
-			// triggered when using menu -> exit
-			dispatchEvent(new WindowEvent(AMainFrame.this, WindowEvent.WINDOW_CLOSING));
-		}
-
-
 		@Override
 		public void windowClosing(final WindowEvent windowEvent)
 		{

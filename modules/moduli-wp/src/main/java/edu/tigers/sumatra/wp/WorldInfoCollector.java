@@ -65,7 +65,6 @@ import edu.tigers.sumatra.wp.vis.EWpShapesLayer;
 import lombok.extern.log4j.Log4j2;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -393,14 +392,7 @@ public class WorldInfoCollector extends AWorldPredictor
 		{
 			int port = getSubnodeConfiguration().getInt("ci-port", 11009);
 			ciGameControllerConnector = new CiGameControllerConnector(port);
-			try
-			{
-				ciGameControllerConnector.start();
-			} catch (IOException e)
-			{
-				log.error("Failed to start game controller", e);
-				ciGameControllerConnector = null;
-			}
+			ciGameControllerConnector.start();
 		}
 	}
 

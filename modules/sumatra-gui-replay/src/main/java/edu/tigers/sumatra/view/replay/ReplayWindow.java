@@ -15,10 +15,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.WindowConstants;
 import java.awt.event.KeyEvent;
+import java.io.Serial;
 
 
 public class ReplayWindow extends AMainFrame
 {
+	@Serial
 	private static final long serialVersionUID = 4040295061416588239L;
 
 
