@@ -58,6 +58,9 @@ jib {
             password = System.getenv("DOCKER_HUB_PASSWORD") ?: ""
         }
     }
+    container {
+        workingDirectory = "/"
+    }
     extraDirectories {
         paths {
             path {
