@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 /**
@@ -88,5 +89,35 @@ public final class StatisticsMath
 	public static <T extends Number> double std(final List<T> values)
 	{
 		return SumatraMath.sqrt(variance(values));
+	}
+
+
+	/**
+	 * Given a list of probabilities describing if their respective events occurs, calculates the probability that any one of the events occurs:
+	 * pAny = 1 - (1-p1) * (1-p2) * ...
+	 *
+	 * @param probabilities List of probabilities p1, p2, ... in the range of 0..1
+	 * @return
+	 */
+	public static double anyOccurs(List<Double> probabilities)
+	{
+		return anyOccurs(probabilities.stream());
+	}
+
+
+	/**
+	 * Given a list of probabilities describing if their respective events occurs, calculates the probability that any one of the events occurs:
+	 * pAny = 1 - (1-p1) * (1-p2) * ...
+	 *
+	 * @param probabilities List of probabilities p1, p2, ... in the range of 0..1
+	 * @return
+	 */
+	public static double anyOccurs(Stream<Double> probabilities)
+	{
+		// Using a computationally more stable way
+		// pAny = 1 - (1-p1) * (1-p2) * ...
+		// pAny = 1 - exp(log((1-p1) * (1-p2) * ...))
+		// pAny = 1 - exp(log(1-p1) + log(1-p2) + ...)
+		return 1.0 - Math.exp(probabilities.mapToDouble(t -> 1.0 - t).map(Math::log).sum());
 	}
 }

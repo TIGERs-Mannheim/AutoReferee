@@ -28,4 +28,11 @@ public class BallID extends AObjectID
 	{
 		return DEFAULT_INSTANCE;
 	}
+
+
+	@Override
+	public String toString()
+	{
+		return "BallID";
+	}
 }
