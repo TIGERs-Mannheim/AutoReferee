@@ -43,6 +43,7 @@ public class PersistenceDb
 	@Setter
 	private boolean compressOnClose = false;
 
+
 	/**
 	 * @param dbPath absolute path to database folder or zip file
 	 */
@@ -65,7 +66,7 @@ public class PersistenceDb
 		}
 
 		File folder = this.dbPath.toFile();
-		if(!folder.exists() && !folder.mkdirs())
+		if (!folder.exists() && !folder.mkdirs())
 			log.warn("Could not create folder for database {}", this.dbPath);
 	}
 
@@ -130,7 +131,8 @@ public class PersistenceDb
 	{
 		SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 		dt.setTimeZone(TimeZone.getDefault());
-		return dt.format(new Date()) + String.format("-%s-%s-%s-vs-%s", matchType, stage, teamYellow, teamBlue);
+		return dt.format(new Date()) + String.format("-%s-%s-%s-vs-%s", matchType, stage,
+				teamYellow.replaceAll("[^\\p{InBasic_Latin}]", "_"), teamBlue.replaceAll("[^\\p{InBasic_Latin}]", "_"));
 	}
 
 
@@ -242,18 +244,22 @@ public class PersistenceDb
 	{
 		log.info("Compressing database {}", this.dbPath);
 		//https://stackoverflow.com/a/32052016 CC BY-SA 3.0 by Nikita Koksharov
-		try (ZipOutputStream zs = new ZipOutputStream(Files.newOutputStream(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip")))) {
-			try(Stream<Path> stream = Files.walk(dbPath))
+		try (ZipOutputStream zs = new ZipOutputStream(
+				Files.newOutputStream(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip"))))
+		{
+			try (Stream<Path> stream = Files.walk(dbPath))
 			{
 				stream
 						.filter(path -> !Files.isDirectory(path))
 						.forEach(path -> {
 							ZipEntry zipEntry = new ZipEntry(dbPath.relativize(path).toString());
-							try {
+							try
+							{
 								zs.putNextEntry(zipEntry);
 								Files.copy(path, zs);
 								zs.closeEntry();
-							} catch (IOException e) {
+							} catch (IOException e)
+							{
 								log.error("Could not compress file {}", path, e);
 							}
 						});
