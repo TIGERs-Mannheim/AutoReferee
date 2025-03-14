@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -51,11 +50,10 @@ public class PersistenceDb
 	{
 		if (dbPath.toString().endsWith(".zip"))
 		{
-			String folderName = determineFolderName(dbPath.toFile());
 			this.dbPath = Paths.get(dbPath.toString().substring(0, dbPath.toString().length() - 4));
 			if (!this.dbPath.toFile().exists())
 			{
-				unpackDatabase(dbPath.toFile(), folderName);
+				unpackDatabase(dbPath.toFile());
 			} else
 			{
 				log.info("Database is already extracted, using: {}", this.dbPath);
@@ -73,27 +71,11 @@ public class PersistenceDb
 
 	private String determineFolderName(final File file)
 	{
-		try (ZipFile zipFile = new ZipFile(file))
-		{
-			String topLevel = null;
-			for (FileHeader fh : zipFile.getFileHeaders())
-			{
-				String root = fh.getFileName().split("/")[0];
-				if (root.equals(topLevel) || topLevel == null)
-				{
-					topLevel = root;
-				} else
-				{
-					log.error("Recording contains more than one folder, this is invalid");
-					return file.getName();
-				}
-			}
-			return topLevel;
-		} catch (IOException e)
-		{
-			log.error("Error while processing zip recording: ", e);
-		}
-		return file.getName();
+		String name = file.getName();
+		if (name.endsWith(".zip"))
+			name = name.substring(0, name.length() - 4);
+
+		return name;
 	}
 
 
@@ -177,17 +159,12 @@ public class PersistenceDb
 	}
 
 
-	private void unpackDatabase(final File file, final String folderName)
+	private void unpackDatabase(final File file)
 	{
 		log.info("Unpacking database: {}", file);
 		try (ZipFile zipFile = new ZipFile(file))
 		{
-			zipFile.extractAll(dbPath.toFile().getParent());
-
-			File extracted = Paths.get(dbPath.toFile().getParent(), folderName).toFile();
-
-			Files.move(extracted.toPath(), Paths.get(dbPath.getParent().toString(), file.getName().replace(".zip", "")));
-
+			zipFile.extractAll(dbPath.toFile().getPath());
 			log.info("Unpacking finished.");
 		} catch (ZipException e)
 		{
