@@ -432,7 +432,7 @@ public class ReplayPresenter extends AMainPresenter
 			PersistenceTable<WorldFrameWrapper> table = db.getTable(WorldFrameWrapper.class);
 			for (long t = getCurrentTime(); t < recEndTime; t += 250_000_000)
 			{
-				WorldFrameWrapper wfw = table.get(t);
+				WorldFrameWrapper wfw = table.get(table.getNearestKey(t));
 				boolean skipStop = !skipStoppedGame || !skipFrameStoppedGame(wfw);
 				boolean command = searchCommand == null || !skipFrameCommand(wfw);
 				boolean gameEvent = searchGameEvent == null || !skipFrameGameEvent(wfw);
