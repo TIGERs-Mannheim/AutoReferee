@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -92,7 +93,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/pause.png",
 				this::togglePlayPause,
 				KeyEvent.VK_P,
-				InputEvent.CTRL_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnSkipFrameFwd = createActionButton(
@@ -100,7 +101,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipFrameForward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onNextFrame),
 				KeyEvent.VK_RIGHT,
-				InputEvent.CTRL_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnSkipFrameBwd = createActionButton(
@@ -108,7 +109,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipFrameBackward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onPreviousFrame),
 				KeyEvent.VK_LEFT,
-				InputEvent.CTRL_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnSkipFwd = createActionButton(
@@ -132,7 +133,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/fastForward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(FAST_TIME * 1_000_000)),
 				KeyEvent.VK_RIGHT,
-				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
 		);
 
 		JButton btnFastBwd = createActionButton(
@@ -140,7 +141,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/fastBackward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-FAST_TIME * 1_000_000)),
 				KeyEvent.VK_LEFT,
-				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
 		);
 
 		JButton btnSnap = createActionButton(
@@ -148,7 +149,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/save.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onSnapshot),
 				KeyEvent.VK_S,
-				InputEvent.CTRL_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnSnapCopy = createActionButton(
@@ -156,7 +157,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/copy.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onCopySnapshot),
 				KeyEvent.VK_C,
-				InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
 		);
 
 		JMenuBar menuBar = new JMenuBar();
