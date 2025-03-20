@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - version/*
+  workflow_dispatch:
 
 jobs:
   release:
