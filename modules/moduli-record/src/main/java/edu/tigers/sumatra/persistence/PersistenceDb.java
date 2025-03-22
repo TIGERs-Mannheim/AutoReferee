@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.progress.ProgressMonitor;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,8 +26,6 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -164,7 +163,9 @@ public class PersistenceDb
 		log.info("Unpacking database: {}", file);
 		try (ZipFile zipFile = new ZipFile(file))
 		{
+			zipFile.setRunInThread(true);
 			zipFile.extractAll(dbPath.toFile().getPath());
+			awaitProgress(zipFile);
 			log.info("Unpacking finished.");
 		} catch (ZipException e)
 		{
@@ -220,31 +221,18 @@ public class PersistenceDb
 	public void compress() throws IOException
 	{
 		log.info("Compressing database {}", this.dbPath);
-		//https://stackoverflow.com/a/32052016 CC BY-SA 3.0 by Nikita Koksharov
-		try (ZipOutputStream zs = new ZipOutputStream(
-				Files.newOutputStream(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip"))))
+		try (ZipFile zipFile = new ZipFile(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip").toFile()))
 		{
-			try (Stream<Path> stream = Files.walk(dbPath))
+			zipFile.setRunInThread(true);
+
+			try (Stream<Path> files = Files.walk(dbPath))
 			{
-				stream
-						.filter(path -> !Files.isDirectory(path))
-						.forEach(path -> {
-							ZipEntry zipEntry = new ZipEntry(dbPath.relativize(path).toString());
-							try
-							{
-								zs.putNextEntry(zipEntry);
-								Files.copy(path, zs);
-								zs.closeEntry();
-							} catch (IOException e)
-							{
-								log.error("Could not compress file {}", path, e);
-							}
-						});
-			} catch (RuntimeException e)
-			{
-				throw new IOException(e);
+				zipFile.addFiles(files.filter(path -> !Files.isDirectory(path)).map(Path::toFile).toList());
 			}
+
+			awaitProgress(zipFile);
 		}
+
 		log.info("Compressed database {}", this.dbPath);
 	}
 
@@ -323,5 +311,28 @@ public class PersistenceDb
 	public String getDbPath()
 	{
 		return dbPath.toString();
+	}
+
+
+	private void awaitProgress(ZipFile zipFile)
+	{
+		ProgressMonitor monitor = zipFile.getProgressMonitor();
+		while (monitor.getState() == ProgressMonitor.State.BUSY)
+		{
+			log.info("{} zipping progress: {}%", dbPath, monitor.getPercentDone());
+
+			try
+			{
+				Thread.sleep(1000);
+			} catch (InterruptedException e)
+			{
+				Thread.currentThread().interrupt();
+			}
+		}
+
+		if (monitor.getResult() == ProgressMonitor.Result.ERROR)
+		{
+			log.error("{} zipping error", dbPath, monitor.getException());
+		}
 	}
 }
