@@ -58,9 +58,9 @@ public class ChipBallTrajectory extends ABallTrajectory
 	 * Create from kick
 	 *
 	 * @param parameters
-	 * @param kickPos in [mm]
-	 * @param kickVel in [mm/s]
-	 * @param kickSpin in [rad/s]
+	 * @param kickPos    in [mm]
+	 * @param kickVel    in [mm/s]
+	 * @param kickSpin   in [rad/s]
 	 * @return
 	 */
 	public static ChipBallTrajectory fromKick(
@@ -74,9 +74,9 @@ public class ChipBallTrajectory extends ABallTrajectory
 	 * Create from state
 	 *
 	 * @param parameters
-	 * @param posNow in [mm]
-	 * @param velNow in [mm/s]
-	 * @param spin in [rad/s]
+	 * @param posNow     in [mm]
+	 * @param velNow     in [mm/s]
+	 * @param spin       in [rad/s]
 	 * @return
 	 */
 	public static ChipBallTrajectory fromState(
@@ -208,12 +208,18 @@ public class ChipBallTrajectory extends ABallTrajectory
 		IVector2 spin = initialSpin;
 
 		// go through hops while max. height is above minHopHeight
-		while (((velNow.z() * velNow.z()) / (2.0 * G)) > parameters.getMinHopHeight())
+		while (true)
 		{
+			var hopHeight = (velNow.z() * velNow.z()) / (2.0 * G);
+			if (hopHeight < parameters.getMinHopHeight())
+				break;
+
 			double tFly = (2 * velNow.z()) / G;
 
-			PlanarCurveSegment fly = PlanarCurveSegment.fromFirstOrder(posNow.getXYVector(),
-					velNow.getXYVector(), tNow, tNow + tFly);
+			PlanarCurveSegment fly = PlanarCurveSegment.fromFirstOrder(posNow.getXYVector(), velNow.getXYVector(), tNow,
+					tNow + tFly);
+			fly.setAirtime(tFly);
+			fly.setHopHeight(hopHeight);
 
 			segments.add(fly);
 
@@ -411,7 +417,7 @@ public class ChipBallTrajectory extends ABallTrajectory
 		}
 
 		IVector2 finalPos = getPosByVel(0).getXYVector();
-		return Lines.segmentFromPoints(locs.get(locs.size() - 1), finalPos);
+		return Lines.segmentFromPoints(locs.getLast(), finalPos);
 	}
 
 
