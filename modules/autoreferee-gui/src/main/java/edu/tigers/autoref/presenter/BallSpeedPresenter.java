@@ -99,10 +99,8 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	public void onStartModuli()
 	{
 		ISumatraViewPresenter.super.onStartModuli();
-		SumatraModel.getInstance().getModuleOpt(AWorldPredictor.class).ifPresent(predictor -> {
-			predictor.addObserver(this);
-			chartTimer.start();
-		});
+		SumatraModel.getInstance().getModuleOpt(AWorldPredictor.class)
+				.ifPresent(predictor -> predictor.addObserver(this));
 	}
 
 
@@ -110,7 +108,6 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	public void onStopModuli()
 	{
 		ISumatraViewPresenter.super.onStopModuli();
-		chartTimer.stop();
 		SumatraModel.getInstance().getModuleOpt(AWorldPredictor.class).ifPresent(
 				predictor -> predictor.removeObserver(this)
 		);
@@ -122,6 +119,7 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	{
 		ISumatraViewPresenter.super.onStart();
 		viewPanel.addObserver(this);
+		chartTimer.start();
 	}
 
 
@@ -130,6 +128,7 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	{
 		ISumatraViewPresenter.super.onStop();
 		viewPanel.removeObserver(this);
+		chartTimer.stop();
 	}
 
 

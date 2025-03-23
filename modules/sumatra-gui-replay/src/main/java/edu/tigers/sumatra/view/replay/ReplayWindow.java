@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.view.replay;
 
+import edu.tigers.autoref.view.ballspeed.BallSpeedView;
 import edu.tigers.autoref.view.gamelog.GameLogView;
 import edu.tigers.sumatra.AMainFrame;
 import edu.tigers.sumatra.presenter.log.LogView;
@@ -36,6 +37,7 @@ public class ReplayWindow extends AMainFrame
 		addView(new ReplayControlView());
 		addView(new GameLogView());
 		addView(new VisualizerView());
+		addView(new BallSpeedView());
 
 		updateViewMenu();
 
