@@ -355,7 +355,7 @@ public class VisionFilterImpl extends AVisionFilter
 			new Thread(this::processCamFrameQueue, "VisionFilter Processor").start();
 			scheduledExecutorService
 					.scheduleAtFixedRate(() -> Safe.run(this::publish), 0, (long) (publishDt * 1e9), TimeUnit.NANOSECONDS);
-			log.info("Using threaded VisionFilter");
+			log.debug("Using threaded VisionFilter");
 		}
 	}
 

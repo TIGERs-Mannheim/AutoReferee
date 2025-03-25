@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 @Log4j2
@@ -87,8 +88,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 
 	private Map<BotID, ITrackedBot> bots = new HashMap<>();
 
-	@Setter
-	private List<BotID> selectedBots = new ArrayList<>();
+	private List<BotID> selectedBots = new CopyOnWriteArrayList<>();
 
 	@Setter
 	private List<DrawableCoordinates> coordinates = List.of();

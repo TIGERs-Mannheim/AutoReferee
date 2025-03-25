@@ -494,6 +494,7 @@ public class BallFilterPreprocessor
 		{
 			Optional<IKickEstimator> bestEstimator = estimators.stream()
 					.filter(k -> k.getFitResult().isPresent())
+					.filter(k -> k.getFitResult().get().getAvgDistance() > 0.0)
 					.min(Comparator.comparingDouble(k -> k.getFitResult().get().getAvgDistance()));
 
 			if (bestEstimator.isPresent())

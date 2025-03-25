@@ -68,16 +68,6 @@ public class PersistenceDb
 	}
 
 
-	private String determineFolderName(final File file)
-	{
-		String name = file.getName();
-		if (name.endsWith(".zip"))
-			name = name.substring(0, name.length() - 4);
-
-		return name;
-	}
-
-
 	/**
 	 * @param matchType
 	 * @param stage
@@ -221,7 +211,8 @@ public class PersistenceDb
 	public void compress() throws IOException
 	{
 		log.info("Compressing database {}", this.dbPath);
-		try (ZipFile zipFile = new ZipFile(dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip").toFile()))
+		File zipFilename = dbPath.resolveSibling(dbPath.getFileName().toString() + ".zip").toFile();
+		try (ZipFile zipFile = new ZipFile(zipFilename))
 		{
 			zipFile.setRunInThread(true);
 
@@ -233,7 +224,7 @@ public class PersistenceDb
 			awaitProgress(zipFile);
 		}
 
-		log.info("Compressed database {}", this.dbPath);
+		log.info("Compressed database {}", zipFilename);
 	}
 
 
@@ -319,11 +310,11 @@ public class PersistenceDb
 		ProgressMonitor monitor = zipFile.getProgressMonitor();
 		while (monitor.getState() == ProgressMonitor.State.BUSY)
 		{
-			log.info("{} zipping progress: {}%", dbPath, monitor.getPercentDone());
+			log.info("Zipping progress of {}: {}%", dbPath.getFileName(), monitor.getPercentDone());
 
 			try
 			{
-				Thread.sleep(1000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e)
 			{
 				Thread.currentThread().interrupt();
