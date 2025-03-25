@@ -303,7 +303,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 							.setColor(new Color(0, 225, 255, 255))));
 		}
 
-		if (robotPositionerLine != null && selectedBots != null && !selectedBots.isEmpty())
+		if (robotPositionerLine != null && !selectedBots.isEmpty())
 		{
 			int numBots = selectedBots.size();
 			var start = robotPositionerLine.getPathStart();
@@ -361,13 +361,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		public void mouseClicked(final MouseEvent e)
 		{
 			IVector2 globalPos = getMousePointGlobal(e.getX(), e.getY());
-			if (e.isControlDown())
-			{
-				selectedBots.clear();
-			} else
-			{
-				onFieldClicks.forEach(c -> c.onInteraction(globalPos, e));
-			}
+			onFieldClicks.forEach(c -> c.onInteraction(globalPos, e));
 		}
 
 
@@ -375,7 +369,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 		public void mouseReleased(MouseEvent e)
 		{
 			if (e.isControlDown() && SwingUtilities.isRightMouseButton(e) && robotPositionerLine != null
-					&& selectedBots != null && !selectedBots.isEmpty())
+					&& !selectedBots.isEmpty())
 			{
 				var start = robotPositionerLine.getPathStart();
 				var end = robotPositionerLine.getPathEnd();
