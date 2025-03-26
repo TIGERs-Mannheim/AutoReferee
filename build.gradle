@@ -13,7 +13,7 @@ plugins {
 
 def gitDescribe = providers.exec {
     commandLine("git", "describe", "--tags", "--always", "--first-parent")
-}.standardOutput.asText.map { it.replace("version/", "").trim() }
+}.standardOutput.asText
 
 version = gitDescribe.get()
 
