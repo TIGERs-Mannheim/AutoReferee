@@ -3,7 +3,7 @@ name: Perform Release
 on:
   push:
     tags:
-      - version/*
+      - *
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
         run: |
-          tag=${GITHUB_REF#refs/tags/version/*}
+          tag=${GITHUB_REF#refs/tags/*}
           docker build --pull --build-arg base_version=$tag -t "tigersmannheim/auto-referee-vnc:$tag" src/main/docker-vnc
           docker login -u "${DOCKER_HUB_USERNAME}" -p "${DOCKER_HUB_PASSWORD}"
           docker push "tigersmannheim/auto-referee-vnc:$tag"
@@ -39,5 +39,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag=${GITHUB_REF#refs/tags/version/*}
+          tag=${GITHUB_REF#refs/tags/*}
           ./gradlew githubRelease -Pversion=$tag
