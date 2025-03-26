@@ -43,18 +43,14 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 	private double[] initialGuess = new double[6];
 
 
-	/**
-	 * @param kickPosition
-	 * @param kickTimestamp
-	 * @param camCalib
-	 * @param initialEstimate
-	 */
-	public ChipKickSolverNonLinIdentDirect(final IVector2 kickPosition, final long kickTimestamp,
-			final Map<Integer, CamCalibration> camCalib, final IVector3 initialEstimate)
+	public ChipKickSolverNonLinIdentDirect(
+			final IVector2 kickPosition,
+			final long kickTimestamp,
+			final Map<Integer, CamCalibration> camCalib,
+			final IVector3 initialEstimate
+	)
 	{
 		super(kickPosition, kickTimestamp, camCalib);
-
-		this.kickTimestamp = kickTimestamp;
 
 		BallParameters ballParams = Geometry.getBallParameters();
 		initialGuess[0] = initialEstimate.x();
@@ -168,14 +164,6 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		private final double dampingZ;
 
 
-		/**
-		 * @param kickVel
-		 * @param kickPos
-		 * @param kickTimestamp
-		 * @param dampingXYFirstHop
-		 * @param dampingXYOtherHops
-		 * @param dampingZ
-		 */
 		public ChipModelIdentResult(final IVector3 kickVel, final IVector2 kickPos, final long kickTimestamp,
 				final double dampingXYFirstHop,
 				final double dampingXYOtherHops, final double dampingZ)
@@ -232,24 +220,6 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		public long getKickTimestamp()
 		{
 			return kickTimestamp;
-		}
-
-
-		public double getDampingXYFirstHop()
-		{
-			return dampingXYFirstHop;
-		}
-
-
-		public double getDampingXYOtherHops()
-		{
-			return dampingXYOtherHops;
-		}
-
-
-		public double getDampingZ()
-		{
-			return dampingZ;
 		}
 
 

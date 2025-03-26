@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
 
 
@@ -31,6 +32,17 @@ public final class StatisticsMath
 		for (Number f : values)
 		{
 			sum += f.doubleValue();
+		}
+		return sum / values.size();
+	}
+
+
+	public static <T> double mean(List<T> values, ToDoubleFunction<T> valueExtractor)
+	{
+		double sum = 0;
+		for (T f : values)
+		{
+			sum += valueExtractor.applyAsDouble(f);
 		}
 		return sum / values.size();
 	}
@@ -80,6 +92,19 @@ public final class StatisticsMath
 	}
 
 
+	public static <T> double variance(List<T> values, ToDoubleFunction<T> valueExtractor)
+	{
+		double mu = mean(values, valueExtractor);
+		List<Number> val2 = new ArrayList<>(values.size());
+		for (T f : values)
+		{
+			double diff = valueExtractor.applyAsDouble(f) - mu;
+			val2.add(diff * diff);
+		}
+		return mean(val2);
+	}
+
+
 	/**
 	 * Calculate standard deviation
 	 *
@@ -89,6 +114,34 @@ public final class StatisticsMath
 	public static <T extends Number> double std(final List<T> values)
 	{
 		return SumatraMath.sqrt(variance(values));
+	}
+
+
+	public static <T> double std(List<T> values, ToDoubleFunction<T> valueExtractor)
+	{
+		return SumatraMath.sqrt(variance(values, valueExtractor));
+	}
+
+
+	/**
+	 * Calculate signal-to-noise ratio
+	 *
+	 * @param values all values
+	 * @return the snr of all values
+	 */
+	public static <T extends Number> double snr(final List<T> values)
+	{
+		double mu = mean(values);
+		double std = std(values);
+		return Math.abs(mu) / std;
+	}
+
+
+	public static <T> double snr(List<T> values, ToDoubleFunction<T> valueExtractor)
+	{
+		double mu = mean(values, valueExtractor);
+		double std = std(values, valueExtractor);
+		return Math.abs(mu) / std;
 	}
 
 

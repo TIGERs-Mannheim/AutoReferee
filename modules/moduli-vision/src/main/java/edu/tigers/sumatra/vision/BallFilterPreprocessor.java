@@ -42,6 +42,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -369,9 +370,10 @@ public class BallFilterPreprocessor
 			{
 				estimators.stream()
 						.filter(e -> e.isDone(mergedRobots, timestamp))
-						.map(IKickEstimator::getModelIdentResult)
-						.flatMap(List::stream)
-						.forEach(this::notifyBallModelIdentificationResult);
+						.forEach(estimator -> CompletableFuture.runAsync(() ->
+								estimator.getModelIdentResult()
+										.forEach(this::notifyBallModelIdentificationResult)
+						));
 			}
 			if (lastBestEstimator != null && lastBestEstimator.isDone(mergedRobots, timestamp))
 			{

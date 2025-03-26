@@ -93,7 +93,7 @@ public class StraightKickEstimator implements IKickEstimator
 		{
 			// remove first sample, as it is much older than the next one
 			// This can happen, if the ball is not visible for some time before it is kicked
-			camBalls.remove(0);
+			camBalls.removeFirst();
 		}
 
 		var ballStateAtKick = getBallStateAtKick(event, filteredBalls);
@@ -141,7 +141,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		for (int i = 0; i < numPoints; i++)
 		{
-			double time = (balls.get(i).gettCapture() - balls.get(0).gettCapture()) * 1e-9;
+			double time = (balls.get(i).gettCapture() - balls.getFirst().gettCapture()) * 1e-9;
 			matA.setEntry(i, 0, time);
 			matA.setEntry(i, 1, 1.0);
 
@@ -288,7 +288,7 @@ public class StraightKickEstimator implements IKickEstimator
 	@Override
 	public boolean isDone(final List<FilteredVisionBot> mergedRobots, final long timestamp)
 	{
-		if (((allRecords.get(allRecords.size() - 1).gettCapture() - allRecords.get(0).gettCapture()) * 1e-9) < 0.1)
+		if (((allRecords.getLast().gettCapture() - allRecords.getFirst().gettCapture()) * 1e-9) < 0.1)
 		{
 			// keep this estimator for at least 0.1s
 			return false;
@@ -296,6 +296,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		if ((allRecords.size() > 20) && isMaxDirectionErrorExceeded(allRecords))
 		{
+			log.debug("Estimator done, because max direction error exceeded");
 			return true;
 		}
 
@@ -306,6 +307,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		if (fitResult.getAvgDistance() > maxFittingError)
 		{
+			log.debug("Estimator done, because average distance exceeded: {}", fitResult.getAvgDistance());
 			return true;
 		}
 
@@ -316,10 +318,17 @@ public class StraightKickEstimator implements IKickEstimator
 
 		if (minDistToRobot < Geometry.getBotRadius())
 		{
+			log.debug("Estimator done, because ball is close to robot: {}", minDistToRobot);
 			return true;
 		}
 
-		return !Geometry.getField().withMargin(100).isPointInShape(posNow);
+		boolean outOfField = !Geometry.getField().withMargin(100).isPointInShape(posNow);
+		if (outOfField)
+		{
+			log.debug("Estimator done, because ball is out of field");
+			return true;
+		}
+		return false;
 	}
 
 
@@ -330,10 +339,11 @@ public class StraightKickEstimator implements IKickEstimator
 
 		if (allRecords.size() < 20)
 		{
+			log.debug("Not enough records for model identification: {}", allRecords.size());
 			return result;
 		}
 
-		long timeAfterKick = allRecords.get(0).gettCapture() + 500_000_000;
+		long timeAfterKick = allRecords.getFirst().gettCapture() + 500_000_000;
 
 		// keep all records directly after the kick and within the field (-10cm)
 		List<CamBall> usedRecords = allRecords.stream()

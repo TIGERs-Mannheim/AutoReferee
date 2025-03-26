@@ -98,7 +98,7 @@ public class ChipKickEstimator implements IKickEstimator
 	 * Create new chip kick estimator.
 	 *
 	 * @param camCalib Camera calibrations.
-	 * @param event Initial kick event.
+	 * @param event    Initial kick event.
 	 */
 	public ChipKickEstimator(final Map<Integer, CamCalibration> camCalib, final KickEvent event)
 	{
@@ -126,8 +126,8 @@ public class ChipKickEstimator implements IKickEstimator
 	/**
 	 * Create new chip kick estimator with known kick speed.
 	 *
-	 * @param camCalib Camera calibrations.
-	 * @param event Initial kick event.
+	 * @param camCalib  Camera calibrations.
+	 * @param event     Initial kick event.
 	 * @param kickSpeed in [mm/s], absolute 3D speed
 	 * @param kickAngle in [deg]
 	 */
@@ -195,7 +195,7 @@ public class ChipKickEstimator implements IKickEstimator
 		{
 			// calculate flight time
 			double tFly = (2 * kickVel.z()) / 9810;
-			CamBall lastRecord = records.get(records.size() - 1);
+			CamBall lastRecord = records.getLast();
 
 			if ((((lastRecord.gettCapture() - kickTimestamp) * 1e-9) > tFly) && (records.size() > 12))
 			{
@@ -308,11 +308,16 @@ public class ChipKickEstimator implements IKickEstimator
 		if (records.isEmpty())
 		{
 			boolean kickWasSomeTimeAgo = ((timestamp - kickEventTimestamp) * 1e-9) > 0.2;
-			return usesPriorKnowledge && kickWasSomeTimeAgo;
+			boolean oldKick = usesPriorKnowledge && kickWasSomeTimeAgo;
+			if (oldKick)
+			{
+				log.debug("Estimator done, no records and old kick: {}", kickEventTimestamp);
+			}
+			return oldKick;
 		}
 
-		long tCaptureLastRecord = records.get(records.size() - 1).gettCapture();
-		if (((tCaptureLastRecord - records.get(0).gettCapture()) * 1e-9) < 0.1)
+		long tCaptureLastRecord = records.getLast().gettCapture();
+		if (((tCaptureLastRecord - records.getFirst().gettCapture()) * 1e-9) < 0.1)
 		{
 			// keep this estimator for at least 0.1s
 			return false;
@@ -320,6 +325,7 @@ public class ChipKickEstimator implements IKickEstimator
 
 		if (failures > maxFailures)
 		{
+			log.debug("Estimator done, too many fitting failures: {}", failures);
 			return true;
 		}
 
@@ -330,6 +336,7 @@ public class ChipKickEstimator implements IKickEstimator
 
 		if ((fitResult.getAvgDistance() > maxFittingError) || (avgDistLatest10 > maxFittingError))
 		{
+			log.debug("Estimator done, fitting error too high: {} / {}", fitResult.getAvgDistance(), avgDistLatest10);
 			return true;
 		}
 
@@ -347,15 +354,23 @@ public class ChipKickEstimator implements IKickEstimator
 
 		if ((minDistToRobot < Geometry.getBotRadius()) && !state.isChipped())
 		{
+			log.debug("Estimator done, ball is too close to robot: {}", minDistToRobot);
 			return true;
 		}
 
 		if (state.getVel().getLength() < 1.0 && records.size() > maxNumberOfRecords / 2)
 		{
+			log.debug("Estimator done, ball is too slow: {}", state.getVel().getLength());
 			return true;
 		}
 
-		return !Geometry.getField().withMargin(100).isPointInShape(posNow);
+		boolean outOfField = !Geometry.getField().withMargin(100).isPointInShape(posNow);
+		if (outOfField)
+		{
+			log.debug("Estimator done, ball is out of field: {}", posNow);
+			return true;
+		}
+		return false;
 	}
 
 
@@ -374,7 +389,7 @@ public class ChipKickEstimator implements IKickEstimator
 			return result;
 		}
 
-		long timeAfterKick = allRecords.get(0).gettCapture() + 500_000_000;
+		long timeAfterKick = allRecords.getFirst().gettCapture() + 500_000_000;
 
 		// keep all records directly after the kick and within the field (-10cm)
 		List<CamBall> usedRecords = allRecords.stream()

@@ -57,7 +57,7 @@ public class StraightKickSolverNonLinIdentDirect
 		double accRoll = Geometry.getBallParameters().getAccRoll();
 		double kSwitch = Geometry.getBallParameters().getKSwitch();
 
-		double[] initialGuess = new double[] { velocities.get(0).getVelocity(), accSlide, accRoll, kSwitch };
+		double[] initialGuess = new double[] { velocities.getFirst().getVelocity(), accSlide, accRoll, kSwitch };
 		double[] lowerBounds = new double[] { 100, -20000, -2000, 0.5 };
 		double[] upperBounds = new double[] { 12000, -100, -10, 0.8 };
 
@@ -75,8 +75,11 @@ public class StraightKickSolverNonLinIdentDirect
 					new CMAESOptimizer.PopulationSize(50));
 
 			return Optional.of(new StraightModelIdentResult(
-					kickLine.get().directionVector(), records.get(0).getFlatPos(),
-					records.get(0).gettCapture(), optimum.getPointRef()));
+					kickLine.get().directionVector(),
+					records.getFirst().getFlatPos(),
+					records.getFirst().gettCapture(),
+					optimum.getPointRef())
+			);
 		} catch (IllegalStateException | MathIllegalArgumentException e)
 		{
 			log.debug("No solution found", e);
@@ -259,7 +262,7 @@ public class StraightKickSolverNonLinIdentDirect
 
 			final double vSwitch = vKick * cSw;
 			final double tSwitch = (vKick * (cSw - 1)) / accSlide;
-			final long tZero = velocities.get(0).getTimestamp();
+			final long tZero = velocities.getFirst().getTimestamp();
 
 			double error = 0;
 
