@@ -3,7 +3,7 @@ name: Perform Release
 on:
   push:
     tags:
-      - *
+      - '*'
   workflow_dispatch:
 
 jobs:
