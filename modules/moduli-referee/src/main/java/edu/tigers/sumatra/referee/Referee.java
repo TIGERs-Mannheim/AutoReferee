@@ -174,6 +174,7 @@ public class Referee extends AReferee
 	public void resetGameController()
 	{
 		log.debug("Resetting game controller");
+		flushChanges();
 		sendGameControllerEvent(GcEventFactory.triggerResetMatch());
 		initGameController();
 	}
