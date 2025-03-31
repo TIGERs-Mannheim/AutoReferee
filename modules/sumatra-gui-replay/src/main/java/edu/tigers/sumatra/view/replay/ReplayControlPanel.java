@@ -160,6 +160,14 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
 		);
 
+		JButton btnCutReplay = createActionButton(
+				"Create replay cut",
+				"/icons8-scissors-60.png",
+				() -> observers.forEach(IReplayControlPanelObserver::cutReplay),
+				KeyEvent.VK_X,
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+		);
+
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(replayMenu);
 		add(menuBar, BorderLayout.PAGE_START);
@@ -201,6 +209,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		bottomPanel.add(btnFastFwd);
 		bottomPanel.add(btnSnap);
 		bottomPanel.add(btnSnapCopy);
+		bottomPanel.add(btnCutReplay);
 		bottomPanel.add(speedSlider);
 
 		add(bottomPanel, BorderLayout.PAGE_END);

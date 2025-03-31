@@ -56,10 +56,14 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 	private final FileOutputStream appendStream;
 	private final FileChannel file;
 
+	@Getter
+	private final Class<T> type;
 
-	public PersistenceTable(Class<T> clazz, Path dbPath, EPersistenceKeyType keyType)
+
+	public PersistenceTable(Class<T> type, Path dbPath, EPersistenceKeyType keyType)
 			throws IOException
 	{
+		this.type = type;
 		this.keyType = keyType;
 
 		fury = Fury.builder()
@@ -71,13 +75,13 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 				.requireClassRegistration(false)
 				.build();
 
-		register(new HashSet<>(), clazz);
+		register(new HashSet<>(), type);
 
-		Path dbFile = dbPath.resolve(clazz.getSimpleName() + ".db");
+		Path dbFile = dbPath.resolve(type.getSimpleName() + ".db");
 		this.appendStream = new FileOutputStream(dbFile.toFile(), true);
 		this.file = FileChannel.open(dbFile, StandardOpenOption.READ);
 
-		this.index = new PersistenceIndex(dbPath.resolve(clazz.getSimpleName() + ".index"), file);
+		this.index = new PersistenceIndex(dbPath.resolve(type.getSimpleName() + ".index"), file);
 	}
 
 
@@ -97,9 +101,9 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 				continue;
 
 			register(registered, field.getType());
-			if (field.getGenericType() instanceof ParameterizedType type)
+			if (field.getGenericType() instanceof ParameterizedType t)
 			{
-				for (Type argument : type.getActualTypeArguments())
+				for (Type argument : t.getActualTypeArguments())
 				{
 					if (argument instanceof Class<?> argClass)
 						register(registered, argClass);
@@ -155,7 +159,7 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 
 
 	@SuppressWarnings("unchecked")
-	public T get(long key)
+	public synchronized T get(long key)
 	{
 		if (!index.get().containsKey(key))
 		{

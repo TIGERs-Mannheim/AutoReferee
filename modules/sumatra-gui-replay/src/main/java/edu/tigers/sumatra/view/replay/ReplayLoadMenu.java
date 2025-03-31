@@ -316,7 +316,14 @@ public class ReplayLoadMenu extends JMenu
 				log.info("Deleting '" + filename + "'...");
 				try
 				{
-					FileUtils.deleteDirectory(new File(filename));
+					File file = new File(filename);
+					if (file.isDirectory())
+					{
+						FileUtils.deleteDirectory(file);
+					} else
+					{
+						FileUtils.delete(file);
+					}
 				} catch (IOException exception)
 				{
 					log.error("Replay deletion not successful!", exception);

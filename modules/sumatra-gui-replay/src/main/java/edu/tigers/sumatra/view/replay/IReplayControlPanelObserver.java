@@ -100,4 +100,9 @@ public interface IReplayControlPanelObserver
 	 */
 	void onCopySnapshot();
 
+
+	/**
+	 * Create a cut replay.
+	 */
+	void cutReplay();
 }

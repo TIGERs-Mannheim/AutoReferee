@@ -27,12 +27,16 @@ import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.extern.log4j.Log4j2;
 
+import javax.swing.JOptionPane;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -291,6 +295,59 @@ public class ReplayPresenter extends AMainPresenter
 	}
 
 
+	@Override
+	public void cutReplay()
+	{
+		String lengthString = JOptionPane.showInputDialog("Create a new recording from the previous n seconds.", 10);
+		if (lengthString == null)
+			return;
+
+		CompletableFuture.runAsync(() -> cutTableAsync(lengthString)).exceptionally(e -> {
+			log.error("Failed to cut the replay.", e);
+			return null;
+		});
+	}
+
+
+	private void cutTableAsync(String lengthString) {
+		long end = refreshThread.getCurrentTime();
+		long start = end - (long) (Double.parseDouble(lengthString) * 1e9);
+
+		PersistenceDb cutDb = new PersistenceDb(
+				Path.of(db.getDbPath() + "-cut-" + refreshThread.currentTimeFormatted("HH_mm_ss-SSS"))
+		);
+
+		log.info("Creating replay cut {}", cutDb.getDbPath());
+		db.forEachTable(table -> copySection(cutDb, table, start, end));
+
+		cutDb.setCompressOnClose(true);
+		cutDb.close();
+
+		try
+		{
+			cutDb.delete();
+		} catch (IOException e)
+		{
+			log.error("Failed to delete the uncompressed replay.", e);
+		}
+	}
+
+
+	private <T extends PersistenceTable.IEntry<T>> void copySection(
+			PersistenceDb cutDb, PersistenceTable<T> table,
+			long start, long end)
+	{
+		cutDb.add(table.getType(), table.getKeyType());
+		PersistenceTable<T> cutTable = cutDb.getTable(table.getType());
+		Long time = table.getNearestKey(start);
+		while (time != null && time < end)
+		{
+			cutTable.write(table.get(time));
+			time = table.getNextKey(time);
+		}
+	}
+
+
 	/**
 	 * This thread will update the field periodically according to the speed
 	 *
@@ -532,20 +589,16 @@ public class ReplayPresenter extends AMainPresenter
 			lastKey = db.getKey(curT);
 
 			replayControllers.forEach(r -> r.update(db, lastKey));
-			updateTimeStep(Math.round(replayCurTime / 1e6));
+			replayControlPresenter.getViewPanel().getTimeStepLabel().setText(currentTimeFormatted("HH:mm:ss,SSS"));
 		}
 
 
-		/**
-		 * get the current TimeStep
-		 */
-		private void updateTimeStep(final long timestamp)
+		public String currentTimeFormatted(String pattern)
 		{
-			Date date = new Date(timestamp);
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
+			Date date = new Date(Math.round(replayCurTime / 1e6));
+			SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 			sdf.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-			String txt = sdf.format(date);
-			replayControlPresenter.getViewPanel().getTimeStepLabel().setText(txt);
+			return sdf.format(date);
 		}
 	}
 }
