@@ -42,7 +42,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed")
 	private static boolean compressOnClose = false;
 
-	@Configurable(defValue = "true", comment = "Automatically record game in productive mode")
+	@Configurable(defValue = "true", comment = "Automatically record game in tournament mode")
 	private static boolean autoRecord = true;
 
 	static
@@ -104,48 +104,31 @@ public class RecordManager extends AModule implements IRefereeObserver
 
 	private boolean isPreStage(final SslGcRefereeMessage.Referee refMsg)
 	{
-		switch (refMsg.getStage())
+		return switch (refMsg.getStage())
 		{
-			case NORMAL_FIRST_HALF_PRE:
-			case NORMAL_SECOND_HALF_PRE:
-			case EXTRA_FIRST_HALF_PRE:
-			case EXTRA_SECOND_HALF_PRE:
-				return true;
-			default:
-				return false;
-		}
+			case NORMAL_FIRST_HALF_PRE, NORMAL_SECOND_HALF_PRE, EXTRA_FIRST_HALF_PRE, EXTRA_SECOND_HALF_PRE -> true;
+			default -> false;
+		};
 	}
 
 
 	private boolean isGameStage(final SslGcRefereeMessage.Referee refMsg)
 	{
-		switch (refMsg.getStage())
+		return switch (refMsg.getStage())
 		{
-			case NORMAL_FIRST_HALF:
-			case NORMAL_SECOND_HALF:
-			case EXTRA_FIRST_HALF:
-			case EXTRA_SECOND_HALF:
-			case PENALTY_SHOOTOUT:
-				return true;
-			default:
-				return false;
-		}
+			case NORMAL_FIRST_HALF, NORMAL_SECOND_HALF, EXTRA_FIRST_HALF, EXTRA_SECOND_HALF, PENALTY_SHOOTOUT -> true;
+			default -> false;
+		};
 	}
 
 
 	private boolean isNoGameStage(final SslGcRefereeMessage.Referee refMsg)
 	{
-		switch (refMsg.getStage())
+		return switch (refMsg.getStage())
 		{
-			case EXTRA_HALF_TIME:
-			case NORMAL_HALF_TIME:
-			case PENALTY_SHOOTOUT_BREAK:
-			case POST_GAME:
-			case EXTRA_TIME_BREAK:
-				return true;
-			default:
-				return false;
-		}
+			case EXTRA_HALF_TIME, NORMAL_HALF_TIME, PENALTY_SHOOTOUT_BREAK, POST_GAME, EXTRA_TIME_BREAK -> true;
+			default -> false;
+		};
 	}
 
 
@@ -294,19 +277,6 @@ public class RecordManager extends AModule implements IRefereeObserver
 		PersistenceDb db = PersistenceDb.withDefaultLocation(matchType, matchStage, teamYellow, teamBlue);
 		onNewPersistenceDb(db);
 		return db;
-	}
-
-
-	/**
-	 * @return the current DB path
-	 */
-	private synchronized String getCurrentDbPath()
-	{
-		if (recorder == null)
-		{
-			return "";
-		}
-		return recorder.getDb().getDbPath();
 	}
 
 
