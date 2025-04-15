@@ -29,7 +29,6 @@ import edu.tigers.sumatra.wp.ShapeMapPersistenceRecorder;
 import edu.tigers.sumatra.wp.WfwPersistenceRecorder;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.Value;
 import lombok.extern.log4j.Log4j2;
@@ -39,6 +38,7 @@ import org.apache.logging.log4j.message.Message;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -57,15 +57,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 @Log4j2
-@RequiredArgsConstructor
-public class AutoRefIntegrationTest
+class AutoRefIntegrationTest
 {
 	private static final String MODULI_CONFIG = "integration_test.xml";
 	private static final String TEST_CASE_DIR = "config/autoref-tests";
 
 	private static SimilarityChecker similarityChecker;
 
-	private final String name;
 	private PersistenceAsyncRecorder recorder;
 	private final LogEventWatcher logEventWatcher = new LogEventWatcher(Level.WARN, Level.ERROR);
 	private boolean testCaseSucceeded;
@@ -85,7 +83,7 @@ public class AutoRefIntegrationTest
 
 	@SneakyThrows
 	@BeforeEach
-	void before()
+	void before(TestInfo testInfo)
 	{
 		logEventWatcher.clear();
 		logEventWatcher.start();
@@ -93,6 +91,7 @@ public class AutoRefIntegrationTest
 		SumatraModel.getInstance().startModules();
 		SumatraModel.getInstance().getModule(AutoRefModule.class).changeMode(EAutoRefMode.PASSIVE);
 
+		String name = testInfo.getTestMethod().toString();
 		PersistenceDb db = PersistenceDb.withCustomLocation(Paths.get("../../" + PersistenceDb.getDefaultBasePath(),
 				PersistenceDb.getDefaultName("FRIENDLY", "NORMAL_FIRST_HALF", "yellow", "blue") + "_" + name));
 		db.add(PersistenceLogEvent.class, EPersistenceKeyType.ARBITRARY);
@@ -193,7 +192,9 @@ public class AutoRefIntegrationTest
 			return stream
 					.filter(p -> p.getFileName().toString().endsWith(".json"))
 					.map(AutoRefIntegrationTest::createTestCase)
-					.sorted(Comparator.comparing(TestCase::getName));
+					.sorted(Comparator.comparing(TestCase::getName))
+					.toList()
+					.stream();
 		} catch (IOException e)
 		{
 			throw new IllegalStateException("Could not walk through test case folder.", e);
