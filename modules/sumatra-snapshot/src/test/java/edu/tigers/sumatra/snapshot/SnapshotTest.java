@@ -11,19 +11,19 @@ import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class SnapshotTest
+class SnapshotTest
 {
 	@Test
-	public void testToJSONBall()
+	void testToJSONBall()
 	{
 		Snapshot snapshot = Snapshot.builder().bots(new HashMap<>()).ball(new SnapObject(Vector3.zero(), Vector3.zero()))
 				.build();
@@ -33,7 +33,7 @@ public class SnapshotTest
 
 
 	@Test
-	public void testToJSONBotsBall()
+	void testToJSONBotsBall()
 	{
 		Map<BotID, SnapObject> bots = new HashMap<>();
 		bots.put(BotID.createBotId(0, ETeamColor.BLUE), new SnapObject(Vector3.zero(), Vector3.zero()));
@@ -44,7 +44,7 @@ public class SnapshotTest
 
 
 	@Test
-	public void testToJSONAll() throws ParseException
+	void testToJSONAll() throws ParseException
 	{
 		Snapshot snapshot = Snapshot.builder()
 				.bot(BotID.createBotId(0, ETeamColor.BLUE), new SnapObject(Vector3.zero(), Vector3.zero()))
@@ -62,7 +62,7 @@ public class SnapshotTest
 
 
 	@Test
-	public void testFromJSONBall() throws ParseException
+	void testFromJSONBall() throws ParseException
 	{
 		JSONParser parser = new JSONParser();
 		Snapshot snapshot = Snapshot.builder().bots(new HashMap<>()).ball(new SnapObject(Vector3.zero(), Vector3.zero()))
@@ -74,7 +74,7 @@ public class SnapshotTest
 
 
 	@Test
-	public void testFromJSONBotBall() throws ParseException
+	void testFromJSONBotBall() throws ParseException
 	{
 		JSONParser parser = new JSONParser();
 		Map<BotID, SnapObject> bots = new HashMap<>();

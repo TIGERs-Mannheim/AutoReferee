@@ -3,25 +3,23 @@
  */
 package edu.tigers.sumatra.clock;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.locks.LockSupport;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
  * Tests methods in {@link ThreadUtil}
- *
- * @author Gero
  */
-public class ThreadUtilTest
+class ThreadUtilTest
 {
 	/**
 	 * Test method for {@link edu.tigers.sumatra.clock.ThreadUtil#parkNanosSafe(long)}.
 	 */
 	@Test
-	public void testParkNanosSafeLong()
+	void testParkNanosSafeLong()
 	{
 		final long sleepFor = 50;
 
@@ -32,7 +30,7 @@ public class ThreadUtilTest
 			final long stop = System.nanoTime();
 
 			final long duration = stop - start;
-			assertTrue("Not slept enough: " + duration + "ns < " + sleepFor + "ns!!!", duration > sleepFor);
+			assertTrue(duration > sleepFor, "Not slept enough: " + duration + "ns < " + sleepFor + "ns!!!");
 		}
 	}
 

@@ -36,31 +36,26 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
-@RunWith(Parameterized.class)
 @Log4j2
 @RequiredArgsConstructor
 public class AutoRefIntegrationTest
@@ -71,21 +66,13 @@ public class AutoRefIntegrationTest
 	private static SimilarityChecker similarityChecker;
 
 	private final String name;
-	private final TestCase testCase;
 	private PersistenceAsyncRecorder recorder;
 	private final LogEventWatcher logEventWatcher = new LogEventWatcher(Level.WARN, Level.ERROR);
 	private boolean testCaseSucceeded;
 
 
-	@Parameterized.Parameters(name = "{0}")
-	public static Collection<Object[]> data()
-	{
-		return findTestCases().stream().map(t -> new Object[] { t.getName(), t }).collect(Collectors.toList());
-	}
-
-
-	@BeforeClass
-	public static void beforeClass()
+	@BeforeAll
+	static void beforeClass()
 	{
 		ConfigRegistration.setDefPath("../../config/");
 		SumatraModel.getInstance().setCurrentModuliConfig(MODULI_CONFIG);
@@ -97,8 +84,8 @@ public class AutoRefIntegrationTest
 
 
 	@SneakyThrows
-	@Before
-	public void before()
+	@BeforeEach
+	void before()
 	{
 		logEventWatcher.clear();
 		logEventWatcher.start();
@@ -121,8 +108,8 @@ public class AutoRefIntegrationTest
 
 
 	@SneakyThrows
-	@After
-	public void after()
+	@AfterEach
+	void after()
 	{
 		logEventWatcher.stop();
 		recorder.stop();
@@ -137,8 +124,9 @@ public class AutoRefIntegrationTest
 	}
 
 
-	@Test
-	public void runTestCase()
+	@ParameterizedTest(allowZeroInvocations = true)
+	@MethodSource("findTestCases")
+	void runTestCase(TestCase testCase)
 	{
 		log.info("Start running test case {}", testCase.getName());
 		GameLogReader logReader = new GameLogReader();
@@ -167,18 +155,18 @@ public class AutoRefIntegrationTest
 
 			if (gameEvents.isEmpty() && desiredGameEvent != null)
 			{
-				Assert.fail("Expected game event: " + desiredGameEvent);
+				fail("Expected game event: " + desiredGameEvent);
 			}
 			if (desiredGameEvent == null && !gameEvents.isEmpty())
 			{
-				Assert.fail("Expected no game events, but got: " + gameEvents);
+				fail("Expected no game events, but got: " + gameEvents);
 			}
 
 			for (var gameEvent : gameEvents)
 			{
 				if (!similarityChecker.isSimilar(gameEvent, desiredGameEvent))
 				{
-					Assert.fail("Game event mismatch.\nExpected: " + desiredGameEvent + "\n     Got: " + gameEvent);
+					fail("Game event mismatch.\nExpected: " + desiredGameEvent + "\n     Got: " + gameEvent);
 				}
 				if (desiredEvent.getStopAfterEvent())
 				{
@@ -193,20 +181,19 @@ public class AutoRefIntegrationTest
 	}
 
 
-	private static List<TestCase> findTestCases()
+	private static Stream<TestCase> findTestCases()
 	{
 		Path testCaseDir = Path.of(TEST_CASE_DIR);
 		if (!testCaseDir.toFile().exists())
 		{
-			return Collections.emptyList();
+			return Stream.of();
 		}
 		try (Stream<Path> stream = Files.walk(testCaseDir))
 		{
 			return stream
 					.filter(p -> p.getFileName().toString().endsWith(".json"))
 					.map(AutoRefIntegrationTest::createTestCase)
-					.sorted(Comparator.comparing(TestCase::getName))
-					.collect(Collectors.toList());
+					.sorted(Comparator.comparing(TestCase::getName));
 		} catch (IOException e)
 		{
 			throw new IllegalStateException("Could not walk through test case folder.", e);
@@ -269,7 +256,7 @@ public class AutoRefIntegrationTest
 
 	@Value
 	@Builder
-	private static class TestCase
+	static class TestCase
 	{
 		String name;
 		Path logfileLocation;

@@ -4,15 +4,14 @@
 
 package edu.tigers.sumatra.filter;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import junit.framework.AssertionFailedError;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.junit.Test;
-
-import junit.framework.AssertionFailedError;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class DataSyncTest

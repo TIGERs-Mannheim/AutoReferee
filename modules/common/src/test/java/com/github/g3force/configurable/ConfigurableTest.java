@@ -11,9 +11,8 @@ package com.github.g3force.configurable;
 import com.github.g3force.configurable.ConfigClass1.ETest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,10 +21,13 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-public class ConfigurableTest
+class ConfigurableTest
 {
 	private static final Logger log = LogManager.getLogger(ConfigurableTest.class.getName());
 
@@ -34,8 +36,8 @@ public class ConfigurableTest
 	private final Path configFilePath = Path.of("config").resolve(CATEGORY + ".xml");
 
 
-	@After
-	public void after()
+	@AfterEach
+	void after()
 	{
 		deleteConfigFile();
 	}
@@ -58,19 +60,19 @@ public class ConfigurableTest
 
 
 	@Test
-	public void testSave()
+	void testSave()
 	{
 		// save current config
 		ConfigRegistration.save(CATEGORY);
 		// the config file will only contain values that differ from their default value
-		Assert.assertTrue(configFilePath.toFile().exists());
+		assertTrue(configFilePath.toFile().exists());
 	}
 
 
 	@Test
-	public void testChangeValue()
+	void testChangeValue()
 	{
-		Assert.assertFalse(ConfigClass1.testBool);
+		assertFalse(ConfigClass1.testBool);
 
 		// change a value
 		ConfigClass1.testBool = true;
@@ -84,19 +86,19 @@ public class ConfigurableTest
 		// apply internal config
 		ConfigRegistration.applyConfig(CATEGORY);
 		// value should be changed back to true
-		Assert.assertTrue(ConfigClass1.testBool);
-		Assert.assertSame(ETest.ONE, ConfigClass1.testEnum);
+		assertTrue(ConfigClass1.testBool);
+		assertSame(ETest.ONE, ConfigClass1.testEnum);
 
 		// save internal config to file
 		ConfigRegistration.save(CATEGORY);
 
 		// config file should exist and contain testbool
-		Assert.assertTrue(configFilePath.toFile().exists());
+		assertTrue(configFilePath.toFile().exists());
 	}
 
 
 	@Test
-	public void testSpezi()
+	void testSpezi()
 	{
 		// default value for fields with spezi is the empty spezi
 		assertEquals(1, ConfigClass2.testSpezi, 0.0001);
@@ -111,7 +113,7 @@ public class ConfigurableTest
 
 
 	@Test
-	public void testInstance()
+	void testInstance()
 	{
 		ConfigClass3 cc = new ConfigClass3();
 		assertEquals(2, cc.testSpezi, 0.0001);
@@ -119,7 +121,7 @@ public class ConfigurableTest
 
 
 	@Test
-	public void testCallback()
+	void testCallback()
 	{
 		ConfigRegistration.registerConfigurableCallback(CATEGORY, new IConfigObserver()
 		{
@@ -139,7 +141,7 @@ public class ConfigurableTest
 
 
 	@Test
-	public void testOverride()
+	void testOverride()
 	{
 		ConfigClass1.testDouble = 1;
 		ConfigRegistration.overrideConfig(ConfigClass1.class, CATEGORY, "testDouble", "42");
@@ -148,7 +150,7 @@ public class ConfigurableTest
 
 
 	@Test
-	public void testDefValue()
+	void testDefValue()
 	{
 		ConfigAnnotationProcessor cap = new ConfigAnnotationProcessor("read");
 		cap.loadClass(ConfigClass4.class, false);

@@ -8,15 +8,15 @@ import edu.tigers.sumatra.math.vector.Vector3;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class SnapObjectTest
+class SnapObjectTest
 {
 	@Test
-	public void testToJSON()
+	void testToJSON()
 	{
 		SnapObject obj = new SnapObject(Vector3.zero(), Vector3.zero());
 		assertEquals("{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]}", obj.toJSON().toJSONString());
@@ -28,7 +28,7 @@ public class SnapObjectTest
 
 
 	@Test
-	public void testFromJSON() throws ParseException
+	void testFromJSON() throws ParseException
 	{
 		JSONParser parser = new JSONParser();
 		SnapObject obj = new SnapObject(Vector3.zero(), Vector3.zero());

@@ -7,6 +7,7 @@ io-humble = "0.3.0"
 org-apache-groovy = "4.0.26"
 org-apache-logging-log4j = "2.24.3"
 org-jacoco = "0.8.12"
+org-junit5 = "5.12.2"
 org-openjdk-jmh = "1.37"
 org-spockframework = "2.3-groovy-4.0"
 plugin-github-release = "2.5.2"
@@ -40,9 +41,7 @@ commons-lang = "commons-lang:commons-lang:2.6"
 gov-nist-math-jama = "gov.nist.math:jama:1.0.3"
 info-picocli-picocli = { module = "info.picocli:picocli", version.ref = "info-picocli" }
 info-picocli-picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "info-picocli" }
-io-humble-humble-video-all = { module = "io.humble:humble-video-all", version.ref = "io-humble" }
 io-humble-humble-video-noarch = { module = "io.humble:humble-video-noarch", version.ref = "io-humble" }
-junit = "junit:junit:4.13.2"
 net-jafama = "net.jafama:jafama:2.3.2"
 net-java-jinput = "net.java.jinput:jinput:2.0.10"
 net-lingala-zip4j = "net.lingala.zip4j:zip4j:2.11.5"
@@ -59,9 +58,7 @@ org-assertj-assertj-core = "org.assertj:assertj-core:3.27.3"
 org-hamcrest = "org.hamcrest:hamcrest:3.0"
 org-influxdb-influxdb-java = "org.influxdb:influxdb-java:2.25"
 org-jgraph-jgraph-core = "org.jgrapht:jgrapht-core:1.5.2"
-org-junit-jupiter-junit-jupiter = "org.junit.jupiter:junit-jupiter:5.12.2"
-org-junit-platform-junit-platform-launcher = "org.junit.platform:junit-platform-launcher:1.12.2"
-org-junit-vintage-junit-vintage-engine = "org.junit.vintage:junit-vintage-engine:5.12.2"
+org-junit-bom = { module = "org.junit:junit-bom", version.ref = "org-junit5" }
 org-mockito-mockito-all = "org.mockito:mockito-all:1.10.19"
 org-openjdk-jmh-jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh" }
 org-openjdk-jmh-jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "org-openjdk-jmh" }

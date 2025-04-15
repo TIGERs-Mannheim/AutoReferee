@@ -14,6 +14,5 @@ dependencies {
     implementation(libs.org.jgraph.jgraph.core)
     runtimeOnly(libs.commons.collections)
 
-    testImplementation(libs.junit)
     testImplementation(libs.org.assertj.assertj.core)
 }
