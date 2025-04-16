@@ -3,14 +3,14 @@
  */
 package edu.tigers.sumatra.snapshot;
 
+import com.github.cliftonlabs.json_simple.JsonException;
+import com.github.cliftonlabs.json_simple.JsonObject;
+import com.github.cliftonlabs.json_simple.Jsoner;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -27,7 +27,7 @@ class SnapshotTest
 	{
 		Snapshot snapshot = Snapshot.builder().bots(new HashMap<>()).ball(new SnapObject(Vector3.zero(), Vector3.zero()))
 				.build();
-		assertThat(snapshot.toJSON().toJSONString())
+		assertThat(snapshot.toJSON().toJson())
 				.isEqualTo("{\"ball\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"bots\":[]}");
 	}
 
@@ -38,13 +38,13 @@ class SnapshotTest
 		Map<BotID, SnapObject> bots = new HashMap<>();
 		bots.put(BotID.createBotId(0, ETeamColor.BLUE), new SnapObject(Vector3.zero(), Vector3.zero()));
 		Snapshot snapshot = Snapshot.builder().bots(bots).ball(new SnapObject(Vector3.zero(), Vector3.zero())).build();
-		assertThat(snapshot.toJSON().toJSONString()).isEqualTo(
+		assertThat(snapshot.toJSON().toJson()).isEqualTo(
 				"{\"ball\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"bots\":[{\"obj\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"id\":{\"number\":0,\"color\":\"BLUE\"}}]}");
 	}
 
 
 	@Test
-	void testToJSONAll() throws ParseException
+	void testToJSONAll() throws JsonException
 	{
 		Snapshot snapshot = Snapshot.builder()
 				.bot(BotID.createBotId(0, ETeamColor.BLUE), new SnapObject(Vector3.zero(), Vector3.zero()))
@@ -54,7 +54,7 @@ class SnapshotTest
 				.placementPos(Vector2.fromXY(1, 2))
 				.build();
 
-		String json = snapshot.toJSON().toJSONString();
+		String json = snapshot.toJSON().toJson();
 		Snapshot parsedSnapshot = Snapshot.fromJSONString(json);
 
 		assertThat(parsedSnapshot).isEqualTo(snapshot);
@@ -62,27 +62,26 @@ class SnapshotTest
 
 
 	@Test
-	void testFromJSONBall() throws ParseException
+	void testFromJSONBall() throws JsonException
 	{
-		JSONParser parser = new JSONParser();
 		Snapshot snapshot = Snapshot.builder().bots(new HashMap<>()).ball(new SnapObject(Vector3.zero(), Vector3.zero()))
 				.build();
 		assertEquals(snapshot,
 				Snapshot.fromJSON(
-						(JSONObject) parser.parse("{\"ball\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"bots\":[]}")));
+						(JsonObject) Jsoner.deserialize(
+								"{\"ball\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"bots\":[]}")));
 	}
 
 
 	@Test
-	void testFromJSONBotBall() throws ParseException
+	void testFromJSONBotBall() throws JsonException
 	{
-		JSONParser parser = new JSONParser();
 		Map<BotID, SnapObject> bots = new HashMap<>();
 		bots.put(BotID.createBotId(0, ETeamColor.BLUE), new SnapObject(Vector3.zero(), Vector3.zero()));
 		Snapshot snapshot = Snapshot.builder().bots(bots).ball(new SnapObject(Vector3.zero(), Vector3.zero())).build();
 		assertEquals(snapshot,
 				Snapshot.fromJSON(
-						(JSONObject) parser.parse(
+						(JsonObject) Jsoner.deserialize(
 								"{\"ball\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"bots\":[{\"obj\":{\"pos\":[0.0,0.0,0.0],\"vel\":[0.0,0.0,0.0]},\"id\":{\"number\":0,\"color\":\"BLUE\"}}]}")));
 	}
 }

@@ -479,14 +479,14 @@ class Vector2Test
 	@Test
 	void testToJSON()
 	{
-		assertThat(Vector2.fromXY(42, 1337).toJSON().toJSONString()).isEqualTo("{\"dim1\":1337.0,\"dim0\":42.0}");
+		assertThat(Vector2.fromXY(42, 1337).toJSON().toJson()).isEqualTo("{\"dim1\":1337.0,\"dim0\":42.0}");
 	}
 	
 	
 	@Test
-	void testToJSONArray()
+	void testToJsonArray()
 	{
-		assertThat(Vector2.fromXY(42, 1337).toJSONArray().toJSONString()).isEqualTo("[42.0,1337.0]");
+		assertThat(Vector2.fromXY(42, 1337).toJsonArray().toJson()).isEqualTo("[42.0,1337.0]");
 	}
 	
 	

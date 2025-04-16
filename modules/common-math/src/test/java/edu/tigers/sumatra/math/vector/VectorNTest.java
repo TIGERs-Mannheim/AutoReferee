@@ -305,15 +305,15 @@ class VectorNTest
 	@Test
 	void testToJSON()
 	{
-		assertThat(VectorN.from(42, 1337, 1).toJSON().toJSONString())
+		assertThat(VectorN.from(42, 1337, 1).toJSON().toJson())
 				.isEqualTo("{\"dim2\":1.0,\"dim1\":1337.0,\"dim0\":42.0}");
 	}
 	
 	
 	@Test
-	void testToJSONArray()
+	void testToJsonArray()
 	{
-		assertThat(VectorN.from(42, 1337, 1).toJSONArray().toJSONString()).isEqualTo("[42.0,1337.0,1.0]");
+		assertThat(VectorN.from(42, 1337, 1).toJsonArray().toJson()).isEqualTo("[42.0,1337.0,1.0]");
 	}
 	
 	

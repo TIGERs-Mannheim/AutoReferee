@@ -24,5 +24,5 @@ dependencies {
     implementation(libs.commons.lang)
 
     api(libs.com.google.protobuf.protobuf.java)
-    implementation(libs.com.googlecode.json.simple)
+    implementation(libs.com.github.cliftonlabs.json.simple)
 }

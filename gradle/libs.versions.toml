@@ -28,7 +28,7 @@ com-google-guava = "com.google.guava:guava:33.4.7-jre"
 com-google-protobuf-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "com-google-protobuf" }
 com-google-protobuf-protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "com-google-protobuf" }
 com-google-protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "com-google-protobuf" }
-com-googlecode-json-simple = "com.googlecode.json-simple:json-simple:1.1.1"
+com-github-cliftonlabs-json-simple = "com.github.cliftonlabs:json-simple:4.0.1"
 com-jidesoft-jide-oss = "com.jidesoft:jide-oss:3.6.18"
 com-miglayout-miglayout-core = { module = "com.miglayout:miglayout-core", version.ref = "com-miglayout" }
 com-miglayout-miglayout-swing = { module = "com.miglayout:miglayout-swing", version.ref = "com-miglayout" }

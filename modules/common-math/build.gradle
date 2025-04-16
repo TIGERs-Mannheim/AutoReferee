@@ -15,7 +15,7 @@ dependencies {
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
 
-    api(libs.com.googlecode.json.simple)
+    api(libs.com.github.cliftonlabs.json.simple)
     implementation(libs.net.jafama)
 
     testImplementation(libs.nl.jqno.equalsverifier)

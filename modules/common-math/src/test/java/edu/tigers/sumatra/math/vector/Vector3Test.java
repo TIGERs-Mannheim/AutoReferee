@@ -313,15 +313,15 @@ class Vector3Test
 	@Test
 	void testToJSON()
 	{
-		assertThat(Vector3.fromXYZ(42, 1337, 1).toJSON().toJSONString())
+		assertThat(Vector3.fromXYZ(42, 1337, 1).toJSON().toJson())
 				.isEqualTo("{\"dim2\":1.0,\"dim1\":1337.0,\"dim0\":42.0}");
 	}
 	
 	
 	@Test
-	void testToJSONArray()
+	void testToJsonArray()
 	{
-		assertThat(Vector3.fromXYZ(42, 1337, 1).toJSONArray().toJSONString()).isEqualTo("[42.0,1337.0,1.0]");
+		assertThat(Vector3.fromXYZ(42, 1337, 1).toJsonArray().toJson()).isEqualTo("[42.0,1337.0,1.0]");
 	}
 	
 	

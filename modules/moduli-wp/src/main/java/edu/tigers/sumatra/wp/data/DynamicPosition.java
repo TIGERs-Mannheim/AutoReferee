@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.wp.data;
 
+import com.github.cliftonlabs.json_simple.JsonObject;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.ids.AObjectID;
 import edu.tigers.sumatra.ids.BallID;
@@ -19,7 +20,6 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,9 +229,9 @@ public class DynamicPosition
 
 
 	@SuppressWarnings("unchecked")
-	public JSONObject toJSON()
+	public JsonObject toJSON()
 	{
-		JSONObject jsonMapping = pos.toJSON();
+		JsonObject jsonMapping = pos.toJSON();
 		jsonMapping.put("trackedId", trackedId == null ? "" : trackedId.getNumber());
 		jsonMapping.put("lookahead", lookahead);
 		return jsonMapping;

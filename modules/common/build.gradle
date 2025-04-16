@@ -24,7 +24,7 @@ dependencies {
 
     implementation(libs.gov.nist.math.jama)
     implementation(libs.net.jafama)
-    implementation(libs.com.googlecode.json.simple)
+    implementation(libs.com.github.cliftonlabs.json.simple)
 
     testImplementation(libs.org.hamcrest)
     testImplementation(libs.org.assertj.assertj.core)

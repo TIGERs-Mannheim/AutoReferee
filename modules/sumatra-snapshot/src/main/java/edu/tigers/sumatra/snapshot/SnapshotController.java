@@ -125,7 +125,7 @@ public class SnapshotController
 		}
 
 		Snapshot snapshot = createSnapshot();
-		String snapJson = snapshot.toJSON().toJSONString();
+		String snapJson = snapshot.toJSON().toJson();
 
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection stringSelection = new StringSelection(snapJson);

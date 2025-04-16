@@ -4,7 +4,6 @@
 
 package edu.tigers.sumatra.filter;
 
-import junit.framework.AssertionFailedError;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,7 @@ public class DataSyncTest
 		assertThat(ds.get(3)).isPresent();
 		assertThat(ds.get(5)).isPresent();
 		assertThat(ds.get(6)).isNotPresent();
-		DataSync<Data>.DataPair dp1 = ds.get(1).orElseThrow(AssertionFailedError::new);
+		DataSync<Data>.DataPair dp1 = ds.get(1).orElseThrow(AssertionError::new);
 		assertThat(dp1.getFirst().getTimestamp()).isEqualTo(1L);
 		assertThat(dp1.getSecond().getTimestamp()).isEqualTo(3L);
 		assertThat(dp1.getFirst().getData()).isEqualTo(new Data(10.0));

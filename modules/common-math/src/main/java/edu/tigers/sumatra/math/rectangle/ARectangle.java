@@ -4,6 +4,7 @@
 
 package edu.tigers.sumatra.math.rectangle;
 
+import com.github.cliftonlabs.json_simple.JsonObject;
 import edu.tigers.sumatra.math.IBoundedPath;
 import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.circle.ICircle;
@@ -12,7 +13,6 @@ import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -276,11 +276,11 @@ abstract class ARectangle implements IRectangle
 
 
 	@Override
-	public JSONObject toJSON()
+	public JsonObject toJSON()
 	{
 		Map<String, Object> jsonMapping = new LinkedHashMap<>();
-		jsonMapping.put("center", center().toJSONArray());
-		jsonMapping.put("extent", Vector2f.fromXY(xExtent(), yExtent()).toJSONArray());
-		return new JSONObject(jsonMapping);
+		jsonMapping.put("center", center().toJsonArray());
+		jsonMapping.put("extent", Vector2f.fromXY(xExtent(), yExtent()).toJsonArray());
+		return new JsonObject(jsonMapping);
 	}
 }

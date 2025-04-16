@@ -3,10 +3,10 @@
  */
 package edu.tigers.sumatra.snapshot;
 
+import com.github.cliftonlabs.json_simple.JsonArray;
+import com.github.cliftonlabs.json_simple.JsonObject;
 import edu.tigers.sumatra.math.vector.IVector3;
 import lombok.Value;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 
 /**
@@ -29,9 +29,9 @@ public class SnapObject
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public JSONObject toJSON()
+	public JsonObject toJSON()
 	{
-		JSONObject obj = new JSONObject();
+		JsonObject obj = new JsonObject();
 		obj.put("pos", JsonConverter.encode(pos));
 		obj.put("vel", JsonConverter.encode(vel));
 		return obj;
@@ -42,13 +42,13 @@ public class SnapObject
 	 * @param obj to read from
 	 * @return snapObject from json
 	 */
-	public static SnapObject fromJSON(final JSONObject obj)
+	public static SnapObject fromJSON(final JsonObject obj)
 	{
 		if (obj == null)
 		{
 			return null;
 		}
-		return new SnapObject(JsonConverter.decodeVector3((JSONArray) obj.get("pos")),
-				JsonConverter.decodeVector3((JSONArray) obj.get("vel")));
+		return new SnapObject(JsonConverter.decodeVector3((JsonArray) obj.get("pos")),
+				JsonConverter.decodeVector3((JsonArray) obj.get("vel")));
 	}
 }
