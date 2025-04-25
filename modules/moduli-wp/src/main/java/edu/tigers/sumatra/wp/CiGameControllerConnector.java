@@ -25,6 +25,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 
@@ -41,7 +42,7 @@ public class CiGameControllerConnector
 	private final Watchdog watchdog = new Watchdog(5000, this.getClass().getSimpleName(), this::onTimeout);
 	private final Object lockSendRecv = new Object();
 	private final Object lockSocket = new Object();
-	private final Object lockInit = new Object();
+	private CountDownLatch latchInit = new CountDownLatch(1);
 	private Socket socket;
 	private SslGcCi.CiInput lastInput;
 	private CamGeometry lastGeometry;
@@ -55,10 +56,8 @@ public class CiGameControllerConnector
 	{
 		log.trace("Starting");
 		watchdog.start();
-		synchronized (lockInit)
-		{
-			initializeConnection();
-		}
+		initializeConnection();
+		latchInit.countDown();
 		log.trace("Started");
 	}
 
@@ -66,6 +65,7 @@ public class CiGameControllerConnector
 	public void stop()
 	{
 		log.trace("Stopping");
+		latchInit = new CountDownLatch(1);
 		watchdog.stop();
 		disconnect();
 		log.trace("Stopped");
@@ -250,31 +250,43 @@ public class CiGameControllerConnector
 
 	public List<SslGcRefereeMessage.Referee> process(final SimpleWorldFrame swf, List<SslGcApi.Input> inputs)
 	{
-		synchronized (lockInit)
+		try
 		{
-			synchronized (lockSocket)
+			boolean initialized = latchInit.await(10, TimeUnit.SECONDS);
+			if (!initialized)
 			{
-				if (socket == null)
+				log.error("Timeout while waiting for connection to be initialized");
+				return Collections.emptyList();
+			}
+		} catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			log.warn("Interrupted while waiting for connection to be initialized", e);
+			return Collections.emptyList();
+		}
+
+		synchronized (lockSocket)
+		{
+			if (socket == null)
+			{
+				boolean wasConnectionFailed = connectionFailed;
+				try
 				{
-					boolean wasConnectionFailed = connectionFailed;
-					try
+					connect();
+				} catch (IOException e)
+				{
+					if (!wasConnectionFailed)
 					{
-						connect();
-					} catch (IOException e)
-					{
-						if (!wasConnectionFailed)
-						{
-							log.warn("Connection to SSL-Game-Controller failed", e);
-						}
+						log.warn("Connection to SSL-Game-Controller failed", e);
 					}
 				}
 			}
-			synchronized (lockSendRecv)
+		}
+		synchronized (lockSendRecv)
+		{
+			if (send(swf, inputs))
 			{
-				if (send(swf, inputs))
-				{
-					return receiveRefereeMessages();
-				}
+				return receiveRefereeMessages();
 			}
 		}
 		return Collections.emptyList();
