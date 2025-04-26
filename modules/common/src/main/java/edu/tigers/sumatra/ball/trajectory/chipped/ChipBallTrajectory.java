@@ -422,10 +422,16 @@ public class ChipBallTrajectory extends ABallTrajectory
 
 
 	@Override
-	public List<ILineSegment> getTravelLinesInterceptable()
+	public List<ILineSegment> getTravelLinesInterceptableByRobot()
+	{
+		return this.getTravelLinesInterceptableBelow(parameters.getMaxInterceptableHeight());
+	}
+
+
+	@Override
+	public List<ILineSegment> getTravelLinesInterceptableBelow(double maximumHeight)
 	{
 		final double g = G;
-		final double h = parameters.getMaxInterceptableHeight();
 		List<ILineSegment> lines = new ArrayList<>();
 		Vector3 posNow = Vector3.copy(kickPos.getXYZVector());
 		Vector3 velNow = Vector3.copy(kickVel);
@@ -437,12 +443,12 @@ public class ChipBallTrajectory extends ABallTrajectory
 		IVector2 p2 = getPosByTime(0).getXYVector();
 
 		// go through hops while max. height is above 150mm
-		while (((velNow.z() * velNow.z()) / (2.0 * g)) > h)
+		while (((velNow.z() * velNow.z()) / (2.0 * g)) > maximumHeight)
 		{
 			double vz = velNow.z();
 			double tFly = (2 * vz) / g;
 
-			t1 = -(SumatraMath.sqrt((vz * vz) - (2 * g * h)) - vz) / g;
+			t1 = -(SumatraMath.sqrt((vz * vz) - (2 * g * maximumHeight)) - vz) / g;
 
 			IVector2 p1 = posNow.addNew(velNow.multiplyNew(t1)).add(Vector3.fromXYZ(0, 0, -0.5 * g * t1 * t1))
 					.getXYVector();
@@ -452,7 +458,7 @@ public class ChipBallTrajectory extends ABallTrajectory
 				lines.add(Lines.segmentFromPoints(p2, p1));
 			}
 
-			t2 = (SumatraMath.sqrt((vz * vz) - (2 * g * h)) + vz) / g;
+			t2 = (SumatraMath.sqrt((vz * vz) - (2 * g * maximumHeight)) + vz) / g;
 
 			if ((tNow + t2) < 0)
 			{

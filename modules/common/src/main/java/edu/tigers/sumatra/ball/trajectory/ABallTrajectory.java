@@ -213,7 +213,14 @@ public abstract class ABallTrajectory implements IBallTrajectory
 
 
 	@Override
-	public List<ILineSegment> getTravelLinesInterceptable()
+	public List<ILineSegment> getTravelLinesInterceptableByRobot()
+	{
+		return getTravelLineSegments();
+	}
+
+
+	@Override
+	public List<ILineSegment> getTravelLinesInterceptableBelow(double maximumHeight)
 	{
 		return getTravelLineSegments();
 	}
@@ -227,7 +234,7 @@ public abstract class ABallTrajectory implements IBallTrajectory
 
 
 	@Override
-	public IVector2 closestPointTo(IVector2 point)
+	public IVector2 closestPointToRolling(IVector2 point)
 	{
 		var closestPointsToIdealPos = getTravelLinesRolling().stream()
 				.map(line -> line.closestPointOnPath(point))
@@ -237,8 +244,18 @@ public abstract class ABallTrajectory implements IBallTrajectory
 
 
 	@Override
+	public IVector2 closestPointToBelow(IVector2 point, double maximumHeight)
+	{
+		var closestPointsToIdealPos = getTravelLinesInterceptableBelow(maximumHeight).stream()
+				.map(line -> line.closestPointOnPath(point))
+				.toList();
+		return point.nearestTo(closestPointsToIdealPos);
+	}
+
+
+	@Override
 	public double distanceTo(IVector2 point)
 	{
-		return closestPointTo(point).distanceTo(point);
+		return closestPointToRolling(point).distanceTo(point);
 	}
 }
