@@ -21,6 +21,11 @@ class AngleMathTest
 	private static final double ACCURACY = 0.001;
 
 
+	private static double deg2rad(double deg)
+	{
+		return AngleMath.deg2rad(deg);
+	}
+
 	@Test
 	void testNormalizeAngle()
 	{
@@ -103,6 +108,34 @@ class AngleMathTest
 		assertThat(AngleMath.compareAngle(0, -1e-7)).isZero();
 	}
 
+
+	@Test
+	void testCapAngle()
+	{
+		assertThat(AngleMath.capAngle(deg2rad(0), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(0));
+		assertThat(AngleMath.capAngle(deg2rad(45), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(90), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(135), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(180), deg2rad(-44), deg2rad(45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(-180), deg2rad(-45), deg2rad(44))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-135), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-90), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-45), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(-45));
+
+		assertThat(AngleMath.capAngle(deg2rad(0), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(0));
+		assertThat(AngleMath.capAngle(deg2rad(45), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(90), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(135), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(180), deg2rad(45), deg2rad(-44))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(-180), deg2rad(44), deg2rad(-45))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-135), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-90), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(-45));
+		assertThat(AngleMath.capAngle(deg2rad(-45), deg2rad(45), deg2rad(-45))).isEqualTo(deg2rad(-45));
+
+		assertThat(AngleMath.capAngle(deg2rad(44), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(44));
+		assertThat(AngleMath.capAngle(deg2rad(45), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(45));
+		assertThat(AngleMath.capAngle(deg2rad(46), deg2rad(-45), deg2rad(45))).isEqualTo(deg2rad(45));
+	}
 
 	@Test
 	void testDeg2Rad()
