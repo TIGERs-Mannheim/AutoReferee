@@ -42,6 +42,7 @@ gov-nist-math-jama = "gov.nist.math:jama:1.0.3"
 info-picocli-picocli = { module = "info.picocli:picocli", version.ref = "info-picocli" }
 info-picocli-picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "info-picocli" }
 io-humble-humble-video-noarch = { module = "io.humble:humble-video-noarch", version.ref = "io-humble" }
+jfreechart = { group = "org.jfree", name = "jfreechart", version = "1.5.5" }
 net-jafama = "net.jafama:jafama:2.3.2"
 net-java-jinput = "net.java.jinput:jinput:2.0.10"
 net-lingala-zip4j = "net.lingala.zip4j:zip4j:2.11.5"
