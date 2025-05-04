@@ -72,7 +72,7 @@ public class AttackerTooCloseToDefenseArea extends AGameEvent
 	@Override
 	public String getDescription()
 	{
-		return String.format("Attacker %d %s was %.2f mm too close to the penalty area @ %s", bot, team, distance,
+		return String.format("Attacker %d %s was %.2f mm away from the penalty area @ %s", bot, team, distance,
 				formatVector(location));
 	}
 }
