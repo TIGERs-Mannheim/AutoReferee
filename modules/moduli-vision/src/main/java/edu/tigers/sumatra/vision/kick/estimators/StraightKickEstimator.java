@@ -360,10 +360,10 @@ public class StraightKickEstimator implements IKickEstimator
 			result.add(straightResult.get());
 
 			final String lineSeparator = System.lineSeparator();
-			log.info("Straight Model:{}{}", lineSeparator, straightResult.get());
+			log.debug("Straight Model:{}{}", lineSeparator, straightResult.get());
 		} else
 		{
-			log.info("Straight model identification failed.");
+			log.debug("Straight model identification failed.");
 		}
 
 		// check redirect identification
@@ -374,7 +374,7 @@ public class StraightKickEstimator implements IKickEstimator
 			result.add(redirectResult.get());
 
 			final String lineSeparator = System.lineSeparator();
-			log.info("Redirect Model:{}{}", lineSeparator, redirectResult.get());
+			log.debug("Redirect Model:{}{}", lineSeparator, redirectResult.get());
 		}
 
 		return result;

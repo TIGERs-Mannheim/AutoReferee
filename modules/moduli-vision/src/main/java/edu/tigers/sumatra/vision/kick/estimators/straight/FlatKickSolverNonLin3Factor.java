@@ -104,7 +104,7 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 		double outboundVelocity = result.getKickVel().getLength2();
 
 		return Optional.of(new RedirectModelIdentResult(result.getKickVel().getXYZVector(), result.kickPos, tZero,
-				minFactor, inboundAngle, inboundVelocity, outboundAngle, outboundVelocity));
+				minFactor, inboundAngle, inboundVelocity, outboundAngle, outboundVelocity, records.size()));
 	}
 
 
@@ -284,6 +284,8 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 		private final double inVel;
 		private final double outAngle;
 		private final double outVel;
+
+		private final int sampleAmount;
 
 
 		public static String[] getParameterNames()

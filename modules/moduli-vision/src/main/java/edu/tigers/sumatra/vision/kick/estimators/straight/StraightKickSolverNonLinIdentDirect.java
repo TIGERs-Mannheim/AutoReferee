@@ -11,6 +11,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
@@ -78,7 +79,8 @@ public class StraightKickSolverNonLinIdentDirect
 					kickLine.get().directionVector(),
 					records.getFirst().getFlatPos(),
 					records.getFirst().gettCapture(),
-					optimum.getPointRef())
+					optimum.getPointRef(),
+					records.size())
 			);
 		} catch (IllegalStateException | MathIllegalArgumentException e)
 		{
@@ -130,6 +132,9 @@ public class StraightKickSolverNonLinIdentDirect
 		private final double accRoll;
 		private final double kSwitch;
 
+		@Getter
+		private final int sampleAmount;
+
 
 		/**
 		 * @param kickDir
@@ -138,7 +143,7 @@ public class StraightKickSolverNonLinIdentDirect
 		 * @param params
 		 */
 		public StraightModelIdentResult(final IVector2 kickDir, final IVector2 kickPos, final long kickTimestamp,
-				final double[] params)
+				final double[] params, final int sampleAmount)
 		{
 			kickVel = kickDir.scaleToNew(params[0]).getXYZVector();
 			this.kickPos = kickPos;
@@ -146,6 +151,7 @@ public class StraightKickSolverNonLinIdentDirect
 			accSlide = params[1];
 			accRoll = params[2];
 			kSwitch = params[3];
+			this.sampleAmount = sampleAmount;
 		}
 
 

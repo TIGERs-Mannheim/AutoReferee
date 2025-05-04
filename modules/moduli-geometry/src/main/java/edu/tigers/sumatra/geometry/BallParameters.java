@@ -6,7 +6,6 @@ package edu.tigers.sumatra.geometry;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 
@@ -14,7 +13,7 @@ import lombok.Setter;
 /**
  * All parameters required for ball models.
  */
-@Setter(AccessLevel.PACKAGE)
+@Setter
 @Data
 public class BallParameters
 {

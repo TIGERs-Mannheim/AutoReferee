@@ -14,6 +14,8 @@ import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.vision.data.KickSolverResult;
 import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -102,7 +104,7 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		IVector3 kickVelEst = Vector3.fromXYZ(result[0], result[1], result[2]);
 
 		return Optional.of(new ChipModelIdentResult(kickVelEst, kickPosition, kickTimestamp,
-				result[3], result[4], result[5]));
+				result[3], result[4], result[5], records.size()));
 	}
 
 
@@ -154,6 +156,7 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		}
 	}
 
+	@AllArgsConstructor
 	public static class ChipModelIdentResult implements IBallModelIdentResult
 	{
 		private final IVector3 kickVel;
@@ -163,18 +166,8 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		private final double dampingXYOtherHops;
 		private final double dampingZ;
 
-
-		public ChipModelIdentResult(final IVector3 kickVel, final IVector2 kickPos, final long kickTimestamp,
-				final double dampingXYFirstHop,
-				final double dampingXYOtherHops, final double dampingZ)
-		{
-			this.kickVel = kickVel;
-			this.kickPos = kickPos;
-			this.kickTimestamp = kickTimestamp;
-			this.dampingXYFirstHop = dampingXYFirstHop;
-			this.dampingXYOtherHops = dampingXYOtherHops;
-			this.dampingZ = dampingZ;
-		}
+		@Getter
+		private final int sampleAmount;
 
 
 		public static String[] getParameterNames()

@@ -408,10 +408,10 @@ public class ChipKickEstimator implements IKickEstimator
 			result.add(chipResult.get());
 
 			final String lineSeparator = System.lineSeparator();
-			log.info("Chip Model:{}{}", lineSeparator, chipResult.get());
+			log.debug("Chip Model:{}{}", lineSeparator, chipResult.get());
 		} else
 		{
-			log.info("Chip model identification failed.");
+			log.debug("Chip model identification failed.");
 		}
 
 		return result;
