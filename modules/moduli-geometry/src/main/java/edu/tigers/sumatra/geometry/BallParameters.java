@@ -47,14 +47,14 @@ public class BallParameters
 	private double inertiaDistribution = 0.5;
 
 	@Configurable(
-			comment = "Amount of spin transferred during a redirect.",
+			comment = "Amount of spin transferred during a redirect. Multiplied to y-part (sidewards) of ballVelocity in robot coordinate system. Effects the redirect angle. 1 keeps full incoming ball velocity, 0 damps is away completely.",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" },
 			defValueSpezis = { "0.8", "0.4", "0.35", "0.4", "0.35", "0.35", "0.8" }
 	)
 	private double redirectSpinFactor = 0.8;
 
 	@Configurable(
-			comment = "Restitution coefficient for redirected balls from a bot.",
+			comment = "Restitution coefficient for redirected balls from a bot. Effects the absolute ball speed. 1 keeps full incoming ball speed, 0 damps is away completely.",
 			spezis = { "SUMATRA", "LAB", "TISCH", "ROBOCUP", "ANDRE", "NICOLAI", "SIMULATOR" },
 			defValueSpezis = { "0.2", "0.1", "0.55", "0.1", "0.55", "0.55", "0.2" }
 	)

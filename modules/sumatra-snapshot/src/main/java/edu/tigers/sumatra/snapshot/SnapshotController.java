@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Log4j2
@@ -43,8 +44,12 @@ public class SnapshotController
 	}
 
 
-	public Snapshot createSnapshot()
+	public Optional<Snapshot> createSnapshot()
 	{
+		if (wfw == null)
+		{
+			return Optional.empty();
+		}
 		Map<BotID, SnapObject> snapBots = new HashMap<>();
 		Map<BotID, IVector3> moveDestinations = new HashMap<>();
 		for (Map.Entry<BotID, ITrackedBot> entry : wfw.getSimpleWorldFrame().getBots().entrySet())
@@ -64,14 +69,14 @@ public class SnapshotController
 		ITrackedBall ball = wfw.getSimpleWorldFrame().getBall();
 		SnapObject snapBall = new SnapObject(ball.getPos3(), ball.getVel3());
 
-		return Snapshot.builder()
+		return Optional.of(Snapshot.builder()
 				.bots(snapBots)
 				.ball(snapBall)
 				.command(wfw.getRefereeMsg().getCommand())
 				.stage(wfw.getRefereeMsg().getStage())
 				.placementPos(wfw.getRefereeMsg().getBallPlacementPos())
 				.moveDestinations(moveDestinations)
-				.build();
+				.build());
 	}
 
 
@@ -91,7 +96,7 @@ public class SnapshotController
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
-		Snapshot snapshot = createSnapshot();
+		Snapshot snapshot = createSnapshot().orElseThrow();
 		String defaultFilename = "data/snapshots/" + sdf.format(new Date()) + ".snap";
 
 		JFileChooser fileChooser = new JFileChooser();
@@ -119,16 +124,11 @@ public class SnapshotController
 	 */
 	public void onCopySnapshot()
 	{
-		if (wfw == null)
-		{
-			return;
-		}
-
-		Snapshot snapshot = createSnapshot();
-		String snapJson = snapshot.toJSON().toJson();
-
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(snapJson);
-		clipboard.setContents(stringSelection, null);
+		createSnapshot().map(snapshot -> snapshot.toJSON().toJson())
+				.ifPresent(snapJson -> {
+					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+					StringSelection stringSelection = new StringSelection(snapJson);
+					clipboard.setContents(stringSelection, null);
+				});
 	}
 }
