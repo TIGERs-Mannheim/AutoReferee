@@ -6,7 +6,6 @@ package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
@@ -338,7 +337,7 @@ public class VisionFilterImpl extends AVisionFilter
 
 
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		super.startModule();
 		SumatraModel.getInstance().getModule(ACam.class).addObserver(this);

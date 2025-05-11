@@ -101,19 +101,19 @@ public class Moduli
 
 		} catch (ConfigurationException e)
 		{
-			throw new LoadModulesException("Configuration contains errors: " + e.getMessage(), e);
+			throw new LoadModulesException("Configuration contains errors", e);
 		} catch (ClassNotFoundException e)
 		{
-			throw new LoadModulesException("Class in configuration can't be found: " + e.getMessage(), e);
+			throw new LoadModulesException("Class in configuration can't be found", e);
 		} catch (ClassCastException e)
 		{
-			throw new LoadModulesException("Given implementation is not an instance of AModule: " + e.getMessage(), e);
+			throw new LoadModulesException("Given implementation is not an instance of AModule", e);
 		} catch (SecurityException e)
 		{
-			throw new LoadModulesException("Security issue at configuration : " + e.getMessage(), e);
+			throw new LoadModulesException("Security issue at configuration", e);
 		} catch (IllegalArgumentException e)
 		{
-			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
+			throw new LoadModulesException("An argument isn't valid", e);
 		}
 	}
 
@@ -215,11 +215,8 @@ public class Moduli
 
 	/**
 	 * Starts all modules in modulesList.
-	 *
-	 * @throws InitModuleException  if the initialization of a module fails
-	 * @throws StartModuleException if the start of a module fails
 	 */
-	public void startModules() throws InitModuleException, StartModuleException
+	public void startModules()
 	{
 		initModules(orderedModules);
 		startUpModules(orderedModules);
@@ -256,7 +253,7 @@ public class Moduli
 	}
 
 
-	private void initModules(List<AModule> orderedModules) throws InitModuleException
+	private void initModules(List<AModule> orderedModules)
 	{
 		for (AModule m : orderedModules)
 		{
@@ -273,14 +270,10 @@ public class Moduli
 	}
 
 
-	private void startUpModules(List<AModule> orderedModules) throws StartModuleException
+	private void startUpModules(List<AModule> orderedModules)
 	{
 		for (AModule m : orderedModules)
 		{
-			if (!m.isStartModule())
-			{
-				continue;
-			}
 			try
 			{
 				log.trace("Starting module {}", m);
@@ -314,10 +307,6 @@ public class Moduli
 	{
 		for (AModule m : reversedModules)
 		{
-			if (!m.isStartModule())
-			{
-				continue;
-			}
 			try
 			{
 				log.trace("Stopping module {}", m);

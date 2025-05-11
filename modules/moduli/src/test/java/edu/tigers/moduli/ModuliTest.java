@@ -5,9 +5,7 @@
 package edu.tigers.moduli;
 
 import edu.tigers.moduli.exceptions.DependencyException;
-import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.moduli.modules.ConcreteTestModule;
 import edu.tigers.moduli.modules.ConfiguredTestModule;
 import edu.tigers.moduli.modules.TestModule;
@@ -46,7 +44,7 @@ class ModuliTest
 
 
 	@Test
-	void testModuliCycle() throws InitModuleException, StartModuleException
+	void testModuliCycle()
 	{
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.NOT_LOADED);
 
@@ -69,7 +67,7 @@ class ModuliTest
 
 
 	@Test
-	void testModuleCycle() throws InitModuleException, StartModuleException
+	void testModuleCycle()
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
 		TestModule module = moduli.getModule(TestModule.class);
@@ -86,7 +84,7 @@ class ModuliTest
 
 
 	@Test
-	void testEmptyConfig() throws InitModuleException, StartModuleException
+	void testEmptyConfig()
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + EMPTY_CONFIG_XML);
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
@@ -110,7 +108,7 @@ class ModuliTest
 
 
 	@Test
-	void testModuleConfiguration() throws InitModuleException, StartModuleException
+	void testModuleConfiguration()
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
 		moduli.startModules();

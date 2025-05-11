@@ -1,12 +1,9 @@
 package edu.tigers.moduli;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.configuration.SubnodeConfiguration;
 
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.StartModuleException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -17,15 +14,12 @@ public abstract class AModule
 	private Class<? extends AModule> clazz;
 	private SubnodeConfiguration subnodeConfiguration;
 	private List<Class<? extends AModule>> dependencies = new ArrayList<>();
-	private boolean startModule = true;
-	
-	
+
+
 	/**
 	 * Inits module.
-	 *
-	 * @throws InitModuleException if the module couldn't be initialized
 	 */
-	public void initModule() throws InitModuleException
+	public void initModule()
 	{
 		// does nothing by default
 	}
@@ -42,10 +36,8 @@ public abstract class AModule
 	
 	/**
 	 * Starts module.
-	 *
-	 * @throws StartModuleException if the module couldn't be started
 	 */
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		// does nothing by default
 	}
@@ -115,23 +107,5 @@ public abstract class AModule
 	public String toString()
 	{
 		return clazz.getSimpleName();
-	}
-	
-	
-	/**
-	 * @return if the module should be started
-	 */
-	public boolean isStartModule()
-	{
-		return startModule;
-	}
-	
-	
-	/**
-	 * @param startModule whether to start this module
-	 */
-	public void setStartModule(final boolean startModule)
-	{
-		this.startModule = startModule;
 	}
 }

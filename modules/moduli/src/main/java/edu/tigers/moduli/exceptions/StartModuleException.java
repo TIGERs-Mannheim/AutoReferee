@@ -12,11 +12,8 @@ package edu.tigers.moduli.exceptions;
 /**
  * Exception if the module-system isn't able to start the modules.
  */
-public class StartModuleException extends Exception
+public class StartModuleException extends RuntimeException
 {
-	private static final long serialVersionUID = 6921416409169961088L;
-
-
 	/**
 	 * @param msg of the exception
 	 * @param cause of the exception

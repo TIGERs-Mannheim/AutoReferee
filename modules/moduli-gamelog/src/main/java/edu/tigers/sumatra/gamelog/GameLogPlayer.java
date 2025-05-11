@@ -5,7 +5,6 @@
 package edu.tigers.sumatra.gamelog;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
@@ -49,7 +48,7 @@ public class GameLogPlayer extends AModule
 
 
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		player = new Thread(this::play, "GameLogPlayer");
 		player.start();

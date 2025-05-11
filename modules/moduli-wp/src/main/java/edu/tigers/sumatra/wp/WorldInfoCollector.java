@@ -8,7 +8,6 @@ import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
-import edu.tigers.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.ball.BallState;
 import edu.tigers.sumatra.bot.BotState;
 import edu.tigers.sumatra.bot.RobotInfo;
@@ -384,7 +383,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 
 	@Override
-	public void startModule() throws StartModuleException
+	public void startModule()
 	{
 		super.startModule();
 

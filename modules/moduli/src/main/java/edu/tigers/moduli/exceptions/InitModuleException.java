@@ -12,11 +12,8 @@ package edu.tigers.moduli.exceptions;
 /**
  * Exception if the module-system isn't able to initialize the modules.
  */
-public class InitModuleException extends Exception
+public class InitModuleException extends RuntimeException
 {
-	private static final long serialVersionUID = -712078133464068775L;
-
-
 	/**
 	 * @param msg of the exception
 	 * @param cause of the exception
