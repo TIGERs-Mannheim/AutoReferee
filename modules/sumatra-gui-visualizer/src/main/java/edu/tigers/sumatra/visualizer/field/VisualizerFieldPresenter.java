@@ -40,6 +40,7 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.swing.SwingUtilities;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
@@ -140,7 +141,7 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	{
 		ISumatraPresenter.super.onStop();
 		mouseAdapters.forEach(fieldPanel::removeMouseAdapter);
-		fieldPanel.setVisible(false);
+		EventQueue.invokeLater(() ->fieldPanel.setVisible(false));
 		fieldPanel.setOffImage(null);
 		shapeMaps.clear();
 	}
