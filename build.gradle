@@ -20,6 +20,7 @@ version = gitDescribe.get()
 dependencies {
     implementation project(':autoreferee-gui')
 
+    implementation project(':common')
     implementation project(':common-gui')
     implementation project(':common-gui-config')
 
@@ -29,7 +30,6 @@ dependencies {
     implementation project(':sumatra-gui-replay')
     implementation project(':sumatra-gui-visualizer')
 
-    implementation project(':moduli')
     implementation project(':moduli-record')
     implementation project(':moduli-autoreferee')
     runtimeOnly project(':moduli-autoreferee-ci')

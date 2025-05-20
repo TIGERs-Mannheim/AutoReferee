@@ -4,9 +4,9 @@
 package edu.tigers.autoref.gui;
 
 import edu.tigers.autoref.gui.view.AutoRefMainFrame;
-import edu.tigers.moduli.IModuliStateObserver;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.ModulesState;
+import edu.tigers.sumatra.moduli.IModuliStateObserver;
+import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
+import edu.tigers.sumatra.moduli.ModulesState;
 import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
 import edu.tigers.sumatra.model.SumatraModel;
