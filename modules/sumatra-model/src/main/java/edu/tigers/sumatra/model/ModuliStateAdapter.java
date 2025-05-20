@@ -49,7 +49,10 @@ public final class ModuliStateAdapter implements PropertyChangeListener
 	public void addObserver(final IModuliStateObserver o)
 	{
 		observers.add(o);
-		o.onModuliStateChanged(SumatraModel.getInstance().getModulesState().get());
+		if (SumatraModel.getInstance().getModulesState().get() == ModulesState.ACTIVE)
+		{
+			o.onModuliStateChanged(SumatraModel.getInstance().getModulesState().get());
+		}
 	}
 
 
