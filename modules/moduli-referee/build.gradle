@@ -12,11 +12,9 @@ plugins {
 dependencies {
     implementation project(':common')
     implementation project(':common-math')
+    implementation project(':sumatra-model')
     implementation project(':moduli-geometry')
     implementation project(':moduli-gamelog')
-    implementation project(':sumatra-model')
-
-    implementation project(':moduli')
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
 

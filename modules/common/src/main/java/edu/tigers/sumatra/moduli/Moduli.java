@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.moduli;
+package edu.tigers.sumatra.moduli;
 
-import edu.tigers.moduli.exceptions.DependencyException;
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.LoadModulesException;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.moduli.exceptions.DependencyException;
+import edu.tigers.sumatra.moduli.exceptions.InitModuleException;
+import edu.tigers.sumatra.moduli.exceptions.LoadModulesException;
+import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
+import edu.tigers.sumatra.moduli.exceptions.StartModuleException;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;

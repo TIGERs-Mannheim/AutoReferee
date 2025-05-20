@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.moduli.modules;
+package edu.tigers.sumatra.moduli.modules;
 
-import edu.tigers.moduli.AModule;
+import edu.tigers.sumatra.moduli.AModule;
 
 
 public abstract class TestModule extends AModule

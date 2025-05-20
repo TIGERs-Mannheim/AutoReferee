@@ -1,13 +1,7 @@
 /*
- * *********************************************************
- * Copyright (c) 2010 DLR Oberpfaffenhofen KN
- * Project: flightControl
- * Date: Mar 5, 2010
- * Authors:
- * Bernhard Perun <bernhard.perun@dlr.de>
- * *********************************************************
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.moduli.exceptions;
+package edu.tigers.sumatra.moduli.exceptions;
 
 /**
  * Exception if the module-system isn't able to find a module.

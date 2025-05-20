@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.moduli.modules;
+package edu.tigers.sumatra.moduli.modules;
 
 public class UnusedConcreteTestModule extends TestModule
 {

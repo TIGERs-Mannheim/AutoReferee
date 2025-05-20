@@ -8,11 +8,9 @@ plugins {
 }
 
 dependencies {
-    implementation project(':sumatra-model')
     implementation project(':common')
+    implementation project(':sumatra-model')
     implementation project(':moduli-referee')
-
-    implementation project(':moduli')
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
     implementation(libs.org.apache.logging.log4j.log4j.core)

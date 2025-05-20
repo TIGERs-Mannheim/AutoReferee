@@ -8,7 +8,7 @@ plugins {
 }
 
 dependencies {
-    api project(':moduli')
+    implementation(project(':common'))
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
     implementation(libs.org.apache.logging.log4j.log4j.core)

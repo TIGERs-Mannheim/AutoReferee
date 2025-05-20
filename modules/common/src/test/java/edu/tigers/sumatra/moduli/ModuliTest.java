@@ -1,15 +1,15 @@
 /*
- * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
-package edu.tigers.moduli;
+package edu.tigers.sumatra.moduli;
 
-import edu.tigers.moduli.exceptions.DependencyException;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.modules.ConcreteTestModule;
-import edu.tigers.moduli.modules.ConfiguredTestModule;
-import edu.tigers.moduli.modules.TestModule;
-import edu.tigers.moduli.modules.UnusedConcreteTestModule;
+import edu.tigers.sumatra.moduli.exceptions.DependencyException;
+import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
+import edu.tigers.sumatra.moduli.modules.ConcreteTestModule;
+import edu.tigers.sumatra.moduli.modules.ConfiguredTestModule;
+import edu.tigers.sumatra.moduli.modules.TestModule;
+import edu.tigers.sumatra.moduli.modules.UnusedConcreteTestModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

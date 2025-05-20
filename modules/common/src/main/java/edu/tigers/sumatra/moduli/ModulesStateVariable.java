@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
-package edu.tigers.moduli;
+package edu.tigers.sumatra.moduli;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

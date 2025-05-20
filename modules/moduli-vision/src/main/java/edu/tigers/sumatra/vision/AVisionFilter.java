@@ -4,13 +4,13 @@
 
 package edu.tigers.sumatra.vision;
 
-import edu.tigers.moduli.AModule;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector3;
+import edu.tigers.sumatra.moduli.AModule;
 import edu.tigers.sumatra.util.Safe;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;

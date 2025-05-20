@@ -8,12 +8,11 @@ plugins {
 }
 
 dependencies {
-    implementation project(':common')
+    api project(':common')
     implementation project(':sumatra-model')
     implementation project(':moduli-record')
 
     implementation(libs.com.github.TIGERs.mannheim.infonode)
-    api project(':moduli')
 
     implementation(libs.commons.configuration)
 

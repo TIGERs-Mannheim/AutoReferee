@@ -17,8 +17,6 @@ dependencies {
     implementation project(':moduli-wp')
     implementation project(':moduli-geometry')
 
-    implementation project(':moduli')
-
     implementation(libs.commons.lang)
     implementation(libs.com.miglayout.miglayout.swing)
     implementation(libs.net.sf.jchart2d)

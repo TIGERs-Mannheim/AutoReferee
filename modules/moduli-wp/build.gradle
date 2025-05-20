@@ -20,8 +20,6 @@ dependencies {
     implementation project(':moduli-geometry')
     api project(':moduli-record')
 
-    implementation project(':moduli')
-
     implementation(libs.commons.lang)
     implementation(libs.commons.configuration)
 

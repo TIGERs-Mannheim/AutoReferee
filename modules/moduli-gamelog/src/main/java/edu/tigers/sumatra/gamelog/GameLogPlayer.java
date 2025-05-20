@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra.gamelog;
 
-import edu.tigers.moduli.AModule;
+import edu.tigers.sumatra.moduli.AModule;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 

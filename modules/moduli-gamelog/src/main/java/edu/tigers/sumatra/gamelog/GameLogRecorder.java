@@ -4,7 +4,8 @@
 
 package edu.tigers.sumatra.gamelog;
 
-import edu.tigers.moduli.AModule;
+
+import edu.tigers.sumatra.moduli.AModule;
 
 
 public class GameLogRecorder extends AModule
