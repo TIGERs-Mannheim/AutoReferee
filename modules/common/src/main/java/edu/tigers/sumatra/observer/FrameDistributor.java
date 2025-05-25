@@ -6,8 +6,8 @@ package edu.tigers.sumatra.observer;
 
 import edu.tigers.sumatra.util.Safe;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
@@ -16,18 +16,17 @@ import java.util.function.Consumer;
  *
  * @param <T> the type of the frame
  */
-public class FrameDistributor<T> implements FrameSubscriber<T>
+public class FrameDistributor<T> extends EventDistributor<T> implements FrameSubscriber<T>
 {
-	private final List<Consumer<T>> consumers = new CopyOnWriteArrayList<>();
-	private final List<Runnable> clearConsumers = new CopyOnWriteArrayList<>();
+	private final Map<String, Runnable> clearConsumers = new ConcurrentHashMap<>();
 
 	private T lastFrame;
 
 
 	@Override
-	public void subscribe(Consumer<T> consumer)
+	public void subscribe(String id, Consumer<T> consumer)
 	{
-		consumers.add(consumer);
+		super.subscribe(id, consumer);
 		var event = lastFrame;
 		if (event != null)
 		{
@@ -37,9 +36,13 @@ public class FrameDistributor<T> implements FrameSubscriber<T>
 
 
 	@Override
-	public void subscribeClear(Runnable runnable)
+	public void subscribeClear(String id, Runnable runnable)
 	{
-		clearConsumers.add(runnable);
+		var currentConsumer = clearConsumers.putIfAbsent(id, runnable);
+		if (currentConsumer != null)
+		{
+			throw new IllegalStateException("There is already a consumer for id " + id);
+		}
 		var event = lastFrame;
 		if (event == null)
 		{
@@ -49,16 +52,9 @@ public class FrameDistributor<T> implements FrameSubscriber<T>
 
 
 	@Override
-	public void unsubscribe(Consumer<T> consumer)
+	public void unsubscribeClear(String id)
 	{
-		consumers.remove(consumer);
-	}
-
-
-	@Override
-	public void unsubscribeClear(Runnable runnable)
-	{
-		clearConsumers.remove(runnable);
+		clearConsumers.remove(id);
 	}
 
 
@@ -68,9 +64,9 @@ public class FrameDistributor<T> implements FrameSubscriber<T>
 	 *
 	 * @param frame
 	 */
-	public synchronized void newFrame(T frame)
+	public void newFrame(T frame)
 	{
-		consumers.forEach(c -> Safe.run(c, frame));
+		super.newEvent(frame);
 		lastFrame = frame;
 	}
 
@@ -79,9 +75,20 @@ public class FrameDistributor<T> implements FrameSubscriber<T>
 	 * Notify all subscribers to clear the frame.
 	 * This method is synchronized to ensure that the consumers are not called in parallel, which they might not expect.
 	 */
-	public synchronized void clearFrame()
+	public void clearFrame()
 	{
 		lastFrame = null;
-		clearConsumers.forEach(Runnable::run);
+		synchronized (this)
+		{
+			clearConsumers.values().forEach(Safe::run);
+		}
+	}
+
+
+	@Override
+	public void clear()
+	{
+		clearFrame();
+		super.clear();
 	}
 }

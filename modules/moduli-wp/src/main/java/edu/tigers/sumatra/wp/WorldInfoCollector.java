@@ -444,8 +444,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	private void registerToVisionFilterModule()
 	{
 		visionFilter = SumatraModel.getInstance().getModule(AVisionFilter.class);
-		visionFilter.getFilteredVisionFrame().subscribe(this::onNewFilteredVisionFrame);
-		visionFilter.getFilteredVisionFrame().subscribeClear(this::reset);
+		visionFilter.getFilteredVisionFrame().subscribe(getClass().getCanonicalName(), this::onNewFilteredVisionFrame);
+		visionFilter.getFilteredVisionFrame().subscribeClear(getClass().getCanonicalName(), this::reset);
 	}
 
 
@@ -453,8 +453,8 @@ public class WorldInfoCollector extends AWorldPredictor
 	{
 		if (visionFilter != null)
 		{
-			visionFilter.getFilteredVisionFrame().unsubscribe(this::onNewFilteredVisionFrame);
-			visionFilter.getFilteredVisionFrame().unsubscribeClear(this::reset);
+			visionFilter.getFilteredVisionFrame().unsubscribe(getClass().getCanonicalName());
+			visionFilter.getFilteredVisionFrame().unsubscribeClear(getClass().getCanonicalName());
 		}
 	}
 

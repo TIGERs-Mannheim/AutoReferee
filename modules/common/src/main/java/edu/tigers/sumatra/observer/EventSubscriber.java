@@ -17,14 +17,15 @@ public interface EventSubscriber<T>
 	/**
 	 * Subscribe to new events.
 	 *
+	 * @param id
 	 * @param consumer the consumer to be notified
 	 */
-	void subscribe(Consumer<T> consumer);
+	void subscribe(String id, Consumer<T> consumer);
 
 	/**
 	 * Unsubscribe from new events.
 	 *
-	 * @param consumer the consumer to be removed
+	 * @param id
 	 */
-	void unsubscribe(Consumer<T> consumer);
+	void unsubscribe(String id);
 }

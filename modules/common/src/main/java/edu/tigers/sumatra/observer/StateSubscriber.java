@@ -14,16 +14,17 @@ public interface StateSubscriber<T>
 	/**
 	 * Subscribe to state changes.
 	 *
+	 * @param id       a unique identifier for the consumer required for unsubscribing
 	 * @param consumer the consumer to be notified
 	 */
-	void subscribe(StateChangeObserver<T> consumer);
+	void subscribe(String id, StateChangeObserver<T> consumer);
 
 	/**
 	 * Unsubscribe from state changes.
 	 *
-	 * @param consumer the consumer to be removed
+	 * @param id the unique identifier of the consumer used for subscribing
 	 */
-	void unsubscribe(StateChangeObserver<T> consumer);
+	void unsubscribe(String id);
 
 	@FunctionalInterface
 	interface StateChangeObserver<T>

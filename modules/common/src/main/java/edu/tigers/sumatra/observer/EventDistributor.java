@@ -4,10 +4,9 @@
 
 package edu.tigers.sumatra.observer;
 
-import lombok.Getter;
+import edu.tigers.sumatra.util.Safe;
+import lombok.extern.log4j.Log4j2;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 
@@ -16,26 +15,9 @@ import java.util.function.Consumer;
  *
  * @param <T> the type of the event
  */
-public class EventDistributor<T> implements EventSubscriber<T>
+@Log4j2
+public class EventDistributor<T> extends BasicDistributor<Consumer<T>> implements EventSubscriber<T>
 {
-	@Getter
-	private final List<Consumer<T>> consumers = new CopyOnWriteArrayList<>();
-
-
-	@Override
-	public void subscribe(Consumer<T> consumer)
-	{
-		consumers.add(consumer);
-	}
-
-
-	@Override
-	public void unsubscribe(Consumer<T> consumer)
-	{
-		consumers.remove(consumer);
-	}
-
-
 	/**
 	 * Notify all registered observers with the given event.
 	 *
@@ -43,6 +25,9 @@ public class EventDistributor<T> implements EventSubscriber<T>
 	 */
 	public void newEvent(T event)
 	{
-		consumers.forEach(consumer -> consumer.accept(event));
+		synchronized (this)
+		{
+			getConsumers().values().forEach(consumer -> Safe.run(consumer, event));
+		}
 	}
 }

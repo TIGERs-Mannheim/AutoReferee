@@ -4,12 +4,9 @@
 
 package edu.tigers.sumatra.observer;
 
+import edu.tigers.sumatra.observer.StateSubscriber.StateChangeObserver;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -19,25 +16,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @AllArgsConstructor
 @NoArgsConstructor
-public class StateDistributor<T> implements StateSubscriber<T>
+public class StateDistributor<T> extends BasicDistributor<StateChangeObserver<T>> implements StateSubscriber<T>
 {
-	@Getter
-	private final List<StateChangeObserver<T>> consumers = new CopyOnWriteArrayList<>();
 	private T state;
-
-
-	@Override
-	public void subscribe(StateChangeObserver<T> consumer)
-	{
-		consumers.add(consumer);
-	}
-
-
-	@Override
-	public void unsubscribe(StateChangeObserver<T> consumer)
-	{
-		consumers.remove(consumer);
-	}
 
 
 	/**
@@ -52,7 +33,7 @@ public class StateDistributor<T> implements StateSubscriber<T>
 		// Make sure that consumers are not called in parallel due to concurrent calls of this set.
 		synchronized (this)
 		{
-			consumers.forEach(consumer -> consumer.onStateChange(oldState, state));
+			getConsumers().values().forEach(consumer -> consumer.onStateChange(oldState, state));
 		}
 	}
 
@@ -60,5 +41,13 @@ public class StateDistributor<T> implements StateSubscriber<T>
 	public T get()
 	{
 		return state;
+	}
+
+
+	@Override
+	public void clear()
+	{
+		super.clear();
+		state = null;
 	}
 }

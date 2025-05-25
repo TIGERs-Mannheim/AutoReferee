@@ -37,8 +37,9 @@ public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvid
 	@Override
 	public void stop()
 	{
-		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class)
-				.ifPresent(v -> v.getFilteredVisionFrame().subscribe(this::onNewFilteredVisionFrame));
+		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class).ifPresent(
+				v -> v.getFilteredVisionFrame().subscribe(getClass().getCanonicalName(), this::onNewFilteredVisionFrame)
+		);
 	}
 
 
@@ -46,7 +47,7 @@ public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvid
 	public void start()
 	{
 		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class)
-				.ifPresent(v -> v.getFilteredVisionFrame().unsubscribe(this::onNewFilteredVisionFrame));
+				.ifPresent(v -> v.getFilteredVisionFrame().unsubscribe(getClass().getCanonicalName()));
 	}
 
 

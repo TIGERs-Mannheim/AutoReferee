@@ -126,7 +126,10 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	@Override
 	public void stopModule()
 	{
-		robotInfoMap = new HashMap<>();
+		onClearCamFrame();
+		filteredVisionFrame.clear();
+		viewportFrame.clear();
+		ballModelIdentResult.clear();
 	}
 
 
@@ -147,6 +150,8 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	public void onClearCamFrame()
 	{
 		robotInfoMap = new HashMap<>();
+		filteredVisionFrame.clearFrame();
+		viewportFrame.clearFrame();
 	}
 
 

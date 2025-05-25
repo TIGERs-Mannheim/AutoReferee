@@ -4,9 +4,6 @@
 
 package edu.tigers.sumatra.observer;
 
-import java.util.function.Consumer;
-
-
 /**
  * Allow subscribing to continuously incoming frames.
  * It is ensured that the observer is called with the latest frame and each new frame.
@@ -16,23 +13,18 @@ import java.util.function.Consumer;
  */
 public interface FrameSubscriber<T> extends EventSubscriber<T>
 {
-	@Override
-	void subscribe(Consumer<T> consumer);
-
 	/**
 	 * Subscribe to clear frame.
 	 *
+	 * @param id
 	 * @param runnable the runnable to be notified
 	 */
-	void subscribeClear(Runnable runnable);
-
-	@Override
-	void unsubscribe(Consumer<T> consumer);
+	void subscribeClear(String id, Runnable runnable);
 
 	/**
 	 * Unsubscribe from clear frames.
 	 *
-	 * @param runnable the runnable to be removed
+	 * @param id
 	 */
-	void unsubscribeClear(Runnable runnable);
+	void unsubscribeClear(String id);
 }
