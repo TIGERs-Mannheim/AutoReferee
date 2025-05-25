@@ -18,7 +18,9 @@ import edu.tigers.sumatra.visualizer.VisualizerView;
 import net.infonode.docking.RootWindow;
 import net.infonode.docking.properties.RootWindowProperties;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JMenu;
+import javax.swing.WindowConstants;
 import java.awt.event.KeyEvent;
 import java.io.Serial;
 import java.nio.file.Path;

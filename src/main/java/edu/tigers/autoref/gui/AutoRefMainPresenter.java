@@ -4,12 +4,12 @@
 package edu.tigers.autoref.gui;
 
 import edu.tigers.autoref.gui.view.AutoRefMainFrame;
-import edu.tigers.sumatra.moduli.IModuliStateObserver;
-import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.sumatra.moduli.ModulesState;
 import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.model.ModuliStateAdapter;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.moduli.IModuliStateObserver;
+import edu.tigers.sumatra.moduli.ModulesState;
+import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.persistence.IRecordObserver;
 import edu.tigers.sumatra.persistence.RecordManager;
 import org.apache.logging.log4j.LogManager;
@@ -109,23 +109,23 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 	}
 
 
+	@Override
+	public void onModuliStateChanged(final ModulesState state)
+	{
+		switch (state)
+		{
+			case ACTIVE:
+				initRecordManagerBinding();
+				break;
+			case RESOLVED:
+				deinitRecordManagerBinding();
+				break;
+			case NOT_LOADED:
+			default:
+				break;
+		}
+	}
 
-	 @Override
-	 public void onModuliStateChanged(final ModulesState state)
-	 {
-		  switch (state)
-		  {
-				case ACTIVE:
-					 initRecordManagerBinding();
-					 break;
-				case RESOLVED:
-					 deinitRecordManagerBinding();
-					 break;
-				case NOT_LOADED:
-				default:
-					 break;
-		  }
-	 }
 
 	private static class RecordManagerObserver implements IRecordObserver
 	{

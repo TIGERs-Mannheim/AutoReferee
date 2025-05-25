@@ -6,10 +6,10 @@ package edu.tigers.autoref;
 import edu.tigers.autoref.gui.AutoRefMainPresenter;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
-import edu.tigers.sumatra.moduli.exceptions.InitModuleException;
-import edu.tigers.sumatra.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.moduli.exceptions.InitModuleException;
+import edu.tigers.sumatra.moduli.exceptions.StartModuleException;
 import edu.tigers.sumatra.referee.Referee;
 import edu.tigers.sumatra.wp.exporter.VisionTrackerSender;
 import org.apache.commons.cli.CommandLine;
@@ -124,6 +124,7 @@ public final class AutoReferee
 				.ifPresent(a -> a.changeMode(EAutoRefMode.ACTIVE));
 	}
 
+
 	private static void setVisionAddress(String fullAddress)
 	{
 		String[] parts = fullAddress.split(":");
@@ -171,7 +172,7 @@ public final class AutoReferee
 
 	private static void start()
 	{
-		String config = cmd.hasOption("c") ? "moduli-ci.xml" : "moduli.xml";
+		String config = cmd.hasOption("c") ? "autoreferee-ci.xml" : "autoreferee.xml";
 		SumatraModel.getInstance().setCurrentModuliConfig(config);
 		try
 		{
