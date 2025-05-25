@@ -6,127 +6,143 @@ package edu.tigers.autoref;
 import edu.tigers.autoref.gui.AutoRefMainPresenter;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
+import edu.tigers.sumatra.Sumatra;
 import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.moduli.exceptions.InitModuleException;
-import edu.tigers.sumatra.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.moduli.ModulesState;
 import edu.tigers.sumatra.referee.Referee;
 import edu.tigers.sumatra.wp.exporter.VisionTrackerSender;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
 
 import javax.swing.SwingUtilities;
+import java.util.function.Consumer;
 
 
 /**
  * Main class for auto referee.
  */
-public final class AutoReferee
+@Log4j2
+public final class AutoReferee implements Runnable
 {
-	private static CommandLine cmd;
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-hl", "--headless" },
+			defaultValue = "${env:AUTOREF_HEADLESS:-false}",
+			description = "run without a UI"
+	))
+	private boolean headless = false;
 
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-va", "--visionAddress" },
+			defaultValue = "${env:AUTOREF_VISION_ADDRESS}",
+			description = "address:port for vision")
+	)
+	private String visionAddress;
 
-	private AutoReferee()
-	{
-	}
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-ra", "--refereeAddress" },
+			defaultValue = "${env:AUTOREF_REFEREE_ADDRESS}",
+			description = "address:port for GC")
+	)
+	private String refereeAddress;
+
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-ta", "--trackerAddress" },
+			defaultValue = "${env:AUTOREF_TRACKER_ADDRESS}",
+			description = "address:port for tracker")
+	)
+	private String trackerAddress;
+
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-a", "--active" },
+			defaultValue = "${env:AUTOREF_ACTIVE:-false}",
+			description = "activate autoRef in active mode")
+	)
+	private boolean autoRef;
+
+	@Setter(onMethod_ = @picocli.CommandLine.Option(
+			names = { "-c", "--ci" },
+			defaultValue = "${env:AUTOREF_CI:-false}",
+			description = "use CI mode")
+	)
+	private boolean ciMode;
 
 
 	public static void main(final String[] args)
 	{
-		Options options = createOptions();
-		cmd = parseOptions(args, options, new DefaultParser());
+		new picocli.CommandLine(new Sumatra()).execute(args);
+	}
 
-		ifHasOption("h", () -> printHelp(options));
-		ifNotHasOption("hl", () -> SwingUtilities.invokeLater(AutoReferee::startUi));
-		ifHasOption("va", () -> setVisionAddress(cmd.getOptionValue("va")));
-		ifHasOption("ra", () -> setRefereeAddress(cmd.getOptionValue("ra")));
-		ifHasOption("ta", () -> setTrackerAddress(cmd.getOptionValue("ta")));
+
+	@Override
+	public void run()
+	{
+		log.info("Starting AutoReferee {}", SumatraModel.getVersion());
+
+		// Start the UI in a separate thread first
+		runIf(!headless, this::startUi);
+
+		ifNotNull(visionAddress, this::updateVisionAddress);
+		ifNotNull(refereeAddress, this::updateRefereeAddress);
+		ifNotNull(trackerAddress, this::updateTrackerAddress);
 
 		start();
 
-		ifHasOption("a", AutoReferee::activateAutoRef);
+		runIf(autoRef, this::activateAutoRef);
+
+		registerShutdownHook();
+		log.trace("Started AutoReferee");
 	}
 
 
-	private static void startUi()
+	private <T> void ifNotNull(T value, Consumer<T> consumer)
 	{
-		AutoRefMainPresenter p = new AutoRefMainPresenter();
-		String windowSize = cmd.getOptionValue("w");
-		if (windowSize != null)
+		if (value != null)
 		{
-			var parts = windowSize.split("x");
-			p.setWindowSize(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+			consumer.accept(value);
 		}
 	}
 
 
-	private static void ifHasOption(String shortOptions, Runnable r)
+	private void runIf(boolean condition, Runnable runnable)
 	{
-		if (cmd.hasOption(shortOptions))
+		if (condition)
 		{
-			r.run();
+			runnable.run();
 		}
 	}
 
 
-	private static void ifNotHasOption(String shortOptions, Runnable r)
+	private void registerShutdownHook()
 	{
-		if (!cmd.hasOption(shortOptions))
+		Runtime.getRuntime().addShutdownHook(new Thread(this::onShutdown, "Sumatra-shutdown"));
+	}
+
+
+	private void onShutdown()
+	{
+		log.debug("Shutting down");
+		if (SumatraModel.getInstance().getModulesState().get() == ModulesState.ACTIVE)
 		{
-			r.run();
+			SumatraModel.getInstance().stopModules();
 		}
+		SumatraModel.getInstance().saveUserProperties();
+		log.debug("Shut down");
+		// We have disabled the shutdown hook in log4j2.xml, so we have to shut log4j down manually
+		LogManager.shutdown();
 	}
 
 
-	private static Options createOptions()
+	private void startUi()
 	{
-		Options options = new Options();
-		options.addOption("h", "help", false, "Print this help message");
-		options.addOption("hl", "headless", false, "run without a UI");
-		options.addOption("a", "active", false, "Start autoRef in active mode");
-		options.addOption("w", "window", true, "Set window size (example: 1920x1080)");
-		options.addOption("va", "visionAddress", true, "address:port for vision");
-		options.addOption("ra", "refereeAddress", true, "address:port for GC");
-		options.addOption("ta", "trackerAddress", true, "address:port for tracker");
-		options.addOption("c", "ci", false, "Enable CI mode");
-		return options;
+		SwingUtilities.invokeLater(AutoRefMainPresenter::new);
 	}
 
 
-	private static CommandLine parseOptions(final String[] args, final Options options, final CommandLineParser parser)
+	private void updateVisionAddress(String fullAddress)
 	{
-		try
-		{
-			return parser.parse(options, args);
-		} catch (ParseException e)
-		{
-			printHelp(options);
-		}
-		return null;
-	}
-
-
-	private static void printHelp(final Options options)
-	{
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("AutoReferee", options);
-		System.exit(0);
-	}
-
-
-	private static void activateAutoRef()
-	{
-		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class)
-				.ifPresent(a -> a.changeMode(EAutoRefMode.ACTIVE));
-	}
-
-
-	private static void setVisionAddress(String fullAddress)
-	{
+		log.info("Setting custom vision address: {}", fullAddress);
 		String[] parts = fullAddress.split(":");
 		String address = parts[0];
 		if (!address.isBlank())
@@ -140,8 +156,9 @@ public final class AutoReferee
 	}
 
 
-	private static void setRefereeAddress(String fullAddress)
+	private void updateRefereeAddress(String fullAddress)
 	{
+		log.info("Setting custom referee address: {}", fullAddress);
 		String[] parts = fullAddress.split(":");
 		String address = parts[0];
 		if (!address.isBlank())
@@ -155,8 +172,9 @@ public final class AutoReferee
 	}
 
 
-	private static void setTrackerAddress(String fullAddress)
+	private void updateTrackerAddress(String fullAddress)
 	{
+		log.info("Setting custom tracker address: {}", fullAddress);
 		String[] parts = fullAddress.split(":");
 		String address = parts[0];
 		if (!address.isBlank())
@@ -170,17 +188,26 @@ public final class AutoReferee
 	}
 
 
-	private static void start()
+	private void activateAutoRef()
 	{
-		String config = cmd.hasOption("c") ? "autoreferee-ci.xml" : "autoreferee.xml";
-		SumatraModel.getInstance().setCurrentModuliConfig(config);
+		log.info("Activating autoRef in active mode");
+		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class)
+				.ifPresent(a -> a.changeMode(EAutoRefMode.ACTIVE));
+	}
+
+
+	private void start()
+	{
 		try
 		{
-			SumatraModel.getInstance().loadModulesOfConfigSafe(SumatraModel.getInstance().getCurrentModuliConfig());
+			String config = ciMode ? "autoreferee-ci.xml" : "autoreferee.xml";
+			SumatraModel.getInstance().setCurrentModuliConfig(config);
+			SumatraModel.getInstance().loadModulesOfConfig(SumatraModel.getInstance().getCurrentModuliConfig());
 			SumatraModel.getInstance().startModules();
-		} catch (InitModuleException | StartModuleException e)
+		} catch (Throwable e)
 		{
-			throw new IllegalStateException("Failed to startup modules", e);
+			log.error("Could not start Sumatra. Setting moduli config to default. Please try again.", e);
+			System.exit(1);
 		}
 	}
 }

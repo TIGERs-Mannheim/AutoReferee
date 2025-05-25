@@ -33,7 +33,6 @@ com-github-cliftonlabs-json-simple = "com.github.cliftonlabs:json-simple:4.0.1"
 com-jidesoft-jide-oss = "com.jidesoft:jide-oss:3.6.18"
 com-miglayout-miglayout-core = { module = "com.miglayout:miglayout-core", version.ref = "com-miglayout" }
 com-miglayout-miglayout-swing = { module = "com.miglayout:miglayout-swing", version.ref = "com-miglayout" }
-commons-cli = "commons-cli:commons-cli:1.9.0"
 commons-codec = "commons-codec:commons-codec:1.18.0"
 commons-collections = "commons-collections:commons-collections:3.2.2"
 commons-configuration = "commons-configuration:commons-configuration:1.10"

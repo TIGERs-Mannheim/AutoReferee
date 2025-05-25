@@ -12,16 +12,12 @@ import edu.tigers.sumatra.moduli.ModulesState;
 import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.persistence.IRecordObserver;
 import edu.tigers.sumatra.persistence.RecordManager;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.log4j.Log4j2;
 
 
-/**
- * @author "Lukas Magel"
- */
+@Log4j2
 public class AutoRefMainPresenter extends AMainPresenter implements IModuliStateObserver
 {
-	private static final Logger log = LogManager.getLogger(AutoRefMainPresenter.class);
 	private static final String LAST_LAYOUT_FILENAME = "last.ly";
 	private static final String DEFAULT_LAYOUT = "default.ly";
 	private static final String KEY_LAYOUT_PROP = AutoRefMainPresenter.class.getName() + ".layout";
@@ -39,14 +35,6 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 
 		ModuliStateAdapter.getInstance().addObserver(this);
 		mainFrame.activate();
-
-		Runtime.getRuntime().addShutdownHook(new Thread(this::onClose));
-	}
-
-
-	public void setWindowSize(int width, int height)
-	{
-		getMainFrame().setSize(width, height);
 	}
 
 
@@ -68,16 +56,6 @@ public class AutoRefMainPresenter extends AMainPresenter implements IModuliState
 	protected String getDefaultLayout()
 	{
 		return DEFAULT_LAYOUT;
-	}
-
-
-	@Override
-	public void onClose()
-	{
-		super.onClose();
-
-		SumatraModel.getInstance().stopModules();
-		SumatraModel.getInstance().saveUserProperties();
 	}
 
 
