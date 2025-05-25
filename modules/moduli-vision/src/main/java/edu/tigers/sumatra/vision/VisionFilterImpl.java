@@ -31,6 +31,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
 import edu.tigers.sumatra.vision.data.IBallModelIdentificationObserver;
+import edu.tigers.sumatra.vision.data.Viewport;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import edu.tigers.sumatra.vision.tracker.BallTracker;
 import edu.tigers.sumatra.vision.tracker.RobotTracker;
@@ -408,7 +409,7 @@ public class VisionFilterImpl extends AVisionFilter
 	@Override
 	public void onViewportUpdated(final int cameraId, final IRectangle viewport)
 	{
-		publishUpdatedViewport(cameraId, viewport);
+		publishUpdatedViewport(new Viewport(cameraId, viewport));
 	}
 
 

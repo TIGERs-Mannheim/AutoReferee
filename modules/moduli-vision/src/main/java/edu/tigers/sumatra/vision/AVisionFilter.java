@@ -8,19 +8,21 @@ import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.ICamFrameObserver;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
 import edu.tigers.sumatra.ids.BotID;
-import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.moduli.AModule;
-import edu.tigers.sumatra.util.Safe;
+import edu.tigers.sumatra.observer.EventDistributor;
+import edu.tigers.sumatra.observer.EventSubscriber;
+import edu.tigers.sumatra.observer.FrameDistributor;
+import edu.tigers.sumatra.observer.FrameSubscriber;
 import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
+import edu.tigers.sumatra.vision.data.Viewport;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 
 /**
@@ -29,22 +31,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Log4j2
 public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 {
+	private final FrameDistributor<FilteredVisionFrame> filteredVisionFrame = new FrameDistributor<>();
+	private final FrameDistributor<Viewport> viewportFrame = new FrameDistributor<>();
+	private final EventDistributor<IBallModelIdentResult> ballModelIdentResult = new EventDistributor<>();
+
+	@Getter
+	@Setter
 	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
-	private final Set<IVisionFilterObserver> observers = new CopyOnWriteArraySet<>();
+
 	@Setter
 	private IBallPlacer ballPlacer;
-
-
-	public Map<BotID, RobotInfo> getRobotInfoMap()
-	{
-		return robotInfoMap;
-	}
-
-
-	public void setRobotInfoMap(final Map<BotID, RobotInfo> robotInfoMap)
-	{
-		this.robotInfoMap = robotInfoMap;
-	}
 
 
 	/**
@@ -57,7 +53,6 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	}
 
 
-
 	/**
 	 * Send a complete and filtered vision frame to external modules
 	 *
@@ -65,19 +60,18 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 */
 	public final void publishFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
-		Safe.forEach(observers, o -> o.onNewFilteredVisionFrame(filteredVisionFrame));
+		this.filteredVisionFrame.newFrame(filteredVisionFrame);
 	}
 
 
 	/**
 	 * Send an updated viewport to external modules.
 	 *
-	 * @param cameraId
 	 * @param viewport
 	 */
-	protected final void publishUpdatedViewport(final int cameraId, final IRectangle viewport)
+	protected final void publishUpdatedViewport(Viewport viewport)
 	{
-		Safe.forEach(observers, o -> o.onViewportUpdated(cameraId, viewport));
+		viewportFrame.newFrame(viewport);
 	}
 
 
@@ -88,7 +82,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	 */
 	protected final void publishBallModelIdentification(final IBallModelIdentResult ident)
 	{
-		observers.forEach(o -> o.onBallModelIdentificationResult(ident));
+		ballModelIdentResult.newEvent(ident);
 	}
 
 
@@ -129,28 +123,6 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	}
 
 
-	/**
-	 * Register for filtered vision frames
-	 *
-	 * @param observer to register to the vision filter
-	 */
-	public final void addObserver(final IVisionFilterObserver observer)
-	{
-		observers.add(observer);
-	}
-
-
-	/**
-	 * Unregister for filtered vision frames
-	 *
-	 * @param observer to unregister
-	 */
-	public final void removeObserver(final IVisionFilterObserver observer)
-	{
-		observers.remove(observer);
-	}
-
-
 	@Override
 	public void stopModule()
 	{
@@ -175,5 +147,23 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	public void onClearCamFrame()
 	{
 		robotInfoMap = new HashMap<>();
+	}
+
+
+	public FrameSubscriber<FilteredVisionFrame> getFilteredVisionFrame()
+	{
+		return filteredVisionFrame;
+	}
+
+
+	public FrameSubscriber<Viewport> getViewport()
+	{
+		return viewportFrame;
+	}
+
+
+	public EventSubscriber<IBallModelIdentResult> getBallModelIdentResult()
+	{
+		return ballModelIdentResult;
 	}
 }

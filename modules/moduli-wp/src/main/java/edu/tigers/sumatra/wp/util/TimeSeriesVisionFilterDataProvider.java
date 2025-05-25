@@ -4,23 +4,22 @@
 
 package edu.tigers.sumatra.wp.util;
 
+import edu.tigers.sumatra.data.collector.IExportable;
+import edu.tigers.sumatra.data.collector.ITimeSeriesDataProvider;
+import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.vision.VisionFilterImpl;
+import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import edu.tigers.sumatra.data.collector.IExportable;
-import edu.tigers.sumatra.data.collector.ITimeSeriesDataProvider;
-import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.vision.IVisionFilterObserver;
-import edu.tigers.sumatra.vision.VisionFilterImpl;
-import edu.tigers.sumatra.vision.data.FilteredVisionFrame;
-
 
 /**
  * Data provider for raw vision data
  */
-public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvider, IVisionFilterObserver
+public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvider
 {
 	private final Map<String, Collection<IExportable>> dataBuffers = new HashMap<>();
 
@@ -38,14 +37,16 @@ public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvid
 	@Override
 	public void stop()
 	{
-		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class).ifPresent(v -> v.removeObserver(this));
+		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class)
+				.ifPresent(v -> v.getFilteredVisionFrame().subscribe(this::onNewFilteredVisionFrame));
 	}
 
 
 	@Override
 	public void start()
 	{
-		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class).ifPresent(v -> v.addObserver(this));
+		SumatraModel.getInstance().getModuleOpt(VisionFilterImpl.class)
+				.ifPresent(v -> v.getFilteredVisionFrame().unsubscribe(this::onNewFilteredVisionFrame));
 	}
 
 
@@ -63,8 +64,7 @@ public class TimeSeriesVisionFilterDataProvider implements ITimeSeriesDataProvid
 	}
 
 
-	@Override
-	public void onNewFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
+	private void onNewFilteredVisionFrame(final FilteredVisionFrame filteredVisionFrame)
 	{
 		dataBuffers.get("filteredBall").add(filteredVisionFrame.getBall());
 		dataBuffers.get("filteredBots").addAll(filteredVisionFrame.getBots());
