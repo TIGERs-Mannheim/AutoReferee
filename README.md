@@ -76,11 +76,11 @@ All configuration options are available via the **Cfg** tab. The **Cfg** tab its
 
 ### Vision port
 The application will try to receive vision frames from **224.5.23.2:10006** by default.
-You can change the default address and port in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+You can change the default address and port in [config/moduli/autoreferee.xml](config/moduli/autoreferee.xml).
 
 ## Referee port
 The application will try to receive referee messages from **224.5.23.1:10003** by default.
-You can change the default address and port in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+You can change the default address and port in [config/moduli/autoreferee.xml](config/moduli/autoreferee.xml).
 
 ### AutoRef detectors
 The behavior of the autoRef can be altered through the **autoreferee** config section. It contains parameters for the
@@ -90,10 +90,10 @@ detectors.
 Parameters defined by the rules can be found under **ruleConst**. 
 
 Default geometry parameters are read from [config/geometry/DIV_A.txt](config/geometry/DIV_A.txt).
-The file that is read can be changed in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+The file that is read can be changed in [config/moduli/autoreferee.xml](config/moduli/autoreferee.xml).
 
 ## Activating the build-in ssl-game-controller
-The autoRef ships with the official ssl-game-controller. To activate it, change `gameController` to true in [config/moduli/moduli.xml](config/moduli/moduli.xml).
+The autoRef ships with the official ssl-game-controller. To activate it, change `gameController` to true in [config/moduli/autoreferee.xml](config/moduli/autoreferee.xml).
 The autoRef will internally launch the game-controller and connect to its websocket API
 to be able to send some basic commands through the **Ref** view.
 This view also contains a button to launch the full game-controller UI.
