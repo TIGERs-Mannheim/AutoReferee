@@ -6,7 +6,6 @@ package edu.tigers.autoref;
 import edu.tigers.autoref.gui.AutoRefMainPresenter;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
-import edu.tigers.sumatra.Sumatra;
 import edu.tigers.sumatra.cam.SSLVisionCam;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.moduli.ModulesState;
@@ -15,6 +14,7 @@ import edu.tigers.sumatra.wp.exporter.VisionTrackerSender;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.LogManager;
+import picocli.CommandLine;
 
 import javax.swing.SwingUtilities;
 import java.util.function.Consumer;
@@ -26,42 +26,42 @@ import java.util.function.Consumer;
 @Log4j2
 public final class AutoReferee implements Runnable
 {
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-hl", "--headless" },
 			defaultValue = "${env:AUTOREF_HEADLESS:-false}",
 			description = "run without a UI"
 	))
 	private boolean headless = false;
 
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-va", "--visionAddress" },
 			defaultValue = "${env:AUTOREF_VISION_ADDRESS}",
 			description = "address:port for vision")
 	)
 	private String visionAddress;
 
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-ra", "--refereeAddress" },
 			defaultValue = "${env:AUTOREF_REFEREE_ADDRESS}",
 			description = "address:port for GC")
 	)
 	private String refereeAddress;
 
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-ta", "--trackerAddress" },
 			defaultValue = "${env:AUTOREF_TRACKER_ADDRESS}",
 			description = "address:port for tracker")
 	)
 	private String trackerAddress;
 
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-a", "--active" },
 			defaultValue = "${env:AUTOREF_ACTIVE:-false}",
 			description = "activate autoRef in active mode")
 	)
 	private boolean autoRef;
 
-	@Setter(onMethod_ = @picocli.CommandLine.Option(
+	@Setter(onMethod_ = @CommandLine.Option(
 			names = { "-c", "--ci" },
 			defaultValue = "${env:AUTOREF_CI:-false}",
 			description = "use CI mode")
@@ -71,7 +71,7 @@ public final class AutoReferee implements Runnable
 
 	public static void main(final String[] args)
 	{
-		new picocli.CommandLine(new Sumatra()).execute(args);
+		new CommandLine(new AutoReferee()).execute(args);
 	}
 
 

@@ -42,7 +42,8 @@ dependencies {
     implementation(libs.org.apache.logging.log4j.log4j.api)
     runtimeOnly(libs.org.apache.logging.log4j.log4j.core)
 
-    implementation(libs.commons.cli)
+    implementation(libs.info.picocli.picocli)
+    annotationProcessor(libs.info.picocli.picocli.codegen)
 }
 
 application {
