@@ -113,16 +113,6 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	}
 
 
-	/**
-	 * Enable model identification functions (not real-time capable).
-	 *
-	 * @param enable
-	 */
-	public void setModelIdentification(final boolean enable)
-	{
-	}
-
-
 	@Override
 	public void stopModule()
 	{

@@ -15,24 +15,14 @@ import java.util.Optional;
 
 
 /**
- * @author Nicolai Ommer <nicolai.ommer@gmail.com>
+ * Interface for a (real) robot.
  */
 public interface IBot
 {
-
 	/**
 	 * @return battery level between 0 and 1
 	 */
 	double getBatteryRelative();
-
-
-	/**
-	 * @return battery level
-	 */
-	default double getBatteryAbsolute()
-	{
-		return 0;
-	}
 
 
 	/**
@@ -104,15 +94,6 @@ public interface IBot
 	 * @return the botId
 	 */
 	BotID getBotId();
-
-
-	/**
-	 * @return
-	 */
-	default double getCenter2DribblerDist()
-	{
-		return getBotParams().getDimensions().getCenter2DribblerDist();
-	}
 
 
 	/**

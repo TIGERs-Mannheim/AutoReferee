@@ -70,8 +70,6 @@ public class BallFilterPreprocessor
 	private final KickDetectors kickDetectors = new KickDetectors();
 	private final KickEstimators kickEstimators = new KickEstimators();
 	private final List<IBallModelIdentificationObserver> observers = new CopyOnWriteArrayList<>();
-	@Configurable(comment = "Enable model identification solver", defValue = "false")
-	private boolean doModelIdentification = false;
 
 
 	/**
@@ -125,15 +123,6 @@ public class BallFilterPreprocessor
 		ballTrackerMerger.reset();
 		kickDetectors.reset();
 		kickEstimators.reset();
-	}
-
-
-	/**
-	 * @param doModelIdentification the doModelIdentification to set
-	 */
-	public void setDoModelIdentification(final boolean doModelIdentification)
-	{
-		this.doModelIdentification = doModelIdentification;
 	}
 
 
@@ -365,16 +354,12 @@ public class BallFilterPreprocessor
 				estimators.forEach(k -> k.addCamBall(ball.getLatestCamBall().get()));
 			}
 
-			// run completed check
-			if (doModelIdentification)
-			{
-				estimators.stream()
-						.filter(e -> e.isDone(mergedRobots, timestamp))
-						.forEach(estimator -> CompletableFuture.runAsync(() ->
-								estimator.getModelIdentResult()
-										.forEach(this::notifyBallModelIdentificationResult)
-						));
-			}
+			estimators.stream()
+					.filter(e -> e.isDone(mergedRobots, timestamp))
+					.forEach(estimator -> CompletableFuture.runAsync(() ->
+							estimator.getModelIdentResult()
+									.forEach(this::notifyBallModelIdentificationResult)
+					));
 			if (lastBestEstimator != null && lastBestEstimator.isDone(mergedRobots, timestamp))
 			{
 				// remove all estimators, if the currently active one finished

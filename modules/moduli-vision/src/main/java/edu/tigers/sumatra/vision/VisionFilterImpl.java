@@ -116,7 +116,7 @@ public class VisionFilterImpl extends AVisionFilter
 
 		List<FilteredVisionBot> extrapolatedBots = frame.getBots().stream()
 				.map(b -> b.extrapolate(timestampNow, timestampFuture))
-				.collect(Collectors.toList());
+				.toList();
 
 		// construct extrapolated vision frame
 		return FilteredVisionFrame.builder()
@@ -224,7 +224,7 @@ public class VisionFilterImpl extends AVisionFilter
 		// filter merged robots by quality
 		List<FilteredVisionBot> filteredRobots = mergedRobots.stream()
 				.filter(b -> robotQualityInspector.passesQualityInspection(b.getBotID()))
-				.collect(Collectors.toList());
+				.toList();
 
 		// check robot quality
 		qualityInspector.inspectRobots(cams.values(), timestamp);
@@ -294,7 +294,7 @@ public class VisionFilterImpl extends AVisionFilter
 	{
 		List<BallTracker> allTrackers = camFilters.stream()
 				.flatMap(f -> f.getBalls().stream())
-				.collect(Collectors.toList());
+				.toList();
 
 		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(lastBall, allTrackers,
 				mergedRobots, getRobotInfoMap(), timestamp);
@@ -389,13 +389,6 @@ public class VisionFilterImpl extends AVisionFilter
 
 
 	@Override
-	public void setModelIdentification(final boolean enable)
-	{
-		ballFilterPreprocessor.setDoModelIdentification(enable);
-	}
-
-
-	@Override
 	public void onClearCamFrame()
 	{
 		super.onClearCamFrame();
@@ -424,7 +417,7 @@ public class VisionFilterImpl extends AVisionFilter
 	{
 		return cams.values().stream()
 				.flatMap(c -> c.getInfoShapes().stream())
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
@@ -432,7 +425,7 @@ public class VisionFilterImpl extends AVisionFilter
 	{
 		return cams.values().stream()
 				.flatMap(c -> c.getRobotTrackerShapes(timestamp).stream())
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 

@@ -73,6 +73,14 @@ public class TimeLimitedBuffer<T>
 	}
 
 
+	public Optional<T> getClosest(long timestamp, double threshold)
+	{
+		return data.stream().min(Comparator.comparing(e -> Math.abs(timestamp - e.getTimestamp())))
+				.filter(e -> Math.abs(timestamp - e.getTimestamp()) / 1e9 < threshold)
+				.map(Entry::getValue);
+	}
+
+
 	public T getValuePercentile(double percentile)
 	{
 		return data.stream()

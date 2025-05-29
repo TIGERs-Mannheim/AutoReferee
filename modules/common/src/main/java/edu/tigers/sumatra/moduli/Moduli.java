@@ -379,7 +379,7 @@ public class Moduli
 			return Optional.of((T) aModule);
 		}
 		return modules.values().stream()
-				.filter(m -> m.getClass().equals(moduleId))
+				.filter(m -> moduleId.isAssignableFrom(m.getClass()))
 				.map(a -> (T) a)
 				.findFirst();
 	}
