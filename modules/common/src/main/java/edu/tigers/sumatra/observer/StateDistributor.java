@@ -5,7 +5,6 @@
 package edu.tigers.sumatra.observer;
 
 import edu.tigers.sumatra.observer.StateSubscriber.StateChangeObserver;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 
@@ -14,40 +13,56 @@ import lombok.NoArgsConstructor;
  *
  * @param <T> the type of the state
  */
-@AllArgsConstructor
 @NoArgsConstructor
 public class StateDistributor<T> extends BasicDistributor<StateChangeObserver<T>> implements StateSubscriber<T>
 {
+	private T oldState;
 	private T state;
+
+
+	public StateDistributor(T state)
+	{
+		this.state = state;
+	}
+
+
+	@Override
+	public synchronized void subscribe(String id, StateChangeObserver<T> consumer)
+	{
+		super.subscribe(id, consumer);
+		if (state != null)
+		{
+			// Notify the new consumer with the current state
+			consumer.onStateChange(oldState, state);
+		}
+	}
 
 
 	/**
 	 * Notify all registered observers with the given state.
 	 *
-	 * @param state the state
+	 * @param newState the state
 	 */
-	public void set(T state)
+	public synchronized void set(T newState)
 	{
-		var oldState = this.state;
-		this.state = state;
-		// Make sure that consumers are not called in parallel due to concurrent calls of this set.
-		synchronized (this)
-		{
-			getConsumers().values().forEach(consumer -> consumer.onStateChange(oldState, state));
-		}
+		oldState = state;
+		state = newState;
+
+		getConsumers().values().forEach(consumer -> consumer.onStateChange(oldState, state));
 	}
 
 
-	public T get()
+	public synchronized T get()
 	{
 		return state;
 	}
 
 
 	@Override
-	public void clear()
+	public synchronized void clear()
 	{
 		super.clear();
 		state = null;
+		oldState = null;
 	}
 }

@@ -43,11 +43,6 @@ public class FrameDistributor<T> extends EventDistributor<T> implements FrameSub
 		{
 			throw new IllegalStateException("There is already a consumer for id " + id);
 		}
-		var event = lastFrame;
-		if (event == null)
-		{
-			Safe.run(runnable);
-		}
 	}
 
 

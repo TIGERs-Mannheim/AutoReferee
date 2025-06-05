@@ -92,12 +92,6 @@ public class ToolBar
 		toolBarPanel.add(fpsPanel, "left");
 		toolBarPanel.add(heapPanel, "left");
 		jToolBar.add(toolBarPanel);
-
-		// initialize icons
-		for (EStartStopButtonState icon : EStartStopButtonState.values())
-		{
-			log.trace("Load button icon " + icon.name());
-		}
 	}
 
 

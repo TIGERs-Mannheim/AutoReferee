@@ -37,6 +37,7 @@ public class ReplayLogController implements IReplayController
 		{
 			if (view.getType() == ESumatraViewType.LOG)
 			{
+				view.ensureInitialized();
 				logPresenter = (LogPresenter) view.getPresenter();
 			}
 		}

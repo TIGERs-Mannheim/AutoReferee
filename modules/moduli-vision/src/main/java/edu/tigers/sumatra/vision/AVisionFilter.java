@@ -117,6 +117,12 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	public void stopModule()
 	{
 		onClearCamFrame();
+	}
+
+
+	@Override
+	public void deinitModule()
+	{
 		filteredVisionFrame.clear();
 		viewportFrame.clear();
 		ballModelIdentResult.clear();

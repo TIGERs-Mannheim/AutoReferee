@@ -46,8 +46,7 @@ public class BasicDistributor<T> implements BasicSubscriber<T>
 	{
 		if (!consumers.isEmpty())
 		{
-			log.warn("There are still consumers registered: {}", consumers.keySet());
-			consumers.clear();
+			throw new IllegalStateException("There are still consumers registered: " + consumers.keySet());
 		}
 	}
 }

@@ -83,12 +83,12 @@ public class InstanceableClass<T>
 	 * @param args the parameters to the constructor
 	 * @return a new instance
 	 */
+	@SuppressWarnings({ "unchecked" })
 	public T newInstance(final Object... args)
 	{
 		try
 		{
 			Constructor<?> con = getConstructor();
-			//noinspection unchecked
 			return (T) con.newInstance(args);
 		} catch (NoSuchMethodException err)
 		{

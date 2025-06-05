@@ -63,12 +63,12 @@ public interface IString2ValueConverter
 	 * @param <T>           the implementation type
 	 * @return an instance of type impl with the given value
 	 */
+	@SuppressWarnings({ "unchecked" })
 	default <T> T parse(
 			final Class<T> impl,
 			final List<Class<?>> genericsImpls,
 			final String value)
 	{
-		//noinspection unchecked
 		return (T) parseString(impl, genericsImpls, value);
 	}
 

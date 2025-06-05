@@ -26,9 +26,9 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 
 
 	@Override
-	public void onStartModuli()
+	public void onModuliStarted()
 	{
-		ISumatraViewPresenter.super.onStartModuli();
+		ISumatraViewPresenter.super.onModuliStarted();
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(autoRef -> autoRef.addObserver(this));
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class)
 				.ifPresent(autoRef -> viewPanel.getStartStopPanel().setAutoRefMode(autoRef.getMode())
@@ -41,9 +41,9 @@ public class AutoRefPresenter implements ISumatraViewPresenter, IStartStopPanelO
 
 
 	@Override
-	public void onStopModuli()
+	public void onModuliStopped()
 	{
-		ISumatraViewPresenter.super.onStopModuli();
+		ISumatraViewPresenter.super.onModuliStopped();
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(autoRef -> autoRef.removeObserver(this));
 		viewPanel.getStartStopPanel().removeObserver(this);
 		viewPanel.getGameEventDetectorPanel().removeObserver(gameEventDetectorObserver);

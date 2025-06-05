@@ -11,7 +11,7 @@ import java.util.List;
 
 
 /**
- * Structure for
+ * Base class for all modules.
  */
 public abstract class AModule
 {

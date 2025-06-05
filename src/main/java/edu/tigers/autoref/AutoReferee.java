@@ -3,7 +3,7 @@
  */
 package edu.tigers.autoref;
 
-import edu.tigers.autoref.gui.AutoRefMainPresenter;
+import edu.tigers.autoref.presenter.AutoRefMainPresenter;
 import edu.tigers.autoreferee.engine.EAutoRefMode;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.sumatra.cam.SSLVisionCam;

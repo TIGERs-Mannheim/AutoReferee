@@ -117,7 +117,6 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	@Override
 	public void onStart()
 	{
-		ISumatraPresenter.super.onStart();
 		mouseAdapters = List.of(
 				new CoordinatesMouseAdapter(this::getMousePointGlobal, this::setCoordinates),
 				new RulerMouseAdapter(this::getMousePointGlobal, this::setDrawableRuler),
@@ -139,7 +138,6 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	@Override
 	public void onStop()
 	{
-		ISumatraPresenter.super.onStop();
 		mouseAdapters.forEach(fieldPanel::removeMouseAdapter);
 		EventQueue.invokeLater(() ->fieldPanel.setVisible(false));
 		fieldPanel.setOffImage(null);

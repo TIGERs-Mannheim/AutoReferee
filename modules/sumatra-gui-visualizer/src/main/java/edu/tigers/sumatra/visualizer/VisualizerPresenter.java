@@ -178,8 +178,6 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	@Override
 	public void onStart()
 	{
-		ISumatraViewPresenter.super.onStart();
-
 		GlobalShortcuts.add(
 				"Reset field",
 				viewPanel,
@@ -213,10 +211,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 
 	@Override
-	public void onStartModuli()
+	public void onModuliStarted()
 	{
-		ISumatraViewPresenter.super.onStartModuli();
-
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(ballInteractor);
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(fieldPresenter);
 
@@ -225,10 +221,8 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 
 
 	@Override
-	public void onStopModuli()
+	public void onModuliStopped()
 	{
-		ISumatraViewPresenter.super.onStopModuli();
-
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(ballInteractor);
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(fieldPresenter);
 	}

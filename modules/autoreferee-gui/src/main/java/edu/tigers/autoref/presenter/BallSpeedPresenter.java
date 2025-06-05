@@ -13,7 +13,6 @@ import edu.tigers.autoref.view.ballspeed.IBallSpeedPanelListener;
 import edu.tigers.autoref.view.generic.FixedTimeRangeChartPanel;
 import edu.tigers.sumatra.geometry.RuleConstraints;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.moduli.IModuliStateObserver;
 import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
 import edu.tigers.sumatra.wp.AWorldPredictor;
@@ -40,8 +39,8 @@ import java.util.concurrent.TimeUnit;
  * consecutive frames. To avoid gaps the timestamp value is not updated when the plot is paused. Because of this new
  * data points are displayed directly after the last points before the pause.
  */
-public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObserver, IModuliStateObserver,
-		IBallSpeedPanelListener, ActionListener
+public class BallSpeedPresenter
+		implements ISumatraViewPresenter, IWorldFrameObserver, IBallSpeedPanelListener, ActionListener
 {
 	/**
 	 * The period in ms at the end of which the chart is updated
@@ -64,9 +63,6 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	private Timer chartTimer;
 
 
-	/**
-	 * Default constructor
-	 */
 	public BallSpeedPresenter()
 	{
 		viewPanel = new BallSpeedPanel(getTimeRange(), TimeUnit.MILLISECONDS.toNanos(CHART_UPDATE_PERIOD));
@@ -75,14 +71,16 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 		chartTimer = new Timer(CHART_UPDATE_PERIOD, this);
 		chartTimer.setDelay(CHART_UPDATE_PERIOD);
 
-		ConfigRegistration.registerConfigurableCallback("autoreferee", new IConfigObserver()
-		{
-			@Override
-			public void afterApply(final IConfigClient configClient)
-			{
-				viewPanel.setMaxBallVelocityLine(RuleConstraints.getMaxBallSpeed());
-			}
-		});
+		ConfigRegistration.registerConfigurableCallback(
+				"autoreferee", new IConfigObserver()
+				{
+					@Override
+					public void afterApply(final IConfigClient configClient)
+					{
+						viewPanel.setMaxBallVelocityLine(RuleConstraints.getMaxBallSpeed());
+					}
+				}
+		);
 	}
 
 
@@ -96,18 +94,16 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 
 
 	@Override
-	public void onStartModuli()
+	public void onModuliStarted()
 	{
-		ISumatraViewPresenter.super.onStartModuli();
 		SumatraModel.getInstance().getModuleOpt(AWorldPredictor.class)
 				.ifPresent(predictor -> predictor.addObserver(this));
 	}
 
 
 	@Override
-	public void onStopModuli()
+	public void onModuliStopped()
 	{
-		ISumatraViewPresenter.super.onStopModuli();
 		SumatraModel.getInstance().getModuleOpt(AWorldPredictor.class).ifPresent(
 				predictor -> predictor.removeObserver(this)
 		);
@@ -117,7 +113,6 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	@Override
 	public void onStart()
 	{
-		ISumatraViewPresenter.super.onStart();
 		viewPanel.addObserver(this);
 		chartTimer.start();
 	}
@@ -126,7 +121,6 @@ public class BallSpeedPresenter implements ISumatraViewPresenter, IWorldFrameObs
 	@Override
 	public void onStop()
 	{
-		ISumatraViewPresenter.super.onStop();
 		viewPanel.removeObserver(this);
 		chartTimer.stop();
 	}

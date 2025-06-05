@@ -11,5 +11,5 @@ public enum ModulesState
 {
 	NOT_LOADED,
 	RESOLVED,
-	ACTIVE
+	ACTIVE,
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 class EventDistributorTest
@@ -45,8 +46,7 @@ class EventDistributorTest
 		eventDistributor.subscribe(getClass().getCanonicalName(), this::consumeEvent);
 
 		assertThat(eventDistributor.getConsumers()).hasSize(1);
-		eventDistributor.clear();
-		assertThat(eventDistributor.getConsumers()).isEmpty();
+		assertThatThrownBy(eventDistributor::clear).isInstanceOf(IllegalStateException.class);
 	}
 
 

@@ -9,6 +9,8 @@ import edu.tigers.sumatra.moduli.exceptions.InitModuleException;
 import edu.tigers.sumatra.moduli.exceptions.LoadModulesException;
 import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
 import edu.tigers.sumatra.moduli.exceptions.StartModuleException;
+import edu.tigers.sumatra.observer.StateDistributor;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -40,31 +42,11 @@ public class Moduli
 {
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
 	private final List<AModule> orderedModules = new LinkedList<>();
+	@Getter
+	private final StateDistributor<ModulesState> modulesState = new StateDistributor<>(ModulesState.NOT_LOADED);
+	@Getter
 	private SubnodeConfiguration globalConfiguration;
-	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	private XMLConfiguration config;
-
-
-	/**
-	 * Getter modulesState.
-	 *
-	 * @return the state of the modules
-	 */
-	public ModulesStateVariable getModulesState()
-	{
-		return modulesState;
-	}
-
-
-	/**
-	 * Getter global configuration
-	 *
-	 * @return the global configuration
-	 */
-	public SubnodeConfiguration getGlobalConfiguration()
-	{
-		return globalConfiguration;
-	}
 
 
 	/**
@@ -79,7 +61,6 @@ public class Moduli
 		modules.clear();
 		orderedModules.clear();
 
-		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 
 		Graph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
@@ -156,7 +137,7 @@ public class Moduli
 
 			modules.put(id, module);
 
-			log.trace("Module created: {}", module);
+			log.trace("Created module {}", module);
 		}
 	}
 
@@ -216,8 +197,13 @@ public class Moduli
 	/**
 	 * Starts all modules in modulesList.
 	 */
-	public void startModules()
+	public synchronized void startModules()
 	{
+		if (modulesState.get() == ModulesState.ACTIVE)
+		{
+			return;
+		}
+
 		initModules(orderedModules);
 		startUpModules(orderedModules);
 
@@ -261,7 +247,7 @@ public class Moduli
 			{
 				log.trace("Initializing module {}", m);
 				m.initModule();
-				log.trace("Module {} initialized", m);
+				log.trace("Initialized module {}", m);
 			} catch (Exception err)
 			{
 				throw new InitModuleException("Could not initialize module " + m, err);
@@ -278,7 +264,7 @@ public class Moduli
 			{
 				log.trace("Starting module {}", m);
 				m.startModule();
-				log.trace("Module {} started", m);
+				log.trace("Started module {}", m);
 			} catch (Exception err)
 			{
 				throw new StartModuleException("Could not initialize module " + m, err);
@@ -290,8 +276,13 @@ public class Moduli
 	/**
 	 * Stops all modules in modulesList.
 	 */
-	public void stopModules()
+	public synchronized void stopModules()
 	{
+		if (modulesState.get() != ModulesState.ACTIVE)
+		{
+			return;
+		}
+
 		List<AModule> reversedModules = new ArrayList<>(orderedModules);
 		Collections.reverse(reversedModules);
 
@@ -311,7 +302,7 @@ public class Moduli
 			{
 				log.trace("Stopping module {}", m);
 				m.stopModule();
-				log.trace("Module {} stopped", m);
+				log.trace("Stopped module {}", m);
 			} catch (Exception err)
 			{
 				log.error("Exception while stopping module {}", m, err);
@@ -328,7 +319,7 @@ public class Moduli
 			{
 				log.trace("Uninitializing module {}", m);
 				m.deinitModule();
-				log.trace("Module {} uninitialized", m);
+				log.trace("Uninitialized module {}", m);
 			} catch (Exception err)
 			{
 				log.error("Exception while uninitializing module {}", m, err);
@@ -410,7 +401,7 @@ public class Moduli
 			Constructor<? extends AModule> constructor = clazz.getDeclaredConstructor();
 			return constructor.newInstance();
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
-				| IllegalArgumentException e)
+		         | IllegalArgumentException e)
 		{
 			throw new IllegalArgumentException("Error constructing module", e);
 		}

@@ -16,7 +16,6 @@ import edu.tigers.autoreferee.engine.log.RefereeGameEventProposalGameLogEntry;
 import edu.tigers.autoreferee.module.AutoRefModule;
 import edu.tigers.sumatra.components.EnumCheckBoxPanel;
 import edu.tigers.sumatra.model.SumatraModel;
-import edu.tigers.sumatra.moduli.ModulesState;
 import edu.tigers.sumatra.referee.data.GameEventProposalGroup;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.views.ISumatraViewPresenter;
@@ -167,7 +166,7 @@ public class GameLogPresenter
 
 
 	@Override
-	public void onStartModuli()
+	public void onModuliStarted()
 	{
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).addObserver(this);
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(m -> m.addObserver(this));
@@ -175,7 +174,7 @@ public class GameLogPresenter
 
 
 	@Override
-	public void onStopModuli()
+	public void onModuliStopped()
 	{
 		SumatraModel.getInstance().getModule(AWorldPredictor.class).removeObserver(this);
 		SumatraModel.getInstance().getModuleOpt(AutoRefModule.class).ifPresent(m -> m.removeObserver(this));

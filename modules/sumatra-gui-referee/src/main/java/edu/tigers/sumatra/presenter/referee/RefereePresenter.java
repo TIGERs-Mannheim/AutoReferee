@@ -31,9 +31,9 @@ public class RefereePresenter
 
 
 	@Override
-	public void onStartModuli()
+	public void onModuliStarted()
 	{
-		ISumatraViewPresenter.super.onStartModuli();
+		ISumatraViewPresenter.super.onModuliStarted();
 		viewPanel.getCommonCommandsPanel().addObserver(this);
 		viewPanel.getChangeStatePanel().addObserver(this);
 		viewPanel.getTeamsPanel().values().forEach(p -> p.addObserver(this));
@@ -46,9 +46,9 @@ public class RefereePresenter
 
 
 	@Override
-	public void onStopModuli()
+	public void onModuliStopped()
 	{
-		ISumatraViewPresenter.super.onStopModuli();
+		ISumatraViewPresenter.super.onModuliStopped();
 		if (referee != null)
 		{
 			referee.removeObserver(this);
