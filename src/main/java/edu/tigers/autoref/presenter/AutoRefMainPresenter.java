@@ -9,10 +9,10 @@ import edu.tigers.autoref.view.gamelog.GameLogView;
 import edu.tigers.autoref.view.main.AutoRefView;
 import edu.tigers.sumatra.AMainPresenter;
 import edu.tigers.sumatra.config.ConfigEditorView;
-import edu.tigers.sumatra.presenter.log.LogView;
-import edu.tigers.sumatra.presenter.referee.RefereeView;
+import edu.tigers.sumatra.gui.log.LogView;
+import edu.tigers.sumatra.gui.referee.RefereeView;
+import edu.tigers.sumatra.gui.visualizer.VisualizerView;
 import edu.tigers.sumatra.views.ASumatraView;
-import edu.tigers.sumatra.visualizer.VisualizerView;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;

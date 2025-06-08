@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoref.presenter;
@@ -20,8 +20,8 @@ import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import lombok.Getter;
 
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.TimeUnit;
@@ -129,7 +129,7 @@ public class BallSpeedPresenter
 	@Override
 	public void onNewWorldFrame(final WorldFrameWrapper wFrameWrapper)
 	{
-		EventQueue.invokeLater(() -> model.update(wFrameWrapper));
+		SwingUtilities.invokeLater(() -> model.update(wFrameWrapper));
 	}
 
 

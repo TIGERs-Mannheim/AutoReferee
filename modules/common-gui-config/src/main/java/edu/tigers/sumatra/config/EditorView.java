@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.config;
@@ -20,7 +20,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -159,7 +158,7 @@ public class EditorView extends JPanel
 		{
 			listenForExpansionEvents = false;
 			model.getAllTreePaths()
-					.forEach(pair -> SwingUtilities.invokeLater(() -> treetable.getTree().expandPath(pair.objectPath())));
+					.forEach(pair -> treetable.getTree().expandPath(pair.objectPath()));
 		} else
 		{
 			listenForExpansionEvents = false;
@@ -175,7 +174,7 @@ public class EditorView extends JPanel
 				.getUserProperty(EditorView.class, pair.nodeNamePath().toString(), false);
 		if (expanded)
 		{
-			SwingUtilities.invokeLater(() -> treetable.getTree().expandPath(pair.objectPath()));
+			treetable.getTree().expandPath(pair.objectPath());
 		}
 	}
 
