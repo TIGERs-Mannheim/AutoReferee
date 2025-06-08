@@ -8,6 +8,7 @@ import edu.tigers.sumatra.drawable.DrawableBorderText;
 import edu.tigers.sumatra.drawable.DrawableFieldBackground;
 import edu.tigers.sumatra.drawable.EFieldTurn;
 import edu.tigers.sumatra.drawable.ShapeMap;
+import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.wp.vis.RefereeVisCalc;
@@ -25,6 +26,8 @@ import java.util.List;
 public class FieldPane
 {
 	private static final Color FIELD_COLOR_BACKGROUND = new Color(93, 93, 93);
+	private static final double SCALE_MIN = 1e-4;
+	private static final double SCALE_MAX = 20;
 
 	private double offsetX;
 	private double offsetY;
@@ -58,7 +61,10 @@ public class FieldPane
 
 		final double oldLenX = (xLen) * scale;
 		final double oldLenY = (yLen) * scale;
-		scale *= scroll;
+
+		scale *= Math.exp(scroll);
+		scale = SumatraMath.cap(scale, SCALE_MIN, SCALE_MAX);
+
 		final double newLenX = (xLen) * scale;
 		final double newLenY = (yLen) * scale;
 		offsetX -= (newLenX - oldLenX) / 2;
