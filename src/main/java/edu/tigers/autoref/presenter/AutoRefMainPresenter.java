@@ -7,7 +7,7 @@ import edu.tigers.autoref.view.AutoRefMainFrame;
 import edu.tigers.autoref.view.ballspeed.BallSpeedView;
 import edu.tigers.autoref.view.gamelog.GameLogView;
 import edu.tigers.autoref.view.main.AutoRefView;
-import edu.tigers.sumatra.AMainPresenter;
+import edu.tigers.sumatra.AModuliMainPresenter;
 import edu.tigers.sumatra.config.ConfigEditorView;
 import edu.tigers.sumatra.gui.log.LogView;
 import edu.tigers.sumatra.gui.referee.RefereeView;
@@ -19,7 +19,7 @@ import java.util.List;
 
 
 @Log4j2
-public class AutoRefMainPresenter extends AMainPresenter<AutoRefMainFrame>
+public class AutoRefMainPresenter extends AModuliMainPresenter<AutoRefMainFrame>
 {
 	public AutoRefMainPresenter()
 	{

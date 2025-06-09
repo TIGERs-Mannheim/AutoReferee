@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.model;
@@ -98,7 +98,7 @@ public final class SumatraModel extends Moduli
 	}
 
 
-	public synchronized void startUp(final String moduliConfig)
+	private synchronized void startUp(final String moduliConfig)
 	{
 		try
 		{
@@ -107,7 +107,7 @@ public final class SumatraModel extends Moduli
 				stopModules();
 			}
 			SumatraModel.getInstance().setCurrentModuliConfig(moduliConfig);
-			loadModulesOfConfig(getCurrentModuliConfig());
+			loadModules();
 			startModules();
 		} catch (Exception e)
 		{
@@ -140,13 +140,13 @@ public final class SumatraModel extends Moduli
 	/**
 	 * Load modules of the given config file. The config path is appended by this method and must not be prepended.
 	 *
-	 * @param configFileName the config file name
 	 * @throws DependencyException
 	 * @throws LoadModulesException
 	 */
 	@SuppressWarnings("squid:S1160") // throwing two exceptions, because this is only a proxy method
-	public void loadModulesOfConfig(final String configFileName) throws DependencyException, LoadModulesException
+	public void loadModules() throws DependencyException, LoadModulesException
 	{
+		var configFileName = getCurrentModuliConfig();
 		try
 		{
 			super.loadModules(MODULI_CONFIG_PATH.resolve(configFileName).toString());

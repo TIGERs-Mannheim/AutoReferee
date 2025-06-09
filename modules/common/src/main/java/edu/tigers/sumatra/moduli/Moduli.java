@@ -56,7 +56,7 @@ public class Moduli
 	 * @throws LoadModulesException an error occurs... Can't continue.
 	 * @throws DependencyException  on dependency issues
 	 */
-	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
+	protected void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
 	{
 		modules.clear();
 		orderedModules.clear();
@@ -181,7 +181,7 @@ public class Moduli
 	 *
 	 * @param filename of the moduli config
 	 */
-	public void loadModulesSafe(final String filename)
+	protected void loadModulesSafe(final String filename)
 	{
 		try
 		{
@@ -325,17 +325,6 @@ public class Moduli
 				log.error("Exception while uninitializing module {}", m, err);
 			}
 		}
-	}
-
-
-	/**
-	 * Returns a list with all loaded modules.
-	 *
-	 * @return all modules
-	 */
-	public List<AModule> getModules()
-	{
-		return new ArrayList<>(modules.values());
 	}
 
 
