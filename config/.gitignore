@@ -1,3 +1,5 @@
+/user.xml
 *.props
-user.xml
-engine.yaml
+*.layers
+/engine.yaml
+*.ly
