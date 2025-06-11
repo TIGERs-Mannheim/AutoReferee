@@ -64,7 +64,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	@NonNull
 	private final IBotParams botParams;
 	@Getter
-	private final boolean healthy;
+	private final ERobotHealthState healthState;
 	@Getter
 	private final boolean availableToAi;
 	private final EDribbleTractionState dribbleTraction;
@@ -89,7 +89,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		internalState = null;
 		barrierInterrupted = false;
 		botParams = new BotParams();
-		healthy = true;
+		healthState = ERobotHealthState.READY;
 		dribbleTraction = EDribbleTractionState.OFF;
 		availableToAi = true;
 		ballState = null;
