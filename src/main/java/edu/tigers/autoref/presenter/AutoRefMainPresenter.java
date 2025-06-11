@@ -24,6 +24,8 @@ public class AutoRefMainPresenter extends AModuliMainPresenter<AutoRefMainFrame>
 	public AutoRefMainPresenter()
 	{
 		super(new AutoRefMainFrame(), createViews(), "auto_ref");
+
+		init();
 	}
 
 

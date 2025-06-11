@@ -16,8 +16,6 @@ public abstract class AModuliMainPresenter<T extends AMainFrame> extends AMainPr
 	protected AModuliMainPresenter(T mainFrame, List<ASumatraView> views, String name)
 	{
 		super(mainFrame, views, name);
-
-		SumatraModel.getInstance().getModulesState().subscribe(getClass().getCanonicalName(), this::moduliStateChanged);
 	}
 
 
@@ -25,12 +23,12 @@ public abstract class AModuliMainPresenter<T extends AMainFrame> extends AMainPr
 	{
 		if (newState == ModulesState.ACTIVE)
 		{
+			onModuliStarted();
 			getViews().forEach(ASumatraView::onModuliStarted);
-			start();
 		} else if (newState == ModulesState.RESOLVED && oldState == ModulesState.ACTIVE)
 		{
+			onModuliStopped();
 			getViews().forEach(ASumatraView::onModuliStopped);
-			stop();
 		}
 	}
 
@@ -47,14 +45,10 @@ public abstract class AModuliMainPresenter<T extends AMainFrame> extends AMainPr
 	}
 
 
-	protected void start()
+	protected void init()
 	{
 		getViews().forEach(ASumatraView::start);
-	}
 
-
-	protected void stop()
-	{
-		getViews().forEach(ASumatraView::stop);
+		SumatraModel.getInstance().getModulesState().subscribe(getClass().getCanonicalName(), this::moduliStateChanged);
 	}
 }
