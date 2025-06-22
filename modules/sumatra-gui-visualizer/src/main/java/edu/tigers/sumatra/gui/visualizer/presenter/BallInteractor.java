@@ -47,6 +47,10 @@ public class BallInteractor implements IWorldFrameObserver
 
 	public void onFieldClick(IVector2 pos, MouseEvent e)
 	{
+		if (lastWorldFrameWrapper == null)
+		{
+			return;
+		}
 		if (SwingUtilities.isRightMouseButton(e))
 		{
 			placeBall(pos, e);

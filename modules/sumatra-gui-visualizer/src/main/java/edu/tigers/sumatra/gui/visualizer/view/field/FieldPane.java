@@ -27,7 +27,7 @@ public class FieldPane
 {
 	private static final Color FIELD_COLOR_BACKGROUND = new Color(93, 93, 93);
 	private static final double SCALE_MIN = 1e-4;
-	private static final double SCALE_MAX = 20;
+	private static final double SCALE_MAX = 10;
 
 	private double offsetX;
 	private double offsetY;
