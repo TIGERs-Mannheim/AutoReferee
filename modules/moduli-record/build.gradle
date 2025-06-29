@@ -4,6 +4,7 @@
 
 plugins {
     id 'sumatra.java'
+    id 'sumatra.test'
     id 'java-library'
 }
 
@@ -14,12 +15,14 @@ dependencies {
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
     implementation(libs.org.apache.logging.log4j.log4j.core)
-    implementation(libs.org.apache.logging.log4j.log4j.slf4j2.impl)
 
     implementation(libs.commons.io)
     implementation(libs.commons.lang)
 
     implementation(libs.net.lingala.zip4j)
 
-    implementation(libs.org.apache.fury)
+    testImplementation(libs.org.projectlombok.lombok)
+    testAnnotationProcessor(libs.org.projectlombok.lombok)
+    testImplementation(libs.org.openjdk.jmh.jmh.core)
+    testAnnotationProcessor(libs.org.openjdk.jmh.jmh.generator.annprocess)
 }

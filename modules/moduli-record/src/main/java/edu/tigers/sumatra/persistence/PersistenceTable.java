@@ -4,56 +4,35 @@
 
 package edu.tigers.sumatra.persistence;
 
+import edu.tigers.sumatra.persistence.serializer.GenericSerializer;
+import edu.tigers.sumatra.persistence.serializer.MappedDataOutputStream;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.fury.Fury;
-import org.apache.fury.config.Language;
-import org.apache.fury.logging.LoggerFactory;
-import org.apache.fury.memory.MemoryBuffer;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.LongSupplier;
 
 
 @Log4j2
-public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
+public class PersistenceTable<T extends PersistenceTable.IEntry<T>> implements AutoCloseable
 {
-	static
-	{
-		/*
-		 This is the LoggerFactory of Fury. Fury brings its own logging framework which directly prints on stdout.
-		 Fury INFOs every compilation of a (de-)serializer for every single custom class and
-		 WARNs for every Fury instance about the disabled class registration requirement since that allows
-		 arbitrary object deserialization (a code injection security risk).
-		 Configure log4j2.xml for filtering.
-		 */
-		LoggerFactory.useSlf4jLogging(true);
-	}
-
 	@Getter
 	private final EPersistenceKeyType keyType;
 
-	private final Fury fury;
+	private final GenericSerializer serializer;
 
 	private final PersistenceIndex index;
 
-	private final FileOutputStream appendStream;
+	private final MappedDataOutputStream stream;
 	private final FileChannel file;
 
 	@Getter
@@ -66,50 +45,13 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 		this.type = type;
 		this.keyType = keyType;
 
-		fury = Fury.builder()
-				// Reduce buffer size requirements by serializing in interpreter mode until the JIT code is generated
-				.withAsyncCompilation(true)
-				// No cross-language compatibility required
-				.withLanguage(Language.JAVA)
-				// Allows for serialization of arbitrary classes
-				.requireClassRegistration(false)
-				.build();
-
-		register(new HashSet<>(), type);
+		serializer = new GenericSerializer(dbPath.resolve(type.getSimpleName() + ".metadata"));
 
 		Path dbFile = dbPath.resolve(type.getSimpleName() + ".db");
-		this.appendStream = new FileOutputStream(dbFile.toFile(), true);
+		this.stream = new MappedDataOutputStream(dbFile);
 		this.file = FileChannel.open(dbFile, StandardOpenOption.READ);
 
 		this.index = new PersistenceIndex(dbPath.resolve(type.getSimpleName() + ".index"), file);
-	}
-
-
-	/**
-	 * Recursively register most classes to reduce final database size and improve performance.
-	 */
-	private void register(Set<Class<?>> registered, Class<?> clazz)
-	{
-		if (clazz.isPrimitive() || clazz.isArray() || clazz.isInterface() || clazz.getPackageName()
-				.startsWith("java.lang") || !registered.add(clazz))
-			return;
-
-		fury.register(clazz);
-		for (Field field : clazz.getDeclaredFields())
-		{
-			if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))
-				continue;
-
-			register(registered, field.getType());
-			if (field.getGenericType() instanceof ParameterizedType t)
-			{
-				for (Type argument : t.getActualTypeArguments())
-				{
-					if (argument instanceof Class<?> argClass)
-						register(registered, argClass);
-				}
-			}
-		}
 	}
 
 
@@ -124,9 +66,9 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 		try
 		{
 			long id = element.getKey();
-			long startIndex = appendStream.getChannel().position();
+			long startIndex = stream.getPos();
 
-			fury.serialize(appendStream, element);
+			serializer.serialize(stream, element);
 			index.append(id, startIndex);
 		} catch (RuntimeException | IOException e)
 		{
@@ -176,7 +118,7 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 				file.read(buf);
 				buf.position(0);
 
-				T entry = (T) fury.deserialize(MemoryBuffer.fromByteBuffer(buf));
+				T entry = (T) serializer.deserialize(buf);
 				if (element != null)
 				{
 					element.merge(entry);
@@ -229,11 +171,13 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>>
 	}
 
 
+	@Override
 	public void close()
 	{
 		try
 		{
-			appendStream.close();
+			serializer.close();
+			stream.close();
 			file.close();
 			index.close();
 		} catch (IOException e)
