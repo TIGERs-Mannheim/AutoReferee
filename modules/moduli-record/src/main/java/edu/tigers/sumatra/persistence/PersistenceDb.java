@@ -12,8 +12,10 @@ import net.lingala.zip4j.exception.ZipException;
 import net.lingala.zip4j.progress.ProgressMonitor;
 import org.apache.commons.io.FileUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,8 +65,36 @@ public class PersistenceDb
 		}
 
 		File folder = this.dbPath.toFile();
-		if (!folder.exists() && !folder.mkdirs())
-			log.warn("Could not create folder for database {}", this.dbPath);
+		Path commit = dbPath.resolve("commit.txt");
+		if (!folder.exists())
+		{
+			if (!folder.mkdirs())
+			{
+				log.error("Could not create folder for database {}", this.dbPath);
+				return;
+			}
+
+			try
+			{
+				Files.writeString(commit, getCommitHash());
+			} catch (IOException e)
+			{
+				log.error("Could not create commit.txt", e);
+			}
+		} else
+		{
+			try
+			{
+				String dbCommit = Files.readString(commit);
+				if (!dbCommit.equals(getCommitHash()))
+				{
+					log.info("Database is from a different commit: {}", dbCommit);
+				}
+			} catch (IOException e)
+			{
+				log.warn("Could not read database version", e);
+			}
+		}
 	}
 
 
@@ -114,6 +144,21 @@ public class PersistenceDb
 	{
 		return SumatraModel.getInstance()
 				.getUserProperty("edu.tigers.sumatra.persistence.basePath", "data/record");
+	}
+
+
+	private static String getCommitHash()
+	{
+		try
+		{
+			return new BufferedReader(new InputStreamReader(
+					new ProcessBuilder("git", "rev-parse", "--short", "HEAD").start().getInputStream()
+			)).readLine();
+		} catch (IOException e)
+		{
+			log.warn("Could not get commit hash", e);
+			return "unknown";
+		}
 	}
 
 
