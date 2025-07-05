@@ -65,7 +65,7 @@ public class PersistenceDb
 		}
 
 		File folder = this.dbPath.toFile();
-		Path commit = dbPath.resolve("commit.txt");
+		Path commit = this.dbPath.resolve("commit.txt");
 		if (!folder.exists())
 		{
 			if (!folder.mkdirs())
