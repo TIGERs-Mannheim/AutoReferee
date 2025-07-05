@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.tracker;
 
@@ -43,6 +43,7 @@ public class RobotTracker
 	private double visionQuality;
 	private double lastCamOrientation;
 	private long orientationTurns = 0;
+	private double botHeight;
 
 	private int health = 2;
 
@@ -89,6 +90,7 @@ public class RobotTracker
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.gettCapture();
 		botId = robot.getBotId();
+		botHeight = robot.getHeight();
 		camId = robot.getCameraId();
 	}
 
@@ -244,7 +246,6 @@ public class RobotTracker
 		return filterW.getVelocityEstimate();
 	}
 
-
 	/**
 	 * @return timestamp in [ns]
 	 */
@@ -262,6 +263,14 @@ public class RobotTracker
 		return botId;
 	}
 
+
+	/**
+	 * @return Robot Height in [mm]
+	 */
+	public double getBotHeight()
+	{
+		return botHeight;
+	}
 
 	/**
 	 * This function merges a variable number of robot trackers and makes a filtered vision bot out of them.

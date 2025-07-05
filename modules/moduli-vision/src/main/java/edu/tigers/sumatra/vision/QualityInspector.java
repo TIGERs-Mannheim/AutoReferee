@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import edu.tigers.sumatra.bot.EBotType;
+import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamGeometry;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
@@ -48,6 +50,8 @@ public class QualityInspector
 	private static boolean drawRobotDeviationIssues = true;
 	@Configurable(defValue = "true", comment = "Draw invisible robot issues in quality layer.")
 	private static boolean drawRobotInvisibleIssues = true;
+	@Configurable(defValue = "true", comment = "Draw height robot issues in quality layer.")
+	private static boolean drawRobotHeightIssues = true;
 	@Configurable(defValue = "true", comment = "Draw robot vision quality issues in quality layer.")
 	private static boolean drawRobotQualityIssues = true;
 	@Configurable(defValue = "400.0", comment = "Maximum allowed camera height difference to median height. [mm]")
@@ -72,6 +76,7 @@ public class QualityInspector
 
 	private List<CamCalibration> problematicCams = new ArrayList<>();
 	private List<RobotDeviationIssue> deviationIssues = new ArrayList<>();
+	private List<RobotHeightIssue> robotHeightIssues = new ArrayList<>();
 	private List<RobotInvisibleIssue> invisibleIssues = new ArrayList<>();
 	private List<FilteredVisionBot> filteredBots = new ArrayList<>();
 	private List<CameraTimeDiffIssue> camTimeDiffIssues = new ArrayList<>();
@@ -105,6 +110,7 @@ public class QualityInspector
 
 			IRectangle viewport = viewPort.get();
 			checkInvisibleRobot(timestamp, filter, viewport);
+			checkRobotHeightDeviation(timestamp, filter);
 		}
 
 		// group trackers by BotID
@@ -137,11 +143,44 @@ public class QualityInspector
 		}
 
 		// check for large differences in latest timestamp to cameras' timestamps
-		camTimeDiffIssues = camFilters.stream()
-				.filter(c -> timestamp - c.getTimestamp() > c.getAverageFrameDt() * 2e9)
-				.map(c -> new CameraTimeDiffIssue(c.getCameraPosition().orElse(Vector3f.ZERO_VECTOR).getXYVector(),
-						timestamp - c.getTimestamp()))
-				.toList();
+		camTimeDiffIssues = camFilters.stream().filter(c -> timestamp - c.getTimestamp() > c.getAverageFrameDt() * 2e9)
+				.map(c -> new CameraTimeDiffIssue(
+						c.getCameraPosition().orElse(Vector3f.ZERO_VECTOR).getXYVector(),
+						timestamp - c.getTimestamp()
+				)).toList();
+	}
+
+
+	private void checkRobotHeightDeviation(final long timestamp, final CamFilter filter)
+	{
+		for (RobotTracker tracker : filter.getValidRobots().values())
+		{
+			RobotInfo robotInfo = filter.getRobotInfoMap().get(tracker.getBotId());
+			if (robotInfo != null && robotInfo.getType() != EBotType.UNKNOWN)
+			{
+				double targetHeight = robotInfo.getBotParams().getDimensions().getHeight();
+				double robotHeight = tracker.getBotHeight();
+				if (Math.abs(targetHeight - robotHeight) > 1e-3)
+
+				{
+					robotHeightIssues.stream().filter(issue -> issue.botId.equals(tracker.getBotId())).findFirst()
+							.ifPresentOrElse(
+									existingIssue -> {
+										existingIssue.robotPos = tracker.getPosition(timestamp);
+										existingIssue.robotHeight = robotHeight;
+										existingIssue.targetHeight = targetHeight;
+									}, () -> {
+										RobotHeightIssue newIssue = new RobotHeightIssue();
+										newIssue.robotPos = tracker.getPosition(timestamp);
+										newIssue.botId = tracker.getBotId();
+										newIssue.robotHeight = robotHeight;
+										newIssue.targetHeight = targetHeight;
+										robotHeightIssues.add(newIssue);
+									}
+							);
+				}
+			}
+		}
 	}
 
 
@@ -292,6 +331,7 @@ public class QualityInspector
 		addRobotDeviationIssues(shapes);
 		addRobotInvisibleIssues(shapes);
 		addRobotQualityIssues(shapes);
+		addRobotHeightIssues(shapes);
 
 		return shapes;
 	}
@@ -314,6 +354,28 @@ public class QualityInspector
 				unc.setColor(bot.getBotID().getTeamColor().getColor());
 				unc.withFontHeight(60);
 				shapes.add(unc);
+			}
+		}
+	}
+
+
+	private void addRobotHeightIssues(List<IDrawableShape> shapes)
+	{
+		if (drawRobotHeightIssues)
+		{
+			for (RobotHeightIssue issue : robotHeightIssues)
+			{
+				DrawableCircle circle = new DrawableCircle(issue.robotPos, 160, Color.MAGENTA);
+				circle.setStrokeWidth(20);
+				shapes.add(circle);
+				DrawableAnnotation warn = new DrawableAnnotation(
+						issue.robotPos.addNew(Vector2.fromXY(0, 240)),
+						"CURRENT_HEIGHT: " + issue.robotHeight + System.lineSeparator() + " TARGET_HEIGHT: "
+								+ issue.targetHeight, false
+				);
+				warn.withFontHeight(100).withBold(true).setColor(Color.MAGENTA);
+
+				shapes.add(warn);
 			}
 		}
 	}
@@ -433,6 +495,14 @@ public class QualityInspector
 		{
 			return firstPos.addNew(secondPos).multiply(0.5);
 		}
+	}
+
+	private static class RobotHeightIssue
+	{
+		private IVector2 robotPos;
+		private BotID botId;
+		private double robotHeight;
+		private double targetHeight;
 	}
 
 	private static class RobotInvisibleIssue

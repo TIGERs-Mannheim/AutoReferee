@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -134,7 +134,10 @@ public class CamFilter
 	 * @param frame
 	 * @param lastFilteredFrame
 	 */
-	public void update(final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame, final List<VirtualBall> virtualBalls)
+	public void update(
+			final CamDetectionFrame frame, final FilteredVisionFrame lastFilteredFrame,
+			final List<VirtualBall> virtualBalls
+	)
 	{
 		checkForNonConsecutiveFrames(frame);
 		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
@@ -224,8 +227,10 @@ public class CamFilter
 		{
 			if (lastCamFrameId != 0)
 			{
-				log.warn("Non-consecutive cam frame for cam {}: {} -> {}", frame.getCameraId(), lastCamFrameId,
-						frame.getCamFrameNumber());
+				log.warn(
+						"Non-consecutive cam frame for cam {}: {} -> {}", frame.getCameraId(), lastCamFrameId,
+						frame.getCamFrameNumber()
+				);
 			}
 			if (Math.abs(frame.getCamFrameNumber() - lastCamFrameId + 1) > 10)
 			{
@@ -258,8 +263,10 @@ public class CamFilter
 				botRadius = Geometry.getBotRadius();
 			}
 
-			shapes.add(new RobotCollisionShape(bot.getPos(), bot.getOrientation(), bot.getVel().multiplyNew(1e3), botRadius, center2Drib,
-					maxBallBotHullLoss, maxBallBotFrontLoss));
+			shapes.add(new RobotCollisionShape(
+					bot.getPos(), bot.getOrientation(), bot.getVel().multiplyNew(1e3), botRadius, center2Drib,
+					maxBallBotHullLoss, maxBallBotFrontLoss
+			));
 		}
 
 		return shapes;
@@ -362,8 +369,10 @@ public class CamFilter
 	}
 
 
-	private void processBalls(final CamDetectionFrame frame, final FilteredVisionBall ball,
-			final List<FilteredVisionBot> mergedRobots, final List<VirtualBall> virtualBalls)
+	private void processBalls(
+			final CamDetectionFrame frame, final FilteredVisionBall ball,
+			final List<FilteredVisionBot> mergedRobots, final List<VirtualBall> virtualBalls
+	)
 	{
 		// remove trackers of balls that have not been visible for some time
 		balls.removeIf(e -> ((frame.gettCapture() - e.getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeBall);
@@ -379,8 +388,10 @@ public class CamFilter
 			b.predict(frame.gettCapture(), colShapes, ball.getPos().z() > maxHeightForCollision);
 		}
 
-		if(!frame.getBalls().isEmpty())
+		if (!frame.getBalls().isEmpty())
+		{
 			lastBallOnCamTimestamp = timestamp;
+		}
 
 		List<CamBall> camBalls = new ArrayList<>(frame.getBalls());
 
@@ -438,6 +449,17 @@ public class CamFilter
 			tracker.setMaxDistance(500);
 			balls.add(tracker);
 		}
+	}
+
+
+	/**
+	 * Get all the robot parameters
+	 *
+	 * @return
+	 */
+	public Map<BotID, RobotInfo> getRobotInfoMap()
+	{
+		return robotInfoMap;
 	}
 
 
@@ -510,16 +532,20 @@ public class CamFilter
 		shapes.add(id);
 
 		// Draw update rate of this camera (smoothed)
-		DrawableAnnotation camRate = new DrawableAnnotation(pos,
-				String.format("Rate: %.1fHz", 1.0 / getAverageFrameDt()));
+		DrawableAnnotation camRate = new DrawableAnnotation(
+				pos,
+				String.format("Rate: %.1fHz", 1.0 / getAverageFrameDt())
+		);
 		camRate.withOffset(Vector2.fromXY(40, -60));
 		camRate.withFontHeight(50);
 		camRate.setColor(Color.GRAY);
 		shapes.add(camRate);
 
 		// Annotate mounting height of this cam
-		DrawableAnnotation height = new DrawableAnnotation(pos,
-				String.format("Height: %.2fm", pos3D.z() * 0.001));
+		DrawableAnnotation height = new DrawableAnnotation(
+				pos,
+				String.format("Height: %.2fm", pos3D.z() * 0.001)
+		);
 		height.withOffset(Vector2.fromXY(40, 60));
 		height.withFontHeight(50);
 		height.setColor(Color.GRAY);
@@ -550,9 +576,13 @@ public class CamFilter
 			id.setColor(tracker.getBotId().getTeamColor().getColor());
 			shapes.add(id);
 
-			DrawableAnnotation age = new DrawableAnnotation(pos,
-					String.format("%d: %.3fs", camId,
-							(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9));
+			DrawableAnnotation age = new DrawableAnnotation(
+					pos,
+					String.format(
+							"%d: %.3fs", camId,
+							(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9
+					)
+			);
 			age.withOffset(Vector2.fromXY(150, (camId * 45.0) - 100.0));
 			age.setColor(Color.GREEN);
 			shapes.add(age);
