@@ -133,7 +133,7 @@ public class VisionFilterImpl extends AVisionFilter
 	@Override
 	protected void updateCamDetectionFrame(final CamDetectionFrame camDetectionFrame)
 	{
-		if (camDetectionFrame.gettCapture() <= 0)
+		if (camDetectionFrame.getTimestamp() <= 0)
 		{
 			// skip negative timestamps. They can produce unexpected behavior
 			return;

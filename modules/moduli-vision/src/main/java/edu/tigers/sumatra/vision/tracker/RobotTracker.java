@@ -83,12 +83,14 @@ public class RobotTracker
 	public RobotTracker(final CamRobot robot)
 	{
 		filterXY = new TrackingFilterPosVel2D(robot.getPos(), initialCovarianceXY, modelErrorXY, measErrorXY,
-				robot.gettCapture());
+				robot.getTimestamp()
+		);
 		filterW = new TrackingFilterPosVel1D(robot.getOrientation(), initialCovarianceW, modelErrorW, measErrorW,
-				robot.gettCapture());
+				robot.getTimestamp()
+		);
 
 		lastCamOrientation = robot.getOrientation();
-		lastUpdateTimestamp = robot.gettCapture();
+		lastUpdateTimestamp = robot.getTimestamp();
 		botId = robot.getBotId();
 		botHeight = robot.getHeight();
 		camId = robot.getCameraId();
@@ -108,12 +110,14 @@ public class RobotTracker
 		RealVector w = new ArrayRealVector(new double[] { filtered.getOrientation(), filtered.getAngularVel() });
 
 		filterXY = new TrackingFilterPosVel2D(xy, initialCovarianceXY, modelErrorXY, measErrorXY,
-				robot.gettCapture());
+				robot.getTimestamp()
+		);
 		filterW = new TrackingFilterPosVel1D(w, initialCovarianceW, modelErrorW, measErrorW,
-				robot.gettCapture());
+				robot.getTimestamp()
+		);
 
 		lastCamOrientation = robot.getOrientation();
-		lastUpdateTimestamp = robot.gettCapture();
+		lastUpdateTimestamp = robot.getTimestamp();
 		botId = robot.getBotId();
 		camId = robot.getCameraId();
 	}
@@ -148,7 +152,7 @@ public class RobotTracker
 	 */
 	public void update(final CamRobot robot)
 	{
-		double dtInSec = Math.abs(robot.gettCapture() - lastUpdateTimestamp) * 1e-9;
+		double dtInSec = Math.abs(robot.getTimestamp() - lastUpdateTimestamp) * 1e-9;
 		double distanceToPrediction = filterXY.getPositionEstimate().distanceTo(robot.getPos());
 		if (distanceToPrediction > (dtInSec * maxLinearVel))
 		{
@@ -169,7 +173,7 @@ public class RobotTracker
 			health += 2;
 		}
 
-		lastUpdateTimestamp = robot.gettCapture();
+		lastUpdateTimestamp = robot.getTimestamp();
 		updateTimestamps.add(lastUpdateTimestamp);
 
 		filterXY.correct(robot.getPos());

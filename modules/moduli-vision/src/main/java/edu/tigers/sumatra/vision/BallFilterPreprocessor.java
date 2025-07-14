@@ -263,7 +263,7 @@ public class BallFilterPreprocessor
 			// Merge these few trackers
 			MergedBall mergedBall = BallTracker.mergeBallTrackers(distinctTrackers, timestamp);
 
-			mergedBall.getLatestCamBall().ifPresent(latestBall -> lastBallUpdateTimestamp = latestBall.gettCapture());
+			mergedBall.getLatestCamBall().ifPresent(latestBall -> lastBallUpdateTimestamp = latestBall.getTimestamp());
 
 			return mergedBall;
 		}
@@ -488,7 +488,8 @@ public class BallFilterPreprocessor
 			{
 				IKickEstimator est = bestEstimator.get();
 				boolean noLastBestEstimator = (lastBestEstimator == null) || !estimators.contains(lastBestEstimator);
-				if (noLastBestEstimator || ((est != lastBestEstimator) && (est.getFitResult().orElseThrow()
+				if (noLastBestEstimator || lastBestEstimator.getFitResult().isEmpty() || ((est != lastBestEstimator) && (
+						est.getFitResult().orElseThrow()
 						.getAvgDistance() < (lastBestEstimator.getFitResult().orElseThrow().getAvgDistance()
 						* (1.0 - estimatorSwitchHysteresis))))
 						|| (lastBestEstimator.getType() == est.getType()))

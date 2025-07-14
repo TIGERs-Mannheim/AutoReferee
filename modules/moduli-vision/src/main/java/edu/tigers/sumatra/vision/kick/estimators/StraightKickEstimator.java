@@ -87,7 +87,7 @@ public class StraightKickEstimator implements IKickEstimator
 				.map(BallTracker.MergedBall::getLatestCamBall)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
-				.collect(Collectors.toList());
+				.toList();
 
 		if (camBalls.size() > 2 && (camBalls.get(1).getTimestamp() - camBalls.get(0).getTimestamp()) * 1e-9 > 0.1)
 		{
@@ -141,7 +141,7 @@ public class StraightKickEstimator implements IKickEstimator
 
 		for (int i = 0; i < numPoints; i++)
 		{
-			double time = (balls.get(i).gettCapture() - balls.getFirst().gettCapture()) * 1e-9;
+			double time = (balls.get(i).getTimestamp() - balls.getFirst().getTimestamp()) * 1e-9;
 			matA.setEntry(i, 0, time);
 			matA.setEntry(i, 1, 1.0);
 
@@ -266,7 +266,7 @@ public class StraightKickEstimator implements IKickEstimator
 		double error = 0;
 		for (CamBall ball : records)
 		{
-			IVector2 modelPos = traj.getMilliStateAtTime((ball.gettCapture() - tZero) * 1e-9).getPos().getXYVector();
+			IVector2 modelPos = traj.getMilliStateAtTime((ball.getTimestamp() - tZero) * 1e-9).getPos().getXYVector();
 			ground.add(modelPos);
 
 			error += modelPos.distanceTo(ball.getFlatPos());
@@ -288,7 +288,7 @@ public class StraightKickEstimator implements IKickEstimator
 	@Override
 	public boolean isDone(final List<FilteredVisionBot> mergedRobots, final long timestamp)
 	{
-		if (((allRecords.getLast().gettCapture() - allRecords.getFirst().gettCapture()) * 1e-9) < 0.1)
+		if (((allRecords.getLast().getTimestamp() - allRecords.getFirst().getTimestamp()) * 1e-9) < 0.1)
 		{
 			// keep this estimator for at least 0.1s
 			return false;
@@ -343,11 +343,11 @@ public class StraightKickEstimator implements IKickEstimator
 			return result;
 		}
 
-		long timeAfterKick = allRecords.getFirst().gettCapture() + 500_000_000;
+		long timeAfterKick = allRecords.getFirst().getTimestamp() + 500_000_000;
 
 		// keep all records directly after the kick and within the field (-10cm)
 		List<CamBall> usedRecords = allRecords.stream()
-				.filter(r -> (r.gettCapture() < timeAfterKick)
+				.filter(r -> (r.getTimestamp() < timeAfterKick)
 						|| Geometry.getField().withMargin(-100).isPointInShape(r.getFlatPos()))
 				.toList();
 

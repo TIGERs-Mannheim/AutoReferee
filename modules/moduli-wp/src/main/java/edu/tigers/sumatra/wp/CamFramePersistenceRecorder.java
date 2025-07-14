@@ -53,7 +53,7 @@ public class CamFramePersistenceRecorder extends ABufferedPersistenceRecorder<Pe
 	public void onNewCamDetectionFrame(final ExtendedCamDetectionFrame frame)
 	{
 		camFrameMap.put(frame.getCameraId(), frame);
-		camFrameMap.values().removeIf(f -> (frame.gettCapture() - f.gettCapture()) / 1e9 > 0.2);
-		queue(new PersistenceCamDetectionFrame(frame.gettCapture(), new HashMap<>(camFrameMap)));
+		camFrameMap.values().removeIf(f -> (frame.getTimestamp() - f.getTimestamp()) / 1e9 > 0.2);
+		queue(new PersistenceCamDetectionFrame(frame.getTimestamp(), new HashMap<>(camFrameMap)));
 	}
 }

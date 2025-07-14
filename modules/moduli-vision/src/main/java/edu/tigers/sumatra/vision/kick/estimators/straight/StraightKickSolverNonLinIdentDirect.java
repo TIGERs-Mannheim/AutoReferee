@@ -78,7 +78,7 @@ public class StraightKickSolverNonLinIdentDirect
 			return Optional.of(new StraightModelIdentResult(
 					kickLine.get().directionVector(),
 					records.getFirst().getFlatPos(),
-					records.getFirst().gettCapture(),
+					records.getFirst().getTimestamp(),
 					optimum.getPointRef(),
 					records.size())
 			);
@@ -104,13 +104,13 @@ public class StraightKickSolverNonLinIdentDirect
 				CamBall prev = ballList.get(i - 1);
 				CamBall next = ballList.get(i);
 				double deltaPos = prev.getFlatPos().distanceTo(next.getFlatPos());
-				double deltaTime = (next.getCameraCaptureTimestamp() - prev.getCameraCaptureTimestamp()) * 1e-9;
+				double deltaTime = (next.getTimestamp() - prev.getTimestamp()) * 1e-9;
 				if (deltaTime < 1e-3)
 				{
 					continue;
 				}
 
-				long centralTime = (next.getCameraCaptureTimestamp() + prev.getCameraCaptureTimestamp()) / 2;
+				long centralTime = (next.getTimestamp() + prev.getTimestamp()) / 2;
 
 				timestampVelocityList.add(new TimeVelocityPair(centralTime, deltaPos / deltaTime));
 			}

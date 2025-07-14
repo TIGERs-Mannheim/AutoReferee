@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -60,6 +61,7 @@ public class CamFilter
 
 	private static final int FRAME_FILTER_NUM_SAMPLES = 100;
 	private static final int FRAME_FILTER_DIVIDER = 6;
+	private static final double MISSING_FRAME_TIMESPAN = 30.0;
 
 	private final FirstOrderMultiSampleEstimator frameIntervalFilter = new FirstOrderMultiSampleEstimator(
 			FRAME_FILTER_NUM_SAMPLES);
@@ -79,6 +81,8 @@ public class CamFilter
 	private Map<BotID, RobotInfo> robotInfoMap = new ConcurrentHashMap<>();
 
 	private Queue<CamBall> ballHistory = QueueUtils.synchronizedQueue(new CircularFifoQueue<>(100));
+
+	private final List<Long> missingFrameTimestamps = new CopyOnWriteArrayList<>();
 
 	@Getter
 	private long lastBallOnCamTimestamp = 0;
@@ -106,9 +110,6 @@ public class CamFilter
 
 	@Configurable(defValue = "200.0", comment = "Max. distance to copy state from filtered bot to new trackers")
 	private static double copyTrackerMaxDistance = 200.0;
-
-	@Configurable(defValue = "false", comment = "Adjust frame times based on estimated frame rate and frame number")
-	private static boolean adjustTCapture = false;
 
 	static
 	{
@@ -140,12 +141,28 @@ public class CamFilter
 	)
 	{
 		checkForNonConsecutiveFrames(frame);
-		CamDetectionFrame adjustedFrame = adjustTCapture(frame);
 
-		processRobots(adjustedFrame, lastFilteredFrame.getBots());
-		processBalls(adjustedFrame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots(), virtualBalls);
+		if ((frame.getCamFrameNumber() % FRAME_FILTER_DIVIDER) == 0)
+		{
+			frameIntervalFilter.addSample(frame.getCamFrameNumber(), frame.getTimestamp());
+		}
 
-		timestamp = adjustedFrame.gettCapture();
+		if (frameIntervalFilter.getNumSamples() > FRAME_FILTER_NUM_SAMPLES / 10)
+		{
+			double frameDt = (frame.getTimestamp() - timestamp) * 1e-9;
+
+			if (frameDt > getAverageFrameDt() * 1.5)
+			{
+				missingFrameTimestamps.add(frame.getTimestamp() - (long) (getAverageFrameDt() * 1e9));
+			}
+
+			missingFrameTimestamps.removeIf(t -> (frame.getTimestamp() - t) * 1e-9 > MISSING_FRAME_TIMESPAN);
+		}
+
+		processRobots(frame, lastFilteredFrame.getBots());
+		processBalls(frame, lastFilteredFrame.getBall(), lastFilteredFrame.getBots(), virtualBalls);
+
+		timestamp = frame.getTimestamp();
 	}
 
 
@@ -195,29 +212,10 @@ public class CamFilter
 	private void reset()
 	{
 		frameIntervalFilter.reset();
+		missingFrameTimestamps.clear();
 		robots.clear();
 		balls.clear();
 		ballHistory.clear();
-	}
-
-
-	private CamDetectionFrame adjustTCapture(final CamDetectionFrame frame)
-	{
-		if ((frame.getCamFrameNumber() % FRAME_FILTER_DIVIDER) == 0)
-		{
-			frameIntervalFilter.addSample(frame.getCamFrameNumber(), frame.gettCapture());
-		}
-
-		if (adjustTCapture)
-		{
-			IVector2 estimate = frameIntervalFilter.getBestEstimate().orElse(Vector2.fromXY(frame.gettCapture(), 0.0));
-
-			double tCapture = estimate.x() + (estimate.y() * frame.getCamFrameNumber());
-
-			return new CamDetectionFrame(frame, (long) tCapture);
-		}
-
-		return frame;
 	}
 
 
@@ -296,22 +294,46 @@ public class CamFilter
 	}
 
 
+	/**
+	 * Get number of missed frames in the last MISSING_FRAME_TIMESPAN seconds.
+	 *
+	 * @return
+	 */
+	public int getNumMissingFrames()
+	{
+		return missingFrameTimestamps.size();
+	}
+
+
+	/**
+	 * Get rate of missed frames versus expected frames.
+	 *
+	 * @return
+	 */
+	public double getFrameMissRate()
+	{
+		double expectedNumFrames = 1.0 / getAverageFrameDt() * MISSING_FRAME_TIMESPAN;
+		return getNumMissingFrames() / expectedNumFrames;
+	}
+
+
 	private void processRobots(final CamDetectionFrame frame, final List<FilteredVisionBot> mergedRobots)
 	{
 		// remove trackers of bots that have not been visible for some time
 		robots.entrySet()
 				.removeIf(
-						e -> ((frame.gettCapture() - e.getValue().getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeRobot);
+						e -> ((frame.getTimestamp() - e.getValue().getLastUpdateTimestamp()) * 1e-9)
+								> invisibleLifetimeRobot);
 
 		// remove trackers out of field
 		fieldRectWithBoundary.ifPresent(iRectangle -> robots.entrySet()
 				.removeIf(
-						e -> !iRectangle.isPointInShape(e.getValue().getPosition(frame.gettCapture()))));
+						e -> !iRectangle.isPointInShape(e.getValue().getPosition(frame.getTimestamp()))));
 
 		// do a prediction on all trackers
 		for (RobotTracker r : robots.values())
 		{
-			r.predict(frame.gettCapture(), getAverageFrameDt());
+			r.predict(frame.getTimestamp(), getAverageFrameDt());
 		}
 
 		for (CamRobot r : frame.getRobots())
@@ -375,17 +397,17 @@ public class CamFilter
 	)
 	{
 		// remove trackers of balls that have not been visible for some time
-		balls.removeIf(e -> ((frame.gettCapture() - e.getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeBall);
+		balls.removeIf(e -> ((frame.getTimestamp() - e.getLastUpdateTimestamp()) * 1e-9) > invisibleLifetimeBall);
 
 		// remove trackers of balls that were out of the field for too long
-		balls.removeIf(e -> ((frame.gettCapture() - e.getLastInFieldTimestamp()) * 1e-9) > invisibleLifetimeBall);
+		balls.removeIf(e -> ((frame.getTimestamp() - e.getLastInFieldTimestamp()) * 1e-9) > invisibleLifetimeBall);
 
 		List<RobotCollisionShape> colShapes = getRobotCollisionShapes(mergedRobots);
 
 		// do a prediction on all trackers
 		for (BallTracker b : balls)
 		{
-			b.predict(frame.gettCapture(), colShapes, ball.getPos().z() > maxHeightForCollision);
+			b.predict(frame.getTimestamp(), colShapes, ball.getPos().z() > maxHeightForCollision);
 		}
 
 		if (!frame.getBalls().isEmpty())
@@ -396,7 +418,7 @@ public class CamFilter
 		List<CamBall> camBalls = new ArrayList<>(frame.getBalls());
 
 		var mappedBalls = virtualBalls.stream()
-				.map(b -> b.toCamBall(camId, frame.getFrameNumber()))
+				.map(b -> b.toCamBall(camId, frame.getGlobalFrameId()))
 				.toList();
 		camBalls.addAll(mappedBalls);
 
@@ -526,7 +548,7 @@ public class CamFilter
 
 		// Draw camera id
 		DrawableAnnotation id = new DrawableAnnotation(pos, Integer.toString(camId));
-		id.withOffset(Vector2.fromXY(-30, -80));
+		id.withOffset(Vector2.fromXY(-100, -80));
 		id.setColor(Color.CYAN);
 		id.withFontHeight(120);
 		shapes.add(id);
@@ -538,7 +560,7 @@ public class CamFilter
 		);
 		camRate.withOffset(Vector2.fromXY(40, -60));
 		camRate.withFontHeight(50);
-		camRate.setColor(Color.GRAY);
+		camRate.setColor(Color.LIGHT_GRAY);
 		shapes.add(camRate);
 
 		// Annotate mounting height of this cam
@@ -548,8 +570,18 @@ public class CamFilter
 		);
 		height.withOffset(Vector2.fromXY(40, 60));
 		height.withFontHeight(50);
-		height.setColor(Color.GRAY);
+		height.setColor(Color.LIGHT_GRAY);
 		shapes.add(height);
+
+		// Annotate missed frames and rate
+		DrawableAnnotation missedFrames = new DrawableAnnotation(
+				pos,
+				String.format("Missed: %d (%.2f%%)", getNumMissingFrames(), getFrameMissRate() * 100.0)
+		);
+		missedFrames.withOffset(Vector2.fromXY(40, 110));
+		missedFrames.withFontHeight(50);
+		missedFrames.setColor(Color.LIGHT_GRAY);
+		shapes.add(missedFrames);
 
 		return shapes;
 	}

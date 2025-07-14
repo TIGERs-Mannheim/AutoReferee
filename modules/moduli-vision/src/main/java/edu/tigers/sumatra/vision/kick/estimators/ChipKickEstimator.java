@@ -184,6 +184,7 @@ public class ChipKickEstimator implements IKickEstimator
 		if (optSolverResult.isEmpty())
 		{
 			failures++;
+			fitResult = null;
 			return;
 		}
 
@@ -197,7 +198,7 @@ public class ChipKickEstimator implements IKickEstimator
 			double tFly = (2 * kickVel.z()) / 9810;
 			CamBall lastRecord = records.getLast();
 
-			if ((((lastRecord.gettCapture() - kickTimestamp) * 1e-9) > tFly) && (records.size() > 12))
+			if ((((lastRecord.getTimestamp() - kickTimestamp) * 1e-9) > tFly) && (records.size() > 12))
 			{
 				doFirstHopFit = false;
 
@@ -215,7 +216,7 @@ public class ChipKickEstimator implements IKickEstimator
 	private void computeFitResult(String solverName)
 	{
 		List<IVector2> modelPoints = records.stream()
-				.map(r -> currentTraj.getMilliStateAtTime((r.gettCapture() - kickTimestamp) * 1e-9).getPos()
+				.map(r -> currentTraj.getMilliStateAtTime((r.getTimestamp() - kickTimestamp) * 1e-9).getPos()
 						.projectToGroundNew(getCameraPosition(r.getCameraId())))
 				.map(IVector2.class::cast)
 				.toList();
@@ -316,8 +317,8 @@ public class ChipKickEstimator implements IKickEstimator
 			return oldKick;
 		}
 
-		long tCaptureLastRecord = records.getLast().gettCapture();
-		if (((tCaptureLastRecord - records.getFirst().gettCapture()) * 1e-9) < 0.1)
+		long tCaptureLastRecord = records.getLast().getTimestamp();
+		if (((tCaptureLastRecord - records.getFirst().getTimestamp()) * 1e-9) < 0.1)
 		{
 			// keep this estimator for at least 0.1s
 			return false;
@@ -389,11 +390,11 @@ public class ChipKickEstimator implements IKickEstimator
 			return result;
 		}
 
-		long timeAfterKick = allRecords.getFirst().gettCapture() + 500_000_000;
+		long timeAfterKick = allRecords.getFirst().getTimestamp() + 500_000_000;
 
 		// keep all records directly after the kick and within the field (-10cm)
 		List<CamBall> usedRecords = allRecords.stream()
-				.filter(r -> (r.gettCapture() < timeAfterKick)
+				.filter(r -> (r.getTimestamp() < timeAfterKick)
 						|| Geometry.getField().withMargin(-100).isPointInShape(r.getFlatPos()))
 				.toList();
 
