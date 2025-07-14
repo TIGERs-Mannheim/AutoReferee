@@ -44,7 +44,8 @@ public class EditorView extends JPanel
 	private final List<IConfigEditorViewObserver> observers = new CopyOnWriteArrayList<>();
 	private boolean wasLoaded = false;
 	private transient ITreeTableModel model;
-	private boolean listenForExpansionEvents = false;
+	private transient HierarchicalConfiguration referenceConfig;
+	private boolean listenForExpansionEvents;
 
 
 	public EditorView(final String title, final String configKey, final HierarchicalConfiguration config)
@@ -125,6 +126,7 @@ public class EditorView extends JPanel
 
 
 		// Finally: Add model
+		referenceConfig = config;
 		model = new ConfigXMLTreeTableModel(config);
 		treetable = new JTreeTable(model);
 		treetable.getModel().addTableModelListener(event -> {
@@ -206,7 +208,7 @@ public class EditorView extends JPanel
 	}
 
 
-	public void reload()
+	private void reload()
 	{
 		notifyReloadPressed(configKey);
 		wasLoaded = true;
@@ -285,6 +287,15 @@ public class EditorView extends JPanel
 		return configKey;
 	}
 
+	public void setReferenceConfig(HierarchicalConfiguration config)
+	{
+		referenceConfig = config;
+	}
+
+	public HierarchicalConfiguration getReferenceConfig()
+	{
+		return referenceConfig;
+	}
 
 	private class MyTreeExpansionListener implements TreeExpansionListener
 	{

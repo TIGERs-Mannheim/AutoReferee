@@ -47,4 +47,6 @@ public @interface Configurable
 
 
 	String category() default "";
+
+	String[] tags() default {};
 }

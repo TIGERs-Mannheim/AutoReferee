@@ -56,6 +56,6 @@ public class ConfigEditorPresenter
 	public void onReloadPressed(final String configKey)
 	{
 		HierarchicalConfiguration config = ConfigRegistration.loadConfig(configKey);
-		SwingUtilities.invokeLater(() -> viewPanel.refreshConfigModel(configKey, config));
+		SwingUtilities.invokeLater(() -> viewPanel.refreshConfigModel(config));
 	}
 }

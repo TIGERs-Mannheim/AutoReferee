@@ -52,6 +52,7 @@ public class ConfigAnnotationProcessor
 		private String fieldValue = "";
 		private String fieldDefValue = "";
 		private String comment = "";
+		private String[] tags = {};
 		private Class<?> fieldType;
 
 
@@ -91,6 +92,7 @@ public class ConfigAnnotationProcessor
 					.append(fieldValue, that.fieldValue)
 					.append(fieldDefValue, that.fieldDefValue)
 					.append(comment, that.comment)
+					.append(tags, that.tags)
 					.append(fieldType, that.fieldType)
 					.isEquals();
 		}
@@ -106,6 +108,7 @@ public class ConfigAnnotationProcessor
 					.append(fieldValue)
 					.append(fieldDefValue)
 					.append(comment)
+					.append(tags)
 					.append(fieldType)
 					.toHashCode();
 		}
@@ -173,12 +176,14 @@ public class ConfigAnnotationProcessor
 							.getValue().getClass(),
 					fieldNode.getValue()));
 			String comment = getAttribute(fieldNode, "comment");
+			String[] tags = getAttribute(fieldNode, "tags").split(" ");
 			ConfigurableFieldData fieldData = new ConfigurableFieldData();
 			fieldData.className = className;
 			fieldData.fieldName = fieldName;
 			fieldData.fieldSpezi = fieldSpezi;
 			fieldData.fieldValue = fieldValue;
 			fieldData.comment = comment;
+			fieldData.tags = tags;
 			if (data.containsKey(fieldData.getKey()))
 			{
 				data.get(fieldData.getKey()).fieldValue = fieldValue;
@@ -221,6 +226,7 @@ public class ConfigAnnotationProcessor
 					fdCur.comment = fd.comment;
 					fdCur.fieldDefValue = fd.fieldDefValue;
 					fdCur.fieldType = fd.fieldType;
+					fdCur.tags = fd.tags;
 				}
 			}
 		}
@@ -468,6 +474,8 @@ public class ConfigAnnotationProcessor
 				cfg.addProperty(clazzKey + "." + fieldData.fieldName + spezi + "[@comment]", escape(fieldData.comment));
 				cfg.addProperty(clazzKey + "." + fieldData.fieldName + spezi + "[@class]",
 						fieldData.fieldType.getName());
+				cfg.addProperty(clazzKey + "." + fieldData.fieldName + spezi + "[@tags]", escape(
+						String.join(" ", fieldData.tags)));
 			}
 			config.append(cfg);
 		}
@@ -586,6 +594,7 @@ public class ConfigAnnotationProcessor
 
 				if (cat.isEmpty() || cat.equals(category))
 				{
+					String[] tags = conf.tags();
 					String comment = conf.comment();
 					String[] declaredSpezis = conf.spezis();
 
@@ -645,6 +654,7 @@ public class ConfigAnnotationProcessor
 						fieldDataSpezi.fieldDefValue = defValue;
 						fieldDataSpezi.fieldSpezi = spezi;
 						fieldDataSpezi.comment = comment;
+						fieldDataSpezi.tags = tags;
 						fieldDataSpezi.fieldType = type;
 						dataRead.add(fieldDataSpezi);
 						speziId++;
