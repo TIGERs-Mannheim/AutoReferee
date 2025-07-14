@@ -16,6 +16,7 @@ import edu.tigers.sumatra.vision.kick.estimators.EBallModelIdentType;
 import edu.tigers.sumatra.vision.kick.estimators.IBallModelIdentResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -37,6 +38,7 @@ import java.util.Optional;
  * Estimate kick velocity and chip parameters over complete chip ball trajectory
  * via a genetic optimization algorithm.
  */
+@Log4j2
 public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 {
 	private static final double[] LOWER_BOUNDS = new double[] { -6500, -6500, 100, 0.1, 0.1, 0.1 };
@@ -79,14 +81,16 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 		double[] result;
 
 		// pull out wide-scatter shotgun
-		CMAESOptimizer optimizer = new CMAESOptimizer(10000, 0.1, true, 10, 0, new MersenneTwister(), false, null);
+		CMAESOptimizer optimizer = new CMAESOptimizer(10000, 0.01, true, 10, 0, new MersenneTwister(), false, null);
 
 		try
 		{
 			// and now fire it onto our problem
+			var model = new ChipBallModel(records);
+
 			final PointValuePair optimum = optimizer.optimize(
 					new MaxEval(20000),
-					new ObjectiveFunction(new ChipBallModel(records)),
+					new ObjectiveFunction(model),
 					GoalType.MINIMIZE,
 					new InitialGuess(initialGuess),
 					new SimpleBounds(LOWER_BOUNDS, UPPER_BOUNDS),
@@ -94,10 +98,25 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 					new CMAESOptimizer.PopulationSize(50));
 
 			result = optimum.getPoint();
+			double error = model.value(result);
+			log.debug(
+					"Optimizer used {} evaluations, {} iterations, error: {}",
+					optimizer.getEvaluations(), optimizer.getIterations(), error
+			);
 		} catch (IllegalStateException | MathIllegalArgumentException e)
 		{
 			// victim did not survive
 			return Optional.empty();
+		}
+
+		for (int i = 0; i < LOWER_BOUNDS.length; i++)
+		{
+			double val = result[i];
+			if (val <= LOWER_BOUNDS[i] || val >= UPPER_BOUNDS[i])
+			{
+				log.debug("Solution discarded, value {} with index {} is at boundary.", val, i);
+				return Optional.empty();
+			}
 		}
 
 		// we have a winner!
@@ -147,9 +166,10 @@ public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 				IVector3 trajPos = traj.getMilliStateAtTime((ball.getTimestamp() - tKick) * 1e-9).getPos();
 				IVector2 ground = trajPos.projectToGroundNew(getCameraPosition(ball.getCameraId()));
 
-				error += ball.getFlatPos().distanceTo(ground);
+				error += ball.getFlatPos().distanceToSqr(ground);
 			}
 
+			error = Math.sqrt(error);
 			error /= records.size();
 
 			return error;

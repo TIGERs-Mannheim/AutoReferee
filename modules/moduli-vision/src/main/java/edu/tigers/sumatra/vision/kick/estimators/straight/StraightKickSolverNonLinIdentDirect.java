@@ -59,21 +59,39 @@ public class StraightKickSolverNonLinIdentDirect
 		double kSwitch = Geometry.getBallParameters().getKSwitch();
 
 		double[] initialGuess = new double[] { velocities.getFirst().getVelocity(), accSlide, accRoll, kSwitch };
-		double[] lowerBounds = new double[] { 100, -20000, -2000, 0.5 };
-		double[] upperBounds = new double[] { 12000, -100, -10, 0.8 };
+		double[] lowerBounds = new double[] { 100, -8000, -2000, 0.5 };
+		double[] upperBounds = new double[] { 10000, -100, -10, 0.85 };
 
-		CMAESOptimizer optimizer = new CMAESOptimizer(10000, 0.1, true, 10, 0, new MersenneTwister(), false, null);
+		CMAESOptimizer optimizer = new CMAESOptimizer(10000, 0.01, true, 10, 0, new MersenneTwister(), false, null);
 
 		try
 		{
+			var model = new StraightBallModel(velocities);
 			final PointValuePair optimum = optimizer.optimize(
 					new MaxEval(20000),
-					new ObjectiveFunction(new StraightBallModel(velocities)),
+					new ObjectiveFunction(model),
 					GoalType.MINIMIZE,
 					new InitialGuess(initialGuess),
 					new SimpleBounds(lowerBounds, upperBounds),
 					new CMAESOptimizer.Sigma(new double[] { 10, 10, 1, 0.01 }),
 					new CMAESOptimizer.PopulationSize(50));
+
+			double error = model.value(optimum.getPointRef());
+			log.debug(
+					"Optimizer used {} evaluations, {} iterations, error: {}",
+					optimizer.getEvaluations(), optimizer.getIterations(), error
+			);
+
+			// Parameters: kickVel (abs), accSlide, accRoll, kSwitch
+			for (int i = 0; i < lowerBounds.length; i++)
+			{
+				double val = optimum.getPointRef()[i];
+				if (val <= lowerBounds[i] || val >= upperBounds[i])
+				{
+					log.debug("Solution discarded, value {} with index {} is at boundary.", val, i);
+					return Optional.empty();
+				}
+			}
 
 			return Optional.of(new StraightModelIdentResult(
 					kickLine.get().directionVector(),
@@ -285,10 +303,11 @@ public class StraightKickSolverNonLinIdentDirect
 					modelVel = vSwitch + ((t - tSwitch) * accRoll);
 				}
 
-				error += Math.abs(entry.getVelocity() - modelVel);
+				error += Math.pow(entry.getVelocity() - modelVel, 2);
 			}
 
-			return error;
+			error = Math.sqrt(error);
+			return error / velocities.size();
 		}
 	}
 }

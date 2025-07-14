@@ -81,13 +81,14 @@ public class StraightKickEstimator implements IKickEstimator
 	 *
 	 * @param event Initial kick event from detector.
 	 */
+	@SuppressWarnings("squid:S6204") // Usage of Collectors.toList() to get modifiable list
 	public StraightKickEstimator(final KickEvent event, List<FilteredVisionBall> filteredBalls)
 	{
 		List<CamBall> camBalls = event.getRecordsSinceKick().stream()
 				.map(BallTracker.MergedBall::getLatestCamBall)
 				.filter(Optional::isPresent)
 				.map(Optional::get)
-				.toList();
+				.collect(Collectors.toList());
 
 		if (camBalls.size() > 2 && (camBalls.get(1).getTimestamp() - camBalls.get(0).getTimestamp()) * 1e-9 > 0.1)
 		{
