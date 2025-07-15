@@ -306,6 +306,20 @@ public class GameState
 
 
 	/**
+	 * @return true if the next state is a DIRECT_FREE or INDIRECT_FREE for us.
+	 */
+	public boolean isNextStandardSituationForThem()
+	{
+		if (isNextGameStateForUs() || isGameRunning())
+		{
+			return false;
+		}
+
+		return (nextState == EGameState.DIRECT_FREE) || (nextState == EGameState.INDIRECT_FREE);
+	}
+
+
+	/**
 	 * @return true if this is a DIRECT_FREE or INDIRECT_FREE
 	 */
 	public boolean isStandardSituation()
