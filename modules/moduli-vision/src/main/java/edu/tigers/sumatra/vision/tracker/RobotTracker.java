@@ -119,6 +119,7 @@ public class RobotTracker
 		lastCamOrientation = robot.getOrientation();
 		lastUpdateTimestamp = robot.getTimestamp();
 		botId = robot.getBotId();
+		botHeight = robot.getHeight();
 		camId = robot.getCameraId();
 	}
 

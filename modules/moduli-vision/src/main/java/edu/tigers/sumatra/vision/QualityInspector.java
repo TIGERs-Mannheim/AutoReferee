@@ -153,28 +153,32 @@ public class QualityInspector
 
 	private void checkRobotHeightDeviation(final long timestamp, final CamFilter filter)
 	{
+		// remove old issues
+		robotHeightIssues.removeIf(i -> Math.abs(timestamp - i.lastOccurence) > (issueTimeout * 1e9));
+
 		for (RobotTracker tracker : filter.getValidRobots().values())
 		{
 			RobotInfo robotInfo = filter.getRobotInfoMap().get(tracker.getBotId());
 			if (robotInfo != null && robotInfo.getType() != EBotType.UNKNOWN)
 			{
 				double targetHeight = robotInfo.getBotParams().getDimensions().getHeight();
-				double robotHeight = tracker.getBotHeight();
-				if (Math.abs(targetHeight - robotHeight) > 1e-3)
-
+				double visionHeight = tracker.getBotHeight();
+				if (Math.abs(targetHeight - visionHeight) > 1e-3)
 				{
 					robotHeightIssues.stream().filter(issue -> issue.botId.equals(tracker.getBotId())).findFirst()
 							.ifPresentOrElse(
 									existingIssue -> {
 										existingIssue.robotPos = tracker.getPosition(timestamp);
-										existingIssue.robotHeight = robotHeight;
+										existingIssue.robotHeight = visionHeight;
 										existingIssue.targetHeight = targetHeight;
+										existingIssue.lastOccurence = timestamp;
 									}, () -> {
 										RobotHeightIssue newIssue = new RobotHeightIssue();
 										newIssue.robotPos = tracker.getPosition(timestamp);
 										newIssue.botId = tracker.getBotId();
-										newIssue.robotHeight = robotHeight;
+										newIssue.robotHeight = visionHeight;
 										newIssue.targetHeight = targetHeight;
+										newIssue.lastOccurence = timestamp;
 										robotHeightIssues.add(newIssue);
 									}
 							);
@@ -369,11 +373,12 @@ public class QualityInspector
 				circle.setStrokeWidth(20);
 				shapes.add(circle);
 				DrawableAnnotation warn = new DrawableAnnotation(
-						issue.robotPos.addNew(Vector2.fromXY(0, 240)),
-						"CURRENT_HEIGHT: " + issue.robotHeight + System.lineSeparator() + " TARGET_HEIGHT: "
-								+ issue.targetHeight, false
+						issue.robotPos,
+						"VISION_HEIGHT: " + issue.robotHeight + System.lineSeparator() + " TARGET_HEIGHT: "
+								+ issue.targetHeight, true
 				);
-				warn.withFontHeight(100).withBold(true).setColor(Color.MAGENTA);
+
+				warn.withOffset(Vector2.fromXY(0, 270)).withFontHeight(100).withBold(true).setColor(Color.MAGENTA);
 
 				shapes.add(warn);
 			}
@@ -503,6 +508,7 @@ public class QualityInspector
 		private BotID botId;
 		private double robotHeight;
 		private double targetHeight;
+		private long lastOccurence;
 	}
 
 	private static class RobotInvisibleIssue

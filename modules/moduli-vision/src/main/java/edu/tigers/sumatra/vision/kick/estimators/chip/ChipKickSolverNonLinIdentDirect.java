@@ -42,7 +42,7 @@ import java.util.Optional;
 public class ChipKickSolverNonLinIdentDirect extends AChipKickSolver
 {
 	private static final double[] LOWER_BOUNDS = new double[] { -6500, -6500, 100, 0.1, 0.1, 0.1 };
-	private static final double[] UPPER_BOUNDS = new double[] { 6500, 6500, 6500, 0.95, 1.0, 0.9 };
+	private static final double[] UPPER_BOUNDS = new double[] { 6500, 6500, 6500, 0.95, 1.001, 0.9 };
 
 	private double[] initialGuess = new double[6];
 
