@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -167,7 +167,7 @@ public class VisionFilterImpl extends AVisionFilter
 			} catch (InterruptedException e)
 			{
 				Thread.currentThread().interrupt();
-			} catch(Throwable e)
+			} catch (Throwable e)
 			{
 				log.error("Uncaught exception while processing cam frame", e);
 			}
@@ -245,6 +245,9 @@ public class VisionFilterImpl extends AVisionFilter
 		// forward frame for inspection
 		qualityInspector.inspectFilteredVisionFrame(frame);
 
+		// Inspect the current state of the cameras
+		qualityInspector.inspectCameras(cams.values());
+
 		// Update active cameras in viewport architect
 		viewportArchitect.updateCameras(cams.keySet());
 
@@ -290,14 +293,17 @@ public class VisionFilterImpl extends AVisionFilter
 			Collection<CamFilter> camFilters,
 			long timestamp,
 			List<FilteredVisionBot> mergedRobots,
-			FilteredVisionBall lastBall)
+			FilteredVisionBall lastBall
+	)
 	{
 		List<BallTracker> allTrackers = camFilters.stream()
 				.flatMap(f -> f.getBalls().stream())
 				.toList();
 
-		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(lastBall, allTrackers,
-				mergedRobots, getRobotInfoMap(), timestamp);
+		BallFilterPreprocessorOutput preOutput = ballFilterPreprocessor.update(
+				lastBall, allTrackers,
+				mergedRobots, getRobotInfoMap(), timestamp
+		);
 
 		lastBallFilterOutput = ballFilter.update(preOutput, lastBall, timestamp);
 
@@ -447,16 +453,24 @@ public class VisionFilterImpl extends AVisionFilter
 				camId.setColor(Color.WHITE);
 				shapes.add(camId);
 
-				DrawableAnnotation unc = new DrawableAnnotation(pos,
-						String.format("%.2f",
-								tracker.getFilter().getPositionUncertainty().getLength() * tracker.getUncertainty()));
+				DrawableAnnotation unc = new DrawableAnnotation(
+						pos,
+						String.format(
+								"%.2f",
+								tracker.getFilter().getPositionUncertainty().getLength() * tracker.getUncertainty()
+						)
+				);
 				unc.withOffset(Vector2.fromX(-80));
 				unc.setColor(Color.WHITE);
 				shapes.add(unc);
 
-				DrawableAnnotation age = new DrawableAnnotation(pos,
-						String.format("%d: %.3fs", camFilter.getCamId(),
-								(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9));
+				DrawableAnnotation age = new DrawableAnnotation(
+						pos,
+						String.format(
+								"%d: %.3fs", camFilter.getCamId(),
+								(timestamp - tracker.getLastUpdateTimestamp()) * 1e-9
+						)
+				);
 				age.withOffset(Vector2.fromXY(120, (camFilter.getCamId() * 45.0) - 100.0));
 				age.setColor(Color.GREEN);
 				shapes.add(age);
@@ -470,14 +484,16 @@ public class VisionFilterImpl extends AVisionFilter
 		return shapes;
 	}
 
+
 	private List<IDrawableShape> getVirtualBallShapes()
 	{
 		List<IDrawableShape> shapes = new ArrayList<>();
 
 		boolean virtualBallUsed = !virtualBallProducer.getVirtualBalls().isEmpty();
-		if(virtualBallUsed)
+		if (virtualBallUsed)
 		{
-			DrawableAnnotation virtHint = new DrawableAnnotation(lastBallFilterOutput.getFilteredBall().getPos().getXYVector(), "VIRTUAL", true);
+			DrawableAnnotation virtHint = new DrawableAnnotation(
+					lastBallFilterOutput.getFilteredBall().getPos().getXYVector(), "VIRTUAL", true);
 			virtHint.setColor(Color.ORANGE);
 			virtHint.withOffset(Vector2.fromY(40));
 			virtHint.withFontHeight(30);
