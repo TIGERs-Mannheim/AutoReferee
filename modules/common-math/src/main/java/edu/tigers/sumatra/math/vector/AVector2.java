@@ -311,4 +311,17 @@ public abstract class AVector2 extends AVector implements IVector2
 				SumatraMath.addMagnitude(y(), offset.y())
 		);
 	}
+
+
+	@Override
+	public Vector2 addMagnitude(double offset)
+	{
+		if (isZeroVector())
+		{
+			return Vector2.zero();
+		}
+		var len = getLength2();
+		var factor = (len + offset) / len;
+		return multiplyNew(factor);
+	}
 }
