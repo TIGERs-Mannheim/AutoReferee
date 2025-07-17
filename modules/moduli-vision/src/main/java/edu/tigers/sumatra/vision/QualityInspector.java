@@ -53,7 +53,7 @@ public class QualityInspector
 	@Configurable(defValue = "true", comment = "Draw height robot issues in quality layer.")
 	private static boolean drawRobotHeightIssues = true;
 	@Configurable(defValue = "true", comment = "Draw Camera FPS quality issues in quality layer.")
-	private static boolean drawFPSIssues = true;
+	private static boolean drawFpsIssues = true;
 	@Configurable(defValue = "true", comment = "Draw robot vision quality issues in quality layer.")
 	private static boolean drawRobotQualityIssues = true;
 	@Configurable(defValue = "400.0", comment = "Maximum allowed camera height difference to median height. [mm]")
@@ -70,8 +70,8 @@ public class QualityInspector
 	private static double minSpeedForInvisibleCheck = 1.5;
 	@Configurable(defValue = "0.1", comment = "Time until an invisible fast robot is reported. [s]")
 	private static double minInvisibleTime = 0.1;
-	@Configurable(defValue = "69.0", comment = "Minimal Camera Frames per Second")
-	private static double minimumCamFPS = 69.0;
+	@Configurable(defValue = "69.0", comment = "Minimal camera frames per second [fps]")
+	private static double minimumCamFps = 69.0;
 
 	static
 	{
@@ -232,12 +232,13 @@ public class QualityInspector
 
 	private void checkCameraFPS(Collection<CamFilter> camFilters)
 	{
+		cameraFpsIssues.clear();
 		for (CamFilter filter : camFilters)
 		{
 			double fps = 1.0 / filter.getAverageFrameDt();
 
 			filter.getCameraPosition().ifPresent(pos -> {
-				if (fps < minimumCamFPS)
+				if (fps < minimumCamFps)
 				{
 					cameraFpsIssues.add(new CameraFpsIssue(pos.getXYVector(), fps));
 				}
@@ -495,7 +496,7 @@ public class QualityInspector
 
 	private void addFPSIssues(List<IDrawableShape> shapes)
 	{
-		if (!drawFPSIssues)
+		if (!drawFpsIssues)
 		{
 			return;
 		}
