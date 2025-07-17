@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra;
 
+import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.ScalingUtil;
@@ -71,6 +73,9 @@ public abstract class AMainPresenter<T extends AMainFrame>
 	static
 	{
 		InfoNodeLookAndFeel.install();
+		FlatIntelliJLaf.installLafInfo();
+		FlatLightLaf.installLafInfo();
+
 		ScalingUtil.updateBaselineSize(new JTextPane().getFont().getSize());
 		// JMenuBar on the macOS menu bar
 		System.setProperty("apple.laf.useScreenMenuBar", "true");

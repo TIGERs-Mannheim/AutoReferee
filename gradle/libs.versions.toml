@@ -20,6 +20,7 @@ plugin-version-catalog-update = "1.0.0"
 com-fasterxml-jackson-core-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "com-fasterxml-jackson-core" }
 com-fasterxml-jackson-core-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "com-fasterxml-jackson-core" }
 com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core" }
+com-formdev-flatlaf = "com.formdev:flatlaf:3.1"
 com-github-haifengl = "com.github.haifengl:smile-core:4.3.0"
 com-github-TIGERs-Mannheim-infonode = "com.github.TIGERs-Mannheim:infonode:1.7.0"
 com-github-TIGERs-Mannheim-jinput = "com.github.TIGERs-Mannheim.jinput:jinput:2.0.10.1"
