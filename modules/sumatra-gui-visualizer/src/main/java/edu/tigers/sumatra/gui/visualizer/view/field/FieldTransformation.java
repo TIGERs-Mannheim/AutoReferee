@@ -172,13 +172,13 @@ public class FieldTransformation implements IDrawableTool
 	}
 
 
-	private int getFieldTotalWidth()
+	public int getFieldTotalWidth()
 	{
 		return getFieldWidth() + 2 * getPanelBoundaryWidth();
 	}
 
 
-	private int getFieldTotalHeight()
+	public int getFieldTotalHeight()
 	{
 		return getFieldHeight() + 2 * getPanelBoundaryWidth();
 	}

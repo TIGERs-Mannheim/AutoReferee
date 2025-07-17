@@ -76,10 +76,19 @@ public class FieldPane
 	public void reset()
 	{
 		int borderOffset = getBorderOffset();
-		transformation.setFieldTurn(EFieldTurn.bestFor(width, height - borderOffset));
-		scale = transformation.getFieldScale(width, height - borderOffset);
-		offsetX = 0;
-		offsetY = 0;
+		int offsetHeight = height - borderOffset;
+		transformation.setFieldTurn(EFieldTurn.bestFor(width, offsetHeight));
+		scale = transformation.getFieldScale(width, offsetHeight);
+
+		if (transformation.getFieldTurn() == EFieldTurn.T90)
+		{
+			offsetY = (offsetHeight - scale * (transformation.getFieldTotalHeight())) / 2;
+			offsetX = (width - scale * (transformation.getFieldTotalWidth())) / 2;
+		} else
+		{
+			offsetX = (width - scale * (transformation.getFieldTotalHeight())) / 2;
+			offsetY = (offsetHeight - scale * (transformation.getFieldTotalWidth())) / 2;
+		}
 	}
 
 
