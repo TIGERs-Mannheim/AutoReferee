@@ -69,10 +69,16 @@ public final class JsonConverter
 
 	static IVector2 decodeVector2(final JsonArray jsonArray)
 	{
+		return decodeVector2(jsonArray, Vector2.zero());
+	}
+
+
+	static IVector2 decodeVector2(final JsonArray jsonArray, IVector2 defaultValue)
+	{
 		Vector2 vector = Vector2.zero();
 		if (jsonArray == null)
 		{
-			return vector;
+			return defaultValue;
 		}
 		for (int i = 0; i < jsonArray.size(); i++)
 		{

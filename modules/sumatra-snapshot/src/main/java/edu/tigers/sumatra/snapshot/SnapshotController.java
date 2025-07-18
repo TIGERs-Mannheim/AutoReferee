@@ -55,9 +55,13 @@ public class SnapshotController
 		for (Map.Entry<BotID, ITrackedBot> entry : wfw.getSimpleWorldFrame().getBots().entrySet())
 		{
 			ITrackedBot bot = entry.getValue();
-			snapBots.put(entry.getKey(),
-					new SnapObject(Vector3.from2d(bot.getPos(), bot.getOrientation()),
-							Vector3.from2d(bot.getVel(), bot.getAngularVel())));
+			snapBots.put(
+					entry.getKey(),
+					new SnapObject(
+							Vector3.from2d(bot.getPos(), bot.getOrientation()),
+							Vector3.from2d(bot.getVel(), bot.getAngularVel())
+					)
+			);
 			if (saveMoveDestinations)
 			{
 				bot.getCurrentTrajectory().map(ITrajectory::getFinalDestination).ifPresent(

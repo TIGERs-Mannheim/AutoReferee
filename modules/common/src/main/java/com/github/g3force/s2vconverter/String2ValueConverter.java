@@ -3,6 +3,7 @@ package com.github.g3force.s2vconverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -97,6 +98,9 @@ public class String2ValueConverter implements IString2ValueConverter
 		} else if (impl.equals(Boolean.class) || impl.equals(Boolean.TYPE))
 		{
 			return Boolean.valueOf(value);
+		} else if (impl.equals(Path.class))
+		{
+			return Path.of(value);
 		} else if (impl.equals(String.class))
 		{
 			return value;
@@ -112,8 +116,10 @@ public class String2ValueConverter implements IString2ValueConverter
 
 
 	@Override
-	public Object parseString(final Class<?> impl,
-			final List<Class<?>> genericsImpls, final String value)
+	public Object parseString(
+			final Class<?> impl,
+			final List<Class<?>> genericsImpls, final String value
+	)
 	{
 		for (IString2ValueConverter c : converters)
 		{
@@ -165,6 +171,9 @@ public class String2ValueConverter implements IString2ValueConverter
 		} else if (impl.equals(Boolean.class) || impl.equals(Boolean.TYPE))
 		{
 			return Boolean.toString((Boolean) value);
+		} else if (impl.equals(Path.class))
+		{
+			return impl.toString();
 		} else if (impl.isEnum())
 		{
 			return ((Enum<?>) value).name();

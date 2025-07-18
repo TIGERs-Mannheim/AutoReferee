@@ -23,6 +23,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.Serial;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -41,10 +42,9 @@ public class InstanceablePanel extends JPanel
 	private final JComboBox<IInstanceableEnum> cbbInstances;
 	private final JPanel inputPanel;
 	private final List<JComponent> inputFields = new ArrayList<>();
-	private JButton btnCreate = null;
 	private final transient List<IInstanceableObserver> observers = new CopyOnWriteArrayList<>();
-
 	private final Properties prop;
+	private JButton btnCreate = null;
 
 
 	public InstanceablePanel(final IInstanceableEnum[] instanceableEnums)
@@ -157,8 +157,7 @@ public class InstanceablePanel extends JPanel
 	}
 
 
-	private void saveParamValue(final IInstanceableEnum instance, final IInstanceableParameter param,
-			final String value)
+	private void saveParamValue(final IInstanceableEnum instance, final IInstanceableParameter param, final String value)
 	{
 		prop.setProperty(getModelParameterKey(instance, param), value);
 	}
@@ -225,6 +224,9 @@ public class InstanceablePanel extends JPanel
 			{
 				boolean bVal = Boolean.parseBoolean(value);
 				return new JCheckBox("", bVal);
+			} else if (param.getImpl().equals(Path.class))
+			{
+				return new FileChooserPanel(Path.of(value));
 			}
 			int size = value.length() + 2;
 			return new JTextField(value, size);
@@ -287,6 +289,10 @@ public class InstanceablePanel extends JPanel
 		{
 			JCheckBox cb = (JCheckBox) comp;
 			return String.valueOf(cb.isSelected());
+		} else if (comp.getClass().equals(FileChooserPanel.class))
+		{
+			FileChooserPanel fileChooserPanel = (FileChooserPanel) comp;
+			return fileChooserPanel.getSelectedPath().toString();
 		}
 		throw new IllegalStateException("Unknown component class: " + comp.getClass());
 	}
