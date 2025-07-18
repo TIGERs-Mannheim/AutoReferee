@@ -197,6 +197,8 @@ public class RobotTracker
 		orient += orientationTurns * AngleMath.PI_TWO;
 
 		filterW.correct(orient);
+
+		botHeight = robot.getHeight();
 	}
 
 

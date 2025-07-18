@@ -99,6 +99,7 @@ public class QualityInspector
 		// remove old issues
 		deviationIssues.removeIf(i -> (timestamp - i.lastOccurence) > (issueTimeout * 1e9));
 		invisibleIssues.removeIf(i -> (timestamp - i.lastOccurence) > (issueTimeout * 1e9));
+		robotHeightIssues.clear();
 
 		// just get all RobotTracker in one list
 		List<RobotTracker> allTrackers = camFilters.stream()
@@ -161,29 +162,18 @@ public class QualityInspector
 		for (RobotTracker tracker : filter.getValidRobots().values())
 		{
 			RobotInfo robotInfo = filter.getRobotInfoMap().get(tracker.getBotId());
-			if (robotInfo != null && robotInfo.getType() != EBotType.UNKNOWN)
+			if (robotInfo == null || robotInfo.getType() == EBotType.UNKNOWN)
 			{
-				double targetHeight = robotInfo.getBotParams().getDimensions().getHeight();
-				double robotHeight = tracker.getBotHeight();
-				if (Math.abs(targetHeight - robotHeight) > 1e-3)
+				continue;
+			}
 
-				{
-					robotHeightIssues.stream().filter(issue -> issue.botId.equals(tracker.getBotId())).findFirst()
-							.ifPresentOrElse(
-									existingIssue -> {
-										existingIssue.robotPos = tracker.getPosition(timestamp);
-										existingIssue.robotHeight = robotHeight;
-										existingIssue.targetHeight = targetHeight;
-									}, () -> {
-										RobotHeightIssue newIssue = new RobotHeightIssue();
-										newIssue.robotPos = tracker.getPosition(timestamp);
-										newIssue.botId = tracker.getBotId();
-										newIssue.robotHeight = robotHeight;
-										newIssue.targetHeight = targetHeight;
-										robotHeightIssues.add(newIssue);
-									}
-							);
-				}
+			double targetHeight = robotInfo.getBotParams().getDimensions().getHeight();
+			double robotHeight = tracker.getBotHeight();
+
+			if (Math.abs(targetHeight - robotHeight) > 1e-3)
+			{
+				robotHeightIssues.add(
+						new RobotHeightIssue(tracker.getPosition(timestamp), tracker.getBotId(), robotHeight, targetHeight));
 			}
 		}
 	}
@@ -565,6 +555,7 @@ public class QualityInspector
 		}
 	}
 
+	@AllArgsConstructor
 	private static class RobotHeightIssue
 	{
 		private IVector2 robotPos;
