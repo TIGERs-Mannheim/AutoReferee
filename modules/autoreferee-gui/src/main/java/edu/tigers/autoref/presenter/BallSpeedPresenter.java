@@ -54,7 +54,7 @@ public class BallSpeedPresenter
 	 * The absolute time range displayed in the chart in seconds
 	 */
 	private int timeRange = 20;
-	private boolean pauseWhenNotRunning = false;
+	private boolean pauseWhenNotRunning = true;
 	private boolean pauseRequested = false;
 	private boolean resumeRequested = false;
 	private PauseState chartState = PauseState.RUNNING;
