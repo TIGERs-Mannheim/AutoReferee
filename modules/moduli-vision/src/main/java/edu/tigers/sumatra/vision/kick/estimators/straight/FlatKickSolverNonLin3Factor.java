@@ -5,6 +5,7 @@
 package edu.tigers.sumatra.vision.kick.estimators.straight;
 
 import edu.tigers.sumatra.cam.data.CamBall;
+import edu.tigers.sumatra.filter.iir.ExponentialMovingAverageFilter;
 import edu.tigers.sumatra.geometry.Geometry;
 import edu.tigers.sumatra.math.AngleMath;
 import edu.tigers.sumatra.math.line.ILineSegment;
@@ -50,6 +51,10 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 	private final NelderMeadSimplex simplex = new NelderMeadSimplex(3, 100.0);
 
 	private IVector2 fixedKickDir = null;
+	private ExponentialMovingAverageFilter spinFactorFilter = new ExponentialMovingAverageFilter(
+			0.95,
+			Geometry.getBallParameters().getRedirectSpinFactor()
+	);
 
 
 	public FlatKickSolverNonLin3Factor(final Pose kickingBotPose, final FilteredVisionBall ballStateAtKick)
@@ -126,12 +131,36 @@ public class FlatKickSolverNonLin3Factor implements IKickSolver
 
 		long tZero = records.get(0).getTimestamp();
 
-		double redirectSpinFactor = Geometry.getBallParameters().getRedirectSpinFactor();
-		NonLinSolve3FactorResult result = nonLinSolve3Factor(records, kickDir.get(),
-				initialSpin.multiplyNew(redirectSpinFactor));
+		double minFactor = 0.0;
+		double maxFactor = Geometry.getBallParameters().getRedirectSpinFactor()
+				+ (1.0 - Geometry.getBallParameters().getRedirectSpinFactor()) * 0.3;
+
+		double spinFactor = (minFactor + maxFactor) / 2;
+		double inc = spinFactor / 2;
+		double eps = 0.001;
+		while (inc > 2 * eps)
+		{
+			var resultLow = nonLinSolve3Factor(records, kickDir.get(), initialSpin.multiplyNew(spinFactor - eps));
+			var resultHigh = nonLinSolve3Factor(records, kickDir.get(), initialSpin.multiplyNew(spinFactor + eps));
+
+			if (resultLow.getError() < resultHigh.getError())
+			{
+				spinFactor -= inc;
+			} else
+			{
+				spinFactor += inc;
+			}
+
+			inc /= 2.0;
+		}
+
+		spinFactorFilter.update(spinFactor);
+
+		var result = nonLinSolve3Factor(records, kickDir.get(), initialSpin.multiplyNew(spinFactorFilter.getState()));
 
 		return Optional.of(new KickSolverResult(result.getKickPos(), result.getKickVel().getXYZVector(), tZero,
-				initialSpin.multiplyNew(redirectSpinFactor), getClass().getSimpleName()));
+				initialSpin.multiplyNew(spinFactorFilter.getState()), getClass().getSimpleName()
+		));
 	}
 
 
