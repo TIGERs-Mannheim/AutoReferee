@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.log;
@@ -30,7 +30,6 @@ public class SumatraAppender extends AbstractAppender
 	private final List<LogEvent> logEventBuffer = new LinkedList<>();
 
 
-	@SuppressWarnings("squid:CallToDeprecatedMethod") // false positive
 	private SumatraAppender(String name, Filter filter, final Layout<? extends Serializable> layout)
 	{
 		super(name, filter, layout, true, new Property[] {});
@@ -48,7 +47,7 @@ public class SumatraAppender extends AbstractAppender
 	}
 
 
-	public void clear()
+	public synchronized void clear()
 	{
 		logEventBuffer.clear();
 	}
@@ -73,7 +72,7 @@ public class SumatraAppender extends AbstractAppender
 		consumers.forEach(c -> c.onNewLogEvent(logEvent));
 		if (logEventBuffer.size() >= BUFFER_SIZE)
 		{
-			logEventBuffer.remove(0);
+			logEventBuffer.removeFirst();
 		}
 		logEventBuffer.add(logEvent.toImmutable());
 	}
