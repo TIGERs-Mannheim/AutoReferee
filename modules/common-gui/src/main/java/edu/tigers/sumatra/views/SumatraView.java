@@ -8,6 +8,7 @@ import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import net.infonode.docking.View;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
@@ -17,9 +18,10 @@ import java.util.stream.Stream;
 @Log4j2
 @Getter
 @ToString(of = "type")
-public abstract class ASumatraView
+public class SumatraView
 {
 	private final ESumatraViewType type;
+	private final Supplier<ISumatraViewPresenter> presenterSupplier;
 	private final View view;
 	private ISumatraViewPresenter presenter;
 
@@ -27,9 +29,10 @@ public abstract class ASumatraView
 	private boolean moduliStarted = false;
 
 
-	protected ASumatraView(ESumatraViewType type)
+	public SumatraView(ESumatraViewType type, Supplier<ISumatraViewPresenter> presenterSupplier)
 	{
 		this.type = type;
+		this.presenterSupplier = presenterSupplier;
 		view = new View(getType().getTitle(), new ViewIcon(), null);
 	}
 
@@ -42,7 +45,7 @@ public abstract class ASumatraView
 		if (presenter == null)
 		{
 			log.trace("Creating presenter for view {}", this);
-			presenter = createPresenter();
+			presenter = presenterSupplier.get();
 			getView().setComponent(presenter.getViewPanel());
 			if (started)
 			{
@@ -150,12 +153,4 @@ public abstract class ASumatraView
 				.flatMap(this::gatherPresenters);
 		return Stream.concat(Stream.of(viewPresenter), childPresenterStream);
 	}
-
-
-	/**
-	 * Create your presenter here. This will be called at the right time and only once
-	 *
-	 * @return
-	 */
-	protected abstract ISumatraViewPresenter createPresenter();
 }

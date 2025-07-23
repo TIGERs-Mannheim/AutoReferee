@@ -7,7 +7,7 @@ package edu.tigers.sumatra.gui.replay.presenter;
 import edu.tigers.sumatra.gui.log.presenter.LogPresenter;
 import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
-import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.SumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import org.apache.logging.log4j.Level;
@@ -31,9 +31,9 @@ public class ReplayLogController implements IReplayController
 	private LogPresenter logPresenter;
 
 
-	public ReplayLogController(List<ASumatraView> sumatraViews)
+	public ReplayLogController(List<SumatraView> sumatraViews)
 	{
-		for (ASumatraView view : sumatraViews)
+		for (SumatraView view : sumatraViews)
 		{
 			if (view.getType() == ESumatraViewType.LOG)
 			{

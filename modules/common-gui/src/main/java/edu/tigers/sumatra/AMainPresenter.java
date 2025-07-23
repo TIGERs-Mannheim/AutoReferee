@@ -8,7 +8,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.ScalingUtil;
-import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.SumatraView;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -68,7 +68,7 @@ public abstract class AMainPresenter<T extends AMainFrame>
 	private final Path layoutConfigPath;
 
 	@Getter
-	private final List<ASumatraView> views;
+	private final List<SumatraView> views;
 
 	static
 	{
@@ -82,7 +82,7 @@ public abstract class AMainPresenter<T extends AMainFrame>
 	}
 
 
-	protected AMainPresenter(T mainFrame, List<ASumatraView> views, String name)
+	protected AMainPresenter(T mainFrame, List<SumatraView> views, String name)
 	{
 		this.views = Collections.unmodifiableList(views);
 		this.mainFrame = mainFrame;
@@ -109,7 +109,7 @@ public abstract class AMainPresenter<T extends AMainFrame>
 	private void initializeViews()
 	{
 		// initialize all views that are currently visible
-		for (ASumatraView view : views)
+		for (SumatraView view : views)
 		{
 			if (view.getView().isShowing() || view.getType().isForceLoad())
 			{
@@ -254,7 +254,7 @@ public abstract class AMainPresenter<T extends AMainFrame>
 	/**
 	 * Creates the root window and the views.
 	 */
-	private static RootWindow createRootWindow(List<ASumatraView> views)
+	private static RootWindow createRootWindow(List<SumatraView> views)
 	{
 		ViewMap viewMap = new ViewMap();
 		// The mixed view map makes it easy to mix static and dynamic views inside the same root window
@@ -337,10 +337,10 @@ public abstract class AMainPresenter<T extends AMainFrame>
 
 	private class RestoreView implements ActionListener
 	{
-		private final ASumatraView sumatraView;
+		private final SumatraView sumatraView;
 
 
-		public RestoreView(final ASumatraView v)
+		public RestoreView(final SumatraView v)
 		{
 			sumatraView = v;
 		}

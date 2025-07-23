@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra;
 
-import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.SumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,7 +21,7 @@ import java.util.Collection;
 @RequiredArgsConstructor
 class WindowViewSerializer implements ViewSerializer
 {
-	private final Collection<ASumatraView> views;
+	private final Collection<SumatraView> views;
 
 
 	@Override
@@ -44,7 +44,7 @@ class WindowViewSerializer implements ViewSerializer
 	{
 		int id = in.readInt();
 
-		for (ASumatraView sumatraView : views)
+		for (SumatraView sumatraView : views)
 		{
 			if (sumatraView.getType().getId() == id)
 			{

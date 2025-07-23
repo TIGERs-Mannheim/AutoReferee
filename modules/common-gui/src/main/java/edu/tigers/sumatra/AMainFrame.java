@@ -4,7 +4,7 @@
 
 package edu.tigers.sumatra;
 
-import edu.tigers.sumatra.views.ASumatraView;
+import edu.tigers.sumatra.views.SumatraView;
 import lombok.Getter;
 
 import javax.swing.ButtonGroup;
@@ -106,7 +106,7 @@ public abstract class AMainFrame extends JFrame
 	}
 
 
-	public Map<ASumatraView, JMenuItem> setViewItems(Collection<ASumatraView> views)
+	public Map<SumatraView, JMenuItem> setViewItems(Collection<SumatraView> views)
 	{
 		var menuItems = views.stream()
 				.collect(Collectors.toMap(Function.identity(), view -> new JMenuItem(view.getType().getTitle())));
