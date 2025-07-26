@@ -88,7 +88,6 @@ public class MulticastUDPTransmitter implements AutoCloseable
 				@SuppressWarnings("squid:S2095") // closing resources: can not close resource here
 				var socket = new MulticastSocket();
 				socket.setNetworkInterface(nif);
-				socket.setTimeToLive(32);
 				sockets.add(new TargetSocket(socket));
 			}
 		} catch (IOException e)
