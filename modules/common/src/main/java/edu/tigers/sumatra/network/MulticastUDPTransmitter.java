@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.network;
@@ -88,6 +88,7 @@ public class MulticastUDPTransmitter implements AutoCloseable
 				@SuppressWarnings("squid:S2095") // closing resources: can not close resource here
 				var socket = new MulticastSocket();
 				socket.setNetworkInterface(nif);
+				socket.setTimeToLive(32);
 				sockets.add(new TargetSocket(socket));
 			}
 		} catch (IOException e)
