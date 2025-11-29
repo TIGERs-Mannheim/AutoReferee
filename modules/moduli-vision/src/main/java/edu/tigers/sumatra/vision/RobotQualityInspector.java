@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.cam.data.CamRobot;
 import edu.tigers.sumatra.ids.BotID;
 
@@ -20,10 +21,10 @@ import java.util.Map;
  */
 public class RobotQualityInspector
 {
-	@Configurable(defValue = "20.0", comment = "The time horizon [s] back into past to measure the quality")
+	@Configurable(defValue = "20.0", comment = "The time horizon back into past to measure the quality", unit = EConfigUnit.TIME_S)
 	private static double trackingTimeHorizon = 20.0;
 
-	@Configurable(defValue = "0.05", comment = "If the quality of a robot is below this, it will not be passed out")
+	@Configurable(defValue = "0.05", comment = "If the quality of a robot is below this, it will not be passed out", unit = EConfigUnit.PERCENTAGE)
 	private static double robotQualityThreshold = 0.05;
 
 	static

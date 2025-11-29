@@ -6,6 +6,7 @@ package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.bot.RobotInfo;
 import edu.tigers.sumatra.cam.data.CamBall;
 import edu.tigers.sumatra.cam.data.CamCalibration;
@@ -87,28 +88,28 @@ public class CamFilter
 	@Getter
 	private long lastBallOnCamTimestamp = 0;
 
-	@Configurable(defValue = "1.0", comment = "Time in [s] after an invisible ball is removed")
+	@Configurable(defValue = "1.0", comment = "Time in after an invisible ball is removed", unit = EConfigUnit.TIME_S)
 	private static double invisibleLifetimeBall = 1.0;
 
-	@Configurable(defValue = "2.0", comment = "Time in [s] after an invisible robot is removed")
+	@Configurable(defValue = "2.0", comment = "Time in after an invisible robot is removed", unit = EConfigUnit.TIME_S)
 	private static double invisibleLifetimeRobot = 2.0;
 
-	@Configurable(defValue = "10", comment = "Maximum number of ball trackers")
+	@Configurable(defValue = "10", comment = "Maximum number of ball trackers", unit = EConfigUnit.COUNT)
 	private static int maxBallTrackers = 10;
 
-	@Configurable(defValue = "true", comment = "Restrict viewport to minimize overlap (from CameraArchitect).")
+	@Configurable(defValue = "true", comment = "Restrict viewport to minimize overlap (from CameraArchitect)", unit = EConfigUnit.BOOLEAN)
 	private static boolean restrictViewport = true;
 
-	@Configurable(defValue = "0.6", comment = "Max. velocity loss at ball-bot hull collisions")
+	@Configurable(defValue = "0.6", comment = "Max. velocity loss at ball-bot hull collisions", unit = EConfigUnit.PERCENTAGE)
 	private static double maxBallBotHullLoss = 0.6;
 
-	@Configurable(defValue = "1.0", comment = "Max. velocity loss at ball-bot front collisions")
+	@Configurable(defValue = "1.0", comment = "Max. velocity loss at ball-bot front collisions", unit = EConfigUnit.PERCENTAGE)
 	private static double maxBallBotFrontLoss = 1.0;
 
-	@Configurable(defValue = "130.0", comment = "Max. height for ball-bot collision check")
+	@Configurable(defValue = "130.0", comment = "Max. height for ball-bot collision check", unit = EConfigUnit.DISTANCE_MM)
 	private static double maxHeightForCollision = 130.0;
 
-	@Configurable(defValue = "200.0", comment = "Max. distance to copy state from filtered bot to new trackers")
+	@Configurable(defValue = "200.0", comment = "Max. distance to copy state from filtered bot to new trackers", unit = EConfigUnit.DISTANCE_MM)
 	private static double copyTrackerMaxDistance = 200.0;
 
 	static

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.sumatra.ball.BallState;
@@ -89,19 +90,19 @@ public class WorldInfoCollector extends AWorldPredictor
 	@Configurable(
 			comment = "Add a faked ball. Set pos,vel,acc in code.",
 			defValue = "false"
-	)
+			, unit = EConfigUnit.BOOLEAN)
 	private static boolean fakeBall = false;
 
 	@Configurable(
 			comment = "Use robot feedback for position and velocity.",
 			defValue = "true"
-	)
+			, unit = EConfigUnit.BOOLEAN)
 	private static boolean preferRobotFeedback = true;
 
 	@Configurable(
 			comment = "Use mal functioning check to filter available bots",
 			defValue = "true"
-	)
+			, unit = EConfigUnit.BOOLEAN)
 	private static boolean checkMalFunction = true;
 
 	static

@@ -6,6 +6,7 @@ package edu.tigers.sumatra.gui.visualizer.presenter.drawables;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.drawable.DrawableAnnotation;
 import edu.tigers.sumatra.drawable.DrawableLine;
 import edu.tigers.sumatra.drawable.EFieldTurn;
@@ -24,11 +25,11 @@ import java.util.List;
 
 public class DrawableRuler implements IDrawableShape
 {
-	@Configurable(comment = "Factor for annotation font height", defValue = "10.0")
+	@Configurable(comment = "Factor for annotation font height", defValue = "10.0", unit = EConfigUnit.FACTOR)
 	private static double factorFontHeight = 10;
-	@Configurable(comment = "Factor for ruler stroke strength", defValue = "1.5")
+	@Configurable(comment = "Factor for ruler stroke strength", defValue = "1.5", unit = EConfigUnit.FACTOR)
 	private static double factorStrokeStrength = 1.5;
-	@Configurable(comment = "[deg] Angle between 0° and 45° to start stacking annotations", defValue = "35")
+	@Configurable(comment = "Angle between 0° and 45° to start stacking annotations", defValue = "35", unit = EConfigUnit.ANGLE_DEG)
 	private static int stackingAngle = 35;
 
 	static

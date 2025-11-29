@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.source;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.network.MulticastUDPReceiver;
 import edu.tigers.sumatra.network.NetworkUtility;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
@@ -27,7 +28,7 @@ public class NetworkRefereeReceiver extends ARefereeMessageSource implements Run
 {
 	private static final int BUFFER_SIZE = 10000;
 
-	@Configurable
+	@Configurable(defValue = "", unit = EConfigUnit.NO_UNIT)
 	private static String network;
 
 	@Setter

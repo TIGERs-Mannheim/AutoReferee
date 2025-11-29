@@ -226,8 +226,12 @@ public class TrackingFilterPosVel1D extends KalmanFilter
 		transitionMatrix.setEntry(0, 1, dt);
 		transitionMatrix.setEntry(1, 0, 0);
 		transitionMatrix.setEntry(1, 1, 1);
-		
-		// optimal process noise error if we assume white noise on acceleration with zero mean
+
+		// Calculations for dt1, dt2, dt3 are derived from assuming a continuous-time white noise for the acceleration
+		// with zero mean
+		//
+		// sigma is chosen such that dt3 = modelError
+
 		double sigma = SumatraMath.sqrt((3.0 * modelError) / dt) / dt;
 		double dt3 = (1.0 / 3.0) * dt * dt * dt * sigma * sigma;
 		double dt2 = (1.0 / 2.0) * dt * dt * sigma * sigma;

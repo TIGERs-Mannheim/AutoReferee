@@ -6,6 +6,7 @@ package edu.tigers.sumatra.vision;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.cam.ACam;
 import edu.tigers.sumatra.cam.data.CamCalibration;
 import edu.tigers.sumatra.cam.data.CamDetectionFrame;
@@ -61,7 +62,7 @@ public class VisionFilterImpl extends AVisionFilter
 {
 	private static final int CAM_FRAME_BUFFER_SIZE = 10;
 
-	@Configurable(defValue = "0.0125", comment = "Publish frequency (requires restart)")
+	@Configurable(defValue = "0.0125", comment = "Publish frequency (requires restart)", unit = EConfigUnit.TIME_S)
 	private static double publishDt = 0.0125;
 
 	static

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.moduli.AModule;
 import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
@@ -39,10 +40,12 @@ public class RecordManager extends AModule implements IRefereeObserver
 	protected String matchType = "";
 	protected String matchStage = "";
 
-	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed")
+	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed",
+			unit = EConfigUnit.BOOLEAN)
 	private static boolean compressOnClose = false;
 
-	@Configurable(defValue = "true", comment = "Automatically record game in tournament mode")
+	@Configurable(defValue = "true", comment = "Automatically record game in tournament mode",
+			unit = EConfigUnit.BOOLEAN)
 	private static boolean autoRecord = true;
 
 	static

@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.validators;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.vision.data.FilteredVisionBot;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
 import org.apache.commons.math3.util.Pair;
@@ -23,13 +24,13 @@ import java.util.stream.Collectors;
  */
 public class DistanceValidator implements IKickValidator
 {
-	@Configurable(defValue = "160.0", comment = "At least one sample must be beyond this distance")
+	@Configurable(defValue = "160.0", comment = "At least one sample must be beyond this distance", unit = EConfigUnit.DISTANCE_MM)
 	private static double	atLeastOneBeyondDist	= 160.0;
 
-	@Configurable(defValue = "130.0", comment = "First sample must be closer, all others further away than this")
+	@Configurable(defValue = "130.0", comment = "First sample must be closer, all others further away than this", unit = EConfigUnit.DISTANCE_MM)
 	private static double	thresholdDist1			= 130.0;
 
-	@Configurable(defValue = "170.0", comment = "First sample must be closer, all others further away than this (alternative)")
+	@Configurable(defValue = "170.0", comment = "First sample must be closer, all others further away than this (alternative)", unit = EConfigUnit.DISTANCE_MM)
 	private static double	thresholdDist2			= 170.0;
 
 	static

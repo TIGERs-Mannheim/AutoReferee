@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import com.github.g3force.configurable.IConfigClient;
 import com.github.g3force.configurable.IConfigObserver;
 import edu.tigers.sumatra.cam.data.CamGeometry;
@@ -46,7 +47,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 	@Setter
 	private static String customAddress;
 
-	@Configurable(comment = "Enter a network address to limit network to a certain network interface")
+	@Configurable(comment = "Enter a network address to limit network to a certain network interface", defValue = "", unit = EConfigUnit.URL)
 	private static String network = "";
 
 	static

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.geometry;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import com.google.protobuf.TextFormat;
 import edu.tigers.sumatra.ball.trajectory.BallFactory;
 import edu.tigers.sumatra.cam.SSLVisionCamGeometryTranslator;
@@ -39,7 +40,7 @@ public class Geometry
 {
 	private static final Path CONFIG_PATH = Path.of("config", "geometry");
 
-	@Configurable(defValue = "85.0")
+	@Configurable(defValue = "85.0", comment = "Distance from the opponent's center to the dribbler", unit = EConfigUnit.DISTANCE_MM)
 	private static double opponentCenter2DribblerDist = 85;
 	private static Geometry instance = defaultInstance();
 	private static ETeamColor negativeHalfTeam = ETeamColor.BLUE;

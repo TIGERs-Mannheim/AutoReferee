@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.wp.util;
 
 import com.github.g3force.configurable.ConfigRegistration;
 import com.github.g3force.configurable.Configurable;
+import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.ids.ETeamColor;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.referee.data.EGameState;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Log4j2
 public class GameStateCalculator
 {
-	@Configurable(comment = "Ball movement tolerance", defValue = "50")
+	@Configurable(comment = "Ball movement tolerance", defValue = "50", unit = EConfigUnit.DISTANCE_MM)
 	private static double ballMovedDistanceTol = 50;
 
 	static

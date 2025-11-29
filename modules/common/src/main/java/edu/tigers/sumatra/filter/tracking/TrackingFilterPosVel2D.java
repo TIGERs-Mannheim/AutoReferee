@@ -238,6 +238,10 @@ public class TrackingFilterPosVel2D extends KalmanFilter
 	 */
 	public static void getOptimalProcessNoise(final RealMatrix m, final double dt, final double error)
 	{
+		// Calculations for dt1, dt2, dt3 are derived from assuming a continuous-time white noise for the acceleration
+		// with zero mean
+		//
+		// sigma is chosen such that dt3 = modelError
 		double sigma = SumatraMath.sqrt((3.0 * error) / dt) / dt;
 		double dt3 = (1.0 / 3.0) * dt * dt * dt * sigma * sigma;
 		double dt2 = (1.0 / 2.0) * dt * dt * sigma * sigma;
