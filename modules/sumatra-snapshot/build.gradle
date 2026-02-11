@@ -13,6 +13,8 @@ dependencies {
     implementation project(':common-math')
     implementation project(':moduli-wp')
     implementation project(':moduli-referee')
+    implementation project(':common-gui')
+
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
 

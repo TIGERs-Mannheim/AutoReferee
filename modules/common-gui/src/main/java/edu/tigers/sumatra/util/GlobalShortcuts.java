@@ -11,8 +11,6 @@ import javax.swing.KeyStroke;
 import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -25,13 +23,15 @@ import java.util.stream.Collectors;
 public final class GlobalShortcuts
 {
 	private static final List<UiShortcut> UI_SHORTCUTS = new CopyOnWriteArrayList<>();
+	private static final List<UiShortcut> DISABLED_UI_SHORTCUTS = new CopyOnWriteArrayList<>();
 
 
 	public static void add(
 			String name,
 			Component component,
 			Runnable runnable,
-			KeyStroke keyStroke)
+			KeyStroke keyStroke
+	)
 	{
 		KeyEventDispatcher dispatcher = e -> {
 			var eventKeyStroke = KeyStroke.getKeyStrokeForEvent(e);
@@ -49,13 +49,10 @@ public final class GlobalShortcuts
 		};
 
 
-		String keys = InputEvent.getModifiersExText(keyStroke.getModifiers())
-				+ "+"
-				+ KeyEvent.getKeyText(keyStroke.getKeyCode());
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher);
 		UI_SHORTCUTS.add(UiShortcut.builder()
 				.name(name)
-				.keys(keys)
+				.keyStroke(keyStroke)
 				.component(component)
 				.dispatcher(dispatcher)
 				.build()
@@ -63,10 +60,56 @@ public final class GlobalShortcuts
 	}
 
 
+	//** Moves the specified shortcut to the disabled ui shortcuts and disables the dispatcher*/
+	private static void disableShortcut(UiShortcut shortcut)
+	{
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(shortcut.getDispatcher());
+	}
+
+
+	//** Moves the specified shortcut to the active ui shortcuts and enables the dispatcher*/
+	private static void enableShortcut(UiShortcut shortcut)
+	{
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(shortcut.getDispatcher());
+	}
+
+
+	/**
+	 * this method allows to disable shortcuts with specific keystrokes temporarily
+	 * it is meant as a workaraound for keystrokes that conflict in certain contexts
+	 * example: disable all space bar shortcuts that are space bar in text fields
+	 * they need to be re-enabled afterward with enableAllKeyStrokes()
+	 */
+	public static void disableByKeyStroke(KeyStroke keyStroke)
+	{
+		// build the shortcut key identifier so that we can identify the keystroke we want to disable
+		// find all shortcuts that match the desired keystrokes and put them into the disabled shortcuts
+		DISABLED_UI_SHORTCUTS.addAll(UI_SHORTCUTS.stream().filter(s -> s.getKeyStroke().equals(keyStroke)).toList());
+		// disable their dispatchers
+		DISABLED_UI_SHORTCUTS.forEach(GlobalShortcuts::disableShortcut);
+		// remove them from the active shortcuts
+		UI_SHORTCUTS.removeAll(DISABLED_UI_SHORTCUTS);
+	}
+
+
+	/**
+	 * This function enables all currently disabled shortcuts
+	 */
+	public static void enableAllShortcuts()
+	{
+		// enable all the shortcuts
+		DISABLED_UI_SHORTCUTS.forEach(GlobalShortcuts::enableShortcut);
+		// put them in the active shortcut list
+		UI_SHORTCUTS.addAll(DISABLED_UI_SHORTCUTS);
+		// clear out all disabled shortcuts (because they are now active)
+		DISABLED_UI_SHORTCUTS.clear();
+	}
+
+
 	public static void removeAllForFrame(JFrame frame)
 	{
 		UI_SHORTCUTS.stream().filter(s -> findRootComponent(s.getComponent()) == frame).forEach(s -> {
-			KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(s.getDispatcher());
+			disableShortcut(s);
 			UI_SHORTCUTS.remove(s);
 		});
 	}
@@ -75,7 +118,7 @@ public final class GlobalShortcuts
 	public static void removeAllForComponent(Component component)
 	{
 		UI_SHORTCUTS.stream().filter(s -> s.getComponent() == component).forEach(s -> {
-			KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(s.getDispatcher());
+			disableShortcut(s);
 			UI_SHORTCUTS.remove(s);
 		});
 	}

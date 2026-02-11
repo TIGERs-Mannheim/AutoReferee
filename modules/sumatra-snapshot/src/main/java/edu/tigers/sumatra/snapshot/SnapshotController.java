@@ -8,6 +8,7 @@ import edu.tigers.sumatra.ids.BotID;
 import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.math.vector.Vector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
+import edu.tigers.sumatra.util.ShortcutSuppressor;
 import edu.tigers.sumatra.wp.data.ITrackedBall;
 import edu.tigers.sumatra.wp.data.ITrackedBot;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
@@ -98,6 +99,9 @@ public class SnapshotController
 	 */
 	public void onSnapshot()
 	{
+		ShortcutSuppressor shortcutSuppressor = new ShortcutSuppressor();
+		shortcutSuppressor.suppressShortcuts();
+
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
 		Snapshot snapshot = createSnapshot().orElseThrow();
@@ -120,6 +124,7 @@ public class SnapshotController
 				log.error("Could not save snapshot file", e);
 			}
 		}
+		shortcutSuppressor.unsupressShortcuts();
 	}
 
 

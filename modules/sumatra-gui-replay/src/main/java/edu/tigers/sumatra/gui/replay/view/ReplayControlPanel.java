@@ -92,8 +92,9 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"Play / Pause",
 				"/pause.png",
 				this::togglePlayPause,
-				KeyEvent.VK_P,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				KeyEvent.VK_SPACE,
+				//0 means no modifier
+				0
 		);
 
 		JButton btnSkipFrameFwd = createActionButton(
@@ -101,7 +102,8 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipFrameForward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onNextFrame),
 				KeyEvent.VK_RIGHT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				//no modifier for frame skips
+				0
 		);
 
 		JButton btnSkipFrameBwd = createActionButton(
@@ -109,7 +111,8 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipFrameBackward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onPreviousFrame),
 				KeyEvent.VK_LEFT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				//no modifier for frame skips
+				0
 		);
 
 		JButton btnSkipFwd = createActionButton(
@@ -117,7 +120,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipForward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(SKIP_TIME * 1_000_000)),
 				KeyEvent.VK_RIGHT,
-				InputEvent.SHIFT_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnSkipBwd = createActionButton(
@@ -125,7 +128,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"/skipBackward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-SKIP_TIME * 1_000_000)),
 				KeyEvent.VK_LEFT,
-				InputEvent.SHIFT_DOWN_MASK
+				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
 		);
 
 		JButton btnFastFwd = createActionButton(
