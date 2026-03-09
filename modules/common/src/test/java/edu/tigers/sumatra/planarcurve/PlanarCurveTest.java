@@ -8,9 +8,9 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import edu.tigers.sumatra.trajectory.BangBangTrajectoryFactory;
-import edu.tigers.sumatra.trajectory.DestinationForTimedPositionCalc;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import edu.tigers.sumatra.trajectory.PlanarCurveFactory;
+import edu.tigers.sumatra.trajectory.TimedTrajectoryFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class PlanarCurveTest
 	private final PlanarCurveFactory planarCurveFactory = new PlanarCurveFactory();
 	private final BangBangTrajectoryFactory trajectoryFactory = new BangBangTrajectoryFactory();
 
-	private final DestinationForTimedPositionCalc timedPositionCalc = new DestinationForTimedPositionCalc();
+	private final TimedTrajectoryFactory timedPositionCalc = new TimedTrajectoryFactory();
 
 
 	private double getRandomDouble(final double minmax)
@@ -157,7 +157,8 @@ public class PlanarCurveTest
 		var v0 = Vector2.fromX(1);
 		// Use overshooting trajectories to the intersection distance. This will create a trajectory that passes the
 		// intersection point but continues afterward with the overshoot.
-		var destination = timedPositionCalc.destinationForBangBang2dSync(p0, intersectionPoint, v0, 2, 3, 0);
+		var timedTraj = timedPositionCalc.fromDestinationAndTimeSync(p0, intersectionPoint, v0, 2, 3, 0);
+		var destination = timedTraj.getFinalDestination().multiplyNew(1e-3f);
 
 		var lineSegment = Lines.segmentFromPoints(Vector2.fromY(1000), Vector2.fromXY(2000, 1000));
 		var halfLine = Lines.halfLineFromDirection(Vector2.fromY(1000), Vector2.fromX(1));
