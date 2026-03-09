@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
+ */
+
 plugins {
     id 'jacoco'
 }
@@ -10,7 +14,7 @@ dependencies {
 
     // Add common test tools
     testImplementation(libs.org.assertj.assertj.core)
-    testImplementation(libs.org.mockito.mockito.all)
+    testImplementation(libs.org.mockito.mockito.core)
 }
 
 test {
