@@ -12,8 +12,8 @@ import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 
 /**
@@ -26,6 +26,13 @@ public final class GlobalShortcuts
 	private static final List<UiShortcut> DISABLED_UI_SHORTCUTS = new CopyOnWriteArrayList<>();
 
 
+	/**
+	 * This adds a Global Shortcut which applies to the current Sumatra window
+	 * @param name the description of what the Shortcut does
+	 * @param component the component that the Shortcut is for
+	 * @param runnable the method the Shortcut is supposed to execute
+	 * @param keyStroke the keystroke that activates the Shortcut
+	 */
 	public static void add(
 			String name,
 			Component component,
@@ -52,7 +59,48 @@ public final class GlobalShortcuts
 		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher);
 		UI_SHORTCUTS.add(UiShortcut.builder()
 				.name(name)
-				.keyStroke(keyStroke)
+				.keyStrokes(Set.of(keyStroke))
+				.component(component)
+				.dispatcher(dispatcher)
+				.build()
+		);
+	}
+
+	/**
+	 * This adds a Global Shortcut which applies to the current Sumatra window
+	 * the difference to add is, that it allows for multiple keyStrokes that activate the shortcut
+	 * @param name the description of what the Shortcut does
+	 * @param component the component that the Shortcut is for
+	 * @param runnable the method the Shortcut is supposed to execute
+	 * @param keyStrokes a set of keystrokes that each activate the shortcut
+	 */
+	public static void addMultiple(
+			String name,
+			Component component,
+			Runnable runnable,
+			Set<KeyStroke> keyStrokes
+	)
+	{
+		KeyEventDispatcher dispatcher = e -> {
+			var eventKeyStroke = KeyStroke.getKeyStrokeForEvent(e);
+			if (keyStrokes.contains(eventKeyStroke))
+			{
+				var rootComponent = findRootComponent(component);
+				Component eventComponent = e.getComponent();
+				if (eventComponent != null && findRootComponent(eventComponent) == rootComponent)
+				{
+					runnable.run();
+					return true;
+				}
+			}
+			return false;
+		};
+
+
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(dispatcher);
+		UI_SHORTCUTS.add(UiShortcut.builder()
+				.name(name)
+				.keyStrokes(keyStrokes)
 				.component(component)
 				.dispatcher(dispatcher)
 				.build()
@@ -84,7 +132,7 @@ public final class GlobalShortcuts
 	{
 		// build the shortcut key identifier so that we can identify the keystroke we want to disable
 		// find all shortcuts that match the desired keystrokes and put them into the disabled shortcuts
-		DISABLED_UI_SHORTCUTS.addAll(UI_SHORTCUTS.stream().filter(s -> s.getKeyStroke().equals(keyStroke)).toList());
+		DISABLED_UI_SHORTCUTS.addAll(UI_SHORTCUTS.stream().filter(list -> list.getKeyStrokes().contains(keyStroke)).toList());
 		// disable their dispatchers
 		DISABLED_UI_SHORTCUTS.forEach(GlobalShortcuts::disableShortcut);
 		// remove them from the active shortcuts
@@ -129,7 +177,7 @@ public final class GlobalShortcuts
 		var rootComponent = findRootComponent(component);
 		return UI_SHORTCUTS.stream()
 				.filter(s -> findRootComponent(s.getComponent()) == rootComponent)
-				.collect(Collectors.toUnmodifiableList());
+				.toList();
 	}
 
 

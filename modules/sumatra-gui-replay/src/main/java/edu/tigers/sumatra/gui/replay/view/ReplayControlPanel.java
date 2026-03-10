@@ -42,6 +42,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -92,83 +93,129 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 				"Play / Pause",
 				"/pause.png",
 				this::togglePlayPause,
-				KeyEvent.VK_SPACE,
-				//0 means no modifier
-				0
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_SPACE,
+								//0 means no modifier
+								0
+						),
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_P,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+						)
+				)
 		);
 
 		JButton btnSkipFrameFwd = createActionButton(
 				"Skip one frame forward",
 				"/skipFrameForward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onNextFrame),
-				KeyEvent.VK_RIGHT,
-				//no modifier for frame skips
-				0
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_RIGHT,
+								//no modifier for frame skips
+								0
+						),
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_RIGHT,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+						)
+				)
 		);
 
 		JButton btnSkipFrameBwd = createActionButton(
 				"Skip one frame backward",
 				"/skipFrameBackward.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onPreviousFrame),
-				KeyEvent.VK_LEFT,
-				//no modifier for frame skips
-				0
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_LEFT,
+								//no modifier for frame skips
+								0
+						),
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_LEFT,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+						)
+				)
 		);
 
 		JButton btnSkipFwd = createActionButton(
 				"Skip forward (" + SKIP_TIME + "ms)",
 				"/skipForward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(SKIP_TIME * 1_000_000)),
-				KeyEvent.VK_RIGHT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_RIGHT,
+								InputEvent.SHIFT_DOWN_MASK
+						))
 		);
 
 		JButton btnSkipBwd = createActionButton(
 				"Skip backward (" + SKIP_TIME + "ms)",
 				"/skipBackward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-SKIP_TIME * 1_000_000)),
-				KeyEvent.VK_LEFT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_LEFT,
+								InputEvent.SHIFT_DOWN_MASK
+						))
 		);
 
 		JButton btnFastFwd = createActionButton(
 				"Fast forward (" + FAST_TIME + "ms)",
 				"/fastForward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(FAST_TIME * 1_000_000)),
-				KeyEvent.VK_RIGHT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_RIGHT,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+						))
 		);
 
 		JButton btnFastBwd = createActionButton(
 				"Fast backward (" + FAST_TIME + "ms)",
 				"/fastBackward.png",
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-FAST_TIME * 1_000_000)),
-				KeyEvent.VK_LEFT,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_LEFT,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+						)
+				)
 		);
 
 		JButton btnSnap = createActionButton(
 				"Take and store snapshot",
 				"/save.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onSnapshot),
-				KeyEvent.VK_S,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_S,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+						))
 		);
 
 		JButton btnSnapCopy = createActionButton(
 				"Copy snapshot to clipboard",
 				"/copy.png",
 				() -> observers.forEach(IReplayControlPanelObserver::onCopySnapshot),
-				KeyEvent.VK_C,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_C,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
+						))
 		);
 
 		JButton btnCutReplay = createActionButton(
 				"Create replay cut",
 				"/icons8-scissors-60.png",
 				() -> observers.forEach(IReplayControlPanelObserver::cutReplay),
-				KeyEvent.VK_X,
-				Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+				Set.of(
+						KeyStroke.getKeyStroke(
+								KeyEvent.VK_X,
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+						))
 		);
 
 		JMenuBar menuBar = new JMenuBar();
@@ -220,7 +267,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 
 
 	private JButton createActionButton(
-			String description, String iconPath, Runnable action, int keyCode, int keyModifiers)
+			String description, String iconPath, Runnable action, Set<KeyStroke> keyStrokes)
 	{
 		JButton button = new JButton();
 		button.addActionListener(e -> action.run());
@@ -228,11 +275,11 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		button.setToolTipText(description);
 		button.setBorder(BorderFactory.createEmptyBorder());
 		button.setBackground(new Color(0, 0, 0, 1));
-		GlobalShortcuts.add(
+		GlobalShortcuts.addMultiple(
 				description,
 				this,
 				action,
-				KeyStroke.getKeyStroke(keyCode, keyModifiers)
+				keyStrokes
 		);
 		return button;
 	}
