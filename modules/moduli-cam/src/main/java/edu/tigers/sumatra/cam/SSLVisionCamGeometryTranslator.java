@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -81,6 +81,8 @@ public class SSLVisionCamGeometryTranslator
 				.goalWidth(field.getGoalWidth())
 				.goalDepth(field.getGoalDepth())
 				.boundaryWidth(field.getBoundaryWidth())
+				.boundaryWidthGoalLine(
+						field.hasBoundaryWidthGoalLine() ? field.getBoundaryWidthGoalLine() : field.getBoundaryWidth())
 				.fieldLines(fieldLines)
 				.fieldArcs(fieldArcs)
 				.penaltyAreaDepth(field.hasPenaltyAreaDepth() ?
@@ -97,6 +99,8 @@ public class SSLVisionCamGeometryTranslator
 				.goalHeight(field.hasGoalHeight() ? field.getGoalHeight() : 155)
 				.ballRadius(field.hasBallRadius() ? field.getBallRadius() : 21.5)
 				.robotRadius(field.hasMaxRobotRadius() ? field.getMaxRobotRadius() : 90)
+				.goalSubstitutionAreaWidth(
+						field.hasGoalSubstitutionAreaWidth() ? field.getGoalSubstitutionAreaWidth() : 300)
 				.build();
 	}
 
