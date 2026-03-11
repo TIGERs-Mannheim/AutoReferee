@@ -29,7 +29,10 @@ import java.util.stream.Stream;
 public class WorldFrame extends SimpleWorldFrame
 {
 	private final Map<BotID, ITrackedBot> opponentBots;
+	private final Map<BotID, ITrackedBot> opponentBotsVisible;
 	private final Map<BotID, ITrackedBot> tigerBotsVisible;
+	private final Map<BotID, ITrackedBot> tigerBotsInSubstitutionArea;
+	private final Map<BotID, ITrackedBot> opponentBotsInSubstitutionArea;
 	private final Map<BotID, ITrackedBot> tigerBotsAvailable;
 	@Getter(AccessLevel.PRIVATE)
 	private final Map<BotID, ITrackedBot> allBots;
@@ -43,10 +46,13 @@ public class WorldFrame extends SimpleWorldFrame
 		this.teamColor = team.getTeamColor();
 		this.inverted = inverted;
 
-		opponentBots = computeOpponentBots(simpleWorldFrame, team);
+		opponentBotsInSubstitutionArea = computeOpponentInSubstitutionArea(simpleWorldFrame, team);
+		opponentBots = computeOpponentBots(simpleWorldFrame, team, opponentBotsInSubstitutionArea);
+		opponentBotsVisible = computeOpponentBotsVisible(simpleWorldFrame, team);
+		tigerBotsInSubstitutionArea = computeTigersInSubstitutionArea(simpleWorldFrame, team);
 		tigerBotsAvailable = computeTigersAvailable(simpleWorldFrame, team);
 		tigerBotsVisible = computeTigersVisible(simpleWorldFrame, team);
-		allBots = Stream.concat(opponentBots.entrySet().stream(), tigerBotsVisible.entrySet().stream())
+		allBots = Stream.concat(opponentBotsVisible.entrySet().stream(), tigerBotsVisible.entrySet().stream())
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
@@ -62,8 +68,11 @@ public class WorldFrame extends SimpleWorldFrame
 		super(original);
 		teamColor = original.getTeamColor();
 		inverted = original.isInverted();
+		opponentBotsInSubstitutionArea = original.getOpponentBotsInSubstitutionArea();
 		opponentBots = original.getOpponentBots();
+		opponentBotsVisible = original.getOpponentBotsVisible();
 		tigerBotsAvailable = original.getTigerBotsAvailable();
+		tigerBotsInSubstitutionArea = original.getTigerBotsInSubstitutionArea();
 		tigerBotsVisible = original.getTigerBotsVisible();
 		allBots = original.getAllBots();
 	}
@@ -83,11 +92,15 @@ public class WorldFrame extends SimpleWorldFrame
 	}
 
 
-	private Map<BotID, ITrackedBot> computeOpponentBots(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	private Map<BotID, ITrackedBot> computeOpponentBots(
+			final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam,
+			final Map<BotID, ITrackedBot> opponentBotsInSubstitutionArea
+	)
 	{
 		Map<BotID, ITrackedBot> opponents = simpleWorldFrame.getBots().values().stream()
 				.filter(bot -> aiTeam.matchesColor(bot.getBotId().getTeamColor().opposite()))
 				.filter(bot -> Geometry.getFieldWBorders().isPointInShape(bot.getPos()))
+				.filter(bot -> !opponentBotsInSubstitutionArea.containsKey(bot.getBotId()))
 				.map(bot -> {
 					RobotInfo info = RobotInfo.stubBuilder(bot.getBotId(), bot.getTimestamp())
 							.withBotParams(bot.getRobotInfo().getBotParams())
@@ -111,7 +124,43 @@ public class WorldFrame extends SimpleWorldFrame
 	}
 
 
-	private Map<BotID, ITrackedBot> computeTigersAvailable(final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	private Map<BotID, ITrackedBot> computeOpponentBotsVisible(
+			final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
+				.filter(bot -> aiTeam.opposite().matchesColor(bot.getTeamColor()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return Collections.unmodifiableMap(visible);
+	}
+
+
+	private Map<BotID, ITrackedBot> computeTigersInSubstitutionArea(
+			final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
+				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor())
+						&& Geometry.getGoalSubstitutionAreaOur().withMargin(-Geometry.getBotRadius())
+						.isPointInShape(bot.getPos()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return Collections.unmodifiableMap(visible);
+	}
+
+
+	private Map<BotID, ITrackedBot> computeOpponentInSubstitutionArea(
+			final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam)
+	{
+		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
+				.filter(bot -> aiTeam.opposite().matchesColor(bot.getTeamColor())
+						&& Geometry.getGoalSubstitutionAreaTheir().withMargin(-Geometry.getBotRadius())
+						.isPointInShape(bot.getPos()))
+				.collect(Collectors.toMap(ITrackedBot::getBotId, Function.identity()));
+		return Collections.unmodifiableMap(visible);
+	}
+
+
+	private Map<BotID, ITrackedBot> computeTigersAvailable(
+			final SimpleWorldFrame simpleWorldFrame, final EAiTeam aiTeam
+	)
 	{
 		Map<BotID, ITrackedBot> visible = simpleWorldFrame.getBots().values().stream()
 				.filter(bot -> aiTeam.matchesColor(bot.getTeamColor()))
