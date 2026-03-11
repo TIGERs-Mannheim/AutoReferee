@@ -270,6 +270,7 @@ public class WorldInfoCollector extends AWorldPredictor
 
 		ShapeMap visionShapeMap = camFrameShapeMapProducer.createShapeMap();
 		addCamObjectFilterShapes(visionShapeMap);
+		addCamSourceShapes(visionShapeMap);
 		notifyNewShapeMap(lastWFTimestamp, visionShapeMap, VISION_SHAPE_MAP_SOURCE);
 	}
 
@@ -296,6 +297,23 @@ public class WorldInfoCollector extends AWorldPredictor
 		var cams = new DrawableBorderText(Vector2.fromXY(1, 8), "Excluded cams: " + String.join(", ", camIdStrings))
 				.setFontSize(EFontSize.LARGE).setColor(Color.RED);
 		return List.of(rectangle, cams);
+	}
+
+
+	private void addCamSourceShapes(ShapeMap shapeMap)
+	{
+		if (cam == null)
+		{
+			return;
+		}
+
+		shapeMap.get(EWpShapesLayer.VISION_SOURCE).add(
+				new DrawableBorderText(
+						Vector2.fromXY(13.5, 4.1),
+						"Vision Source: " + cam.getCamSource().toString().replace("SSL_SOURCE_", "")
+				)
+						.setColor(Color.WHITE)
+		);
 	}
 
 
