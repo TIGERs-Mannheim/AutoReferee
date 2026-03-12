@@ -111,7 +111,7 @@ public class BorderVisCalc implements IWpCalc
 		).multiply(sign);
 
 		var backDistance = SumatraMath.max(
-				Geometry.getBoundaryWidth() - GOAL_BORDER_WIDTH_MM - Geometry.getLineWidth() / 2, goal.getDepth());
+				Geometry.getBoundaryWidthGoalLine() - GOAL_BORDER_WIDTH_MM, goal.getDepth());
 
 		var backOffset = Vector2.fromX(backDistance).multiply(sign);
 		var middleOffset = Vector2.fromX(goal.getDepth()).multiply(sign);

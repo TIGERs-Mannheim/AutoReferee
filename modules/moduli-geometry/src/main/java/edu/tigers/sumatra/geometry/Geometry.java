@@ -447,9 +447,9 @@ public class Geometry
 	/**
 	 * @return the boundaryLength
 	 */
-	public static double getBoundaryLength()
+	public static double getBoundaryWidthGoalLine()
 	{
-		return getBoundaryWidth();
+		return getLastCamGeometry().getFieldSize().getBoundaryWidthGoalLine();
 	}
 
 
