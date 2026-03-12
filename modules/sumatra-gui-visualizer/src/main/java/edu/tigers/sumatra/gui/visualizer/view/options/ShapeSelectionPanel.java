@@ -8,6 +8,7 @@ package edu.tigers.sumatra.gui.visualizer.view.options;
 import com.jidesoft.swing.CheckBoxTree;
 import edu.tigers.sumatra.components.BetterScrollPane;
 import edu.tigers.sumatra.util.ImageScaler;
+import edu.tigers.sumatra.util.ShortcutSuppressor;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 
@@ -107,6 +108,10 @@ public class ShapeSelectionPanel extends JPanel
 		add(toolBarNorth, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 		add(toolBarSouth, BorderLayout.SOUTH);
+
+		// this panel uses arrow keys and space bar. So shortcuts need to be suppressed
+		ShortcutSuppressor onTreeSelect = new ShortcutSuppressor();
+		tree.addFocusListener(onTreeSelect);
 	}
 
 
