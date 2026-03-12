@@ -71,7 +71,8 @@ public class RobotQualityInspector
 		double trackingTime = (camRobot.getTimestamp() - initialTimestamp) / 1e9;
 		if (trackingTime < 0)
 		{
-			log.warn("Negative tracking time: {}", trackingTime);
+			// May happen, as we run on camRobots on all cameras
+			log.debug("Negative tracking time: {}", trackingTime);
 			return;
 		}
 		double time = Math.min(trackingTime, trackingTimeHorizon);
