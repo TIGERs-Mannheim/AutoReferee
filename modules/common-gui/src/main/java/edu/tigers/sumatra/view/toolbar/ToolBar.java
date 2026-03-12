@@ -3,6 +3,7 @@
  */
 package edu.tigers.sumatra.view.toolbar;
 
+import edu.tigers.sumatra.ids.EAiTeam;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.ImageScaler;
 import edu.tigers.sumatra.view.BaseStationPanel;
@@ -24,15 +25,15 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-
 /**
- * The frame tool bar.
+ * The frame toolbar.
  */
 @Log4j2
 public class ToolBar
 {
 	private final List<IToolbarObserver> observers = new CopyOnWriteArrayList<>();
 	private final JToggleButton btnRecSave = new JToggleButton();
+	private final JButton btnEmergency = new JButton();
 
 	@Getter
 	private final JToolBar jToolBar = new JToolBar();
@@ -45,12 +46,14 @@ public class ToolBar
 	@Getter
 	private final BaseStationPanel baseStationPanel = new BaseStationPanel();
 
+	private EAIControlState yellowMode = EAIControlState.ACTIVE;
+	private EAIControlState blueMode = EAIControlState.ACTIVE;
+
 
 	public ToolBar()
 	{
 		log.trace("Create toolbar");
 
-		var btnEmergency = new JButton();
 		btnEmergency.addActionListener(actionEvent -> notifyEmergencyStop());
 		btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/stop-emergency.png"));
 		btnEmergency.setToolTipText("Emergency stop [Esc]");
@@ -132,6 +135,25 @@ public class ToolBar
 	}
 
 
+	public void onAiModeChanged(EAiTeam aiTeam, EAIControlState mode)
+	{
+		if (aiTeam == EAiTeam.BLUE)
+		{
+			blueMode = mode;
+		} else if (aiTeam == EAiTeam.YELLOW)
+		{
+			yellowMode = mode;
+		}
+
+		if (blueMode == EAIControlState.EMERGENCY_MODE || yellowMode == EAIControlState.EMERGENCY_MODE)
+		{
+			btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/alarm.gif"));
+		} else
+		{
+			btnEmergency.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/stop-emergency.png"));
+		}
+	}
+
 	private void toggleTournamentMode(ActionEvent e)
 	{
 		JToggleButton btn = (JToggleButton) e.getSource();
@@ -142,9 +164,19 @@ public class ToolBar
 	private void toggleRecord()
 	{
 		btnRecSave.setEnabled(false);
-		new Thread(() -> {
-			observers.forEach(IToolbarObserver::onToggleRecord);
-			btnRecSave.setEnabled(true);
-		}, "RecordSaveButton").start();
+		new Thread(
+				() -> {
+					observers.forEach(IToolbarObserver::onToggleRecord);
+					btnRecSave.setEnabled(true);
+				}, "RecordSaveButton"
+		).start();
+	}
+
+
+	public enum EAIControlState
+	{
+		ACTIVE,
+		EMERGENCY_MODE,
+		OFF
 	}
 }

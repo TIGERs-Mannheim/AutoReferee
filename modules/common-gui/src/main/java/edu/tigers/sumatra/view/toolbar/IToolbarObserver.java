@@ -18,7 +18,6 @@ public interface IToolbarObserver
 	{
 	}
 
-
 	/**
 	 * Start or stop record
 	 */
