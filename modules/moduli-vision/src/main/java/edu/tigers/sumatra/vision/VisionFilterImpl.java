@@ -158,6 +158,13 @@ public class VisionFilterImpl extends AVisionFilter
 
 	private void processCamDetectionFrame(CamDetectionFrame camDetectionFrame)
 	{
+		double frameDt = (lastFrame.getTimestamp() - camDetectionFrame.getTimestamp()) * 1e-9;
+		if (Math.abs(frameDt) > 1)
+		{
+			log.warn("Frame dt is {}s, resetting vision filter", String.format("%.2f", frameDt));
+			onClearCamFrame();
+		}
+
 		int camId = camDetectionFrame.getCameraId();
 
 		// let viewport architect adjust
@@ -370,12 +377,9 @@ public class VisionFilterImpl extends AVisionFilter
 			camDetectionFrameQueue.clear();
 			camGeometryQueue.clear();
 		}
-		cams.clear();
 		viewportArchitect.removeObserver(this);
 		ballFilterPreprocessor.removeObserver(this);
-		ballFilterPreprocessor.clear();
-		robotQualityInspector.reset();
-		lastFrame = FilteredVisionFrame.createEmptyFrame();
+		onClearCamFrame();
 	}
 
 
