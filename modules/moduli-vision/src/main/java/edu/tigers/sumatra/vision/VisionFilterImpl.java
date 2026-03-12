@@ -159,7 +159,7 @@ public class VisionFilterImpl extends AVisionFilter
 	private void processCamDetectionFrame(CamDetectionFrame camDetectionFrame)
 	{
 		double frameDt = (lastFrame.getTimestamp() - camDetectionFrame.getTimestamp()) * 1e-9;
-		if (Math.abs(frameDt) > 1)
+		if (lastFrame.getTimestamp() != 0 && Math.abs(frameDt) > 1)
 		{
 			log.warn("Frame dt is {}s, resetting vision filter", String.format("%.2f", frameDt));
 			onClearCamFrame();
