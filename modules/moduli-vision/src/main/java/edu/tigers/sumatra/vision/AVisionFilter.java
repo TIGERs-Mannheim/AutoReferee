@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.vision;
@@ -21,7 +21,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.HashMap;
 import java.util.Map;
 
 
@@ -36,11 +35,17 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	private final EventDistributor<IBallModelIdentResult> ballModelIdentResult = new EventDistributor<>();
 
 	@Getter
-	@Setter
-	private Map<BotID, RobotInfo> robotInfoMap = new HashMap<>();
+	@SuppressWarnings("java:S3077") // Map is immutable, so volatile is enough for thread safety
+	private volatile Map<BotID, RobotInfo> robotInfoMap = Map.of();
 
 	@Setter
 	private IBallPlacer ballPlacer;
+
+
+	public void setRobotInfoMap(final Map<BotID, RobotInfo> robotInfoMap)
+	{
+		this.robotInfoMap = Map.copyOf(robotInfoMap);
+	}
 
 
 	/**
@@ -145,7 +150,7 @@ public abstract class AVisionFilter extends AModule implements ICamFrameObserver
 	@Override
 	public void onClearCamFrame()
 	{
-		robotInfoMap = new HashMap<>();
+		robotInfoMap = Map.of();
 		filteredVisionFrame.clearFrame();
 		viewportFrame.clearFrame();
 	}
