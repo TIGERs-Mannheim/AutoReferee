@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.detector;
@@ -32,6 +32,7 @@ public class GoalDetector extends AGameEventDetector
 	private final Map<ETeamColor, Double> maxBallHeightMap = new EnumMap<>(ETeamColor.class);
 	private KickedBall lastKickedball;
 
+
 	public GoalDetector()
 	{
 		super(EGameEventDetectorType.GOAL, Set.of(EGameState.RUNNING, EGameState.PENALTY));
@@ -54,8 +55,10 @@ public class GoalDetector extends AGameEventDetector
 				maxBallHeightMap.put(team, 0.0);
 			} else
 			{
-				maxBallHeightMap.compute(team,
-						(t, h) -> Math.max(h == null ? 0.0 : h, frame.getWorldFrame().getBall().getHeight()));
+				maxBallHeightMap.compute(
+						team,
+						(t, h) -> Math.max(h == null ? 0.0 : h, frame.getWorldFrame().getBall().getHeight())
+				);
 			}
 		}
 		return frame.getBallLeftFieldPos()
@@ -100,15 +103,28 @@ public class GoalDetector extends AGameEventDetector
 	}
 
 
-	private IGameEvent createEvent(final BallLeftFieldPosition ballLeftFieldPosition,
-			final IVector2 kickLocation, final BotID kickingBot)
+	private IGameEvent createEvent(
+			final BallLeftFieldPosition ballLeftFieldPosition,
+			final IVector2 kickLocation, final BotID kickingBot
+	)
 	{
 		final ETeamColor forTeam = goalForTeam(ballLeftFieldPosition);
 		final IVector2 location = ballLeftFieldPosition.getPosition().getPos();
 		final double maxBallHeight = maxBallHeightMap.get(forTeam);
 		final int numRobots = (int) frame.getWorldFrame().getBots().keySet().stream()
-				.filter(b -> b.getTeamColor() == forTeam).count();
+				.filter(b -> b.getTeamColor() == forTeam)
+				.filter(this::isInField)
+				.count();
 		final long lastTouched = lastTouchedMap.get(forTeam);
 		return new PossibleGoal(forTeam, kickingBot, location, kickLocation, maxBallHeight, numRobots, lastTouched);
+	}
+
+
+	private boolean isInField(final BotID botID)
+	{
+		IVector2 pos = frame.getWorldFrame().getBot(botID).getPos();
+		return Geometry.getFieldWBorders().isPointInShape(pos)
+				&& !Geometry.getGoalSubstitutionAreaOur().isPointInShape(pos)
+				&& !Geometry.getGoalSubstitutionAreaTheir().isPointInShape(pos);
 	}
 }
