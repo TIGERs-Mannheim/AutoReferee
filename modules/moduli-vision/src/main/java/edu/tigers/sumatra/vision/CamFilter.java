@@ -189,7 +189,10 @@ public class CamFilter
 		fieldRect = Optional.of(
 				Rectangle.fromCenter(Vector2f.ZERO_VECTOR, field.getFieldLength(), field.getFieldWidth())
 		);
-		fieldRectWithBoundary = fieldRect.map(r -> r.withMargin(500 + field.getBoundaryWidth()));
+		fieldRectWithBoundary = fieldRect.map(r -> r.withMarginXy(
+				500 + field.getBoundaryWidthGoalLine(),
+				500 + field.getBoundaryWidth()
+		));
 	}
 
 

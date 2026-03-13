@@ -96,7 +96,7 @@ public class ViewportArchitect
 		this.field = new Viewport(
 				Vector2f.ZERO_VECTOR,
 				Rectangle.fromCenter(Vector2f.ZERO_VECTOR, fieldSize.getFieldLength(), fieldSize.getFieldWidth())
-						.withMargin(fieldSize.getBoundaryWidth())
+						.withMarginXy(fieldSize.getBoundaryWidthGoalLine(), fieldSize.getBoundaryWidth())
 		);
 	}
 
