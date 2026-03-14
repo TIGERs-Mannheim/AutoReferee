@@ -14,6 +14,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
@@ -218,6 +219,12 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 						))
 		);
 
+		//also add a custom shortcut for unfocussing the current thing
+		GlobalShortcuts.add("Un-Select current panel",
+				this,this::looseFocus,
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)
+		);
+
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(replayMenu);
 		add(menuBar, BorderLayout.PAGE_START);
@@ -370,6 +377,15 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			btnPlay.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/play.png"));
 		}
 		repaint();
+	}
+
+
+	/**
+	 * This sets the focus away from what is currently selected, so shortcuts can get unsuppressed
+	 */
+	private void looseFocus()
+	{
+		FocusManager.getCurrentManager().clearFocusOwner();
 	}
 
 
