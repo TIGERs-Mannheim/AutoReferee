@@ -39,7 +39,7 @@ class TimedTrajectoryFactoryTest extends Specification {
             var x = generator.getTimedPos1D((float) distanceX, (float) v0x, (float) (3.5 * cA), (float) (2.5 * cA), (float) targetTime)
             var y = generator.getTimedPos1D((float) distanceY, (float) v0y, (float) (3.5 * sA), (float) (2.5 * sA), (float) targetTime)
 
-            var diff = Math.abs(x.time() - y.time())
+            var diff = Math.abs(x.totalTime() - y.totalTime())
             if (diff < bestDiff) {
                 bestDiff = diff
                 bestX = x
@@ -55,7 +55,7 @@ class TimedTrajectoryFactoryTest extends Specification {
                 2.5f,
                 (float) targetTime,
                 alpha -> alpha
-        ).getFinalDestination().multiplyNew(1e-3f)
+        ).trajectory2D().getFinalDestination().multiplyNew(1e-3f)
         var sCorrect = Vector2.fromXY(s0.x() + bestX.pos(), s0.y() + bestY.pos())
 
         then:
@@ -81,10 +81,10 @@ class TimedTrajectoryFactoryTest extends Specification {
         var timedPos = generator.getTimedPos1D((float) s, (float) v0, (float) vMax, (float) aMax, (float) tt)
         var timedPosMirrored = generator.getTimedPos1D((float) -s, (float) -v0, (float) vMax, (float) aMax, (float) tt)
         then:
-        SumatraMath.isEqual((double) timedPos.time(), (double) time)
+        SumatraMath.isEqual((double) timedPos.totalTime(), (double) time)
         SumatraMath.isEqual((double) timedPos.pos(), (double) pos)
 
-        SumatraMath.isEqual((double) timedPosMirrored.time(), (double) time)
+        SumatraMath.isEqual((double) timedPosMirrored.totalTime(), (double) time)
         SumatraMath.isEqual((double) timedPosMirrored.pos(), (double) -pos)
         where:
         s   | v0   | tt                | vMax | aMax || time              | pos
@@ -136,69 +136,5 @@ class TimedTrajectoryFactoryTest extends Specification {
         1.0 | 0.0  | 1.0               | 3.5  | 2.5  || 1.367544467966324 | 1.16886116991581
         1.0 | 1.0  | 0.8               | 3.5  | 2.5  || 1.020204          | 1.0606123
         1.0 | -1.0 | 1.5               | 3.5  | 2.5  || 1.892893          | 1.192956
-    }
-
-
-    def "fromDestinationAndVelLimit GetTimed1D"() {
-        when:
-        var generator = new TimedTrajectoryFactory()
-        var bangBangFactory = new BangBangTrajectoryFactory();
-
-        var timeAtTarget = generator.getTime1D((float) s, (float) v0, (float) vMax, (float) aMax, (float) vMaxAtTarget)
-        var timeAtTargetMirrored = generator.getTime1D((float) -s, (float) -v0, (float) vMax, (float) aMax, (float) vMaxAtTarget)
-
-        var timedPos = generator.getTimedPos1D((float) s, (float) v0, (float) vMax, (float) aMax, (float) timeAtTarget);
-        var trajectory = bangBangFactory.singleDim(0, timedPos.pos(), (double) v0, (double) vMax, (double) aMax);
-        var vAtTarget = trajectory.getVelocity(time)
-
-        then:
-        SumatraMath.isEqual((double) timeAtTarget, (double) time)
-        SumatraMath.isEqual((double) timeAtTarget, (double) timeAtTargetMirrored)
-
-        vAtTarget < vMaxAtTarget || SumatraMath.isEqual(vAtTarget, (double) vMaxAtTarget)
-        SumatraMath.isEqual(trajectory.getPosition(time), s)
-
-        where:
-        s    | v0   | vMaxAtTarget | vMax | aMax || time
-        // Straight not reaching vMaxAtTarget
-        // https://www.wolframalpha.com/input?i=solve+s%3D0.5*%28v%2Bv_1%29*t%2C+v_1+%3D+v+%2B+a*t%2C+a%3D1%2C+v%3D0%2C+s%3D0.5+for+t
-        0.5  | 0.0  | 1.5          | 3.5  | 1.0  || 1.000000000000000
-        0.5  | 1.0  | 1.5          | 3.5  | 1.0  || 0.414213562373095
-        0.5  | -1.0 | 1.5          | 3.5  | 1.0  || 2.414213562373095
-
-        // Trapezoidal stopping
-        // https://www.wolframalpha.com/input?i=solve+s%3D0.5*%28v%2Bv_1%29*t_1%2B+v_1+*+t_2+%2B+0.5*v_1*t_3%2C+v_1+%3D+v%2Ba*t_1%2C+0%3Dv_1-a*t_3%2C+t%3Dt_1%2Bt_2%2Bt_3%2C+v_1%3D3.5%2C+a%3D2.5%2C+s%3D5%2C+v%3D0%2C+for+t
-        5.0  | 0.0  | 0.0          | 3.5  | 2.5  || 2.828571428571428
-        5.0  | 1.0  | 0.0          | 3.5  | 2.5  || 2.485714285714285
-        5.0  | -1.0 | 0.0          | 3.5  | 2.5  || 3.285714285714285
-        3.5  | 2.75 | 0.0          | 1.75 | 1.25 || 2.471428571428571
-
-        // Trapezoidal direct
-        // https://www.wolframalpha.com/input?i=solve+s%3D0.5*%28v%2Bv_1%29*t_1%2B+v_1+*+t_2+%2B+0.5*%28v_1+%2B+1.5%29*t_3%2C+v_1+%3D+v%2Ba*t_1%2C+1.5%3Dv_1-a*t_3%2C+t%3Dt_1%2Bt_2%2Bt_3%2C+v_1%3D3.5%2C+a%3D2.5%2C+s%3D5%2C+v%3D0%2C+for+t
-        5.0  | 0.0  | 1.5          | 3.5  | 2.5  || 2.357142857142857
-        5.0  | 1.0  | 1.5          | 3.5  | 2.5  || 2.014285714285714
-        5.0  | -1.0 | 1.5          | 3.5  | 2.5  || 2.814285714285714
-        3.5  | 2.75 | 1.5          | 1.75 | 1.25 || 1.785714285714286
-
-        // Trapezoidal too fast and recover
-        // https://www.wolframalpha.com/input?i=solve+1%3D0.5*%28v_1%2Bv_2%29*t_1%2B+v_2+*+t_2+%2B+0.5*%28v_2+%2B+v_3%29*t_3%2C+v_2+%3D+v_1-a*t_1%2C+v_3%3Dv_2%2Ba*t_3%2C+t%3Dt_1%2Bt_2%2Bt_3%2C+v_2%3D-3.0%2C+a%3D2.5%2C+v_3%3D-1.5%2C+v_1%3D5%2C+for+t
-        1.0  | 5.0  | 1.5          | 3.0  | 2.5  || 4.083333333333333
-
-        // Triangular stopping
-        // https://www.wolframalpha.com/input?i=solve+s%3Dv*t_1+%2B+0.5*a*t_1**2+%2B+v_1+*+t_2+-+0.5*a*t_2**2%2C+t%3Dt_1%2Bt_2%2C+t_2%3DAbs%5Bv_1%2Fa%5D%2C+v_1%3Dv+%2B+a+*+t_1%2C+a%3D2.5%2C+s%3D1%2C+v%3D-1
-        1.0  | 0.0  | 0.0          | 3.5  | 2.5  || 1.264911064067351
-        1.0  | 1.0  | 0.0          | 3.5  | 2.5  || 0.985640646055101
-        1.0  | -1.0 | 0.0          | 3.5  | 2.5  || 1.785640646055101
-
-        // Triangular direct
-        // https://www.wolframalpha.com/input?i=solve+s%3Dv*t_1+%2B+0.5*a*t_1**2+%2B+v_1+*+t_2+-+0.5*a*t_2**2%2C+t%3Dt_1%2Bt_2%2C+v_1%3Dv+%2B+a+*+t_1%2C+1.5%3Dv_1+-+a+*+t_2%2C+a%3D2.5%2C+s%3D1%2C+v%3D0+for+t
-        1.0  | 0.0  | 1.5          | 3.5  | 2.5  || 0.923154621172782
-        1.0  | 1.0  | 1.5          | 3.5  | 2.5  || 0.624807680927192
-        1.0  | -1.0 | 1.5          | 3.5  | 2.5  || 1.42480768092719
-
-        // Trapezoidal too fast
-        // https://www.wolframalpha.com/input?i=solve+s%3Dv*t_1+%2B+0.5*a*t_1**2+%2B+v_1+*+t_2%2C+v_1+%3D+v%2Ba*t_1%2C+t%3Dt_1%2Bt_2%2C+v_1%3D3.5%2C+a%3D2.5%2C+s%3D3%2C+v%3D0+for+t
-        // https://www.wolframalpha.com/input?i=solve+s%3D0.5*v*t%2C+t%3Dv%2Fa%2C+a%3D2.5%2C+v+%3D+3.5
-        0.35 | 3.0  | 1.5          | 3.5  | 2.5  || 2.343559577416269
     }
 }

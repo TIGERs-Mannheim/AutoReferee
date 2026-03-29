@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.util.List;
+
 
 @ToString
 @Getter
@@ -18,6 +20,50 @@ public class TimedTrajectory2D implements ITrajectory<IVector2>
 	private final ITrajectory<IVector2> trajectory;
 	private final IVector2 targetDest;
 	private final double targetTime;
+	private final double timeAtTargetX;
+	private final double timeAtTargetY;
+
+
+	@Override
+	public IVector2 getNextDestination(double t)
+	{
+		return trajectory.getNextDestination(t);
+	}
+
+
+	@Override
+	public IVector2 getFinalDestination()
+	{
+		return trajectory.getFinalDestination();
+	}
+
+
+	@Override
+	public PosVelAcc<IVector2> getValuesAtTime(double tt)
+	{
+		return trajectory.getValuesAtTime(tt);
+	}
+
+
+	@Override
+	public List<Double> getTimeSections()
+	{
+		return trajectory.getTimeSections();
+	}
+
+
+	@Override
+	public double getTotalTimeToPrimaryDirection()
+	{
+		return trajectory.getTotalTimeToPrimaryDirection();
+	}
+
+
+	@Override
+	public double getMaxSpeed()
+	{
+		return trajectory.getMaxSpeed();
+	}
 
 
 	@Override
@@ -67,7 +113,9 @@ public class TimedTrajectory2D implements ITrajectory<IVector2>
 		return new TimedTrajectory2D(
 				trajectory.mirrored(),
 				targetDest.multiplyNew(-1),
-				targetTime
+				targetTime,
+				timeAtTargetX,
+				timeAtTargetY
 		);
 	}
 }

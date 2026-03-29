@@ -39,18 +39,21 @@ public class TimedTrajectoryFactory
 			double targetTime
 	)
 	{
-		return new TimedTrajectory2D(
-				fromDestinationAndTime(
-						s0,
-						s1,
-						v0,
-						(float) vMax,
-						(float) aMax,
-						(float) targetTime,
-						alpha -> alpha
-				),
+		var partialTimed = fromDestinationAndTime(
+				s0,
 				s1,
-				targetTime
+				v0,
+				(float) vMax,
+				(float) aMax,
+				(float) targetTime,
+				alpha -> alpha
+		);
+		return new TimedTrajectory2D(
+				partialTimed.trajectory2D,
+				s1,
+				targetTime,
+				partialTimed.timeAtTargetX,
+				partialTimed.timeAtTargetY
 		);
 	}
 
@@ -80,7 +83,7 @@ public class TimedTrajectoryFactory
 		var v0Rotated = v0.turnNew(-rotation);
 
 
-		var child = fromDestinationAndTime(
+		var partialTimed = fromDestinationAndTime(
 				Vector2f.ZERO_VECTOR,
 				startToTarget,
 				v0Rotated,
@@ -91,73 +94,16 @@ public class TimedTrajectoryFactory
 		);
 
 		return new TimedTrajectory2D(
-				new BangBangTrajectory2DAsync(child, s0, rotation),
+				new BangBangTrajectory2DAsync(partialTimed.trajectory2D, s0, rotation),
 				s1,
-				targetTime
+				targetTime,
+				partialTimed.timeAtTargetX,
+				partialTimed.timeAtTargetY
 		);
 	}
 
 
-	public TimedTrajectory2D fromDestinationAndVelLimitSync(
-			IVector2 s0,
-			IVector2 s1,
-			IVector2 v0,
-			double vMax,
-			double aMax,
-			double vMaxAtTarget
-	)
-	{
-		var timedBangBag = fromDestinationAndVelLimit(
-				s0,
-				s1,
-				v0,
-				(float) vMax,
-				(float) aMax,
-				(float) vMaxAtTarget,
-				alpha -> alpha
-		);
-
-		return new TimedTrajectory2D(
-				timedBangBag.trajectory,
-				s1,
-				timedBangBag.targetTime
-		);
-	}
-
-
-	public TimedTrajectory2D fromDestinationAndVelLimitAsync(
-			IVector2 s0,
-			IVector2 s1,
-			IVector2 v0,
-			double vMax,
-			double aMax,
-			double vMaxAtTarget,
-			IVector2 primaryDirection
-	)
-	{
-		var rotation = primaryDirection.getAngle();
-		var startToTarget = s1.subtractNew(s0).turn(-rotation);
-		var v0Rotated = v0.turnNew(-rotation);
-
-		var timedBangBag = fromDestinationAndVelLimit(
-				Vector2f.ZERO_VECTOR,
-				startToTarget,
-				v0Rotated,
-				(float) vMax,
-				(float) aMax,
-				(float) vMaxAtTarget,
-				BangBangTrajectoryFactory.ALPHA_FN_ASYNC
-		);
-
-		return new TimedTrajectory2D(
-				new BangBangTrajectory2DAsync(timedBangBag.trajectory(), s0, rotation),
-				s1,
-				timedBangBag.targetTime
-		);
-	}
-
-
-	BangBangTrajectory2D fromDestinationAndTime(
+	PartialTimedTrajectory2D fromDestinationAndTime(
 			IVector2 s0,
 			IVector2 s1,
 			IVector2 v0,
@@ -180,8 +126,8 @@ public class TimedTrajectoryFactory
 		float cosinAlpha = 0;
 
 
-		TimedPos1D x = new TimedPos1D(0, 0);
-		TimedPos1D y = new TimedPos1D(0, 0);
+		TimedPos1D x = new TimedPos1D(0, 0, 0);
+		TimedPos1D y = new TimedPos1D(0, 0, 0);
 
 		// binary search, some iterations (fixed)
 		while (inc > 1e-7)
@@ -193,12 +139,12 @@ public class TimedTrajectoryFactory
 			x = getTimedPos1D(distanceX, v0x, vMax * cosinAlpha, aMax * cosinAlpha, targetTime);
 			y = getTimedPos1D(distanceY, v0y, vMax * sinusAlpha, aMax * sinusAlpha, targetTime);
 
-			double diff = Math.abs(x.time() - y.time());
+			double diff = Math.abs(x.totalTime() - y.totalTime());
 			if (diff < BangBangTrajectoryFactory.SYNC_ACCURACY)
 			{
 				break;
 			}
-			if (x.time() > y.time())
+			if (x.totalTime() > y.totalTime())
 			{
 				alpha -= inc;
 			} else
@@ -218,7 +164,11 @@ public class TimedTrajectoryFactory
 		xTraj.generate((float) s0.x(), virtualDestX, v0x, vMax * cosinAlpha, aMax * cosinAlpha);
 		yTraj.generate((float) s0.y(), virtualDestY, v0y, vMax * sinusAlpha, aMax * sinusAlpha);
 
-		return new BangBangTrajectory2D(xTraj, yTraj);
+		return new PartialTimedTrajectory2D(
+				new BangBangTrajectory2D(xTraj, yTraj),
+				x.timeAtTarget(),
+				y.timeAtTarget()
+		);
 	}
 
 
@@ -266,7 +216,7 @@ public class TimedTrajectoryFactory
 			// Calc the fastest overshoot by starting at sZeroVel in opposed direction with v0=0.0
 			var timed = calcFastestDirect(s - sZeroVel, 0.f, -v1Max, aMax, tt - tBreaking);
 			// Extend TimedPos1D to accommodate breaking
-			return new TimedPos1D(timed.pos() + sZeroVel, timed.time() + tBreaking);
+			return new TimedPos1D(timed.pos() + sZeroVel, timed.totalTime() + tBreaking, timed.timeAtTarget() + tBreaking);
 		}
 	}
 
@@ -350,7 +300,7 @@ public class TimedTrajectoryFactory
 		var t12TooSlow = (s13) / v1Max;
 		if (t01 + t12TooSlow >= tt)
 		{
-			return Optional.of(new TimedPos1D(s + s23, t01 + t12TooSlow + t23));
+			return Optional.of(new TimedPos1D(s + s23, t01 + t12TooSlow + t23, t01 + t12TooSlow));
 		}
 
 		// Determine if "Trapezoidal finishing early"
@@ -367,7 +317,7 @@ public class TimedTrajectoryFactory
 		var t12Early = s12Early / v1Max;
 		if (t12Early >= 0.0f && t01 + t12Early + t23 <= tt)
 		{
-			return Optional.of(new TimedPos1D(s, t01 + t12Early + t23));
+			return Optional.of(new TimedPos1D(s, t01 + t12Early + t23, t01 + t12Early + t23));
 		}
 
 		// Determine if "Trapezoidal direct hit"
@@ -390,7 +340,7 @@ public class TimedTrajectoryFactory
 		{
 			var v3 = v1Max + aDec * t23Direct;
 			var t34 = -v3 / aDec;
-			return Optional.of(new TimedPos1D(s + 0.5f * v3 * t34, tt + t34));
+			return Optional.of(new TimedPos1D(s + 0.5f * v3 * t34, tt + t34, tt));
 		}
 		return Optional.empty();
 	}
@@ -407,13 +357,18 @@ public class TimedTrajectoryFactory
 	{
 
 		// Determining if "Straight too slow"
-		// Can*t reach v1Max before reaching s, but already checked slowestDirect Time is smaller than tt (getPosition1D)
+		// Can't reach v1Max before reaching s, but already checked slowestDirect Time is smaller than tt (getPosition1D)
 		// => we are too slow at s and only reasonable trajectory left is straight decelerating
 		if ((v1Max >= 0) == (v0 >= v1Max))
 		{
 			var t = -v0 / aDec;
-			return new TimedPos1D(0.5f * v0 * t, t);
-
+			var sqrt = (float) SumatraMath.sqrt(2 * aDec * s + v0 * v0);
+			var timeAtTarget = (sqrt - v0) / aDec;
+			Validate.isTrue(SumatraMath.isEqual(
+					0.5f * aDec * timeAtTarget * timeAtTarget + v0 * timeAtTarget,
+					s
+			));
+			return new TimedPos1D(0.5f * v0 * t, t, timeAtTarget);
 		}
 		var aAcc = -aDec;
 		// Determining if "Triangular too slow"
@@ -434,7 +389,7 @@ public class TimedTrajectoryFactory
 		{
 			var v1TooSlow = v0 + aAcc * t01TooSLow;
 			var t12TooSlow = Math.abs(v1TooSlow / aAcc);
-			return new TimedPos1D(s + 0.5f * v1TooSlow * t12TooSlow, t01TooSLow + t12TooSlow);
+			return new TimedPos1D(s + 0.5f * v1TooSlow * t12TooSlow, t01TooSLow + t12TooSlow, t01TooSLow);
 		}
 
 		// Determining if "Triangular finishing early"
@@ -455,7 +410,7 @@ public class TimedTrajectoryFactory
 		var t01Early = (v1Early - v0) / aAcc;
 		if (t01Early + t12Early <= tt)
 		{
-			return new TimedPos1D(s, t01Early + t12Early);
+			return new TimedPos1D(s, t01Early + t12Early, t01Early + t12Early);
 		}
 
 		// Determining if "Triangular direct hit"
@@ -478,183 +433,14 @@ public class TimedTrajectoryFactory
 		var t13Direct = v1Direct / aAcc;
 		var s01Direct = 0.5f * (v0 + v1Direct) * t01Direct;
 		var s13Direct = 0.5f * v1Direct * t13Direct;
-		return new TimedPos1D(s01Direct + s13Direct, t01Direct + t13Direct);
+		return new TimedPos1D(s01Direct + s13Direct, t01Direct + t13Direct, tt);
 
 	}
 
 
-	private TimedBangBangTrajectory2d fromDestinationAndVelLimit(
-			IVector2 s0,
-			IVector2 s1,
-			IVector2 v0,
-			float vMax,
-			float aMax,
-			float vMaxAtTarget,
-			UnaryOperator<Float> alphaFn
-	)
-	{
-		float v0x = (float) v0.x();
-		float v0y = (float) v0.y();
-
-		var distance = s1.subtractNew(s0);
-		float distanceX = (float) distance.x();
-		float distanceY = (float) distance.y();
-
-
-		float inc = (float) AngleMath.PI / 8.0f;
-		float alpha = (float) AngleMath.PI / 4.0f;
-		float sinusAlpha = 1;
-		float cosinAlpha = 0;
-
-		float x = 0;
-		float y = 0;
-
-		// binary search, some iterations (fixed)
-		while (inc > 1e-7)
-		{
-			DoubleWrapper cos = new DoubleWrapper();
-			sinusAlpha = (float) FastMath.sinAndCos(alphaFn.apply(alpha), cos);
-			cosinAlpha = (float) cos.value;
-
-			x = getTime1D(distanceX, v0x, vMax * cosinAlpha, aMax * cosinAlpha, vMaxAtTarget * cosinAlpha);
-			y = getTime1D(distanceY, v0y, vMax * sinusAlpha, aMax * sinusAlpha, vMaxAtTarget * sinusAlpha);
-
-			double diff = Math.abs(x - y);
-			if (diff < BangBangTrajectoryFactory.SYNC_ACCURACY)
-			{
-				break;
-			}
-			if (x > y)
-			{
-				alpha -= inc;
-			} else
-			{
-				alpha += inc;
-			}
-
-			inc *= 0.5f;
-		}
-
-		float tt = ((x + y) / 2);
-
-		var virtualDestX = getTimedPos1D(distanceX, v0x, vMax * cosinAlpha, aMax * cosinAlpha, tt);
-		var virtualDestY = getTimedPos1D(distanceY, v0y, vMax * sinusAlpha, aMax * sinusAlpha, tt);
-
-		BangBangTrajectory1D xTraj = new BangBangTrajectory1D();
-		BangBangTrajectory1D yTraj = new BangBangTrajectory1D();
-
-		xTraj.generate((float) s0.x(), virtualDestX.pos(), v0x, vMax * cosinAlpha, aMax * cosinAlpha);
-		yTraj.generate((float) s0.y(), virtualDestY.pos(), v0y, vMax * sinusAlpha, aMax * sinusAlpha);
-
-		return new TimedBangBangTrajectory2d(
-				new BangBangTrajectory2D(xTraj, yTraj),
-				tt
-		);
-	}
-
-
-	float getTime1D(float s, float v0, float vMax, float aMax, float vMaxAtTarget)
-	{
-		if (s < 0)
-		{
-			// Assure s >= 0
-			return getTime1D(-s, -v0, vMax, aMax, vMaxAtTarget);
-		}
-
-		if (v0 > vMax)
-		{
-			// Assure v0 <= vMax
-			float tBreak = (v0 - vMax) / aMax;
-			float sBreak = 0.5f * (vMax + v0) * tBreak;
-			return tBreak + getTime1D(s - sBreak, vMax, vMax, aMax, vMaxAtTarget);
-		}
-
-		if (v0 < 0)
-		{
-			// Assure v0 >= 0
-			float tBreak = -v0 / aMax;
-			float sBreak = -0.5f * v0 * tBreak;
-			return tBreak + getTime1DSimplified(s + sBreak, 0, vMax, aMax, vMaxAtTarget);
-		}
-
-		if (v0 <= vMaxAtTarget)
-		{
-			return getTime1DSimplified(s, v0, vMax, aMax, vMaxAtTarget);
-		}
-
-
-		float tSlowDown = (v0 - vMaxAtTarget) / aMax;
-		float sSlowDown = 0.5f * (vMaxAtTarget + v0) * tSlowDown;
-		if (sSlowDown > s)
-		{
-			// Not enough space to slow down to vMaxAtTarget -> overshoot and recover
-			float tBreak = v0 / aMax;
-			float sBreak = 0.5f * v0 * tBreak;
-			return tBreak + getTime1DSimplified(sBreak - s, 0, vMax, aMax, vMaxAtTarget);
-		}
-
-		return minimizeTime(v0, s - sSlowDown, vMax, aMax) + tSlowDown;
-	}
-
-	private float getTime1DSimplified(
-			float s,
-			float v0,
-			float vMax,
-			float aMax,
-			float vMaxAtTarget
-	)
-	{
-
-		var tAcc = vMaxAtTarget > 0 ? (vMaxAtTarget - v0) / aMax : 0;
-		var sAcc = 0.5f * (v0 + vMaxAtTarget) * tAcc;
-
-		if (sAcc <= s)
-		{
-			return tAcc + minimizeTime(vMaxAtTarget, s - sAcc, vMax, aMax);
-		}
-
-		return triangleTime(s, v0, aMax);
-	}
-
-
-	private float minimizeTime(
-			float vStartEnd,
-			float s,
-			float vMax,
-			float aMax
-	)
-	{
-		Validate.isTrue(vMax >= vStartEnd);
-
-		float sAccAvailable = s / 2;
-		float tAcc = (vMax - vStartEnd) / aMax;
-		float sAcc = 0.5f * (vMax + vStartEnd) * tAcc;
-
-		if (sAccAvailable >= sAcc)
-		{
-			// Sufficient space to reach vMax -> trapezoidal form
-			return 2 * (tAcc + (sAccAvailable - sAcc) / vMax);
-		}
-
-		return 2 * triangleTime(sAccAvailable, vStartEnd, aMax);
-	}
-
-
-	private float triangleTime(float s, float v, float aMax)
-	{
-		// Solving s = 0.5 * aMax * t^2 + v * t for t:
-		float discriminant = (float) SumatraMath.sqrt(v * v + 2 * aMax * s);
-		float t = (discriminant - v) / aMax;
-		Validate.isTrue(t >= 0);
-		return t;
-	}
-
-
-	record TimedPos1D(float pos, float time)
+	record TimedPos1D(float pos, float totalTime, float timeAtTarget)
 	{}
 
-	private record TimedBangBangTrajectory2d(
-			BangBangTrajectory2D trajectory,
-			float targetTime
-	) {}
+	record PartialTimedTrajectory2D(BangBangTrajectory2D trajectory2D, double timeAtTargetX, double timeAtTargetY)
+	{}
 }
