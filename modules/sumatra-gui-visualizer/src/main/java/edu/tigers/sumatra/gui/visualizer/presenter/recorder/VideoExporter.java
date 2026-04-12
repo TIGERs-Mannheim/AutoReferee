@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.gui.visualizer.presenter.recorder;
@@ -192,6 +192,6 @@ public class VideoExporter
 
 		encode(null);
 		muxer.close();
-		log.info("Finished recording video to " + filePath);
+		log.info("Finished recording video to {}", filePath);
 	}
 }

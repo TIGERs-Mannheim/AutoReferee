@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.cam;
 
@@ -88,7 +88,7 @@ public class SSLVisionCam extends ACam implements Runnable, IReceiverObserver, I
 			receiver = new MulticastUDPReceiver(address, port);
 		} else
 		{
-			log.debug("Chose nif for vision-cam: " + nif.getDisplayName());
+			log.debug("Chose nif for vision-cam: {}", nif.getDisplayName());
 			receiver = new MulticastUDPReceiver(address, port, nif);
 		}
 		receiver.addObserver(this);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.estimators.chip;
 
@@ -128,7 +128,7 @@ public class ChipKickSolverLin5Offset extends AChipKickSolver
 			Optional<LinSolve5OffsetResult> optResultNeg = linSolve5Offset(records, tOff - 1e-5);
 			Optional<LinSolve5OffsetResult> optResultPos = linSolve5Offset(records, tOff + 1e-5);
 
-			if (!optResultNeg.isPresent() || !optResultPos.isPresent())
+			if (optResultNeg.isEmpty() || optResultPos.isEmpty())
 			{
 				return Optional.empty();
 			}
@@ -153,7 +153,7 @@ public class ChipKickSolverLin5Offset extends AChipKickSolver
 	private Optional<KickSolverResult> postProcessSolveResult(final List<CamBall> records,
 			final Optional<LinSolve5OffsetResult> optBestResult)
 	{
-		if (!optBestResult.isPresent())
+		if (optBestResult.isEmpty())
 		{
 			return Optional.empty();
 		}

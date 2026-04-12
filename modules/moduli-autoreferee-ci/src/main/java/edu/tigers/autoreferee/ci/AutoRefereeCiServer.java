@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.ci;
@@ -50,7 +50,7 @@ public class AutoRefereeCiServer
 			serverSocket = new ServerSocket(port);
 		} catch (IOException e)
 		{
-			log.error("Could not listen on port " + port, e);
+			log.error("Could not listen on port {}", port, e);
 			return;
 		}
 		thread = new Thread(() -> Safe.run(this::listen));

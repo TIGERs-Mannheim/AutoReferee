@@ -1,16 +1,14 @@
 /*
- * *********************************************************
- * Copyright (c) 2009 - 2011, DHBW Mannheim - Tigers Mannheim
- * Project: TIGERS - Sumatra
- * Date: 19.02.2011
- * Author(s): DanielW
- * *********************************************************
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.export;
 
+import java.io.Serial;
+
+
 /**
  * simple wrapper for exceptions that might occur while exporting to csv
- * 
+ *
  * @author DanielW
  */
 public class CSVExporterException extends RuntimeException
@@ -18,12 +16,13 @@ public class CSVExporterException extends RuntimeException
 	// --------------------------------------------------------------------------
 	// --- variables and constants ----------------------------------------------
 	// --------------------------------------------------------------------------
-	
-	
+
+
 	/**  */
+	@Serial
 	private static final long	serialVersionUID	= 1L;
-	
-	
+
+
 	// --------------------------------------------------------------------------
 	// --- constructors ---------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -35,12 +34,12 @@ public class CSVExporterException extends RuntimeException
 	{
 		super(message, throwable);
 	}
-	
+
 	// --------------------------------------------------------------------------
 	// --- methods --------------------------------------------------------------
 	// --------------------------------------------------------------------------
-	
-	
+
+
 	// --------------------------------------------------------------------------
 	// --- getter/setter --------------------------------------------------------
 	// --------------------------------------------------------------------------

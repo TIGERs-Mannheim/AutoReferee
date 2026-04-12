@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.bot;
@@ -71,7 +71,7 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	private final BotBallState ballState;
 
 
-	private RobotInfo(final BotID botId, final long timestamp)
+	private RobotInfo(final @NonNull BotID botId, final long timestamp)
 	{
 		this.botId = botId;
 		this.timestamp = timestamp;

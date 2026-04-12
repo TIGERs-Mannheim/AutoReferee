@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.math.vector;
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 
 /**
@@ -137,7 +136,7 @@ public abstract class AVector implements IVector
 
 	private static Double valueOfElement(final String val)
 	{
-		String value = val.replaceAll("pi", String.valueOf(Math.PI));
+		String value = val.replace("pi", String.valueOf(Math.PI));
 
 		return parseStatement(value, "\\+", Double::sum)
 				.orElseGet(() -> parseStatement(value, "-", (x, y) -> x - y)
@@ -257,7 +256,6 @@ public abstract class AVector implements IVector
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public JsonArray toJsonArray()
 	{
@@ -331,7 +329,7 @@ public abstract class AVector implements IVector
 	{
 		IVectorN mu = meanVector(values);
 		List<IVectorN> val2 = new ArrayList<>(values.size());
-		for (IVectorN v : values.stream().map(VectorN::copy).collect(Collectors.toList()))
+		for (IVectorN v : values.stream().map(VectorN::copy).toList())
 		{
 			IVectorN diff = v.subtractNew(mu);
 			val2.add(diff.applyNew(a -> a * a));
@@ -348,7 +346,7 @@ public abstract class AVector implements IVector
 	 */
 	public static IVector stdVector(final List<? extends IVector> values)
 	{
-		IVector var = varianceVector(values);
-		return var.applyNew(Math::sqrt);
+		IVector v = varianceVector(values);
+		return v.applyNew(Math::sqrt);
 	}
 }

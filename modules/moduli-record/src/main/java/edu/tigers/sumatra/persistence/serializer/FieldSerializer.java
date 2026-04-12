@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence.serializer;
@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 /**
  * Serializer abstraction for Object and Record field access depending on primitive type
  * (for generic objects see GenericSerializer).
- *
+ * <p>
  * Reducing this boilerplate code with functional abstraction leads to primitives being boxed into Objects,
  * causing allocations (significant performance hit).
  */

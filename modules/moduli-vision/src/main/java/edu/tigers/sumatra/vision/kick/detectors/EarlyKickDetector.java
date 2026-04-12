@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.detectors;
 
@@ -56,7 +56,7 @@ public class EarlyKickDetector implements IKickDetector
 	public KickEvent addRecord(final MergedBall ball, final List<FilteredVisionBot> mergedRobots)
 	{
 		Optional<CamBall> camBall = ball.getLatestCamBall();
-		if (!camBall.isPresent())
+		if (camBall.isEmpty())
 		{
 			return null;
 		}

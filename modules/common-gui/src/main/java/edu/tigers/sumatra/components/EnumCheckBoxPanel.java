@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2019, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.components;
 
@@ -161,7 +161,7 @@ public class EnumCheckBoxPanel<T extends Enum<T>> extends BasePanel<EnumCheckBox
 				onSelectionChange(enumValue, value);
 			} catch (IllegalArgumentException ex)
 			{
-				log.warn("Unable to parse \"" + ((JCheckBox) e.getSource()).getActionCommand() + "\" to enum value", ex);
+				log.warn("Unable to parse \"{}\" to enum value", ((JCheckBox) e.getSource()).getActionCommand(), ex);
 			}
 		}
 

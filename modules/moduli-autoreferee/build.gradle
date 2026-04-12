@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 plugins {
@@ -61,7 +61,7 @@ testing {
             }
 
             targets {
-                all {
+                configureEach {
                     testTask.configure {
                         inputs.dir(file('config'))
                     }

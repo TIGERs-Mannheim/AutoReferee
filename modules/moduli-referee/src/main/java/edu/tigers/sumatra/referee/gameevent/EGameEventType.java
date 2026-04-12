@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.gameevent;
@@ -12,6 +12,4 @@ public enum EGameEventType
 	BALL_LEFT_FIELD,
 	FOUL,
 	OTHER,
-
-	;
 }

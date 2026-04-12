@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2016, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.referee.data;
@@ -24,6 +24,4 @@ public enum EGameState
 	DIRECT_FREE,
 	INDIRECT_FREE,
 	BALL_PLACEMENT,
-
-	;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.treetable;
 
@@ -36,6 +36,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.util.EventObject;
 
 
@@ -67,6 +68,7 @@ public class JTreeTable extends JTable
 	/**
 	 *
 	 */
+	@Serial
 	private static final long serialVersionUID = -3052468144632521282L;
 
 	/**
@@ -360,6 +362,7 @@ public class JTreeTable extends JTable
 		/**
 		 *
 		 */
+		@Serial
 		private static final long serialVersionUID = 6816892617917678961L;
 
 		/**
@@ -469,6 +472,7 @@ public class JTreeTable extends JTable
 		/**
 		 *
 		 */
+		@Serial
 		private static final long serialVersionUID = -2591875536212318768L;
 
 
@@ -545,6 +549,7 @@ public class JTreeTable extends JTable
 		/**
 		 *
 		 */
+		@Serial
 		private static final long serialVersionUID = -5909393885929909085L;
 
 		/**

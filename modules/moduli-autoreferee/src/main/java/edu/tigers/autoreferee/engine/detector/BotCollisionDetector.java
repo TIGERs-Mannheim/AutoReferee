@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.autoreferee.engine.detector;
@@ -219,7 +219,8 @@ public class BotCollisionDetector extends AGameEventDetector
 		lastViolators.clear();
 	}
 
-	private class BotPair
+
+	private static class BotPair
 	{
 		ITrackedBot blueBot;
 		ITrackedBot yellowBot;

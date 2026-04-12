@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.network;
@@ -18,7 +18,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -45,7 +44,7 @@ public class MulticastUDPTransmitter implements AutoCloseable
 	{
 		try
 		{
-			return NetworkInterface.networkInterfaces().collect(Collectors.toUnmodifiableList());
+			return NetworkInterface.networkInterfaces().toList();
 		} catch (SocketException e)
 		{
 			log.error("Could not get available network interfaces", e);

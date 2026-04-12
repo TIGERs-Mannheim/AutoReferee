@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.config;
@@ -24,6 +24,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import java.awt.event.ActionEvent;
+import java.io.Serial;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,6 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class EditorView extends JPanel
 {
+	@Serial
 	private static final long serialVersionUID = -7098099480668190062L;
 
 	private static final boolean DISABLE_APPLY = false;
@@ -67,6 +69,7 @@ public class EditorView extends JPanel
 		// Apply
 		applyAction = new AbstractAction("Apply")
 		{
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 
@@ -84,6 +87,7 @@ public class EditorView extends JPanel
 
 		saveAction = new AbstractAction("Save")
 		{
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 
@@ -101,6 +105,7 @@ public class EditorView extends JPanel
 
 		Action reloadAction = new AbstractAction("Reload")
 		{
+			@Serial
 			private static final long serialVersionUID = 1L;
 
 

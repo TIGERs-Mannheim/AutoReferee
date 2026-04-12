@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.gui.referee.view;
 
@@ -9,6 +9,7 @@ import net.miginfocom.swing.MigLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import java.io.Serial;
 
 
 /**
@@ -16,6 +17,7 @@ import javax.swing.JButton;
  */
 public class CommonCommandsPanel extends ARefBoxRemoteControlGeneratorPanel
 {
+	@Serial
 	private static final long serialVersionUID = -1270833222588447522L;
 
 	private final JButton halt;

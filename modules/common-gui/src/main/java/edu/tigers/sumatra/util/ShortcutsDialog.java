@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2021, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.util;
 
@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.Serial;
 
 
 /**
@@ -19,6 +20,7 @@ import java.awt.Toolkit;
  */
 public class ShortcutsDialog extends JDialog
 {
+	@Serial
 	private static final long serialVersionUID = 3461893941869192656L;
 
 

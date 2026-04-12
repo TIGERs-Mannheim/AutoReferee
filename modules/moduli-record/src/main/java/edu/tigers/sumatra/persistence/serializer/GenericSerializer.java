@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.sumatra.persistence.serializer;
@@ -26,7 +26,7 @@ import java.util.Map;
  * Prefixes each object prior to serialization with an integer id to determine types during deserialization.
  * For objects with special fields (e.g. direct memory, reflection, data in transient fields)
  * custom serializers need to be written prior to serialization.
- *
+ * <p>
  * Stores the class structure metadata in a separate metadata file (with the statically typed metadataSerializer).
  * Id 0 corresponds to the special case of a null object.
  */

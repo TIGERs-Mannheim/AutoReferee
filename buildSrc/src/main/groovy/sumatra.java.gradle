@@ -39,3 +39,9 @@ java {
 }
 
 jar.archiveVersion.convention(null)
+
+idea {
+    module {
+        excludeDirs += file('data')
+    }
+}

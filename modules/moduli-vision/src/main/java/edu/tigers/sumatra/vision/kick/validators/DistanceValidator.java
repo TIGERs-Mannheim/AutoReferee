@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.vision.kick.validators;
 
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 /**
@@ -62,22 +61,18 @@ public class DistanceValidator implements IKickValidator
 			List<Double> distances = data.stream()
 					.map(d -> d.getFirst().getLatestCamBall().get().getPos().getXYVector()
 							.distanceTo(d.getSecond().getPos()))
-					.collect(Collectors.toList());
+					.toList();
 
-			boolean distantBall = false;
-			if (distances.stream().anyMatch(d -> d > atLeastOneBeyondDist))
-			{
-				distantBall = true;
-			}
+			boolean distantBall = distances.stream().anyMatch(d -> d > atLeastOneBeyondDist);
 
-			if ((distances.get(0) < thresholdDist1)
+			if ((distances.getFirst() < thresholdDist1)
 					&& distances.subList(1, distances.size()).stream().allMatch(d -> d > thresholdDist1)
 					&& distantBall)
 			{
 				return true;
 			}
 
-			if ((distances.get(0) < thresholdDist2)
+			if ((distances.getFirst() < thresholdDist2)
 					&& distances.subList(1, distances.size()).stream().allMatch(d -> d > thresholdDist2)
 					&& distantBall)
 			{

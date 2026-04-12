@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
+ * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
  */
 package edu.tigers.sumatra.referee.data;
 
@@ -180,7 +180,7 @@ public class RefereeMsg
 	 * @param color the team color
 	 * @return the bot id
 	 */
-	public final BotID getKeeperBotID(final ETeamColor color)
+	public BotID getKeeperBotID(final ETeamColor color)
 	{
 		switch (color)
 		{
@@ -211,7 +211,7 @@ public class RefereeMsg
 	 * @return {@code TeamInfo} of the specified team
 	 * @throws IllegalArgumentException if {@code color} is not {@link ETeamColor#BLUE} or {@link ETeamColor#YELLOW}
 	 */
-	public final TeamInfo getTeamInfo(final ETeamColor color)
+	public TeamInfo getTeamInfo(final ETeamColor color)
 	{
 		switch (color)
 		{
