@@ -1,11 +1,11 @@
 [versions]
-com-fasterxml-jackson-core = "2.21.1"
-com-google-protobuf = "4.34.0"
+com-fasterxml-jackson-core = "2.21.2"
+com-google-protobuf = "4.34.1"
 com-miglayout = "11.4.3"
 info-picocli = "4.7.7"
 io-humble = "0.3.0"
-org-apache-groovy = "5.0.4"
-org-apache-logging-log4j = "2.25.3"
+org-apache-groovy = "5.0.5"
+org-apache-logging-log4j = "2.25.4"
 org-jacoco = "0.8.13"
 org-junit5 = "6.0.3"
 org-openjdk-jmh = "1.37"
@@ -20,7 +20,7 @@ plugin-version-catalog-update = "1.1.0"
 com-fasterxml-jackson-core-jackson-annotations = "com.fasterxml.jackson.core:jackson-annotations:2.21"
 com-fasterxml-jackson-core-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "com-fasterxml-jackson-core" }
 com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core" }
-com-formdev-flatlaf = "com.formdev:flatlaf:3.7"
+com-formdev-flatlaf = "com.formdev:flatlaf:3.7.1"
 com-github-TIGERs-Mannheim-infonode = "com.github.TIGERs-Mannheim:infonode:1.7.0"
 com-github-TIGERs-Mannheim-jinput = "com.github.TIGERs-Mannheim.jinput:jinput:2.0.10.1"
 com-github-TIGERs-Mannheim-matlabcontrol = "com.github.TIGERs-Mannheim.matlabcontrol:matlabcontrol:4.1.2"
@@ -57,13 +57,13 @@ org-apache-logging-log4j-log4j-core = { module = "org.apache.logging.log4j:log4j
 org-assertj-assertj-core = "org.assertj:assertj-core:3.27.7"
 org-hamcrest = "org.hamcrest:hamcrest:3.0"
 org-influxdb-influxdb-java = "org.influxdb:influxdb-java:2.25"
-org-jgraph-jgraph-core = "org.jgrapht:jgrapht-core:1.5.2"
+org-jgraph-jgraph-core = "org.jgrapht:jgrapht-core:1.5.3"
 org-junit-bom = { module = "org.junit:junit-bom", version.ref = "org-junit5" }
-org-mockito-mockito-core = "org.mockito:mockito-core:5.15.2"
+org-mockito-mockito-core = "org.mockito:mockito-core:5.23.0"
 org-openjdk-jmh-jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh" }
 org-openjdk-jmh-jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "org-openjdk-jmh" }
 org-openjdk-jol-jol-core = "org.openjdk.jol:jol-core:0.17"
-org-projectlombok-lombok = "org.projectlombok:lombok:1.18.42"
+org-projectlombok-lombok = "org.projectlombok:lombok:1.18.44"
 org-spockframework-spock-bom = { module = "org.spockframework:spock-bom", version.ref = "org-spockframework" }
 org-swinglabs-swingx-swingx-all = "org.swinglabs.swingx:swingx-all:1.6.5-1"
 plugin-jib = { module = "com.google.cloud.tools:jib-gradle-plugin", version.ref = "plugin-jib" }
