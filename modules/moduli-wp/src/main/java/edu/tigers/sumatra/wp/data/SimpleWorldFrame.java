@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class SimpleWorldFrame implements IMirrorable<SimpleWorldFrame>
 {
 	private final long frameNumber;
+	// Timestamp in nanoseconds
 	private final long timestamp;
 	private final Map<BotID, ITrackedBot> bots;
 	private final ITrackedBall ball;
