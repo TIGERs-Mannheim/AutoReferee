@@ -49,8 +49,8 @@ public class ViewportArchitect
 	@Configurable(defValue = "400.0", comment = "Maximum camera overlap.", unit = EConfigUnit.DISTANCE_MM)
 	private static double maxViewportOverlap = 400.0;
 
-	@Configurable(defValue = "DYNAMICALLY", comment = "Method to be used to construct viewports.", unit = EConfigUnit.NO_UNIT)
-	private static EViewportConstruction viewportConstruction = EViewportConstruction.DYNAMICALLY;
+	@Configurable(defValue = "FROM_CAM_PROJECTION", comment = "Method to be used to construct viewports.", unit = EConfigUnit.NO_UNIT)
+	private static EViewportConstruction viewportConstruction = EViewportConstruction.FROM_CAM_PROJECTION;
 
 	@Configurable(defValue = "50.0", comment = "Update rate for viewport changes to base station (per camera)", unit = EConfigUnit.HZ)
 	private static double reportRate = 50.0;
