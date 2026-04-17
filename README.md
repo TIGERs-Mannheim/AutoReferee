@@ -42,6 +42,17 @@ The headless version can be run with the following command:
 docker run --net host tigersmannheim/auto-referee
 ```
 
+## Integration tests
+
+The league-shared integration tests for autoRefs from https://gitlab.com/robocup-small-size/autoref-tests can be run with the following commands:
+
+```shell
+git clone https://gitlab.com/robocup-small-size/autoref-tests.git modules/moduli-autoreferee/config/autoref-tests
+git lfs install
+git -C modules/moduli-autoreferee/config/autoref-tests lfs pull
+./gradlew --stacktrace check integrationTest
+```
+
 ## IntelliJ
 IntelliJ reads the Gradle configuration and can use Gradle to perform the build.
 Make sure to configure Gradle for build and tests under Build, Execution, Deployment -> Build Tools -> Gradle.
