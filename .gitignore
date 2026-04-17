@@ -17,3 +17,8 @@ cache
 out
 **/test/generated_tests
 **/integrationTest/generated
+
+.classpath
+.project
+.settings
+bin
