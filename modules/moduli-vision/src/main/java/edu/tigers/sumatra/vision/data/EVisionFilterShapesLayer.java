@@ -18,9 +18,9 @@ public final class EVisionFilterShapesLayer
 	private static final String VISION_FILTER = "Vision Filter";
 
 	public static final IShapeLayerIdentifier QUALITY_SHAPES = F.create(
-			F.category(VISION_FILTER).layerName("Quality Inspector"));
+			F.category(VISION_FILTER).layerName("Quality Inspector").visibleByDefault(true));
 	public static final IShapeLayerIdentifier CAM_INFO_SHAPES = F.create(
-			F.category(VISION_FILTER).layerName("Cam Info"));
+			F.category(VISION_FILTER).layerName("Cam Info").visibleByDefault(true));
 	public static final IShapeLayerIdentifier VIEWPORT_SHAPES = F.create(
 			F.category(VISION_FILTER).layerName("Viewports"));
 	public static final IShapeLayerIdentifier ROBOT_TRACKER_SHAPES = F.create(
