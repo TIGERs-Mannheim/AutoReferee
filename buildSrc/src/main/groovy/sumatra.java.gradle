@@ -43,5 +43,7 @@ jar.archiveVersion.convention(null)
 idea {
     module {
         excludeDirs += file('data')
+        excludeDirs += file('bin')
+        excludeDirs += file('.settings')
     }
 }
