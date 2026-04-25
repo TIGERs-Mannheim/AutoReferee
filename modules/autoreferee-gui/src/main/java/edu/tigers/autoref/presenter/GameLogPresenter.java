@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2022, DHBW Mannheim - TIGERs Mannheim
- */
 package edu.tigers.autoref.presenter;
 
 import edu.tigers.autoref.model.gamelog.GameLogTableModel;

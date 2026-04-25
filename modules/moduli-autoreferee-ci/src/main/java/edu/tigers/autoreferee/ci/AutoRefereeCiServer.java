@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
- */
-
 package edu.tigers.autoreferee.ci;
 
 import edu.tigers.autoreferee.proto.SslAutorefCi.AutoRefCiInput;

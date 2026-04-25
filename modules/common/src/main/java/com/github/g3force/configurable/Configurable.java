@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
- */
 package com.github.g3force.configurable;
 
 import java.lang.annotation.ElementType;

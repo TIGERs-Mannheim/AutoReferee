@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
- */
 package com.github.g3force.configurable;
 
 import org.w3c.dom.DOMConfiguration;

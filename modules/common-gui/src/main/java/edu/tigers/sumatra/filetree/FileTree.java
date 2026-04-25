@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2026, DHBW Mannheim - TIGERs Mannheim
- */
 package edu.tigers.sumatra.filetree;
 
 import org.apache.logging.log4j.LogManager;

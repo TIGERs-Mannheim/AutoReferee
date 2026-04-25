@@ -1,14 +1,10 @@
-/*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
- */
-
 package edu.tigers.sumatra.gui.replay.presenter;
 
 import edu.tigers.sumatra.gui.log.presenter.LogPresenter;
 import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
-import edu.tigers.sumatra.views.SumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
+import edu.tigers.sumatra.views.SumatraView;
 import edu.tigers.sumatra.wp.data.WorldFrameWrapper;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;

@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
- */
 package edu.tigers.sumatra.config;
 
 import com.github.g3force.s2vconverter.String2ValueConverter;

@@ -1,11 +1,7 @@
-/*
- * Copyright (c) 2009 - 2025, DHBW Mannheim - TIGERs Mannheim
- */
-
 package edu.tigers.sumatra;
 
-import edu.tigers.sumatra.views.SumatraView;
 import edu.tigers.sumatra.views.ESumatraViewType;
+import edu.tigers.sumatra.views.SumatraView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.infonode.docking.View;

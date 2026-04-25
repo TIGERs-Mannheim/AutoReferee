@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
- */
-
 package edu.tigers.autoreferee.engine.calc;
 
 import edu.tigers.sumatra.ids.BotID;

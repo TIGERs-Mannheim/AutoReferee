@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2009 - 2020, DHBW Mannheim - TIGERs Mannheim
- */
 package edu.tigers.sumatra.filter;
 
 import org.apache.commons.lang.Validate;

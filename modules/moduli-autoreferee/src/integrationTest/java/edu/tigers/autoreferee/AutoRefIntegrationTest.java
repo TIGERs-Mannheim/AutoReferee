@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2009 - 2023, DHBW Mannheim - TIGERs Mannheim
- */
-
 package edu.tigers.autoreferee;
 
 import com.github.g3force.configurable.ConfigRegistration;
