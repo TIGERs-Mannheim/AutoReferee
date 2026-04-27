@@ -60,6 +60,7 @@ jib {
         }
     }
     container {
+        mainClass = application.mainClass
         workingDirectory = "/"
     }
     extraDirectories {
