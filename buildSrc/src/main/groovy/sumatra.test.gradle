@@ -28,6 +28,7 @@ test {
     }
     exclude '**/*IntegrationTest.class'
     jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+    jvmArgs += edu.tigers.sumatra.gradle.JvmArgs.PERSISTENCE_ADD_OPENS
 }
 
 jacoco {

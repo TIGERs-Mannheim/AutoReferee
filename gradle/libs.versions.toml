@@ -11,6 +11,7 @@ org-junit5 = "6.0.3"
 org-openjdk-jmh = "1.37"
 org-spockframework = "2.4-groovy-5.0"
 plugin-github-release = "2.5.2"
+plugin-idea-ext = "1.4.1"
 plugin-jib = "3.4.5"
 plugin-protobuf = "0.9.6"
 plugin-sonar = "7.2.3.7755"
@@ -71,5 +72,6 @@ plugin-protobuf = { module = "com.google.protobuf:protobuf-gradle-plugin", versi
 
 [plugins]
 githubRelease = { id = "com.github.breadmoirai.github-release", version.ref = "plugin-github-release" }
+ideaExt = { id = "org.jetbrains.gradle.plugin.idea-ext", version.ref = "plugin-idea-ext" }
 sonar = { id = "org.sonarqube", version.ref = "plugin-sonar" }
 versionCatalogUpdate = { id = "nl.littlerobots.version-catalog-update", version.ref = "plugin-version-catalog-update" }

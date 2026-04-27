@@ -33,6 +33,16 @@ dependencies {
     testAnnotationProcessor(libs.org.openjdk.jmh.jmh.generator.annprocess)
 }
 
+// Silence Log4j2 GraalVmProcessor warning about missing GAV options.
+// We don't build native images, but the processor still runs here because
+// log4j-core is on the annotationProcessor classpath.
+compileJava {
+    options.compilerArgs += [
+            "-Alog4j.graalvm.groupId=edu.tigers.sumatra",
+            "-Alog4j.graalvm.artifactId=common",
+    ]
+}
+
 tasks.register("runBangBangTrajectoryBenchmark", JavaExec) {
     group = "Execution"
     description = "Run BangBangTrajectoryBenchmark"
