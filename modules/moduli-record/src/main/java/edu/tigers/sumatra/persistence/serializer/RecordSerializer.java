@@ -26,6 +26,7 @@ public class RecordSerializer<T extends Record> extends Serializer<T>
 	{
 		super(genericSerializer, type);
 		fields = ObjectSerializer.getFields(genericSerializer, type, false);
+		initRecordConstructor(type);
 	}
 
 
@@ -67,17 +68,25 @@ public class RecordSerializer<T extends Record> extends Serializer<T>
 	@Override
 	public void transientInit(GenericSerializer genericSerializer)
 	{
-		Class<?>[] types = new Class[fields.length];
-		int i = 0;
 		for (CompoundField<?> field : fields)
 		{
 			field.initDeserializer(genericSerializer, false);
-			types[i++] = field.getType();
+		}
+		initRecordConstructor(getType());
+	}
+
+
+	private void initRecordConstructor(Class<T> type)
+	{
+		Class<?>[] types = new Class[fields.length];
+		for (int i = 0; i < fields.length; i++)
+		{
+			types[i] = fields[i].getType();
 		}
 
 		try
 		{
-			constructor = getType().getConstructor(types);
+			constructor = type.getConstructor(types);
 		} catch (NoSuchMethodException e)
 		{
 			log.warn("Could not find public record constructor with serialized signature, substituting with null.", e);

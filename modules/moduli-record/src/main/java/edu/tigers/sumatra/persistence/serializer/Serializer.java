@@ -46,18 +46,23 @@ public abstract class Serializer<T> implements PrimitiveSerializer<T>, Primitive
 		this.genericSerializer = genericSerializer;
 		this.id = genericSerializer.getSerializerId();
 		this.name = type.getName();
+		initAllocator(type);
 	}
 
 
 	/**
 	 * Necessary for (re-)initialization after metadata deserialization.
 	 */
-	@SuppressWarnings("unchecked")
 	public void transientInit(GenericSerializer genericSerializer)
 	{
 		this.genericSerializer = genericSerializer;
-		Class<T> type = getType();
+		initAllocator(getType());
+	}
 
+
+	@SuppressWarnings("unchecked")
+	private void initAllocator(Class<T> type)
+	{
 		try
 		{
 			constructor = type.getConstructor()::newInstance;
