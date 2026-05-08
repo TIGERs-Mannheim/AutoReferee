@@ -171,7 +171,7 @@ public final class TrackedBot implements ITrackedBot
 	@Override
 	public MoveConstraints getMoveConstraints()
 	{
-		return new MoveConstraints(getRobotInfo().getBotParams().getMovementLimits());
+		return MoveConstraints.from(getRobotInfo().getBotParams().getMovementLimits());
 	}
 
 

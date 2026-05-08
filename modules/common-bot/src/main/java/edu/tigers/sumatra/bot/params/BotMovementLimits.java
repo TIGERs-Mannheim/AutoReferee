@@ -8,14 +8,9 @@ public class BotMovementLimits implements IBotMovementLimits
 	private double velMax = 0.1;
 	private double accMax = 0.1;
 	private double brkMax = 0.1;
-	private double jerkMax = 0.1;
 
 	private double velMaxW = 0.1;
 	private double accMaxW = 0.1;
-	private double jerkMaxW = 0.1;
-
-	private double velMaxFast = 0.1;
-	private double accMaxFast = 0.1;
 
 
 	/**
@@ -36,12 +31,8 @@ public class BotMovementLimits implements IBotMovementLimits
 		velMax = limits.getVelMax();
 		accMax = limits.getAccMax();
 		brkMax = limits.getBrkMax();
-		jerkMax = limits.getJerkMax();
 		velMaxW = limits.getVelMaxW();
 		accMaxW = limits.getAccMaxW();
-		jerkMaxW = limits.getJerkMaxW();
-		velMaxFast = limits.getVelMaxFast();
-		accMaxFast = limits.getAccMaxFast();
 	}
 
 
@@ -85,19 +76,6 @@ public class BotMovementLimits implements IBotMovementLimits
 
 
 	@Override
-	public double getJerkMax()
-	{
-		return jerkMax;
-	}
-
-
-	public void setJerkMax(final double jerkMax)
-	{
-		this.jerkMax = jerkMax;
-	}
-
-
-	@Override
 	public double getVelMaxW()
 	{
 		return velMaxW;
@@ -120,45 +98,6 @@ public class BotMovementLimits implements IBotMovementLimits
 	public void setAccMaxW(final double accMaxW)
 	{
 		this.accMaxW = accMaxW;
-	}
-
-
-	@Override
-	public double getJerkMaxW()
-	{
-		return jerkMaxW;
-	}
-
-
-	public void setJerkMaxW(final double jerkMaxW)
-	{
-		this.jerkMaxW = jerkMaxW;
-	}
-
-
-	@Override
-	public double getVelMaxFast()
-	{
-		return velMaxFast;
-	}
-
-
-	public void setVelMaxFast(final double velMaxFast)
-	{
-		this.velMaxFast = velMaxFast;
-	}
-
-
-	@Override
-	public double getAccMaxFast()
-	{
-		return accMaxFast;
-	}
-
-
-	public void setAccMaxFast(final double accMaxFast)
-	{
-		this.accMaxFast = accMaxFast;
 	}
 
 }

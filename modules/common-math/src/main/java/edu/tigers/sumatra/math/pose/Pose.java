@@ -78,4 +78,10 @@ public class Pose implements IMirrorable<Pose>
 		IVector2 intpPos = pos.addNew(posDiff);
 		return Pose.from(intpPos, intpOrientation);
 	}
+
+
+	public boolean isFinite()
+	{
+		return pos.isFinite() && Double.isFinite(orientation);
+	}
 }
