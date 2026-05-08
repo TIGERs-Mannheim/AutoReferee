@@ -60,6 +60,7 @@ testing {
                 configureEach {
                     testTask.configure {
                         inputs.dir(file('config'))
+                        jvmArgs += edu.tigers.sumatra.gradle.JvmArgs.PERSISTENCE_ADD_OPENS
                     }
                 }
             }
