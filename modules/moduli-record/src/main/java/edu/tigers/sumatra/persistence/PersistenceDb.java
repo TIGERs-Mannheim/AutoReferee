@@ -1,6 +1,7 @@
 package edu.tigers.sumatra.persistence;
 
 import edu.tigers.sumatra.model.SumatraModel;
+import edu.tigers.sumatra.thread.NamedThreadFactory;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.lingala.zip4j.ZipFile;
@@ -22,6 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -35,6 +40,16 @@ public class PersistenceDb
 	private final Path dbPath;
 
 	private final Map<Class<?>, PersistenceTable<?>> tables = new HashMap<>();
+
+	/**
+	 * Single-threaded executor that owns all writes against {@link PersistenceTable} streams.
+	 * {@link edu.tigers.sumatra.persistence.serializer.MappedDataOutputStream} uses confined arenas,
+	 * so the table open / first write / subsequent writes / close must all happen on the same thread.
+	 * Funneling everything through this executor satisfies that invariant; recorders schedule their
+	 * periodic flushes here too via {@link #getIoExecutor()}.
+	 */
+	private final ScheduledExecutorService ioExecutor = Executors.newSingleThreadScheduledExecutor(
+			new NamedThreadFactory("PersistenceDb-IO"));
 
 	@Setter
 	private boolean compressOnClose = false;
@@ -162,11 +177,32 @@ public class PersistenceDb
 	{
 		try
 		{
-			tables.put(clazz, new PersistenceTable<>(clazz, dbPath, keyType));
-		} catch (IOException e)
+			ioExecutor.submit(() -> {
+				try
+				{
+					tables.put(clazz, new PersistenceTable<>(clazz, dbPath, keyType));
+				} catch (IOException e)
+				{
+					log.error("Could not add datatype to db", e);
+				}
+			}).get();
+		} catch (InterruptedException e)
 		{
-			log.error("Could not add datatype to db", e);
+			Thread.currentThread().interrupt();
+		} catch (ExecutionException e)
+		{
+			log.error("Could not add datatype to db", e.getCause());
 		}
+	}
+
+
+	/**
+	 * @return the single-threaded executor that owns table I/O — recorders must schedule flushes here
+	 * so writes share the thread that opened the streams.
+	 */
+	public ScheduledExecutorService getIoExecutor()
+	{
+		return ioExecutor;
 	}
 
 
@@ -209,12 +245,15 @@ public class PersistenceDb
 
 
 	/**
-	 * Close database
+	 * Close database and block until the IO executor has terminated. Table close runs on the IO
+	 * executor (the same thread that opened and wrote them); compression, if configured, runs on
+	 * the calling thread after the executor has drained.
 	 */
 	public void close()
 	{
-		tables.values().forEach(PersistenceTable::close);
-		tables.clear();
+		scheduleTableClose();
+		ioExecutor.shutdown();
+		awaitClose(60, TimeUnit.SECONDS);
 
 		if (compressOnClose)
 		{
@@ -225,6 +264,66 @@ public class PersistenceDb
 			{
 				log.error("Could not compress the replay during closing", e);
 			}
+		}
+	}
+
+
+	/**
+	 * Initiate close without blocking the caller. Schedules the table close (and compression, if
+	 * configured) on the IO executor and shuts it down so it terminates once those tasks finish.
+	 * Use {@link #awaitClose(long, TimeUnit)} to block until the IO has drained.
+	 */
+	public void initiateClose()
+	{
+		if (ioExecutor.isShutdown())
+		{
+			return;
+		}
+		scheduleTableClose();
+		if (compressOnClose)
+		{
+			ioExecutor.execute(() -> {
+				try
+				{
+					compress();
+				} catch (IOException e)
+				{
+					log.error("Could not compress the replay during closing", e);
+				}
+			});
+		}
+		ioExecutor.shutdown();
+	}
+
+
+	private void scheduleTableClose()
+	{
+		ioExecutor.execute(() -> {
+			tables.values().forEach(PersistenceTable::close);
+			tables.clear();
+		});
+	}
+
+
+	/**
+	 * Block until the IO executor terminates or the timeout elapses.
+	 *
+	 * @return true if the executor terminated within the timeout
+	 */
+	public boolean awaitClose(long timeout, TimeUnit unit)
+	{
+		try
+		{
+			boolean terminated = ioExecutor.awaitTermination(timeout, unit);
+			if (!terminated)
+			{
+				log.warn("Could not terminate PersistenceDb IO executor within {} {}", timeout, unit);
+			}
+			return terminated;
+		} catch (InterruptedException e)
+		{
+			Thread.currentThread().interrupt();
+			return false;
 		}
 	}
 
