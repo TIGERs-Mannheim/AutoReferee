@@ -2,7 +2,7 @@ package edu.tigers.sumatra.filter.iir;
 
 import edu.tigers.sumatra.math.vector.IVectorN;
 import edu.tigers.sumatra.math.vector.VectorN;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 
 /**

@@ -12,7 +12,7 @@ import edu.tigers.sumatra.vision.data.FilteredVisionBall;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape.CollisionResult;
 import edu.tigers.sumatra.vision.data.RobotCollisionShape.ECollisionLocation;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.math3.linear.RealVector;
 
 import java.util.List;

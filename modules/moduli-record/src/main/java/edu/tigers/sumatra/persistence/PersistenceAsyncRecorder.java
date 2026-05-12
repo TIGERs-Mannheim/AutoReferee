@@ -1,7 +1,7 @@
 package edu.tigers.sumatra.persistence;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;

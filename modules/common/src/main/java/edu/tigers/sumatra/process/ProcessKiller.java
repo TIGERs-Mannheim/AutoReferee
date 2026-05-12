@@ -1,6 +1,6 @@
 package edu.tigers.sumatra.process;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 

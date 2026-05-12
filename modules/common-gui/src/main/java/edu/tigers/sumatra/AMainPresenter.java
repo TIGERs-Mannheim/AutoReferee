@@ -20,7 +20,7 @@ import net.infonode.docking.util.MixedViewHandler;
 import net.infonode.docking.util.ViewMap;
 import net.infonode.gui.laf.InfoNodeLookAndFeel;
 import net.infonode.util.Direction;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;

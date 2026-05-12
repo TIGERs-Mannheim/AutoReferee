@@ -19,7 +19,7 @@ import edu.tigers.sumatra.wp.IWorldFrameObserver;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.AbstractButton;
 import javax.swing.JTextField;

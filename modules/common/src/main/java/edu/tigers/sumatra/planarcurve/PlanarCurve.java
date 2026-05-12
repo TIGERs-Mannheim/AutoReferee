@@ -4,7 +4,7 @@ import edu.tigers.sumatra.math.SumatraMath;
 import edu.tigers.sumatra.math.line.ILineBase;
 import edu.tigers.sumatra.math.rectangle.IRectangle;
 import edu.tigers.sumatra.math.vector.IVector2;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.math3.util.Pair;
 
 import java.util.ArrayList;

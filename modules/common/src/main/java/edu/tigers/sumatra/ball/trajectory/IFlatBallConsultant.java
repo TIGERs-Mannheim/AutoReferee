@@ -1,7 +1,7 @@
 package edu.tigers.sumatra.ball.trajectory;
 
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 
 /**

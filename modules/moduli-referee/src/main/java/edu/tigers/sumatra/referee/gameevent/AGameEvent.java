@@ -8,8 +8,8 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.referee.proto.SslGcCommon;
 import edu.tigers.sumatra.referee.proto.SslGcGameEvent;
 import edu.tigers.sumatra.referee.proto.SslGcGeometry;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
 import java.util.List;

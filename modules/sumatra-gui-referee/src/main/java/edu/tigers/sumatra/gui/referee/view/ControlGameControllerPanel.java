@@ -4,7 +4,7 @@ import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.referee.Referee;
 import lombok.extern.log4j.Log4j2;
 import net.miginfocom.swing.MigLayout;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;

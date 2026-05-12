@@ -4,7 +4,7 @@ import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.PersistenceDb;
 import edu.tigers.sumatra.persistence.RecordManager;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

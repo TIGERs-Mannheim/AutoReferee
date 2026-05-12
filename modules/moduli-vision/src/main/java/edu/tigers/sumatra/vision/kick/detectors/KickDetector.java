@@ -19,7 +19,7 @@ import edu.tigers.sumatra.vision.kick.validators.InFrontValidator;
 import edu.tigers.sumatra.vision.kick.validators.IncreasingDistanceValidator;
 import edu.tigers.sumatra.vision.kick.validators.VelocityValidator;
 import edu.tigers.sumatra.vision.tracker.BallTracker.MergedBall;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
