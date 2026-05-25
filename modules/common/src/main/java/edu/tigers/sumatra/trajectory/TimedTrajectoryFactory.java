@@ -6,7 +6,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
 import net.jafama.DoubleWrapper;
 import net.jafama.FastMath;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
@@ -179,6 +179,29 @@ public class TimedTrajectoryFactory
 	 */
 	TimedPos1D getTimedPos1D(float s, float v0, float vMax, float aMax, float tt)
 	{
+		// Simplify logic by ensuring s >= 0
+		if (s < 0)
+		{
+			return getTimedPos1D(-s, -v0, vMax, aMax, tt).flip();
+		}
+
+		float tBreaking;
+		float sZeroVel;
+		// Ensure v0 is always >= 0
+		if (v0 < 0)
+		{
+			// We are moving away from the goal -> recover from overshoot
+			tBreaking = -(v0 / aMax);
+			sZeroVel = 0.5f * v0 * tBreaking;
+			// new s is ensured to be above 0 (sZeroVel < 0) -> use calcFastestDirect immediately
+			return calcFastestDirect(s - sZeroVel, 0, vMax, aMax, tt - tBreaking, Float.POSITIVE_INFINITY).add(
+					sZeroVel, tBreaking);
+		} else
+		{
+			tBreaking = v0 / aMax;
+			sZeroVel = 0.5f * v0 * tBreaking;
+		}
+
 		// Hit Windows:
 		// Either our v0 is low enough that we could stop before reaching the goal target:
 		//
@@ -193,57 +216,59 @@ public class TimedTrajectoryFactory
 		//  |     Direct Hit                   Overshoot and Recover
 		// -|---------------------------------------------------------> tt
 
-		var aDec = v0 >= 0 ? -aMax : aMax;
-		var sZeroVel = 0.5f * v0 * (-v0 / aDec);
-		var v1Max = s >= 0 ? vMax : -vMax;
+		// Calculate necessary time to break to zero
 
-		if ((s >= 0.f) != (v0 > 0.f) // If v0 and s0 -> sT are in a different direction -> no forced overshoot
-				// abs(sZeroVel) > abs(s), without this breaking is always possible -> no forced overshoot
-				|| (s >= 0) == (sZeroVel < s)
+		float slowestDirect = Float.POSITIVE_INFINITY;
+		if (sZeroVel < s
 				// Determine if we can be slow enough -> no forced overshoot
-				|| calcSlowestDirectTime(s, v0, aMax) >= tt
+				|| (slowestDirect = calcSlowestDirectTime(s, v0, aMax)) >= tt
 		)
 		{
+			// sZeroVel > s, brake distance is small enough -> no forced overshoot
 			// We can directly hit the timed target position
-			return calcFastestDirect(s, v0, v1Max, aMax, tt);
-		} else
-		{
-			// Calculate necessary time to break to zero
-			var tBreaking = Math.abs(v0 / aMax);
-			// Calc the fastest overshoot by starting at sZeroVel in opposed direction with v0=0.0
-			var timed = calcFastestDirect(s - sZeroVel, 0.f, -v1Max, aMax, tt - tBreaking);
-			// Extend TimedPos1D to accommodate breaking
-			return new TimedPos1D(timed.pos() + sZeroVel, timed.totalTime() + tBreaking, timed.timeAtTarget() + tBreaking);
+			return calcFastestDirect(s, v0, vMax, aMax, tt, slowestDirect);
 		}
+
+		// Calc the fastest overshoot by starting at sZeroVel in opposed direction with v0=0.0
+		return calcFastestDirect(sZeroVel - s, 0, vMax, aMax, tt - tBreaking, Float.POSITIVE_INFINITY)
+				.flip()
+				.add(sZeroVel, tBreaking);
 	}
 
 
+	/**
+	 * 4 Assumptions:
+	 * s >= 0
+	 * v0 >= 0
+	 * aMax >= 0
+	 * s too short to brake from v0 to s with aMax
+	 */
 	private float calcSlowestDirectTime(
 			float s,
 			float v0,
 			float aMax
 	)
 	{
-		var aDec = (v0 >= 0) ? -aMax : aMax;
-		var sqrt = (float) SumatraMath.sqrt(v0 * v0 + 2 * aDec * (s));
-		return (v0 >= 0.f) ? ((-v0 + sqrt) / aDec) : ((-v0 - sqrt) / aDec);
+		var sqrt = (float) SumatraMath.sqrt(v0 * v0 - 2 * aMax * s);
+		return (v0 - sqrt) / aMax;
 	}
 
 
 	/**
-	 * @param s     TargetPos - InitialPos
-	 * @param v0    initialVel
-	 * @param v1Max maximal velocity but with the same sign (direction) as s
-	 * @param aMax  maximal acceleration
-	 * @param tt    TargetTime
+	 * @param s    TargetPos - InitialPos
+	 * @param v0   initialVel
+	 * @param vMax maximal velocity but with the same sign (direction) as s
+	 * @param aMax maximal acceleration
+	 * @param tt   TargetTime
 	 * @return
 	 */
 	private TimedPos1D calcFastestDirect(
 			float s,
 			float v0,
-			float v1Max,
+			float vMax,
 			float aMax,
-			float tt
+			float tt,
+			float slowestDirectTime
 	)
 	{
 		// Possible Fastest Directs:
@@ -254,38 +279,36 @@ public class TimedTrajectoryFactory
 		//  - Triangular too slow
 		//  - Triangular finishing early
 		//  - Triangular direct hit
-		var aDec = v1Max >= 0 ? -aMax : aMax;
-		var trapezoidal = calcFastestDirectTrapezoidal(s, v0, v1Max, aMax, aDec, tt);
-		return trapezoidal.orElseGet(() -> calcFastestDirectTriangular(s, v0, v1Max, aMax, aDec, tt));
+		var trapezoidal = calcFastestDirectTrapezoidal(s, v0, vMax, aMax, tt);
+		return trapezoidal.orElseGet(() -> calcFastestDirectTriangular(s, v0, vMax, aMax, tt, slowestDirectTime));
 	}
 
 
 	private Optional<TimedPos1D> calcFastestDirectTrapezoidal(
 			float s,
 			float v0,
-			float v1Max,
+			float vMax,
 			float aMax,
-			float aDec,
 			float tt
 	)
 	{
-		// Full acceleration for s01 to reach v1Max
-		var aAcc = v0 >= v1Max ? -aMax : aMax;
-		var t01 = (v1Max - v0) / aAcc;
-		var s01 = 0.5f * (v1Max + v0) * t01;
+		// Full acceleration for s01 to reach vMax
+		var aAcc = v0 >= vMax ? -aMax : aMax;
+		var t01 = (vMax - v0) / aAcc;
+		var s01 = 0.5f * (vMax + v0) * t01;
 
-		if ((s >= 0.0f) == (s <= s01))
+		if (s <= s01)
 		{
-			// We are not able to accel to v1Max before reaching s -> No Trapezoidal form possible
+			// We are not able to accelerate/deccelerate to vMax before reaching s -> No Trapezoidal form possible
 			return Optional.empty();
 		}
 
 		var s13 = s - s01;
-		var t23 = -v1Max / aDec;
-		var s23 = 0.5f * v1Max * t23;
+		var t23 = vMax / aMax;
+		var s23 = 0.5f * vMax * t23;
 
 		// Determining if "Trapezoidal too slow"
-		// v1Max,v2    _________
+		// vMax,v2     _________
 		//            /|   |   |\
 		//           / |   |   | \          s reached at t=t2
 		//          /  |   |   |  \
@@ -294,14 +317,14 @@ public class TimedTrajectoryFactory
 		//    ---|-----|---|---|-----|----------->
 		//      t0    t1  tt  t2    t3
 		//       |-t01-|--t12--|-t23-|
-		var t12TooSlow = (s13) / v1Max;
+		var t12TooSlow = (s13) / vMax;
 		if (t01 + t12TooSlow >= tt)
 		{
 			return Optional.of(new TimedPos1D(s + s23, t01 + t12TooSlow + t23, t01 + t12TooSlow));
 		}
 
 		// Determine if "Trapezoidal finishing early"
-		// v1Max,v2    _________
+		// vMax,v2     _________
 		//            /|       |\
 		//           / |       | \          s reached at t=t3
 		//          /  |       |  \
@@ -311,14 +334,14 @@ public class TimedTrajectoryFactory
 		//      t0    t1      t2    t3    tt
 		//       |-t01-|--t12--|-t23-|
 		var s12Early = s13 - s23;
-		var t12Early = s12Early / v1Max;
+		var t12Early = s12Early / vMax;
 		if (t12Early >= 0.0f && t01 + t12Early + t23 <= tt)
 		{
 			return Optional.of(new TimedPos1D(s, t01 + t12Early + t23, t01 + t12Early + t23));
 		}
 
 		// Determine if "Trapezoidal direct hit"
-		// v1Max,v2     _________
+		// vMax,v2      _________
 		//             /|       |\
 		//            / |       | \         tt = t3
 		//           /  |       |  \        s reached at t=tt
@@ -331,12 +354,12 @@ public class TimedTrajectoryFactory
 		//              |----t13----|
 		// https://www.wolframalpha.com/input?i=solve+v_0*t_1+%3Dv_0*t_2%2B1%2F2*a*Power%5Bt_2%2C2%5D%2Bv_1*t_3%2C+v_1+%3D+v_0%2Ba*t_2%2C+t_1%2Bt%3Dt_2%2Bt_3+for+v_1%2Ct_1%2C++t_2
 		var t13 = tt - t01;
-		var t23Direct = (float) SumatraMath.sqrt(2 * (s13 - t13 * v1Max) / aDec);
+		var t23Direct = (float) SumatraMath.sqrt(2 * (s13 - t13 * vMax) / -aMax);
 		var t12Direct = t13 - t23Direct;
 		if (t12Direct > 0 && t23Direct < t23)
 		{
-			var v3 = v1Max + aDec * t23Direct;
-			var t34 = -v3 / aDec;
+			var v3 = vMax + -aMax * t23Direct;
+			var t34 = v3 / aMax;
 			return Optional.of(new TimedPos1D(s + 0.5f * v3 * t34, tt + t34, tt));
 		}
 		return Optional.empty();
@@ -346,28 +369,26 @@ public class TimedTrajectoryFactory
 	private TimedPos1D calcFastestDirectTriangular(
 			float s,
 			float v0,
-			float v1Max,
+			float vMax,
 			float aMax,
-			float aDec,
-			float tt
+			float tt,
+			float slowestDirectTime
 	)
 	{
-
 		// Determining if "Straight too slow"
-		// Can't reach v1Max before reaching s, but already checked slowestDirect Time is smaller than tt (getPosition1D)
-		// => we are too slow at s and only reasonable trajectory left is straight decelerating
-		if ((v1Max >= 0) == (v0 >= v1Max))
+		// Can't slow down to vMax before reaching s (otherwise trapezoidal)
+		// Already checked slowestDirectTime is bigger than tt in getPosition1D() (otherwise overshoot recovery will be triggered in getPosition1D(), and v0 is 0)
+		// => we are not reaching s in time, although we are still faster than vMax when reaching s. Only reasonable trajectory left is straight decelerating
+		if (v0 >= vMax)
 		{
-			var t = -v0 / aDec;
-			var sqrt = (float) SumatraMath.sqrt(2 * aDec * s + v0 * v0);
-			var timeAtTarget = (sqrt - v0) / aDec;
-			Validate.isTrue(SumatraMath.isEqual(
-					0.5f * aDec * timeAtTarget * timeAtTarget + v0 * timeAtTarget,
-					s
-			));
+			var t = v0 / aMax;
+			var timeAtTarget = slowestDirectTime;
+			Validate.isTrue(
+					SumatraMath.isEqual(-0.5f * aMax * timeAtTarget * timeAtTarget + v0 * timeAtTarget, s),
+					"s=%.20f, v0=%.20f, vMax=%.20f, aMax%.20f, tt=%.20f", s, v0, vMax, aMax, tt
+			);
 			return new TimedPos1D(0.5f * v0 * t, t, timeAtTarget);
 		}
-		var aAcc = -aDec;
 		// Determining if "Triangular too slow"
 		//
 		//                  _/|\_
@@ -380,12 +401,12 @@ public class TimedTrajectoryFactory
 		//      t0     tt    t1           t2
 		//       |-----t01----|-----t12----|
 		// https://www.wolframalpha.com/input?i=solve+s%3Dv_0*t_01%2B1%2F2*a*t_01%5E2%2C+for+t_01
-		var sqrtTooSlow = (float) SumatraMath.sqrt(2 * aAcc * s + v0 * v0);
-		var t01TooSLow = (v1Max >= 0.f) ? ((-v0 + sqrtTooSlow) / aAcc) : ((-v0 - sqrtTooSlow) / aAcc);
+		var sqrtTooSlow = (float) SumatraMath.sqrt(2 * aMax * s + v0 * v0);
+		var t01TooSLow = (-v0 + sqrtTooSlow) / aMax;
 		if (t01TooSLow >= tt)
 		{
-			var v1TooSlow = v0 + aAcc * t01TooSLow;
-			var t12TooSlow = Math.abs(v1TooSlow / aAcc);
+			var v1TooSlow = v0 + aMax * t01TooSLow;
+			var t12TooSlow = Math.abs(v1TooSlow / aMax);
 			return new TimedPos1D(s + 0.5f * v1TooSlow * t12TooSlow, t01TooSLow + t12TooSlow, t01TooSLow);
 		}
 
@@ -401,10 +422,10 @@ public class TimedTrajectoryFactory
 		//      t0           t1           t2   tt
 		//       |-----t01----|-----t12----|
 		// https://www.wolframalpha.com/input?i=solve+s%3Dv_0+*+t_1+%2B+1%2F2+*+a+*+t_1%5E2+%2B+v_1+*+t_2+%2B+1%2F2+*+%28-a%29+*+t_2%5E2%2C+v_1+%3D+v_0+%2B+a+*+t_1%2C+0%3Dv_1%2B+%28-a%29+*+t_2+for+t_1%2C+v_1%2C+t_2
-		var sqEarly = ((s * aAcc) + (0.5f * v0 * v0)) / (aMax * aMax);
+		var sqEarly = ((s * aMax) + (0.5f * v0 * v0)) / (aMax * aMax);
 		var t12Early = sqEarly > 0.0f ? (float) SumatraMath.sqrt(sqEarly) : 0.0f;
-		var v1Early = aAcc * t12Early;
-		var t01Early = (v1Early - v0) / aAcc;
+		var v1Early = aMax * t12Early;
+		var t01Early = (v1Early - v0) / aMax;
 		if (t01Early + t12Early <= tt)
 		{
 			return new TimedPos1D(s, t01Early + t12Early, t01Early + t12Early);
@@ -424,10 +445,10 @@ public class TimedTrajectoryFactory
 		//                    |-----t13----|
 		// https://www.wolframalpha.com/input?i=solve+s+%3D+v_0+*+t_1+%2B+0.5+*+a+*+t_1+**+2+%2Bv_1*t_2+-+0.5+*+a+*+t_2**2%2C+v_1+%3D+v_0+%2B+a+*+t_1%2C+v_2%3Dv_1-a*t_2%2C+t%3Dt_1%2Bt_2+for+v_2%2Cv_1%2C+t_1%2C+t_2
 
-		var sqDirect = (float) SumatraMath.sqrt(2 * aAcc * (aAcc * tt * tt - 2 * s + 2 * tt * v0));
+		var sqDirect = (float) SumatraMath.sqrt(2 * aMax * (aMax * tt * tt - 2 * s + 2 * tt * v0));
 		var t01Direct = tt - sqDirect / (2 * aMax);
-		var v1Direct = v0 + aAcc * t01Direct;
-		var t13Direct = v1Direct / aAcc;
+		var v1Direct = v0 + aMax * t01Direct;
+		var t13Direct = v1Direct / aMax;
 		var s01Direct = 0.5f * (v0 + v1Direct) * t01Direct;
 		var s13Direct = 0.5f * v1Direct * t13Direct;
 		return new TimedPos1D(s01Direct + s13Direct, t01Direct + t13Direct, tt);
@@ -436,7 +457,18 @@ public class TimedTrajectoryFactory
 
 
 	record TimedPos1D(float pos, float totalTime, float timeAtTarget)
-	{}
+	{
+		TimedPos1D flip()
+		{
+			return new TimedPos1D(-pos, totalTime, timeAtTarget);
+		}
+
+
+		TimedPos1D add(float pos, float extraTime)
+		{
+			return new TimedPos1D(this.pos + pos, this.totalTime + extraTime, this.timeAtTarget + extraTime);
+		}
+	}
 
 	record PartialTimedTrajectory2D(BangBangTrajectory2D trajectory2D, double timeAtTargetX, double timeAtTargetY)
 	{}
