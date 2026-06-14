@@ -10,7 +10,7 @@ public interface IBotParams
 	/**
 	 * @return the movementLimits
 	 */
-	IBotMovementLimits getMovementLimits();
+	BotMovementLimits getMovementLimits();
 
 
 	/**

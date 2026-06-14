@@ -6,16 +6,22 @@ package edu.tigers.sumatra.bot.params;
  */
 public class BotParams implements IBotParams
 {
-	private final BotMovementLimits movementLimits = new BotMovementLimits();
+	private BotMovementLimits movementLimits = BotMovementLimits.ZERO;
 	private final BotDimensions dimensions = new BotDimensions();
 	private final BotKickerSpecs kickerSpecs = new BotKickerSpecs();
 	private final BotDribblerSpecs dribblerSpecs = new BotDribblerSpecs();
 
 
 	@Override
-	public IBotMovementLimits getMovementLimits()
+	public BotMovementLimits getMovementLimits()
 	{
 		return movementLimits;
+	}
+
+
+	public void setMovementLimits(final BotMovementLimits movementLimits)
+	{
+		this.movementLimits = movementLimits;
 	}
 
 

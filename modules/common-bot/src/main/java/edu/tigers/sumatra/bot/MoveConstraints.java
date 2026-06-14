@@ -1,6 +1,6 @@
 package edu.tigers.sumatra.bot;
 
-import edu.tigers.sumatra.bot.params.IBotMovementLimits;
+import edu.tigers.sumatra.bot.params.BotMovementLimits;
 import edu.tigers.sumatra.data.collector.IExportable;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
@@ -23,11 +23,9 @@ import java.util.List;
 @With
 public class MoveConstraints implements IExportable
 {
-	double velMax;
-	double accMax;
-	double brkMax;
-	double velMaxW;
-	double accMaxW;
+	@NonNull
+	@Builder.Default
+	BotMovementLimits limits = BotMovementLimits.ZERO;
 
 	@NonNull
 	@Builder.Default
@@ -37,51 +35,83 @@ public class MoveConstraints implements IExportable
 	public static final MoveConstraints ZERO = MoveConstraints.builder().build();
 
 
-	MoveConstraints(
-			double velMax,
-			double accMax,
-			double brkMax,
-			double velMaxW,
-			double accMaxW,
-			@NonNull IVector2 primaryDirection
-	)
+	MoveConstraints(@NonNull BotMovementLimits limits, @NonNull IVector2 primaryDirection)
 	{
-		Validate.isTrue(velMax >= 0, "velMax must be >=0: ", velMax);
-		Validate.isTrue(accMax >= 0, "accMax must be >=0: ", accMax);
-		Validate.isTrue(brkMax >= 0, "brkMax must be >=0: ", brkMax);
-		Validate.isTrue(velMaxW >= 0, "velMaxW must be >=0: ", velMaxW);
-		Validate.isTrue(accMaxW >= 0, "accMaxW must be >=0: ", accMaxW);
 		Validate.isTrue(primaryDirection.isFinite(), "primaryDirection must be finite: ", primaryDirection);
-		this.velMax = velMax;
-		this.accMax = accMax;
-		this.brkMax = brkMax;
-		this.velMaxW = velMaxW;
-		this.accMaxW = accMaxW;
+		this.limits = limits;
 		this.primaryDirection = primaryDirection;
 	}
 
 
-	public static MoveConstraints from(IBotMovementLimits limits)
+	public static MoveConstraints from(final BotMovementLimits limits)
 	{
-		return MoveConstraints.builder()
-				.velMax(limits.getVelMax())
-				.accMax(limits.getAccMax())
-				.brkMax(limits.getBrkMax())
-				.velMaxW(limits.getVelMaxW())
-				.accMaxW(limits.getAccMaxW())
-				.build();
+		return MoveConstraints.builder().limits(limits).build();
 	}
 
 
-	public MoveConstraints limitedBy(IBotMovementLimits limits)
+	public MoveConstraints limitedBy(final BotMovementLimits other)
 	{
-		return toBuilder()
-				.velMax(Math.min(velMax, limits.getVelMax()))
-				.accMax(Math.min(accMax, limits.getAccMax()))
-				.brkMax(Math.min(brkMax, limits.getBrkMax()))
-				.velMaxW(Math.min(velMaxW, limits.getVelMaxW()))
-				.accMaxW(Math.min(accMaxW, limits.getAccMaxW()))
-				.build();
+		return withLimits(limits.limitedBy(other));
+	}
+
+
+	public double getVelMax()
+	{
+		return limits.getVelMax();
+	}
+
+
+	public double getAccMax()
+	{
+		return limits.getAccMax();
+	}
+
+
+	public double getBrkMax()
+	{
+		return limits.getBrkMax();
+	}
+
+
+	public double getVelMaxW()
+	{
+		return limits.getVelMaxW();
+	}
+
+
+	public double getAccMaxW()
+	{
+		return limits.getAccMaxW();
+	}
+
+
+	public MoveConstraints withVelMax(final double velMax)
+	{
+		return withLimits(limits.withVelMax(velMax));
+	}
+
+
+	public MoveConstraints withAccMax(final double accMax)
+	{
+		return withLimits(limits.withAccMax(accMax));
+	}
+
+
+	public MoveConstraints withBrkMax(final double brkMax)
+	{
+		return withLimits(limits.withBrkMax(brkMax));
+	}
+
+
+	public MoveConstraints withVelMaxW(final double velMaxW)
+	{
+		return withLimits(limits.withVelMaxW(velMaxW));
+	}
+
+
+	public MoveConstraints withAccMaxW(final double accMaxW)
+	{
+		return withLimits(limits.withAccMaxW(accMaxW));
 	}
 
 
@@ -89,11 +119,11 @@ public class MoveConstraints implements IExportable
 	public List<Number> getNumberList()
 	{
 		List<Number> nbrs = new ArrayList<>();
-		nbrs.add(velMax);
-		nbrs.add(accMax);
-		nbrs.add(brkMax);
-		nbrs.add(velMaxW);
-		nbrs.add(accMaxW);
+		nbrs.add(getVelMax());
+		nbrs.add(getAccMax());
+		nbrs.add(getBrkMax());
+		nbrs.add(getVelMaxW());
+		nbrs.add(getAccMaxW());
 		nbrs.add(primaryDirection.x());
 		nbrs.add(primaryDirection.y());
 		return nbrs;
