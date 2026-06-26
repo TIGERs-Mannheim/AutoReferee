@@ -12,6 +12,7 @@ import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
+import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 
@@ -63,9 +64,12 @@ public class Arc implements IArc
 	 * @param rotation
 	 * @return
 	 */
-	public static IArc createArc(final IVector2 center, final double radius, final double startAngle,
-			final double rotation)
+	public static IArc createArc(
+			final IVector2 center, final double radius, final double startAngle,
+			final double rotation
+	)
 	{
+		Validate.isTrue(-AngleMath.PI_TWO <= rotation && rotation <= AngleMath.PI_TWO, "Rotation out of range: %.3f", rotation);
 		return new Arc(center, radius, startAngle, rotation);
 	}
 
@@ -109,9 +113,13 @@ public class Arc implements IArc
 	public final boolean equals(final Object o)
 	{
 		if (this == o)
+		{
 			return true;
+		}
 		if (!(o instanceof IArc arc))
+		{
 			return false;
+		}
 
 		return center.equals(arc.center())
 				&& SumatraMath.isEqual(radius, arc.radius())
@@ -264,7 +272,7 @@ public class Arc implements IArc
 	@Override
 	public IVector2 stepAlongPath(double stepSize)
 	{
-		var angle = AngleMath.normalizeAngle(startAngle + (stepSize / getLength() * rotation));
+		var angle = AngleMath.normalizeAngle(startAngle + (stepSize / radius * Math.signum(rotation)));
 		return center.addNew(Vector2.fromX(radius).turn(angle));
 	}
 
@@ -272,7 +280,24 @@ public class Arc implements IArc
 	@Override
 	public double distanceFromStart(IVector2 pointOnPath)
 	{
+
 		var anglePointOnPath = Vector2.fromPoints(center, pointOnPath).getAngle();
-		return AngleMath.diffAbs(startAngle, anglePointOnPath) * radius;
+		var diff = AngleMath.difference(anglePointOnPath, startAngle);
+
+		if (SumatraMath.isZero(diff) || Math.signum(rotation) == Math.signum(diff))
+		{
+			return Math.abs(diff) * radius;
+		}
+
+		return (AngleMath.PI_TWO - Math.abs(diff)) * radius;
+	}
+
+
+	@Override
+	public IVector2 getTangentialDirection(double stepSize)
+	{
+		return Vector2.fromAngle(AngleMath.normalizeAngle(startAngle +
+				(stepSize / radius + AngleMath.PI_HALF) * Math.signum(rotation)
+		));
 	}
 }

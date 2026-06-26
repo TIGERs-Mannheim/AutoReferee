@@ -264,4 +264,11 @@ final class LineSegment extends ALine implements ILineSegment
 	{
 		return pointOnPath.distanceTo(getPathStart());
 	}
+
+
+	@Override
+	public IVector2 getTangentialDirection(double stepSize)
+	{
+		return directionVector();
+	}
 }
