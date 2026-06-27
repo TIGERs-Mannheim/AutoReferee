@@ -12,7 +12,6 @@ import edu.tigers.sumatra.math.line.Lines;
 import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.math.vector.Vector2f;
-import org.apache.commons.lang3.Validate;
 
 import java.util.List;
 
@@ -69,7 +68,6 @@ public class Arc implements IArc
 			final double rotation
 	)
 	{
-		Validate.isTrue(-AngleMath.PI_TWO <= rotation && rotation <= AngleMath.PI_TWO, "Rotation out of range: %.3f", rotation);
 		return new Arc(center, radius, startAngle, rotation);
 	}
 
@@ -277,6 +275,9 @@ public class Arc implements IArc
 	}
 
 
+	/**
+	 * For Arcs with more than 360° rotation, this will always return the distance from start on the first rotation.
+	 */
 	@Override
 	public double distanceFromStart(IVector2 pointOnPath)
 	{
