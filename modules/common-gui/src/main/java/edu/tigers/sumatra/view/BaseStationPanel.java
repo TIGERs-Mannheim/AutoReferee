@@ -55,9 +55,9 @@ public class BaseStationPanel extends JPanel
 	}
 
 
-	public void setUpdateRate(final int updateRate)
+	public void setUpdateRate(double updateRate)
 	{
-		rate.setText(String.format("Rate: %3dHz", updateRate));
+		rate.setText(String.format("Rate: %.1fHz", updateRate));
 	}
 
 
