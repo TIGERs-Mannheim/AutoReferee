@@ -1,6 +1,8 @@
 package edu.tigers.sumatra;
 
 import edu.tigers.sumatra.views.SumatraView;
+import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.swing.IconFontSwing;
 import lombok.Getter;
 
 import javax.swing.ButtonGroup;

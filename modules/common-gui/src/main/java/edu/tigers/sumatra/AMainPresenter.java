@@ -1,7 +1,12 @@
 package edu.tigers.sumatra;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.FlatGradiantoMidnightBlueIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.FlatSolarizedDarkIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialDarkerIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMoonlightIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTNightOwlIJTheme;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.ScalingUtil;
@@ -18,13 +23,14 @@ import net.infonode.docking.theme.ShapedGradientDockingTheme;
 import net.infonode.docking.util.DockingUtil;
 import net.infonode.docking.util.MixedViewHandler;
 import net.infonode.docking.util.ViewMap;
-import net.infonode.gui.laf.InfoNodeLookAndFeel;
 import net.infonode.util.Direction;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -69,9 +75,14 @@ public abstract class AMainPresenter<T extends AMainFrame>
 
 	static
 	{
-		InfoNodeLookAndFeel.install();
-		FlatIntelliJLaf.installLafInfo();
 		FlatLightLaf.installLafInfo();
+		FlatMaterialDesignDarkIJTheme.installLafInfo();
+		FlatMTNightOwlIJTheme.installLafInfo();
+		FlatMTMoonlightIJTheme.installLafInfo();
+		FlatSolarizedDarkIJTheme.installLafInfo();
+		FlatGradiantoMidnightBlueIJTheme.installLafInfo();
+		FlatMTMaterialDarkerIJTheme.installLafInfo();
+		TIGERsTheme.installLafInfo();
 
 		ScalingUtil.updateBaselineSize(new JTextPane().getFont().getSize());
 		// JMenuBar on the macOS menu bar
@@ -99,6 +110,14 @@ public abstract class AMainPresenter<T extends AMainFrame>
 		mainFrame.getMenuItemLayoutSave().addActionListener(e -> onSaveLayout());
 		mainFrame.addWindowListener(new WindowListener());
 
+		SwingUtilities.invokeLater(() -> SwingUtilities.updateComponentTreeUI(mainFrame));
+		UIManager.addPropertyChangeListener(e ->
+		{
+			if ("lookAndFeel".equals(e.getPropertyName()))
+			{
+				SwingUtilities.invokeLater(() -> SwingUtilities.updateComponentTreeUI(mainFrame));
+			}
+		});
 		mainFrame.setVisible(true);
 	}
 

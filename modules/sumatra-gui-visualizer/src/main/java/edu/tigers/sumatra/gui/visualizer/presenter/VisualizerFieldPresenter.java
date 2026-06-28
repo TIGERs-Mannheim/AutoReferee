@@ -202,12 +202,6 @@ public class VisualizerFieldPresenter implements ISumatraPresenter, IWorldFrameO
 	}
 
 
-	public void setFancyPainting(boolean state)
-	{
-		fieldPane.setFancyPainting(state);
-	}
-
-
 	public void setDarkMode(boolean state)
 	{
 		fieldPane.getTransformation().setDarkMode(state);

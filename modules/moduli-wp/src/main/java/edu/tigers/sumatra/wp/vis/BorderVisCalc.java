@@ -40,10 +40,8 @@ public class BorderVisCalc implements IWpCalc
 
 		var field = Geometry.getFieldWBorders();
 
-
 		shapeMap.get(EWpShapesLayer.FIELD_BACKGROUND)
 				.add(new DrawableFieldBackground(field, 0));
-
 
 		drawLine(shapes, new DrawableRectangle(Geometry.getField()));
 		drawLine(shapes, new DrawableCircle(Geometry.getCenterCircle()));

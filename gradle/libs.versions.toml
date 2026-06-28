@@ -22,6 +22,7 @@ com-fasterxml-jackson-core-jackson-annotations = "com.fasterxml.jackson.core:jac
 com-fasterxml-jackson-core-jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "com-fasterxml-jackson-core" }
 com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core" }
 com-formdev-flatlaf = "com.formdev:flatlaf:3.7.1"
+com-formdev-flatlaf-intellij-themes = "com.formdev:flatlaf-intellij-themes:3.7.1"
 com-github-TIGERs-Mannheim-infonode = "com.github.TIGERs-Mannheim:infonode:1.7.0"
 com-github-TIGERs-Mannheim-jinput = "com.github.TIGERs-Mannheim.jinput:jinput:2.0.10.1"
 com-github-TIGERs-Mannheim-matlabcontrol = "com.github.TIGERs-Mannheim.matlabcontrol:matlabcontrol:4.1.2"
@@ -32,6 +33,9 @@ com-google-guava = "com.google.guava:guava:33.5.0-jre"
 com-google-protobuf-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "com-google-protobuf" }
 com-google-protobuf-protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "com-google-protobuf" }
 com-google-protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "com-google-protobuf" }
+com-github-jiconfont-jiconfont = "com.github.jiconfont:jiconfont:1.0.0"
+com-github-jiconfont-jiconfont-font-awesome = "com.github.jiconfont:jiconfont-font_awesome:4.7.0.1"
+com-github-jiconfont-jiconfont-swing = "com.github.jiconfont:jiconfont-swing:1.0.1"
 com-jidesoft-jide-oss = "com.jidesoft:jide-oss:3.6.18"
 com-miglayout-miglayout-core = { module = "com.miglayout:miglayout-core", version.ref = "com-miglayout" }
 com-miglayout-miglayout-swing = { module = "com.miglayout:miglayout-swing", version.ref = "com-miglayout" }

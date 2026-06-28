@@ -4,11 +4,11 @@ import edu.tigers.sumatra.referee.data.EGameState;
 import edu.tigers.sumatra.referee.gameevent.EGameEvent;
 import edu.tigers.sumatra.referee.proto.SslGcRefereeMessage;
 import edu.tigers.sumatra.util.GlobalShortcuts;
-import edu.tigers.sumatra.util.ImageScaler;
+import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.swing.IconFontSwing;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.FocusManager;
 import javax.swing.JButton;
@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
@@ -43,9 +44,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-/**
- * This panel holds the control elements for the replay window
- */
 public class ReplayControlPanel extends JPanel implements IReplayPositionObserver
 {
 	@Serial
@@ -56,12 +54,12 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 	private static final int NUM_SPEED_FACTORS = 4;
 	private static final long SLIDER_SCALE = 100_000_000;
 
-
 	private final List<IReplayControlPanelObserver> observers = new CopyOnWriteArrayList<>();
+
 	private final JSlider slider;
 
-
 	private final JLabel timeStepLabel = new JLabel();
+
 	private boolean settingSliderByHand = false;
 
 	private final JButton btnPlay;
@@ -71,172 +69,163 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 	private final JMenu replayMenu = new JMenu("Replay");
 
 
-	/**
-	 * Default
-	 */
 	public ReplayControlPanel()
 	{
 		setLayout(new BorderLayout());
 
 		slider = new JSlider(SwingConstants.HORIZONTAL, 0, 1, 0);
+
 		SliderListener sliderListener = new SliderListener();
+
 		slider.addChangeListener(sliderListener);
 		slider.addMouseListener(sliderListener);
+
 		slider.setPreferredSize(new Dimension(2000, slider.getPreferredSize().height));
 
 		JSlider speedSlider = createSpeedSlider();
 
 		btnPlay = createActionButton(
 				"Play / Pause",
-				"/pause.png",
+				this::getPlayPauseIcon,
 				this::togglePlayPause,
 				Set.of(
-						KeyStroke.getKeyStroke(
-								KeyEvent.VK_SPACE,
-								//0 means no modifier
-								0
-						),
+						KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_P,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
-						)
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx())
 				)
 		);
 
 		JButton btnSkipFrameFwd = createActionButton(
 				"Skip one frame forward",
-				"/skipFrameForward.png",
+				() -> FontAwesome.STEP_FORWARD,
 				() -> observers.forEach(IReplayControlPanelObserver::onNextFrame),
 				Set.of(
+						KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_RIGHT,
-								//no modifier for frame skips
-								0
-						),
-						KeyStroke.getKeyStroke(
-								KeyEvent.VK_RIGHT,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
-						)
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx())
 				)
 		);
 
 		JButton btnSkipFrameBwd = createActionButton(
 				"Skip one frame backward",
-				"/skipFrameBackward.png",
+				() -> FontAwesome.STEP_BACKWARD,
 				() -> observers.forEach(IReplayControlPanelObserver::onPreviousFrame),
 				Set.of(
+						KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_LEFT,
-								//no modifier for frame skips
-								0
-						),
-						KeyStroke.getKeyStroke(
-								KeyEvent.VK_LEFT,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
-						)
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx())
 				)
 		);
 
 		JButton btnSkipFwd = createActionButton(
 				"Skip forward (" + SKIP_TIME + "ms)",
-				"/skipForward.png",
+				() -> FontAwesome.FORWARD,
 				() -> observers.forEach(o -> o.onChangeRelativeTime(SKIP_TIME * 1_000_000)),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_RIGHT,
-								InputEvent.SHIFT_DOWN_MASK
-						))
+								InputEvent.SHIFT_DOWN_MASK))
 		);
 
 		JButton btnSkipBwd = createActionButton(
 				"Skip backward (" + SKIP_TIME + "ms)",
-				"/skipBackward.png",
+				() -> FontAwesome.BACKWARD,
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-SKIP_TIME * 1_000_000)),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_LEFT,
-								InputEvent.SHIFT_DOWN_MASK
-						))
+								InputEvent.SHIFT_DOWN_MASK))
 		);
 
 		JButton btnFastFwd = createActionButton(
 				"Fast forward (" + FAST_TIME + "ms)",
-				"/fastForward.png",
+				() -> FontAwesome.FAST_FORWARD,
 				() -> observers.forEach(o -> o.onChangeRelativeTime(FAST_TIME * 1_000_000)),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_RIGHT,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
-						))
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+										| InputEvent.SHIFT_DOWN_MASK))
 		);
 
 		JButton btnFastBwd = createActionButton(
 				"Fast backward (" + FAST_TIME + "ms)",
-				"/fastBackward.png",
+				() -> FontAwesome.FAST_BACKWARD,
 				() -> observers.forEach(o -> o.onChangeRelativeTime(-FAST_TIME * 1_000_000)),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_LEFT,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
-						)
-				)
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+										| InputEvent.SHIFT_DOWN_MASK))
 		);
 
 		JButton btnSnap = createActionButton(
 				"Take and store snapshot",
-				"/save.png",
+				() -> FontAwesome.FLOPPY_O,
 				() -> observers.forEach(IReplayControlPanelObserver::onSnapshot),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_S,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
-						))
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()))
 		);
 
 		JButton btnSnapCopy = createActionButton(
 				"Copy snapshot to clipboard",
-				"/copy.png",
+				() -> FontAwesome.CLIPBOARD,
 				() -> observers.forEach(IReplayControlPanelObserver::onCopySnapshot),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_C,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | InputEvent.SHIFT_DOWN_MASK
-						))
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
+										| InputEvent.SHIFT_DOWN_MASK))
 		);
 
 		JButton btnCutReplay = createActionButton(
 				"Create replay cut",
-				"/icons8-scissors-60.png",
+				() -> FontAwesome.SCISSORS,
 				() -> observers.forEach(IReplayControlPanelObserver::cutReplay),
 				Set.of(
 						KeyStroke.getKeyStroke(
 								KeyEvent.VK_X,
-								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()
-						))
+								Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()))
 		);
 
-		//also add a custom shortcut for unfocussing the current thing
-		GlobalShortcuts.add("Un-Select current panel",
-				this,this::looseFocus,
+		GlobalShortcuts.add(
+				"Un-Select current panel",
+				this,
+				this::looseFocus,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)
 		);
 
 		JMenuBar menuBar = new JMenuBar();
+
 		menuBar.add(replayMenu);
+
 		add(menuBar, BorderLayout.PAGE_START);
 
 		JMenu jumpCommandMenu = new JMenu("Jump to Command");
+
 		menuBar.add(jumpCommandMenu);
+
 		Arrays.stream(SslGcRefereeMessage.Referee.Command.values())
 				.map(JumpCommandAction::new)
 				.forEach(jumpCommandMenu::add);
+
 		JMenu jumpGameStateMenu = new JMenu("Jump to Game State");
+
 		menuBar.add(jumpGameStateMenu);
+
 		Arrays.stream(EGameState.values())
 				.map(JumpGameStateAction::new)
 				.forEach(jumpGameStateMenu::add);
+
 		JMenu jumpGameEventMenu = new JMenu("Jump to Game Event");
+
 		menuBar.add(jumpGameEventMenu);
+
 		Arrays.stream(EGameEvent.values())
 				.map(JumpGameEventAction::new)
 				.forEach(jumpGameEventMenu::add);
@@ -245,14 +234,21 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		replayMenu.add(new SkipBallPlacementAction());
 
 		JPanel topPanel = new JPanel();
+
 		topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.LINE_AXIS));
+
 		topPanel.add(slider);
-		final JPanel timeStepPanel = createTimeStepPanel();
+
+		JPanel timeStepPanel = createTimeStepPanel();
+
 		topPanel.add(timeStepPanel);
+
 		add(topPanel, BorderLayout.CENTER);
 
 		JPanel bottomPanel = new JPanel();
+
 		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.LINE_AXIS));
+
 		bottomPanel.add(btnFastBwd);
 		bottomPanel.add(btnSkipBwd);
 		bottomPanel.add(btnSkipFrameBwd);
@@ -266,154 +262,196 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		bottomPanel.add(speedSlider);
 
 		add(bottomPanel, BorderLayout.PAGE_END);
+
+		updateIcons();
 	}
 
+	@Override
+	public void updateUI()
+	{
+		super.updateUI();
+		updateIcons();
+	}
+
+	private void updateIcons()
+	{
+		repaint();
+	}
+
+	private FontAwesome getPlayPauseIcon()
+	{
+		return playing
+				? FontAwesome.PAUSE
+				: FontAwesome.PLAY;
+	}
 
 	private JButton createActionButton(
-			String description, String iconPath, Runnable action, Set<KeyStroke> keyStrokes)
+			String description,
+			IconSupplier iconSupplier,
+			Runnable action,
+			Set<KeyStroke> keyStrokes)
 	{
 		JButton button = new JButton();
+
 		button.addActionListener(e -> action.run());
-		button.setIcon(ImageScaler.scaleDefaultButtonImageIcon(iconPath));
+
+		button.putClientProperty("iconSupplier", iconSupplier);
+
+		updateButtonIcon(button);
+
 		button.setToolTipText(description);
-		button.setBorder(BorderFactory.createEmptyBorder());
-		button.setBackground(new Color(0, 0, 0, 1));
+
 		GlobalShortcuts.addMultiple(
 				description,
 				this,
 				action,
 				keyStrokes
 		);
+
 		return button;
 	}
 
+	private void updateButtonIcon(JButton button)
+	{
+		Color color = UIManager.getColor("Label.foreground");
+		IconSupplier supplier =
+				(IconSupplier) button.getClientProperty("iconSupplier");
 
-	/**
-	 * @param action
-	 */
+		button.setIcon(
+				IconFontSwing.buildIcon(
+						supplier.get(),
+						22,
+						color));
+	}
+
 	public void addMenuCheckbox(Action action)
 	{
 		replayMenu.add(new JCheckBoxMenuItem(action));
 	}
 
-
-	/**
-	 * @return
-	 */
 	private JPanel createTimeStepPanel()
 	{
 		JPanel panel = new JPanel();
+
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+
 		panel.add(timeStepLabel);
+
 		return panel;
 	}
 
-
-	@SuppressWarnings("squid:S1149") // Hashtable -> dictated by swing
+	@SuppressWarnings("squid:S1149")
 	private JSlider createSpeedSlider()
 	{
-		JSlider speedSlider = new JSlider(SwingConstants.HORIZONTAL, -NUM_SPEED_FACTORS, NUM_SPEED_FACTORS, 0);
+		JSlider speedSlider =
+				new JSlider(
+						SwingConstants.HORIZONTAL,
+						-NUM_SPEED_FACTORS,
+						NUM_SPEED_FACTORS,
+						0);
+
 		speedSlider.addChangeListener(new SpeedSliderListener());
+
 		speedSlider.setMajorTickSpacing(1);
 		speedSlider.setPaintTicks(true);
 		speedSlider.setPaintLabels(true);
+
 		speedSlider.setFont(new Font("", Font.PLAIN, 8));
+
 		Dictionary<Integer, JLabel> dict = new Hashtable<>();
+
 		DecimalFormat format = new DecimalFormat("0.###");
+
 		for (int i = NUM_SPEED_FACTORS; i > 0; i--)
 		{
 			dict.put(-i, new JLabel(format.format(1f / Math.pow(2, i)) + "x"));
 		}
+
 		dict.put(0, new JLabel("1x"));
+
 		for (int i = 1; i <= NUM_SPEED_FACTORS; i++)
 		{
 			dict.put(i, new JLabel(String.format("%dx", (int) Math.pow(2, i))));
 		}
+
 		Enumeration<JLabel> labels = dict.elements();
+
 		while (labels.hasMoreElements())
 		{
 			labels.nextElement().setFont(speedSlider.getFont());
 		}
+
 		speedSlider.setLabelTable(dict);
+
 		return speedSlider;
 	}
 
-
-	/**
-	 * @param timeMax
-	 */
 	public void setTimeMax(final long timeMax)
 	{
 		slider.setMaximum((int) (timeMax / SLIDER_SCALE));
 	}
 
-
-	/**
-	 * @param observer
-	 */
 	@SuppressWarnings("squid:S2250")
 	public void addObserver(final IReplayControlPanelObserver observer)
 	{
 		observers.add(observer);
 	}
 
-
 	private void togglePlayPause()
 	{
 		playing = !playing;
+
 		for (IReplayControlPanelObserver o : observers)
 		{
 			o.onPlayPause(playing);
 		}
-		if (playing)
-		{
-			btnPlay.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/pause.png"));
-		} else
-		{
-			btnPlay.setIcon(ImageScaler.scaleDefaultButtonImageIcon("/play.png"));
-		}
+
+		updateButtonIcon(btnPlay);
+
 		repaint();
 	}
 
-
-	/**
-	 * This sets the focus away from what is currently selected, so shortcuts can get unsuppressed
-	 */
 	private void looseFocus()
 	{
 		FocusManager.getCurrentManager().clearFocusOwner();
 	}
 
+	private interface IconSupplier
+	{
+		FontAwesome get();
+	}
 
 	private class SpeedSliderListener implements ChangeListener
 	{
-
 		@Override
 		public void stateChanged(final ChangeEvent e)
 		{
 			JSlider jSlider = (JSlider) e.getSource();
+
 			int value = jSlider.getValue();
+
 			double newSpeed = 1;
+
 			for (int i = 0; i < value; i++)
 			{
 				newSpeed *= 2;
 			}
+
 			for (int i = 0; i < -value; i++)
 			{
 				newSpeed /= 2;
 			}
+
 			for (IReplayControlPanelObserver o : observers)
 			{
 				o.onSetSpeed(newSpeed);
 			}
 		}
-
 	}
 
 	private class SliderListener implements ChangeListener, MouseListener
 	{
 		private int value = 0;
-
 
 		@Override
 		public void stateChanged(final ChangeEvent e)
@@ -421,6 +459,7 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			if (settingSliderByHand)
 			{
 				value = slider.getValue();
+
 				for (IReplayControlPanelObserver o : observers)
 				{
 					o.onChangeAbsoluteTime(value * SLIDER_SCALE);
@@ -428,47 +467,40 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			}
 		}
 
-
 		@Override
 		public void mouseClicked(final MouseEvent e)
 		{
-			// ignored
 		}
-
 
 		@Override
 		public void mousePressed(final MouseEvent e)
 		{
 			settingSliderByHand = true;
+
 			value = slider.getValue();
 		}
-
 
 		@Override
 		public void mouseReleased(final MouseEvent e)
 		{
 			settingSliderByHand = false;
+
 			for (IReplayControlPanelObserver o : observers)
 			{
 				o.onChangeAbsoluteTime(value * SLIDER_SCALE);
 			}
 		}
 
-
 		@Override
 		public void mouseEntered(final MouseEvent e)
 		{
-			// ignored
 		}
-
 
 		@Override
 		public void mouseExited(final MouseEvent e)
 		{
-			// ignored
 		}
 	}
-
 
 	private class SkipStopAction extends AbstractAction
 	{
@@ -477,11 +509,11 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			super("Skip STOP state");
 		}
 
-
 		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
 			JCheckBoxMenuItem chk = (JCheckBoxMenuItem) e.getSource();
+
 			for (IReplayControlPanelObserver o : observers)
 			{
 				o.onSetSkipStop(chk.isSelected());
@@ -496,11 +528,11 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 			super("Skip Ball Placement");
 		}
 
-
 		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
 			JCheckBoxMenuItem chk = (JCheckBoxMenuItem) e.getSource();
+
 			for (IReplayControlPanelObserver o : observers)
 			{
 				o.onSetSkipBallPlacement(chk.isSelected());
@@ -512,13 +544,12 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 	{
 		private final SslGcRefereeMessage.Referee.Command command;
 
-
 		public JumpCommandAction(SslGcRefereeMessage.Referee.Command command)
 		{
 			super(command.name());
+
 			this.command = command;
 		}
-
 
 		@Override
 		public void actionPerformed(final ActionEvent e)
@@ -534,13 +565,12 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 	{
 		private final EGameEvent gameEvent;
 
-
 		public JumpGameEventAction(EGameEvent gameEvent)
 		{
 			super(gameEvent.name());
+
 			this.gameEvent = gameEvent;
 		}
-
 
 		@Override
 		public void actionPerformed(final ActionEvent e)
@@ -556,13 +586,12 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 	{
 		private final EGameState gameState;
 
-
 		public JumpGameStateAction(EGameState gameState)
 		{
 			super(gameState.name());
+
 			this.gameState = gameState;
 		}
-
 
 		@Override
 		public void actionPerformed(final ActionEvent e)
@@ -574,7 +603,6 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		}
 	}
 
-
 	@Override
 	public void onPositionChanged(final long position)
 	{
@@ -584,10 +612,6 @@ public class ReplayControlPanel extends JPanel implements IReplayPositionObserve
 		}
 	}
 
-
-	/**
-	 * @return the timeStepLabel
-	 */
 	public final JLabel getTimeStepLabel()
 	{
 		return timeStepLabel;

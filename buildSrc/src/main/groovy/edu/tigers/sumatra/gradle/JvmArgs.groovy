@@ -36,5 +36,9 @@ final class JvmArgs {
             '--add-opens=java.desktop/java.awt=ALL-UNNAMED',
     ].asImmutable()
 
-    static final List<String> ALL_JVM_ARGS = (APP_JVM_ARGS + PERSISTENCE_ADD_OPENS).asImmutable()
+    static final List<String> NATIVE_ACCESS_ARGS = [
+            '--enable-native-access=ALL-UNNAMED',
+    ].asImmutable()
+
+    static final List<String> ALL_JVM_ARGS = (APP_JVM_ARGS + PERSISTENCE_ADD_OPENS + NATIVE_ACCESS_ARGS).asImmutable()
 }

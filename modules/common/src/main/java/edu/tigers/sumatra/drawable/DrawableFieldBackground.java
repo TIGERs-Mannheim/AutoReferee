@@ -5,6 +5,7 @@ import edu.tigers.sumatra.math.vector.IVector2;
 import edu.tigers.sumatra.math.vector.Vector2;
 import lombok.Getter;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 
 
@@ -48,5 +49,8 @@ public class DrawableFieldBackground implements IDrawableShape
 
 		g.setColor(tool.getFieldColor());
 		g.fillRect(x, y, width, height);
+
+		g.setColor(Color.BLACK);
+		g.drawRect(x, y, width, height);
 	}
 }

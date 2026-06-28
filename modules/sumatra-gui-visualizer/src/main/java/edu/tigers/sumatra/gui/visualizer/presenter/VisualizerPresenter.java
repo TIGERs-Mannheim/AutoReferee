@@ -22,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.KeyStroke;
@@ -76,12 +77,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 	{
 		fieldPresenter.getOnFieldClicks().add(ballInteractor::onFieldClick);
 
-		connect(
-				viewPanel.getToolbar().getFancyDrawing(),
-				"fancyPainting",
-				true,
-				fieldPresenter::setFancyPainting
-		);
+		fieldPresenter.getFieldPanel().setBorder(BorderFactory.createBevelBorder(2));
 		connect(
 				viewPanel.getToolbar().getDarkMode(),
 				"darkMode",

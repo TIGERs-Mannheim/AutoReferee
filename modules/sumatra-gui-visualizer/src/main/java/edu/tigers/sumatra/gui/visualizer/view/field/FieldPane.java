@@ -10,6 +10,7 @@ import edu.tigers.sumatra.math.vector.Vector2;
 import edu.tigers.sumatra.wp.vis.RefereeVisCalc;
 import lombok.Data;
 
+import javax.swing.UIManager;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -31,7 +32,6 @@ public class FieldPane
 	private int height;
 	private double scale = 1;
 	private boolean addBorderOffset;
-	private boolean fancyPainting = true;
 
 	private final FieldTransformation transformation = new FieldTransformation();
 
@@ -107,15 +107,12 @@ public class FieldPane
 
 	public void paint(Graphics2D g2, List<ShapeMap.ShapeLayer> shapeLayers)
 	{
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
 		final BasicStroke defaultStroke = new BasicStroke(Math.max(1, transformation.scaleGlobalToGui(10)));
 		g2.setColor(FIELD_COLOR_BACKGROUND);
 		g2.fillRect(0, 0, width, height);
-
-		if (fancyPainting)
-		{
-			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		}
 
 		g2.translate(offsetX, offsetY + getBorderOffset());
 		g2.scale(scale, scale);
@@ -124,7 +121,14 @@ public class FieldPane
 		g2.translate(-offsetX, -offsetY - getBorderOffset());
 
 		g2.setColor(FIELD_COLOR_BACKGROUND);
-		g2.fillRect(0, 0, width, getBorderOffset());
+		g2.fillRect(0, 0, Math.max(1, width - 1), getBorderOffset());
+
+		Color c = UIManager.getColor("Label.foreground");
+		g2.setColor(c);
+		if (getBorderOffset() > 0)
+		{
+			g2.drawRect(0, 0, Math.max(1, width - 1), getBorderOffset());
+		}
 
 		shapeLayers.forEach(shapeLayer -> paintShapeMapBorderText(g2, shapeLayer, defaultStroke));
 	}

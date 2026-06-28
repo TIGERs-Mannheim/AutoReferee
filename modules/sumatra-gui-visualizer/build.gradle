@@ -17,4 +17,8 @@ dependencies {
     implementation(libs.io.humble.humble.video.noarch)
     implementation(libs.com.jidesoft.jide.oss)
     implementation(libs.commons.lang)
+
+    implementation(libs.com.github.jiconfont.jiconfont)
+    implementation(libs.com.github.jiconfont.jiconfont.font.awesome)
+    implementation(libs.com.github.jiconfont.jiconfont.swing)
 }

@@ -31,7 +31,6 @@ public class CaptureSettingsDialog extends JDialog
 		setResizable(false);
 		setTitle("Capture settings");
 
-		// --- alignment: center on screen ---
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenDimension = tk.getScreenSize();
 		this.setLocation((int) (screenDimension.getWidth() - getWidth()) / 2,

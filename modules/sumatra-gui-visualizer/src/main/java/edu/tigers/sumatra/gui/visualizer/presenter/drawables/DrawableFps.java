@@ -6,6 +6,7 @@ import edu.tigers.sumatra.drawable.IDrawableShape;
 import edu.tigers.sumatra.util.ScalingUtil;
 import lombok.RequiredArgsConstructor;
 
+import javax.swing.UIManager;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -24,7 +25,9 @@ public class DrawableFps implements IDrawableShape
 	{
 		int fontSize = ScalingUtil.getFontSize(EFontSize.SMALL);
 		g.setFont(new Font("", Font.PLAIN, fontSize));
-		g.setColor(Color.black);
+
+		Color c = UIManager.getColor("Label.foreground");
+		g.setColor(c);
 
 		int x = width - fontSize * 3;
 		int y = 20;

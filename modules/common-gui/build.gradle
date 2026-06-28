@@ -9,6 +9,7 @@ dependencies {
     implementation project(':moduli-record')
 
     implementation(libs.com.formdev.flatlaf)
+    implementation(libs.com.formdev.flatlaf.intellij.themes)
     implementation(libs.com.github.TIGERs.mannheim.infonode)
 
     implementation(libs.commons.configuration)
@@ -18,4 +19,8 @@ dependencies {
 
     implementation(libs.com.miglayout.miglayout.swing)
     implementation(libs.com.miglayout.miglayout.core)
+
+    implementation(libs.com.github.jiconfont.jiconfont)
+    implementation(libs.com.github.jiconfont.jiconfont.font.awesome)
+    implementation(libs.com.github.jiconfont.jiconfont.swing)
 }

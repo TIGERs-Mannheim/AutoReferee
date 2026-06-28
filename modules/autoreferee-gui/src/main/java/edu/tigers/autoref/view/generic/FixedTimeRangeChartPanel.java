@@ -14,6 +14,7 @@ import info.monitorenter.gui.chart.traces.painters.TracePainterLine;
 import info.monitorenter.util.Range;
 
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -22,34 +23,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-/**
- * This chart class displays time based values in a fixed time range like an Oscilloscope. To achieve this data points
- * are wrapped around if they exceed the displayed range. It uses a specialized painter class to avoid painting long
- * strokes which are caused by large differences in x.
- *
- * @author "Lukas Magel"
- */
 public class FixedTimeRangeChartPanel extends JPanel
 {
-	/**  */
 	@Serial
-	private static final long				serialVersionUID	= -5176647826548801416L;
+	private static final long serialVersionUID = -5176647826548801416L;
 
-	private long								timeRange;
+	private long timeRange;
 
-	private Chart2D							mainChart			= new Chart2D();
-	private Trace2DLtd						mainTrace			= new Trace2DLtd();
+	private Chart2D mainChart = new Chart2D();
+	private Trace2DLtd mainTrace = new Trace2DLtd();
 	private Trace2DLtd initialVelTrace = new Trace2DLtd();
-	private Map<String, Trace2DSimple>	horizontalLines	= new HashMap<>();
+	private Map<String, Trace2DSimple> horizontalLines = new HashMap<>();
 
 	private boolean highlightHead;
-	private Trace2DLtd						headTrace			= new Trace2DLtd(1);
+	private Trace2DLtd headTrace = new Trace2DLtd(1);
 
 
-	/**
-	 * @param timeRange The time range that will be displayed in nanoseconds
-	 * @param highlightHead If true the point which was inserted last will be highlighted
-	 */
 	public FixedTimeRangeChartPanel(final long timeRange, final boolean highlightHead)
 	{
 		this.highlightHead = highlightHead;
@@ -63,6 +52,28 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
+	private void applyTheme()
+	{
+		if (mainChart == null)
+		{
+			return;
+		}
+
+		Color bg = UIManager.getColor("Panel.background");
+		Color fg = UIManager.getColor("Label.foreground");
+		Color grid = fg.darker();
+
+		setBackground(bg);
+
+		mainChart.setBackground(bg);
+		mainChart.setForeground(fg);
+		mainChart.setGridColor(grid);
+
+		mainChart.getAxisX().getAxisTitle().setTitleColor(fg);
+		mainChart.getAxisY().getAxisTitle().setTitleColor(fg);
+	}
+
+
 	private void setupChart()
 	{
 		IAxis<?> xAxis = mainChart.getAxisX();
@@ -72,10 +83,6 @@ public class FixedTimeRangeChartPanel extends JPanel
 		xAxis.setRangePolicy(new RangePolicyFixedViewport());
 		yAxis.setPaintGrid(true);
 
-		/*
-		 * Setup the main trace of the graph
-		 * The trace uses the special painter class to avoid long strokes which are caused by larger x value differences.
-		 */
 		mainTrace.setTracePainter(new NoCarriageReturnLinePainter());
 		mainTrace.setName(null);
 		mainChart.addTrace(mainTrace);
@@ -90,15 +97,11 @@ public class FixedTimeRangeChartPanel extends JPanel
 		mainChart.addTrace(headTrace);
 
 		mainChart.setGridColor(Color.LIGHT_GRAY);
+
+		applyTheme();
 	}
 
 
-	/**
-	 * Add a new data point to the chart
-	 *
-	 * @param timestamp in nanoseconds
-	 * @param y
-	 */
 	public void addPoint(final long timestamp, final double y)
 	{
 		double x = (timestamp % timeRange) / 1e9;
@@ -111,25 +114,13 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * Add a new data point to the chart
-	 *
-	 * @param timestamp in nanoseconds
-	 * @param y
-	 */
 	public void addInitialVelPoint(final long timestamp, final double y)
 	{
 		double x = (timestamp % timeRange) / 1e9;
 		initialVelTrace.addPoint(x, y);
-
 	}
 
-	/**
-	 * Set the displayed y range
-	 *
-	 * @param min
-	 * @param max
-	 */
+
 	public void clipY(final double min, final double max)
 	{
 		mainChart.getAxisY().setRangePolicy(new RangePolicyFixedViewport(new Range(min, max)));
@@ -140,17 +131,11 @@ public class FixedTimeRangeChartPanel extends JPanel
 	public void yTicks(double spacing)
 	{
 		AAxis<IAxisScalePolicy> yAxis = (AAxis<IAxisScalePolicy>) mainChart.getAxisY();
-
 		yAxis.setAxisScalePolicy(new AxisScalePolicyManualTicks());
 		yAxis.setMinorTickSpacing(spacing);
 	}
 
 
-	/**
-	 * Set the color of the data plot
-	 *
-	 * @param color
-	 */
 	public void setColor(final Color color)
 	{
 		mainTrace.setColor(color);
@@ -158,44 +143,24 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * X axis title
-	 *
-	 * @param title
-	 */
 	public void setXTitle(final String title)
 	{
 		mainChart.getAxisX().getAxisTitle().setTitle(title);
 	}
 
 
-	/**
-	 * Y axis title
-	 *
-	 * @param title
-	 */
 	public void setYTitle(final String title)
 	{
 		mainChart.getAxisY().getAxisTitle().setTitle(title);
 	}
 
 
-	/**
-	 * The size of the data point buffer of the chart
-	 *
-	 * @return
-	 */
 	public int getPointBufferSize()
 	{
 		return mainTrace.getMaxSize();
 	}
 
 
-	/**
-	 * The time range that is displayed
-	 *
-	 * @param range_ns in nanoseconds
-	 */
 	public void setRange(final long range_ns)
 	{
 		timeRange = range_ns;
@@ -203,9 +168,6 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * @param bufSize
-	 */
 	public void setPointBufferSize(final int bufSize)
 	{
 		mainTrace.setMaxSize(bufSize);
@@ -213,11 +175,6 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * Whether or not the current head of the graph should be highlighted
-	 *
-	 * @param val
-	 */
 	public void setHighlightHead(final boolean val)
 	{
 		highlightHead = val;
@@ -228,11 +185,6 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * @param name
-	 * @param color
-	 * @param yValue
-	 */
 	public void setHorizontalLine(final String name, final Color color, final double yValue)
 	{
 		if (!horizontalLines.containsKey(name))
@@ -243,6 +195,7 @@ public class FixedTimeRangeChartPanel extends JPanel
 			trace.setZIndex(mainTrace.getZIndex() - 1);
 			horizontalLines.put(name, trace);
 		}
+
 		Trace2DSimple trace = horizontalLines.get(name);
 
 		trace.setColor(color);
@@ -252,12 +205,6 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * Calculates the data point buffer size of the chart to accomodate enough points to fill 90 percent of its width if
-	 * new data points arrive with a time delta (T) of {@code updatePeriod} nanoseconds.
-	 *
-	 * @param updatePeriod in nanoseconds
-	 */
 	public void setPointBufferSizeWithPeriod(final long updatePeriod)
 	{
 		if (updatePeriod <= 0)
@@ -270,40 +217,36 @@ public class FixedTimeRangeChartPanel extends JPanel
 	}
 
 
-	/**
-	 * Remove all currently displayed data points
-	 */
 	public void clear()
 	{
 		mainTrace.removeAllPoints();
 	}
 
 
-	/**
-	 * Special line painter class which only draws a line if the x values of line start and end are not spaced too far
-	 * apart.
-	 *
-	 * @author "Lukas Magel"
-	 */
 	private static class NoCarriageReturnLinePainter extends TracePainterLine
 	{
-
-		/**  */
 		@Serial
-		private static final long	serialVersionUID	= 672321723106037578L;
+		private static final long serialVersionUID = 672321723106037578L;
 
 
 		@Override
-		public void paintPoint(final int absoluteX, final int absoluteY, final int nextX, final int nextY,
-				final Graphics g, final ITracePoint2D original)
+		public void paintPoint(
+				final int absoluteX, final int absoluteY, final int nextX, final int nextY,
+				final Graphics g, final ITracePoint2D original
+		)
 		{
 			if (Math.abs((nextX - absoluteX)) < 10)
 			{
 				super.paintPoint(absoluteX, absoluteY, nextX, nextY, g, original);
 			}
 		}
-
 	}
 
 
+	@Override
+	public void updateUI()
+	{
+		super.updateUI();
+		applyTheme();
+	}
 }

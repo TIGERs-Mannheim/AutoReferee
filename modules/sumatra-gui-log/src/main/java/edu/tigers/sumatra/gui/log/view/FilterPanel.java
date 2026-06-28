@@ -1,7 +1,6 @@
 package edu.tigers.sumatra.gui.log.view;
 
 import edu.tigers.sumatra.drawable.EFontSize;
-import edu.tigers.sumatra.gui.log.presenter.LogPresenter;
 import edu.tigers.sumatra.util.ScalingUtil;
 import edu.tigers.sumatra.util.ShortcutSuppressor;
 import net.miginfocom.swing.MigLayout;
@@ -13,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -60,11 +60,8 @@ public class FilterPanel extends JPanel
 		freeze.setMargin(new Insets(0, 5, 0, 5));
 
 		lblNumFatals = new JLabel("0");
-		lblNumFatals.setForeground(LogPresenter.DEFAULT_COLOR_FATAL);
 		lblNumErrors = new JLabel("0");
-		lblNumErrors.setForeground(LogPresenter.DEFAULT_COLOR_ERROR);
 		lblNumWarnings = new JLabel("0");
-		lblNumWarnings.setForeground(LogPresenter.DEFAULT_COLOR_WARN);
 
 		add(slidePanel);
 		add(new JLabel("Filter: "));
@@ -110,6 +107,14 @@ public class FilterPanel extends JPanel
 	public void setNumWarnings(final int num)
 	{
 		lblNumWarnings.setText(String.valueOf(num));
+	}
+
+
+	public void setColors(Color colorFatal, Color colorError, Color colorWarn)
+	{
+		lblNumFatals.setForeground(colorFatal);
+		lblNumErrors.setForeground(colorError);
+		lblNumWarnings.setForeground(colorWarn);
 	}
 
 
