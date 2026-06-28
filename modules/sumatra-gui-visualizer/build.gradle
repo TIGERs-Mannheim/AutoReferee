@@ -14,7 +14,8 @@ dependencies {
 
     implementation(libs.org.apache.logging.log4j.log4j.api)
 
-    implementation(libs.io.humble.humble.video.noarch)
+    implementation(libs.org.jcodec.jcodec)
+    implementation(libs.org.jcodec.jcodec.javase)
     implementation(libs.com.jidesoft.jide.oss)
     implementation(libs.commons.lang)
 

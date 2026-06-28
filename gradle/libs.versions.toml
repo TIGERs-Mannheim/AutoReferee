@@ -3,7 +3,7 @@ com-fasterxml-jackson-core = "2.21.2"
 com-google-protobuf = "4.34.1"
 com-miglayout = "11.4.3"
 info-picocli = "4.7.7"
-io-humble = "0.3.0"
+org-jcodec = "0.2.5"
 org-apache-groovy = "5.0.5"
 org-apache-logging-log4j = "2.25.4"
 org-jacoco = "0.8.13"
@@ -44,10 +44,11 @@ commons-collections = "commons-collections:commons-collections:3.2.2"
 commons-configuration = "commons-configuration:commons-configuration:1.10"
 commons-io = "commons-io:commons-io:2.21.0"
 commons-lang = "org.apache.commons:commons-lang3:3.20.0"
+org-jcodec-jcodec = { module = "org.jcodec:jcodec", version.ref = "org-jcodec" }
+org-jcodec-jcodec-javase = { module = "org.jcodec:jcodec-javase", version.ref = "org-jcodec" }
 gov-nist-math-jama = "gov.nist.math:jama:1.0.3"
 info-picocli-picocli = { module = "info.picocli:picocli", version.ref = "info-picocli" }
 info-picocli-picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "info-picocli" }
-io-humble-humble-video-noarch = { module = "io.humble:humble-video-noarch", version.ref = "io-humble" }
 jfreechart = "org.jfree:jfreechart:1.5.6"
 net-jafama = "net.jafama:jafama:2.3.2"
 net-java-jinput = "net.java.jinput:jinput:2.0.10"
