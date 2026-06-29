@@ -59,6 +59,12 @@ public abstract class TransitionableState extends AState
 	}
 
 
+	protected void afterUpdate()
+	{
+		// can be overwritten
+	}
+
+
 	@Override
 	public final void doEntryActions()
 	{
@@ -90,5 +96,6 @@ public abstract class TransitionableState extends AState
 			}
 		}
 		onUpdate();
+		afterUpdate();
 	}
 }
