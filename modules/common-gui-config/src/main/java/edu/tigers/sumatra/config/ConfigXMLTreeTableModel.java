@@ -166,18 +166,6 @@ public class ConfigXMLTreeTableModel extends ATreeTableModel
 	@Override
 	public String getToolTipText(final MouseEvent event)
 	{
-		final JTable table = (JTable) event.getSource();
-		final int row = table.rowAtPoint(event.getPoint());
-
-		// Always show the comment as tooltip
-		final Object obj = table.getValueAt(row, 2);
-		// This is the value which is actually displayed in the table: a String!
-		final String value = (String) obj;
-
-		if (!value.isEmpty())
-		{
-			return value;
-		}
 		return null;
 	}
 

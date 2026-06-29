@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeExpansionEvent;
@@ -137,8 +138,8 @@ public class EditorView extends JPanel
 			}
 		});
 		listenForExpansionEvents = false;
+		treetable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		treetable.getTree().addTreeExpansionListener(new MyTreeExpansionListener());
-		scrollpane.add(treetable);
 		scrollpane.setViewportView(treetable);
 	}
 
@@ -168,6 +169,7 @@ public class EditorView extends JPanel
 			model.getAllTreePaths().forEach(this::applyExpansions);
 			listenForExpansionEvents = true;
 		}
+		treetable.resizeColumnsToFit();
 	}
 
 
@@ -203,7 +205,9 @@ public class EditorView extends JPanel
 	public void initialReload()
 	{
 		if (wasLoaded)
+		{
 			return;
+		}
 
 		reload();
 	}
@@ -288,15 +292,18 @@ public class EditorView extends JPanel
 		return configKey;
 	}
 
+
 	public void setReferenceConfig(HierarchicalConfiguration config)
 	{
 		referenceConfig = config;
 	}
 
+
 	public HierarchicalConfiguration getReferenceConfig()
 	{
 		return referenceConfig;
 	}
+
 
 	private class MyTreeExpansionListener implements TreeExpansionListener
 	{
