@@ -181,6 +181,7 @@ public class ConfigEditorPanel extends JPanel
 		);
 
 		var description = stringsToCheck
+				.filter(Objects::nonNull)
 				.map(s -> s.split(" "))
 				.flatMap(Arrays::stream)
 				.map(String::strip)
