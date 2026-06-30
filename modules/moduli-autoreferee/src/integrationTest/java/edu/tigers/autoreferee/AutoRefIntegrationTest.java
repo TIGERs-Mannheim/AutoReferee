@@ -15,8 +15,8 @@ import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.persistence.EPersistenceKeyType;
 import edu.tigers.sumatra.persistence.PersistenceAsyncRecorder;
 import edu.tigers.sumatra.persistence.PersistenceDb;
-import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
 import edu.tigers.sumatra.persistence.log.PersistenceLogRecorder;
+import edu.tigers.sumatra.persistence.log.PersistenceLogCohort;
 import edu.tigers.sumatra.referee.gameevent.GameEventFactory;
 import edu.tigers.sumatra.referee.gameevent.IGameEvent;
 import edu.tigers.sumatra.referee.gameevent.SimilarityChecker;
@@ -90,7 +90,7 @@ class AutoRefIntegrationTest
 		String name = testInfo.getTestMethod().toString();
 		PersistenceDb db = PersistenceDb.withCustomLocation(Paths.get("../../" + PersistenceDb.getDefaultBasePath(),
 				PersistenceDb.getDefaultName("FRIENDLY", "NORMAL_FIRST_HALF", "yellow", "blue") + "_" + name));
-		db.add(PersistenceLogEvent.class, EPersistenceKeyType.ARBITRARY);
+		db.add(PersistenceLogCohort.class, EPersistenceKeyType.ARBITRARY);
 		db.add(PersistenceShapeMapFrame.class, EPersistenceKeyType.SUMATRA_TIMESTAMP);
 		db.add(WorldFrameWrapper.class, EPersistenceKeyType.SUMATRA_TIMESTAMP);
 

@@ -6,7 +6,7 @@ import com.github.g3force.configurable.EConfigUnit;
 import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.moduli.AModule;
 import edu.tigers.sumatra.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.sumatra.persistence.log.PersistenceLogEvent;
+import edu.tigers.sumatra.persistence.log.PersistenceLogCohort;
 import edu.tigers.sumatra.persistence.log.PersistenceLogRecorder;
 import edu.tigers.sumatra.referee.AReferee;
 import edu.tigers.sumatra.referee.IRefereeObserver;
@@ -286,7 +286,7 @@ public class RecordManager extends AModule implements IRefereeObserver
 	 */
 	protected void onNewPersistenceDb(PersistenceDb db)
 	{
-		db.add(PersistenceLogEvent.class, EPersistenceKeyType.ARBITRARY);
+		db.add(PersistenceLogCohort.class, EPersistenceKeyType.ARBITRARY);
 	}
 
 
