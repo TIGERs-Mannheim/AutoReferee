@@ -292,11 +292,7 @@ public class VisualizerPresenter implements ISumatraViewPresenter, IWorldFrameOb
 				SumatraModel.getInstance().setUserProperty(propertiesPrefix + category.name(), String.valueOf(noDigIn));
 			}
 		});
-		// Repaint to refresh the selection-dependent cell renderer styling.
-		// Must not call updateUI() here: this runs as a selection listener during mouse-event
-		// dispatch, and reinstalling the TreeUI mid-dispatch leaves FlatLaf's stale mouse handler
-		// with a null tree field, causing a NullPointerException on the next click.
-		viewPanel.getShapeSelectionPanel().getTree().repaint();
+		SwingUtilities.invokeLater(() -> viewPanel.getShapeSelectionPanel().getTree().updateUI());
 	}
 
 
