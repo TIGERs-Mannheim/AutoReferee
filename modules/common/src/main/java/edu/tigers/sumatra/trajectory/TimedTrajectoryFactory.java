@@ -333,7 +333,7 @@ public class TimedTrajectoryFactory
 		//    ---|-----|-------|-----|-----|----->
 		//      t0    t1      t2    t3    tt
 		//       |-t01-|--t12--|-t23-|
-		var s12Early = s13 - s23;
+		var s12Early = SumatraMath.clampToZeroIfSlightlyNegative(s13 - s23);
 		var t12Early = s12Early / vMax;
 		if (t12Early >= 0.0f && t01 + t12Early + t23 <= tt)
 		{

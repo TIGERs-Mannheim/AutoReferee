@@ -77,14 +77,24 @@ class TimedTrajectoryFactoryTest extends Specification {
         var generator = new TimedTrajectoryFactory()
         var timedPos = generator.getTimedPos1D((float) s, (float) v0, (float) vMax, (float) aMax, (float) tt)
         var timedPosMirrored = generator.getTimedPos1D((float) -s, (float) -v0, (float) vMax, (float) aMax, (float) tt)
+
+        var trajectory = new BangBangTrajectory1D()
+        var trajectoryMirrored = new BangBangTrajectory1D()
+
+        trajectory.generate(0, timedPos.pos(), v0, vMax, aMax)
+        trajectoryMirrored.generate(0, timedPosMirrored.pos(), -v0, vMax, aMax)
+
         then:
         SumatraMath.isEqual((double) timedPos.totalTime(), (double) totalTime)
         SumatraMath.isEqual((double) timedPos.timeAtTarget(), (double) timeAtTarget)
         SumatraMath.isEqual((double) timedPos.pos(), (double) pos)
+        SumatraMath.isEqual((double) trajectory.getPosition(timedPos.timeAtTarget()), s)
 
         SumatraMath.isEqual((double) timedPosMirrored.totalTime(), (double) totalTime)
         SumatraMath.isEqual((double) timedPosMirrored.timeAtTarget(), (double) timeAtTarget)
         SumatraMath.isEqual((double) timedPosMirrored.pos(), (double) -pos)
+        SumatraMath.isEqual((double) trajectoryMirrored.getPosition(timedPosMirrored.timeAtTarget()), -s)
+
         where:
         s   | v0   | tt                | vMax | aMax || totalTime         | timeAtTarget      | pos
         // https://www.wolframalpha.com/input?i=solve+s_1%3D-0.5*a*t_1%5E2%2Bv*t_1%2C+t%3Dv%2Fa%2C+s%3D-0.5*a*t%5E2%2Bv*t%2C+s_1%3D1%2C+v%3D2.5%2C+a%3D1.25+for+t%2C+t_1
@@ -136,5 +146,29 @@ class TimedTrajectoryFactoryTest extends Specification {
         1.0 | 0.0  | 1.0               | 3.5  | 2.5  || 1.367544467966324 | 1.0               | 1.16886116991581
         1.0 | 1.0  | 0.8               | 3.5  | 2.5  || 1.020204          | 0.8               | 1.0606123
         1.0 | -1.0 | 1.5               | 3.5  | 2.5  || 1.892893          | 1.5               | 1.192956
+    }
+
+
+    def "fromDestinationAndTime GetTimedPos1D Edge Cases"() {
+        when:
+        var generator = new TimedTrajectoryFactory()
+        var timedPos = generator.getTimedPos1D((float) s, (float) v0, (float) vMax, (float) aMax, (float) tt)
+        var timedPosMirrored = generator.getTimedPos1D((float) -s, (float) -v0, (float) vMax, (float) aMax, (float) tt)
+
+        var trajectory = new BangBangTrajectory1D()
+        var trajectoryMirrored = new BangBangTrajectory1D()
+
+        trajectory.generate(0, timedPos.pos(), v0, vMax, aMax)
+        trajectoryMirrored.generate(0, timedPosMirrored.pos(), -v0, vMax, aMax)
+        then:
+        SumatraMath.isEqual((double) timedPos.totalTime(), (double) timedPosMirrored.totalTime())
+        SumatraMath.isEqual((double) timedPos.timeAtTarget(), (double) timedPosMirrored.timeAtTarget())
+
+        SumatraMath.isEqual((double) trajectory.getPosition(timedPos.timeAtTarget()), s)
+        SumatraMath.isEqual((double) trajectoryMirrored.getPosition(timedPosMirrored.timeAtTarget()), -s)
+        where:
+        s                      | v0                     | tt                     | vMax                   | aMax
+        0.37286123633384705000 | 0.32165107131004333000 | 2.47730970382690430000 | 0.13873715698719025000 | 0.13873715698719025000
+        1.82650411128997800000 | 1.96891546249389650000 | 4.51175308227539100000 | 1.06121528148651120000 | 1.06121528148651120000
     }
 }

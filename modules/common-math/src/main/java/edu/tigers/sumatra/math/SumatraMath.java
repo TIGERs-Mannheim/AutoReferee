@@ -167,6 +167,30 @@ public final class SumatraMath
 	}
 
 
+	public static double clampToZeroIfSlightlyNegative(double v)
+	{
+		return -EQUAL_TOL < v && v < 0 ? 0 : v;
+	}
+
+
+	public static double clampToZeroIfSlightlyPositive(double v)
+	{
+		return 0 < v && v < EQUAL_TOL ? 0 : v;
+	}
+
+
+	public static float clampToZeroIfSlightlyNegative(float v)
+	{
+		return -EQUAL_TOL < v && v < 0 ? 0 : v;
+	}
+
+
+	public static float clampToZeroIfSlightlyPositive(float v)
+	{
+		return 0 < v && v < EQUAL_TOL ? 0 : v;
+	}
+
+
 	/**
 	 * Project value to a relative values between 0 and 1
 	 *
