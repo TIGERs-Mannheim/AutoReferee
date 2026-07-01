@@ -91,13 +91,19 @@ public class RecordManager extends AModule implements IRefereeObserver
 
 	public void pauseRecorder()
 	{
-		recorder.pause();
+		if (recorder != null) // Can happen while starting/stopping recording due to concurrency
+		{
+			recorder.pause();
+		}
 	}
 
 
 	public void resumeRecorder()
 	{
-		recorder.resume();
+		if (recorder != null) // Can happen while starting/stopping recording due to concurrency
+		{
+			recorder.resume();
+		}
 	}
 
 
