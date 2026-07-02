@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Connect to a multicast group on all reasonable network interfaces, and receive {@link DatagramPacket}s on it.
  */
 @Log4j2
-public class MulticastUDPReceiver implements AutoCloseable
+public class MulticastUDPReceiver implements UDPReceiver
 {
 	private static final int SO_TIMEOUT = 500;
 	private static final String[] USELESS_PREFIXES = { "tap", "tun", "ham", "WAN" };
@@ -63,12 +63,14 @@ public class MulticastUDPReceiver implements AutoCloseable
 	}
 
 
+	@Override
 	public void addObserver(final IReceiverObserver observer)
 	{
 		observers.add(observer);
 	}
 
 
+	@Override
 	public void removeObserver(final IReceiverObserver observer)
 	{
 		observers.remove(observer);
@@ -141,6 +143,7 @@ public class MulticastUDPReceiver implements AutoCloseable
 	}
 
 
+	@Override
 	public void receive(final DatagramPacket store) throws IOException
 	{
 		if (currentSocket == null)
