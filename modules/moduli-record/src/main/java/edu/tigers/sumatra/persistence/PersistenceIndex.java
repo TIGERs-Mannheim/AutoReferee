@@ -68,7 +68,7 @@ public class PersistenceIndex
 				long nextKey = stream.readLong();
 				long nextAddress = stream.readLong();
 
-				if (address != -1)
+				if (key != 0 && address != -1)
 				{
 					index.computeIfAbsent(
 							key, k -> new ArrayList<>(1)
