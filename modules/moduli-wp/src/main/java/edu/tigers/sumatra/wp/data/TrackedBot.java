@@ -352,7 +352,8 @@ public final class TrackedBot implements ITrackedBot
 		numbers.add(filteredState == null ? 0 : 1);
 		numbers.add(robotInfo.getKickSpeed());
 		numbers.add(robotInfo.isChip() ? 1 : 0);
-		numbers.add(robotInfo.getDribbleSpeed());
+		numbers.add(robotInfo.getDribbleSpeedSet());
+		numbers.add(robotInfo.getDribbleSpeedFeedback());
 		numbers.add(robotInfo.isBarrierInterrupted() ? 1 : 0);
 		numbers.add(tAssembly);
 		numbers.addAll(Vector3.zero().getNumberList()); // buffered_pos
@@ -367,7 +368,7 @@ public final class TrackedBot implements ITrackedBot
 	public List<String> getHeaders()
 	{
 		return Arrays.asList("id", "color", "timestamp", "pos_x", "pos_y", "pos_z", "vel_x", "vel_y", "vel_z", "acc_x",
-				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleRpm", "barrierInterrupted", "tAssembly",
+				"acc_y", "acc_z", "visible", "kickSpeed", "isChip", "dribbleSet", "dribbleFB", "barrierInterrupted", "tAssembly",
 				"buffered_pos_x", "buffered_pos_y", "buffered_pos_z",
 				"buffered_vel_x", "buffered_vel_y", "buffered_vel_z",
 				"dist2Traj",

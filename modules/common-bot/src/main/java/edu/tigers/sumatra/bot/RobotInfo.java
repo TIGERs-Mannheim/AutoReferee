@@ -50,7 +50,9 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	@NonNull
 	private final Float kickerLevelRelative;
 	@NonNull
-	private final Float dribbleSpeed;
+	private final Float dribbleSpeedSet;
+	@NonNull
+	private final Float dribbleSpeedFeedback;
 	@Getter
 	private final int hardwareId;
 	private final BotState internalState;
@@ -80,7 +82,8 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 		armed = false;
 		batteryRelative = 0.0f;
 		kickerLevelRelative = 0.0f;
-		dribbleSpeed = 0.0f;
+		dribbleSpeedSet = 0.0f;
+		dribbleSpeedFeedback = 0.0f;
 		hardwareId = 255;
 		internalState = null;
 		barrierInterrupted = false;
@@ -195,9 +198,14 @@ public class RobotInfo implements IMirrorable<RobotInfo>
 	}
 
 
-	public float getDribbleSpeed()
+	public float getDribbleSpeedSet()
 	{
-		return dribbleSpeed;
+		return dribbleSpeedSet;
+	}
+
+	public float getDribbleSpeedFeedback()
+	{
+		return dribbleSpeedFeedback;
 	}
 
 
