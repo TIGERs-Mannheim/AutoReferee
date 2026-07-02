@@ -87,7 +87,7 @@ public class PersistenceDb
 
 			try
 			{
-				Files.writeString(commit, getCommitHash());
+				Files.writeString(commit, getCurrentVersion());
 			} catch (IOException e)
 			{
 				log.error("Could not create commit.txt", e);
@@ -97,7 +97,7 @@ public class PersistenceDb
 			try
 			{
 				String dbCommit = Files.readString(commit);
-				if (!dbCommit.equals(getCommitHash()))
+				if (!dbCommit.equals(getCurrentVersion()))
 				{
 					log.info("Database is from a different commit: {}", dbCommit);
 				}
@@ -158,13 +158,13 @@ public class PersistenceDb
 	}
 
 
-	private static String getCommitHash()
+	private static String getCurrentVersion()
 	{
 		try
 		{
 			return new BufferedReader(new InputStreamReader(
-					new ProcessBuilder("git", "rev-parse", "--short", "HEAD").start().getInputStream()
-			)).readLine();
+					new ProcessBuilder("git", "describe", "--tags", "--always", "--first-parent").start().getInputStream()
+			)).readLine().replace("merge/", "").trim();
 		} catch (IOException e)
 		{
 			log.warn("Could not get commit hash", e);
