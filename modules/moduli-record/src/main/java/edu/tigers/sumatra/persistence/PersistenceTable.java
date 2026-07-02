@@ -62,6 +62,12 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>> implements A
 		try
 		{
 			long id = element.getKey();
+			if (id == 0)
+			{
+				log.warn("PersistenceTable<{}>: id = 0 write attempted.", type.getName());
+				return;
+			}
+
 			long startIndex = stream.getPos();
 
 			serializer.serialize(stream, element);
@@ -161,7 +167,9 @@ public class PersistenceTable<T extends PersistenceTable.IEntry<T>> implements A
 		Long neighbour = index.get().floorKey(key);
 		Long ceil = index.get().ceilingKey(key);
 		if (ceil != null && (neighbour == null || Math.abs(ceil - key) < Math.abs(neighbour - key)))
+		{
 			return ceil;
+		}
 
 		return neighbour;
 	}
