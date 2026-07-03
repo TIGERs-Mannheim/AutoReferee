@@ -93,8 +93,11 @@ public class CamFilter
 	@Configurable(defValue = "10", comment = "Maximum number of ball trackers", unit = EConfigUnit.COUNT)
 	private static int maxBallTrackers = 10;
 
-	@Configurable(defValue = "true", comment = "Restrict viewport to minimize overlap (from CameraArchitect)", unit = EConfigUnit.BOOLEAN)
-	private static boolean restrictViewport = true;
+	@Configurable(defValue = "true", comment = "Restrict robot viewport to minimize overlap (from CameraArchitect)", unit = EConfigUnit.BOOLEAN)
+	private static boolean restrictRobotViewport = true;
+
+	@Configurable(defValue = "false", comment = "Restrict ball viewport to minimize overlap (from CameraArchitect)", unit = EConfigUnit.BOOLEAN)
+	private static boolean restrictBallViewport = false;
 
 	@Configurable(defValue = "0.6", comment = "Max. velocity loss at ball-bot hull collisions", unit = EConfigUnit.PERCENTAGE)
 	private static double maxBallBotHullLoss = 0.6;
@@ -339,7 +342,7 @@ public class CamFilter
 		for (CamRobot r : frame.getRobots())
 		{
 			// ignore robots outside our viewport
-			if (restrictViewport && viewport.isPresent() && !viewport.get().isPointInShape(r.getPos()))
+			if (restrictRobotViewport && viewport.isPresent() && !viewport.get().isPointInShape(r.getPos()))
 			{
 				continue;
 			}
@@ -425,6 +428,12 @@ public class CamFilter
 		// iterate over all balls on the camera
 		for (CamBall b : camBalls)
 		{
+			// ignore balls outside our viewport
+			if (restrictBallViewport && viewport.isPresent() && !viewport.get().isPointInShape(b.getPos().getXYVector()))
+			{
+				continue;
+			}
+
 			boolean consumed = false;
 
 			for (BallTracker t : balls)
