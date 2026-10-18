@@ -73,7 +73,7 @@ public class GameStateCalculator
 	{
 		GameState.GameStateBuilder builder = lastGameState.toBuilder();
 
-		if (refereeMsg.getCmdCounter() != lastRefMsgCounter)
+		if (refereeMsg.getCmdCounter() != lastRefMsgCounter || refereeMsg.getCommand() != lastRefCmd)
 		{
 			log.debug("Referee message with new command: {}", refereeMsg);
 			lastRefMsgCounter = refereeMsg.getCmdCounter();
