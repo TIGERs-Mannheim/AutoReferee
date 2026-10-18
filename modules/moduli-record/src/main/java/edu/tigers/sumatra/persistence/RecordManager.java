@@ -33,7 +33,6 @@ public class RecordManager extends AModule implements IRefereeObserver
 	protected String teamYellow = "";
 	protected String teamBlue = "";
 	protected String matchType = "";
-	protected String matchStage = "";
 
 	@Configurable(defValue = "false", comment = "Automatically compress recordings after they were closed",
 			unit = EConfigUnit.BOOLEAN)
@@ -134,7 +133,6 @@ public class RecordManager extends AModule implements IRefereeObserver
 			teamYellow = refMsg.getYellow().getName().replace(" ", "_");
 			teamBlue = refMsg.getBlue().getName().replace(" ", "_");
 			matchType = refMsg.getMatchType().toString();
-			matchStage = refMsg.getStage().toString().replace("_PRE", "");
 		}
 		if (autoRecord && SumatraModel.getInstance().isTournamentMode() && refMsg != null)
 		{

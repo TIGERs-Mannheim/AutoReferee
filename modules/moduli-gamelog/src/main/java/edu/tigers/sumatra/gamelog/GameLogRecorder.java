@@ -8,21 +8,18 @@ public class GameLogRecorder extends AModule
 {
 	private final GameLogWriter writer = new GameLogWriter();
 	private String matchType = "";
-	private String matchStage = "";
 	private String teamYellow = "";
 	private String teamBlue = "";
 
 
 	/**
 	 * @param match  type of match
-	 * @param stage  stage of match
 	 * @param yellow name of yellow team
 	 * @param blue   name of blue team
 	 */
-	public void setMatchInfo(String match, String stage, String yellow, String blue)
+	public void setMatchInfo(String match, String yellow, String blue)
 	{
 		matchType = match;
-		matchStage = stage;
 		teamYellow = yellow;
 		teamBlue = blue;
 	}
@@ -42,7 +39,7 @@ public class GameLogRecorder extends AModule
 	{
 		if (enable && !writer.isOpen())
 		{
-			writer.open(matchType, matchStage, teamYellow, teamBlue);
+			writer.open(matchType, teamYellow, teamBlue);
 		} else if (!enable && writer.isOpen())
 		{
 			writer.close();
