@@ -7,7 +7,6 @@ import edu.tigers.sumatra.math.vector.IVector3;
 import edu.tigers.sumatra.trajectory.ITrajectory;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -19,7 +18,7 @@ import java.util.Optional;
 /**
  * @author Nicolai Ommer <nicolai.ommer@gmail.com>
  */
-@Builder(setterPrefix = "with", builderClassName = "Builder", builderMethodName = "newBuilder", toBuilder = true)
+@lombok.Builder(setterPrefix = "with", builderClassName = "Builder", builderMethodName = "newBuilder", toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RobotInfo implements IMirrorable<RobotInfo>
 {
