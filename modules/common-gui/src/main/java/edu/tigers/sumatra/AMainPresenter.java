@@ -11,6 +11,8 @@ import edu.tigers.sumatra.model.SumatraModel;
 import edu.tigers.sumatra.util.GlobalShortcuts;
 import edu.tigers.sumatra.util.ScalingUtil;
 import edu.tigers.sumatra.views.SumatraView;
+import jiconfont.icons.font_awesome.FontAwesome;
+import jiconfont.swing.IconFontSwing;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -83,6 +85,8 @@ public abstract class AMainPresenter<T extends AMainFrame>
 		FlatGradiantoMidnightBlueIJTheme.installLafInfo();
 		FlatMTMaterialDarkerIJTheme.installLafInfo();
 		TIGERsTheme.installLafInfo();
+
+		IconFontSwing.register(FontAwesome.getIconFont());
 
 		ScalingUtil.updateBaselineSize(new JTextPane().getFont().getSize());
 		// JMenuBar on the macOS menu bar
