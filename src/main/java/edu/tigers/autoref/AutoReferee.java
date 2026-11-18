@@ -88,7 +88,11 @@ public final class AutoReferee extends BaseApp implements Runnable
 
 	private void startUi()
 	{
-		CompletableFuture.runAsync(AutoRefMainPresenter::new);
+		CompletableFuture.runAsync(AutoRefMainPresenter::new)
+				.exceptionally(e -> {
+					log.error("Could not start UI", e);
+					return null;
+				});
 	}
 
 
