@@ -33,6 +33,11 @@ import java.util.stream.Collectors;
 @Getter
 public abstract class AMainFrame extends JFrame
 {
+	static
+	{
+		IconFontSwing.register(FontAwesome.getIconFont());
+	}
+
 	private final JMenu menuViews = new JMenu("Views");
 	private final JMenu menuLayout = new JMenu("Layout");
 	private final JMenuItem menuItemLayoutSave = new JMenuItem("Save layout");
