@@ -58,7 +58,7 @@ public interface ITrajectory<T> extends IMirrorable<ITrajectory<T>>
 
 	/**
 	 * @param t time [s]
-	 * @return the next destination, if this trajectory is divided into multiple subtract-pathes
+	 * @return the next destination, if this trajectory is divided into multiple sub-pathes
 	 */
 	default T getNextDestination(final double t)
 	{

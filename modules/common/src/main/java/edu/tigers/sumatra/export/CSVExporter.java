@@ -46,7 +46,7 @@ public final class CSVExporter implements Closeable
 
 	/**
 	 * @param folder       the target folder
-	 * @param baseFileName subtract-dir and name of exported file without .csv ending
+	 * @param baseFileName sub-dir and name of exported file without .csv ending
 	 * @param mode         the write mode
 	 */
 	public CSVExporter(final String folder, final String baseFileName, final EMode mode)
@@ -59,7 +59,7 @@ public final class CSVExporter implements Closeable
 
 	/**
 	 * @param folder       the target folder
-	 * @param baseFileName subtract-dir and name of exported file without .csv ending
+	 * @param baseFileName sub-dir and name of exported file without .csv ending
 	 * @param mode         the write mode
 	 */
 	public CSVExporter(final Path folder, final String baseFileName, final EMode mode)
